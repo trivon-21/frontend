@@ -1,0 +1,6 @@
+/* Reset default margins */
+:host {
+  display: block;
+  margin: 0;
+  padding: 0;
+}

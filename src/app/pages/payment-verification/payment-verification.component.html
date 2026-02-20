@@ -1,0 +1,106 @@
+<div class="page-container">
+  
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2 class="page-title">Payment Verification</h2>
+    <div class="page-search">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Search by Order ID or Customer..." 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        [disabled]="isLoading"
+      />
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredPayments.length === 0" class="empty-state">
+    <p>🎉 No pending payments to verify</p>
+  </div>
+
+  <!-- Payments Grid -->
+  <div class="payments-grid">
+    <div class="payment-card" *ngFor="let payment of filteredPayments">
+      <div class="card-header">
+        <span class="order-id">Order #{{ payment.orderId }}</span>
+        <span class="status-badge status-{{ payment.status | lowercase }}">{{ payment.status }}</span>
+      </div>
+      
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">CUSTOMER</label>
+          <p class="field-value">{{ payment.customerName }}</p>
+          <p class="field-value-small" *ngIf="payment.customerEmail">{{ payment.customerEmail }}</p>
+        </div>
+        
+        <div class="field">
+          <label class="field-label">AMOUNT</label>
+          <p class="field-value amount">${{ (payment.amount || 0) | number:'1.2-2' }}</p>
+        </div>
+        
+        <button class="slip-preview-btn" (click)="viewSlip(payment)" [disabled]="isLoading">
+          📄 Slip Preview
+        </button>
+        
+        <div class="action-buttons">
+          <button class="btn btn-approve" (click)="approvePayment(payment)" [disabled]="isLoading">
+            {{ isLoading ? '...' : '✓ Approve' }}
+          </button>
+          <button class="btn btn-reject" (click)="openRejectModal(payment)" [disabled]="isLoading">
+            {{ isLoading ? '...' : '✕ Reject' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal-overlay" *ngIf="showRejectModal" (click)="closeRejectModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Reject Payment</h3>
+        <button class="modal-close" (click)="closeRejectModal()" [disabled]="isLoading">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <p><strong>Order:</strong> #{{ selectedPayment?.orderId }}</p>
+        <p><strong>Amount:</strong> ${{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
+        
+        <div class="form-group">
+          <label for="reason">Rejection Reason <span class="required">*</span></label>
+          <textarea 
+            id="reason" 
+            rows="4" 
+            [(ngModel)]="rejectionReason"
+            placeholder="Explain why this payment is being rejected..."
+            [disabled]="isLoading"
+          ></textarea>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeRejectModal()" [disabled]="isLoading">
+          Cancel
+        </button>
+        <button class="btn btn-reject" (click)="rejectPayment()" [disabled]="isLoading || !rejectionReason.trim()">
+          {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
