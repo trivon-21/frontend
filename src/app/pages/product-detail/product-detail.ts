@@ -31,6 +31,17 @@ export class ProductDetail {
   selectedCapacity = this.capacityOptions[0];
   capacityDropdownOpen = false;
 
+  // Add a mapping for capacity to price
+  capacityPriceMap: { [key: string]: number } = {
+    '1 Ton – LKR 95,000': 95000,
+    '1.5 Ton – LKR 125,000': 125000,
+    '2 Ton – LKR 165,000': 165000
+  };
+
+  get selectedPrice(): number {
+    return this.capacityPriceMap[this.selectedCapacity] || 125000;
+  }
+
   constructor() {
     // Try to fetch username from localStorage, fallback to 'Customer'
     this.username = localStorage.getItem('username') || 'Customer';
@@ -60,5 +71,6 @@ export class ProductDetail {
   selectCapacity(option: string) {
     this.selectedCapacity = option;
     this.capacityDropdownOpen = false;
+    // No need to do anything else, price is computed via getter
   }
 }

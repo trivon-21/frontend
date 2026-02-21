@@ -36,7 +36,7 @@
         <!-- LEFT: Image Gallery -->
         <div class="pd-gallery">
             <div class="pd-main-image">
-                <img [src]="images[selectedImageIdx]" alt="AirLux Premium Split AC - 1.5 Ton" id="main-product-img">
+                <img [src]="images[selectedImageIdx]" alt="AirLux Premium Split AC" id="main-product-img">
             </div>
             <div class="pd-thumbnails">
                 <div class="pd-thumb" *ngFor="let img of images; let i = index" [class.active]="selectedImageIdx === i" (click)="selectImage(i)">
@@ -51,10 +51,10 @@
                 <span class="pd-dot"></span> In Stock
             </div>
 
-            <h2 class="pd-product-name">AirLux Premium Split AC - 1.5 Ton</h2>
+            <h2 class="pd-product-name">AirLux Premium Split AC</h2>
             <div class="pd-price-row">
                 <span class="pd-currency">LKR</span>
-                <span class="pd-price">125,000</span>
+                <span class="pd-price">{{ selectedPrice | number:'1.0-0' }}</span>
             </div>
 
             <!-- Capacity Selector -->
