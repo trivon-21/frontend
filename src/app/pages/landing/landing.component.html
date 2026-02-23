@@ -23,7 +23,7 @@
 
       <div class="hero-inquiry">
         <p class="inquiry-label">Need to know anything?</p>
-        <a routerLink="/signup" class="btn btn-primary btn-inquiry">Inquiry</a>
+        <button (click)="handleInquiryClick()" class="btn btn-primary btn-inquiry">Inquiry</button>
       </div>
     </div>
   </div>
@@ -351,3 +351,8 @@
 </section>
 
 <app-footer></app-footer>
+
+<app-inquiry-modal
+  *ngIf="showInquiry"
+  (closed)="showInquiry = false"
+></app-inquiry-modal>
