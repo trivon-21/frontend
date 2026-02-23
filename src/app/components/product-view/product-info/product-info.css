@@ -1,0 +1,305 @@
+/* ==============================================
+   product-info.css — Product details panel styles
+   ============================================== */
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* -----------------------------------------------
+   In Stock / Out of Stock Badge
+   ----------------------------------------------- */
+.product-info__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  width: fit-content;
+}
+
+.product-info__stock--in {
+  color: var(--color-primary-dark);
+}
+
+.product-info__stock--out {
+  color: #dc2626;
+}
+
+.product-info__stock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  display: inline-block;
+}
+
+.product-info__stock-dot--out {
+  background-color: #dc2626;
+}
+
+/* -----------------------------------------------
+   Product Name
+   ----------------------------------------------- */
+.product-info__name {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+/* -----------------------------------------------
+   Price
+   ----------------------------------------------- */
+.product-info__price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.product-info__currency {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.product-info__amount {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: -1px;
+}
+
+/* -----------------------------------------------
+   Field Label
+   ----------------------------------------------- */
+.product-info__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+/* -----------------------------------------------
+   Capacity Select Dropdown
+   ----------------------------------------------- */
+.product-info__field {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-info__select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-white);
+  appearance: auto;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-info__select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* -----------------------------------------------
+   Acknowledgment Checkbox
+   ----------------------------------------------- */
+.product-info__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.product-info__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------
+   Divider
+   ----------------------------------------------- */
+.product-info__divider {
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* -----------------------------------------------
+   Description & Features
+   ----------------------------------------------- */
+.product-info__section-heading {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.product-info__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin-bottom: var(--space-4);
+}
+
+/* Feature list with custom green checkmark icons */
+.product-info__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.product-info__feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.product-info__check-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------
+   Quantity Stepper
+   ----------------------------------------------- */
+.product-info__quantity-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.product-info__quantity-row .product-info__label {
+  margin-bottom: 0;
+}
+
+.product-info__quantity-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.product-info__qty-btn {
+  width: 36px;
+  height: 36px;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  transition: background-color 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.product-info__qty-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.product-info__qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.product-info__qty-value {
+  min-width: 40px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  padding: 0 var(--space-2);
+  line-height: 36px;
+}
+
+/* -----------------------------------------------
+   Action Buttons
+   ----------------------------------------------- */
+.product-info__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Add to Cart — filled green */
+.btn-add-to-cart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-add-to-cart:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.btn-add-to-cart:active {
+  transform: translateY(0);
+}
+
+/* View Warranty Details — outlined green */
+.btn-warranty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4);
+  background-color: transparent;
+  color: var(--color-primary-dark);
+  border: 1.5px solid var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-warranty:hover {
+  background-color: var(--color-primary-light);
+}
+
+/* Shared button icon size */
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

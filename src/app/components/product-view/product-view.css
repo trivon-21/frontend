@@ -7,3 +7,42 @@
   flex-direction: column;
   min-height: 100vh;
 }
+
+/* Centered content wrapper with vertical flow */
+.product-view__main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* Product card: 2-column grid (gallery | info) */
+.product-view__card {
+  display: grid;
+  grid-template-columns: 45fr 55fr;
+  gap: var(--space-8);
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-8);
+}
+
+/* Prevent grid blowout on long content */
+.product-view__gallery-col,
+.product-view__info-col {
+  min-width: 0;
+}
+
+/* Loading / Error status text */
+.product-view__status {
+  text-align: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  padding: var(--space-8) 0;
+}
+
+.product-view__status--error {
+  color: #dc2626;
+}

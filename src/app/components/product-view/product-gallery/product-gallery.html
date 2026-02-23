@@ -1,0 +1,29 @@
+<!-- product-gallery.html — Main image display + thumbnail strip -->
+<div class="gallery">
+  <!-- Main Product Image -->
+  <div class="gallery__main">
+    <img [src]="activeImage()" [alt]="product().name" class="gallery__main-image" loading="eager" />
+  </div>
+
+  <!-- Thumbnail Strip — clicking a thumbnail updates the main image -->
+  <div class="gallery__thumbnails" role="list" aria-label="Product image thumbnails">
+    @for (thumb of thumbnails(); track thumb; let i = $index) {
+      <button
+        class="gallery__thumb-btn"
+        [class.gallery__thumb-btn--active]="activeImageIndex() === i + 1"
+        (click)="selectImage(i + 1)"
+        [attr.aria-label]="'View image ' + (i + 2)"
+        [attr.aria-pressed]="activeImageIndex() === i + 1"
+        role="listitem"
+        type="button"
+      >
+        <img
+          [src]="thumb"
+          [alt]="product().name + ' thumbnail ' + (i + 2)"
+          class="gallery__thumb-image"
+          loading="lazy"
+        />
+      </button>
+    }
+  </div>
+</div>

@@ -8,24 +8,24 @@
  * Represents a single capacity/price tier the user can choose from.
  */
 export interface CapacityOption {
-  label: string;  // e.g. "1.5 Ton"
-  price: number;  // e.g. 125000
+  label: string; // e.g. "1.5 Ton"
+  price: number; // e.g. 125000
 }
 
 /**
  * Represents a single technical specification row (label + value).
  */
 export interface ProductSpecification {
-  label: string;  // e.g. "Cooling Capacity"
-  value: string;  // e.g. "1.5 Ton (18,000 BTU)"
+  label: string; // e.g. "Cooling Capacity"
+  value: string; // e.g. "1.5 Ton (18,000 BTU)"
 }
 
 /**
  * Represents a warranty period with its title and a short description.
  */
 export interface WarrantyTerm {
-  title: string;        // e.g. "Comprehensive Warranty (2 Years)"
-  description: string;  // e.g. "Covers all parts and labor…"
+  title: string; // e.g. "Comprehensive Warranty (2 Years)"
+  description: string; // e.g. "Covers all parts and labor…"
 }
 
 /**
@@ -33,7 +33,9 @@ export interface WarrantyTerm {
  * All data displayed on the product detail page should map to this interface.
  */
 export interface Product {
-  id: number;
+  /** MongoDB document ID (string from API) or numeric ID */
+  _id?: string;
+  id?: number;
 
   /** Display name of the product */
   name: string;

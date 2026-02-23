@@ -1,0 +1,97 @@
+<!-- product-tabs.html — Specifications and Warranty tabs -->
+<div class="tabs-section">
+  <!-- Tab Headers -->
+  <div class="tabs__header" role="tablist" aria-label="Product detail tabs">
+    <button
+      id="tab-specifications"
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'specifications'"
+      (click)="setTab('specifications')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'specifications'"
+      aria-controls="panel-specifications"
+      type="button"
+    >
+      Specifications
+    </button>
+
+    <button
+      id="tab-warranty"
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'warranty'"
+      (click)="setTab('warranty')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'warranty'"
+      aria-controls="panel-warranty"
+      type="button"
+    >
+      Warranty
+    </button>
+  </div>
+
+  <!-- Divider below tabs -->
+  <div class="tabs__divider" role="separator" aria-hidden="true"></div>
+
+  <!-- ================================================
+     Tab Panel: Specifications
+     Content comes from product().specifications[] via input()
+     ================================================ -->
+  @if (activeTab() === 'specifications') {
+    <div
+      id="panel-specifications"
+      class="tabs__panel"
+      role="tabpanel"
+      aria-labelledby="tab-specifications"
+    >
+      <h3 class="tabs__panel-heading">Technical Specifications</h3>
+
+      <dl class="specs-list">
+        @for (spec of product().specifications; track spec.label) {
+          <div class="specs-list__row">
+            <dt class="specs-list__label">{{ spec.label }}</dt>
+            <dd class="specs-list__value">{{ spec.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  }
+
+  <!-- ================================================
+     Tab Panel: Warranty
+     Content comes from product().warrantyTerms, warrantyCovered,
+     and warrantyNotCovered via input()
+     ================================================ -->
+  @if (activeTab() === 'warranty') {
+    <div id="panel-warranty" class="tabs__panel" role="tabpanel" aria-labelledby="tab-warranty">
+      <h3 class="tabs__panel-heading">Warranty Coverage</h3>
+
+      <!-- Warranty term cards (e.g. 2-Year, 5-Year Compressor) -->
+      @for (term of product().warrantyTerms; track term.title) {
+        <div class="warranty-term">
+          <p class="warranty-term__title">{{ term.title }}:</p>
+          <p class="warranty-term__desc">{{ term.description }}</p>
+        </div>
+      }
+
+      <!-- What's Covered -->
+      <div class="warranty-covered">
+        <p class="warranty-covered__heading">What's Covered:</p>
+        <ul class="warranty-covered__list">
+          @for (item of product().warrantyCovered; track item) {
+            <li class="warranty-covered__item">&bull; {{ item }}</li>
+          }
+        </ul>
+      </div>
+
+      <!-- What's Not Covered -->
+      <div class="warranty-covered warranty-covered--not">
+        <p class="warranty-covered__heading">What's Not Covered:</p>
+        <ul class="warranty-covered__list">
+          @for (item of product().warrantyNotCovered; track item) {
+            <li class="warranty-covered__item">&bull; {{ item }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+</div>
