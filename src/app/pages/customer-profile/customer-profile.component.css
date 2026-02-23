@@ -423,8 +423,8 @@
 /* ── Actions Row ── */
 .actions-row {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 12px;
   padding-top: 8px;
 }
@@ -553,6 +553,54 @@
 
 .btn-cancel-delete:hover {
   background: #f3f4f2;
+}
+
+/* ── Change Password Button ── */
+.btn-change-password {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #fff;
+  color: #1f5b45;
+  border: 1.5px solid #1f5b45;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.13s, color 0.13s;
+}
+
+.btn-change-password:hover:not(:disabled) {
+  background: #edf5f0;
+}
+
+.btn-change-password:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Reset Link Feedback ── */
+.reset-link-notice {
+  font-size: 13.5px;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 100%;
+  text-align: right;
+}
+
+.reset-link-error-notice {
+  font-size: 13.5px;
+  color: #c0392b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 100%;
+  text-align: right;
 }
 
 @media (max-width: 700px) {

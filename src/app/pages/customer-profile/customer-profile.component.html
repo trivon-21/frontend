@@ -161,6 +161,12 @@
     <!-- Action buttons -->
     <div class="actions-row">
 
+      <!-- Reset link feedback -->
+      <div *ngIf="resetLinkSent" class="reset-link-notice">
+        A password reset link has been sent to <strong>{{ profile.email }}</strong>. Check your inbox.
+      </div>
+      <div *ngIf="resetLinkError" class="reset-link-error-notice">{{ resetLinkError }}</div>
+
       <!-- Delete confirm prompt -->
       <div *ngIf="confirmDelete" class="delete-confirm">
         <span class="delete-confirm-text">Are you sure? This action cannot be undone.</span>
@@ -179,6 +185,12 @@
             {{ saving ? 'Saving...' : 'Save Changes' }}
           </button>
         </ng-container>
+        <button class="btn-change-password" (click)="sendPasswordResetLink()" [disabled]="sendingResetLink || resetLinkSent">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          {{ sendingResetLink ? 'Sending...' : resetLinkSent ? 'Link Sent!' : 'Change Password' }}
+        </button>
         <button class="btn-delete-account" (click)="deleteAccount()">Delete Account</button>
       </div>
     </div>

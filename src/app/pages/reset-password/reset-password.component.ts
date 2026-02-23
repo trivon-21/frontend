@@ -42,6 +42,7 @@ export class ResetPasswordComponent implements OnInit {
   isLoading = false;
   successMessage = '';
   errorMessage = '';
+  isTokenInvalid = false;
   token = '';
   form!: FormGroup;
 
@@ -95,7 +96,12 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message ?? 'Reset failed. The link may have expired.';
+        const msg: string = err.error?.message ?? '';
+        if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('expired')) {
+          this.isTokenInvalid = true;
+        } else {
+          this.errorMessage = msg || 'Reset failed. Please try again.';
+        }
       },
     });
   }

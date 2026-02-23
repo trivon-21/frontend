@@ -26,6 +26,9 @@ export class CustomerProfileComponent implements OnInit {
   addEmailError = '';
   addingEmail = false;
   confirmDelete = false;
+  sendingResetLink = false;
+  resetLinkSent = false;
+  resetLinkError = '';
 
   constructor(
     private fb: FormBuilder,
@@ -162,6 +165,23 @@ export class CustomerProfileComponent implements OnInit {
 
   cancelDelete(): void {
     this.confirmDelete = false;
+  }
+
+  sendPasswordResetLink(): void {
+    if (!this.profile) return;
+    this.sendingResetLink = true;
+    this.resetLinkSent = false;
+    this.resetLinkError = '';
+    this.authService.forgotPassword(this.profile.email).subscribe({
+      next: () => {
+        this.resetLinkSent = true;
+        this.sendingResetLink = false;
+      },
+      error: () => {
+        this.resetLinkError = 'Failed to send reset link. Please try again.';
+        this.sendingResetLink = false;
+      }
+    });
   }
 
   timeAgo(dateStr?: string): string {
