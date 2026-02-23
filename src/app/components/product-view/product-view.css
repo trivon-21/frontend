@@ -1,0 +1,9 @@
+/* ==============================================
+   product-view.css — Product page layout
+   ============================================== */
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
