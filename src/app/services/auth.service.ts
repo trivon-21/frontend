@@ -11,6 +11,7 @@ export interface SignupPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface AuthUser {
@@ -44,28 +45,39 @@ export class AuthService {
 
   signup(payload: SignupPayload): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/signup`, payload).pipe(
-      tap((res) => this.saveSession(res.token, res.user))
+      tap((res) => this.saveSession(res.token, res.user, true))
     );
   }
 
   login(payload: LoginPayload): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, payload).pipe(
-      tap((res) => this.saveSession(res.token, res.user))
+      tap((res) => this.saveSession(res.token, res.user, payload.rememberMe !== false))
     );
   }
 
-  saveSession(token: string, user: AuthUser): void {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password/${token}`, {
+      password
+    });
+  }
+
+  saveSession(token: string, user: AuthUser, rememberMe = true): void {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem('token', token);
+    storage.setItem('user', JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   }
 
   getUser(): AuthUser | null {
-    const raw = localStorage.getItem('user');
+    const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!raw) return null;
     try {
       return JSON.parse(raw) as AuthUser;
@@ -81,6 +93,8 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     this.currentUserSubject.next(null);
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -8,7 +8,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
@@ -31,27 +31,33 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
 }
 
 @Component({
-  selector: 'app-signup',
+  selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
-  templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css',
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.css',
 })
-export class SignupComponent {
+export class ResetPasswordComponent implements OnInit {
   showPassword = false;
   isLoading = false;
+  successMessage = '';
   errorMessage = '';
+  token = '';
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.token = this.route.snapshot.paramMap.get('token') || '';
     this.form = this.fb.group(
       {
-        firstName: ['', [Validators.required, Validators.minLength(2)]],
-        lastName: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, strongPassword]],
         confirmPassword: ['', [Validators.required]],
-        agreeTerms: [false, [Validators.requiredTrue]],
       },
       { validators: passwordsMatch }
     );
@@ -78,21 +84,18 @@ export class SignupComponent {
       this.form.markAllAsTouched();
       return;
     }
-
-    const { firstName, lastName, email, password } = this.form.value;
-    const fullName = `${firstName.trim()} ${lastName.trim()}`;
-
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.signup({ fullName, email, password }).subscribe({
-      next: () => {
+    this.authService.resetPassword(this.token, this.form.value.password).subscribe({
+      next: (res) => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.successMessage = res.message;
+        setTimeout(() => this.router.navigate(['/login']), 2500);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message ?? 'Signup failed. Please try again.';
+        this.errorMessage = err.error?.message ?? 'Reset failed. The link may have expired.';
       },
     });
   }

@@ -23,38 +23,89 @@
           <div class="row two">
             <div class="field">
               <label>First name</label>
-              <input type="text" formControlName="firstName" />
+              <input type="text" formControlName="firstName" placeholder="First Name" />
+              @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+                <span class="field-error">First name is required (min 2 chars)</span>
+              }
             </div>
             <div class="field">
               <label>Last name</label>
-              <input type="text" formControlName="lastName" />
+              <input type="text" formControlName="lastName" placeholder="Last Name" />
+              @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+                <span class="field-error">Last name is required (min 2 chars)</span>
+              }
             </div>
           </div>
 
           <div class="row">
             <div class="field">
               <label>Email address</label>
-              <input type="email" formControlName="email" />
+              <input type="email" formControlName="email" placeholder="you@example.com" />
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <span class="field-error">Please enter a valid email address</span>
+              }
             </div>
           </div>
 
           <div class="row two">
             <div class="field">
               <label>Password</label>
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" />
+              <div class="input-wrap">
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Password" />
+                <button type="button" class="eye-btn" (click)="toggleShowPassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                  @if (!showPassword) {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  } @else {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
             <div class="field">
               <label>Confirm your password</label>
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" />
+              <div class="input-wrap">
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password" />
+              </div>
+              @if (form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched) {
+                <span class="field-error">Passwords do not match</span>
+              }
             </div>
           </div>
 
-          <p class="hint">Use 8 or more characters with a mix of letters, numbers &amp; symbols</p>
+          <!-- Password strength rules -->
+          @if (passwordTouched || pw.length > 0) {
+            <ul class="pw-rules">
+              <li [class.ok]="pw.length >= 8" [class.fail]="pw.length > 0 && pw.length < 8">
+                <span class="rule-icon">{{ pw.length >= 8 ? '✓' : '✗' }}</span> At least 8 characters
+              </li>
+              <li [class.ok]="!pwErrors['uppercase'] && pw.length > 0" [class.fail]="!!pwErrors['uppercase'] && pw.length > 0">
+                <span class="rule-icon">{{ !pwErrors['uppercase'] && pw.length > 0 ? '✓' : '✗' }}</span> One uppercase letter
+              </li>
+              <li [class.ok]="!pwErrors['lowercase'] && pw.length > 0" [class.fail]="!!pwErrors['lowercase'] && pw.length > 0">
+                <span class="rule-icon">{{ !pwErrors['lowercase'] && pw.length > 0 ? '✓' : '✗' }}</span> One lowercase letter
+              </li>
+              <li [class.ok]="!pwErrors['number'] && pw.length > 0" [class.fail]="!!pwErrors['number'] && pw.length > 0">
+                <span class="rule-icon">{{ !pwErrors['number'] && pw.length > 0 ? '✓' : '✗' }}</span> One number
+              </li>
+              <li [class.ok]="!pwErrors['specialChar'] && pw.length > 0" [class.fail]="!!pwErrors['specialChar'] && pw.length > 0">
+                <span class="rule-icon">{{ !pwErrors['specialChar'] && pw.length > 0 ? '✓' : '✗' }}</span> One special character
+              </li>
+            </ul>
+          }
 
-          <label class="check">
-            <input type="checkbox" (change)="toggleShowPassword()" />
-            <span>Show password</span>
+          <!-- Terms & Conditions -->
+          <label class="check terms-check">
+            <input type="checkbox" formControlName="agreeTerms" />
+            <span>I agree to the <a class="link" href="#" target="_blank">Terms &amp; Conditions</a></span>
           </label>
+          @if (form.get('agreeTerms')?.invalid && form.get('agreeTerms')?.touched) {
+            <span class="field-error">You must accept the Terms &amp; Conditions</span>
+          }
 
           <div class="actions">
             <a class="link small" routerLink="/login">log in instead</a>
