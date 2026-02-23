@@ -1,0 +1,122 @@
+<div class="page">
+  <!-- Header -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">AirLux</div>
+
+      <div class="search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search" />
+      </div>
+
+      <nav class="navlinks">
+        <a href="#">View products</a>
+        <a href="#">Our Services</a>
+        <a href="#">About Us</a>
+      </nav>
+
+      <div class="authbtns">
+        <button class="btn ghost" type="button">Log in</button>
+        <button class="btn solid" type="button">Sign up</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Background image -->
+  <div class="hero-bg" aria-hidden="true"></div>
+
+  <!-- Center Card -->
+  <main class="content">
+    <section class="card">
+      <div class="card-left">
+        <img class="illus" src="assets/signup-illustration.png" alt="Login illustration" />
+      </div>
+
+      <div class="card-right">
+        <h1>Login to account</h1>
+        <p class="sub">
+          Don't have an account?
+          <a class="link" href="/signup">Signup</a>
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+          <div class="row">
+            <div class="field">
+              <label>Email address</label>
+              <input type="email" formControlName="email" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>Password</label>
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" />
+            </div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" (change)="toggleShowPassword()" />
+            <span>Show password</span>
+          </label>
+
+          <div class="actions">
+            <a class="link small" href="#">Forgot Password?</a>
+            <button class="btn big" type="submit" [disabled]="isLoading">
+              {{ isLoading ? 'Logging in…' : 'Log in' }}
+            </button>
+          </div>
+
+          @if (errorMessage) {
+            <p class="error-msg">{{ errorMessage }}</p>
+          }
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="foot-col">
+        <div class="foot-brand">AirLux</div>
+        <p class="foot-text">
+          Sri Lanka's trusted AC service<br />
+          management system.<br />
+          Professional solutions for all your<br />
+          cooling needs.
+        </p>
+      </div>
+
+      <div class="foot-col">
+        <div class="foot-title">Contact Us</div>
+        <div class="foot-item">
+          <span class="ico">📍</span>
+          <span>123 Galle Road, Colombo 03,<br />Sri Lanka</span>
+        </div>
+        <div class="foot-item">
+          <span class="ico">📞</span>
+          <span>+94 11 234 5678</span>
+        </div>
+        <div class="foot-item">
+          <span class="ico">✉️</span>
+          <span>support@airlux.lk</span>
+        </div>
+      </div>
+
+      <div class="foot-col">
+        <div class="foot-title">Follow Us</div>
+        <div class="socials">
+          <a class="soc" href="#" aria-label="Facebook">f</a>
+          <a class="soc" href="#" aria-label="Twitter">𝕏</a>
+          <a class="soc" href="#" aria-label="Instagram">⌁</a>
+          <a class="soc" href="#" aria-label="LinkedIn">in</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="line"></div>
+      <div class="copy">© 2026 AirLux. All rights reserved. | AC Service Management System</div>
+    </div>
+  </footer>
+</div>
