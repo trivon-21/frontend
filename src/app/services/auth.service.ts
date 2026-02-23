@@ -16,8 +16,15 @@ export interface LoginPayload {
 export interface AuthUser {
   id: string;
   fullName: string;
+  lastName?: string;
   email: string;
   role: string;
+  gender?: string;
+  address?: string;
+  phoneNumber?: string;
+  profilePhoto?: string;
+  additionalEmails?: { _id: string; email: string; addedAt: string }[];
+  createdAt?: string;
 }
 
 export interface AuthResponse {

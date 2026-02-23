@@ -1,0 +1,187 @@
+<div class="profile-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">My Profile</h1>
+    <div class="page-search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="page-search-icon">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="page-search" type="text" placeholder="Search here" />
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">Loading profile...</div>
+
+  <ng-container *ngIf="!loading && profile">
+
+    <!-- Alert messages -->
+    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+    <!-- Top section: Profile card + Details -->
+    <div class="top-row">
+
+      <!-- Profile card -->
+      <div class="profile-card">
+        <div class="profile-avatar-area">
+          <div class="profile-avatar" *ngIf="!profile.profilePhoto">{{ avatarInitials }}</div>
+          <img *ngIf="profile.profilePhoto" [src]="profile.profilePhoto" alt="Profile photo" class="profile-photo" />
+        </div>
+        <div class="profile-name-area">
+          <div class="profile-first-name">{{ profile.fullName }}</div>
+          <div class="profile-last-name">{{ profile.lastName }}</div>
+        </div>
+      </div>
+
+      <!-- Details panel -->
+      <div class="details-panel">
+        <h3 class="details-title">Details</h3>
+        <hr class="details-divider" />
+        <p class="details-row" *ngIf="profile.phoneNumber">
+          <span class="details-label">Contact:</span> {{ profile.phoneNumber }}
+        </p>
+        <p class="details-row" *ngIf="!profile.phoneNumber">
+          <span class="details-label">Contact:</span> <span class="details-empty">Not set</span>
+        </p>
+        <p class="details-row">
+          <span class="details-label">Email:</span> {{ profile.email }}
+        </p>
+        <p class="details-row" *ngIf="profile.address">
+          <span class="details-label">Address:</span> {{ profile.address }}
+        </p>
+        <p class="details-row" *ngIf="!profile.address">
+          <span class="details-label">Address:</span> <span class="details-empty">Not set</span>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Profile Form -->
+    <form [formGroup]="profileForm" class="profile-form">
+      <div class="form-grid two-col">
+        <div class="form-field">
+          <label class="form-label">Full Name</label>
+          <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Last Name</label>
+          <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" />
+        </div>
+      </div>
+
+      <div class="form-grid two-col">
+        <div class="form-field">
+          <label class="form-label">Gender</label>
+          <div class="select-wrap">
+            <select formControlName="gender" class="form-input form-select">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Address</label>
+          <input formControlName="address" type="text" class="form-input" placeholder="Your Address" />
+        </div>
+      </div>
+
+      <div class="form-grid one-col">
+        <div class="form-field">
+          <label class="form-label">Contact Number</label>
+          <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" />
+        </div>
+      </div>
+    </form>
+
+    <!-- Email section -->
+    <div class="email-section">
+      <h3 class="email-section-title">My email Address</h3>
+
+      <!-- Primary email -->
+      <div class="email-item">
+        <div class="email-icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="email-info">
+          <div class="email-address">{{ profile.email }}</div>
+          <div class="email-time">{{ timeAgo(profile.createdAt) }}</div>
+        </div>
+      </div>
+
+      <!-- Additional emails -->
+      <div *ngFor="let ae of profile.additionalEmails" class="email-item">
+        <div class="email-icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="email-info">
+          <div class="email-address">{{ ae.email }}</div>
+          <div class="email-time">{{ timeAgo(ae.addedAt) }}</div>
+        </div>
+        <button class="email-remove-btn" (click)="removeEmail(ae._id)" aria-label="Remove email">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Add email input -->
+      <div *ngIf="showAddEmailInput" class="add-email-row">
+        <input
+          type="email"
+          class="form-input add-email-input"
+          [(ngModel)]="newEmail"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Enter new email address"
+        />
+        <button class="btn-confirm-email" (click)="submitAddEmail()" [disabled]="addingEmail">
+          {{ addingEmail ? 'Adding...' : 'Add' }}
+        </button>
+        <button class="btn-cancel-email" (click)="toggleAddEmail()">Cancel</button>
+        <span *ngIf="addEmailError" class="add-email-error">{{ addEmailError }}</span>
+      </div>
+
+      <button class="add-email-btn" (click)="toggleAddEmail()">
+        + Add Email Address
+      </button>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="actions-row">
+
+      <!-- Delete confirm prompt -->
+      <div *ngIf="confirmDelete" class="delete-confirm">
+        <span class="delete-confirm-text">Are you sure? This action cannot be undone.</span>
+        <button class="btn-confirm-delete" (click)="deleteAccount()">Yes, Delete</button>
+        <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
+      </div>
+
+      <div class="action-btns" *ngIf="!confirmDelete">
+        <!-- Edit / Save / Cancel -->
+        <ng-container *ngIf="!isEditing">
+          <button class="btn-edit-details" (click)="startEditing()">Edit Details</button>
+        </ng-container>
+        <ng-container *ngIf="isEditing">
+          <button class="btn-cancel-edit" (click)="cancelEditing()">Cancel</button>
+          <button class="btn-save-details" (click)="saveProfile()" [disabled]="saving || profileForm.invalid">
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </ng-container>
+        <button class="btn-delete-account" (click)="deleteAccount()">Delete Account</button>
+      </div>
+    </div>
+
+  </ng-container>
+</div>
