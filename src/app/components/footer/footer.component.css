@@ -1,0 +1,60 @@
+.footer {
+  position: relative;
+  z-index: 2;
+  background: #0f231b;
+  color: rgba(255,255,255,0.9);
+  padding: 42px 18px 18px;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  gap: 30px;
+}
+.foot-brand {
+  font-weight: 800;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+.foot-text { line-height: 1.7; color: rgba(255,255,255,0.80); }
+.foot-title { font-weight: 700; font-size: 22px; margin-bottom: 14px; }
+
+.foot-item {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  color: rgba(255,255,255,0.82);
+}
+.ico { width: 22px; text-align: center; opacity: 0.95; }
+
+.socials { display: flex; gap: 12px; }
+.soc {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.92);
+  font-weight: 800;
+}
+.soc:hover { background: rgba(255,255,255,0.14); }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 28px auto 0;
+  text-align: center;
+  color: rgba(255,255,255,0.65);
+}
+.line {
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin-bottom: 14px;
+}
+.copy { font-size: 13px; }
+
+@media (max-width: 560px) {
+  .footer-inner { grid-template-columns: 1fr; }
+}
