@@ -1,1 +1,69 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --color-primary-green: #2B5738;
+    --color-background: #F4F6F6;
+    --color-surface: #FFFFFF;
+    --color-text-primary: #1A1C30;
+    --color-text-secondary: #8B909A;
+    --color-border: #E8EBF0;
+
+    --color-success-bg: #D1FAE5;
+    --color-success-text: #059669;
+    --color-warning-bg: #FEF3C7;
+    --color-warning-text: #D97706;
+    --color-danger-bg: #FEE2E2;
+    --color-danger-text: #DC2626;
+
+    --sidebar-width: 260px;
+    --header-height: 80px;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-card: 0px 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+button {
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+input,
+textarea {
+    font-family: 'Inter', sans-serif;
+}

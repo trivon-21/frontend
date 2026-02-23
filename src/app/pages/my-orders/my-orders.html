@@ -1,0 +1,146 @@
+<div class="orders-page">
+    <div class="page-header">
+        <h1 class="page-title">My Orders</h1>
+        <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" placeholder="Search here">
+        </div>
+    </div>
+
+    <div class="filters-row">
+        <div class="search-box search-box--large">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" placeholder="Search ID">
+        </div>
+
+        <div class="filters-actions">
+            <div class="filter-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span>Filters:</span>
+            </div>
+
+            <div class="select-wrapper">
+                <select class="custom-select">
+                    <option value="all">All</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="select-icon">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            <div class="date-picker">
+                <span>Set Date</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ORDER ID</th>
+                    <th>ITEM</th>
+                    <th>DATE</th>
+                    <th>AMOUNT</th>
+                    <th>DETAILS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>AC-COMP-004</td>
+                    <td>2 Ton Split AC Compressor</td>
+                    <td>
+                        <div class="date-cell">
+                            <span>Sat, 20</span>
+                            <span>Apr 2020</span>
+                        </div>
+                    </td>
+                    <td>$80.09</td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+                <tr>
+                    <td>AC-COMP-005</td>
+                    <td>R410A Refrigerant (1kg)</td>
+                    <td>
+                        <div class="date-cell">
+                            <span>Sat, 20</span>
+                            <span>Apr 2020</span>
+                        </div>
+                    </td>
+                    <td>$80.09</td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+                <tr>
+                    <td>AC-COMP-005</td>
+                    <td>R410A Refrigerant (1kg)</td>
+                    <td>
+                        <div class="date-cell">
+                            <span>Sat, 20</span>
+                            <span>Apr 2020</span>
+                        </div>
+                    </td>
+                    <td>$80.09</td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+                <tr>
+                    <td>AC-COMP-005</td>
+                    <td>R410A Refrigerant (1kg)</td>
+                    <td>
+                        <div class="date-cell">
+                            <span>Sat, 20</span>
+                            <span>Apr 2020</span>
+                        </div>
+                    </td>
+                    <td>$80.09</td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+                <tr>
+                    <td>AC-COMP-005</td>
+                    <td>R410A Refrigerant (1kg)</td>
+                    <td>
+                        <div class="date-cell">
+                            <span>Sat, 20</span>
+                            <span>Apr 2020</span>
+                        </div>
+                    </td>
+                    <td>$80.09</td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-row">
+        <div class="pagination-info">Showing 1-8 of 247 items</div>
+        <div class="pagination-controls">
+            <button class="page-link" disabled>Previous</button>
+            <button class="page-link active">1</button>
+            <button class="page-link">2</button>
+            <button class="page-link">3</button>
+            <span class="page-dots">...</span>
+            <button class="page-link">31</button>
+            <button class="page-link">Next</button>
+        </div>
+    </div>
+</div>
