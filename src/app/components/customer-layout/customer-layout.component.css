@@ -31,6 +31,12 @@
   color: #1f5b45;
   padding: 0 24px 32px;
   letter-spacing: -0.5px;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar-brand:hover {
+  color: #184a38;
 }
 
 .sidebar-nav {
@@ -163,6 +169,28 @@
   cursor: pointer;
   user-select: none;
   letter-spacing: 0.5px;
+}
+
+/* ── Back to Home button ── */
+.back-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #566463;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  flex-shrink: 0;
+}
+
+.back-home-btn:hover {
+  background: #f0f5f3;
+  color: #1f5b45;
+  border-color: rgba(31, 91, 69, 0.3);
 }
 
 /* ── Content ── */

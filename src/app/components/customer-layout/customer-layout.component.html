@@ -1,7 +1,7 @@
 <div class="dashboard-wrapper">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-brand">AirLux</div>
+    <a routerLink="/" class="sidebar-brand">AirLux</a>
     <nav class="sidebar-nav">
       <a
         routerLink="/dashboard"
@@ -37,6 +37,12 @@
   <div class="dashboard-main">
     <!-- Header -->
     <header class="dashboard-header">
+      <a routerLink="/" class="back-home-btn" aria-label="Back to Home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <span>Home</span>
+      </a>
       <div class="header-search-wrap">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
