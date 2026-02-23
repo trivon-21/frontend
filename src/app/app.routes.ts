@@ -1,20 +1,21 @@
 import { Routes } from '@angular/router';
+
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PaymentVerificationComponent } from './pages/payment-verification/payment-verification.component';
+import { VerifiedPaymentsComponent } from './pages/verified-payments/verified-payments.component';
+import { RejectedPaymentsComponent } from './pages/rejected-payments/rejected-payments.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/payment-verification', pathMatch: 'full' },
-  { path: 'payment-verification', component: PaymentVerificationComponent },
-  { path: '**', redirectTo: '/payment-verification' }
-];
-/*import { Routes } from '@angular/router';
-import { PaymentVerificationComponent } from './pages/payment-verification/payment-verification.component';
 
-export const routes: Routes = [
-  { path: '', component: PaymentVerificationComponent },
+
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+
+  { path: 'dashboard', component: DashboardComponent },
+
   { path: 'payment-verification', component: PaymentVerificationComponent },
-  // Add a redirect for the dashboard until you build that page
-  { path: 'dashboard', redirectTo: '' }, 
-  { path: 'verified-payments', redirectTo: '' },
-  { path: 'rejected-payments', redirectTo: '' }
+  { path: 'verified-payments', component: VerifiedPaymentsComponent },
+  { path: 'rejected-payments', component: RejectedPaymentsComponent },
+
+  { path: '**', redirectTo: '/dashboard' }
+
 ];
-*/

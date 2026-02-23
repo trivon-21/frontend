@@ -12,12 +12,3 @@ export interface Payment {
   approvedAt?: string | Date;
   rejectedAt?: string | Date;
 }
-/*export interface Payment {
-  _id: string;
-  orderId: string;
-  customerName: string;
-  amount: number;
-  slipUrl: string;
-  status: 'PENDING' | 'VERIFIED' | 'REJECTED';
-  createdAt: Date;
-}*/

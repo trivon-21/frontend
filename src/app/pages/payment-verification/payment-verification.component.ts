@@ -157,7 +157,7 @@ export class PaymentVerificationComponent implements OnInit {
     });
   }
 
-  // 🔧 Debug: Test backend connection manually
+  // Debug Test backend connection manually
   testConnection(): void {
     this.connectionError = 'Testing...';
     

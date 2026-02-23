@@ -1,4 +1,3 @@
-// src/app/services/payment.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -7,7 +6,6 @@ import { Payment } from '../shared/models/payment.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  // ✅ Use 127.0.0.1 (more reliable than 'localhost' on Windows)
   private apiUrl = 'http://127.0.0.1:3000/api/payments';
 
   constructor(private http: HttpClient) {}
@@ -37,17 +35,22 @@ export class PaymentService {
       .pipe(catchError(this.handleError));
   }
 
+  getApprovedPayments() {
+  return this.http.get<any[]>(`${this.apiUrl}/approved`);
+}
 approvePayment(id: string) {
   return this.http.put(`${this.apiUrl}/approve/${id}`, {})
       .pipe(catchError(this.handleError));
   }
 
 rejectPayment(id: string, reason: string) {
-  // Change 'reason' to 'rejectionReason' to match backend
+ 
   return this.http.put(`${this.apiUrl}/reject/${id}`, { rejectionReason: reason })
       .pipe(catchError(this.handleError));
 }
-
+getRejectedPayments() {
+  return this.http.get<any[]>(`${this.apiUrl}/rejected`);
+}
   reuploadSlip(id: string, slipUrl: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/reupload`, { slipUrl })
       .pipe(catchError(this.handleError));
