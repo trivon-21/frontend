@@ -1,15 +1,26 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+interface Order {
+  name: string;
+  date: string;
+  price: string;
+  status: 'Completed' | 'Pending' | 'Returned';
+}
+
 @Component({
   selector: 'app-customer-dashboard-home',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div style="font-family:'Inter',sans-serif; padding: 8px 0;">
-      <h2 style="font-size:22px;font-weight:700;color:#1b2f27;margin:0 0 8px;">Dashboard</h2>
-      <p style="color:#566463;font-size:14px;">Welcome back! Your dashboard overview will appear here.</p>
-    </div>
-  `
+  templateUrl: './customer-dashboard-home.component.html',
+  styleUrl: './customer-dashboard-home.component.css',
 })
-export class CustomerDashboardHomeComponent {}
+export class CustomerDashboardHomeComponent {
+  orders: Order[] = [
+    { name: 'John Doe',     date: 'Sat, 20 Apr 2020', price: '$80.09', status: 'Completed' },
+    { name: 'Mc Dillan',    date: 'Fri, 19 Apr 2020',  price: '$7.03',  status: 'Pending'   },
+    { name: 'Dasun Perera', date: 'Tue, 19 Apr 2020', price: '$30.09', status: 'Returned'  },
+    { name: 'Ameesha',      date: 'Sat, 20 Apr 2020', price: '$80.09', status: 'Completed' },
+    { name: 'Nisal',        date: 'Tue, 19 Apr 2020', price: '$30.09', status: 'Returned'  },
+  ];
+}

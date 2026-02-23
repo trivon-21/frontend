@@ -1,0 +1,187 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h2 class="page-title">Dashboard</h2>
+  <div class="page-header-right">
+    <button class="track-order-btn">Track Order</button>
+    <div class="page-search-wrap">
+      <svg class="page-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="page-search" type="text" placeholder="Search here" />
+    </div>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stat-cards">
+  <!-- Total Purchases -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon stat-icon--green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1f5b45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </div>
+      <button class="more-btn" aria-label="More options">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+    </div>
+    <p class="stat-label">Total Purchases</p>
+    <p class="stat-value">05</p>
+  </div>
+
+  <!-- Return Orders -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon stat-icon--pink">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d64040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
+        </svg>
+      </div>
+      <button class="more-btn" aria-label="More options">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+    </div>
+    <p class="stat-label">Return Orders</p>
+    <p class="stat-value">02</p>
+  </div>
+
+  <!-- Pending Payment -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon stat-icon--purple">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b5dd3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <button class="more-btn" aria-label="More options">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+    </div>
+    <p class="stat-label">Pending Payment</p>
+    <p class="stat-value">01</p>
+  </div>
+
+  <!-- Completed -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon stat-icon--orange">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+      </div>
+      <button class="more-btn" aria-label="More options">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+    </div>
+    <p class="stat-label">Completed</p>
+    <div class="stat-bottom-row">
+      <p class="stat-value">02</p>
+      <span class="stat-badge-up">+1.29%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Body: Order History + Right Panel -->
+<div class="dashboard-body">
+
+  <!-- Order History -->
+  <div class="order-history-card">
+    <div class="oh-header">
+      <h3 class="oh-title">Order History</h3>
+      <div class="oh-search-wrap">
+        <input class="oh-search" type="text" placeholder="Search for anything...." />
+        <svg class="oh-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div class="oh-date-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>10 May - 20 May</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+
+    <table class="oh-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>
+            <div class="order-name-cell">
+              <div class="order-avatar"></div>
+              <span>{{ order.name }}</span>
+            </div>
+          </td>
+          <td>{{ order.date }}</td>
+          <td>{{ order.price }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <button class="panel-action-btn">+ Request Service</button>
+
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title">Service Requests</span>
+        <button class="more-btn" aria-label="More options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        </button>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Ongoing</span>
+        <span class="panel-stat-value">01</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Addressed</span>
+        <span class="panel-stat-value">03</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Closed</span>
+        <span class="panel-stat-value">01</span>
+      </div>
+    </div>
+
+    <button class="panel-action-btn">+ Inquiry</button>
+
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title">Inquiries</span>
+        <button class="more-btn" aria-label="More options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        </button>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Ongoing</span>
+        <span class="panel-stat-value">01</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Addressed</span>
+        <span class="panel-stat-value">03</span>
+      </div>
+    </div>
+
+    <button class="panel-action-btn">+ Feedback</button>
+  </div>
+</div>
