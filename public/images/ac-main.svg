@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <rect x="100" y="60" width="200" height="140" rx="12" fill="#e5e7eb" stroke="#d1d5db" stroke-width="2"/>
+  <rect x="130" y="200" width="140" height="10" rx="5" fill="#d1d5db"/>
+  <text x="200" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" fill="#6b7280">AirLux Split AC</text>
+  <circle cx="200" cy="100" r="20" fill="#22c55e" opacity="0.3"/>
+  <text x="200" y="106" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" fill="#22c55e">❄</text>
+</svg>

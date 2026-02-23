@@ -1,0 +1,68 @@
+/* ==============================================
+   navbar.css — Styles for the top navigation bar
+   ============================================== */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-white);
+  padding: 0 var(--space-8);
+  height: 56px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* -----------------------------------------------
+   Brand / Logo
+   ----------------------------------------------- */
+.navbar__logo {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease;
+}
+
+.navbar__logo:hover {
+  color: var(--color-primary-dark);
+}
+
+/* -----------------------------------------------
+   Navigation Links
+   ----------------------------------------------- */
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.navbar__link {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: var(--color-text-primary);
+}
+
+/* -----------------------------------------------
+   Logout Button
+   ----------------------------------------------- */
+.navbar__logout-btn {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background-color: var(--color-text-primary);
+  color: var(--color-white);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.navbar__logout-btn:hover {
+  background-color: #374151;
+}
