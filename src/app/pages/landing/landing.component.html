@@ -1,60 +1,172 @@
 <app-navbar></app-navbar>
 
 <!-- Hero Section -->
-<section class="hero">
-  <div class="hero-content">
-    <h1 class="hero-title">Reliable AC Solutions for a Cooler Tomorrow</h1>
-    <p class="hero-sub">Installations, repairs, and maintenance at your doorstep in Sri Lanka.</p>
-    <div class="hero-btns">
-      <button class="btn-outline">View Products</button>
-      <button class="btn-outline">View Services</button>
-    </div>
-    <div class="hero-inquiry">
-      <p class="inquiry-label">Need to know anything?</p>
-      <button class="btn-inquiry">Inqiury</button>
+<section class="hero" aria-label="Hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <h1 class="hero-title">
+        Reliable AC<br />
+        Solutions for<br />
+        a Cooler<br />
+        Tomorrow
+      </h1>
+
+      <p class="hero-sub">
+        Installations, repairs, and maintenance at<br />
+        your doorstep in Sri Lanka.
+      </p>
+
+      <div class="hero-btns">
+        <button class="btn btn-primary">View Products</button>
+        <button class="btn btn-outline">View Services</button>
+      </div>
+
+      <div class="hero-inquiry">
+        <p class="inquiry-label">Need to know anything?</p>
+        <button class="btn btn-primary btn-inquiry">Inquiry</button>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- Our Services Section -->
-<section class="section services-section">
+<section class="section services-section" aria-label="Our Services">
   <div class="section-inner">
     <h2 class="section-title">Our Services</h2>
-    <div class="cards-grid four-col">
-      <div class="card">
-        <div class="card-icon green-icon">🛒</div>
-        <div class="card-body">
-          <div class="card-title">Buy & Install</div>
-          <p class="card-text">Purchase premium AC units with expert installation included.</p>
+
+    <div class="cards-grid four-col service-cards">
+      <!-- Card 1 -->
+      <div class="card service-card">
+        <div class="icon-box icon-dark">
+          <!-- cart -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M6 6h15l-1.5 8h-11L6 6Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M6 6 5 3H2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+            <circle cx="9" cy="19" r="1.5" fill="currentColor" />
+            <circle cx="18" cy="19" r="1.5" fill="currentColor" />
+          </svg>
         </div>
-        <a class="card-link" href="#">Learn more →</a>
+
+        <div class="card-title">Buy &amp; Install</div>
+        <p class="card-text">
+          Purchase<br />
+          premium AC<br />
+          units with expert<br />
+          installation<br />
+          included.
+        </p>
+
+        <a class="card-link" href="#">
+          Learn more <span class="arrow">→</span>
+        </a>
       </div>
-      <div class="card">
-        <div class="card-icon green-icon">🔧</div>
-        <div class="card-body">
-          <div class="card-title">Installation Only</div>
-          <p class="card-text">Professional installation services for your existing AC units.</p>
+
+      <!-- Card 2 -->
+      <div class="card service-card">
+        <div class="icon-box icon-dark">
+          <!-- wrench -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M14.5 6.5a4.5 4.5 0 0 0-6.2 5.9L3.5 17.2a1.5 1.5 0 0 0 2.1 2.1l4.8-4.8a4.5 4.5 0 0 0 5.9-6.2l-2.3 2.3-2-2 2.5-2.1Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linejoin="round"
+            />
+          </svg>
         </div>
-        <a class="card-link" href="#">Learn more →</a>
+
+        <div class="card-title">Installation Only</div>
+        <p class="card-text">
+          Professional<br />
+          installation<br />
+          services for your<br />
+          existing AC<br />
+          units.
+        </p>
+
+        <a class="card-link" href="#">
+          Learn more <span class="arrow">→</span>
+        </a>
       </div>
-      <div class="card">
-        <div class="card-icon green-icon">⚙️</div>
-        <div class="card-body">
-          <div class="card-title">Repair & Service</div>
-          <p class="card-text">Fast and reliable repair services for all AC brands.</p>
+
+      <!-- Card 3 -->
+      <div class="card service-card">
+        <div class="icon-box icon-dark">
+          <!-- gear -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+            />
+            <path
+              d="M19 12a7 7 0 0 0-.1-1l2-1.3-2-3.4-2.3.8a7 7 0 0 0-1.7-1l-.3-2.4H9.4L9 6.1a7 7 0 0 0-1.7 1L5 6.3 3 9.7 5 11a7 7 0 0 0 0 2l-2 1.3 2 3.4 2.3-.8a7 7 0 0 0 1.7 1l.3 2.4h5.2l.3-2.4a7 7 0 0 0 1.7-1l2.3.8 2-3.4-2-1.3c.1-.3.1-.7.1-1Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linejoin="round"
+            />
+          </svg>
         </div>
-        <a class="card-link" href="#">Learn more →</a>
+
+        <div class="card-title">Repair &amp; Service</div>
+        <p class="card-text">
+          Fast and reliable<br />
+          repair services<br />
+          for all AC<br />
+          brands.
+        </p>
+
+        <a class="card-link" href="#">
+          Learn more <span class="arrow">→</span>
+        </a>
       </div>
-      <div class="card">
-        <div class="card-icon green-icon">📋</div>
-        <div class="card-body">
-          <div class="card-title">Annual Maintenance</div>
-          <p class="card-text">Comprehensive maintenance plans to keep your AC running smoothly.</p>
+
+      <!-- Card 4 -->
+      <div class="card service-card">
+        <div class="icon-box icon-dark">
+          <!-- shield -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3 20 6.5V12c0 5-3.5 8.6-8 9.9C7.5 20.6 4 17 4 12V6.5L12 3Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linejoin="round"
+            />
+          </svg>
         </div>
-        <a class="card-link" href="#">Learn more →</a>
+
+        <div class="card-title">Annual Maintenance</div>
+        <p class="card-text">
+          Comprehensive<br />
+          maintenance<br />
+          plans to keep<br />
+          your AC running<br />
+          smoothly.
+        </p>
+
+        <a class="card-link" href="#">
+          Learn more <span class="arrow">→</span>
+        </a>
       </div>
     </div>
-    <p class="section-desc">
+
+    <p class="section-desc services-desc">
       From seamless installations to dedicated maintenance, we provide expert care tailored to your unique
       cooling needs. Experience peace of mind with our smart tracking system, designed to ensure your
       comfort is never interrupted.
@@ -63,27 +175,100 @@
 </section>
 
 <!-- Smart System Tracking Section -->
-<section class="section tracking-section">
+<section class="section tracking-section" aria-label="Smart System Tracking">
   <div class="section-inner">
-    <h2 class="section-title">Smart System Tracking</h2>
-    <div class="cards-grid three-col">
-      <div class="card">
-        <div class="card-icon green-icon">🔔</div>
-        <div class="card-title">Automated Warranty Alerts</div>
-        <p class="card-text">Never miss a warranty expiration with timely notifications and reminders.</p>
+    <h2 class="section-title big-title">Smart System Tracking</h2>
+
+    <div class="cards-grid three-col tracking-cards">
+      <!-- 1 -->
+      <div class="card tracking-card">
+        <div class="icon-box icon-light">
+          <!-- bell -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 21a2.2 2.2 0 0 0 2.2-2.2H9.8A2.2 2.2 0 0 0 12 21Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <path
+              d="M18 16H6c1.2-1.3 2-2.6 2-5a4 4 0 1 1 8 0c0 2.4.8 3.7 2 5Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+
+        <div class="tracking-title">Automated<br />Warranty Alerts</div>
+        <p class="tracking-text">
+          Never miss a warranty<br />
+          expiration with timely<br />
+          notifications and<br />
+          reminders.
+        </p>
       </div>
-      <div class="card">
-        <div class="card-icon green-icon">📍</div>
-        <div class="card-title">Technician Tracking</div>
-        <p class="card-text">Real-time ETA updates and live tracking of your assigned technician.</p>
+
+      <!-- 2 -->
+      <div class="card tracking-card">
+        <div class="icon-box icon-light">
+          <!-- location -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <circle cx="12" cy="9" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        </div>
+
+        <div class="tracking-title">Technician<br />Tracking</div>
+        <p class="tracking-text">
+          Real-time ETA updates<br />
+          and live tracking of<br />
+          your assigned<br />
+          technician.
+        </p>
       </div>
-      <div class="card">
-        <div class="card-icon green-icon">📄</div>
-        <div class="card-title">Transparent Audit Logs</div>
-        <p class="card-text">Complete service history with detailed reports and audit logs.</p>
+
+      <!-- 3 -->
+      <div class="card tracking-card">
+        <div class="icon-box icon-light">
+          <!-- doc -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M8 3h7l4 4v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M15 3v5h5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <path d="M9 12h6" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <path d="M9 16h6" fill="none" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        </div>
+
+        <div class="tracking-title">Transparent<br />Audit Logs</div>
+        <p class="tracking-text">
+          Complete service<br />
+          history with detailed<br />
+          reports and audit logs.
+        </p>
       </div>
     </div>
-    <p class="section-desc">
+
+    <p class="section-desc tracking-desc">
       Monitor your home's comfort with real-time digital logs and automated status updates that keep you
       effortlessly informed. Our proactive intelligence engine manages your service schedule and warranty
       life cycle, ensuring peak performance and absolute reliability.
@@ -92,42 +277,69 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="section testimonials-section">
+<section class="section testimonials-section" aria-label="Testimonials">
   <div class="section-inner">
-    <h2 class="section-title">What Our Customers Say</h2>
+    <h2 class="section-title big-title">What Our Customers Say</h2>
+
     <div class="rating-row">
-      <span class="stars">★★★★★</span>
+      <span class="stars-lg">
+        <span class="star on">★</span><span class="star on">★</span><span class="star on">★</span><span class="star on">★</span><span class="star off">★</span>
+      </span>
       <span class="rating-num">4.9</span>
       <span class="rating-label">out of 5</span>
     </div>
-    <div class="cards-grid three-col">
-      <div class="card testimonial-card">
+
+    <div class="cards-grid three-col review-cards">
+      <!-- 1 -->
+      <div class="card review-card">
         <div class="stars-sm">★★★★★</div>
-        <p class="testimonial-text">"Excellent service! The technician was professional and fixed my AC in no time."</p>
+        <p class="review-text">
+          "Excellent service! The<br />
+          technician was<br />
+          professional and fixed my<br />
+          AC in no time."
+        </p>
+
         <div class="reviewer">
-          <div class="avatar avatar-purple">P</div>
+          <div class="avatar-grad">P</div>
           <div>
             <div class="reviewer-name">Priya Jayawardena</div>
             <div class="reviewer-tag">Verified Customer</div>
           </div>
         </div>
       </div>
-      <div class="card testimonial-card">
+
+      <!-- 2 -->
+      <div class="card review-card">
         <div class="stars-sm">★★★★★</div>
-        <p class="testimonial-text">"Very reliable and transparent. The AMC plan has saved me a lot of money."</p>
+        <p class="review-text">
+          "Very reliable and<br />
+          transparent. The AMC<br />
+          plan has saved me a lot<br />
+          of money."
+        </p>
+
         <div class="reviewer">
-          <div class="avatar avatar-blue">R</div>
+          <div class="avatar-grad">R</div>
           <div>
             <div class="reviewer-name">Rohan Fernando</div>
             <div class="reviewer-tag">Verified Customer</div>
           </div>
         </div>
       </div>
-      <div class="card testimonial-card">
+
+      <!-- 3 -->
+      <div class="card review-card">
         <div class="stars-sm">★★★★★</div>
-        <p class="testimonial-text">"Best AC service in Colombo. Highly recommended for installation and repairs."</p>
+        <p class="review-text">
+          "Best AC service in<br />
+          Colombo. Highly<br />
+          recommended for<br />
+          installation and repairs."
+        </p>
+
         <div class="reviewer">
-          <div class="avatar avatar-green">N</div>
+          <div class="avatar-grad">N</div>
           <div>
             <div class="reviewer-name">Nisha Perera</div>
             <div class="reviewer-tag">Verified Customer</div>
