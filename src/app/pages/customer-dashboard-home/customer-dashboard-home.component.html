@@ -12,7 +12,7 @@
 <div class="page-header">
   <h2 class="page-title">Dashboard</h2>
   <div class="page-header-right">
-    <button class="track-order-btn">Track Order</button>
+    <button class="track-order-btn" (click)="showTrackOrder = true">Track Order</button>
     <div class="page-search-wrap">
       <svg class="page-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -150,7 +150,7 @@
 
   <!-- Right Panel -->
   <div class="right-panel">
-    <button class="panel-action-btn">+ Request Service</button>
+    <button class="panel-action-btn" (click)="showRequestService = true">+ Request Service</button>
 
     <div class="panel-card">
       <div class="panel-card-header">
@@ -173,7 +173,7 @@
       </div>
     </div>
 
-    <button class="panel-action-btn">+ Inquiry</button>
+    <button class="panel-action-btn" (click)="showInquiry = true">+ Inquiry</button>
 
     <div class="panel-card">
       <div class="panel-card-header">
@@ -192,6 +192,27 @@
       </div>
     </div>
 
-    <button class="panel-action-btn">+ Feedback</button>
+    <button class="panel-action-btn" (click)="showFeedback = true">+ Feedback</button>
   </div>
 </div>
+
+<!-- ── Modals ── -->
+<app-track-order-modal
+  *ngIf="showTrackOrder"
+  (closed)="showTrackOrder = false"
+></app-track-order-modal>
+
+<app-request-service-modal
+  *ngIf="showRequestService"
+  (closed)="showRequestService = false"
+></app-request-service-modal>
+
+<app-inquiry-modal
+  *ngIf="showInquiry"
+  (closed)="showInquiry = false"
+></app-inquiry-modal>
+
+<app-feedback-modal
+  *ngIf="showFeedback"
+  (closed)="showFeedback = false"
+></app-feedback-modal>

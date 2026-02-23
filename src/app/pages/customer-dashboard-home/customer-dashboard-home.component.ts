@@ -1,11 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService, DashboardData, DashboardOrder } from '../../services/dashboard.service';
+import { TrackOrderModalComponent } from '../../components/track-order-modal/track-order-modal.component';
+import { RequestServiceModalComponent } from '../../components/request-service-modal/request-service-modal.component';
+import { InquiryModalComponent } from '../../components/inquiry-modal/inquiry-modal.component';
+import { FeedbackModalComponent } from '../../components/feedback-modal/feedback-modal.component';
 
 @Component({
   selector: 'app-customer-dashboard-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    TrackOrderModalComponent,
+    RequestServiceModalComponent,
+    InquiryModalComponent,
+    FeedbackModalComponent,
+  ],
   templateUrl: './customer-dashboard-home.component.html',
   styleUrl: './customer-dashboard-home.component.css',
 })
@@ -13,6 +23,11 @@ export class CustomerDashboardHomeComponent implements OnInit {
   data: DashboardData | null = null;
   loading = true;
   error: string | null = null;
+
+  showTrackOrder = false;
+  showRequestService = false;
+  showInquiry = false;
+  showFeedback = false;
 
   constructor(private dashboardService: DashboardService) {}
 

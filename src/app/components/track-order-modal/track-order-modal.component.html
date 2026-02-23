@@ -1,0 +1,182 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-box">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f5b45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <h2 class="modal-title">Track Order</h2>
+      </div>
+      <button class="modal-close" (click)="close()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Search Section (shown when no order loaded) -->
+    <div *ngIf="!order" class="search-section">
+      <p class="search-hint">Enter your order reference number to view full order details and status.</p>
+
+      <div class="form-group">
+        <label class="form-label">Order Reference Number <span class="required">*</span></label>
+        <input
+          class="form-input"
+          type="text"
+          placeholder="e.g. ORD-A1B2C3D4"
+          [(ngModel)]="searchRef"
+          (keydown.enter)="search()"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone (optional)</label>
+          <input class="form-input" type="tel" placeholder="Your phone number" [(ngModel)]="searchPhone" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (optional)</label>
+          <input class="form-input" type="email" placeholder="Your email address" [(ngModel)]="searchEmail" />
+        </div>
+      </div>
+
+      <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+      <button class="btn-primary" (click)="search()" [disabled]="loading">
+        <span *ngIf="loading" class="btn-spinner"></span>
+        <span *ngIf="!loading">Search Order</span>
+        <span *ngIf="loading">Searching...</span>
+      </button>
+    </div>
+
+    <!-- Order Results -->
+    <div *ngIf="order" class="results-section">
+
+      <!-- Back button -->
+      <button class="back-btn" (click)="resetSearch()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Search again
+      </button>
+
+      <!-- Order Summary Card -->
+      <div class="summary-card">
+        <div class="summary-top">
+          <div class="summary-product">
+            <div class="product-img">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1f5b45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div>
+              <p class="product-name">{{ order.itemName }}</p>
+              <p class="product-meta">Qty: {{ order.quantity }}</p>
+            </div>
+          </div>
+          <div class="summary-amount">{{ formatAmount(order.amount) }}</div>
+        </div>
+
+        <div class="summary-meta-row">
+          <div class="meta-item">
+            <span class="meta-label">Order ID</span>
+            <span class="meta-value mono">{{ order.orderRef }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Order Date</span>
+            <span class="meta-value">{{ formatDate(order.createdAt) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Order Type</span>
+            <span class="meta-value">{{ order.orderType }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Payment Status</span>
+            <span class="status-badge" [ngClass]="getPaymentStatusClass(order.paymentStatus)">
+              {{ order.paymentStatus }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Status Timeline -->
+      <div class="section-block">
+        <h3 class="section-title">Order Timeline</h3>
+        <div class="timeline">
+          <div
+            *ngFor="let step of getSteps(); let last = last"
+            class="timeline-item"
+            [ngClass]="'step-' + getStepState(step.key)"
+          >
+            <div class="timeline-left">
+              <div class="timeline-dot">
+                <svg *ngIf="getStepState(step.key) === 'done'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div *ngIf="!last" class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <span class="timeline-label">{{ step.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Tracking (Buy Only, if shipped) -->
+      <div *ngIf="order.orderType === 'Buy Only' && order.deliveryTrackingId" class="section-block">
+        <h3 class="section-title">Delivery Tracking</h3>
+        <div class="delivery-row">
+          <div>
+            <span class="meta-label">Tracking ID</span>
+            <span class="meta-value mono">{{ order.deliveryTrackingId }}</span>
+          </div>
+          <a *ngIf="order.deliveryPartnerUrl" [href]="order.deliveryPartnerUrl" target="_blank" class="link-btn">
+            Track Shipment
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Invoice & Warranty -->
+      <div class="section-block">
+        <h3 class="section-title">Invoice & Warranty</h3>
+        <div class="warranty-grid">
+          <div class="warranty-item">
+            <span class="meta-label">Warranty Status</span>
+            <span class="status-badge" [ngClass]="warrantyActive() ? 'badge--green' : 'badge--red'">
+              {{ warrantyActive() ? 'Active' : 'Expired / Not Set' }}
+            </span>
+          </div>
+          <div class="warranty-item" *ngIf="order.warrantyStart">
+            <span class="meta-label">Warranty Start</span>
+            <span class="meta-value">{{ formatDate(order.warrantyStart) }}</span>
+          </div>
+          <div class="warranty-item" *ngIf="order.warrantyExpiry">
+            <span class="meta-label">Warranty Expiry</span>
+            <span class="meta-value">{{ formatDate(order.warrantyExpiry) }}</span>
+          </div>
+          <div class="warranty-item">
+            <span class="meta-label">AMC Status</span>
+            <span class="status-badge" [ngClass]="order.amcStatus === 'Active' ? 'badge--green' : 'badge--grey'">
+              {{ order.amcStatus }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button *ngIf="canCancel()" class="btn-danger" (click)="cancelOrder()">Cancel Order</button>
+        <button *ngIf="canReupload()" class="btn-secondary">Re-upload Payment Slip</button>
+        <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
+      </div>
+
+    </div>
+
+  </div>
+</div>
