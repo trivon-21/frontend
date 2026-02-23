@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InquiryService, Inquiry, ThreadMessage } from '../../services/inquiry.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './inquiry-modal.component.css',
 })
 export class InquiryModalComponent implements OnInit {
+  @Input() initialTab: 'new' | 'list' = 'new';
   @Output() closed = new EventEmitter<void>();
 
   activeTab: 'new' | 'list' = 'new';
@@ -48,6 +49,10 @@ export class InquiryModalComponent implements OnInit {
       this.name = `${user.fullName}${user.lastName ? ' ' + user.lastName : ''}`.trim();
       this.email = user.email;
       this.phone = user.phoneNumber || '';
+    }
+    if (this.initialTab === 'list') {
+      this.activeTab = 'list';
+      this.loadInquiries();
     }
   }
 

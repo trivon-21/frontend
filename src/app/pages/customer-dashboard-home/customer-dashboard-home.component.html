@@ -155,7 +155,7 @@
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="panel-card-title">Service Requests</span>
-        <button class="more-btn" aria-label="More options">
+        <button class="more-btn" aria-label="More options" (click)="showServiceRequestsList = true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
         </button>
       </div>
@@ -178,7 +178,7 @@
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="panel-card-title">Inquiries</span>
-        <button class="more-btn" aria-label="More options">
+        <button class="more-btn" aria-label="More options" (click)="showInquiryList = true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
         </button>
       </div>
@@ -216,3 +216,14 @@
   *ngIf="showFeedback"
   (closed)="showFeedback = false"
 ></app-feedback-modal>
+
+<app-service-requests-list-modal
+  *ngIf="showServiceRequestsList"
+  (closed)="showServiceRequestsList = false"
+></app-service-requests-list-modal>
+
+<app-inquiry-modal
+  *ngIf="showInquiryList"
+  [initialTab]="'list'"
+  (closed)="showInquiryList = false"
+></app-inquiry-modal>
