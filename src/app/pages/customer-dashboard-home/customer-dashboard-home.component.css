@@ -445,3 +445,43 @@
     align-items: flex-start;
   }
 }
+
+/* ── Loading / Error States ── */
+.state-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(31, 91, 69, 0.15);
+  border-top-color: #1f5b45;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-banner {
+  background: #fde8e8;
+  color: #d64040;
+  border: 1px solid rgba(214, 64, 64, 0.2);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13.5px;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 20px;
+}
+
+.oh-empty {
+  text-align: center;
+  color: #9aa09e;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  padding: 24px 0;
+}

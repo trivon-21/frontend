@@ -1,3 +1,13 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="state-overlay">
+  <div class="spinner"></div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="!loading && error" class="error-banner">
+  {{ error }}
+</div>
+
 <!-- Page Header -->
 <div class="page-header">
   <h2 class="page-title">Dashboard</h2>
@@ -29,7 +39,7 @@
       </button>
     </div>
     <p class="stat-label">Total Purchases</p>
-    <p class="stat-value">05</p>
+    <p class="stat-value">{{ pad(data?.stats?.totalPurchases ?? 0) }}</p>
   </div>
 
   <!-- Return Orders -->
@@ -45,7 +55,7 @@
       </button>
     </div>
     <p class="stat-label">Return Orders</p>
-    <p class="stat-value">02</p>
+    <p class="stat-value">{{ pad(data?.stats?.returnOrders ?? 0) }}</p>
   </div>
 
   <!-- Pending Payment -->
@@ -62,7 +72,7 @@
       </button>
     </div>
     <p class="stat-label">Pending Payment</p>
-    <p class="stat-value">01</p>
+    <p class="stat-value">{{ pad(data?.stats?.pendingPayment ?? 0) }}</p>
   </div>
 
   <!-- Completed -->
@@ -78,10 +88,7 @@
       </button>
     </div>
     <p class="stat-label">Completed</p>
-    <div class="stat-bottom-row">
-      <p class="stat-value">02</p>
-      <span class="stat-badge-up">+1.29%</span>
-    </div>
+    <p class="stat-value">{{ pad(data?.stats?.completed ?? 0) }}</p>
   </div>
 </div>
 
@@ -123,16 +130,19 @@
           <td>
             <div class="order-name-cell">
               <div class="order-avatar"></div>
-              <span>{{ order.name }}</span>
+              <span>{{ order.itemName }}</span>
             </div>
           </td>
-          <td>{{ order.date }}</td>
-          <td>{{ order.price }}</td>
+          <td>{{ formatDate(order.date) }}</td>
+          <td>{{ formatAmount(order.amount) }}</td>
           <td>
             <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
               {{ order.status }}
             </span>
           </td>
+        </tr>
+        <tr *ngIf="!loading && orders.length === 0">
+          <td colspan="4" class="oh-empty">No orders found.</td>
         </tr>
       </tbody>
     </table>
@@ -151,15 +161,15 @@
       </div>
       <div class="panel-stat-row">
         <span class="panel-stat-label">Ongoing</span>
-        <span class="panel-stat-value">01</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.ongoing ?? 0) }}</span>
       </div>
       <div class="panel-stat-row">
         <span class="panel-stat-label">Addressed</span>
-        <span class="panel-stat-value">03</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.addressed ?? 0) }}</span>
       </div>
       <div class="panel-stat-row">
         <span class="panel-stat-label">Closed</span>
-        <span class="panel-stat-value">01</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.closed ?? 0) }}</span>
       </div>
     </div>
 
@@ -174,11 +184,11 @@
       </div>
       <div class="panel-stat-row">
         <span class="panel-stat-label">Ongoing</span>
-        <span class="panel-stat-value">01</span>
+        <span class="panel-stat-value">{{ pad(data?.inquiries?.ongoing ?? 0) }}</span>
       </div>
       <div class="panel-stat-row">
         <span class="panel-stat-label">Addressed</span>
-        <span class="panel-stat-value">03</span>
+        <span class="panel-stat-value">{{ pad(data?.inquiries?.addressed ?? 0) }}</span>
       </div>
     </div>
 
