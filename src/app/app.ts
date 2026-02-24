@@ -1,10 +1,3 @@
-/**
- * app.ts
- * Root application component.
- * Its only responsibility is to host the <router-outlet />,
- * which renders the matched route component (ProductDetailComponent by default).
- */
-
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 

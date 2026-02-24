@@ -1,11 +1,3 @@
-/**
- * product.service.ts
- * Fetches product data from the Express.js backend API.
- * Exposes a readonly signal that components can consume.
- *
- * Usage: inject(ProductService).product()
- */
-
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Product } from '../../models/product.model';
@@ -19,13 +11,8 @@ export class ProductService {
   private readonly _loading = signal(true);
   private readonly _error = signal<string | null>(null);
 
-  /** Current product data (null while loading) */
   readonly product = this._product.asReadonly();
-
-  /** Whether the initial fetch is still in progress */
   readonly loading = this._loading.asReadonly();
-
-  /** Error message if the fetch failed */
   readonly error = this._error.asReadonly();
 
   constructor() {

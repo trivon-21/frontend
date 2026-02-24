@@ -16,6 +16,28 @@
   position: relative;
 }
 
+/* Gradient overlay — sits above the image, below the content */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.25) 60%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content renders above the overlay */
+.hero__content,
+.hero__right {
+  position: relative;
+  z-index: 1;
+}
+
 /* -----------------------------------------------
    Left: Heading & Subtitle
    ----------------------------------------------- */

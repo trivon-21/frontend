@@ -1,18 +1,6 @@
-<!-- product-view.html
-     Root template for the ProductView page.
-     Calls product() to unwrap the signal, then passes the value
-     to each child component via [product]="..." input binding.
-     Editing ProductService is the only change needed to update all sections. -->
-
-<!-- Top Navigation (presentational, no inputs) -->
 <app-navbar />
-
-<!-- Hero Banner (presentational, no inputs) -->
 <app-hero-section />
 
-<!-- ============================================================
-     Main Page Content
-     ============================================================ -->
 @if (loading()) {
   <main class="product-view__main" aria-label="Loading">
     <p class="product-view__status">Loading product&hellip;</p>
@@ -23,23 +11,16 @@
   </main>
 } @else if (product(); as p) {
   <main class="product-view__main" aria-label="Product View">
-    <!-- Product Card: gallery on the left, info on the right -->
     <div class="product-view__card">
-      <!-- Left column: image gallery + thumbnails -->
       <div class="product-view__gallery-col">
         <app-product-gallery [product]="p" />
       </div>
-
-      <!-- Right column: name, price, capacity, features, quantity, buttons -->
       <div class="product-view__info-col">
         <app-product-info [product]="p" />
       </div>
     </div>
-
-    <!-- Specifications / Warranty tabbed section -->
     <app-product-tabs [product]="p" />
   </main>
 }
 
-<!-- Site-wide Footer (presentational, no inputs) -->
 <app-footer />

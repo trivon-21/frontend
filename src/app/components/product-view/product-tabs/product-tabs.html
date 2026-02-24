@@ -1,4 +1,3 @@
-<!-- product-tabs.html — Specifications and Warranty tabs -->
 <div class="tabs-section">
   <!-- Tab Headers -->
   <div class="tabs__header" role="tablist" aria-label="Product detail tabs">
@@ -29,13 +28,10 @@
     </button>
   </div>
 
-  <!-- Divider below tabs -->
+  <!-- Divider -->
   <div class="tabs__divider" role="separator" aria-hidden="true"></div>
 
-  <!-- ================================================
-     Tab Panel: Specifications
-     Content comes from product().specifications[] via input()
-     ================================================ -->
+  <!-- Specifications Panel -->
   @if (activeTab() === 'specifications') {
     <div
       id="panel-specifications"
@@ -56,16 +52,11 @@
     </div>
   }
 
-  <!-- ================================================
-     Tab Panel: Warranty
-     Content comes from product().warrantyTerms, warrantyCovered,
-     and warrantyNotCovered via input()
-     ================================================ -->
+  <!-- Warranty Panel -->
   @if (activeTab() === 'warranty') {
     <div id="panel-warranty" class="tabs__panel" role="tabpanel" aria-labelledby="tab-warranty">
       <h3 class="tabs__panel-heading">Warranty Coverage</h3>
 
-      <!-- Warranty term cards (e.g. 2-Year, 5-Year Compressor) -->
       @for (term of product().warrantyTerms; track term.title) {
         <div class="warranty-term">
           <p class="warranty-term__title">{{ term.title }}:</p>
@@ -73,7 +64,6 @@
         </div>
       }
 
-      <!-- What's Covered -->
       <div class="warranty-covered">
         <p class="warranty-covered__heading">What's Covered:</p>
         <ul class="warranty-covered__list">

@@ -1,11 +1,3 @@
-/**
- * landing.ts
- * Landing page component — the first page users see.
- * Use this component to build the home/welcome screen of the AirLux system.
- *
- * Route: configured in app.routes.ts
- */
-
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 

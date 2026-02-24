@@ -1,6 +1,5 @@
-<!-- product-info.html — Product title, price, options, features, and action buttons -->
 <div class="product-info">
-  <!-- Stock Status Badge -->
+  <!-- Stock Badge -->
   @if (product().inStock) {
     <div class="product-info__stock product-info__stock--in" aria-label="Stock status">
       <span class="product-info__stock-dot" aria-hidden="true"></span>
@@ -13,16 +12,15 @@
     </div>
   }
 
-  <!-- Product Name -->
   <h2 class="product-info__name">{{ product().name }}</h2>
 
-  <!-- Price — selected capacity price formatted with the DecimalPipe -->
+  <!-- Price -->
   <div class="product-info__price" aria-label="Price">
     <span class="product-info__currency">{{ product().currency }}</span>
     <span class="product-info__amount">{{ displayPrice() | number: '1.0-0' }}</span>
   </div>
 
-  <!-- Capacity Selector Dropdown -->
+  <!-- Capacity Selector -->
   <div class="product-info__field">
     <label class="product-info__label" for="capacity-select">Capacity</label>
     <select
@@ -40,7 +38,7 @@
     </select>
   </div>
 
-  <!-- Specification Acknowledgment Checkbox -->
+  <!-- Acknowledgment -->
   <label class="product-info__checkbox-label">
     <input
       type="checkbox"
@@ -60,11 +58,9 @@
     <h3 class="product-info__section-heading">Product Description</h3>
     <p class="product-info__description">{{ product().description }}</p>
 
-    <!-- Feature Bullet Points -->
     <ul class="product-info__features" aria-label="Product features">
       @for (feature of product().features; track feature) {
         <li class="product-info__feature-item">
-          <!-- Green checkmark icon -->
           <svg class="product-info__check-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M9 12l2 2 4-4"
@@ -84,7 +80,7 @@
   <!-- Section Divider -->
   <div class="product-info__divider" role="separator" aria-hidden="true"></div>
 
-  <!-- Quantity Stepper -->
+  <!-- Quantity -->
   <div class="product-info__quantity-row">
     <span class="product-info__label">Quantity:</span>
     <div class="product-info__quantity-ctrl" role="group" aria-label="Quantity selector">
@@ -111,9 +107,8 @@
     </div>
   </div>
 
-  <!-- Action Buttons -->
+  <!-- Actions -->
   <div class="product-info__actions">
-    <!-- Add to Cart -->
     <button class="btn-add-to-cart" type="button" aria-label="Add to cart">
       <svg
         viewBox="0 0 24 24"
