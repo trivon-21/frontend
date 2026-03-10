@@ -212,6 +212,130 @@ h1 {
 /* ── Terms check ── */
 .terms-check { margin-top: 4px; margin-bottom: 2px; }
 
+/* ── OTP Verification Step ── */
+.otp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0;
+}
+
+.otp-icon {
+  margin-bottom: 16px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #edf5f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-title {
+  font-size: 28px;
+  margin: 0 0 10px;
+}
+
+.otp-sub {
+  color: #6b7470;
+  font-size: 14px;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.otp-input-row {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.otp-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  outline: none;
+  font-size: 26px;
+  letter-spacing: 10px;
+  text-align: center;
+  font-weight: 700;
+  color: #1b2f27;
+  background: white;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.otp-input:focus {
+  border-color: #1f5b45;
+  box-shadow: 0 0 0 4px rgba(31, 91, 69, 0.10);
+}
+
+.otp-input::placeholder {
+  letter-spacing: 8px;
+  color: #c8d0ce;
+  font-size: 22px;
+}
+
+.otp-btn {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.otp-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  width: 100%;
+  justify-content: center;
+}
+
+.otp-resend-btn {
+  background: none;
+  border: none;
+  color: #1f5b45;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+}
+
+.otp-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-later-btn {
+  background: none;
+  border: none;
+  color: #9aa09e;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+}
+
+.otp-later-btn:hover {
+  color: #566463;
+}
+
+.otp-hint {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #aab0ae;
+  text-align: center;
+}
+
+.success-msg {
+  margin-top: 8px;
+  color: #166534;
+  font-size: 13px;
+  text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .card { grid-template-columns: 1fr; }

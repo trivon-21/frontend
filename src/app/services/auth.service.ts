@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface SignupPayload {
@@ -25,6 +25,7 @@ export interface AuthUser {
   phoneNumber?: string;
   profilePhoto?: string;
   additionalEmails?: { _id: string; email: string; addedAt: string }[];
+  emailVerified?: boolean;
   createdAt?: string;
 }
 
@@ -63,6 +64,22 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password/${token}`, {
       password
     });
+  }
+
+  verifyEmail(otp: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/verify-email`,
+      { otp },
+      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+    );
+  }
+
+  resendOtp(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/resend-otp`,
+      {},
+      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+    );
   }
 
   saveSession(token: string, user: AuthUser, rememberMe = true): void {

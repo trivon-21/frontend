@@ -51,4 +51,12 @@ export class ProfileService {
       headers: this.headers()
     });
   }
+
+  verifyEmail(otp: string): Observable<{ message: string }> {
+    return this.authService.verifyEmail(otp);
+  }
+
+  resendOtp(): Observable<{ message: string }> {
+    return this.authService.resendOtp();
+  }
 }

@@ -32,6 +32,10 @@
         <div class="profile-name-area">
           <div class="profile-first-name">{{ profile.fullName }}</div>
           <div class="profile-last-name">{{ profile.lastName }}</div>
+          <div class="account-status">
+            <span class="account-status-badge verified" *ngIf="emailVerified">Account Verified</span>
+            <span class="account-status-badge unverified" *ngIf="!emailVerified">Account Not Verified</span>
+          </div>
         </div>
       </div>
 
@@ -113,9 +117,46 @@
           </svg>
         </div>
         <div class="email-info">
-          <div class="email-address">{{ profile.email }}</div>
+          <div class="email-address-row">
+            <span class="email-address">{{ profile.email }}</span>
+            <span class="email-badge verified" *ngIf="emailVerified">Verified</span>
+            <span class="email-badge unverified" *ngIf="!emailVerified">Not Verified</span>
+          </div>
           <div class="email-time">{{ timeAgo(profile.createdAt) }}</div>
         </div>
+        <button
+          *ngIf="!emailVerified && !showOtpInput"
+          class="btn-verify-email"
+          (click)="startEmailVerification()"
+        >Verify Email</button>
+      </div>
+
+      <!-- OTP verification panel -->
+      <div *ngIf="showOtpInput" class="otp-panel">
+        <p class="otp-panel-desc">Enter the 6-digit code sent to <strong>{{ profile.email }}</strong></p>
+        <div class="otp-panel-row">
+          <input
+            class="otp-panel-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="000000"
+            [(ngModel)]="profileOtpValue"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="otpVerifying"
+          />
+          <button class="btn-otp-confirm" (click)="submitEmailOtp()" [disabled]="otpVerifying">
+            {{ otpVerifying ? 'Verifying…' : 'Confirm' }}
+          </button>
+          <button class="btn-otp-cancel" (click)="cancelEmailVerification()">Cancel</button>
+        </div>
+        <div class="otp-panel-links">
+          <button class="otp-resend-link" (click)="resendProfileOtp()" [disabled]="otpResending">
+            {{ otpResending ? 'Sending…' : 'Resend code' }}
+          </button>
+        </div>
+        <p *ngIf="otpError" class="otp-panel-error">{{ otpError }}</p>
+        <p *ngIf="otpSuccess" class="otp-panel-success">{{ otpSuccess }}</p>
       </div>
 
       <!-- Additional emails -->

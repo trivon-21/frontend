@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
+  FormsModule,
   FormBuilder,
   Validators,
   FormGroup,
@@ -33,7 +34,7 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
 })
@@ -42,6 +43,14 @@ export class SignupComponent {
   isLoading = false;
   errorMessage = '';
   form!: FormGroup;
+
+  step: 'form' | 'otp' = 'form';
+  signupEmail = '';
+  otpValue = '';
+  otpError = '';
+  verifyingOtp = false;
+  resendingOtp = false;
+  resendSuccess = '';
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.form = this.fb.group(
@@ -88,11 +97,51 @@ export class SignupComponent {
     this.authService.signup({ fullName, email, password }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.signupEmail = email;
+        this.step = 'otp';
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = err.error?.message ?? 'Signup failed. Please try again.';
+      },
+    });
+  }
+
+  verifyOtp() {
+    if (!this.otpValue || this.otpValue.length !== 6) {
+      this.otpError = 'Please enter the 6-digit OTP sent to your email.';
+      return;
+    }
+    this.verifyingOtp = true;
+    this.otpError = '';
+    this.authService.verifyEmail(this.otpValue).subscribe({
+      next: () => {
+        this.verifyingOtp = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.verifyingOtp = false;
+        this.otpError = err.error?.message ?? 'Verification failed. Please try again.';
+      },
+    });
+  }
+
+  verifyLater() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  resendOtp() {
+    this.resendingOtp = true;
+    this.resendSuccess = '';
+    this.otpError = '';
+    this.authService.resendOtp().subscribe({
+      next: () => {
+        this.resendingOtp = false;
+        this.resendSuccess = 'A new OTP has been sent to your email.';
+      },
+      error: (err) => {
+        this.resendingOtp = false;
+        this.otpError = err.error?.message ?? 'Failed to resend OTP. Please try again.';
       },
     });
   }

@@ -30,6 +30,15 @@ export class CustomerProfileComponent implements OnInit {
   resetLinkSent = false;
   resetLinkError = '';
 
+  // Email verification
+  emailVerified = false;
+  showOtpInput = false;
+  profileOtpValue = '';
+  otpVerifying = false;
+  otpResending = false;
+  otpError = '';
+  otpSuccess = '';
+
   constructor(
     private fb: FormBuilder,
     private profileService: ProfileService,
@@ -53,6 +62,7 @@ export class CustomerProfileComponent implements OnInit {
     this.profileService.getProfile().subscribe({
       next: (data) => {
         this.profile = data;
+        this.emailVerified = data.emailVerified || false;
         this.profileForm.setValue({
           fullName: data.fullName || '',
           lastName: data.lastName || '',
@@ -180,6 +190,67 @@ export class CustomerProfileComponent implements OnInit {
       error: () => {
         this.resetLinkError = 'Failed to send reset link. Please try again.';
         this.sendingResetLink = false;
+      }
+    });
+  }
+
+  startEmailVerification(): void {
+    this.showOtpInput = true;
+    this.profileOtpValue = '';
+    this.otpError = '';
+    this.otpSuccess = '';
+    this.profileService.resendOtp().subscribe({
+      next: () => {
+        this.otpSuccess = 'A verification code has been sent to your email.';
+      },
+      error: (err) => {
+        this.otpError = err.error?.message ?? 'Failed to send OTP. Please try again.';
+      }
+    });
+  }
+
+  cancelEmailVerification(): void {
+    this.showOtpInput = false;
+    this.profileOtpValue = '';
+    this.otpError = '';
+    this.otpSuccess = '';
+  }
+
+  submitEmailOtp(): void {
+    if (!this.profileOtpValue || this.profileOtpValue.length !== 6) {
+      this.otpError = 'Please enter the 6-digit code sent to your email.';
+      return;
+    }
+    this.otpVerifying = true;
+    this.otpError = '';
+    this.profileService.verifyEmail(this.profileOtpValue).subscribe({
+      next: () => {
+        this.emailVerified = true;
+        this.showOtpInput = false;
+        this.otpVerifying = false;
+        this.otpSuccess = '';
+        if (this.profile) this.profile.emailVerified = true;
+        this.success = 'Your email has been verified successfully.';
+      },
+      error: (err) => {
+        this.otpVerifying = false;
+        this.otpError = err.error?.message ?? 'Verification failed. Please try again.';
+      }
+    });
+  }
+
+  resendProfileOtp(): void {
+    this.otpResending = true;
+    this.otpError = '';
+    this.otpSuccess = '';
+    this.profileService.resendOtp().subscribe({
+      next: () => {
+        this.otpResending = false;
+        this.otpSuccess = 'A new code has been sent to your email.';
+      },
+      error: (err) => {
+        this.otpResending = false;
+        this.otpError = err.error?.message ?? 'Failed to resend code. Please try again.';
       }
     });
   }
