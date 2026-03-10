@@ -24,7 +24,7 @@ export interface AuthUser {
   address?: string;
   phoneNumber?: string;
   profilePhoto?: string;
-  additionalEmails?: { _id: string; email: string; addedAt: string }[];
+  additionalEmails?: { _id: string; email: string; addedAt: string; verified: boolean }[];
   emailVerified?: boolean;
   createdAt?: string;
 }

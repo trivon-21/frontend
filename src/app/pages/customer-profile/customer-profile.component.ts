@@ -25,6 +25,14 @@ export class CustomerProfileComponent implements OnInit {
   newEmail = '';
   addEmailError = '';
   addingEmail = false;
+
+  // Additional email verification
+  pendingAdditionalEmailId: string | null = null;
+  additionalEmailOtpValue = '';
+  additionalEmailOtpVerifying = false;
+  additionalEmailOtpResending = false;
+  additionalEmailOtpError = '';
+  additionalEmailOtpSuccess = '';
   confirmDelete = false;
   sendingResetLink = false;
   resetLinkSent = false;
@@ -140,9 +148,14 @@ export class CustomerProfileComponent implements OnInit {
         this.newEmail = '';
         this.showAddEmailInput = false;
         this.addingEmail = false;
+        // Start OTP verification for the newly added email
+        this.pendingAdditionalEmailId = res.newEmailId;
+        this.additionalEmailOtpValue = '';
+        this.additionalEmailOtpError = '';
+        this.additionalEmailOtpSuccess = 'A verification code has been sent to the new email address.';
       },
-      error: () => {
-        this.addEmailError = 'Failed to add email. Please try again.';
+      error: (err) => {
+        this.addEmailError = err.error?.message ?? 'Failed to add email. Please try again.';
         this.addingEmail = false;
       }
     });
@@ -152,6 +165,75 @@ export class CustomerProfileComponent implements OnInit {
     this.profileService.removeEmail(emailId).subscribe({
       next: (res) => {
         if (this.profile) this.profile.additionalEmails = res.additionalEmails;
+        if (this.pendingAdditionalEmailId === emailId) {
+          this.pendingAdditionalEmailId = null;
+          this.additionalEmailOtpValue = '';
+          this.additionalEmailOtpError = '';
+          this.additionalEmailOtpSuccess = '';
+        }
+      }
+    });
+  }
+
+  startAdditionalEmailVerification(emailId: string): void {
+    this.pendingAdditionalEmailId = emailId;
+    this.additionalEmailOtpValue = '';
+    this.additionalEmailOtpError = '';
+    this.additionalEmailOtpSuccess = '';
+    this.profileService.resendAdditionalEmailOtp(emailId).subscribe({
+      next: () => {
+        this.additionalEmailOtpSuccess = 'A verification code has been sent to the email address.';
+      },
+      error: (err) => {
+        this.additionalEmailOtpError = err.error?.message ?? 'Failed to send verification code.';
+      }
+    });
+  }
+
+  cancelAdditionalEmailVerification(): void {
+    this.pendingAdditionalEmailId = null;
+    this.additionalEmailOtpValue = '';
+    this.additionalEmailOtpError = '';
+    this.additionalEmailOtpSuccess = '';
+  }
+
+  submitAdditionalEmailOtp(): void {
+    if (!this.additionalEmailOtpValue || this.additionalEmailOtpValue.length !== 6) {
+      this.additionalEmailOtpError = 'Please enter the 6-digit code.';
+      return;
+    }
+    if (!this.pendingAdditionalEmailId) return;
+    this.additionalEmailOtpVerifying = true;
+    this.additionalEmailOtpError = '';
+    this.profileService.verifyAdditionalEmail(this.pendingAdditionalEmailId, this.additionalEmailOtpValue).subscribe({
+      next: (res) => {
+        if (this.profile) this.profile.additionalEmails = res.additionalEmails;
+        this.pendingAdditionalEmailId = null;
+        this.additionalEmailOtpValue = '';
+        this.additionalEmailOtpVerifying = false;
+        this.additionalEmailOtpSuccess = '';
+        this.success = 'Email address verified successfully.';
+      },
+      error: (err) => {
+        this.additionalEmailOtpVerifying = false;
+        this.additionalEmailOtpError = err.error?.message ?? 'Verification failed. Please try again.';
+      }
+    });
+  }
+
+  resendAdditionalOtp(): void {
+    if (!this.pendingAdditionalEmailId) return;
+    this.additionalEmailOtpResending = true;
+    this.additionalEmailOtpError = '';
+    this.additionalEmailOtpSuccess = '';
+    this.profileService.resendAdditionalEmailOtp(this.pendingAdditionalEmailId).subscribe({
+      next: () => {
+        this.additionalEmailOtpResending = false;
+        this.additionalEmailOtpSuccess = 'A new code has been sent to the email address.';
+      },
+      error: (err) => {
+        this.additionalEmailOtpResending = false;
+        this.additionalEmailOtpError = err.error?.message ?? 'Failed to resend code. Please try again.';
       }
     });
   }

@@ -31,8 +31,8 @@ export class ProfileService {
     });
   }
 
-  addEmail(email: string): Observable<{ message: string; additionalEmails: any[] }> {
-    return this.http.post<{ message: string; additionalEmails: any[] }>(
+  addEmail(email: string): Observable<{ message: string; additionalEmails: any[]; newEmailId: string }> {
+    return this.http.post<{ message: string; additionalEmails: any[]; newEmailId: string }>(
       `${this.apiUrl}/emails`,
       { email },
       { headers: this.headers() }
@@ -42,6 +42,22 @@ export class ProfileService {
   removeEmail(emailId: string): Observable<{ message: string; additionalEmails: any[] }> {
     return this.http.delete<{ message: string; additionalEmails: any[] }>(
       `${this.apiUrl}/emails/${emailId}`,
+      { headers: this.headers() }
+    );
+  }
+
+  verifyAdditionalEmail(emailId: string, otp: string): Observable<{ message: string; additionalEmails: any[] }> {
+    return this.http.post<{ message: string; additionalEmails: any[] }>(
+      `${this.apiUrl}/emails/${emailId}/verify`,
+      { otp },
+      { headers: this.headers() }
+    );
+  }
+
+  resendAdditionalEmailOtp(emailId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/emails/${emailId}/resend-otp`,
+      {},
       { headers: this.headers() }
     );
   }
