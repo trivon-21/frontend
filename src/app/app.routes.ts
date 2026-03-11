@@ -12,7 +12,7 @@ export const routes: Routes = [
             },
             {
                 path: 'orders',
-                loadComponent: () => import('./pages/my-orders/my-orders').then(c => c.MyOrders)
+                loadComponent: () => import('./pages/my-orders/my-orders').then(c => c.MyOrdersComponent)
             },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
