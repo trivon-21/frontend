@@ -31,6 +31,7 @@ export interface AuthUser {
   additionalEmails?: { _id: string; email: string; addedAt: string; verified: boolean }[];
   emailVerified?: boolean;
   phoneVerified?: boolean;
+  authMethods?: string[]; // ['email'], ['phone'], or ['email', 'phone']
   authType?: 'email' | 'phone';
   createdAt?: string;
 }

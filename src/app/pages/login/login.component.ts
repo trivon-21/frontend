@@ -74,15 +74,8 @@ export class LoginComponent {
     this.authService.login(payload).subscribe({
       next: (response: AuthResponse) => {
         this.isLoading = false;
-        // If phone login requires OTP verification
-        if (response.requiringPhoneVerification) {
-          this.showOtpStep = true;
-          this.sessionId = response.sessionId || '';
-          this.errorMessage = '';
-        } else {
-          // Email login successful or phone already verified
-          this.router.navigateByUrl(this.returnUrl);
-        }
+        // Direct login successful (no OTP required for phone login)
+        this.router.navigateByUrl(this.returnUrl);
       },
       error: (err) => {
         this.isLoading = false;

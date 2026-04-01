@@ -40,6 +40,8 @@ export class CustomerProfileComponent implements OnInit {
 
   // Email verification
   emailVerified = false;
+  phoneVerified = false;
+  authMethods: string[] = [];
   showOtpInput = false;
   profileOtpValue = '';
   otpVerifying = false;
@@ -71,6 +73,8 @@ export class CustomerProfileComponent implements OnInit {
       next: (data) => {
         this.profile = data;
         this.emailVerified = data.emailVerified || false;
+        this.phoneVerified = data.phoneVerified || false;
+        this.authMethods = data.authMethods || ['email'];
         this.profileForm.setValue({
           fullName: data.fullName || '',
           lastName: data.lastName || '',
@@ -86,6 +90,24 @@ export class CustomerProfileComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  // Helper method to check if account is verified based on auth methods
+  isAccountVerified(): boolean {
+    // If user has only email auth, check emailVerified
+    if (this.authMethods.includes('email') && !this.authMethods.includes('phone')) {
+      return this.emailVerified;
+    }
+    // If user has only phone auth, check phoneVerified
+    if (this.authMethods.includes('phone') && !this.authMethods.includes('email')) {
+      return this.phoneVerified;
+    }
+    // If user has both, either one verified means account is verified
+    if (this.authMethods.includes('email') && this.authMethods.includes('phone')) {
+      return this.emailVerified || this.phoneVerified;
+    }
+    // Default: check emailVerified
+    return this.emailVerified;
   }
 
   startEditing(): void {
