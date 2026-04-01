@@ -10,7 +10,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, AuthResponse } from '../../services/auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 
@@ -45,7 +45,9 @@ export class SignupComponent {
   form!: FormGroup;
 
   step: 'form' | 'otp' = 'form';
-  signupEmail = '';
+  signupIdentifier = '';
+  detectedAuthType: 'email' | 'phone' | 'invalid' | null = null;
+  sessionId = '';
   otpValue = '';
   otpError = '';
   verifyingOtp = false;
@@ -57,7 +59,7 @@ export class SignupComponent {
       {
         firstName: ['', [Validators.required, Validators.minLength(2)]],
         lastName: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.required, Validators.email]],
+        identifier: ['', [Validators.required]], // Email or phone number
         password: ['', [Validators.required, strongPassword]],
         confirmPassword: ['', [Validators.required]],
         agreeTerms: [false, [Validators.requiredTrue]],
@@ -68,6 +70,11 @@ export class SignupComponent {
 
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
+  }
+
+  onIdentifierChange(identifier: string) {
+    const authType = this.authService.identifyAuthType(identifier);
+    this.detectedAuthType = authType;
   }
 
   get pw() {
@@ -88,16 +95,29 @@ export class SignupComponent {
       return;
     }
 
-    const { firstName, lastName, email, password } = this.form.value;
+    const { firstName, lastName, identifier, password } = this.form.value;
+    const authType = this.authService.identifyAuthType(identifier);
+
+    if (authType === 'invalid') {
+      this.errorMessage = 'Please enter a valid email or Sri Lankan phone number (0XXXXXXXXX)';
+      return;
+    }
+
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.signup({ fullName, email, password }).subscribe({
-      next: () => {
+    const payload = authType === 'email'
+      ? { fullName, email: identifier, password }
+      : { fullName, phoneNumber: identifier, password };
+
+    this.authService.signup(payload).subscribe({
+      next: (response: AuthResponse) => {
         this.isLoading = false;
-        this.signupEmail = email;
+        this.signupIdentifier = identifier;
+        this.detectedAuthType = authType;
+        this.sessionId = response.sessionId || '';
         this.step = 'otp';
       },
       error: (err) => {
@@ -109,12 +129,17 @@ export class SignupComponent {
 
   verifyOtp() {
     if (!this.otpValue || this.otpValue.length !== 6) {
-      this.otpError = 'Please enter the 6-digit OTP sent to your email.';
+      this.otpError = 'Please enter the 6-digit OTP.';
       return;
     }
     this.verifyingOtp = true;
     this.otpError = '';
-    this.authService.verifyEmail(this.otpValue).subscribe({
+
+    const verifyMethod = this.detectedAuthType === 'phone'
+      ? this.authService.verifyPhone(this.otpValue, this.sessionId)
+      : this.authService.verifyEmail(this.otpValue);
+
+    verifyMethod.subscribe({
       next: () => {
         this.verifyingOtp = false;
         this.router.navigate(['/dashboard']);
@@ -134,10 +159,15 @@ export class SignupComponent {
     this.resendingOtp = true;
     this.resendSuccess = '';
     this.otpError = '';
-    this.authService.resendOtp().subscribe({
+
+    const resendMethod = this.detectedAuthType === 'phone'
+      ? this.authService.resendOtpPhone(this.sessionId)
+      : this.authService.resendOtp();
+
+    resendMethod.subscribe({
       next: () => {
         this.resendingOtp = false;
-        this.resendSuccess = 'A new OTP has been sent to your email.';
+        this.resendSuccess = `A new OTP has been sent to your ${this.detectedAuthType}.`;
       },
       error: (err) => {
         this.resendingOtp = false;

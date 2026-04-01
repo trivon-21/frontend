@@ -41,10 +41,19 @@
 
             <div class="row">
               <div class="field">
-                <label>Email address</label>
-                <input type="email" formControlName="email" placeholder="you@example.com" />
-                @if (form.get('email')?.invalid && form.get('email')?.touched) {
-                  <span class="field-error">Please enter a valid email address</span>
+                <label>Email address or phone number</label>
+                <input
+                  type="text"
+                  formControlName="identifier"
+                  placeholder="you@example.com or 0779541563"
+                  (blur)="onIdentifierChange(form.get('identifier')?.value || '')"
+                />
+                @if (
+                  form.get('identifier')?.invalid &&
+                  form.get('identifier')?.touched &&
+                  detectedAuthType === 'invalid'
+                ) {
+                  <span class="field-error">Please enter a valid email or Sri Lankan phone number (0XXXXXXXXX)</span>
                 }
               </div>
             </div>
@@ -132,9 +141,9 @@
               <polyline points="22,6 12,13 2,6"/>
             </svg>
           </div>
-          <h1 class="otp-title">Verify your email</h1>
+          <h1 class="otp-title">Verify your {{ detectedAuthType }}</h1>
           <p class="otp-sub">
-            We sent a 6-digit code to <strong>{{ signupEmail }}</strong>.<br />
+            We sent a 6-digit code to <strong>{{ signupIdentifier }}</strong>.<br />
             Enter it below to verify your account.
           </p>
 
@@ -158,7 +167,7 @@
           }
 
           <button class="btn big otp-btn" (click)="verifyOtp()" [disabled]="verifyingOtp">
-            {{ verifyingOtp ? 'Verifying…' : 'Verify Email' }}
+            {{ verifyingOtp ? 'Verifying…' : 'Verify ' + (detectedAuthType | titlecase) }}
           </button>
 
           <div class="otp-actions">
@@ -169,7 +178,7 @@
           </div>
 
           <p class="otp-hint">
-            You can also verify your email later from your profile page.
+            You can also verify your {{ detectedAuthType }} later from your profile page.
           </p>
         </div>
       }

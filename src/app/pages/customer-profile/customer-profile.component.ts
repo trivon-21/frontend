@@ -260,7 +260,10 @@ export class CustomerProfileComponent implements OnInit {
   }
 
   sendPasswordResetLink(): void {
-    if (!this.profile) return;
+    if (!this.profile || !this.profile.email) {
+      this.resetLinkError = 'Email not found. Please update your profile.';
+      return;
+    }
     this.sendingResetLink = true;
     this.resetLinkSent = false;
     this.resetLinkError = '';

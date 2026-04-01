@@ -47,7 +47,7 @@ export class InquiryModalComponent implements OnInit {
     const user = this.authService.getUser();
     if (user) {
       this.name = `${user.fullName}${user.lastName ? ' ' + user.lastName : ''}`.trim();
-      this.email = user.email;
+      this.email = user.email || '';
       this.phone = user.phoneNumber || '';
     }
     if (this.initialTab === 'list') {
