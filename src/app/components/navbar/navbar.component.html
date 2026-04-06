@@ -22,7 +22,7 @@
     <!-- Logged-in user area -->
     <div class="user-area" *ngIf="currentUser">
       <a routerLink="/dashboard" class="btn dashboard-btn">Dashboard</a>
-      <div class="user-menu" (clickOutside)="closeDropdown()">
+      <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
         <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
           <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
           <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>

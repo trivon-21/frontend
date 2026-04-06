@@ -19,6 +19,7 @@
     <!-- Alert messages -->
     <div *ngIf="error" class="alert alert-error">{{ error }}</div>
     <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+    <div *ngIf="photoUploadError" class="alert alert-error">{{ photoUploadError }}</div>
 
     <!-- Top section: Profile card + Details -->
     <div class="top-row">
@@ -28,6 +29,19 @@
         <div class="profile-avatar-area">
           <div class="profile-avatar" *ngIf="!profile.profilePhoto">{{ avatarInitials }}</div>
           <img *ngIf="profile.profilePhoto" [src]="profile.profilePhoto" alt="Profile photo" class="profile-photo" />
+          <label class="profile-photo-upload-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onProfilePhotoSelected($event)"
+              [disabled]="uploadingPhoto"
+              style="display: none"
+            />
+          </label>
+          <div *ngIf="uploadingPhoto" class="photo-uploading">Uploading...</div>
         </div>
         <div class="profile-name-area">
           <div class="profile-first-name">{{ profile.fullName }}</div>

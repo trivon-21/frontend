@@ -75,4 +75,12 @@ export class ProfileService {
   resendOtp(): Observable<{ message: string }> {
     return this.authService.resendOtp();
   }
+
+  uploadProfilePhoto(photoData: string): Observable<{ message: string; profilePhoto: string }> {
+    return this.http.put<{ message: string; profilePhoto: string }>(
+      `${this.apiUrl}/photo`,
+      { profilePhoto: photoData },
+      { headers: this.headers() }
+    );
+  }
 }

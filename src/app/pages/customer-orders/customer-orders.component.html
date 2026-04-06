@@ -1,0 +1,93 @@
+<div style="font-family:'Inter',sans-serif;">
+  <!-- Page Header -->
+  <h2 style="font-size:22px;font-weight:700;color:#1b2f27;margin:0 0 20px;">My Orders</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" style="padding: 40px; text-align: center; color: #666;">
+    <p>Loading your orders...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" style="padding: 20px; background: #fee; border: 1px solid #fcc; border-radius: 6px; color: #c33; margin-bottom: 20px;">
+    {{ error }}
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && orders.length === 0 && !error" style="padding: 40px; text-align: center; color: #999;">
+    <p style="font-size: 16px;">You haven't placed any orders yet.</p>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!loading && orders.length > 0" class="orders-list">
+    <div *ngFor="let order of orders" class="order-card">
+      <!-- Order Header -->
+      <div class="order-header">
+        <div class="order-ref-section">
+          <span class="order-label">Order Reference</span>
+          <span class="order-ref">{{ order.orderRef }}</span>
+        </div>
+        <div class="order-status-section">
+          <span class="order-label">Status</span>
+          <span class="order-status-badge" [style.background-color]="getStatusColor(order.orderStatus)">
+            {{ order.orderStatus }}
+          </span>
+        </div>
+        <div class="payment-status-section">
+          <span class="order-label">Payment</span>
+          <span class="payment-status-badge" [style.background-color]="getPaymentStatusColor(order.paymentStatus)">
+            {{ order.paymentStatus }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Order Details -->
+      <div class="order-details">
+        <div class="product-info">
+          <div class="product-image" *ngIf="order.productImage">
+            <img [src]="order.productImage" alt="{{ order.itemName }}" />
+          </div>
+          <div class="product-text">
+            <div class="product-name">{{ order.itemName }}</div>
+            <div class="product-quantity">Quantity: {{ order.quantity }}</div>
+            <div class="order-type-badge" [style.background-color]="order.orderType === 'Buy & Install' ? '#E8F5E9' : '#F3E5F5'">
+              {{ order.orderType }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-info-grid">
+          <div class="info-item">
+            <span class="info-label">Amount</span>
+            <span class="info-value">Rs. {{ order.amount }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Warranty</span>
+            <span class="info-value" *ngIf="order.warrantyStart && order.warrantyExpiry">
+              {{ order.warrantyStart | date: 'MMM dd, yyyy' }} - {{ order.warrantyExpiry | date: 'MMM dd, yyyy' }}
+            </span>
+            <span class="info-value" *ngIf="!order.warrantyStart">Not Available</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">AMC Status</span>
+            <span class="info-value" [style.color]="order.amcStatus === 'Active' ? '#228B22' : order.amcStatus === 'Expired' ? '#DC143C' : '#999'">
+              {{ order.amcStatus }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ order.createdAt | date: 'MMM dd, yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Info -->
+      <div class="tracking-info" *ngIf="order.deliveryTrackingId">
+        <span class="tracking-label">Tracking ID:</span>
+        <span class="tracking-id">{{ order.deliveryTrackingId }}</span>
+        <a class="tracking-link" *ngIf="order.deliveryPartnerUrl" [href]="order.deliveryPartnerUrl" target="_blank">
+          Track Delivery →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

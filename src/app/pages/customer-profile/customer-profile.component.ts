@@ -49,6 +49,10 @@ export class CustomerProfileComponent implements OnInit {
   otpError = '';
   otpSuccess = '';
 
+  // Profile photo upload
+  uploadingPhoto = false;
+  photoUploadError = '';
+
   constructor(
     private fb: FormBuilder,
     private profileService: ProfileService,
@@ -376,6 +380,46 @@ export class CustomerProfileComponent implements OnInit {
     if (diffMonths < 12) return `${diffMonths} months ago`;
     const diffYears = Math.floor(diffMonths / 12);
     return diffYears === 1 ? '1 year ago' : `${diffYears} years ago`;
+  }
+
+  onProfilePhotoSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      this.photoUploadError = 'Please select a valid image file.';
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.photoUploadError = 'Image size should be less than 5MB.';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const photoData = e.target?.result as string;
+      this.uploadPhoto(photoData);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  uploadPhoto(photoData: string): void {
+    this.uploadingPhoto = true;
+    this.photoUploadError = '';
+    this.profileService.uploadProfilePhoto(photoData).subscribe({
+      next: (res) => {
+        if (this.profile) this.profile.profilePhoto = res.profilePhoto;
+        this.uploadingPhoto = false;
+        this.success = 'Profile photo updated successfully.';
+      },
+      error: () => {
+        this.photoUploadError = 'Failed to upload photo. Please try again.';
+        this.uploadingPhoto = false;
+      }
+    });
   }
 
   get displayName(): string {
