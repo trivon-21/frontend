@@ -67,6 +67,13 @@ export const routes: Routes = [
             (m) => m.NotificationsPageComponent
           ),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/customer-profile/customer-profile.component').then(
+            (m) => m.CustomerProfileComponent
+          ),
+      },
     ],
   },
 ];
