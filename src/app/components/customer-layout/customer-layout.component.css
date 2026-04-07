@@ -169,9 +169,281 @@
   cursor: pointer;
   user-select: none;
   letter-spacing: 0.5px;
+  border: none;
+  transition: opacity 0.15s;
 }
 
-/* ── Back to Home button ── */
+.user-avatar:hover {
+  opacity: 0.9;
+}
+
+/* Notifications Container */
+.notifications-container {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  background: #c0392b;
+  color: #fff;
+  border: 2px solid white;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 300;
+  max-height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  flex-shrink: 0;
+}
+
+.notifications-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #10251c;
+  margin: 0;
+}
+
+.notifications-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9aa09e;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.action-link:hover {
+  color: #1f5b45;
+}
+
+.notifications-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #9aa09e;
+  font-size: 13px;
+}
+
+.notification-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: background 0.12s;
+  align-items: flex-start;
+}
+
+.notification-item:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+.notification-item.unread {
+  background: rgba(31,91,69,0.04);
+}
+
+.notif-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #10251c;
+  margin-bottom: 2px;
+}
+
+.notif-message {
+  font-size: 11px;
+  color: #566463;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notif-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c8d0ce;
+  font-size: 14px;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.notif-delete:hover {
+  color: #c0392b;
+}
+
+.notifications-footer {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.notifications-footer a {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f5b45;
+  text-decoration: none;
+}
+
+.notifications-footer a:hover {
+  text-decoration: underline;
+}
+
+/* User Menu Container */
+.user-menu-container {
+  position: relative;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 300;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.user-avatar-lg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1f5b45 0%, #00c2d1 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #10251c;
+}
+
+.user-email {
+  font-size: 11px;
+  color: #9aa09e;
+  margin-top: 2px;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.07);
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2a2f2d;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.menu-item:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.menu-item svg {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.menu-item.logout {
+  color: #c0392b;
+}
+
+.menu-item.logout svg {
+  color: #c0392b;
+}
+
+.menu-item.logout:hover {
+  background: rgba(192,57,43,0.06);
+}
+
+/* ── Content ── */
 .back-home-btn {
   display: flex;
   align-items: center;

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
 
 export interface ThreadMessage {
   sender: 'Customer' | 'Support';
@@ -37,7 +38,11 @@ export interface CreateInquiryPayload {
 export class InquiryService {
   private apiUrl = 'http://localhost:5000/api/inquiries';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   private headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
@@ -52,7 +57,14 @@ export class InquiryService {
   }
 
   createInquiry(payload: CreateInquiryPayload): Observable<{ message: string; inquiry: Inquiry }> {
-    return this.http.post<{ message: string; inquiry: Inquiry }>(this.apiUrl, payload, { headers: this.headers() });
+    return this.http.post<{ message: string; inquiry: Inquiry }>(this.apiUrl, payload, { headers: this.headers() }).pipe(
+      tap((res) => {
+        this.notificationService.notifyGeneral(
+          'Inquiry Submitted',
+          `Your inquiry has been submitted with reference ${res.inquiry.inquiryRef}`
+        );
+      })
+    );
   }
 
   replyToInquiry(id: string, message: string): Observable<{ message: string; inquiry: Inquiry }> {
@@ -60,6 +72,13 @@ export class InquiryService {
       `${this.apiUrl}/${id}/reply`,
       { message },
       { headers: this.headers() }
+    ).pipe(
+      tap((res) => {
+        this.notificationService.notifyGeneral(
+          'Reply Sent',
+          'Your reply has been sent to support'
+        );
+      })
     );
   }
 }

@@ -54,10 +54,17 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'profile',
+        path: 'settings',
         loadComponent: () =>
-          import('./pages/customer-profile/customer-profile.component').then(
-            (m) => m.CustomerProfileComponent
+          import('./pages/notification-settings/notification-settings.component').then(
+            (m) => m.NotificationSettingsComponent
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./pages/notifications/notifications.component').then(
+            (m) => m.NotificationsPageComponent
           ),
       },
     ],

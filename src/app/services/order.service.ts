@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
 
 export interface TrackedOrder {
   id: string;
@@ -36,7 +37,11 @@ export interface TrackedOrder {
 export class OrderService {
   private apiUrl = 'http://localhost:5000/api/orders';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   private headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
@@ -58,7 +63,11 @@ export class OrderService {
   }
 
   cancelOrder(id: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/${id}/cancel`, {}, { headers: this.headers() });
+    return this.http.post<{ message: string }>(`${this.apiUrl}/${id}/cancel`, {}, { headers: this.headers() }).pipe(
+      tap(() => {
+        this.notificationService.notifyGeneral('Order Cancelled', 'Your order has been cancelled successfully');
+      })
+    );
   }
 
   reuploadPayment(id: string, paymentSlipUrl: string): Observable<{ message: string }> {
@@ -66,6 +75,10 @@ export class OrderService {
       `${this.apiUrl}/${id}/reupload-payment`,
       { paymentSlipUrl },
       { headers: this.headers() }
+    ).pipe(
+      tap(() => {
+        this.notificationService.notifyGeneral('Payment Resubmitted', 'Your payment slip has been resubmitted for review');
+      })
     );
   }
 }

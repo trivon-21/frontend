@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
 
 export interface Feedback {
   _id: string;
@@ -33,7 +34,11 @@ export interface CreateFeedbackPayload {
 export class FeedbackService {
   private apiUrl = 'http://localhost:5000/api/feedback';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   private headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
@@ -44,6 +49,10 @@ export class FeedbackService {
   }
 
   createFeedback(payload: CreateFeedbackPayload): Observable<{ message: string; feedback: Feedback }> {
-    return this.http.post<{ message: string; feedback: Feedback }>(this.apiUrl, payload, { headers: this.headers() });
+    return this.http.post<{ message: string; feedback: Feedback }>(this.apiUrl, payload, { headers: this.headers() }).pipe(
+      tap(() => {
+        this.notificationService.notifyFeedback('Thank you! Your feedback has been received and helps us improve our services.');
+      })
+    );
   }
 }
