@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
-import { InquiryModalComponent } from '../../components/inquiry-modal/inquiry-modal.component';
-import { AuthService } from '../../services/auth.service';
+import { InquiryModalComponent } from '../../components/modals/inquiry-modal/inquiry-modal.component';
+import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, AuthUser } from '../../services/auth.service';
+import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -35,42 +36,42 @@ export const routes: Routes = [
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./components/customer-layout/customer-layout.component').then(
+      import('./features/customer/components/layout/customer-layout/customer-layout.component').then(
         (m) => m.CustomerLayoutComponent
       ),
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./pages/customer-dashboard-home/customer-dashboard-home.component').then(
+          import('./features/customer/pages/dashboard/customer-dashboard-home.component').then(
             (m) => m.CustomerDashboardHomeComponent
           ),
       },
       {
         path: 'orders',
         loadComponent: () =>
-          import('./pages/customer-orders/customer-orders.component').then(
+          import('./features/customer/pages/orders/customer-orders.component').then(
             (m) => m.CustomerOrdersComponent
           ),
       },
       {
         path: 'settings',
         loadComponent: () =>
-          import('./pages/notification-settings/notification-settings.component').then(
+          import('./features/customer/pages/settings/notification-settings.component').then(
             (m) => m.NotificationSettingsComponent
           ),
       },
       {
         path: 'notifications',
         loadComponent: () =>
-          import('./pages/notifications/notifications.component').then(
+          import('./features/customer/pages/notifications/notifications.component').then(
             (m) => m.NotificationsPageComponent
           ),
       },
       {
         path: 'profile',
         loadComponent: () =>
-          import('./pages/customer-profile/customer-profile.component').then(
+          import('./features/customer/pages/profile/customer-profile.component').then(
             (m) => m.CustomerProfileComponent
           ),
       },
