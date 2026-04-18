@@ -16,10 +16,10 @@ import { ServiceRequestsListModalComponent } from '../../../../components/modals
     RequestServiceModalComponent,
     InquiryModalComponent,
     FeedbackModalComponent,
-    ServiceRequestsListModalComponent,
+    ServiceRequestsListModalComponent
   ],
   templateUrl: './customer-dashboard-home.component.html',
-  styleUrl: './customer-dashboard-home.component.css',
+  styleUrl: './customer-dashboard-home.component.css'
 })
 export class CustomerDashboardHomeComponent implements OnInit {
   data: DashboardData | null = null;
