@@ -286,14 +286,27 @@ export class CustomerProfileComponent implements OnInit {
   }
 
   sendPasswordResetLink(): void {
-    if (!this.profile || !this.profile.email) {
-      this.resetLinkError = 'Email not found. Please update your profile.';
+    if (!this.profile) {
+      this.resetLinkError = 'Unable to load profile. Please refresh the page.';
       return;
     }
+
+    // Check if user has an email (either primary or additional)
+    const hasEmail = this.profile.email ||
+                     (this.profile.additionalEmails && this.profile.additionalEmails.length > 0);
+
+    if (!hasEmail) {
+      this.resetLinkError = 'You need to add an email address to reset your password. Please add an email in your profile.';
+      return;
+    }
+
+    // Use primary email if available, otherwise use first additional email
+    const resetEmail = this.profile.email || this.profile.additionalEmails?.[0]?.email;
+
     this.sendingResetLink = true;
     this.resetLinkSent = false;
     this.resetLinkError = '';
-    this.authService.forgotPassword(this.profile.email).subscribe({
+    this.authService.forgotPassword(resetEmail!).subscribe({
       next: () => {
         this.resetLinkSent = true;
         this.sendingResetLink = false;
