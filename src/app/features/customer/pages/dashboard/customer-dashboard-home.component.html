@@ -34,9 +34,15 @@
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
       </div>
-      <button class="more-btn" aria-label="More options">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('tp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'tp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'tp')">View Details</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('export', 'tp')">Export</button>
+        </div>
+      </div>
     </div>
     <p class="stat-label">Total Purchases</p>
     <p class="stat-value">{{ pad(data?.stats?.totalPurchases ?? 0) }}</p>
@@ -50,9 +56,15 @@
           <path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
         </svg>
       </div>
-      <button class="more-btn" aria-label="More options">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('ro', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'ro'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'ro')">View Details</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'ro')">Contact Support</button>
+        </div>
+      </div>
     </div>
     <p class="stat-label">Return Orders</p>
     <p class="stat-value">{{ pad(data?.stats?.returnOrders ?? 0) }}</p>
@@ -67,12 +79,40 @@
           <path d="M12 6v6l4 2"/>
         </svg>
       </div>
-      <button class="more-btn" aria-label="More options">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('pp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'pp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('pay-now', 'pp')">View Details</button>
+        </div>
+      </div>
     </div>
     <p class="stat-label">Pending Payment</p>
     <p class="stat-value">{{ pad(data?.stats?.pendingPayment ?? 0) }}</p>
+  </div>
+
+  <!-- Rejected Payment -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon stat-icon--red">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d64040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('rp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'rp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('retry-payment', 'rp')">Retry Payment</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'rp')">Contact Support</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Rejected Payment</p>
+    <p class="stat-value">{{ pad(data?.stats?.rejectedPayment ?? 0) }}</p>
   </div>
 
   <!-- Completed -->
@@ -83,9 +123,15 @@
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
         </svg>
       </div>
-      <button class="more-btn" aria-label="More options">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('comp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'comp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-orders', 'comp')">View Orders</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('leave-review', 'comp')">Leave Review</button>
+        </div>
+      </div>
     </div>
     <p class="stat-label">Completed</p>
     <p class="stat-value">{{ pad(data?.stats?.completed ?? 0) }}</p>
@@ -197,6 +243,45 @@
 </div>
 
 <!-- ── Modals ── -->
+
+<!-- Filtered Orders Modal -->
+<div *ngIf="showFilteredOrders" class="modal-overlay" (click)="closeFilteredOrders()">
+  <div class="modal-content filtered-orders-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        {{ filterMode === 'completed' ? 'Completed Orders' :
+           filterMode === 'pending' ? 'Pending Orders' :
+           filterMode === 'returned' ? 'Returned Orders' :
+           filterMode === 'rejected' ? 'Rejected Orders' : 'All Orders' }}
+      </h2>
+      <button class="modal-close" (click)="closeFilteredOrders()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="getFilteredOrders().length === 0" class="empty-state">
+        <p>No orders found</p>
+      </div>
+      <div *ngIf="getFilteredOrders().length > 0" class="orders-list">
+        <div *ngFor="let order of getFilteredOrders()" class="order-item">
+          <div class="order-info">
+            <div class="order-name">{{ order.itemName }}</div>
+            <div class="order-date">{{ formatDate(order.date) }}</div>
+          </div>
+          <div class="order-amount">{{ formatAmount(order.amount) }}</div>
+          <div class="order-status">
+            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <app-track-order-modal
   *ngIf="showTrackOrder"
   (closed)="showTrackOrder = false"

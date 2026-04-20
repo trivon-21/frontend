@@ -29,19 +29,16 @@
         <div class="profile-avatar-area">
           <div class="profile-avatar" *ngIf="!profile.profilePhoto">{{ avatarInitials }}</div>
           <img *ngIf="profile.profilePhoto" [src]="profile.profilePhoto" alt="Profile photo" class="profile-photo" />
-          <label class="profile-photo-upload-label">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            <input
-              type="file"
-              accept="image/*"
-              (change)="onProfilePhotoSelected($event)"
-              [disabled]="uploadingPhoto"
-              style="display: none"
-            />
-          </label>
           <div *ngIf="uploadingPhoto" class="photo-uploading">Uploading...</div>
+          <div *ngIf="removingPhoto" class="photo-uploading">Removing...</div>
+          <input
+            type="file"
+            accept="image/*"
+            (change)="onProfilePhotoSelected($event)"
+            [disabled]="uploadingPhoto"
+            #fileInput
+            style="display: none"
+          />
         </div>
         <div class="profile-name-area">
           <div class="profile-first-name">{{ profile.fullName }}</div>
@@ -49,6 +46,14 @@
           <div class="account-status">
             <span class="account-status-badge verified" *ngIf="isAccountVerified()">Account Verified</span>
             <span class="account-status-badge unverified" *ngIf="!isAccountVerified()">Account Not Verified</span>
+          </div>
+          <div class="profile-photo-buttons">
+            <button class="btn-edit-photo" (click)="triggerPhotoUpload()" [disabled]="uploadingPhoto || removingPhoto">
+              {{ profile.profilePhoto ? 'Edit' : 'Add Photo' }}
+            </button>
+            <button *ngIf="profile.profilePhoto" class="btn-remove-photo" (click)="removeProfilePhoto()" [disabled]="removingPhoto || uploadingPhoto">
+              Remove
+            </button>
           </div>
         </div>
       </div>

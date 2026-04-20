@@ -52,6 +52,7 @@ export class CustomerProfileComponent implements OnInit {
   // Profile photo upload
   uploadingPhoto = false;
   photoUploadError = '';
+  removingPhoto = false;
 
   constructor(
     private fb: FormBuilder,
@@ -433,6 +434,27 @@ export class CustomerProfileComponent implements OnInit {
         this.uploadingPhoto = false;
       }
     });
+  }
+
+  removeProfilePhoto(): void {
+    this.removingPhoto = true;
+    this.photoUploadError = '';
+    this.profileService.removeProfilePhoto().subscribe({
+      next: () => {
+        if (this.profile) this.profile.profilePhoto = undefined;
+        this.removingPhoto = false;
+        this.success = 'Profile photo removed successfully.';
+      },
+      error: () => {
+        this.photoUploadError = 'Failed to remove photo. Please try again.';
+        this.removingPhoto = false;
+      }
+    });
+  }
+
+  triggerPhotoUpload(): void {
+    const input = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+    input?.click();
   }
 
   get displayName(): string {

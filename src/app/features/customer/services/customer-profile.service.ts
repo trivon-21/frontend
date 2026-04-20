@@ -78,4 +78,11 @@ export class CustomerProfileService {
       { profilePhoto: photoData }
     );
   }
+
+  removeProfilePhoto(): Observable<{ message: string; profilePhoto: null }> {
+    // Interceptor automatically adds Bearer token
+    return this.http.delete<{ message: string; profilePhoto: null }>(
+      `${this.apiUrl}/photo`
+    );
+  }
 }

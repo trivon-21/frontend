@@ -7,7 +7,7 @@ export interface DashboardOrder {
   itemName: string;
   date: string;
   amount: number;
-  status: 'Completed' | 'Pending' | 'Returned';
+  status: 'Completed' | 'Pending' | 'Returned' | 'Rejected';
 }
 
 export interface DashboardData {
@@ -15,6 +15,7 @@ export interface DashboardData {
     totalPurchases: number;
     returnOrders: number;
     pendingPayment: number;
+    rejectedPayment: number;
     completed: number;
   };
   orders: DashboardOrder[];
