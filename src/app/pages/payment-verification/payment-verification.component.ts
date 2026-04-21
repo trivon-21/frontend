@@ -1,191 +1,82 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Payment } from '../../shared/models/payment.model';
 import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-payment-verification',
-  templateUrl: './payment-verification.component.html',
-  styleUrl: './payment-verification.component.css',
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
+  templateUrl: './payment-verification.component.html',
+  styleUrls: ['./payment-verification.component.css']
 })
 export class PaymentVerificationComponent implements OnInit {
-  payments: Payment[] = [];
-  searchQuery: string = '';
-  showRejectModal: boolean = false;
-  selectedPayment: Payment | null = null;
-  rejectionReason: string = '';
-  isLoading: boolean = false;
-  connectionError: string = '';
+
+  payments:        any[] = [];
+  searchQuery      = '';
+  showRejectModal  = false;
+  showSlipModal    = false;
+  selectedPayment: any  = null;
+  rejectionReason  = '';
+  isLoading        = false;
 
   constructor(private paymentService: PaymentService) {}
 
-  ngOnInit(): void {
-    this.loadPayments();
-  }
+  ngOnInit(): void { this.loadPayments(); }
 
   loadPayments(): void {
     this.isLoading = true;
-    this.connectionError = '';
-    
     this.paymentService.getPendingPayments().subscribe({
-      next: (data) => {
-        console.log('✅ Loaded payments:', data.length);
-        this.payments = data.map(p => ({
-          ...p,
-          customerName: p.customerName || p.customerEmail?.split('@')[0] || 'Unknown Customer',
-          amount: p.amount || 0,
-          status: (p.status as 'PENDING' | 'APPROVED' | 'REJECTED') || 'PENDING'
-        }));
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        console.error('❌ Load payments error:', error);
-        this.connectionError = error.message || 'Unknown error';
-        this.isLoading = false;
-        
-        let msg = 'Cannot load payments.';
-        if (error.message?.includes('Cannot connect')) {
-          msg = '❌ Cannot connect to backend\n\nIs the server running on port 3000?\n\nTry: node backend/server.js';
-        }
-        alert(msg);
-      }
+      next:  (data) => { this.payments = data; this.isLoading = false; },
+      error: (err)  => { console.error(err); this.isLoading = false; }
     });
   }
 
-  onSearch(): void {
-    console.log('Search:', this.searchQuery);
+  isImage(url: string | null | undefined): boolean {
+    if (!url) return false;
+    return url.startsWith('data:image') ||
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   }
 
-  viewSlip(payment: Payment): void {
-    if (payment.slipUrl) {
-      window.open(payment.slipUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      alert('No slip available for this order.');
-    }
+  get filteredPayments(): any[] {
+    if (!this.searchQuery.trim()) return this.payments;
+    const q = this.searchQuery.toLowerCase();
+    return this.payments.filter(p =>
+      p.orderId?.toLowerCase().includes(q) ||
+      p.customerName?.toLowerCase().includes(q) ||
+      p.itemName?.toLowerCase().includes(q)
+    );
   }
 
-  approvePayment(payment: Payment): void {
-    console.log('🎯 Approving payment:', payment._id);
+  openSlipModal(payment: any)  { this.selectedPayment = payment; this.showSlipModal = true; }
+  closeSlipModal()             { this.showSlipModal = false; this.selectedPayment = null; }
 
-    if (!payment._id) {
-      console.error('❌ Missing payment._id');
-      alert('Cannot approve: Payment ID is missing');
-      return;
-    }
-
-    if (!confirm(`Approve payment for Order #${payment.orderId}?`)) {
-      return;
-    }
-
+  approvePayment(payment: any): void {
+    if (!confirm(`Approve payment for Order ${payment.orderId}?`)) return;
     this.isLoading = true;
-    
     this.paymentService.approvePayment(payment._id).subscribe({
-      next: (response) => {
-        console.log('✅ Approval successful:', response);
-        alert('✅ Payment approved successfully!');
-        this.loadPayments();
-      },
-      error: (error: any) => {
-        console.error('❌ Approval failed:', error);
-        this.isLoading = false;
-        
-        let msg = 'Failed to approve payment.';
-        if (error.message?.includes('Cannot connect')) {
-          msg = '❌ Cannot connect to backend\n\nIs server running on port 3000?';
-        } else if (error.status === 404) {
-          msg = 'Payment not found (may be already processed).';
-        } else if (error.status === 500) {
-          msg = 'Server error. Check backend console.';
-        }
-        alert(`❌ ${msg}`);
-      }
+      next: () => { alert('✅ Payment approved! Confirmation email sent to customer.'); this.loadPayments(); },
+      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Approval failed.'); }
     });
   }
 
-  openRejectModal(payment: Payment): void {
-    this.selectedPayment = payment;
-    this.rejectionReason = '';
-    this.showRejectModal = true;
+  openRejectModal(payment: any): void {
+    this.selectedPayment = payment; this.rejectionReason = ''; this.showRejectModal = true;
   }
 
   closeRejectModal(): void {
-    this.showRejectModal = false;
-    this.selectedPayment = null;
-    this.rejectionReason = '';
+    this.showRejectModal = false; this.selectedPayment = null; this.rejectionReason = '';
   }
 
   rejectPayment(): void {
-    const reason = this.rejectionReason.trim();
-    
-    if (!reason) {
-      alert('⚠️ Please enter a rejection reason.');
-      return;
-    }
-
-    if (!this.selectedPayment?._id) {
-      console.error('❌ Missing payment._id');
-      alert('Cannot reject: Payment ID is missing');
-      return;
-    }
-
+    if (!this.rejectionReason.trim()) { alert('Please enter a rejection reason.'); return; }
     this.isLoading = true;
-    
-    this.paymentService.rejectPayment(this.selectedPayment._id, reason).subscribe({
-      next: (response) => {
-        console.log('✅ Rejection successful:', response);
-        alert('✅ Payment rejected and email sent!');
-        this.closeRejectModal();
-        this.loadPayments();
+    this.paymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
+      next: () => {
+        alert('✅ Payment rejected. Email with re-upload link sent to customer.');
+        this.closeRejectModal(); this.loadPayments();
       },
-      error: (error: any) => {
-        console.error('❌ Rejection failed:', error);
-        this.isLoading = false;
-        
-        let msg = 'Failed to reject payment.';
-        if (error.message?.includes('Cannot connect')) {
-          msg = '❌ Cannot connect to backend\n\nIs server running on port 3000?';
-        } else if (error.status === 404) {
-          msg = 'Payment not found.';
-        } else if (error.status === 500) {
-          msg = 'Server error. Check backend console.';
-        }
-        alert(`❌ ${msg}`);
-      }
+      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Rejection failed.'); }
     });
-  }
-
-  // Debug Test backend connection manually
-  testConnection(): void {
-    this.connectionError = 'Testing...';
-    
-    fetch('http://127.0.0.1:3000/api/health')
-      .then(res => {
-        if (!res.ok) throw new Error(`Status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        console.log('✅ Backend connected:', data);
-        this.connectionError = '';
-        alert('✅ Backend is reachable!\n\n' + JSON.stringify(data, null, 2));
-        this.loadPayments();
-      })
-      .catch(err => {
-        console.error('❌ Connection failed:', err);
-        this.connectionError = err.message;
-        alert('❌ Cannot reach backend\n\n' + err.message + '\n\nCheck:\n1. Backend running: node backend/server.js\n2. MongoDB running\n3. Port 3000 not blocked');
-      });
-  }
-
-  get filteredPayments(): Payment[] {
-    if (!this.searchQuery.trim()) return this.payments;
-    const query = this.searchQuery.toLowerCase();
-    return this.payments.filter(p => 
-      p.orderId.toLowerCase().includes(query) ||
-      p.customerName?.toLowerCase().includes(query) ||
-      p.customerEmail?.toLowerCase().includes(query)
-    );
   }
 }

@@ -6,29 +6,106 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 interface NavItem {
   label: string;
   icon: string;
-  route: string;
-  active?: boolean;
+  route?: string;
+  children?: NavItem[];
+  isOpen?: boolean;
+}
+
+interface NavSection {
+  title: string;
+  icon: string;
+  isOpen: boolean;
+  items: NavItem[];
 }
 
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css'],
-  standalone: true        
+  styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
   constructor(private sanitizer: DomSanitizer) {}
 
-  navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', active: false },
-    { label: 'Payment Verification', icon: 'verification', route: '/payment-verification', active: true },
-    { label: 'Verified Payments', icon: 'verified', route: '/verified-payments', active: false },
-    { label: 'Rejected Payments', icon: 'rejected', route: '/rejected-payments', active: false }
-  ];
+sections: NavSection[] = [
+  {
+    title: 'Buy Only',
+    icon: 'buyonly',
+    isOpen: false,
+    items: [
+      { label: 'Payment Verification', icon: 'verification', route: '/payment-verification'  },
+      { label: 'Verified Payments',    icon: 'verified',     route: '/verified-payments'      },
+      { label: 'Rejected Payments',    icon: 'rejected',     route: '/rejected-payments'      },
+    ]
+  },
+  {
+    title: 'Inspection',
+    icon: 'inspection',
+    isOpen: false,
+    items: [
+      { label: 'Payment Verification', icon: 'verification', route: '/inspection-payment-verification' },
+      { label: 'Verified Payments',    icon: 'verified',     route: '/inspection-verified-payments'     },
+      { label: 'Rejected Payments',    icon: 'rejected',     route: '/inspection-rejected-payments'     },
+    ]
+  },
+  {
+    title: 'Invoice Payment',
+    icon: 'invoicepayment',
+    isOpen: false,
+    items: [
+      { label: 'Payment Verification', icon: 'verification', route: '/invoice/payment-verification' },
+      { label: 'Verified Payments',    icon: 'verified',     route: '/invoice/verified-payments'    },
+      { label: 'Rejected Payments',    icon: 'rejected',     route: '/invoice/rejected-payments'    },
+    ]
+  },
 
-  onNavClick(route: string) {
-    console.log('Navigate to:', route);
+  {
+    title: 'Invoice',
+    icon: 'invoice',
+    isOpen: false,
+    items: [
+      { label: 'Dashboard',         icon: 'dashboard',    route: '/invoice/dashboard'     },
+      { label: 'Generate Invoice',  icon: 'verification', route: '/invoice/generate'      },
+      { label: 'Pending Invoices',  icon: 'verification', route: '/invoice/pending'       },
+      { label: 'Accepted Invoices', icon: 'verified',     route: '/invoice/accepted'      },
+      { label: 'Rejected Invoices', icon: 'rejected',     route: '/invoice/rejected'      },
+      { label: 'Paid Invoices',     icon: 'verified',     route: '/invoice/paid'          },
+      { label: 'Auto Cancelled',    icon: 'rejected',     route: '/invoice/auto-cancelled'},
+    ]
+  },
+  {
+  title: 'Services',
+  icon: 'services',
+  isOpen: false,
+  items: [
+    {
+      label: 'Repair',
+      icon: 'repair',
+      isOpen: false,
+      children: [
+        { label: 'Payment Verification', icon: 'verification', route: '/services/repair-verification' },
+        { label: 'Verified Payments',    icon: 'verified',     route: '/services/repair-verified'     },
+        { label: 'Rejected Payments',    icon: 'rejected',     route: '/services/repair-rejected'     },
+      ]
+    },
+    {
+      label: 'Maintenance',
+      icon: 'maintenance',
+      isOpen: false,
+      children: [
+        { label: 'Payment Verification', icon: 'verification', route: '/services/maintenance-verification' },
+        { label: 'Verified Payments',    icon: 'verified',     route: '/services/maintenance-verified'     },
+        { label: 'Rejected Payments',    icon: 'rejected',     route: '/services/maintenance-rejected'     },
+      ]
+    },
+  ]
+},
+];
+toggleItem(item: NavItem) { item.isOpen = !item.isOpen; }
+
+  toggleSection(section: NavSection) {
+    section.isOpen = !section.isOpen;
   }
 
   getIcon(iconName: string): SafeHtml {
@@ -44,7 +121,35 @@ export class SidebarComponent {
       </svg>`,
       rejected: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>`
+      </svg>`,
+      buyonly: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>`,
+      inspection: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>`,
+      invoice: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+      </svg>`,
+      invoicepayment: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+      </svg>`,
+      chevron: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>`,
+      services: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+</svg>`,
+repair: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+</svg>`,
+maintenance: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+</svg>`,
     };
     return this.sanitizer.bypassSecurityTrustHtml(icons[iconName] || '');
   }

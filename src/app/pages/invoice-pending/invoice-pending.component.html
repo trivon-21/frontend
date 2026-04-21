@@ -1,0 +1,153 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2 class="page-title">Pending Invoices</h2>
+    <div class="page-search">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" placeholder="Search here"
+        [(ngModel)]="searchQuery" (input)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <div class="search-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" placeholder="Search ID or Customer"
+        [(ngModel)]="searchQuery" (input)="applyFilters()" />
+    </div>
+    <div class="filters-section">
+      <span class="filter-label">Filters:</span>
+      <select [(ngModel)]="selectedFilter" (change)="applyFilters()">
+        <option value="All">All</option>
+        <option value="Pending">Pending</option>
+      </select>
+      <input type="date" class="date-btn"
+        [(ngModel)]="selectedDate" (change)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>INVOICE ID</th>
+          <th>CUSTOMER</th>
+          <th>DATE</th>
+          <th>AMOUNT</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of paginatedInvoices">
+          <td>{{ invoice.orderId }}</td>
+          <td>{{ invoice.invoiceId }}</td>
+          <td>{{ invoice.customerName }}</td>
+          <td>{{ invoice.date | date:'EEE, dd MMM yyyy' }}</td>
+          <td class="amount">${{ invoice.amount }}</td>
+          <td>
+            <button class="view-btn" (click)="viewInvoice(invoice)">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
+    <div class="pages">
+      <button (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+      <button *ngFor="let page of totalPages" (click)="goToPage(page)"
+        [class.active]="currentPage === page">{{ page }}</button>
+      <button (click)="nextPage()"
+        [disabled]="currentPage * itemsPerPage >= totalItems">Next</button>
+    </div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div>
+          <h3>Invoice</h3>
+          <p class="modal-subtitle">{{ selectedInvoice?.invoiceId }}</p>
+        </div>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Invoice Info -->
+        <div class="invoice-info-grid">
+          <div>
+            <p class="info-label">Order ID</p>
+            <p class="info-value">{{ selectedInvoice?.orderId }}</p>
+          </div>
+          <div>
+            <p class="info-label">Invoice ID</p>
+            <p class="info-value">{{ selectedInvoice?.invoiceId }}</p>
+          </div>
+          <div>
+            <p class="info-label">Customer</p>
+            <p class="info-value">{{ selectedInvoice?.customerName }}</p>
+          </div>
+          <div>
+            <p class="info-label">Email</p>
+            <p class="info-value">{{ selectedInvoice?.customerEmail }}</p>
+          </div>
+          <div>
+            <p class="info-label">Date</p>
+            <p class="info-value">{{ selectedInvoice?.date | date:'dd MMM yyyy' }}</p>
+          </div>
+        </div>
+
+        <hr class="modal-divider" />
+
+        <!-- Line Items -->
+        <table class="invoice-items-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price (LKR)</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedInvoice?.items">
+              <td>{{ item.name }}</td>
+              <td>{{ item.qty }}</td>
+              <td>{{ item.price | number }}</td>
+              <td>{{ item.qty * item.price | number }}</td>
+            </tr>
+            <tr class="labor-row">
+              <td colspan="3">Labor Cost</td>
+              <td>{{ selectedInvoice?.laborCost | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-row">
+          <span>Total Amount</span>
+          <span class="total-amount">LKR {{ selectedInvoice?.totalAmount | number }}</span>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-send" (click)="sendToCustomer()">
+          📧 Send to Customer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

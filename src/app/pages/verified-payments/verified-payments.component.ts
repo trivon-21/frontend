@@ -34,10 +34,13 @@ export class VerifiedPaymentsComponent implements OnInit {
   }
 
   loadApprovedPayments() {
-    this.paymentService.getApprovedPayments().subscribe(data => {
-      this.approvedPayments = data;
-      this.applyFilters();
-    });
+this.paymentService.getApprovedPayments().subscribe({
+  next: (data) => {
+    this.approvedPayments = data;
+    this.applyFilters();
+  },
+  error: (err) => console.error(err)
+});
   }
 
   applyFilters() {

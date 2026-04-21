@@ -1,0 +1,94 @@
+<div class="page-container">
+
+  <h2 class="page-title">Verified Inspection Payments</h2>
+
+  <div class="controls-row">
+    <div class="search-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" placeholder="Search ID or Customer"
+        [(ngModel)]="searchQuery" (input)="applyFilters()"/>
+    </div>
+    <div class="filters-section">
+      <span class="filter-label">Filters:</span>
+      <select [(ngModel)]="selectedFilter" (change)="applyFilters()">
+        <option value="All">All</option>
+        <option value="Approved">Approved</option>
+      </select>
+      <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()"/>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="verified-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>TICKET ID</th>
+          <th>CUSTOMER</th>
+          <th>APPROVED DATE</th>
+          <th>AMOUNT</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of paginatedPayments">
+          <td>{{ payment.orderId }}</td>
+          <td>{{ payment.ticketId }}</td>
+          <td>{{ payment.customerName }}</td>
+          <td>{{ payment.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
+          <td class="amount">${{ payment.amount | number:'1.2-2' }}</td>
+          <td><button class="view-btn" (click)="openDetails(payment)">View</button></td>
+        </tr>
+        <tr *ngIf="filteredPayments.length === 0">
+          <td colspan="6" style="text-align:center; color:#9ca3af; padding:24px;">
+            No verified payments found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span>Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} items</span>
+    <div class="pages">
+      <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
+      <button *ngFor="let page of totalPages" (click)="goToPage(page)"
+        [class.active]="currentPage===page">{{ page }}</button>
+      <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Inspection Payment Details</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
+        <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
+        <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
+        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
+        <p><strong>Amount:</strong> ${{ selectedPayment?.amount | number:'1.2-2' }}</p>
+        <p><strong>Status:</strong>
+          <span style="color:#065f46; font-weight:600;"> ✓ Payment Confirmed</span>
+        </p>
+        <p><strong>Approved Date:</strong> {{ selectedPayment?.updatedAt | date:'dd MMM yyyy, hh:mm a' }}</p>
+        <div *ngIf="selectedPayment?.slipUrl" style="margin-top:12px">
+          <p><strong>Payment Slip:</strong></p>
+          <img *ngIf="selectedPayment?.slipUrl?.startsWith('data:image')"
+            [src]="selectedPayment?.slipUrl" style="width:100%;max-height:250px;object-fit:contain;border-radius:8px;border:1px solid #e5e7eb;margin-top:8px"/>
+          <a *ngIf="!selectedPayment?.slipUrl?.startsWith('data:image')"
+            [href]="selectedPayment?.slipUrl" target="_blank" class="slip-link">
+            View Slip
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

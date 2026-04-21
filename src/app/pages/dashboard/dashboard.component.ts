@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { InspectionTicketService } from '../../services/inspection-ticket.service';
 import { PaymentService } from '../../services/payment.service';
+import { ServicePaymentService } from '../../services/service-payment.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,175 +15,175 @@ import { PaymentService } from '../../services/payment.service';
 })
 export class DashboardComponent implements OnInit {
 
-  payments: any[] = [];
-  filteredPayments: any[] = [];
+activeFilter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'REPAIR' | 'MAINTENANCE' = 'ALL';
+  searchText     = '';
+  selectedStatus = 'ALL';
+  selectedDate   = '';
+  currentPage    = 1;
+  itemsPerPage   = 8;
+  totalItems     = 0;
+
+  totalBalance       = 0;
+  approvedAmount     = 0;
+  pendingAmount      = 0;
+  rejectedAmount     = 0;
+  approvedPercentage = 0;
+  pendingPercentage  = 0;
+  rejectedPercentage = 0;
+  verificationCount  = 0;
+  pendingCount       = 0;
+  rejectedCount      = 0;
+
+  allPayments:       any[] = [];
+  filteredPayments:  any[] = [];
   paginatedPayments: any[] = [];
 
-  searchText = '';
-  selectedStatus = 'ALL';
-  selectedDate: string | null = null;
+  constructor(
+    private ticketService: InspectionTicketService,
+    private paymentService: PaymentService,
+    private servicePaymentService: ServicePaymentService
+  ) {}
 
-  // Stats
-  totalAmount = 0;
-  approvedAmount = 0;
-  pendingAmount = 0;
-  rejectedAmount = 0;
+  ngOnInit(): void { this.loadAllPayments(); }
 
-  approvedCount = 0;
-  pendingCount = 0;
-  rejectedCount = 0;
+loadAllPayments(): void {
+  forkJoin({
+    buyPending:      this.paymentService.getPendingPayments(),
+    buyVerified:     this.paymentService.getApprovedPayments(),
+    buyRejected:     this.paymentService.getRejectedPayments(),
+    inspVerified:    this.ticketService.getVerifiedPayments(),
+    inspPending:     this.ticketService.getPendingVerification(),
+    inspRejected:    this.ticketService.getRejectedPayments(),
+    repairPending:   this.servicePaymentService.getPendingVerification('REPAIR'),
+    repairVerified:  this.servicePaymentService.getVerifiedPayments('REPAIR'),
+    repairRejected:  this.servicePaymentService.getRejectedPayments('REPAIR'),
+    maintPending:    this.servicePaymentService.getPendingVerification('MAINTENANCE'),
+    maintVerified:   this.servicePaymentService.getVerifiedPayments('MAINTENANCE'),
+    maintRejected:   this.servicePaymentService.getRejectedPayments('MAINTENANCE'),
+  }).subscribe({
+    next: (res: any) => {
+      const buyPending    = (res.buyPending    || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY',     status: 'PENDING',  displayDate: p.updatedAt }));
+      const buyVerified   = (res.buyVerified   || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY',     status: 'APPROVED', displayDate: p.updatedAt }));
+      const buyRejected   = (res.buyRejected   || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY',     status: 'REJECTED', displayDate: p.updatedAt }));
+      const inspPending   = (res.inspPending   || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION',   status: 'PENDING',  invoiceId: p.ticketId, displayDate: p.date || p.updatedAt }));
+      const inspVerified  = (res.inspVerified  || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION',   status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.updatedAt }));
+      const inspRejected  = (res.inspRejected  || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION',   status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.updatedAt }));
+      const repairPending  = (res.repairPending  || []).map((p: any) => ({ ...p, paymentType: 'REPAIR',       status: 'PENDING',  invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
+      const repairVerified = (res.repairVerified || []).map((p: any) => ({ ...p, paymentType: 'REPAIR',       status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
+      const repairRejected = (res.repairRejected || []).map((p: any) => ({ ...p, paymentType: 'REPAIR',       status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
+      const maintPending   = (res.maintPending   || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE',  status: 'PENDING',  invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
+      const maintVerified  = (res.maintVerified  || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE',  status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
+      const maintRejected  = (res.maintRejected  || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE',  status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
 
-  // Percentages
-  approvedPercentage = 0;
-  pendingPercentage = 0;
-  rejectedPercentage = 0;
+      this.allPayments = [
+        ...buyPending, ...buyVerified, ...buyRejected,
+        ...inspPending, ...inspVerified, ...inspRejected,
+        ...repairPending, ...repairVerified, ...repairRejected,
+        ...maintPending, ...maintVerified, ...maintRejected,
+      ];
+      this.calculateStats(this.allPayments);
+      this.applyFilters();
+    },
+    error: (err: any) => console.error('Dashboard load failed:', err)
+  });
+}
 
-  // Pagination
-  currentPage = 1;
-  itemsPerPage = 8;
-  totalItems = 0;
 
-  @ViewChild('datePicker') datePicker!: ElementRef;
-
-  constructor(private paymentService: PaymentService) {}
-
-  ngOnInit(): void {
-    this.loadAllPayments();
+  calculateStats(payments: any[]) {
+    this.totalBalance      = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    this.approvedAmount    = payments.filter(p => p.status === 'APPROVED').reduce((s, p) => s + (p.amount || 0), 0);
+    this.pendingAmount     = payments.filter(p => p.status === 'PENDING' ).reduce((s, p) => s + (p.amount || 0), 0);
+    this.rejectedAmount    = payments.filter(p => p.status === 'REJECTED').reduce((s, p) => s + (p.amount || 0), 0);
+    this.verificationCount = payments.filter(p => p.status === 'APPROVED').length;
+    this.pendingCount      = payments.filter(p => p.status === 'PENDING' ).length;
+    this.rejectedCount     = payments.filter(p => p.status === 'REJECTED').length;
+    const total = payments.length || 1;
+    this.approvedPercentage = Math.round((this.verificationCount / total) * 100);
+    this.pendingPercentage  = Math.round((this.pendingCount      / total) * 100);
+    this.rejectedPercentage = Math.round((this.rejectedCount     / total) * 100);
   }
 
-  loadAllPayments() {
-    forkJoin({
-      approved: this.paymentService.getApprovedPayments(),
-      pending: this.paymentService.getPendingPayments(),
-      rejected: this.paymentService.getRejectedPayments()
-    }).subscribe({
-      next: (res) => {
-        const approved = res.approved || [];
-        const pending = res.pending || [];
-        const rejected = res.rejected || [];
-
-        this.payments = [
-          ...approved.map((p: any) => ({ ...p, status: 'APPROVED' })),
-          ...pending.map((p: any) => ({ ...p, status: 'PENDING' })),
-          ...rejected.map((p: any) => ({ ...p, status: 'REJECTED' }))
-        ];
-
-        this.totalItems = this.payments.length;
-        this.calculateStats();
-        this.applyFilters();
-      }
-    });
-  }
-
-  calculateStats() {
-    this.totalAmount = this.payments.reduce((sum, p) => sum + (p.amount || 0), 0);
-
-    this.approvedAmount = this.payments
-      .filter(p => p.status === 'APPROVED')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-    this.pendingAmount = this.payments
-      .filter(p => p.status === 'PENDING')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-    this.rejectedAmount = this.payments
-      .filter(p => p.status === 'REJECTED')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-
-    this.approvedCount = this.payments.filter(p => p.status === 'APPROVED').length;
-    this.pendingCount = this.payments.filter(p => p.status === 'PENDING').length;
-    this.rejectedCount = this.payments.filter(p => p.status === 'REJECTED').length;
-
-    const total = this.payments.length || 1;
-
-    this.approvedPercentage = Math.round((this.approvedCount / total) * 100);
-    this.pendingPercentage = Math.round((this.pendingCount / total) * 100);
-    this.rejectedPercentage = Math.round((this.rejectedCount / total) * 100);
-  }
+setFilter(filter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'REPAIR' | 'MAINTENANCE') {
+  this.activeFilter = filter;
+  this.applyFilters();
+}
 
   applyFilters() {
-    this.filteredPayments = this.payments.filter(p => {
+    let base = this.allPayments;
+    if (this.activeFilter !== 'ALL') {
+      base = base.filter(p => p.paymentType === this.activeFilter);
+    }
+    this.filteredPayments = base.filter(p => {
       const matchesSearch =
         p.orderId?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        p.invoiceId?.toLowerCase().includes(this.searchText.toLowerCase()) ||
         p.customerName?.toLowerCase().includes(this.searchText.toLowerCase());
-
-      const matchesStatus =
-        this.selectedStatus === 'ALL' || p.status === this.selectedStatus;
-
-      let matchesDate = true;
-      if (this.selectedDate) {
-      if (!p.updatedAt) return false;
-      const paymentDate = new Date(p.updatedAt).toISOString().split('T')[0];
-        matchesDate = paymentDate === this.selectedDate;
-      }
-
+      const matchesStatus = this.selectedStatus === 'ALL' || p.status === this.selectedStatus;
+      const matchesDate   = this.selectedDate
+        ? new Date(p.displayDate).toISOString().split('T')[0] === this.selectedDate
+        : true;
       return matchesSearch && matchesStatus && matchesDate;
     });
-
-    this.totalItems = this.filteredPayments.length;
+    this.calculateStats(this.filteredPayments);
+    this.totalItems  = this.filteredPayments.length;
     this.currentPage = 1;
-    this.updatePaginatedData();
+    this.updatePaginated();
   }
 
-  updatePaginatedData() {
+  updatePaginated() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    this.paginatedPayments = this.filteredPayments.slice(start, end);
+    this.paginatedPayments = this.filteredPayments.slice(start, start + this.itemsPerPage);
   }
 
-  goToPage(page: number) {
-    this.currentPage = page;
-    this.updatePaginatedData();
+  get totalPages(): number[] {
+    return Array.from({ length: Math.ceil(this.totalItems / this.itemsPerPage) }, (_, i) => i + 1);
   }
 
-  nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePaginatedData();
+  get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
+  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) { this.currentPage++; this.updatePaginated(); } }
+  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePaginated(); } }
+  goToPage(p: number) { this.currentPage = p; this.updatePaginated(); }
+
+  getStatusClass(s: string): string {
+    switch (s) {
+      case 'APPROVED': return 'approved';
+      case 'PENDING':  return 'pending';
+      case 'REJECTED': return 'rejected';
+      default: return '';
     }
   }
 
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePaginatedData();
-    }
+getTypeLabel(type: string): string {
+  switch (type) {
+    case 'BUY_ONLY':     return 'Buy Only';
+    case 'INSPECTION':   return 'Inspection';
+    case 'INVOICE':      return 'Invoice';
+    case 'REPAIR':       return 'Repair';
+    case 'MAINTENANCE':  return 'Maintenance';
+    default: return type;
   }
+}
 
-  openDatePicker() {
-    if (this.datePicker) {
-      this.datePicker.nativeElement.showPicker();
-    }
+getTypeBadgeClass(type: string): string {
+  switch (type) {
+    case 'BUY_ONLY':     return 'type-buy';
+    case 'INSPECTION':   return 'type-inspection';
+    case 'INVOICE':      return 'type-invoice';
+    case 'REPAIR':       return 'type-repair';
+    case 'MAINTENANCE':  return 'type-maintenance';
+    default: return '';
   }
+}
 
-  get totalPages(): number {
-    return Math.ceil(this.totalItems / this.itemsPerPage);
-  }
+  formatAmount(n: number): string { return (n || 0).toFixed(3); }
 
-  get startItem(): number {
-    return (this.currentPage - 1) * this.itemsPerPage + 1;
-  }
-
-  get endItem(): number {
-    return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-  }
-
-  getStatusClass(status: string): string {
-    return status.toLowerCase();
-  }
-
-  formatAmount(amount: number): string {
-    return amount.toFixed(3);
-  }
-
-  formatDate(dateString: string | Date): string {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
+  formatDate(d: any): string {
+    if (!d) return 'N/A';
+    const date = new Date(d);
     if (isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
   }
+
+  openDatePicker(el: HTMLInputElement) { el.showPicker(); }
 }

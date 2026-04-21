@@ -1,0 +1,153 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">AirLux</div>
+  <div class="nav-links">
+    <a href="#">Profile</a>
+    <a href="#">View products</a>
+    <a href="#">Our Services</a>
+    <button class="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-banner">
+  <div class="hero-text">
+    <h1>Premium Cooling<br>Solutions</h1>
+    <p>Discover our curated collection of high-performance air conditioning systems</p>
+  </div>
+  <div class="hero-right">
+    <div class="welcome-badge">🔔 Welcome {{ customerName }}!</div>
+    <div class="hero-avatar">
+      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar"/>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP MESSAGE -->
+<div class="popup-toast" *ngIf="showPopup">
+  <span>{{ popupMessage }}</span>
+</div>
+
+<!-- PAGE BODY -->
+<div class="page-body">
+
+  <!-- LOADING -->
+  <div class="loading-card" *ngIf="isLoading">
+    <p>Loading available dates...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-card" *ngIf="loadError && !isLoading">
+    <p>{{ loadError }}</p>
+  </div>
+
+  <!-- CALENDAR CARD -->
+  <div class="calendar-card" *ngIf="!isLoading && !loadError && !isConfirmed">
+    <p class="welcome-back">Welcome Back {{ customerName }} !</p>
+    <h2 class="calendar-title">Schedule Inspection</h2>
+
+    <div class="calendar-grid">
+      <div class="day-header" *ngFor="let d of weekDays">{{ d }}</div>
+      <div class="day-cell empty" *ngFor="let s of startOffset"></div>
+      <div class="day-cell"
+        *ngFor="let day of calendarDays"
+        [ngClass]="{
+          'unavailable':   day.status === 'unavailable',
+          'holiday':       day.status === 'holiday',
+          'fully-booked':  day.status === 'fully_booked',
+          'available':     day.status === 'available',
+          'selected':      day.isSelected
+        }"
+        (click)="selectDay(day)"
+      >
+        <span *ngIf="day.status === 'unavailable'" class="cross">✕</span>
+        <span *ngIf="day.status === 'holiday'" class="holiday-text">Public<br>Holiday</span>
+        <span *ngIf="day.status === 'fully_booked'" class="fully-booked-text">Full</span>
+        <span *ngIf="day.status === 'available' || day.isSelected" class="date-text">
+          {{ day.label }}
+        </span>
+      </div>
+    </div>
+
+    <p class="pick-day" *ngIf="!selectedDay">Pick a day !</p>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot unavailable-dot"></div>
+        <span>Not available</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot available-dot"></div>
+        <span>Available</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot holiday-dot"></div>
+        <span>Public Holiday</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot booked-dot"></div>
+        <span>Fully Booked</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELECTED DATE CARD -->
+  <div class="selected-card" *ngIf="selectedDay && !isConfirmed">
+    <h3>Schedule inspection on</h3>
+    <p class="selected-date">{{ formattedSelectedDate }}</p>
+    <p class="selected-weekday">{{ selectedWeekday }}</p>
+    <p class="slots-left" *ngIf="selectedDay.slotsLeft > 0">
+      {{ selectedDay.slotsLeft }} slot(s) remaining
+    </p>
+  </div>
+
+  <!-- CONFIRM BUTTON -->
+  <button class="confirm-btn" *ngIf="selectedDay && !isConfirmed"
+    (click)="confirm()" [disabled]="isSubmitting">
+    {{ isSubmitting ? 'Confirming...' : 'Confirm' }}
+  </button>
+
+  <!-- SUCCESS STATE -->
+  <div class="success-card" *ngIf="isConfirmed">
+    <div class="success-tick">✓</div>
+    <h2>Inspection Scheduled!</h2>
+    <p class="success-date">{{ formattedSelectedDate }}</p>
+    <p class="success-weekday">{{ selectedWeekday }}</p>
+    <div class="success-status">Status: Inspection Scheduled</div>
+    <p class="success-msg">
+      A confirmation email has been sent to you.<br>
+      You will receive a reminder the day before your inspection.<br>
+      Our team will visit you on the selected date. Stay connected!
+    </p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>AirLux</h3>
+      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
+    </div>
+    <div class="footer-contact">
+      <h4>Contact Us</h4>
+      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
+      <p>📞 +94 11 234 5678</p>
+      <p>✉️ support@airlux.lk</p>
+    </div>
+    <div class="footer-social">
+      <h4>Follow Us</h4>
+      <div class="social-icons">
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
+  </div>
+</footer>
