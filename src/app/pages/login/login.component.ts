@@ -30,7 +30,7 @@ export class LoginComponent {
     private router: Router,
     private route: ActivatedRoute,
   ) {
-    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
     this.form = this.fb.group({
       identifier: ['', [Validators.required]],
       password: ['', [Validators.required]],
@@ -43,6 +43,19 @@ export class LoginComponent {
 
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
+  }
+
+  private getRedirectUrl(): string {
+    if (this.returnUrl) {
+      return this.returnUrl;
+    }
+
+    const user = this.authService.getUser();
+    if (user?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+
+    return '/dashboard';
   }
 
   onIdentifierChange(identifier: string) {
@@ -75,7 +88,7 @@ export class LoginComponent {
       next: (response: AuthResponse) => {
         this.isLoading = false;
         // Direct login successful (no OTP required for phone login)
-        this.router.navigateByUrl(this.returnUrl);
+        this.router.navigateByUrl(this.getRedirectUrl());
       },
       error: (err) => {
         this.isLoading = false;
@@ -101,7 +114,7 @@ export class LoginComponent {
     verifyMethod.subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigateByUrl(this.returnUrl);
+        this.router.navigateByUrl(this.getRedirectUrl());
       },
       error: (err) => {
         this.isLoading = false;

@@ -1,0 +1,249 @@
+* {
+  box-sizing: border-box;
+}
+
+.dashboard-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  overflow: hidden;
+  background: #f3f4f2;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0 24px;
+}
+
+.sidebar-brand {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f5b45;
+  padding: 0 24px 32px;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar-brand:hover {
+  color: #184a38;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #566463;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.13s, color 0.13s;
+}
+
+.nav-item:hover {
+  background: #f0f5f3;
+  color: #1f5b45;
+}
+
+.nav-item.active {
+  background: #e8f5ee;
+  color: #1f5b45;
+  font-weight: 600;
+}
+
+.nav-item.active svg {
+  stroke: #1f5b45;
+}
+
+/* ── Main ── */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  flex-shrink: 0;
+}
+
+.back-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #566463;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  flex-shrink: 0;
+}
+
+.back-home-btn:hover {
+  background: #f0f5f3;
+  color: #1f5b45;
+  border-color: rgba(31, 91, 69, 0.3);
+}
+
+.header-spacer {
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1f5b45 0%, #00c2d1 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.5px;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.user-avatar:hover {
+  opacity: 0.9;
+}
+
+/* User Menu Container */
+.user-menu-container {
+  position: relative;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 300;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.user-avatar-lg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1f5b45 0%, #00c2d1 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #10251c;
+}
+
+.user-email {
+  font-size: 11px;
+  color: #9aa09e;
+  margin-top: 2px;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.07);
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2a2f2d;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.menu-item svg {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.menu-item.logout {
+  color: #c0392b;
+}
+
+.menu-item.logout svg {
+  color: #c0392b;
+}
+
+.menu-item.logout:hover {
+  background: rgba(192, 57, 43, 0.06);
+}
+
+/* ── Content ── */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}

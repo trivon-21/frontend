@@ -1,4 +1,5 @@
 export type UserRole =
+  | 'SUPER_ADMIN'
   | 'CUSTOMER'
   | 'CSA'
   | 'INSPECTION'

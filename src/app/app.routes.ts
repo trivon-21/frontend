@@ -77,4 +77,29 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'super-admin',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['SUPER_ADMIN'] },
+    loadComponent: () =>
+      import('./features/super-admin/components/layout/super-admin-layout/super-admin-layout.component').then(
+        (m) => m.SuperAdminLayoutComponent
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/super-admin/pages/dashboard/super-admin-dashboard.component').then(
+            (m) => m.SuperAdminDashboardComponent
+          ),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/super-admin/pages/users/users.component').then(
+            (m) => m.UsersComponent
+          ),
+      },
+    ],
+  },
 ];
