@@ -23,11 +23,13 @@ yarn-error.log*
 # Dependency directories
 jspm_packages/
 
-# Environment files (if you create any)
+# Environment files
 .env
 .env.local
 .env.development
 .env.production
+.env.test
+.env.*.local
 
 # VS Code
 .vscode/
@@ -42,10 +44,20 @@ jspm_packages/
 *.njsproj
 *.sln
 
+# OS files
 .DS_Store
 Thumbs.db
 
+# Testing
 coverage/
 
+# Misc
 *.swp
 *.bak
+.history/
+
+# Personal Documentation / Dev Notes
+src/app/core/styling/FAILURE_POINTS*
+src/app/core/styling/RECOVERY*
+src/app/core/styling/*.md
+!src/app/core/styling/README.md
