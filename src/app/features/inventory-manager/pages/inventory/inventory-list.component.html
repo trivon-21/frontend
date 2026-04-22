@@ -1,0 +1,105 @@
+<div class="inventory-container">
+  <!-- Action Header -->
+  <div class="action-header">
+    <div class="page-title">
+      <h1>Inventory</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-action secondary">
+        <i class="icon-procurement"></i>
+        Procurement
+      </button>
+      <button class="btn-action primary" [routerLink]="['/inventory-manager/list-items']">
+        <i class="icon-list"></i>
+        List Items
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-card glass-panel">
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search Inventory...">
+    </div>
+    
+    <div class="filter-group">
+      <span class="filter-label">Filters:</span>
+      
+      <div class="select-wrapper">
+        <select [(ngModel)]="selectedType">
+          <option>All Types</option>
+          <option>Single</option>
+          <option>Bundle</option>
+        </select>
+      </div>
+
+      <div class="select-wrapper">
+        <select [(ngModel)]="selectedBrand">
+          <option>All Brands</option>
+          <option>Samsung</option>
+          <option>LG</option>
+          <option>Daikin</option>
+        </select>
+      </div>
+
+      <div class="select-wrapper">
+        <select [(ngModel)]="selectedLocation">
+          <option>All Locations</option>
+          <option>Logistic Area 1</option>
+          <option>Logistic Area 2</option>
+          <option>Logistic Area 3</option>
+        </select>
+      </div>
+
+      <button class="btn-link" (click)='clearFilters()'>Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="table-container glass-panel">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU /Asset Tag</th>
+          <th>PRODUCT NAME</th>
+          <th>TYPE</th>
+          <th>AVAILABLE</th>
+          <th>RESERVED</th>
+          <th>LOCATION</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of inventoryItems">
+          <td class="sku-cell">{{ item.sku }}</td>
+          <td class="name-cell">{{ item.name }}</td>
+          <td>
+            <span class="status-pill" [class.bundle]="item.type === 'Bundle'">
+              {{ item.type }}
+            </span>
+          </td>
+          <td class="num-cell">{{ item.available }}</td>
+          <td class="num-cell">{{ item.reserved }}</td>
+          <td>{{ item.location }}</td>
+          <td>
+            <button class="btn-table" [routerLink]="['/inventory-manager/product-wizard']">Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <span class="pagination-info">Showing 1-8 of 247 items</span>
+      <div class="pagination-controls">
+        <button class="btn-page">Previous</button>
+        <button class="btn-page active">1</button>
+        <button class="btn-page">2</button>
+        <button class="btn-page">3</button>
+        <span class="dots">...</span>
+        <button class="btn-page">31</button>
+        <button class="btn-page">Next</button>
+      </div>
+    </div>
+  </div>
+</div>

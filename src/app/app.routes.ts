@@ -90,6 +90,76 @@ export const routes: Routes = [
             (m) => m.InventoryManagerDashboardComponent,
           ),
       },
+      {
+        path: 'inventory',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/inventory/inventory-list.component').then(
+            (m) => m.InventoryListComponent,
+          ),
+      },
+      {
+        path: 'list-items',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/list-items/list-items.component').then(
+            (m) => m.ListItemsComponent,
+          ),
+      },
+      {
+        path: 'product-wizard',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/product-wizard/product-wizard.component').then(
+            (m) => m.ProductWizardComponent,
+          ),
+      },
+      {
+        path: 'asset-management',
+        loadComponent: () =>
+          import(
+            './features/inventory-manager/pages/asset-management/asset-management.component'
+          ).then((m) => m.AssetManagementComponent),
+      },
+      {
+        path: 'material-requests',
+        loadComponent: () =>
+          import(
+            './features/inventory-manager/pages/material-requests/material-requests.component'
+          ).then((m) => m.MaterialRequestsComponent),
+      },
+      {
+        path: 'dispatch-logistics',
+        loadComponent: () =>
+          import(
+            './features/inventory-manager/pages/dispatch-logistics/dispatch-logistics.component'
+          ).then((m) => m.DispatchLogisticsComponent),
+      },
+      {
+        path: 'returns-rma',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/returns-rma/returns-rma.component').then(
+            (m) => m.ReturnsRmaComponent,
+          ),
+      },
+      {
+        path: 'procurement',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/procurement/procurement.component').then(
+            (m) => m.ProcurementComponent,
+          ),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/customer/pages/settings/notification-settings.component').then(
+            (m) => m.NotificationSettingsComponent,
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/customer/pages/notifications/notifications.component').then(
+            (m) => m.NotificationsPageComponent,
+          ),
+      },
     ],
   },
 ];
