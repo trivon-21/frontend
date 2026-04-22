@@ -136,7 +136,7 @@ export const routes: Routes = [
         path: 'returns-rma',
         loadComponent: () =>
           import('./features/inventory-manager/pages/returns-rma/returns-rma.component').then(
-            (m) => m.ReturnsRmaComponent,
+            (m) => m.ReturnsRmaDashboardComponent,
           ),
       },
       {
@@ -170,3 +170,5 @@ export const routes: Routes = [
     ],
   },
 ];
+
+// Force reload for Returns & RMA implementation
