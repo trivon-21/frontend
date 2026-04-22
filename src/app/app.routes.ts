@@ -116,7 +116,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import(
             './features/inventory-manager/pages/asset-management/asset-management.component'
-          ).then((m) => m.AssetManagementComponent),
+          ).then((m) => m.AssetManagementDashboardComponent),
       },
       {
         path: 'material-requests',
