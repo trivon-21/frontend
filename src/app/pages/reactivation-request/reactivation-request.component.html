@@ -44,9 +44,6 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn-outline" (click)="goToLogin()">
-          Back to Login
-        </button>
         <button type="submit" class="btn btn-primary" [disabled]="loading || userReason.length < 20">
           {{ loading ? 'Submitting...' : 'Submit Request' }}
         </button>

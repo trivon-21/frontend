@@ -40,7 +40,31 @@ export class UsersComponent implements OnInit {
   showCreateModal = false;
   showEditModal = false;
   showDeactivationModal = false;
+  showViewMoreModal = false;
+  showRejectionModal = false;
+  showUserDetailsModal = false;
   selectedUser: User | null = null;
+  selectedReactivationRequest: ReactivationRequest | null = null;
+
+  // Loading states for buttons
+  approvingRequestId: string | null = null;
+  rejectingRequestId: string | null = null;
+  deletingUserId: string | null = null;
+  deactivatingUserId: string | null = null;
+
+  // Rejection form
+  rejectionForm = {
+    reason: '',
+    customReason: '',
+  };
+
+  rejectionReasons = [
+    'Policy Violation',
+    'Verification Failed',
+    'Multiple Violations',
+    'User Request Denied',
+    'Other',
+  ];
 
   // Form data
   formData = {
@@ -197,6 +221,68 @@ export class UsersComponent implements OnInit {
     this.deactivationForm.reason = '';
   }
 
+  openViewMoreModal(request: ReactivationRequest): void {
+    this.selectedReactivationRequest = request;
+    this.showViewMoreModal = true;
+  }
+
+  closeViewMoreModal(): void {
+    this.showViewMoreModal = false;
+    this.selectedReactivationRequest = null;
+  }
+
+  openUserDetailsModal(user: User): void {
+    this.selectedUser = user;
+    this.showUserDetailsModal = true;
+  }
+
+  closeUserDetailsModal(): void {
+    this.showUserDetailsModal = false;
+    this.selectedUser = null;
+  }
+
+  openRejectionModal(request: ReactivationRequest): void {
+    this.selectedReactivationRequest = request;
+    this.rejectionForm.reason = '';
+    this.rejectionForm.customReason = '';
+    this.showRejectionModal = true;
+  }
+
+  closeRejectionModal(): void {
+    this.showRejectionModal = false;
+    this.selectedReactivationRequest = null;
+    this.rejectionForm.reason = '';
+    this.rejectionForm.customReason = '';
+  }
+
+  submitRejection(): void {
+    if (!this.selectedReactivationRequest) return;
+
+    const finalReason = this.rejectionForm.reason === 'Other'
+      ? this.rejectionForm.customReason
+      : this.rejectionForm.reason;
+
+    if (!finalReason.trim()) {
+      alert('Please enter or select a reason');
+      return;
+    }
+
+    this.rejectingRequestId = this.selectedReactivationRequest._id;
+    this.superAdminService.handleReactivationRequest(this.selectedReactivationRequest._id, false, finalReason).subscribe({
+      next: () => {
+        this.rejectingRequestId = null;
+        this.closeRejectionModal();
+        this.loadReactivationRequests();
+        this.loadDeactivatedUsers();
+        alert('Reactivation request rejected. User account has been deleted.');
+      },
+      error: (err) => {
+        this.rejectingRequestId = null;
+        alert(err.error?.message || 'Failed to reject request');
+      },
+    });
+  }
+
   resetForm(): void {
     this.formData = {
       fullName: '',
@@ -272,13 +358,16 @@ export class UsersComponent implements OnInit {
       return;
     }
 
+    this.deactivatingUserId = this.selectedUser._id;
     this.superAdminService.deactivateUser(this.selectedUser._id, this.deactivationForm.reason).subscribe({
       next: () => {
+        this.deactivatingUserId = null;
         this.closeDeactivationModal();
         this.loadUsers();
         alert('User deactivated successfully. Email sent to user.');
       },
       error: (err) => {
+        this.deactivatingUserId = null;
         alert(err.error?.message || 'Failed to deactivate user');
       },
     });
@@ -291,8 +380,10 @@ export class UsersComponent implements OnInit {
 
     if (!confirm(confirmMsg)) return;
 
+    this.deletingUserId = user._id;
     this.superAdminService.deleteUser(user._id, hardDelete).subscribe({
       next: () => {
+        this.deletingUserId = null;
         if (this.activeTab === 'active') {
           this.loadUsers();
         } else if (this.activeTab === 'deactivated') {
@@ -301,6 +392,7 @@ export class UsersComponent implements OnInit {
         alert(hardDelete ? 'User permanently deleted' : 'User deactivated');
       },
       error: (err) => {
+        this.deletingUserId = null;
         alert(err.error?.message || 'Failed to delete user');
       },
     });
@@ -309,12 +401,15 @@ export class UsersComponent implements OnInit {
   reactivateUserDirectly(user: User): void {
     if (!confirm('Reactivate this user?')) return;
 
+    this.approvingRequestId = user._id;
     this.superAdminService.handleReactivationRequest(user._id, true, 'Reactivated by admin').subscribe({
       next: () => {
+        this.approvingRequestId = null;
         this.loadDeactivatedUsers();
         alert('User reactivated successfully');
       },
       error: (err) => {
+        this.approvingRequestId = null;
         alert(err.error?.message || 'Failed to reactivate user');
       },
     });
@@ -323,30 +418,23 @@ export class UsersComponent implements OnInit {
   approveReactivationRequest(request: ReactivationRequest): void {
     if (!confirm('Approve this reactivation request?')) return;
 
+    this.approvingRequestId = request._id;
     this.superAdminService.handleReactivationRequest(request._id, true, '').subscribe({
       next: () => {
+        this.approvingRequestId = null;
         this.loadReactivationRequests();
+        this.loadDeactivatedUsers();
         alert('Reactivation request approved');
       },
       error: (err) => {
+        this.approvingRequestId = null;
         alert(err.error?.message || 'Failed to approve request');
       },
     });
   }
 
   rejectReactivationRequest(request: ReactivationRequest): void {
-    const reason = prompt('Enter reason for rejection:');
-    if (reason === null) return;
-
-    this.superAdminService.handleReactivationRequest(request._id, false, reason).subscribe({
-      next: () => {
-        this.loadReactivationRequests();
-        alert('Reactivation request rejected');
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Failed to reject request');
-      },
-    });
+    this.openRejectionModal(request);
   }
 
   applyFilters(): void {
@@ -392,14 +480,15 @@ export class UsersComponent implements OnInit {
   }
 
   getStatusText(user: User): string {
-    if (user.emailVerified && user.phoneVerified) return 'Fully Verified';
-    if (user.emailVerified || user.phoneVerified) return 'Partially Verified';
-    return 'Unverified';
+    if (user.emailVerified && user.phoneVerified) return 'Both Verified';
+    if (user.phoneVerified && !user.emailVerified) return 'Phone Verified';
+    if (user.emailVerified && !user.phoneVerified) return 'Email Verified';
+    return 'Not Verified';
   }
 
   getStatusBadgeClass(user: User): string {
     if (user.emailVerified && user.phoneVerified) return 'status-badge--verified';
-    if (user.emailVerified || user.phoneVerified) return 'status-badge--partial';
+    if (user.phoneVerified || user.emailVerified) return 'status-badge--partial';
     return 'status-badge--unverified';
   }
 
@@ -409,5 +498,17 @@ export class UsersComponent implements OnInit {
       return '0' + phoneNumber.slice(3);
     }
     return phoneNumber;
+  }
+
+  getEmailVerificationStatus(user: User): string {
+    return user.emailVerified ? 'Verified' : 'Not Verified';
+  }
+
+  getPhoneVerificationStatus(user: User): string {
+    return user.phoneVerified ? 'Verified' : 'Not Verified';
+  }
+
+  getVerificationBadgeClass(verified: boolean): string {
+    return verified ? 'badge-verified' : 'badge-not-verified';
   }
 }

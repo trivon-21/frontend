@@ -16,6 +16,9 @@ export interface User {
   deactivatedAt?: Date | null;
   deactivationReason?: string;
   reactivatedAt?: Date | null;
+  address?: string;
+  gender?: string;
+  profilePhoto?: string;
   createdAt: string;
   updatedAt: string;
 }

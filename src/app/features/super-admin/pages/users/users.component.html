@@ -110,7 +110,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of users">
+          <tr *ngFor="let user of users" (click)="openUserDetailsModal(user)" class="clickable-row">
             <td>{{ user.fullName }}</td>
             <td>{{ user.email || '-' }}</td>
             <td>{{ user.phoneNumber || '-' }}</td>
@@ -123,7 +123,7 @@
               </span>
             </td>
             <td>{{ user.createdAt | date: 'short' }}</td>
-            <td class="actions-cell">
+            <td class="actions-cell" (click)="$event.stopPropagation()">
               <button class="btn btn-sm btn-edit" (click)="openEditModal(user)">Edit</button>
               <button class="btn btn-sm btn-delete" (click)="openDeactivationModal(user)">
                 Deactivate
@@ -183,11 +183,19 @@
             <td>{{ user.deactivationReason || '-' }}</td>
             <td>{{ user.deactivatedAt | date: 'short' }}</td>
             <td class="actions-cell">
-              <button class="btn btn-sm btn-primary" (click)="reactivateUserDirectly(user)">
-                Reactivate
+              <button
+                class="btn btn-sm btn-primary"
+                (click)="reactivateUserDirectly(user)"
+                [disabled]="approvingRequestId === user._id"
+              >
+                {{ approvingRequestId === user._id ? 'Reactivating...' : 'Reactivate' }}
               </button>
-              <button class="btn btn-sm btn-delete" (click)="deleteUser(user, true)">
-                Delete
+              <button
+                class="btn btn-sm btn-delete"
+                (click)="deleteUser(user, true)"
+                [disabled]="deletingUserId === user._id"
+              >
+                {{ deletingUserId === user._id ? 'Deleting...' : 'Delete' }}
               </button>
             </td>
           </tr>
@@ -237,14 +245,31 @@
             <td>{{ request.fullName }}</td>
             <td>{{ request.email || '-' }}</td>
             <td>{{ request.deactivationReason || '-' }}</td>
-            <td>{{ request.userReason }}</td>
+            <td class="reason-cell">
+              <div class="reason-container">
+                <p class="reason-text">
+                  {{ request.userReason.length > 50 ? (request.userReason | slice: 0:50) + '...' : request.userReason }}
+                </p>
+                <button *ngIf="request.userReason.length > 50" class="btn-view-more" (click)="openViewMoreModal(request)">
+                  View More
+                </button>
+              </div>
+            </td>
             <td>{{ request.requestedAt | date: 'short' }}</td>
             <td class="actions-cell">
-              <button class="btn btn-sm btn-primary" (click)="approveReactivationRequest(request)">
-                Approve
+              <button
+                class="btn btn-sm btn-primary"
+                (click)="approveReactivationRequest(request)"
+                [disabled]="approvingRequestId === request._id"
+              >
+                {{ approvingRequestId === request._id ? 'Approving...' : 'Approve' }}
               </button>
-              <button class="btn btn-sm btn-delete" (click)="rejectReactivationRequest(request)">
-                Reject
+              <button
+                class="btn btn-sm btn-delete"
+                (click)="rejectReactivationRequest(request)"
+                [disabled]="rejectingRequestId === request._id"
+              >
+                {{ rejectingRequestId === request._id ? 'Rejecting...' : 'Reject' }}
               </button>
             </td>
           </tr>
@@ -394,7 +419,229 @@
 
     <div class="modal-footer">
       <button class="btn btn-outline" (click)="closeDeactivationModal()">Cancel</button>
-      <button class="btn btn-delete" (click)="deactivateUser()">Deactivate User</button>
+      <button
+        class="btn btn-delete"
+        (click)="deactivateUser()"
+        [disabled]="deactivatingUserId === selectedUser?._id"
+      >
+        {{ deactivatingUserId === selectedUser?._id ? 'Deactivating...' : 'Deactivate User' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- View More Modal -->
+<div class="modal" *ngIf="showViewMoreModal && selectedReactivationRequest">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <h2>Reactivation Request Details</h2>
+      <button class="btn-close" (click)="closeViewMoreModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-section">
+        <h3 class="detail-label">User Name</h3>
+        <p class="detail-value">{{ selectedReactivationRequest.fullName }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-label">Email</h3>
+        <p class="detail-value">{{ selectedReactivationRequest.email }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-label">Phone</h3>
+        <p class="detail-value">{{ selectedReactivationRequest.phoneNumber || '-' }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-label">Deactivation Reason</h3>
+        <p class="detail-value">{{ selectedReactivationRequest.deactivationReason || '-' }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-label">User's Reactivation Reason</h3>
+        <div class="detail-value full-text">{{ selectedReactivationRequest.userReason }}</div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-label">Requested At</h3>
+        <p class="detail-value">{{ selectedReactivationRequest.requestedAt | date: 'medium' }}</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeViewMoreModal()">Close</button>
+      <button
+        class="btn btn-primary"
+        (click)="closeViewMoreModal(); approveReactivationRequest(selectedReactivationRequest)"
+        [disabled]="approvingRequestId === selectedReactivationRequest._id"
+      >
+        {{ approvingRequestId === selectedReactivationRequest._id ? 'Approving...' : 'Approve' }}
+      </button>
+      <button
+        class="btn btn-delete"
+        (click)="closeViewMoreModal(); rejectReactivationRequest(selectedReactivationRequest)"
+        [disabled]="rejectingRequestId === selectedReactivationRequest._id"
+      >
+        {{ rejectingRequestId === selectedReactivationRequest._id ? 'Rejecting...' : 'Reject' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div class="modal" *ngIf="showRejectionModal && selectedReactivationRequest">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Reject Reactivation Request</h2>
+      <button class="btn-close" (click)="closeRejectionModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="rejection-user">
+        <strong>User:</strong> {{ selectedReactivationRequest.fullName }}
+      </p>
+
+      <div class="form-group">
+        <label>Reason for Rejection *</label>
+        <select [(ngModel)]="rejectionForm.reason" class="input">
+          <option value="">Select a reason</option>
+          <option *ngFor="let reason of rejectionReasons" [value]="reason">
+            {{ reason }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="rejectionForm.reason === 'Other'" class="form-group">
+        <label>Custom Reason *</label>
+        <textarea
+          [(ngModel)]="rejectionForm.customReason"
+          class="textarea"
+          placeholder="Enter your reason for rejection..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <p class="info-text">
+        The user will receive an email with your rejection reason.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeRejectionModal()">Cancel</button>
+      <button
+        class="btn btn-delete"
+        (click)="submitRejection()"
+        [disabled]="rejectingRequestId === selectedReactivationRequest._id"
+      >
+        {{ rejectingRequestId === selectedReactivationRequest._id ? 'Rejecting...' : 'Reject Request' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal" *ngIf="showUserDetailsModal && selectedUser">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <h2>User Details</h2>
+      <button class="btn-close" (click)="closeUserDetailsModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="details-grid">
+        <div class="detail-section">
+          <h3 class="detail-label">Full Name</h3>
+          <p class="detail-value">{{ selectedUser.fullName }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Email</h3>
+          <p class="detail-value">{{ selectedUser.email || '-' }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Phone Number</h3>
+          <p class="detail-value">{{ selectedUser.phoneNumber || '-' }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Role</h3>
+          <p class="detail-value"><span class="badge badge-role">{{ selectedUser.role }}</span></p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Status</h3>
+          <p class="detail-value">
+            <span [class]="'status-badge ' + getStatusBadgeClass(selectedUser)">
+              {{ getStatusText(selectedUser) }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Address</h3>
+          <p class="detail-value">{{ selectedUser.address || '-' }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Gender</h3>
+          <p class="detail-value">{{ selectedUser.gender || '-' }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Account Status</h3>
+          <p class="detail-value">
+            <span [class]="selectedUser.isActive ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
+              {{ selectedUser.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Email Verified</h3>
+          <p class="detail-value">
+            <span [class]="selectedUser.emailVerified ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
+              {{ selectedUser.emailVerified ? 'Yes' : 'No' }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Phone Verified</h3>
+          <p class="detail-value">
+            <span [class]="selectedUser.phoneVerified ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
+              {{ selectedUser.phoneVerified ? 'Yes' : 'No' }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Created At</h3>
+          <p class="detail-value">{{ selectedUser.createdAt | date: 'medium' }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="detail-label">Last Updated</h3>
+          <p class="detail-value">{{ selectedUser.updatedAt | date: 'medium' }}</p>
+        </div>
+
+        <div *ngIf="!selectedUser.isActive" class="detail-section">
+          <h3 class="detail-label">Deactivation Reason</h3>
+          <p class="detail-value">{{ selectedUser.deactivationReason || '-' }}</p>
+        </div>
+
+        <div *ngIf="!selectedUser.isActive" class="detail-section">
+          <h3 class="detail-label">Deactivated At</h3>
+          <p class="detail-value">{{ selectedUser.deactivatedAt | date: 'medium' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeUserDetailsModal()">Close</button>
+      <button class="btn btn-primary" (click)="closeUserDetailsModal(); openEditModal(selectedUser)">Edit User</button>
     </div>
   </div>
 </div>
