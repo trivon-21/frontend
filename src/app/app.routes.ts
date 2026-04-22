@@ -123,7 +123,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import(
             './features/inventory-manager/pages/material-requests/material-requests.component'
-          ).then((m) => m.MaterialRequestsComponent),
+          ).then((m) => m.MaterialRequestsDashboardComponent),
       },
       {
         path: 'dispatch-logistics',
@@ -158,6 +158,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/customer/pages/notifications/notifications.component').then(
             (m) => m.NotificationsPageComponent,
+          ),
+      },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/customer/pages/dashboard/customer-dashboard-home.component').then(
+            (m) => m.CustomerDashboardHomeComponent,
           ),
       },
     ],

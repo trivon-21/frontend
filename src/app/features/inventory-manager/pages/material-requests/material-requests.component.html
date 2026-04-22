@@ -1,0 +1,73 @@
+<div class="material-requests-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Material Requests</h1>
+    <button class="btn-bulk">
+      <i class="icon-scan"></i>
+      Bulk Scan
+    </button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'pending'"
+      (click)="setActiveTab('pending')">
+      Pending Requests <span class="badge">{{ pendingRequests.length }}</span>
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'reserved'"
+      (click)="setActiveTab('reserved')">
+      Reserved/Kitted <span class="badge">{{ reservedRequests.length }}</span>
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'completed'"
+      (click)="setActiveTab('completed')">
+      Completed
+    </button>
+  </div>
+
+  <!-- Requests Grid -->
+  <div class="requests-grid">
+    <div class="request-card glass-panel" *ngFor="let request of currentRequests">
+      <div class="card-header">
+        <div class="id-row">
+          <span class="request-id">{{ request.id }}</span>
+          <span class="status-dot" [class.warning]="request.status === 'warning'"></span>
+        </div>
+        <h3 class="requester-name">{{ request.requester }}</h3>
+        <div class="meta-row">
+          <div class="meta-item">
+            <i class="icon-calendar"></i>
+            <span>{{ request.date }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="icon-location"></i>
+            <span>{{ request.location }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="materials-section">
+        <span class="section-label">MATERIALS LIST</span>
+        <div class="items-list">
+          <div class="item-row" *ngFor="let item of request.items">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-qty">×{{ item.qty }}</span>
+          </div>
+        </div>
+        <button class="btn-more">+{{ request.moreCount }} more items</button>
+      </div>
+
+      <div class="card-footer">
+        <span class="availability-status" [class.warning]="request.status === 'warning'">
+          {{ request.status === 'available' ? 'All items available' : 'Items pending allocation' }}
+        </span>
+        <button class="btn-allocate">Click to allocate →</button>
+      </div>
+    </div>
+  </div>
+</div>
