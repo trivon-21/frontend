@@ -130,7 +130,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import(
             './features/inventory-manager/pages/dispatch-logistics/dispatch-logistics.component'
-          ).then((m) => m.DispatchLogisticsComponent),
+          ).then((m) => m.DispatchLogisticsDashboardComponent),
       },
       {
         path: 'returns-rma',
