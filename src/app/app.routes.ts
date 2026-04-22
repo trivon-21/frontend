@@ -33,6 +33,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'reactivation-request',
+    loadComponent: () =>
+      import('./pages/reactivation-request/reactivation-request.component').then(
+        (m) => m.ReactivationRequestComponent
+      ),
+  },
+  {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>

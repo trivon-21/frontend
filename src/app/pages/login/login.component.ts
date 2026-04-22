@@ -22,6 +22,8 @@ export class LoginComponent {
   otpForm!: FormGroup;
   sessionId = '';
   detectedAuthType: 'email' | 'phone' | 'invalid' | null = null;
+  deactivatedEmail: string | null = null;
+  showDeactivationNotice = false;
   private returnUrl: string;
 
   constructor(
@@ -92,9 +94,26 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
+
+        // Check for account deactivation error
+        if (err.error?.code === 'ACCOUNT_DEACTIVATED') {
+          this.showDeactivationNotice = true;
+          this.deactivatedEmail = identifier;
+          this.errorMessage = err.error?.message || 'This account has been deactivated';
+          return;
+        }
+
         this.errorMessage = err.error?.message ?? 'Login failed. Please try again.';
       },
     });
+  }
+
+  requestReactivation(): void {
+    if (this.deactivatedEmail) {
+      this.router.navigate(['/reactivation-request'], {
+        queryParams: { email: this.deactivatedEmail },
+      });
+    }
   }
 
   submitOtp() {

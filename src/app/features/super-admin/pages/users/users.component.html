@@ -9,118 +9,274 @@
     {{ error }}
   </div>
 
-  <!-- Filters Section -->
-  <div class="filters-section">
-    <div class="filters-grid">
-      <div class="filter-group">
-        <label>Search</label>
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          placeholder="Search by name or email..."
-          class="input"
-        />
+  <!-- Tabs -->
+  <div class="tabs">
+    <button
+      [class.tab-active]="activeTab === 'active'"
+      (click)="switchTab('active')"
+      class="tab-button"
+    >
+      Active Users
+    </button>
+    <button
+      [class.tab-active]="activeTab === 'deactivated'"
+      (click)="switchTab('deactivated')"
+      class="tab-button"
+    >
+      Deactivated Users
+    </button>
+    <button
+      [class.tab-active]="activeTab === 'reactivation'"
+      (click)="switchTab('reactivation')"
+      class="tab-button"
+    >
+      Reactivation Requests
+    </button>
+  </div>
+
+  <!-- Active Users Tab -->
+  <div *ngIf="activeTab === 'active'">
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Search</label>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Search by name or email..."
+            class="input"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label>Role</label>
+          <select [(ngModel)]="roleFilter" class="input">
+            <option value="">All Roles</option>
+            <option value="CUSTOMER">Customer</option>
+            <option value="CSA">CSA</option>
+            <option value="INSPECTION">Inspection</option>
+            <option value="MAIN_TECH">Main Technician</option>
+            <option value="SERVICE_TEAM">Service Team</option>
+            <option value="FINANCE">Finance</option>
+            <option value="INVENTORY">Inventory</option>
+            <option value="MANAGER">Manager</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Email Verified</label>
+          <select [(ngModel)]="emailVerifiedFilter" class="input">
+            <option value="">All</option>
+            <option value="true">Verified</option>
+            <option value="false">Not Verified</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Phone Verified</label>
+          <select [(ngModel)]="phoneVerifiedFilter" class="input">
+            <option value="">All</option>
+            <option value="true">Verified</option>
+            <option value="false">Not Verified</option>
+          </select>
+        </div>
       </div>
 
-      <div class="filter-group">
-        <label>Role</label>
-        <select [(ngModel)]="roleFilter" class="input">
-          <option value="">All Roles</option>
-          <option value="CUSTOMER">Customer</option>
-          <option value="CSA">CSA</option>
-          <option value="INSPECTION">Inspection</option>
-          <option value="MAIN_TECH">Main Technician</option>
-          <option value="SERVICE_TEAM">Service Team</option>
-          <option value="FINANCE">Finance</option>
-          <option value="INVENTORY">Inventory</option>
-          <option value="MANAGER">Manager</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Email Verified</label>
-        <select [(ngModel)]="emailVerifiedFilter" class="input">
-          <option value="">All</option>
-          <option value="true">Verified</option>
-          <option value="false">Not Verified</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Phone Verified</label>
-        <select [(ngModel)]="phoneVerifiedFilter" class="input">
-          <option value="">All</option>
-          <option value="true">Verified</option>
-          <option value="false">Not Verified</option>
-        </select>
+      <div class="filter-buttons">
+        <button class="btn btn-primary" (click)="applyFilters()">Apply Filters</button>
+        <button class="btn btn-outline" (click)="clearFilters()">Clear</button>
+        <button class="btn btn-success" (click)="openCreateModal()">Create User</button>
       </div>
     </div>
 
-    <div class="filter-buttons">
-      <button class="btn btn-primary" (click)="applyFilters()">Apply Filters</button>
-      <button class="btn btn-outline" (click)="clearFilters()">Clear</button>
-      <button class="btn btn-success" (click)="openCreateModal()">Create User</button>
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loading">
+      <p>Loading users...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container" *ngIf="!loading && users.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.email || '-' }}</td>
+            <td>{{ user.phoneNumber || '-' }}</td>
+            <td>
+              <span class="badge badge-role">{{ user.role }}</span>
+            </td>
+            <td>
+              <span [class]="'status-badge ' + getStatusBadgeClass(user)">
+                {{ getStatusText(user) }}
+              </span>
+            </td>
+            <td>{{ user.createdAt | date: 'short' }}</td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-edit" (click)="openEditModal(user)">Edit</button>
+              <button class="btn btn-sm btn-delete" (click)="openDeactivationModal(user)">
+                Deactivate
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && users.length === 0">
+      <p>No users found</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="btn btn-outline" (click)="previousPage()" [disabled]="currentPage === 1">
+        Previous
+      </button>
+      <span class="page-info">Page {{ currentPage }} of {{ totalPages }} (Total: {{ totalUsers }})</span>
+      <button class="btn btn-outline" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next
+      </button>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading" *ngIf="loading">
-    <p>Loading users...</p>
+  <!-- Deactivated Users Tab -->
+  <div *ngIf="activeTab === 'deactivated'">
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loading">
+      <p>Loading deactivated users...</p>
+    </div>
+
+    <!-- Deactivated Users Table -->
+    <div class="table-container" *ngIf="!loading && deactivatedUsers.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Deactivation Reason</th>
+            <th>Deactivated At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of deactivatedUsers">
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.email || '-' }}</td>
+            <td>{{ user.phoneNumber || '-' }}</td>
+            <td>
+              <span class="badge badge-role">{{ user.role }}</span>
+            </td>
+            <td>{{ user.deactivationReason || '-' }}</td>
+            <td>{{ user.deactivatedAt | date: 'short' }}</td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-primary" (click)="reactivateUserDirectly(user)">
+                Reactivate
+              </button>
+              <button class="btn btn-sm btn-delete" (click)="deleteUser(user, true)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && deactivatedUsers.length === 0">
+      <p>No deactivated users</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="btn btn-outline" (click)="previousPage()" [disabled]="currentPage === 1">
+        Previous
+      </button>
+      <span class="page-info">Page {{ currentPage }} of {{ totalPages }} (Total: {{ totalUsers }})</span>
+      <button class="btn btn-outline" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next
+      </button>
+    </div>
   </div>
 
-  <!-- Users Table -->
-  <div class="table-container" *ngIf="!loading && users.length > 0">
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th>Full Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td>{{ user.fullName }}</td>
-          <td>{{ user.email || '-' }}</td>
-          <td>{{ user.phoneNumber || '-' }}</td>
-          <td>
-            <span class="badge badge-role">{{ user.role }}</span>
-          </td>
-          <td>
-            <span [class]="'status-badge ' + getStatusBadgeClass(user)">
-              {{ getStatusText(user) }}
-            </span>
-          </td>
-          <td>{{ user.createdAt | date: 'short' }}</td>
-          <td class="actions-cell">
-            <button class="btn btn-sm btn-edit" (click)="openEditModal(user)">Edit</button>
-            <button class="btn btn-sm btn-delete" (click)="deleteUser(user, false)">
-              Deactivate
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- Reactivation Requests Tab -->
+  <div *ngIf="activeTab === 'reactivation'">
+    <!-- Loading State -->
+    <div class="loading" *ngIf="loading">
+      <p>Loading reactivation requests...</p>
+    </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && users.length === 0">
-    <p>No users found</p>
-  </div>
+    <!-- Reactivation Requests Table -->
+    <div class="table-container" *ngIf="!loading && reactivationRequests.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Deactivation Reason</th>
+            <th>User's Reason</th>
+            <th>Requested At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of reactivationRequests">
+            <td>{{ request.fullName }}</td>
+            <td>{{ request.email || '-' }}</td>
+            <td>{{ request.deactivationReason || '-' }}</td>
+            <td>{{ request.userReason }}</td>
+            <td>{{ request.requestedAt | date: 'short' }}</td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-primary" (click)="approveReactivationRequest(request)">
+                Approve
+              </button>
+              <button class="btn btn-sm btn-delete" (click)="rejectReactivationRequest(request)">
+                Reject
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="!loading && totalPages > 1">
-    <button class="btn btn-outline" (click)="previousPage()" [disabled]="currentPage === 1">
-      Previous
-    </button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} (Total: {{ totalUsers }})</span>
-    <button class="btn btn-outline" (click)="nextPage()" [disabled]="currentPage === totalPages">
-      Next
-    </button>
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && reactivationRequests.length === 0">
+      <p>No reactivation requests</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && reactivationTotalPages > 1">
+      <button
+        class="btn btn-outline"
+        (click)="previousReactivationPage()"
+        [disabled]="reactivationPage === 1"
+      >
+        Previous
+      </button>
+      <span class="page-info">
+        Page {{ reactivationPage }} of {{ reactivationTotalPages }} (Total: {{ reactivationTotalRequests }})
+      </span>
+      <button
+        class="btn btn-outline"
+        (click)="nextReactivationPage()"
+        [disabled]="reactivationPage === reactivationTotalPages"
+      >
+        Next
+      </button>
+    </div>
   </div>
 </div>
 
@@ -204,6 +360,41 @@
     <div class="modal-footer">
       <button class="btn btn-outline" (click)="closeEditModal()">Cancel</button>
       <button class="btn btn-primary" (click)="updateUser()">Update User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deactivation Modal -->
+<div class="modal" *ngIf="showDeactivationModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Deactivate User</h2>
+      <button class="btn-close" (click)="closeDeactivationModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="deactivation-user">
+        <strong>User:</strong> {{ selectedUser?.fullName }}
+      </p>
+
+      <div class="form-group">
+        <label>Deactivation Reason *</label>
+        <select [(ngModel)]="deactivationForm.reason" class="input">
+          <option value="">Select a reason</option>
+          <option *ngFor="let reason of deactivationReasons" [value]="reason">
+            {{ reason }}
+          </option>
+        </select>
+      </div>
+
+      <p class="info-text">
+        The user will receive an email notification with the deactivation reason and a link to request reactivation.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeDeactivationModal()">Cancel</button>
+      <button class="btn btn-delete" (click)="deactivateUser()">Deactivate User</button>
     </div>
   </div>
 </div>

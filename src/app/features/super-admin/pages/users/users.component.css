@@ -13,6 +13,36 @@
   margin: 0;
 }
 
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.tab-button {
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #566463;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: #1f5b45;
+}
+
+.tab-button.tab-active {
+  color: #1f5b45;
+  border-bottom-color: #1f5b45;
+}
+
 /* Filters Section */
 .filters-section {
   background: #f0f5f3;
@@ -346,6 +376,25 @@
   background: #f9f9f9;
 }
 
+/* Deactivation Modal */
+.deactivation-user {
+  background: #f0f5f3;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: #2a2f2d;
+}
+
+.info-text {
+  background: #fff3cd;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #856404;
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .filters-grid {
@@ -379,5 +428,14 @@
 
   .modal-content {
     width: 95%;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    padding: 10px 12px;
+    font-size: 12px;
   }
 }

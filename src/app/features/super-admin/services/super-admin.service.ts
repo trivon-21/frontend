@@ -12,6 +12,10 @@ export interface User {
   emailVerified: boolean;
   phoneVerified: boolean;
   authMethods: string[];
+  isActive: boolean;
+  deactivatedAt?: Date | null;
+  deactivationReason?: string;
+  reactivatedAt?: Date | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,6 +54,28 @@ export interface UserResponse {
 export interface DeleteResponse {
   message: string;
   deleted: boolean;
+}
+
+export interface ReactivationRequest {
+  _id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  deactivationReason: string;
+  requestedAt: string;
+  userReason: string;
+  requestStatus: string;
+}
+
+export interface ReactivationRequestsResponse {
+  message: string;
+  data: ReactivationRequest[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }
 
 @Injectable({
@@ -117,5 +143,46 @@ export class SuperAdminService {
    */
   deleteUser(userId: string, hardDelete: boolean = false): Observable<DeleteResponse> {
     return this.apiService.delete<DeleteResponse>(`/super-admin/users/${userId}?hardDelete=${hardDelete}`);
+  }
+
+  /**
+   * Deactivate user
+   */
+  deactivateUser(userId: string, reason: string): Observable<UserResponse> {
+    return this.apiService.patch<UserResponse>(`/super-admin/users/${userId}/deactivate`, { reason });
+  }
+
+  /**
+   * Get reactivation requests
+   */
+  getReactivationRequests(page: number = 1, limit: number = 10): Observable<ReactivationRequestsResponse> {
+    let params = new HttpParams();
+    params = params.set('page', page.toString());
+    params = params.set('limit', limit.toString());
+    return this.apiService.get<ReactivationRequestsResponse>('/super-admin/reactivation-requests', params);
+  }
+
+  /**
+   * Handle reactivation request (approve/reject)
+   */
+  handleReactivationRequest(
+    userId: string,
+    approve: boolean,
+    adminResponse: string = ''
+  ): Observable<{ message: string; approved: boolean }> {
+    return this.apiService.patch<{ message: string; approved: boolean }>(
+      `/super-admin/reactivation-requests/${userId}`,
+      { approve, adminResponse }
+    );
+  }
+
+  /**
+   * Submit reactivation request (user-facing)
+   */
+  submitReactivationRequest(email: string, userReason: string): Observable<{ message: string; status: string }> {
+    return this.apiService.post<{ message: string; status: string }>('/auth/reactivation-request', {
+      email,
+      userReason
+    });
   }
 }

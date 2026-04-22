@@ -1,0 +1,75 @@
+<div class="reactivation-container">
+  <div class="reactivation-card">
+    <div class="reactivation-header">
+      <h1 class="reactivation-title">Account Reactivation Request</h1>
+      <p class="reactivation-subtitle">Tell us why you'd like to reactivate your account</p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="success">
+      {{ success }}
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="submitRequest()" *ngIf="!submitted">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          class="input"
+          placeholder="Your email address"
+          readonly
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Reason for Reactivation *</label>
+        <textarea
+          id="reason"
+          [(ngModel)]="userReason"
+          name="userReason"
+          class="textarea"
+          placeholder="Please explain why you'd like to reactivate your account..."
+          rows="6"
+        ></textarea>
+        <p class="hint-text">Minimum 20 characters required</p>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" (click)="goToLogin()">
+          Back to Login
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading || userReason.length < 20">
+          {{ loading ? 'Submitting...' : 'Submit Request' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Submitted State -->
+    <div class="submitted-state" *ngIf="submitted">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">Request Submitted</h2>
+      <p class="success-message">
+        Your reactivation request has been received. Our team will review your request and contact you within 24-48 hours.
+      </p>
+      <button class="btn btn-primary" (click)="goToLogin()">
+        Return to Login
+      </button>
+    </div>
+
+    <div class="footer-text">
+      <p>
+        If you have questions, please
+        <a href="mailto:support@airlux.com">contact our support team</a>.
+      </p>
+    </div>
+  </div>
+</div>

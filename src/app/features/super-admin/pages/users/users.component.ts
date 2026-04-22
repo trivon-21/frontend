@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SuperAdminService, User } from '../../services/super-admin.service';
+import { SuperAdminService, User, ReactivationRequest } from '../../services/super-admin.service';
 
 @Component({
   selector: 'app-users',
@@ -11,14 +11,24 @@ import { SuperAdminService, User } from '../../services/super-admin.service';
   styleUrls: ['./users.component.css'],
 })
 export class UsersComponent implements OnInit {
+  // Tab management
+  activeTab: 'active' | 'deactivated' | 'reactivation' = 'active';
+
   // Users Management
   users: User[] = [];
+  deactivatedUsers: User[] = [];
+  reactivationRequests: ReactivationRequest[] = [];
   loading = false;
   error: string | null = null;
   currentPage = 1;
   pageSize = 10;
   totalUsers = 0;
   totalPages = 0;
+
+  // Reactivation requests pagination
+  reactivationPage = 1;
+  reactivationTotalPages = 0;
+  reactivationTotalRequests = 0;
 
   // Filters
   roleFilter = '';
@@ -29,6 +39,7 @@ export class UsersComponent implements OnInit {
   // Modals
   showCreateModal = false;
   showEditModal = false;
+  showDeactivationModal = false;
   selectedUser: User | null = null;
 
   // Form data
@@ -39,6 +50,20 @@ export class UsersComponent implements OnInit {
     role: '',
     password: '',
   };
+
+  // Deactivation form
+  deactivationForm = {
+    reason: '',
+  };
+
+  deactivationReasons = [
+    'Violation of Terms',
+    'Suspicious Activity',
+    'Account Compromise',
+    'User Request',
+    'Inactivity',
+    'Other',
+  ];
 
   roles = [
     'CUSTOMER',
@@ -57,6 +82,20 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  switchTab(tab: 'active' | 'deactivated' | 'reactivation'): void {
+    this.activeTab = tab;
+    this.currentPage = 1;
+    this.reactivationPage = 1;
+
+    if (tab === 'active') {
+      this.loadUsers();
+    } else if (tab === 'deactivated') {
+      this.loadDeactivatedUsers();
+    } else if (tab === 'reactivation') {
+      this.loadReactivationRequests();
+    }
+  }
+
   loadUsers(): void {
     this.loading = true;
     this.error = null;
@@ -69,14 +108,50 @@ export class UsersComponent implements OnInit {
 
     this.superAdminService.listUsers(this.currentPage, this.pageSize, filters).subscribe({
       next: (response) => {
-        this.users = response.data;
-        this.totalUsers = response.pagination.total;
+        this.users = response.data.filter((u) => u.isActive !== false);
+        this.totalUsers = this.users.length;
         this.totalPages = response.pagination.pages;
         this.currentPage = response.pagination.page;
         this.loading = false;
       },
       error: (err) => {
         this.error = err.error?.message || 'Failed to load users';
+        this.loading = false;
+      },
+    });
+  }
+
+  loadDeactivatedUsers(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.superAdminService.listUsers(this.currentPage, this.pageSize).subscribe({
+      next: (response) => {
+        this.deactivatedUsers = response.data.filter((u) => u.isActive === false);
+        this.totalUsers = this.deactivatedUsers.length;
+        this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load deactivated users';
+        this.loading = false;
+      },
+    });
+  }
+
+  loadReactivationRequests(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.superAdminService.getReactivationRequests(this.reactivationPage, this.pageSize).subscribe({
+      next: (response) => {
+        this.reactivationRequests = response.data;
+        this.reactivationTotalRequests = response.pagination.total;
+        this.reactivationTotalPages = response.pagination.pages;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load reactivation requests';
         this.loading = false;
       },
     });
@@ -97,7 +172,7 @@ export class UsersComponent implements OnInit {
     this.formData = {
       fullName: user.fullName,
       email: user.email || '',
-      phoneNumber: user.phoneNumber || '',
+      phoneNumber: this.formatPhoneNumberForDisplay(user.phoneNumber || ''),
       role: user.role,
       password: '',
     };
@@ -108,6 +183,18 @@ export class UsersComponent implements OnInit {
     this.showEditModal = false;
     this.selectedUser = null;
     this.resetForm();
+  }
+
+  openDeactivationModal(user: User): void {
+    this.selectedUser = user;
+    this.deactivationForm.reason = '';
+    this.showDeactivationModal = true;
+  }
+
+  closeDeactivationModal(): void {
+    this.showDeactivationModal = false;
+    this.selectedUser = null;
+    this.deactivationForm.reason = '';
   }
 
   resetForm(): void {
@@ -179,6 +266,24 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  deactivateUser(): void {
+    if (!this.selectedUser || !this.deactivationForm.reason) {
+      alert('Please select a deactivation reason');
+      return;
+    }
+
+    this.superAdminService.deactivateUser(this.selectedUser._id, this.deactivationForm.reason).subscribe({
+      next: () => {
+        this.closeDeactivationModal();
+        this.loadUsers();
+        alert('User deactivated successfully. Email sent to user.');
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to deactivate user');
+      },
+    });
+  }
+
   deleteUser(user: User, hardDelete: boolean = false): void {
     const confirmMsg = hardDelete
       ? 'Permanently delete this user? This cannot be undone.'
@@ -188,11 +293,58 @@ export class UsersComponent implements OnInit {
 
     this.superAdminService.deleteUser(user._id, hardDelete).subscribe({
       next: () => {
-        this.loadUsers();
+        if (this.activeTab === 'active') {
+          this.loadUsers();
+        } else if (this.activeTab === 'deactivated') {
+          this.loadDeactivatedUsers();
+        }
         alert(hardDelete ? 'User permanently deleted' : 'User deactivated');
       },
       error: (err) => {
         alert(err.error?.message || 'Failed to delete user');
+      },
+    });
+  }
+
+  reactivateUserDirectly(user: User): void {
+    if (!confirm('Reactivate this user?')) return;
+
+    this.superAdminService.handleReactivationRequest(user._id, true, 'Reactivated by admin').subscribe({
+      next: () => {
+        this.loadDeactivatedUsers();
+        alert('User reactivated successfully');
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to reactivate user');
+      },
+    });
+  }
+
+  approveReactivationRequest(request: ReactivationRequest): void {
+    if (!confirm('Approve this reactivation request?')) return;
+
+    this.superAdminService.handleReactivationRequest(request._id, true, '').subscribe({
+      next: () => {
+        this.loadReactivationRequests();
+        alert('Reactivation request approved');
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to approve request');
+      },
+    });
+  }
+
+  rejectReactivationRequest(request: ReactivationRequest): void {
+    const reason = prompt('Enter reason for rejection:');
+    if (reason === null) return;
+
+    this.superAdminService.handleReactivationRequest(request._id, false, reason).subscribe({
+      next: () => {
+        this.loadReactivationRequests();
+        alert('Reactivation request rejected');
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to reject request');
       },
     });
   }
@@ -225,6 +377,20 @@ export class UsersComponent implements OnInit {
     }
   }
 
+  previousReactivationPage(): void {
+    if (this.reactivationPage > 1) {
+      this.reactivationPage--;
+      this.loadReactivationRequests();
+    }
+  }
+
+  nextReactivationPage(): void {
+    if (this.reactivationPage < this.reactivationTotalPages) {
+      this.reactivationPage++;
+      this.loadReactivationRequests();
+    }
+  }
+
   getStatusText(user: User): string {
     if (user.emailVerified && user.phoneVerified) return 'Fully Verified';
     if (user.emailVerified || user.phoneVerified) return 'Partially Verified';
@@ -235,5 +401,13 @@ export class UsersComponent implements OnInit {
     if (user.emailVerified && user.phoneVerified) return 'status-badge--verified';
     if (user.emailVerified || user.phoneVerified) return 'status-badge--partial';
     return 'status-badge--unverified';
+  }
+
+  formatPhoneNumberForDisplay(phoneNumber: string): string {
+    if (!phoneNumber) return '';
+    if (phoneNumber.startsWith('+94')) {
+      return '0' + phoneNumber.slice(3);
+    }
+    return phoneNumber;
   }
 }
