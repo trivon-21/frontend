@@ -1,0 +1,195 @@
+﻿
+    <div class="team-management-container">
+      <div class="search-filter-section">
+        <div class="search-bar">
+          <span class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Search by team, member, type..."
+            [value]="searchQuery"
+            (input)="onSearchInput($event)"
+          >
+        </div>
+        
+        <div class="filters">
+          <span class="filter-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filters:
+          </span>
+          <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="All">All</option>
+            <option value="Busy">Busy</option>
+            <option value="Available">Available</option>
+          </select>
+          <button class="clear-filters" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+
+      <div class="assignment-alert">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="alert-content">
+          <h3>Pending Team Assignment</h3>
+          <p>{{ pendingAssignmentCount }} jobs waiting for team assignment</p>
+        </div>
+      </div>
+
+      <div class="main-content-grid">
+        <div class="team-list-pane">
+          <div class="loading-state" *ngIf="isLoading">
+            <div class="loading-bar"></div>
+            <div class="loading-bar short"></div>
+            <div class="loading-bar"></div>
+          </div>
+
+          <div class="empty-state" *ngIf="!isLoading && filteredTeams.length === 0">
+            <h4>No teams found</h4>
+            <p>Try clearing the filters or check the team records in the database.</p>
+          </div>
+
+          <div 
+            *ngFor="let team of filteredTeams" 
+            class="team-card" 
+            [class.selected]="selectedTeam?.id === team.id"
+            (click)="selectTeam(team)"
+          >
+            <div class="team-card-header">
+              <div class="team-icon" [ngClass]="team.type.toLowerCase()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="team-header-info">
+                <h4>{{ team.name }}</h4>
+                <p>{{ team.membersCount }} Members &bull; Active Jobs: {{ team.activeJobs }}</p>
+              </div>
+              <span class="status-chip" [ngClass]="team.status.toLowerCase()">
+                {{ team.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-detail-pane" *ngIf="selectedTeam">
+          <header class="detail-header">
+            <div class="header-info">
+              <h2>{{ selectedTeam.name }}</h2>
+              <p>{{ selectedTeam.type }} Team</p>
+            </div>
+          </header>
+
+          <div class="stats-overview">
+            <div class="stat-item">
+              <span class="stat-label">Team Members</span>
+              <span class="stat-value">{{ selectedTeam.membersCount }} Members</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Active Jobs</span>
+              <span class="stat-value">{{ selectedTeam.activeJobs }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Available Slots</span>
+              <span class="stat-value">{{ selectedTeam.availableSlots }} Dates</span>
+            </div>
+          </div>
+
+          <div class="detail-sections-grid">
+            <div class="members-section">
+              <h3>Team Members</h3>
+              <div class="member-list">
+                <div *ngFor="let member of selectedTeam.members" class="member-item">
+                  <div class="member-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                  <div class="member-info">
+                    <span class="member-name">{{ member.name }}</span>
+                    <span class="member-role">{{ member.role }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="active-jobs-section">
+              <h3>Active Jobs</h3>
+              <ng-container *ngIf="selectedTeam.activeJobsList.length > 0; else noActiveJobs">
+                <div class="job-card" *ngFor="let job of selectedTeam.activeJobsList">
+                  <div class="job-info">
+                    <span class="job-id">{{ job.ticketId }}</span>
+                    <span class="job-customer">{{ job.customerName }}</span>
+                    <span class="job-location">{{ job.location }}</span>
+                  </div>
+                  <span class="job-chip">{{ job.type }}</span>
+                </div>
+              </ng-container>
+              <ng-template #noActiveJobs>
+                <div class="empty-inline-state">
+                  <p>No active jobs assigned to this team.</p>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="availability-section">
+            <h3>Available Dates</h3>
+            <div class="date-grid">
+              <div *ngFor="let dateObj of selectedTeam.availableDates" class="date-slot">
+                <span class="date-day">{{ dateObj.day }}</span>
+                <span class="date-value">{{ dateObj.date }}</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="assign-btn" (click)="openAssignModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Assign New Job
+          </button>
+        </div>
+      </div>
+
+      <!-- Assign Job Modal -->
+      <div class="modal-backdrop" *ngIf="showAssignModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Assign Job to {{ selectedTeam?.name }}</h2>
+            <p>Select a pending job to assign to the Team</p>
+          </div>
+
+          <div class="pending-jobs-list">
+            <div 
+              *ngFor="let job of pendingJobs" 
+              class="pending-job-card" 
+              [class.selected]="selectedPendingJobId === job.id"
+              (click)="selectedPendingJobId = job.id"
+            >
+              <div class="job-card-main">
+                <div class="job-id-row">
+                  <span class="job-id">{{ job.id }}</span>
+                  <span class="job-type-chip" [ngClass]="job.type.toLowerCase()">{{ job.type }}</span>
+                </div>
+                <span class="job-customer">{{ job.customer }}</span>
+                <div class="job-details-row">
+                  <div class="detail-item">
+                    <span class="label">Location</span>
+                    <span class="value">{{ job.location }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Type</span>
+                    <span class="value">{{ job.productType }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="cancel-btn" (click)="showAssignModal = false">Cancel</button>
+            <button class="confirm-assign-btn" [disabled]="!selectedPendingJobId" (click)="assignSelectedJob()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Assign Team & Send Available Dates to CSA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  

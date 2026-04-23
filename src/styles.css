@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --primary-color: #41603d; /* AirLux Dark Green */
+  --primary-light: #e8f5e9; /* AirLux Light Green */
+  --secondary-color: #4a5a48;
+  --bg-color: #f1f3f5;
+  --text-main: #1a1a1b;
+  --text-muted: #6b7280;
+  --white: #ffffff;
+  --border-color: #e5e7eb;
+  --sidebar-width: 280px;
+  --header-height: 80px;
+  --success-color: #22c55e;
+  --danger-color: #ef4444;
+  --primary-default: #008236;
+  --primary-bold: #1B2A22;
+  --neutral-subtle: #5B6670;
+  --neutral-border: #D0D5DD;
+  --neutral-bg: #FDFDFE;
+  --primary-surface: #E6FBE7;
+  --Error-red: #DA3E33;
+  --Background-green: #E6FBE7;
+  --danger-dafault: #C10007;
+  --accent-blue: #155DFC;
+  --Norm-green: #3C5F35;
+  --neutral-content: #2B2F38;
+  --background-grey: #0F172B;
+  --grey: #5B6670;
+  --danger-surface: #FEF2F2;
+
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-main);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}

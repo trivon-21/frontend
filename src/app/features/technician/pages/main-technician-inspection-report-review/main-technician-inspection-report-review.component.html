@@ -1,0 +1,368 @@
+﻿<div class="review-container">
+  <div class="back-navigation">
+    <a routerLink="/main-technician-inspection-reports" class="back-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to Inspection Reports
+    </a>
+  </div>
+  
+  <header class="page-header">
+    <h1>Inspection Report Review #{{ id }}</h1>
+  </header>
+
+  @if (isLoading) {
+    <div class="summary-card" style="margin-bottom: 16px;">
+      <div class="card-content">
+        <p class="label">Loading</p>
+        <p class="value">Fetching unified report data...</p>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="summary-card" style="margin-bottom: 16px; border-left: 4px solid #ef4444;">
+      <div class="card-content">
+        <p class="label">Error</p>
+        <p class="value">{{ error }}</p>
+      </div>
+    </div>
+  }
+
+  <section class="summary-cards">
+    <div class="summary-card">
+      <div class="card-icon customer-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Customer</p>
+        <p class="value">{{ report?.customerId?.name || '-' }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon location-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Location</p>
+        <p class="value">{{ report?.customerId?.address || '-' }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon date-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Inspection Date</p>
+        <p class="value">{{ report?.inspectionMeta?.date | date:'longDate' }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon product-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Recommended</p>
+        <p class="value">{{ recommendedProductType }}</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs-nav">
+    <ul class="tabs-list">
+      <li class="tab-item" [class.active]="activeTab === 'Overview'" (click)="activeTab = 'Overview'">Overview</li>
+      <li class="tab-item" [class.active]="activeTab === 'Findings'" (click)="activeTab = 'Findings'">Inspection Findings</li>
+      <li class="tab-item" [class.active]="activeTab === 'Materials'" (click)="activeTab = 'Materials'">Materials & Labour</li>
+      <li class="tab-item" [class.active]="activeTab === 'Photos'" (click)="activeTab = 'Photos'">Photo Evidence</li>
+    </ul>
+  </nav>
+
+  <main class="review-content">
+    @if (activeTab === 'Overview') {
+      <div class="content-grid">
+        <section class="info-column card">
+          <div class="card-header"><h2>Customer Information</h2></div>
+          <div class="card-body">
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Full Name</p>
+                <p class="info-value">{{ report?.customerId?.name || '-' }}</p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Phone Number</p>
+                <p class="info-value">{{ report?.customerId?.contactNo || '-' }}</p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Email Address</p>
+                <p class="info-value">{{ report?.customerId?.email || '-' }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="details-column card">
+          <div class="card-header"><h2>Site Details</h2></div>
+          <div class="card-body details-grid">
+            <div class="detail-item">
+              <p class="detail-label">Building Type</p>
+              <p class="detail-value">{{ report?.siteDetails?.buildingType || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Floors</p>
+              <p class="detail-value">{{ report?.siteDetails?.floors ?? '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Rooms</p>
+              <p class="detail-value">{{ report?.siteDetails?.rooms ?? '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Ceiling Height</p>
+              <p class="detail-value">{{ report?.siteDetails?.ceilingHeight || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Wall Type</p>
+              <p class="detail-value">{{ report?.siteDetails?.wallType || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Power Supply</p>
+              <p class="detail-value">{{ report?.siteDetails?.powerSupply || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Outdoor Access</p>
+              <p class="detail-value">{{ report?.siteDetails?.outdoorAccess || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Materials Count</p>
+              <p class="detail-value">{{ report?.requirements?.materials?.length || 0 }} items</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Team Size</p>
+              <p class="detail-value">{{ report?.requirements?.labour?.technicians || 0 }} Technicians, {{ report?.requirements?.labour?.helpers || 0 }} Helpers</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Estimated Duration</p>
+              <p class="detail-value">{{ report?.requirements?.labour?.duration || '-' }}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (activeTab === 'Findings') {
+      <section class="findings-summary card full-width-card">
+        <div class="card-header"><h2>Inspection Findings Summary</h2></div>
+        <div class="card-body">
+          <div class="findings-list">
+            <div class="finding-item" *ngFor="let finding of report?.findings">
+              <div class="finding-header">
+                <div class="finding-title">
+                  <h3>{{ finding.category }}</h3>
+                </div>
+                <span class="status-badge" [ngClass]="finding.status === 'Needs Attention' ? 'attention' : 'good'">
+                  {{ finding.status }}
+                </span>
+              </div>
+              <p class="finding-desc">{{ finding.description }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (activeTab === 'Materials') {
+      <div class="content-grid">
+        <section class="materials-column card">
+          <div class="card-header"><h2>Required Materials</h2></div>
+          <div class="card-body">
+            <table class="materials-table">
+              <thead><tr><th>ITEM</th><th>QUANTITY</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let item of materials">
+                  <td>{{ item.item }}</td>
+                  <td>{{ item.quantity }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
+        <section class="labour-column card">
+          <div class="card-header"><h2>Labour Requirements</h2></div>
+          <div class="card-body">
+            <div class="labour-item">
+              <p class="labour-label">Estimated Duration</p>
+              <p class="labour-value">{{ labourDetails.duration }}</p>
+            </div>
+            <div class="labour-item">
+              <p class="labour-label">Team Size</p>
+              <p class="labour-value">{{ labourDetails.technicians }} Techs, {{ labourDetails.helpers }} Helpers</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (activeTab === 'Photos') {
+      <section class="photos-gallery card full-width-card">
+        <div class="card-header"><h2>Site Inspection Photos</h2></div>
+        <div class="card-body">
+          <div class="photos-grid">
+            <div class="photo-item" *ngFor="let photo of report?.photos">
+              <div class="photo-wrapper">
+                <img [src]="photo.url" [alt]="photo.caption">
+              </div>
+              <p class="photo-caption">{{ photo.caption }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <section class="review-section card full-width-card">
+      <div class="card-header"><h2>Review</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label for="review-notes">Review Notes</label>
+          <textarea id="review-notes" [(ngModel)]="reviewNotes" placeholder="Add approval comments..."></textarea>
+        </div>
+      </div>
+      <div class="card-footer actions-footer">
+        <button class="footer-btn reject" (click)="openRejectModal()">Reject</button>
+        <button class="footer-btn changes" (click)="openMakeChangesModal()">Adjust Requirements</button>
+        <button class="footer-btn approve" (click)="openApproveModal()">Confirm Approval</button>
+      </div>
+    </section>
+  </main>
+
+  @if (showApproveModal) {
+    <div class="modal-overlay" (click)="closeApproveModal()">
+      <div class="modal-container approve-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h2>Approve Report #{{ id }}</h2>
+          <p class="modal-subtitle">This will create a 'Pending' job in the Installations collection.</p>
+        </header>
+        <div class="modal-body">
+          <div class="finance-notes-section">
+            <p class="section-label">Notes for Finance Officer</p>
+            <textarea [(ngModel)]="financeNotes" placeholder="Special instructions for Finance..."></textarea>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button class="modal-btn cancel" (click)="closeApproveModal()">Cancel</button>
+          <button class="modal-btn approve" (click)="submitApproval()">Submit Approval</button>
+        </footer>
+      </div>
+    </div>
+  }
+
+  @if (showRejectModal) {
+    <div class="modal-overlay" (click)="closeRejectModal()">
+      <div class="modal-container reject-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h2>Reject Report #{{ id }}</h2>
+          <p class="modal-subtitle">The report will be marked as rejected and returned to the inspection queue.</p>
+        </header>
+        <div class="modal-body">
+          <div class="reason-section">
+            <label for="rejection-reason">Rejection Reason</label>
+            <textarea
+              id="rejection-reason"
+              class="modal-textarea"
+              [(ngModel)]="rejectionReason"
+              placeholder="Explain why this report is being rejected..."
+            ></textarea>
+            <p class="info-notice">This note will be saved with the report history.</p>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button class="modal-btn cancel" (click)="closeRejectModal()">Cancel</button>
+          <button class="modal-btn confirm" (click)="submitRejection()" [disabled]="isSubmitting || !rejectionReason.trim()">Reject Report</button>
+        </footer>
+      </div>
+    </div>
+  }
+
+  @if (showMakeChangesModal) {
+    <div class="modal-overlay" (click)="closeMakeChangesModal()">
+      <div class="modal-container changes-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h2>Adjust Requirements #{{ id }}</h2>
+          <p class="modal-subtitle">Update the materials and labour estimate before sending the report forward.</p>
+        </header>
+
+        <nav class="modal-tabs">
+          <button class="modal-tab" [class.active]="activeRequirementsTab === 'Materials'" (click)="activeRequirementsTab = 'Materials'">Materials</button>
+          <button class="modal-tab" [class.active]="activeRequirementsTab === 'Labour'" (click)="activeRequirementsTab = 'Labour'">Labour</button>
+        </nav>
+
+        <div class="tab-content-wrapper no-padding">
+          @if (activeRequirementsTab === 'Materials') {
+            <div class="content-header">
+              <h3>Required Materials</h3>
+              <button class="add-new-btn" type="button" (click)="addMaterialRow()">Add Material</button>
+            </div>
+            <div class="material-scroll-area">
+              <table class="modal-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of editableMaterials; let index = index">
+                    <td>
+                      <input class="requirement-input" [(ngModel)]="item.item" placeholder="Material name">
+                    </td>
+                    <td>
+                      <input class="requirement-input" [(ngModel)]="item.quantity" placeholder="Quantity">
+                    </td>
+                    <td class="actions-cell">
+                      <button type="button" class="action-round-btn delete" (click)="removeMaterialRow(index)">−</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (activeRequirementsTab === 'Labour') {
+            <div class="labour-edit-list">
+              <div class="labour-edit-item">
+                <div>
+                  <p class="labour-edit-label">Technicians</p>
+                  <p class="labour-edit-value">How many technicians are needed</p>
+                </div>
+                <input class="requirement-input narrow" type="number" min="0" [(ngModel)]="editableLabour.technicians">
+              </div>
+              <div class="labour-edit-item">
+                <div>
+                  <p class="labour-edit-label">Helpers</p>
+                  <p class="labour-edit-value">How many helpers are needed</p>
+                </div>
+                <input class="requirement-input narrow" type="number" min="0" [(ngModel)]="editableLabour.helpers">
+              </div>
+              <div class="labour-edit-item">
+                <div>
+                  <p class="labour-edit-label">Duration</p>
+                  <p class="labour-edit-value">Estimated installation duration</p>
+                </div>
+                <input class="requirement-input narrow" type="text" [(ngModel)]="editableLabour.duration" placeholder="e.g. 4 hours">
+              </div>
+            </div>
+          }
+        </div>
+
+        <footer class="modal-footer changes-footer">
+          <button class="modal-btn cancel" (click)="closeMakeChangesModal()">Cancel</button>
+          <button class="modal-btn save-changes" (click)="submitRequirements()" [disabled]="isSubmitting">Save Changes</button>
+        </footer>
+      </div>
+    </div>
+  }
+</div>
+  

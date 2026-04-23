@@ -1,0 +1,161 @@
+<div class="review-container" *ngIf="report">
+  <div class="back-navigation">
+    <a class="back-btn" (click)="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to Service Reports
+    </a>
+  </div>
+
+  <header class="page-header">
+    <h1>Service Report Review #{{ report.id.replace('#', '') }}</h1>
+  </header>
+
+  <section class="summary-cards">
+    <div class="summary-card">
+      <div class="card-icon customer-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Customer</p>
+        <p class="value">{{ report.customerInfo.name }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon location-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Location</p>
+        <p class="value">{{ report.location }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon date-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Service Date</p>
+        <p class="value">{{ report.serviceDate }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon product-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Product Type</p>
+        <p class="value">{{ report.productType }}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="content-grid">
+    <section class="card">
+      <div class="card-header"><h2>Customer Information</h2></div>
+      <div class="card-body">
+        <div class="info-row">
+          <div>
+            <p class="info-label">Full Name</p>
+            <p class="info-value">{{ report.customerInfo.name }}</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <div>
+            <p class="info-label">Phone Number</p>
+            <p class="info-value">{{ report.customerInfo.phone }}</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <div>
+            <p class="info-label">Email Address</p>
+            <p class="info-value">{{ report.customerInfo.email }}</p>
+          </div>
+        </div>
+        <div class="info-row">
+          <div>
+            <p class="info-label">Address</p>
+            <p class="info-value">{{ report.customerInfo.address }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>Required Materials</h2></div>
+      <div class="card-body">
+        <table class="materials-table">
+          <thead>
+            <tr>
+              <th>ITEM</th>
+              <th>QUANTITY</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let material of report.requiredMaterials">
+              <td>{{ material.item }}</td>
+              <td>{{ material.quantity }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="card full-width-card">
+    <div class="card-header"><h2>Service Details</h2></div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div>
+          <p class="meta-label">Service Team</p>
+          <p class="meta-value">{{ report.serviceDetails.team }}</p>
+        </div>
+        <div>
+          <p class="meta-label">Date</p>
+          <p class="meta-value">{{ report.serviceDetails.date }}</p>
+        </div>
+        <div>
+          <p class="meta-label">Time</p>
+          <p class="meta-value">{{ report.serviceDetails.time }}</p>
+        </div>
+      </div>
+      <p class="section-label">Service Note</p>
+      <p class="notes-text">{{ report.serviceDetails.note }}</p>
+    </div>
+  </section>
+
+  <section class="card full-width-card">
+    <div class="card-header"><h2>Review</h2></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label for="review-notes">Notes</label>
+        <textarea id="review-notes" placeholder="Add any comment or specific instructions.." [(ngModel)]="reviewNotes"></textarea>
+      </div>
+    </div>
+    <div class="card-footer actions-footer">
+      <button class="footer-btn approve" (click)="completeReview()" [disabled]="isLoading">
+        <span class="btn-text">{{ isLoading ? 'Processing...' : 'Complete Review' }}</span>
+      </button>
+    </div>
+  </section>
+</div>
+
+<div class="review-container" *ngIf="isLoading && !report">
+  <div class="summary-card" style="margin-bottom: 16px;">
+    <div class="card-content">
+      <p class="label">Loading</p>
+      <p class="value">Fetching service report data...</p>
+    </div>
+  </div>
+</div>
+
+<div class="review-container" *ngIf="error">
+  <div class="summary-card" style="margin-bottom: 16px; border-left: 4px solid #ef4444;">
+    <div class="card-content">
+      <p class="label">Error</p>
+      <p class="value">{{ error }}</p>
+      <button class="footer-btn changes" style="margin-top: 12px;" (click)="loadServiceReport()">
+        <span class="btn-text">Retry</span>
+      </button>
+    </div>
+  </div>
+</div>
