@@ -71,8 +71,8 @@
       <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
         <option value="ALL">All Status</option>
         <option value="ONGOING">Ongoing</option>
-        <option value="SCHEDULED">Scheduled</option>
-        <option value="INSPECTED">Inspected</option>
+        <option value="INSPECTION_SCHEDULED">Scheduled</option>
+        <option value="REPORT_RECORDED">Inspected</option>
       </select>
       <button class="date-btn" (click)="datePicker.showPicker()">
         Set Date

@@ -44,7 +44,13 @@
   <!-- CALENDAR CARD -->
   <div class="calendar-card" *ngIf="!isLoading && !loadError && !isConfirmed">
     <p class="welcome-back">Welcome Back {{ customerName }} !</p>
-    <h2 class="calendar-title">Schedule Inspection</h2>
+    <h2 class="calendar-title">
+      {{ mode === 'reschedule' ? 'Reschedule Inspection' : 'Schedule Inspection' }}
+    </h2>
+    
+    <div *ngIf="mode === 'reschedule'" style="background:#fef3c7;border:1px solid #fcd34d;padding:12px 16px;margin:16px 0;border-radius:6px;font-size:14px;color:#92400e;">
+      <strong>ℹ️ Note:</strong> You can reschedule up to 1 day before your current inspection date. Choose a new date from the calendar below.
+    </div>
 
     <div class="calendar-grid">
       <div class="day-header" *ngFor="let d of weekDays">{{ d }}</div>
@@ -105,16 +111,16 @@
   <!-- CONFIRM BUTTON -->
   <button class="confirm-btn" *ngIf="selectedDay && !isConfirmed"
     (click)="confirm()" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Confirming...' : 'Confirm' }}
+    {{ isSubmitting ? (mode === 'reschedule' ? 'Rescheduling...' : 'Confirming...') : (mode === 'reschedule' ? 'Confirm Reschedule' : 'Confirm') }}
   </button>
 
   <!-- SUCCESS STATE -->
   <div class="success-card" *ngIf="isConfirmed">
     <div class="success-tick">✓</div>
-    <h2>Inspection Scheduled!</h2>
+    <h2>{{ mode === 'reschedule' ? 'Inspection Rescheduled!' : 'Inspection Scheduled!' }}</h2>
     <p class="success-date">{{ formattedSelectedDate }}</p>
     <p class="success-weekday">{{ selectedWeekday }}</p>
-    <div class="success-status">Status: Inspection Scheduled</div>
+    <div class="success-status">Status: Inspection {{ mode === 'reschedule' ? 'Rescheduled' : 'Scheduled' }}</div>
     <p class="success-msg">
       A confirmation email has been sent to you.<br>
       You will receive a reminder the day before your inspection.<br>

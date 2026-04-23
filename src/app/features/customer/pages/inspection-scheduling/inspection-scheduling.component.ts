@@ -26,6 +26,7 @@ export class InspectionSchedulingComponent implements OnInit {
 
   customerName  = 'Customer';
   ticketId      = '';
+  mode          = 'scheduling'; // 'scheduling' or 'reschedule'
   selectedDay:  CalendarDay | null = null;
   isConfirmed   = false;
   isLoading     = true;
@@ -33,6 +34,7 @@ export class InspectionSchedulingComponent implements OnInit {
   loadError     = '';
   popupMessage  = '';
   showPopup     = false;
+  currentScheduledDate: string = ''; // For reschedule mode
 
   startOffset:  any[] = [];
   weekDays      = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -47,8 +49,10 @@ export class InspectionSchedulingComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const ticketId = params['ticketId'];
+      const mode = params['mode'];
       if (ticketId) {
         this.ticketId = ticketId;
+        this.mode = mode || 'scheduling';
         this.loadCalendar(ticketId);
       } else {
         this.isLoading = false;
@@ -61,12 +65,17 @@ export class InspectionSchedulingComponent implements OnInit {
     this.isLoading = true;
     this.ticketService.getAvailableDates(ticketId).subscribe({
       next: (data: any) => {
-        // If already scheduled show confirmed state
-        if (data.alreadyScheduled) {
+        // If already scheduled show confirmed state (but not if in reschedule mode)
+        if (data.alreadyScheduled && this.mode !== 'reschedule') {
           this.isConfirmed = true;
           this.isLoading   = false;
           this.cdr.detectChanges();
           return;
+        }
+
+        // Store current scheduled date for reschedule mode
+        if (data.alreadyScheduled && this.mode === 'reschedule') {
+          this.currentScheduledDate = data.alreadyScheduled;
         }
 
         this.calendarDays = data.calendar.map((d: any) => ({
@@ -156,7 +165,12 @@ export class InspectionSchedulingComponent implements OnInit {
     if (!this.selectedDay || !this.ticketId) return;
     this.isSubmitting = true;
 
-    this.ticketService.confirmScheduling(this.ticketId, this.selectedDay.date).subscribe({
+    // Use reschedule endpoint if in reschedule mode, otherwise use confirmScheduling
+    const serviceCall = this.mode === 'reschedule'
+      ? this.ticketService.rescheduleInspection(this.ticketId, this.selectedDay.date)
+      : this.ticketService.confirmScheduling(this.ticketId, this.selectedDay.date);
+
+    serviceCall.subscribe({
       next: () => {
         this.isSubmitting = false;
         this.isConfirmed  = true;
@@ -164,7 +178,7 @@ export class InspectionSchedulingComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.showPopupMessage(err.message || 'Failed to confirm scheduling. Please try again.');
+        this.showPopupMessage(err.message || 'Failed to confirm. Please try again.');
         // Reload calendar in case slots changed
         this.loadCalendar(this.ticketId);
       }

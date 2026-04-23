@@ -36,6 +36,11 @@ export class InspectionTicketService {
       .pipe(catchError(this.handleError));
   }
 
+  rescheduleInspection(ticketId: string, newDate: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/reschedule/${ticketId}`, { newDate })
+      .pipe(catchError(this.handleError));
+  }
+
   getPendingVerification(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/pending`)
       .pipe(catchError(this.handleError));
