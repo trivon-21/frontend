@@ -81,6 +81,23 @@ export interface ReactivationRequestsResponse {
   };
 }
 
+export interface SuperAdminDashboardSummary {
+  users: {
+    total: number;
+    active: number;
+    deactivated: number;
+    pendingReactivationRequests: number;
+  };
+  operations: {
+    totalOrders: number;
+    pendingOrders: number;
+    totalInquiries: number;
+    openInquiries: number;
+    totalServiceRequests: number;
+    openServiceRequests: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -163,6 +180,12 @@ export class SuperAdminService {
     params = params.set('page', page.toString());
     params = params.set('limit', limit.toString());
     return this.apiService.get<ReactivationRequestsResponse>('/super-admin/reactivation-requests', params);
+  }
+
+  getDashboardSummary(): Observable<{ message: string; data: SuperAdminDashboardSummary }> {
+    return this.apiService.get<{ message: string; data: SuperAdminDashboardSummary }>(
+      '/super-admin/dashboard-summary'
+    );
   }
 
   /**

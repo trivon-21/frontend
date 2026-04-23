@@ -3,10 +3,59 @@
   <h2 class="page-title">Dashboard</h2>
 </div>
 
-<!-- Dashboard Content -->
-<div class="dashboard-overview">
+<div *ngIf="loading" class="state-box">Loading dashboard summary...</div>
+<div *ngIf="!loading && error" class="state-box state-error">{{ error }}</div>
+
+<div class="dashboard-overview" *ngIf="!loading && data">
   <div class="overview-card">
-    <h3>Welcome to Admin Dashboard</h3>
-    <p>Use the sidebar to navigate to different sections</p>
+    <h3>Users</h3>
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-label">Total</span>
+        <span class="metric-value">{{ data.users.total }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Active</span>
+        <span class="metric-value">{{ data.users.active }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Deactivated</span>
+        <span class="metric-value">{{ data.users.deactivated }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Pending Reactivations</span>
+        <span class="metric-value">{{ data.users.pendingReactivationRequests }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="overview-card">
+    <h3>Operations</h3>
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-label">Total Orders</span>
+        <span class="metric-value">{{ data.operations.totalOrders }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Pending Orders</span>
+        <span class="metric-value">{{ data.operations.pendingOrders }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Total Inquiries</span>
+        <span class="metric-value">{{ data.operations.totalInquiries }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Open Inquiries</span>
+        <span class="metric-value">{{ data.operations.openInquiries }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Total Service Requests</span>
+        <span class="metric-value">{{ data.operations.totalServiceRequests }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Open Service Requests</span>
+        <span class="metric-value">{{ data.operations.openServiceRequests }}</span>
+      </div>
+    </div>
   </div>
 </div>

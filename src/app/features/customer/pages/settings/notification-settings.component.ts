@@ -1,15 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface NotificationPreference {
-  orderUpdates: boolean;
-  inquiryResponses: boolean;
-  serviceRequests: boolean;
-  feedbackConfirmation: boolean;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-}
+import { NotificationPreferences, NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-notification-settings',
@@ -41,7 +33,7 @@ interface NotificationPreference {
         <label class="setting-item">
           <input type="checkbox" [(ngModel)]="preferences.orderUpdates" (change)="savePreferences()" />
           <span class="setting-label">
-            <strong>📦 Order Updates</strong>
+            <strong>Order Updates</strong>
             <span class="setting-desc">Updates about your orders and deliveries</span>
           </span>
         </label>
@@ -49,7 +41,7 @@ interface NotificationPreference {
         <label class="setting-item">
           <input type="checkbox" [(ngModel)]="preferences.inquiryResponses" (change)="savePreferences()" />
           <span class="setting-label">
-            <strong>💬 Inquiry Responses</strong>
+            <strong>Inquiry Responses</strong>
             <span class="setting-desc">Responses to your support inquiries</span>
           </span>
         </label>
@@ -57,7 +49,7 @@ interface NotificationPreference {
         <label class="setting-item">
           <input type="checkbox" [(ngModel)]="preferences.serviceRequests" (change)="savePreferences()" />
           <span class="setting-label">
-            <strong>🔧 Service Requests</strong>
+            <strong>Service Requests</strong>
             <span class="setting-desc">Updates on your service requests</span>
           </span>
         </label>
@@ -65,7 +57,7 @@ interface NotificationPreference {
         <label class="setting-item">
           <input type="checkbox" [(ngModel)]="preferences.feedbackConfirmation" (change)="savePreferences()" />
           <span class="setting-label">
-            <strong>⭐ Feedback Confirmation</strong>
+            <strong>Feedback Confirmation</strong>
             <span class="setting-desc">When your feedback has been received</span>
           </span>
         </label>
@@ -168,7 +160,7 @@ interface NotificationPreference {
   `]
 })
 export class NotificationSettingsComponent implements OnInit {
-  preferences: NotificationPreference = {
+  preferences: NotificationPreferences = {
     orderUpdates: true,
     inquiryResponses: true,
     serviceRequests: true,
@@ -179,20 +171,33 @@ export class NotificationSettingsComponent implements OnInit {
 
   saved = false;
 
+  constructor(private notificationService: NotificationService) {}
+
   ngOnInit(): void {
     this.loadPreferences();
   }
 
   loadPreferences(): void {
-    const saved = localStorage.getItem('notificationPreferences');
-    if (saved) {
-      this.preferences = JSON.parse(saved);
-    }
+    this.notificationService.getPreferences().subscribe({
+      next: (res) => {
+        this.preferences = res.data;
+      },
+      error: () => {
+        // Keep defaults if server load fails.
+      }
+    });
   }
 
   savePreferences(): void {
-    localStorage.setItem('notificationPreferences', JSON.stringify(this.preferences));
-    this.saved = true;
-    setTimeout(() => this.saved = false, 3000);
+    this.notificationService.updatePreferences(this.preferences).subscribe({
+      next: (res) => {
+        this.preferences = res.data;
+        this.saved = true;
+        setTimeout(() => this.saved = false, 3000);
+      },
+      error: () => {
+        this.saved = false;
+      }
+    });
   }
 }

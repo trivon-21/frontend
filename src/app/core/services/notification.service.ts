@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 export interface Notification {
   id: string;
@@ -11,87 +12,97 @@ export interface Notification {
   actionUrl?: string;
 }
 
+export interface NotificationPreferences {
+  orderUpdates: boolean;
+  inquiryResponses: boolean;
+  serviceRequests: boolean;
+  feedbackConfirmation: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private notifications$ = new BehaviorSubject<Notification[]>([]);
-  private unreadCount$ = new BehaviorSubject<number>(0);
+  private notificationsSubject = new BehaviorSubject<Notification[]>([]);
+  private unreadCountSubject = new BehaviorSubject<number>(0);
 
-  constructor() {
+  constructor(private api: ApiService) {
     this.loadNotifications();
   }
 
   getNotifications(): Observable<Notification[]> {
-    return this.notifications$.asObservable();
+    return this.notificationsSubject.asObservable();
   }
 
   getUnreadCount(): Observable<number> {
-    return this.unreadCount$.asObservable();
+    return this.unreadCountSubject.asObservable();
   }
 
-  addNotification(notification: Omit<Notification, 'id' | 'createdAt'>): void {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
-
-    const current = this.notifications$.value;
-    this.notifications$.next([newNotification, ...current]);
-    this.updateUnreadCount();
-
-    // Save to localStorage
-    this.saveNotifications();
+  createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): void {
+    this.api.post<{ data: Notification }>('/customer/notifications', notification).subscribe({
+      next: () => this.loadNotifications(),
+      error: (err) => console.error('Failed to create notification', err)
+    });
   }
 
   markAsRead(id: string): void {
-    const notifications = this.notifications$.value.map(n =>
-      n.id === id ? { ...n, read: true } : n
-    );
-    this.notifications$.next(notifications);
-    this.updateUnreadCount();
-    this.saveNotifications();
+    this.api.patch(`/customer/notifications/${id}/read`, {}).subscribe({
+      next: () => this.loadNotifications(),
+      error: (err) => console.error('Failed to mark notification as read', err)
+    });
   }
 
   markAllAsRead(): void {
-    const notifications = this.notifications$.value.map(n => ({ ...n, read: true }));
-    this.notifications$.next(notifications);
-    this.updateUnreadCount();
-    this.saveNotifications();
+    this.api.patch('/customer/notifications/read-all', {}).subscribe({
+      next: () => this.loadNotifications(),
+      error: (err) => console.error('Failed to mark all notifications as read', err)
+    });
   }
 
   clearNotifications(): void {
-    this.notifications$.next([]);
-    this.updateUnreadCount();
-    this.saveNotifications();
+    this.api.delete('/customer/notifications').subscribe({
+      next: () => this.loadNotifications(),
+      error: (err) => console.error('Failed to clear notifications', err)
+    });
   }
 
   deleteNotification(id: string): void {
-    const notifications = this.notifications$.value.filter(n => n.id !== id);
-    this.notifications$.next(notifications);
-    this.updateUnreadCount();
-    this.saveNotifications();
+    this.api.delete(`/customer/notifications/${id}`).subscribe({
+      next: () => this.loadNotifications(),
+      error: (err) => console.error('Failed to delete notification', err)
+    });
+  }
+
+  getPreferences(): Observable<{ data: NotificationPreferences }> {
+    return this.api.get<{ data: NotificationPreferences }>('/customer/notifications/preferences');
+  }
+
+  updatePreferences(preferences: NotificationPreferences): Observable<{ data: NotificationPreferences }> {
+    return this.api.put<{ data: NotificationPreferences }>('/customer/notifications/preferences', preferences);
   }
 
   private updateUnreadCount(): void {
-    const count = this.notifications$.value.filter(n => !n.read).length;
-    this.unreadCount$.next(count);
-  }
-
-  private saveNotifications(): void {
-    localStorage.setItem('notifications', JSON.stringify(this.notifications$.value));
+    const count = this.notificationsSubject.value.filter((n) => !n.read).length;
+    this.unreadCountSubject.next(count);
   }
 
   private loadNotifications(): void {
-    const saved = localStorage.getItem('notifications');
-    if (saved) {
-      this.notifications$.next(JSON.parse(saved));
-    }
-    this.updateUnreadCount();
+    this.api.get<{ data: Notification[] }>('/customer/notifications').subscribe({
+      next: (response) => {
+        this.notificationsSubject.next(response.data || []);
+        this.updateUnreadCount();
+      },
+      error: (err) => {
+        console.error('Failed to load notifications', err);
+        this.notificationsSubject.next([]);
+        this.updateUnreadCount();
+      }
+    });
   }
 
-  // Helper methods for specific notification types
+  // Helper wrappers used by existing call sites.
   notifyOrderUpdate(orderRef: string, status: string): void {
-    this.addNotification({
+    this.createNotification({
       type: 'order',
       title: `Order ${orderRef} Updated`,
       message: `Your order status is now: ${status}`,
@@ -101,7 +112,7 @@ export class NotificationService {
   }
 
   notifyInquiryResponse(inquiryId: string): void {
-    this.addNotification({
+    this.createNotification({
       type: 'inquiry',
       title: 'New Response',
       message: 'You have a new response to your inquiry',
@@ -111,7 +122,7 @@ export class NotificationService {
   }
 
   notifyServiceRequest(requestId: string, status: string): void {
-    this.addNotification({
+    this.createNotification({
       type: 'service',
       title: 'Service Request Update',
       message: `Your service request status: ${status}`,
@@ -121,7 +132,7 @@ export class NotificationService {
   }
 
   notifyFeedback(message: string): void {
-    this.addNotification({
+    this.createNotification({
       type: 'feedback',
       title: 'Feedback Submitted',
       message,
@@ -130,7 +141,7 @@ export class NotificationService {
   }
 
   notifyGeneral(title: string, message: string): void {
-    this.addNotification({
+    this.createNotification({
       type: 'general',
       title,
       message,

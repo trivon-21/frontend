@@ -107,26 +107,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.stat-icon--green {
-  background: #d4f7e7;
-}
-
-.stat-icon--pink {
-  background: #fde8e8;
-}
-
-.stat-icon--purple {
-  background: #ede8ff;
-}
-
-.stat-icon--orange {
-  background: #fff0d0;
-}
-
-.stat-icon--red {
-  background: #fde8e8;
+  background: #e8f5ee;
+  color: #1f5b45;
 }
 
 .more-btn {
@@ -385,18 +367,18 @@
 }
 
 .status-badge--pending {
-  background: #ede8ff;
-  color: #6b5dd3;
+  background: #eef2f1;
+  color: #566463;
 }
 
 .status-badge--returned {
-  background: #fde8e8;
-  color: #d64040;
+  background: #eef2f1;
+  color: #566463;
 }
 
 .status-badge--rejected {
-  background: #fde8e8;
-  color: #d64040;
+  background: #eef2f1;
+  color: #566463;
 }
 
 /* ── Right Panel ── */

@@ -23,7 +23,7 @@ import { NotificationService, Notification } from '../../../../core/services/not
 
       <!-- Empty State -->
       <div *ngIf="notifications.length === 0" class="empty-state">
-        <span class="empty-icon">🔔</span>
+        <span class="empty-icon">NT</span>
         <h2>No notifications yet</h2>
         <p>You'll see all your notifications here</p>
       </div>
@@ -290,14 +290,14 @@ export class NotificationsPageComponent implements OnInit {
   }
 
   getNotificationIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      order: '📦',
-      inquiry: '💬',
-      service: '🔧',
-      feedback: '⭐',
-      general: '🔔'
+    const labels: { [key: string]: string } = {
+      order: 'OR',
+      inquiry: 'IN',
+      service: 'SV',
+      feedback: 'FB',
+      general: 'NT'
     };
-    return icons[type] || '🔔';
+    return labels[type] || 'NT';
   }
 
   getTypeName(type: string): string {

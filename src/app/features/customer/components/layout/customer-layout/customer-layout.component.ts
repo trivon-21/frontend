@@ -108,13 +108,13 @@ export class CustomerLayoutComponent implements OnInit {
   }
 
   getNotificationIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      order: '📦',
-      inquiry: '💬',
-      service: '🔧',
-      feedback: '⭐',
-      general: '🔔'
+    const labels: { [key: string]: string } = {
+      order: 'OR',
+      inquiry: 'IN',
+      service: 'SV',
+      feedback: 'FB',
+      general: 'NT'
     };
-    return icons[type] || '🔔';
+    return labels[type] || 'NT';
   }
 }
