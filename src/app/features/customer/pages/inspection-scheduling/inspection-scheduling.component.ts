@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { InspectionTicketService } from '../../services/inspection-ticket.service';
+import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
 
 interface CalendarDay {
   date:        string;

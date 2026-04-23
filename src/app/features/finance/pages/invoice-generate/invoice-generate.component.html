@@ -12,6 +12,14 @@
     </div>
   </div>
 
+  <div *ngIf="!isLoading && filteredInvoices.length === 0" class="empty-state">
+    <p>🎉 Nothing yet to generate</p>
+  </div>
+
+  <div *ngIf="isLoading" class="empty-state">
+    <p>Loading...</p>
+  </div>
+
   <div class="invoices-grid">
     <div class="invoice-card" *ngFor="let invoice of filteredInvoices">
 

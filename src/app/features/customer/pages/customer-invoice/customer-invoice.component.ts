@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { InvoiceService } from '../../services/invoice.service';
+import { InvoiceService } from '../../../finance/services/invoice.service';
 
 @Component({
   selector: 'app-customer-invoice',

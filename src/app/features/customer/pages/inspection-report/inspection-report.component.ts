@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
 
 interface Room {
   name: string;
