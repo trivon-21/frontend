@@ -1,0 +1,61 @@
+<div class="assigned-jobs-container">
+  <div class="header-actions">
+    <div class="search-box">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        type="text"
+        placeholder="Search by ticket, customer..."
+        [(ngModel)]="searchQuery"
+        (input)="filterTasks()"
+      >
+    </div>
+
+    <div class="filters">
+      <div class="filter-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span>Filters:</span>
+      </div>
+      <select [(ngModel)]="statusFilter" (change)="filterTasks()">
+        <option value="All">All</option>
+        <option value="Assigned">Assigned</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+        <option value="On Hold">On Hold</option>
+      </select>
+      <button class="clear-filters" (click)="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+
+  <div class="jobs-list">
+    <div class="job-card" *ngFor="let task of filteredTasks">
+      <div class="job-info">
+        <div class="job-id-title">
+          <h3>#{{ task.id }} - {{ task.type }}</h3>
+          <p class="customer-name">{{ task.customer?.name || task.customer }}</p>
+        </div>
+
+        <div class="job-details-grid">
+          <div class="detail-item">
+            <label>Location</label>
+            <span>{{ task.location }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Type</label>
+            <span>{{ task.serviceType }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="job-status-action">
+        <span class="status-badge" [ngClass]="statusClass(task.status)">
+          {{ displayStatus(task.status) }}
+        </span>
+        <button class="view-btn" [routerLink]="['/service-team/service-details', task.id]">View</button>
+      </div>
+    </div>
+
+    <div class="no-results" *ngIf="filteredTasks.length === 0">
+      <p>No jobs found matching your criteria.</p>
+    </div>
+  </div>
+</div>

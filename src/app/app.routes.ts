@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { LayoutComponent } from './shared/components/layout/layout.component';
+import { LayoutComponent as TechnicianLayoutComponent } from './features/technician/components/layout/layout.component';
+import { LayoutComponent as ServiceTeamLayoutComponent } from './features/service-team/components/layout/layout.component';
 import { MainTechnicianDashboardComponent } from './features/technician/pages/main-technician-dashboard/main-technician-dashboard.component';
 import { MainTechnicianInspectionDetailsComponent } from './features/technician/pages/main-technician-inspection-details/main-technician-inspection-details.component';
 import { MainTechnicianInspectionReportsComponent } from './features/technician/pages/main-technician-inspection-report/main-technician-inspection-report.component';
@@ -14,13 +15,21 @@ import { MainTechnicianInspectionsComponent } from './features/technician/pages/
 import { MainTechnicianServiceHistoryComponent } from './features/technician/pages/main-technician-service-history/main-technician-service-history.component';
 import { MainTechnicianServiceReportsComponent } from './features/technician/pages/main-technician-service-report/main-technician-service-report.component';
 import { MainTechnicianServiceReportReviewComponent } from './features/technician/pages/main-technician-service-report-review/main-technician-service-report-review.component';
+import { ServiceTeamDashboardComponent } from './features/service-team/pages/service-team-dashboard/service-team-dashboard.component';
+import { ServiceTeamAssignedJobsComponent } from './features/service-team/pages/service-team-assigned-jobs/service-team-assigned-jobs.component';
+import { ServiceTeamTeamDetailsComponent } from './features/service-team/pages/service-team-team-details/service-team-team-details.component';
+import { ServiceTeamServiceDetailsComponent } from './features/service-team/pages/service-team-service-details/service-team-service-details.component';
+import { ServiceTeamServiceHistoryComponent } from './features/service-team/pages/service-team-service-history/service-team-service-history.component';
+import { LandingPage } from './features/landing-page/landing-page';
+import { LoginPage } from './features/login-page/login-page';
 
 export const routes: Routes = [
+  { path: '', component: LandingPage, pathMatch: 'full' },
+  { path: 'login', component: LoginPage, pathMatch: 'full' },
   {
     path: '',
-    component: LayoutComponent,
+    component: TechnicianLayoutComponent,
     children: [
-      { path: '', redirectTo: 'main-technician-dashboard', pathMatch: 'full' },
       { path: 'main-technician-dashboard', component: MainTechnicianDashboardComponent },
       { path: 'main-technician-inspections', component: MainTechnicianInspectionsComponent },
       { path: 'main-technician-inspection-report-review/:id', component: MainTechnicianInspectionReportReviewComponent },
@@ -37,5 +46,38 @@ export const routes: Routes = [
       { path: 'main-technician-service-reports', component: MainTechnicianServiceReportsComponent },
       { path: 'main-technician-service-report-review/:id', component: MainTechnicianServiceReportReviewComponent },
     ]
+  },
+  {
+    path: 'service-team',
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+  // Backward compatibility routes
+  {
+    path: 'service-dashboard',
+    redirectTo: 'service-team/dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: 'service-team-dashboard',
+    redirectTo: 'service-team/dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: 'service-team-assigned-jobs',
+    redirectTo: 'service-team/assigned-jobs',
+    pathMatch: 'full'
+  },
+  {
+    path: 'service-team-team-details',
+    redirectTo: 'service-team/team-details',
+    pathMatch: 'full'
   }
 ];
