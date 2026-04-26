@@ -1,112 +1,247 @@
-<div class="inventory-dashboard">
+<div class="inventory-dashboard" *ngIf="data">
   <!-- Header Section -->
   <div class="welcome-banner">
     <div class="banner-content">
-      <h1 class="welcome-title">Welcome Back Inventory Manager {{ data?.managerName }}!</h1>
-      <p class="current-date" *ngIf="data">
-        Today: <span>{{ formatDate(data.currentDate) }}</span>
+      <div class="title-row">
+        <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
+        <span class="status-badge">
+          <span class="dot"></span>
+          {{ data.status }}
+        </span>
+      </div>
+      <p class="subtitle">
+        {{ formatDate(data.currentDate) }} &nbsp; Morning Shift (06:00 - 14:00)
       </p>
     </div>
     <div class="header-actions">
-      <button class="action-btn procurement" (click)="onProcurement()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+      <button class="action-btn-outline" (click)="onScanQR()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+          <path d="M7 12h10M12 7v10" />
         </svg>
-        Procurement
+        Scan QR/Barcode
       </button>
-      <button class="action-btn find-serial" (click)="onFindSerial()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="action-btn-outline" (click)="onFindSerial()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.3-4.3" />
         </svg>
         Find Serial
       </button>
-      <button class="action-btn lend-item" (click)="onLendItem()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-          <path d="M3 6h18" />
-          <path d="M16 10a4 4 0 0 1-8 0" />
+      <button class="action-btn-outline" (click)="onLendItem()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m15.5 7.5 2.3 2.3a1 1 0 0 1 0 1.4L12 17l-5-5 5.8-5.8a1 1 0 0 1 1.4 0l1.3 1.3" />
+          <path d="m7 12-3 3" />
+          <path d="m10 15-3 3" />
         </svg>
         Lend Item
+      </button>
+      <button class="action-btn-primary" (click)="onProcurement()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+        New Procurement
       </button>
     </div>
   </div>
 
-  <!-- Summary Section -->
-  <div class="summary-section">
-    <h2 class="summary-title">Summary</h2>
-    <div class="summary-grid" *ngIf="data">
-      <div class="summary-card">
-        <span class="card-label">Pending Requests</span>
-        <span class="card-value">{{ data.stats.pendingRequests }}</span>
+  <!-- Summary Cards Section -->
+  <div class="summary-grid">
+    <!-- Material Reservations -->
+    <div class="summary-card gold">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Material Reservations</span>
+          <span class="card-value">{{ data.stats.materialReservations.total }}</span>
+        </div>
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+        </div>
       </div>
-      <div class="summary-card">
-        <span class="card-label">Dispatch Ready</span>
-        <span class="card-value">{{ data.stats.dispatchReady }}</span>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.materialReservations.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
       </div>
-      <div class="summary-card">
-        <span class="card-label">Tools Checked Out</span>
-        <span class="card-value">{{ data.stats.toolsCheckedOut }}</span>
+    </div>
+
+    <!-- Dispatch Queue -->
+    <div class="summary-card blue">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Dispatch Queue</span>
+          <span class="card-value">{{ data.stats.dispatchQueue.total }}</span>
+        </div>
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 18H3c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h3.19M15 18h2c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-3.19" />
+            <path d="M12 6V2l-4 4 4 4V6z" />
+            <path d="M12 18v4l4-4-4-4v4z" />
+          </svg>
+        </div>
       </div>
-      <div class="summary-card">
-        <span class="card-label">Low Stock Alerts</span>
-        <span class="card-value">{{ data.stats.lowStockAlerts }}</span>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.dispatchQueue.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Health -->
+    <div class="summary-card green">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Asset Health</span>
+          <span class="card-value">{{ data.stats.assetHealth.total }}</span>
+        </div>
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.assetHealth.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Alerts -->
+    <div class="summary-card red">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Stock Alerts</span>
+          <span class="card-value">{{ data.stats.stockAlerts.total }}</span>
+        </div>
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.stockAlerts.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content Grid -->
-  <div class="dashboard-grid" *ngIf="data">
-    <!-- Recent Activity Feed -->
-    <div class="grid-card activity-feed">
+  <!-- Main Grid Content -->
+  <div class="dashboard-main-grid">
+    <!-- Left Column: Activity Feed -->
+    <div class="content-card activity-card">
       <div class="card-header">
-        <h3 class="card-title">Recent Activity Feed</h3>
+        <h2 class="card-title">Recent Activity</h2>
+        <a href="#" class="view-all-link">View All</a>
       </div>
-      <div class="activity-list">
-        <div *ngFor="let item of data.recentActivity" class="activity-item">
-          <div class="activity-icon-wrap" [ngClass]="item.type">
-            <svg *ngIf="item.type === 'return' || item.type === 'dispatch' || item.type === 'grn'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m7.5 4.27 9 5.15" />
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-              <path d="m3.3 7 8.7 5 8.7-5" />
-              <path d="M12 22V12" />
-            </svg>
-            <svg *ngIf="item.type === 'request'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            <svg *ngIf="item.type === 'alert'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
+      <div class="timeline-container">
+        <div *ngFor="let activity of data.recentActivity" class="timeline-item">
+          <div class="timeline-line"></div>
+          <div class="timeline-marker" [ngClass]="activity.type">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 7l5 5 5-5" *ngIf="activity.type === 'return'" />
+              <path d="M17 17l-5-5-5 5" *ngIf="activity.type === 'dispatch'" />
+              <path d="M20 6L9 17l-5-5" *ngIf="activity.type === 'grn'" />
+              <path d="M12 19l7-7-7-7" *ngIf="activity.type === 'request'" />
+              <circle cx="12" cy="12" r="10" *ngIf="activity.type === 'alert'" />
             </svg>
           </div>
-          <div class="activity-info">
-            <p class="activity-text">{{ item.title }}</p>
-            <p class="activity-time">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              {{ item.timeAgo }}
-            </p>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <p class="activity-title">{{ activity.title }}</p>
+              <span class="activity-time">{{ activity.timeAgo }}</span>
+            </div>
+            <div class="activity-actions" *ngIf="activity.actionLabel">
+              <button class="activity-btn" (click)="onReorder(activity.id)">{{ activity.actionLabel }}</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Urgent Stock Alerts -->
-    <div class="grid-card stock-alerts">
-      <div class="card-header">
-        <h3 class="card-title">Urgent Stock Alerts</h3>
-      </div>
-      <div class="alerts-list">
-        <div *ngFor="let alert of data.stockAlerts" class="alert-item">
-          <div class="alert-info">
-            <p class="alert-name">{{ alert.itemName }}</p>
-            <p class="alert-status">{{ alert.remaining }}</p>
+    <!-- Right Column: Reorder & Logistics -->
+    <div class="side-column">
+      <!-- Reorder List -->
+      <div class="content-card reorder-card">
+        <div class="card-header">
+          <div class="title-with-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="error-icon">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
+            <h2 class="card-title">Reorder List</h2>
           </div>
-          <button class="reorder-link" (click)="onReorder(alert.id)">Reorder</button>
+          <span class="count-badge">{{ data.reorderList.length }} Items</span>
+        </div>
+        <div class="table-container">
+          <table class="reorder-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Avail</th>
+                <th>Rsvd</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of data.reorderList">
+                <td class="item-name">{{ item.itemName }}</td>
+                <td class="item-avail" [class.critical]="item.avail < item.rsvd">{{ item.avail }}</td>
+                <td class="item-rsvd" [class.warning]="item.avail <= item.rsvd">{{ item.rsvd }}</td>
+                <td>
+                  <button class="reorder-btn" [class.primary]="item.status === 'critical'" (click)="onReorder(item.id)">
+                    Reorder
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Today's Logistics -->
+      <div class="content-card logistics-card">
+        <div class="card-header">
+          <div class="title-with-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="info-icon">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <h2 class="card-title">Today's Logistics</h2>
+          </div>
+        </div>
+        <div class="logistics-content">
+          <div *ngFor="let item of data.logistics" class="logistics-item">
+            <div class="logistics-header">
+              <div class="logistics-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 17h4V5H2v12h3m15 0h1v-6.8a2 2 0 0 0-1.4-1.9L17 8h-3v11h2m-6 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0m10 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0" />
+                </svg>
+                {{ item.label }}
+              </div>
+              <div class="logistics-stats">
+                <span class="current">{{ item.current }}</span> / <span class="total">{{ item.total }}</span>
+              </div>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" [style.width]="getProgressBarWidth(item.current, item.total)"></div>
+            </div>
+            <p class="logistics-sub" *ngIf="item.subLabel">{{ item.subLabel }}</p>
+          </div>
         </div>
       </div>
     </div>

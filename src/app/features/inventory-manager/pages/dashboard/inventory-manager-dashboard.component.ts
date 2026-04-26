@@ -57,8 +57,11 @@ export class InventoryManagerDashboardComponent implements OnInit {
     }
   }
 
+  onScanQR(): void {
+    console.log('Open QR Scanner');
+  }
+
   onProcurement(): void {
-    // TODO: Navigate to procurement
     console.log('Navigate to Procurement');
   }
 
@@ -73,7 +76,10 @@ export class InventoryManagerDashboardComponent implements OnInit {
   }
 
   onReorder(alertId: string): void {
-    // TODO: Open reorder modal/form
-    console.log('Reorder for alert:', alertId);
+    console.log('Reorder for item:', alertId);
+  }
+
+  getProgressBarWidth(current: number, total: number): string {
+    return `${(current / total) * 100}%`;
   }
 }
