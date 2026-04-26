@@ -23,10 +23,10 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #3f6212;
+  background: var(--primary-main);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -46,7 +46,7 @@
   padding: 12px 0;
   font-size: 15px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   position: relative;
   display: flex;
@@ -55,7 +55,7 @@
 }
 
 .tab-btn.active {
-  color: #064e3b;
+  color: var(--primary-main);
 }
 
 .tab-btn.active::after {
@@ -65,12 +65,12 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: #064e3b;
+  background: var(--primary-main);
 }
 
 .badge {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   padding: 2px 8px;
   border-radius: 20px;
   font-size: 12px;
@@ -105,19 +105,19 @@
 .status-dot {
   width: 10px;
   height: 10px;
-  background: #22c55e;
+  background: var(--primary-main);
   border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 0 4px var(--primary-lighter);
 }
 
 .status-dot.warning {
-  background: #ef4444;
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  background: var(--error);
+  box-shadow: 0 0 0 4px var(--error-light);
 }
 
 .requester-name {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 4px 0 12px 0;
 }
 
@@ -131,7 +131,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 /* Materials List */
@@ -144,7 +144,7 @@
 .section-label {
   font-size: 11px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: 0.05em;
 }
 
@@ -158,13 +158,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .btn-more {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--info);
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -184,11 +184,11 @@
 .availability-status {
   font-size: 12px;
   font-weight: 600;
-  color: #16a34a;
+  color: var(--primary-main);
 }
 
 .availability-status.warning {
-  color: #dc2626;
+  color: var(--error);
 }
 
 .btn-allocate {

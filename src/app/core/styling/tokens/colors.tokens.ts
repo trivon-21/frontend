@@ -68,51 +68,51 @@ export interface ColorPalette {
  */
 const universalColors: ColorPalette = {
   primary: {
-    main: '#41603d',
-    hover: '#2d4428',
-    active: '#1a2a1f',
-    light: '#e6fbe7',
-    lighter: '#f0f7f0',
+    main: '#00843D',     // Vibrant Forest Green (Top Left)
+    hover: '#006B32',    // Derived Darker Green
+    active: '#1A2421',   // Darkest Green/Black (Top 2nd)
+    light: '#B9FBC0',    // Mint Green (Top 3rd)
+    lighter: '#E8FDF0',  // Pale Mint (Top Right)
   },
   secondary: {
-    main: '#16a34a',
-    hover: '#15803d',
-    light: '#dcfce7',
+    main: '#2D3139',     // Slate Gray (Middle Left)
+    hover: '#5C646D',    // Medium Slate (Middle 2nd)
+    light: '#D1D5DB',    // Light Gray (Middle 3rd)
   },
   semantic: {
-    success: '#22c55e',
-    successLight: '#dcfce7',
-    error: '#ef4444',
-    errorLight: '#fee2e2',
-    warning: '#f97316',
-    warningLight: '#fff7ed',
-    info: '#3b82f6',
+    success: '#00843D',
+    successLight: '#E8FDF0',
+    error: '#C20E0E',      // Vibrant Red (Bottom Left)
+    errorLight: '#FEF2F2', // Very Pale Red (Bottom 3rd)
+    warning: '#f59e0b',    // standard orange
+    warningLight: '#FECACA', // Pale Red/Pink (Bottom 2nd)
+    info: '#1D61FF',       // Vibrant Blue (Bottom Right)
     infoLight: '#eff6ff',
   },
   text: {
-    primary: '#1a1a1b',
-    secondary: '#4b5563',
-    muted: '#6b7280',
-    disabled: '#9ca3af',
+    primary: '#2D3139',    // Slate Gray (Middle Left)
+    secondary: '#5C646D',  // Medium Slate (Middle 2nd)
+    muted: '#9ca3af',
+    disabled: '#D1D5DB',   // Light Gray (Middle 3rd)
     inverse: '#ffffff',
   },
   backgrounds: {
-    page: '#f5f7f9',
+    page: '#F9FAFB',       // Off-White (Middle Right)
     card: '#ffffff',
-    input: '#f9fafb',
+    input: '#ffffff',
     hover: '#f3f4f6',
-    selected: '#eaf7ea',
+    selected: '#E8FDF0',
     disabled: '#e5e7eb',
   },
   borders: {
     light: '#e5e7eb',
-    medium: '#d0d5dd',
+    medium: '#D1D5DB',     // Light Gray (Middle 3rd)
     dark: '#9ca3af',
   },
   surface: {
     overlay: 'rgba(0, 0, 0, 0.4)',
-    elevation1: 'rgba(59, 90, 56, 0.02)',
-    elevation2: 'rgba(59, 90, 56, 0.04)',
+    elevation1: 'rgba(0, 132, 61, 0.02)',
+    elevation2: 'rgba(0, 132, 61, 0.04)',
   },
 };
 

@@ -120,20 +120,20 @@ h1 {
   background: transparent;
 }
 .btn.big {
-  padding: 14px 40px; /* Better proportions */
-  border-radius: 99px; /* Perfect pill */
-  background: #065f46; /* Unified Forest Green */
+  padding: 14px 40px;
+  border-radius: 99px;
+  background: var(--primary-main);
   color: var(--text-inverse);
   border: none;
   min-width: 200px;
   font-size: 16px;
-  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.2);
+  box-shadow: var(--shadow-medium);
   transition: all 0.2s;
 }
 .btn.big:hover { 
-  background: #044e3a; 
+  background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(6, 95, 70, 0.25);
+  box-shadow: var(--shadow-large);
 }
 .btn.big:disabled { opacity: 0.65; cursor: not-allowed; }
 

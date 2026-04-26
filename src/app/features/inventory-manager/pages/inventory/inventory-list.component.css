@@ -41,7 +41,7 @@
 }
 
 .btn-action.secondary {
-  background: #067647;
+  background: var(--secondary-main);
   color: white;
 }
 
@@ -79,7 +79,7 @@
 .search-box input:focus {
   border-color: var(--primary-main);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-lighter);
 }
 
 .filter-group {
@@ -107,7 +107,7 @@
 .btn-link {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--info);
   font-weight: 500;
   font-size: 14px;
   cursor: pointer;
@@ -127,8 +127,8 @@ table {
 th {
   text-align: left;
   padding: 20px 24px;
-  background: #f8fbff;
-  color: #64748b;
+  background: var(--background-page);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -146,7 +146,7 @@ td {
 .sku-cell {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .name-cell {
@@ -158,13 +158,13 @@ td {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  background: #ecfdf5;
-  color: #059669;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
 }
 
 .status-pill.bundle {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--background-hover);
+  color: var(--text-secondary);
 }
 
 .num-cell {
@@ -174,7 +174,7 @@ td {
 .btn-table {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
   cursor: pointer;
 }
@@ -210,7 +210,7 @@ td {
 }
 
 .btn-page.active {
-  background: #ecfdf5;
+  background: var(--primary-lighter);
   color: var(--primary-main);
   border-color: var(--primary-main);
   font-weight: 600;

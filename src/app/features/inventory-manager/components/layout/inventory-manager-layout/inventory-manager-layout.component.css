@@ -298,7 +298,7 @@
 }
 
 .action-link:hover {
-  color: #2563eb;
+  color: var(--primary-main);
 }
 
 .notifications-list {
@@ -360,7 +360,7 @@
 .notif-delete {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
   font-size: 18px;
   transition: color 0.2s;

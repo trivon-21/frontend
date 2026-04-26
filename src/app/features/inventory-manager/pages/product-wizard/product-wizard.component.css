@@ -60,8 +60,8 @@
 }
 
 .header-row {
-  background: #f0fdf4;
-  color: #064e3b;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -72,7 +72,7 @@
   padding: 20px 24px;
   border-right: 1px solid var(--border-light);
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -145,11 +145,11 @@
 }
 
 .btn-add-feature {
-  background: #067647;
+  background: var(--primary-main);
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 99px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -167,27 +167,27 @@
 }
 
 .btn-primary {
-  background: #067647;
+  background: var(--primary-main);
   color: white;
   border: none;
   padding: 12px 32px;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--background-page);
+  color: var(--text-secondary);
   border: 1px solid var(--border-light);
   padding: 12px 32px;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: #05603a;
+  background: var(--primary-hover);
   transform: translateY(-2px);
 }

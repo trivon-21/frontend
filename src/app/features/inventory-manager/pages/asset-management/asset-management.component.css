@@ -23,17 +23,17 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #067647;
+  background: var(--primary-main);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-register:hover {
-  background: #05603a;
+  background: var(--primary-hover);
   transform: translateY(-2px);
 }
 
@@ -91,10 +91,10 @@
 
 .btn-checkout {
   padding: 14px 32px;
-  background: #14532d;
+  background: var(--primary-active);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -120,7 +120,7 @@
 
 .loan-count {
   font-size: 13px;
-  color: #3b82f6;
+  color: var(--info);
 }
 
 table {
@@ -131,10 +131,10 @@ table {
 th {
   text-align: left;
   padding: 16px 24px;
-  background: #f8fafc;
+  background: var(--background-page);
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--border-light);
@@ -156,19 +156,19 @@ td {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
-  background: #ecfdf5;
-  color: #059669;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
 }
 
 .status-pill.overdue {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--error-light);
+  color: var(--error);
 }
 
 .btn-action {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--info);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -186,8 +186,8 @@ td {
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--error-light);
+  color: var(--error);
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
@@ -196,17 +196,17 @@ td {
 .dot {
   width: 8px;
   height: 8px;
-  background: #dc2626;
+  background: var(--error);
   border-radius: 50%;
 }
 
 .view-all {
-  color: #16a34a;
+  color: var(--primary-main);
   text-decoration: none;
   font-weight: 600;
   font-size: 13px;
   padding: 8px 16px;
-  background: #f0fdf4;
+  background: var(--primary-lighter);
   border-radius: 20px;
 }
 
@@ -263,10 +263,10 @@ td {
 
 .btn-add {
   padding: 14px 48px;
-  background: #3f6212;
+  background: var(--primary-main);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 700;
   cursor: pointer;
 }
