@@ -1,0 +1,143 @@
+<div class="procurement-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Procurement</h1>
+  </div>
+
+  <!-- GRN Entry Stepper -->
+  <div class="grn-card glass-panel">
+    <div class="grn-header">
+      <h2>Goods Received Note (GRN) Entry</h2>
+      
+      <div class="stepper">
+        <div class="step" [class.active]="currentStep >= 1" (click)="setStep(1)">
+          <span class="step-num">1</span>
+          <span class="step-label">Supplier Info</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" [class.active]="currentStep >= 2" (click)="setStep(2)">
+          <span class="step-num">2</span>
+          <span class="step-label">Item Entry</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" [class.active]="currentStep >= 3" (click)="setStep(3)">
+          <span class="step-num">3</span>
+          <span class="step-label">Serial Capture</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grn-body">
+      <!-- Step 1: Supplier Info -->
+      <div *ngIf="currentStep === 1" class="step-content animate-fade">
+        <h3>Supplier Information</h3>
+        <p class="step-desc">Select the supplier and enter invoice details</p>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Select Supplier *</label>
+            <select class="form-select">
+              <option value="">Select Supplier</option>
+              <option value="lg">LG Electronics Lanka</option>
+              <option value="samsung">Samsung Electronics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Invoice Number *</label>
+            <input type="text" placeholder="e.g., INV-2025-001" class="form-input">
+          </div>
+        </div>
+
+        <div class="info-box">
+          <p>Note: Make sure the invoice number matches the delivery documentation exactly.</p>
+        </div>
+      </div>
+
+      <!-- Step 2: Item Entry -->
+      <div *ngIf="currentStep === 2" class="step-content animate-fade">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>PRODUCT NAME</label>
+            <input type="text" placeholder="Enter Name" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>PRODUCT TYPE</label>
+            <select class="form-select">
+              <option value="single">Single</option>
+              <option value="bundle">Bundle</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>DATE</label>
+            <div class="date-picker">
+              <input type="text" placeholder="Set Date">
+              <i class="icon-calendar"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Serial Capture -->
+      <div *ngIf="currentStep === 3" class="step-content animate-fade">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>SKU</label>
+            <div class="scan-input">
+              <i class="icon-scan"></i>
+              <input type="text" placeholder="Scan Barcode">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>UNIT COUNT</label>
+            <input type="text" value="null" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>LOCATION</label>
+            <select class="form-select">
+              <option value="single">Single</option>
+              <option value="bundle">Bundle</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ITEM COUNT</label>
+            <input type="text" value="null" class="form-input">
+          </div>
+        </div>
+      </div>
+
+      <div class="grn-footer">
+        <button class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">Back</button>
+        <div class="spacer"></div>
+        <button class="btn-next" *ngIf="currentStep < 3" (click)="nextStep()">Next Step</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Shipments -->
+  <div class="shipments-section">
+    <div class="section-header">
+      <h2>Recent Shipments</h2>
+      <p class="subtitle">Last 5 deliveries received</p>
+    </div>
+
+    <div class="shipments-list glass-panel">
+      <div class="shipment-item" *ngFor="let s of shipments">
+        <div class="item-main">
+          <div class="item-id-row">
+            <span class="shipment-id">{{ s.id }}</span>
+            <span class="status-badge">Completed</span>
+          </div>
+          <h4 class="supplier-name">{{ s.supplier }}</h4>
+          <div class="item-meta">
+            <span>{{ s.items }} • {{ s.units }}</span>
+            <span class="divider"></span>
+            <span><i class="icon-time"></i> {{ s.date }}</span>
+            <span class="divider"></span>
+            <span>By: {{ s.user }}</span>
+          </div>
+        </div>
+        <button class="btn-view-details">View Details</button>
+      </div>
+    </div>
+  </div>
+</div>

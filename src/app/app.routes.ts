@@ -143,7 +143,7 @@ export const routes: Routes = [
         path: 'procurement',
         loadComponent: () =>
           import('./features/inventory-manager/pages/procurement/procurement.component').then(
-            (m) => m.ProcurementComponent,
+            (m) => m.ProcurementDashboardComponent,
           ),
       },
       {

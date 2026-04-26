@@ -1,0 +1,287 @@
+.procurement-container {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* GRN Card */
+.grn-card {
+  padding: 0;
+  overflow: hidden;
+  border: none;
+}
+
+.grn-header {
+  background: #365314; /* Deep Forest Green */
+  padding: 24px 32px;
+  color: white;
+}
+
+.grn-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.step.active .step-num {
+  background: white;
+  color: #365314;
+}
+
+.step-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.step-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.grn-body {
+  padding: 40px 32px;
+  background: white;
+  min-height: 300px;
+}
+
+.step-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.step-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+/* Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.form-input, .form-select, .date-picker input, .scan-input input {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: #365314;
+}
+
+.info-box {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  padding: 16px;
+  border-radius: 10px;
+  color: #166534;
+  font-size: 13px;
+}
+
+.date-picker, .scan-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-picker input, .scan-input input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.date-picker i, .scan-input i {
+  position: absolute;
+  right: 12px;
+  color: #64748b;
+}
+
+.grn-footer {
+  display: flex;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.spacer { flex: 1; }
+
+.btn-next {
+  background: #f0fdf4;
+  color: #166534;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-back {
+  background: white;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Shipments Section */
+.shipments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.section-header .subtitle {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.shipments-list {
+  background: white;
+  border-radius: 20px;
+  padding: 8px;
+}
+
+.shipment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.shipment-item:last-child {
+  border-bottom: none;
+}
+
+.item-id-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.shipment-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.status-badge {
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.supplier-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin: 0 0 8px 0;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.divider {
+  width: 4px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 50%;
+}
+
+.btn-view-details {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.animate-fade {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
