@@ -63,13 +63,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 99px; /* Unified pill shape */
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid var(--border-light);
+  white-space: nowrap;
 }
 
 .action-btn-outline {
@@ -377,13 +378,14 @@
 .item-rsvd.warning { color: #f59e0b; font-weight: 700; }
 
 .reorder-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 99px; /* Pill shape for consistency */
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid var(--border-light);
   background: white;
+  transition: all 0.2s;
 }
 
 .reorder-btn.primary {

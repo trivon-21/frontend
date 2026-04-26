@@ -106,10 +106,10 @@ h1 {
 .check input { width: 16px; height: 16px; }
 
 .actions {
-  margin-top: 26px;
+  margin-top: 32px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* Center the login button */
 }
 .btn {
   border: 1px solid var(--border-light);
@@ -120,14 +120,21 @@ h1 {
   background: transparent;
 }
 .btn.big {
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius-full);
-  background: var(--primary-main);
+  padding: 14px 40px; /* Better proportions */
+  border-radius: 99px; /* Perfect pill */
+  background: #065f46; /* Unified Forest Green */
   color: var(--text-inverse);
   border: none;
-  min-width: 160px;
+  min-width: 200px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.2);
+  transition: all 0.2s;
 }
-.btn.big:hover { background: var(--primary-hover); }
+.btn.big:hover { 
+  background: #044e3a; 
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(6, 95, 70, 0.25);
+}
 .btn.big:disabled { opacity: 0.65; cursor: not-allowed; }
 
 .error-msg {
