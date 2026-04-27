@@ -23,6 +23,10 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  getHomeLink(): string {
+    return this.currentUser ? '/inventory-manager' : '/login';
+  }
+
   getInitials(name: string): string {
     return name
       .split(' ')
@@ -43,6 +47,6 @@ export class NavbarComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.showDropdown = false;
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 }

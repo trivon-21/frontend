@@ -5,12 +5,8 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/landing/landing.component').then((m) => m.LandingComponent),
-  },
-  {
-    path: 'signup',
-    loadComponent: () => import('./pages/signup/signup.component').then((m) => m.SignupComponent),
+    redirectTo: 'login',
+    pathMatch: 'full',
   },
   {
     path: 'login',
@@ -29,51 +25,6 @@ export const routes: Routes = [
       import('./pages/reset-password/reset-password.component').then(
         (m) => m.ResetPasswordComponent,
       ),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/customer/components/layout/customer-layout/customer-layout.component').then(
-        (m) => m.CustomerLayoutComponent,
-      ),
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/customer/pages/dashboard/customer-dashboard-home.component').then(
-            (m) => m.CustomerDashboardHomeComponent,
-          ),
-      },
-      {
-        path: 'orders',
-        loadComponent: () =>
-          import('./features/customer/pages/orders/customer-orders.component').then(
-            (m) => m.CustomerOrdersComponent,
-          ),
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/customer/pages/settings/notification-settings.component').then(
-            (m) => m.NotificationSettingsComponent,
-          ),
-      },
-      {
-        path: 'notifications',
-        loadComponent: () =>
-          import('./features/customer/pages/notifications/notifications.component').then(
-            (m) => m.NotificationsPageComponent,
-          ),
-      },
-      {
-        path: 'profile',
-        loadComponent: () =>
-          import('./features/customer/pages/profile/customer-profile.component').then(
-            (m) => m.CustomerProfileComponent,
-          ),
-      },
-    ],
   },
   {
     path: 'inventory-manager',
@@ -147,28 +98,15 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/customer/pages/settings/notification-settings.component').then(
-            (m) => m.NotificationSettingsComponent,
-          ),
-      },
-      {
-        path: 'notifications',
-        loadComponent: () =>
-          import('./features/customer/pages/notifications/notifications.component').then(
-            (m) => m.NotificationsPageComponent,
-          ),
-      },
-      {
         path: 'reports',
         loadComponent: () =>
-          import('./features/customer/pages/dashboard/customer-dashboard-home.component').then(
-            (m) => m.CustomerDashboardHomeComponent,
+          import('./features/inventory-manager/pages/dashboard/inventory-manager-dashboard.component').then(
+            (m) => m.InventoryManagerDashboardComponent,
           ),
       },
     ],
   },
 ];
+
 
 // Force reload for Returns & RMA implementation

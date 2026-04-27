@@ -1,6 +1,6 @@
 <header class="topbar">
   <div class="topbar-inner">
-    <a routerLink="/" class="brand">AirLux</a>
+    <a [routerLink]="getHomeLink()" class="brand">AirLux</a>
 
     <div class="search">
       <span class="search-icon">🔍</span>
@@ -15,13 +15,12 @@
 
     <!-- Guest buttons -->
     <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
+      <a routerLink="/login" class="btn solid">Log in</a>
     </div>
 
     <!-- Logged-in user area -->
     <div class="user-area" *ngIf="currentUser">
-      <a routerLink="/dashboard" class="btn dashboard-btn">Dashboard</a>
+      <a routerLink="/inventory-manager" class="btn dashboard-btn">Dashboard</a>
       <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
         <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
           <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
@@ -40,13 +39,9 @@
             </div>
           </div>
           <div class="dropdown-divider"></div>
-          <a routerLink="/dashboard" class="dropdown-item" (click)="closeDropdown()">
+          <a routerLink="/inventory-manager" class="dropdown-item" (click)="closeDropdown()">
             <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
             My Dashboard
-          </a>
-          <a routerLink="/dashboard/profile" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            My Profile
           </a>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item logout-item" (click)="logout()">

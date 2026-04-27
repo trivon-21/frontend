@@ -225,6 +225,11 @@
   min-width: 280px;
 }
 
+.user-menu-container {
+  position: relative;
+  z-index: 400; /* Higher than other header elements */
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;

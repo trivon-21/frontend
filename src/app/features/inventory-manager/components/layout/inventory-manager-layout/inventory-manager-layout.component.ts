@@ -100,14 +100,9 @@ export class InventoryManagerLayoutComponent implements OnInit {
     this.showNotifications = false;
   }
 
-  goToSettings(): void {
-    this.router.navigate(['/inventory-manager/settings']);
-    this.showUserMenu = false;
-  }
-
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 
   getNotificationIcon(type: string): string {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ import { FooterComponent } from '../../components/footer/footer.component';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
@@ -30,7 +30,7 @@ export class LoginComponent {
     private router: Router,
     private route: ActivatedRoute,
   ) {
-    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/inventory-manager';
     this.form = this.fb.group({
       identifier: ['', [Validators.required]],
       password: ['', [Validators.required]],
@@ -39,6 +39,12 @@ export class LoginComponent {
     this.otpForm = this.fb.group({
       otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
     });
+  }
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigateByUrl(this.returnUrl);
+    }
   }
 
   toggleShowPassword() {
