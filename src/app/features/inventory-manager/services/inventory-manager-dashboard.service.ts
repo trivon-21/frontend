@@ -82,4 +82,16 @@ export class InventoryManagerDashboardService {
   updateItem(id: string, data: any): Observable<InventoryItem> {
     return this.http.put<InventoryItem>(`${this.apiUrl}/item/${id}`, data);
   }
+
+  addItem(data: any): Observable<InventoryItem> {
+    return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
+  }
+
+  getSuppliers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/suppliers`);
+  }
+
+  addSupplier(name: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/suppliers`, { name });
+  }
 }

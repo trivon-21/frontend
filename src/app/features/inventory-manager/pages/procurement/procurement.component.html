@@ -5,7 +5,7 @@
   </div>
 
   <!-- GRN Entry Stepper -->
-  <div class="grn-card glass-panel">
+  <div class="grn-card glass-panel" [formGroup]="grnForm">
     <div class="grn-header">
       <h2>Goods Received Note (GRN) Entry</h2>
       
@@ -22,85 +22,154 @@
         <div class="step-divider"></div>
         <div class="step" [class.active]="currentStep >= 3" (click)="setStep(3)">
           <span class="step-num">3</span>
-          <span class="step-label">Serial Capture</span>
+          <span class="step-label">Inventory Settings</span>
         </div>
       </div>
     </div>
 
     <div class="grn-body">
+      <!-- Success/Error Messages -->
+      <div class="alert success animate-fade" *ngIf="successMessage">
+        <i class="icon-check"></i>
+        {{ successMessage }}
+      </div>
+      <div class="alert error animate-fade" *ngIf="errorMessage">
+        <i class="icon-error"></i>
+        {{ errorMessage }}
+      </div>
+
       <!-- Step 1: Supplier Info -->
-      <div *ngIf="currentStep === 1" class="step-content animate-fade">
+      <div *ngIf="currentStep === 1" class="step-content animate-fade" formGroupName="supplierInfo">
         <h3>Supplier Information</h3>
         <p class="step-desc">Select the supplier and enter invoice details</p>
         
         <div class="form-grid">
-          <div class="form-group">
-            <label>Select Supplier *</label>
-            <select class="form-select">
-              <option value="">Select Supplier</option>
-              <option value="lg">LG Electronics Lanka</option>
-              <option value="samsung">Samsung Electronics</option>
-            </select>
+          <!-- Supplier Autocomplete Field -->
+          <div class="form-group supplier-group">
+            <label>Select/Add Supplier *</label>
+            <div class="autocomplete-container">
+              <input 
+                type="text" 
+                placeholder="Type supplier name..." 
+                class="form-input" 
+                formControlName="supplier"
+                (focus)="onSupplierInputFocus()"
+                (blur)="onSupplierInputBlur()"
+                autocomplete="off">
+              
+              <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
+                <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
+                  <i class="icon-plus"></i> Add New Supplier
+                </div>
+                <div 
+                  class="dropdown-item" 
+                  *ngFor="let supplier of filteredSuppliers"
+                  (mousedown)="selectSupplier(supplier)">
+                  {{ supplier.name }}
+                </div>
+                <div class="dropdown-no-results" *ngIf="filteredSuppliers.length === 0 && grnForm.get('supplierInfo.supplier')?.value">
+                  No existing suppliers found. Click above to add.
+                </div>
+              </div>
+            </div>
+
+            <!-- New Supplier Confirmation -->
+            <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
+              <button class="btn-confirm-mini" (click)="confirmNewSupplier()" [disabled]="isSubmitting">Confirm Supplier</button>
+              <button class="btn-cancel-mini" (click)="cancelNewSupplier()" [disabled]="isSubmitting">Cancel</button>
+            </div>
+
+            <span class="error-text" *ngIf="grnForm.get('supplierInfo.supplier')?.touched && grnForm.get('supplierInfo.supplier')?.invalid">
+              Supplier is required
+            </span>
           </div>
+
           <div class="form-group">
             <label>Invoice Number *</label>
-            <input type="text" placeholder="e.g., INV-2025-001" class="form-input">
+            <input type="text" placeholder="e.g., INV-2025-001" class="form-input" formControlName="invoiceNumber">
+            <span class="error-text" *ngIf="grnForm.get('supplierInfo.invoiceNumber')?.touched && grnForm.get('supplierInfo.invoiceNumber')?.invalid">
+              Invoice number is required
+            </span>
           </div>
         </div>
 
         <div class="info-box">
-          <p>Note: Make sure the invoice number matches the delivery documentation exactly.</p>
+          <p><i class="icon-info"></i> Note: Make sure the invoice number matches the delivery documentation exactly.</p>
         </div>
       </div>
 
       <!-- Step 2: Item Entry -->
-      <div *ngIf="currentStep === 2" class="step-content animate-fade">
+      <div *ngIf="currentStep === 2" class="step-content animate-fade" formGroupName="itemDetails">
+        <h3>Product Details</h3>
+        <p class="step-desc">Define the product being received</p>
+        
         <div class="form-grid">
           <div class="form-group">
-            <label>PRODUCT NAME</label>
-            <input type="text" placeholder="Enter Name" class="form-input">
+            <label>PRODUCT NAME *</label>
+            <input type="text" placeholder="Enter Product Name" class="form-input" formControlName="name">
+            <span class="error-text" *ngIf="grnForm.get('itemDetails.name')?.touched && grnForm.get('itemDetails.name')?.invalid">
+              Product name is required
+            </span>
           </div>
           <div class="form-group">
-            <label>PRODUCT TYPE</label>
-            <select class="form-select">
-              <option value="single">Single</option>
-              <option value="bundle">Bundle</option>
+            <label>SKU (Unique Code) *</label>
+            <input type="text" placeholder="e.g., AC-LG-12000-INV" class="form-input" formControlName="sku">
+            <span class="error-text" *ngIf="grnForm.get('itemDetails.sku')?.touched && grnForm.get('itemDetails.sku')?.invalid">
+              Valid alphanumeric SKU is required
+            </span>
+          </div>
+          <div class="form-group">
+            <label>PRODUCT TYPE *</label>
+            <select class="form-select" formControlName="type">
+              <option value="Single">Single Item</option>
+              <option value="Bundle">Bundle Pack</option>
             </select>
           </div>
           <div class="form-group">
-            <label>DATE</label>
-            <div class="date-picker">
-              <input type="text" placeholder="Set Date">
-              <i class="icon-calendar"></i>
-            </div>
+            <label>CATEGORY *</label>
+            <select class="form-select" formControlName="category">
+              <option value="Air Conditioners">Air Conditioners</option>
+              <option value="Installation Kits">Installation Kits</option>
+              <option value="Repair Parts">Repair Parts</option>
+              <option value="Tools">Tools</option>
+              <option value="General">General</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Serial Capture -->
-      <div *ngIf="currentStep === 3" class="step-content animate-fade">
+      <!-- Step 3: Inventory Settings -->
+      <div *ngIf="currentStep === 3" class="step-content animate-fade" formGroupName="inventorySettings">
+        <h3>Inventory & Stock Settings</h3>
+        <p class="step-desc">Configure storage and initial quantities</p>
+        
         <div class="form-grid">
           <div class="form-group">
-            <label>SKU</label>
-            <div class="scan-input">
-              <i class="icon-scan"></i>
-              <input type="text" placeholder="Scan Barcode">
-            </div>
+            <label>INITIAL QUANTITY *</label>
+            <input type="number" class="form-input" formControlName="available">
+            <span class="error-text" *ngIf="grnForm.get('inventorySettings.available')?.touched && grnForm.get('inventorySettings.available')?.invalid">
+              Quantity must be 0 or more
+            </span>
           </div>
           <div class="form-group">
-            <label>UNIT COUNT</label>
-            <input type="text" value="null" class="form-input">
+            <label>LOCATION *</label>
+            <input type="text" placeholder="e.g., Warehouse A, Section 4" class="form-input" formControlName="location">
           </div>
           <div class="form-group">
-            <label>LOCATION</label>
-            <select class="form-select">
-              <option value="single">Single</option>
-              <option value="bundle">Bundle</option>
+            <label>UNIT OF MEASURE *</label>
+            <select class="form-select" formControlName="unit">
+              <option value="units">Units</option>
+              <option value="sets">Sets</option>
+              <option value="kg">Kilograms</option>
+              <option value="meters">Meters</option>
             </select>
           </div>
           <div class="form-group">
-            <label>ITEM COUNT</label>
-            <input type="text" value="null" class="form-input">
+            <label>REORDER LEVEL *</label>
+            <input type="number" class="form-input" formControlName="reorderLevel">
+            <span class="error-text" *ngIf="grnForm.get('inventorySettings.reorderLevel')?.touched && grnForm.get('inventorySettings.reorderLevel')?.invalid">
+              Level must be 0 or more
+            </span>
           </div>
         </div>
       </div>
@@ -108,7 +177,10 @@
       <div class="grn-footer">
         <button class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">Back</button>
         <div class="spacer"></div>
-        <button class="btn-next" *ngIf="currentStep < 3" (click)="nextStep()">Next Step</button>
+        <button class="btn-next" [disabled]="isSubmitting || (currentStep === 1 && isAddingNewSupplier)" (click)="nextStep()">
+          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Complete Entry' : 'Next Step' }}</span>
+          <span *ngIf="isSubmitting" class="loader-small"></span>
+        </button>
       </div>
     </div>
   </div>
@@ -117,7 +189,7 @@
   <div class="shipments-section">
     <div class="section-header">
       <h2>Recent Shipments</h2>
-      <p class="subtitle">Last 5 deliveries received</p>
+      <p class="subtitle">Last entries processed</p>
     </div>
 
     <div class="shipments-list glass-panel">
