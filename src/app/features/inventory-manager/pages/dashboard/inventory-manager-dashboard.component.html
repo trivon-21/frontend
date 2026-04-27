@@ -199,9 +199,9 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of data.reorderList">
-                <td class="item-name">{{ item.itemName }}</td>
-                <td class="item-avail" [class.critical]="item.avail < item.rsvd">{{ item.avail }}</td>
-                <td class="item-rsvd" [class.warning]="item.avail <= item.rsvd">{{ item.rsvd }}</td>
+                <td class="item-name">{{ item.name }}</td>
+                <td class="item-avail" [class.critical]="item.available < item.reserved">{{ item.available }}</td>
+                <td class="item-rsvd" [class.warning]="item.available <= item.reserved">{{ item.reserved }}</td>
                 <td>
                   <button class="reorder-btn" [class.primary]="item.status === 'critical'" (click)="onReorder(item.id)">
                     Reorder

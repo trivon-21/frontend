@@ -63,6 +63,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'product-wizard/:id',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/product-wizard/product-wizard.component').then(
+            (m) => m.ProductWizardComponent,
+          ),
+      },
+      {
         path: 'asset-management',
         loadComponent: () =>
           import(

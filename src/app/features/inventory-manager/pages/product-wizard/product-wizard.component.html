@@ -204,8 +204,14 @@
   <div class="wizard-footer">
     <button class="btn-secondary" (click)="prevStep()" *ngIf="currentStep > 1">Back</button>
     <div class="spacer"></div>
-    <button class="btn-primary" (click)="nextStep()">
+    <button class="btn-primary" (click)="currentStep === totalSteps ? saveProduct() : nextStep()">
       {{ currentStep === totalSteps ? 'Save Product' : 'Next Step' }}
     </button>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Processing...</p>
   </div>
 </div>

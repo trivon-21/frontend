@@ -25,13 +25,7 @@ export class InventoryListComponent implements OnInit {
   ngOnInit(): void {
     this.inventoryService.getInventory().subscribe({
       next: (items) => {
-        // Map backend name to itemName if necessary, or just use as is
-        // Our backend returns { name, sku, type, ... }
-        // Let's ensure the frontend template uses 'name' or 'itemName'
-        this.inventoryItems = items.map(item => ({
-          ...item,
-          itemName: (item as any).name || item.itemName
-        }));
+        this.inventoryItems = items;
         this.loading = false;
       },
       error: (err) => {

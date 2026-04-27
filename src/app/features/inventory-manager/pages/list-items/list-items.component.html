@@ -56,7 +56,7 @@
             <span class="item-name">{{ item.name }}</span>
             <span class="item-sku">{{ item.sku }}</span>
           </div>
-          <button class="btn-add-details" [routerLink]="['/inventory-manager/product-wizard']">Add Details</button>
+          <button class="btn-add-details" [routerLink]="['/inventory-manager/product-wizard', item.id]">Add Details</button>
         </div>
       </div>
     </div>

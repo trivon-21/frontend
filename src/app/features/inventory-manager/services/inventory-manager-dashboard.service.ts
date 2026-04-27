@@ -27,9 +27,9 @@ export interface ActivityItem {
 
 export interface ReorderItem {
   id: string;
-  itemName: string;
-  avail: number;
-  rsvd: number;
+  name: string;
+  available: number;
+  reserved: number;
   status: 'critical' | 'warning' | 'normal';
 }
 
@@ -39,6 +39,7 @@ export interface InventoryItem extends ReorderItem {
   category: string;
   location: string;
   unit: string;
+  time?: string;
 }
 
 export interface LogisticsItem {
@@ -72,5 +73,13 @@ export class InventoryManagerDashboardService {
 
   getInventory(): Observable<InventoryItem[]> {
     return this.http.get<InventoryItem[]>(`${this.apiUrl}/list`);
+  }
+
+  getItem(id: string): Observable<InventoryItem> {
+    return this.http.get<InventoryItem>(`${this.apiUrl}/item/${id}`);
+  }
+
+  updateItem(id: string, data: any): Observable<InventoryItem> {
+    return this.http.put<InventoryItem>(`${this.apiUrl}/item/${id}`, data);
   }
 }

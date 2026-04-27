@@ -83,7 +83,7 @@
           <td class="num-cell">{{ item.reserved }}</td>
           <td>{{ item.location }}</td>
           <td>
-            <button class="btn-table" [routerLink]="['/inventory-manager/product-wizard']">Edit</button>
+            <button class="btn-table" [routerLink]="['/inventory-manager/product-wizard', item.id]">Edit</button>
           </td>
         </tr>
       </tbody>
