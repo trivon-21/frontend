@@ -3,9 +3,12 @@
 /tmp
 /out-tsc
 /bazel-out
+build/
+temp/
 
 # Dependencies
-/node_modules
+node_modules/
+jspm_packages/
 
 # IDEs and editors
 .idea/
@@ -16,17 +19,20 @@
 .settings/
 *.sublime-workspace
 .history/
+.vscode/
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# Visual Studio
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 # Logs
-npm-debug.log
-yarn-error.log
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 testem.log
 
 # Testing
@@ -39,3 +45,21 @@ Thumbs.db
 
 # Angular CLI
 .angular/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+
+# Misc
+*.swp
+*.bak
+
+# Personal Documentation / Dev Notes
+src/app/core/styling/FAILURE_POINTS*
+src/app/core/styling/RECOVERY*
+src/app/core/styling/*.md
+!src/app/core/styling/README.md

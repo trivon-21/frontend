@@ -1,0 +1,130 @@
+<div class="rma-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Return & RMA</h1>
+  </div>
+
+  <div class="main-grid">
+    <!-- Left: Leftover Entry -->
+    <div class="card-panel glass-panel">
+      <div class="panel-header">
+        <i class="icon-entry"></i>
+        <h2>Leftover Entry</h2>
+      </div>
+      
+      <div class="form-body">
+        <div class="form-group">
+          <label>Job ID</label>
+          <input type="text" placeholder="e.g., #402" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Item Name</label>
+          <div class="search-input">
+            <input type="text" placeholder="Search or scan item...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Quantity Returned</label>
+          <input type="number" value="0" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Condition</label>
+          <input type="text" class="form-input">
+        </div>
+
+        <button class="btn-add">Add back to Stock</button>
+
+        <div class="note-box">
+          <p>Note: Items marked as "Scrap" will be automatically moved to the Quarantine Zone below.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Defective / RMA Log -->
+    <div class="card-panel glass-panel">
+      <div class="panel-header">
+        <i class="icon-warning"></i>
+        <div class="title-group">
+          <h2>Defective / RMA Log</h2>
+          <span class="subtitle">5 active RMA cases</span>
+        </div>
+      </div>
+
+      <div class="log-table-container">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>SERIAL NUMBER</th>
+              <th>FAULT DESCRIPTION</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of rmaLogs">
+              <td>
+                <div class="serial-cell">
+                  <span class="serial">{{ log.serial }}</span>
+                  <span class="by">By: {{ log.user }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="fault-cell">
+                  <span class="fault">{{ log.fault }}</span>
+                  <span class="by">By: {{ log.user }}</span>
+                </div>
+              </td>
+              <td class="date">{{ log.date }}</td>
+              <td>
+                <span class="status-badge" [class.bundle]="log.status === 'Bundle'">
+                  {{ log.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: Quarantine Zone -->
+  <div class="quarantine-section">
+    <div class="quarantine-header">
+      <div class="header-left">
+        <i class="icon-warning-red"></i>
+        <div class="title-group">
+          <h2>Quarantine Zone</h2>
+          <span class="subtitle">Items damaged or incomplete - pending disposal decision</span>
+        </div>
+      </div>
+      <span class="items-badge">3 items • Cannot be sold</span>
+    </div>
+
+    <div class="quarantine-table-container">
+      <table class="quarantine-table">
+        <thead>
+          <tr>
+            <th>ITEM NAME</th>
+            <th>QUANTITY</th>
+            <th>REASON</th>
+            <th>DATE ADDED</th>
+            <th>LOCATION</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of quarantineItems; let i = index">
+            <td>{{ item.name }}</td>
+            <td>{{ item.qty }}</td>
+            <td>{{ item.reason }}</td>
+            <td>{{ item.dateAdded }}</td>
+            <td>{{ item.location }}</td>
+            <td>
+              <button class="btn-dispose" (click)="disposeItem(i)">Dispose</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

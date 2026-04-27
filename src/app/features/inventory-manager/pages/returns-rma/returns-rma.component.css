@@ -1,0 +1,218 @@
+.rma-container {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 24px;
+}
+
+.card-panel {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: block;
+}
+
+/* Form Styles */
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.form-input, .search-input input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--background-page);
+  outline: none;
+  font-size: 14px;
+}
+
+.btn-add {
+  padding: 14px;
+  background: var(--primary-main);
+  color: white;
+  border: none;
+  border-radius: 99px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.note-box {
+  background: var(--info-light);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--info);
+  line-height: 1.5;
+}
+
+/* RMA Log Table */
+.log-table-container {
+  overflow-x: auto;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.log-table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--background-page);
+  border-bottom: 2px solid var(--border-light);
+}
+
+.log-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+}
+
+.serial-cell, .fault-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.serial { font-weight: 700; color: var(--text-primary); }
+.fault { color: var(--text-secondary); }
+.by { font-size: 11px; color: #94a3b8; }
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+}
+
+.status-badge.bundle {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Quarantine Zone */
+.quarantine-section {
+  background: var(--error-light);
+  border: 1px solid var(--error-light);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.quarantine-header {
+  padding: 20px 24px;
+  background: var(--error-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quarantine-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--error);
+  margin: 0;
+}
+
+.quarantine-header .subtitle { color: var(--error); }
+
+.items-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--error);
+}
+
+.quarantine-table-container {
+  background: white;
+  margin: 0 1px 1px 1px;
+}
+
+.quarantine-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quarantine-table th {
+  text-align: left;
+  padding: 16px 24px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--error);
+  border-bottom: 1px solid var(--error-light);
+  background: var(--error-light);
+}
+
+.quarantine-table td {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--error-light);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.btn-dispose {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.text-right { text-align: right; }
