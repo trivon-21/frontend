@@ -43,7 +43,7 @@ export class InspectionPaymentComponent implements OnInit {
     private ticketService: InspectionTicketService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -56,41 +56,41 @@ export class InspectionPaymentComponent implements OnInit {
       }
     });
   }
-loadOrderData(orderId: string): void {
-  this.isLoading = true;
-  this.ticketService.getOrCreateTicket(orderId).subscribe({
-    next: (data: any) => {
-      this.ticketId = data.ticket._id;
-      this.orderId = data.order.orderId;
-      this.customerName = data.order.customerName || 'Customer';
-      this.items = Array.isArray(data.order.items)
-        ? data.order.items
-        : [data.order.itemName];
-      this.totalAmount = data.order.amount;
+  loadOrderData(orderId: string): void {
+    this.isLoading = true;
+    this.ticketService.getOrCreateTicket(orderId).subscribe({
+      next: (data: any) => {
+        this.ticketId = data.ticket._id;
+        this.orderId = data.order.orderId;
+        this.customerName = data.order.customerName || 'Customer';
+        this.items = Array.isArray(data.order.items)
+          ? data.order.items
+          : [data.order.itemName];
+        this.totalAmount = data.order.amount;
 
-      // Map backend bankDetails fields to frontend bankDetails object
-      this.bankDetails = {
-        bankName:         data.bankDetails.bankName,
-        branchName:       data.bankDetails.branchName,
-        accountName:      data.bankDetails.accountName,
-        accountNo:        data.bankDetails.accountNo,
-        inspectionAmount: data.bankDetails.inspectionFee  // ← map inspectionFee → inspectionAmount
-      };
+        // Map backend bankDetails fields to frontend bankDetails object
+        this.bankDetails = {
+          bankName: data.bankDetails.bankName,
+          branchName: data.bankDetails.branchName,
+          accountName: data.bankDetails.accountName,
+          accountNo: data.bankDetails.accountNo,
+          inspectionAmount: data.bankDetails.inspectionFee  // ← map inspectionFee → inspectionAmount
+        };
 
-      if (data.ticket.status === 'PAYMENT_UNDER_REVIEW') {
-        this.slipSubmitted = true;
+        if (data.ticket.status === 'PAYMENT_UNDER_REVIEW') {
+          this.slipSubmitted = true;
+        }
+
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Failed to load order:', err);
+        this.loadError = 'Failed to load order details. Please try again.';
+        this.isLoading = false;
       }
-
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    },
-    error: (err: any) => {
-      console.error('Failed to load order:', err);
-      this.loadError = 'Failed to load order details. Please try again.';
-      this.isLoading = false;
-    }
-  });
-}
+    });
+  }
 
   triggerFileInput() {
     const input = document.querySelector('input[type=file]') as HTMLElement;

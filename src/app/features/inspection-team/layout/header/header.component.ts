@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { PaymentService } from '../../../finance/services/payment.service';
+import { InspectionOfficerService } from '../../services/inspection-officer.service';
 
 @Component({
   selector: 'app-header',
@@ -18,14 +18,14 @@ export class HeaderComponent implements OnInit {
   showSettings = false;
   showNotifications = false;
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private inspectionOfficerService: InspectionOfficerService) { }
 
   ngOnInit(): void {
-    this.loadPendingPayments();
+    this.loadScheduledInspections();
   }
 
-  loadPendingPayments() {
-    this.paymentService.getPendingPayments().subscribe({
+  loadScheduledInspections() {
+    this.inspectionOfficerService.getScheduledInspections().subscribe({
       next: (data) => {
         this.pendingCount = data.length;
       },

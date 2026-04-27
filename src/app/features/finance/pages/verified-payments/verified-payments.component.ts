@@ -25,22 +25,22 @@ export class VerifiedPaymentsComponent implements OnInit {
   // Filters/Search
   searchQuery = '';
   selectedFilter = 'All';
-  selectedDate: string = ''; 
+  selectedDate: string = '';
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) { }
 
   ngOnInit(): void {
     this.loadApprovedPayments();
   }
 
   loadApprovedPayments() {
-this.paymentService.getApprovedPayments().subscribe({
-  next: (data) => {
-    this.approvedPayments = data;
-    this.applyFilters();
-  },
-  error: (err) => console.error(err)
-});
+    this.paymentService.getApprovedPayments().subscribe({
+      next: (data) => {
+        this.approvedPayments = data;
+        this.applyFilters();
+      },
+      error: (err) => console.error(err)
+    });
   }
 
   applyFilters() {
@@ -49,7 +49,7 @@ this.paymentService.getApprovedPayments().subscribe({
       // Search filter
       const matchesSearch = this.searchQuery
         ? payment.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          payment.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        payment.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
 
       // Status filter
@@ -61,7 +61,7 @@ this.paymentService.getApprovedPayments().subscribe({
       // Date filter
       const matchesDate = this.selectedDate
         ? new Date(payment.updatedAt).toDateString() ===
-          new Date(this.selectedDate).toDateString()
+        new Date(this.selectedDate).toDateString()
         : true;
 
       return matchesSearch && matchesStatus && matchesDate;

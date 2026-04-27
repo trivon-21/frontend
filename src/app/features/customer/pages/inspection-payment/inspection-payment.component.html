@@ -52,7 +52,7 @@
     </div>
   </div>
 
-    <!-- BEFORE SUBMIT: Bank Details + Upload -->
+  <!-- BEFORE SUBMIT: Bank Details + Upload -->
   <div class="bottom-card" *ngIf="!slipSubmitted">
 
     <!-- LEFT: BANK DETAILS -->
@@ -101,22 +101,10 @@
 
       <p class="upload-label">Upload Slip:</p>
 
-      <div
-        class="drop-zone"
-        [class.has-file]="uploadedFile"
-        [class.drag-over]="isDragOver"
-        (click)="triggerFileInput()"
-        (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave()"
-        (drop)="onDrop($event)"
-      >
-        <input
-          #fileInput
-          type="file"
-          accept=".pdf,.png,.jpg,.jpeg"
-          (change)="onFileSelected($event)"
-          style="display:none"
-        />
+      <div class="drop-zone" [class.has-file]="uploadedFile" [class.drag-over]="isDragOver" (click)="triggerFileInput()"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+        <input #fileInput type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event)"
+          style="display:none" />
 
         <div *ngIf="!uploadedFile" class="drop-content">
           <span class="camera-icon">📷</span>
@@ -133,11 +121,7 @@
 
       <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
 
-      <button
-        class="confirm-btn"
-        (click)="confirmAndContinue()"
-        [disabled]="!uploadedFile || isSubmitting"
-      >
+      <button class="confirm-btn" (click)="confirmAndContinue()" [disabled]="!uploadedFile || isSubmitting">
         {{ isSubmitting ? 'Submitting...' : 'Confirm and Continue →' }}
       </button>
     </div>

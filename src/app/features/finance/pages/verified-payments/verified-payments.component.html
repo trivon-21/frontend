@@ -10,11 +10,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
-      <input
-        type="text"
-        placeholder="Search ID or Customer"
-        [(ngModel)]="searchQuery"
-        (input)="applyFilters()" />
+      <input type="text" placeholder="Search ID or Customer" [(ngModel)]="searchQuery" (input)="applyFilters()" />
     </div>
 
     <!-- Filters -->
@@ -27,11 +23,7 @@
       </select>
 
       <!-- Date Filter -->
-      <input
-        type="date"
-        class="date-btn"
-        [(ngModel)]="selectedDate"
-        (change)="applyFilters()" />
+      <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()" />
     </div>
 
   </div>
@@ -76,16 +68,11 @@
         Previous
       </button>
 
-      <button
-        *ngFor="let page of totalPages"
-        (click)="goToPage(page)"
-        [class.active]="currentPage===page">
+      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">
         {{ page }}
       </button>
 
-      <button
-        (click)="nextPage()"
-        [disabled]="currentPage*itemsPerPage >= totalItems">
+      <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage >= totalItems">
         Next
       </button>
     </div>
@@ -105,11 +92,7 @@
         <p><strong>Amount:</strong> ${{ selectedPayment?.amount }}</p>
         <p><strong>Status:</strong> {{ selectedPayment?.status }}</p>
 
-        <a
-          *ngIf="selectedPayment?.slipUrl"
-          [href]="selectedPayment?.slipUrl"
-          target="_blank"
-          class="slip-link">
+        <a *ngIf="selectedPayment?.slipUrl" [href]="selectedPayment?.slipUrl" target="_blank" class="slip-link">
           View Slip Preview
         </a>
       </div>

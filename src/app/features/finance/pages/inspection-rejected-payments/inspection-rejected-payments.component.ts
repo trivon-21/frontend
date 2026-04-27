@@ -25,7 +25,7 @@ export class InspectionRejectedPaymentsComponent implements OnInit {
   selectedFilter = 'All';
   selectedDate = '';
 
-  constructor(private ticketService: InspectionTicketService) {}
+  constructor(private ticketService: InspectionTicketService) { }
 
   ngOnInit(): void {
     this.loadRejectedPayments();
@@ -47,8 +47,8 @@ export class InspectionRejectedPaymentsComponent implements OnInit {
     this.filteredPayments = this.rejectedPayments.filter(p => {
       const matchesSearch = this.searchQuery
         ? p.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
         ? new Date(p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()

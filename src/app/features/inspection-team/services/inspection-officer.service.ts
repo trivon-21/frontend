@@ -8,7 +8,7 @@ export class InspectionOfficerService {
 
   private apiUrl = 'http://127.0.0.1:3000/api/inspection-officer';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private handleError(error: HttpErrorResponse) {
     return throwError(() => new Error(error.error?.message || error.message || 'Request failed'));

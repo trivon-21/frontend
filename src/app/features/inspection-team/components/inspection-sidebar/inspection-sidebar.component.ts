@@ -17,7 +17,7 @@ interface NavItem {
   styleUrls: ['./inspection-sidebar.component.css']
 })
 export class InspectionSidebarComponent {
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) { }
 
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/inspection-officer/dashboard' },

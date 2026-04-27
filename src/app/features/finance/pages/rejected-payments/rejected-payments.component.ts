@@ -30,7 +30,7 @@ export class RejectedPaymentsComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) { }
 
   ngOnInit(): void {
     this.loadRejectedPayments();
@@ -77,14 +77,14 @@ export class RejectedPaymentsComponent implements OnInit {
     this.filteredPayments = this.rejectedPayments.filter(payment => {
       const matchesSearch = this.searchQuery
         ? payment.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          payment.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        payment.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
 
       const matchesStatus = this.selectedFilter === 'All' || payment.status === this.selectedFilter;
 
       const matchesDate = this.selectedDate
         ? new Date(payment.updatedAt).toDateString() ===
-          new Date(this.selectedDate).toDateString()
+        new Date(this.selectedDate).toDateString()
         : true;
 
       return matchesSearch && matchesStatus && matchesDate;

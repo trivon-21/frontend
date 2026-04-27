@@ -12,23 +12,23 @@ import { PaymentService } from '../../services/payment.service';
 })
 export class PaymentVerificationComponent implements OnInit {
 
-  payments:        any[] = [];
-  searchQuery      = '';
-  showRejectModal  = false;
-  showSlipModal    = false;
-  selectedPayment: any  = null;
-  rejectionReason  = '';
-  isLoading        = false;
+  payments: any[] = [];
+  searchQuery = '';
+  showRejectModal = false;
+  showSlipModal = false;
+  selectedPayment: any = null;
+  rejectionReason = '';
+  isLoading = false;
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) { }
 
   ngOnInit(): void { this.loadPayments(); }
 
   loadPayments(): void {
     this.isLoading = true;
     this.paymentService.getPendingPayments().subscribe({
-      next:  (data) => { this.payments = data; this.isLoading = false; },
-      error: (err)  => { console.error(err); this.isLoading = false; }
+      next: (data) => { this.payments = data; this.isLoading = false; },
+      error: (err) => { console.error(err); this.isLoading = false; }
     });
   }
 
@@ -48,14 +48,19 @@ export class PaymentVerificationComponent implements OnInit {
     );
   }
 
-  openSlipModal(payment: any)  { this.selectedPayment = payment; this.showSlipModal = true; }
-  closeSlipModal()             { this.showSlipModal = false; this.selectedPayment = null; }
+  openSlipModal(payment: any) { this.selectedPayment = payment; this.showSlipModal = true; }
+  closeSlipModal() { this.showSlipModal = false; this.selectedPayment = null; }
 
   approvePayment(payment: any): void {
     if (!confirm(`Approve payment for Order ${payment.orderId}?`)) return;
     this.isLoading = true;
     this.paymentService.approvePayment(payment._id).subscribe({
-      next: () => { alert('✅ Payment approved! Confirmation email sent to customer.'); this.loadPayments(); },
+      next: (response: any) => {
+        alert('✅ Payment approved! Confirmation email sent to customer.');
+        // Remove from list immediately
+        this.payments = this.payments.filter(p => p._id !== payment._id);
+        this.isLoading = false;
+      },
       error: (err) => { console.error(err); this.isLoading = false; alert('❌ Approval failed.'); }
     });
   }
@@ -72,9 +77,12 @@ export class PaymentVerificationComponent implements OnInit {
     if (!this.rejectionReason.trim()) { alert('Please enter a rejection reason.'); return; }
     this.isLoading = true;
     this.paymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
-      next: () => {
+      next: (response: any) => {
         alert('✅ Payment rejected. Email with re-upload link sent to customer.');
-        this.closeRejectModal(); this.loadPayments();
+        // Remove from list immediately
+        this.payments = this.payments.filter(p => p._id !== this.selectedPayment._id);
+        this.closeRejectModal();
+        this.isLoading = false;
       },
       error: (err) => { console.error(err); this.isLoading = false; alert('❌ Rejection failed.'); }
     });

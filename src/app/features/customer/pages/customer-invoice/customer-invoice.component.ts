@@ -13,24 +13,24 @@ import { InvoiceService } from '../../../finance/services/invoice.service';
 })
 export class CustomerInvoiceComponent implements OnInit {
 
-  invoiceId    = '';
+  invoiceId = '';
   invoice: any = null;
-  daysLeft     = 0;
-  isLoading    = true;
-  loadError    = '';
+  daysLeft = 0;
+  isLoading = true;
+  loadError = '';
 
   // UI state
-  isAccepted   = false;
-  isRejected   = false;
-  showRejectModal   = false;
-  rejectionReason   = '';
-  isSubmitting      = false;
+  isAccepted = false;
+  isRejected = false;
+  showRejectModal = false;
+  rejectionReason = '';
+  isSubmitting = false;
 
   constructor(
     private route: ActivatedRoute,
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -47,11 +47,11 @@ export class CustomerInvoiceComponent implements OnInit {
   loadInvoice(id: string): void {
     this.invoiceService.getInvoiceForCustomer(id).subscribe({
       next: (data: any) => {
-        this.invoice  = data.invoice;
+        this.invoice = data.invoice;
         this.daysLeft = data.daysLeft || 0;
         this.isAccepted = data.invoice.status === 'ACCEPTED';
         this.isRejected = data.invoice.status === 'REJECTED';
-        this.isLoading  = false;
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
@@ -72,7 +72,7 @@ export class CustomerInvoiceComponent implements OnInit {
     this.invoiceService.acceptInvoice(this.invoiceId).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.isAccepted   = true;
+        this.isAccepted = true;
         this.invoice.status = 'ACCEPTED';
         this.cdr.detectChanges();
       },
@@ -95,9 +95,9 @@ export class CustomerInvoiceComponent implements OnInit {
     this.isSubmitting = true;
     this.invoiceService.rejectInvoice(this.invoiceId, this.rejectionReason).subscribe({
       next: () => {
-        this.isSubmitting    = false;
-        this.isRejected      = true;
-        this.invoice.status  = 'REJECTED';
+        this.isSubmitting = false;
+        this.isRejected = true;
+        this.invoice.status = 'REJECTED';
         this.showRejectModal = false;
         this.cdr.detectChanges();
       },
@@ -114,8 +114,8 @@ export class CustomerInvoiceComponent implements OnInit {
     this.invoiceService.cancelRejection(this.invoiceId).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.isRejected   = false;
-        this.isAccepted   = true;
+        this.isRejected = false;
+        this.isAccepted = true;
         this.invoice.status = 'ACCEPTED';
         this.cdr.detectChanges();
       },

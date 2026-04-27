@@ -13,20 +13,20 @@ import { InspectionOfficerService } from '../../services/inspection-officer.serv
 })
 export class OngoingInspectionsComponent implements OnInit {
 
-  inspections:   any[] = [];
+  inspections: any[] = [];
   filteredInspections: any[] = [];
-  searchQuery    = '';
+  searchQuery = '';
   selectedFilter = 'All';
-  selectedDate   = '';
-  currentPage    = 1;
-  itemsPerPage   = 8;
-  totalItems     = 0;
-  isLoading      = false;
+  selectedDate = '';
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalItems = 0;
+  isLoading = false;
 
   constructor(
     private officerService: InspectionOfficerService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
@@ -46,8 +46,8 @@ export class OngoingInspectionsComponent implements OnInit {
     this.filteredInspections = this.inspections.filter(i => {
       const matchesSearch = this.searchQuery
         ? i.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
         ? new Date(i.inspectionDate).toDateString() === new Date(this.selectedDate).toDateString()
@@ -68,7 +68,7 @@ export class OngoingInspectionsComponent implements OnInit {
   }
 
   get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
-  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  get endItem() { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
   nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) this.currentPage++; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   goToPage(page: number) { this.currentPage = page; }
@@ -76,11 +76,11 @@ export class OngoingInspectionsComponent implements OnInit {
   recordInspection(inspection: any): void {
     this.router.navigate(['/inspection-report'], {
       queryParams: {
-        ticketId:      inspection._id,
-        customerName:  inspection.prefill?.customerName  || '',
+        ticketId: inspection._id,
+        customerName: inspection.prefill?.customerName || '',
         contactNumber: inspection.prefill?.contactNumber || '',
-        siteAddress:   inspection.prefill?.siteAddress   || '',
-        inspectionDate:inspection.prefill?.inspectionDate|| '',
+        siteAddress: inspection.prefill?.siteAddress || '',
+        inspectionDate: inspection.prefill?.inspectionDate || '',
       }
     });
   }

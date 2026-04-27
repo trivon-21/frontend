@@ -5,13 +5,13 @@ import { ActivatedRoute } from '@angular/router';
 import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
 
 interface CalendarDay {
-  date:        string;
-  label:       string;
-  status:      'available' | 'unavailable' | 'holiday' | 'fully_booked';
-  isSelected:  boolean;
-  slotsLeft:   number;
-  isWeekend:   boolean;
-  isHoliday:   boolean;
+  date: string;
+  label: string;
+  status: 'available' | 'unavailable' | 'holiday' | 'fully_booked';
+  isSelected: boolean;
+  slotsLeft: number;
+  isWeekend: boolean;
+  isHoliday: boolean;
   isFullyBooked: boolean;
 }
 
@@ -24,27 +24,27 @@ interface CalendarDay {
 })
 export class InspectionSchedulingComponent implements OnInit {
 
-  customerName  = 'Customer';
-  ticketId      = '';
-  mode          = 'scheduling'; // 'scheduling' or 'reschedule'
-  selectedDay:  CalendarDay | null = null;
-  isConfirmed   = false;
-  isLoading     = true;
-  isSubmitting  = false;
-  loadError     = '';
-  popupMessage  = '';
-  showPopup     = false;
+  customerName = 'Customer';
+  ticketId = '';
+  mode = 'scheduling'; // 'scheduling' or 'reschedule'
+  selectedDay: CalendarDay | null = null;
+  isConfirmed = false;
+  isLoading = true;
+  isSubmitting = false;
+  loadError = '';
+  popupMessage = '';
+  showPopup = false;
   currentScheduledDate: string = ''; // For reschedule mode
 
-  startOffset:  any[] = [];
-  weekDays      = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  startOffset: any[] = [];
+  weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   calendarDays: CalendarDay[] = [];
 
   constructor(
     private ticketService: InspectionTicketService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -68,7 +68,7 @@ export class InspectionSchedulingComponent implements OnInit {
         // If already scheduled show confirmed state (but not if in reschedule mode)
         if (data.alreadyScheduled && this.mode !== 'reschedule') {
           this.isConfirmed = true;
-          this.isLoading   = false;
+          this.isLoading = false;
           this.cdr.detectChanges();
           return;
         }
@@ -79,21 +79,21 @@ export class InspectionSchedulingComponent implements OnInit {
         }
 
         this.calendarDays = data.calendar.map((d: any) => ({
-          date:          d.date,
-          label:         this.formatLabel(d.date),
-          status:        d.status,
-          isSelected:    false,
-          slotsLeft:     d.slotsLeft,
-          isWeekend:     d.isWeekend,
-          isHoliday:     d.isHoliday,
+          date: d.date,
+          label: this.formatLabel(d.date),
+          status: d.status,
+          isSelected: false,
+          slotsLeft: d.slotsLeft,
+          isWeekend: d.isWeekend,
+          isHoliday: d.isHoliday,
           isFullyBooked: d.isFullyBooked,
         }));
 
         // Calculate offset for first day
         if (this.calendarDays.length > 0) {
           const firstDate = new Date(this.calendarDays[0].date);
-          const day       = firstDate.getDay();
-          const offset    = day === 0 ? 6 : day - 1;
+          const day = firstDate.getDay();
+          const offset = day === 0 ? 6 : day - 1;
           this.startOffset = Array(offset).fill(0);
         }
 
@@ -109,9 +109,9 @@ export class InspectionSchedulingComponent implements OnInit {
   }
 
   formatLabel(dateStr: string): string {
-    const date  = new Date(dateStr);
+    const date = new Date(dateStr);
     const month = date.toLocaleString('en-US', { month: 'long' });
-    const day   = String(date.getDate()).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${month} ${day}`;
   }
 
@@ -136,17 +136,17 @@ export class InspectionSchedulingComponent implements OnInit {
 
   showPopupMessage(msg: string) {
     this.popupMessage = msg;
-    this.showPopup    = true;
+    this.showPopup = true;
     setTimeout(() => { this.showPopup = false; }, 3000);
   }
 
   get formattedSelectedDate(): string {
     if (!this.selectedDay) return '';
-    const d      = new Date(this.selectedDay.date);
-    const day    = d.getDate();
+    const d = new Date(this.selectedDay.date);
+    const day = d.getDate();
     const suffix = this.getOrdinal(day);
-    const month  = d.toLocaleString('en-US', { month: 'long' });
-    const year   = d.getFullYear();
+    const month = d.toLocaleString('en-US', { month: 'long' });
+    const year = d.getFullYear();
     return `${day}${suffix} of ${month}, ${year}`;
   }
 
@@ -173,7 +173,7 @@ export class InspectionSchedulingComponent implements OnInit {
     serviceCall.subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.isConfirmed  = true;
+        this.isConfirmed = true;
         this.cdr.detectChanges();
       },
       error: (err: any) => {

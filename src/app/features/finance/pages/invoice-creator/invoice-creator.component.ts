@@ -13,18 +13,18 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class InvoiceCreatorComponent implements OnInit {
 
-  currentPage  = 1;
-  totalPages   = 3;
-  invoiceId    = '';
-  isLoading    = true;
+  currentPage = 1;
+  totalPages = 3;
+  invoiceId = '';
+  isLoading = true;
   isConfirming = false;
 
-  invoiceNumber   = '';
-  invoiceDate     = '';
-  customerName    = '';
+  invoiceNumber = '';
+  invoiceDate = '';
+  customerName = '';
   customerAddress = '';
-  items:  any[]   = [];
-  serviceCharge   = 0;
+  items: any[] = [];
+  serviceCharge = 0;
 
   get subTotal(): number {
     return this.items.reduce((s, i) => s + (i.amount || 0), 0);
@@ -38,7 +38,7 @@ export class InvoiceCreatorComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private invoiceService: InvoiceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -52,13 +52,13 @@ export class InvoiceCreatorComponent implements OnInit {
   loadInvoice(id: string): void {
     this.invoiceService.getInvoice(id).subscribe({
       next: (data: any) => {
-        this.invoiceNumber   = data.invoiceNumber;
-        this.invoiceDate     = new Date(data.invoiceDate).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-        this.customerName    = data.customerName;
+        this.invoiceNumber = data.invoiceNumber;
+        this.invoiceDate = new Date(data.invoiceDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        this.customerName = data.customerName;
         this.customerAddress = data.customerAddress;
-        this.items           = data.items || [];
-        this.serviceCharge   = data.serviceCharge || 0;
-        this.isLoading       = false;
+        this.items = data.items || [];
+        this.serviceCharge = data.serviceCharge || 0;
+        this.isLoading = false;
       },
       error: (err: any) => {
         console.error(err);

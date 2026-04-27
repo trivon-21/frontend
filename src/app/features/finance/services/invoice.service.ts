@@ -8,7 +8,7 @@ export class InvoiceService {
 
   private apiUrl = 'http://127.0.0.1:3000/api/invoices';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private handleError(error: HttpErrorResponse) {
     if (error.status === 0)

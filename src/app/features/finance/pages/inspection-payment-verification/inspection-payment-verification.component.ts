@@ -20,7 +20,7 @@ export class InspectionPaymentVerificationComponent implements OnInit {
   rejectionReason = '';
   isLoading = false;
 
-  constructor(private ticketService: InspectionTicketService) {}
+  constructor(private ticketService: InspectionTicketService) { }
 
   ngOnInit(): void {
     this.loadPayments();

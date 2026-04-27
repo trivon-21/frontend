@@ -18,15 +18,19 @@
   <div class="hero-right">
     <div class="welcome-badge">🔔 Welcome {{ customerName }}!</div>
     <div class="hero-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar"/>
+      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
     </div>
   </div>
 </div>
 
 <div class="page-body">
 
-  <div class="loading-card" *ngIf="isLoading"><p>Loading invoice...</p></div>
-  <div class="error-card"   *ngIf="loadError && !isLoading"><p>{{ loadError }}</p></div>
+  <div class="loading-card" *ngIf="isLoading">
+    <p>Loading invoice...</p>
+  </div>
+  <div class="error-card" *ngIf="loadError && !isLoading">
+    <p>{{ loadError }}</p>
+  </div>
 
   <ng-container *ngIf="!isLoading && !loadError && invoice">
 
@@ -94,9 +98,12 @@
 
       <div class="terms-section">
         <p class="terms-title">Terms & Conditions</p>
-        <p class="terms-text">Payment Deadline: Once an invoice is accepted, the customer must complete the payment and upload the payment slip within fourteen (14) calendar days.</p>
-        <p class="terms-text">Rejection Policy: If the invoice is rejected, it can be resumed within one (1) month of the rejection date. After this period, the request will be permanently closed.</p>
-        <p class="terms-text">Failure to upload the payment slip within the 2-week period, the invoice will be automatically cancelled.</p>
+        <p class="terms-text">Payment Deadline: Once an invoice is accepted, the customer must complete the payment and
+          upload the payment slip within fourteen (14) calendar days.</p>
+        <p class="terms-text">Rejection Policy: If the invoice is rejected, it can be resumed within one (1) month of
+          the rejection date. After this period, the request will be permanently closed.</p>
+        <p class="terms-text">Failure to upload the payment slip within the 2-week period, the invoice will be
+          automatically cancelled.</p>
       </div>
     </div>
 
@@ -178,14 +185,12 @@
       <div class="form-group">
         <label>Rejection Reason <span class="required">*</span></label>
         <textarea rows="4" [(ngModel)]="rejectionReason"
-          placeholder="Please explain why you are rejecting this invoice..."
-          [disabled]="isSubmitting"></textarea>
+          placeholder="Please explain why you are rejecting this invoice..." [disabled]="isSubmitting"></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" (click)="closeRejectModal()" [disabled]="isSubmitting">Cancel</button>
-      <button class="btn-confirm-reject" (click)="confirmReject()"
-        [disabled]="isSubmitting || !rejectionReason.trim()">
+      <button class="btn-confirm-reject" (click)="confirmReject()" [disabled]="isSubmitting || !rejectionReason.trim()">
         {{ isSubmitting ? 'Processing...' : 'Confirm Reject' }}
       </button>
     </div>

@@ -26,7 +26,7 @@
 .search-wrapper {
   position: relative;
   width: 340px;
-   max-width: 100%;
+  max-width: 100%;
 }
 
 .search-wrapper svg {
@@ -247,6 +247,7 @@
 .slip-link:hover {
   text-decoration: underline;
 }
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .page-container {

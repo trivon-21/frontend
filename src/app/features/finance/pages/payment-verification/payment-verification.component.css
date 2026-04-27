@@ -54,7 +54,7 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card-body {
@@ -149,7 +149,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,13 +224,13 @@ textarea:focus {
     margin-left: 0;
     padding: 1rem;
   }
-  
+
   .page-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
-  
+
   .page-search {
     width: 100%;
   }

@@ -57,49 +57,49 @@ interface PhotoEntry {
 export class InspectionReportComponent implements OnInit {
 
   currentPage = 1;
-  totalPages  = 3;
+  totalPages = 3;
   obstacleOptions = ['Furniture', 'Beams', 'Electrical wiring', 'Glass panels', 'Plumbing lines', 'Other'];
 
   // Page 1 — auto filled from URL params
-  ticketId      = '';
-  customerName  = '';
+  ticketId = '';
+  customerName = '';
   contactNumber = '';
-  siteAddress   = '';
-  siteType      = '';
+  siteAddress = '';
+  siteType = '';
   inspectionDate = '';
-  siteStatus     = 'New';
-  floorLevel     = '';
+  siteStatus = 'New';
+  floorLevel = '';
   elevatorAvailability = true;
-  parkingAvailability  = '';
+  parkingAvailability = '';
 
   // Rooms
   rooms: Room[] = [this.newRoom()];
 
   // Page 3
-  photoEntries:      PhotoEntry[] = [];
-  pendingPhotoName   = '';
+  photoEntries: PhotoEntry[] = [];
+  pendingPhotoName = '';
   showPhotoNameInput = false;
-  pendingPhotoFile:  string | null = null;
-  inspectorName      = '';
-  acknowledgeDate    = '';
+  pendingPhotoFile: string | null = null;
+  inspectorName = '';
+  acknowledgeDate = '';
 
   constructor(
     private route: ActivatedRoute,
     private officerService: InspectionOfficerService
-  ) {}
+  ) { }
 
-ngOnInit(): void {
-  // Auto-fill today's date
-  this.acknowledgeDate = new Date().toISOString().split('T')[0];
+  ngOnInit(): void {
+    // Auto-fill today's date
+    this.acknowledgeDate = new Date().toISOString().split('T')[0];
 
-  this.route.queryParams.subscribe(params => {
-    if (params['ticketId'])       this.ticketId       = params['ticketId'];
-    if (params['customerName'])   this.customerName   = params['customerName'];
-    if (params['contactNumber'])  this.contactNumber  = params['contactNumber'];
-    if (params['siteAddress'])    this.siteAddress    = params['siteAddress'];
-    if (params['inspectionDate']) this.inspectionDate = params['inspectionDate'];
-  });
-}
+    this.route.queryParams.subscribe(params => {
+      if (params['ticketId']) this.ticketId = params['ticketId'];
+      if (params['customerName']) this.customerName = params['customerName'];
+      if (params['contactNumber']) this.contactNumber = params['contactNumber'];
+      if (params['siteAddress']) this.siteAddress = params['siteAddress'];
+      if (params['inspectionDate']) this.inspectionDate = params['inspectionDate'];
+    });
+  }
 
   newRoom(): Room {
     return {
@@ -120,7 +120,7 @@ ngOnInit(): void {
     };
   }
 
-  addRoom()  { this.rooms.push(this.newRoom()); }
+  addRoom() { this.rooms.push(this.newRoom()); }
   removeRoom(i: number) { if (this.rooms.length > 1) this.rooms.splice(i, 1); }
 
   calcArea(room: Room) {
@@ -155,9 +155,9 @@ ngOnInit(): void {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.pendingPhotoFile  = e.target?.result as string;
+        this.pendingPhotoFile = e.target?.result as string;
         this.showPhotoNameInput = true;
-        this.pendingPhotoName  = '';
+        this.pendingPhotoName = '';
       };
       reader.readAsDataURL(input.files[0]);
     }
@@ -169,17 +169,17 @@ ngOnInit(): void {
       return;
     }
     this.photoEntries.push({
-      name:    this.pendingPhotoName.trim(),
+      name: this.pendingPhotoName.trim(),
       dataUrl: this.pendingPhotoFile!
     });
-    this.pendingPhotoFile   = null;
-    this.pendingPhotoName   = '';
+    this.pendingPhotoFile = null;
+    this.pendingPhotoName = '';
     this.showPhotoNameInput = false;
   }
 
   cancelPhoto() {
-    this.pendingPhotoFile   = null;
-    this.pendingPhotoName   = '';
+    this.pendingPhotoFile = null;
+    this.pendingPhotoName = '';
     this.showPhotoNameInput = false;
   }
 
@@ -199,20 +199,20 @@ ngOnInit(): void {
     }
 
     const reportData = {
-      customerName:         this.customerName,
-      contactNumber:        this.contactNumber,
-      siteAddress:          this.siteAddress,
-      siteType:             this.siteType,
-      inspectionDate:       this.inspectionDate,
-      siteStatus:           this.siteStatus,
-      floorLevel:           this.floorLevel,
+      customerName: this.customerName,
+      contactNumber: this.contactNumber,
+      siteAddress: this.siteAddress,
+      siteType: this.siteType,
+      inspectionDate: this.inspectionDate,
+      siteStatus: this.siteStatus,
+      floorLevel: this.floorLevel,
       elevatorAvailability: this.elevatorAvailability,
-      parkingAvailability:  this.parkingAvailability,
-      rooms:                this.rooms,
-      photos:               this.photoEntries,
-      inspectorName:        this.inspectorName,
-      acknowledgeDate:      this.acknowledgeDate,
-      acknowledgeTime:      this.currentTime,
+      parkingAvailability: this.parkingAvailability,
+      rooms: this.rooms,
+      photos: this.photoEntries,
+      inspectorName: this.inspectorName,
+      acknowledgeDate: this.acknowledgeDate,
+      acknowledgeTime: this.currentTime,
     };
 
     this.officerService.recordReport(this.ticketId, reportData).subscribe({

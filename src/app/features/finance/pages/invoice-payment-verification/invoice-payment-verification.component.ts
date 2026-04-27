@@ -12,15 +12,15 @@ import { InspectionTicketService } from '../../services/inspection-ticket.servic
 })
 export class InvoicePaymentVerificationComponent implements OnInit {
 
-  payments:         any[] = [];
-  searchQuery       = '';
-  showRejectModal   = false;
-  showDetailsModal  = false;
-  selectedPayment:  any   = null;
-  rejectionReason   = '';
-  isLoading         = false;
+  payments: any[] = [];
+  searchQuery = '';
+  showRejectModal = false;
+  showDetailsModal = false;
+  selectedPayment: any = null;
+  rejectionReason = '';
+  isLoading = false;
 
-  constructor(private ticketService: InspectionTicketService) {}
+  constructor(private ticketService: InspectionTicketService) { }
 
   ngOnInit(): void { this.loadPayments(); }
 
@@ -28,7 +28,7 @@ export class InvoicePaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.ticketService.getPendingVerification().subscribe({
       next: (data: any[]) => { this.payments = data; this.isLoading = false; },
-      error: (err: any)   => { console.error(err); this.isLoading = false; }
+      error: (err: any) => { console.error(err); this.isLoading = false; }
     });
   }
 
@@ -55,15 +55,15 @@ export class InvoicePaymentVerificationComponent implements OnInit {
   }
 
   openRejectModal(payment: any): void {
-    this.selectedPayment  = payment;
-    this.rejectionReason  = '';
-    this.showRejectModal  = true;
+    this.selectedPayment = payment;
+    this.rejectionReason = '';
+    this.showRejectModal = true;
   }
 
   closeRejectModal(): void {
-    this.showRejectModal  = false;
-    this.selectedPayment  = null;
-    this.rejectionReason  = '';
+    this.showRejectModal = false;
+    this.selectedPayment = null;
+    this.rejectionReason = '';
   }
 
   rejectPayment(): void {

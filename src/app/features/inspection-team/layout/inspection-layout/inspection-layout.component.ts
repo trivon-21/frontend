@@ -6,7 +6,7 @@ import { InspectionSidebarComponent } from '../../components/inspection-sidebar/
 @Component({
   selector: 'app-inspection-layout',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent,InspectionSidebarComponent],
+  imports: [RouterOutlet, HeaderComponent, InspectionSidebarComponent],
   templateUrl: './inspection-layout.component.html'
 })
-export class InspectionLayoutComponent {}
+export class InspectionLayoutComponent { }

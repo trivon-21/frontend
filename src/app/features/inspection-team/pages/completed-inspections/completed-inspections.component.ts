@@ -12,24 +12,24 @@ import { InspectionOfficerService } from '../../services/inspection-officer.serv
 })
 export class CompletedInspectionsComponent implements OnInit {
 
-  inspections: any[]  = [];
+  inspections: any[] = [];
   filteredInspections: any[] = [];
   selectedInspection: any = null;
-  showReportModal     = false;
-  reportData: any     = null;
-  isEditing           = false;
-  editedReport: any   = null;
-  isLoading           = false;
-  isSubmitting        = false;
+  showReportModal = false;
+  reportData: any = null;
+  isEditing = false;
+  editedReport: any = null;
+  isLoading = false;
+  isSubmitting = false;
 
-  searchQuery    = '';
+  searchQuery = '';
   selectedFilter = 'All';
-  selectedDate   = '';
-  currentPage    = 1;
-  itemsPerPage   = 8;
-  totalItems     = 0;
+  selectedDate = '';
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalItems = 0;
 
-  constructor(private officerService: InspectionOfficerService) {}
+  constructor(private officerService: InspectionOfficerService) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
@@ -49,8 +49,8 @@ export class CompletedInspectionsComponent implements OnInit {
     this.filteredInspections = this.inspections.filter(i => {
       const matchesSearch = this.searchQuery
         ? i.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
         ? new Date(i.inspectionDate).toDateString() === new Date(this.selectedDate).toDateString()
@@ -71,7 +71,7 @@ export class CompletedInspectionsComponent implements OnInit {
   }
 
   get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
-  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  get endItem() { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
   nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) this.currentPage++; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   goToPage(page: number) { this.currentPage = page; }
@@ -82,7 +82,7 @@ export class CompletedInspectionsComponent implements OnInit {
     this.isLoading = true;
     this.officerService.getReport(inspection._id).subscribe({
       next: (data: any) => {
-        this.reportData   = data;
+        this.reportData = data;
         this.editedReport = JSON.parse(JSON.stringify(data));
         this.showReportModal = true;
         this.isLoading = false;
@@ -99,7 +99,7 @@ export class CompletedInspectionsComponent implements OnInit {
     this.showReportModal = false;
     this.selectedInspection = null;
     this.reportData = null;
-    this.isEditing  = false;
+    this.isEditing = false;
   }
 
   startEditing(): void { this.isEditing = true; }
@@ -109,8 +109,8 @@ export class CompletedInspectionsComponent implements OnInit {
     this.officerService.saveReport(this.selectedInspection._id, this.editedReport).subscribe({
       next: () => {
         this.reportData = JSON.parse(JSON.stringify(this.editedReport));
-        this.isEditing  = false;
-        this.isLoading  = false;
+        this.isEditing = false;
+        this.isLoading = false;
         alert('✅ Report updated successfully!');
       },
       error: (err: any) => {

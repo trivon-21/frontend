@@ -28,8 +28,11 @@ import { InvoiceVerifiedPaymentsComponent } from './features/finance/pages/invoi
 import { InvoiceRejectedPaymentsComponent } from './features/finance/pages/invoice-rejected-payments/invoice-rejected-payments.component';
 import { CustomerInvoiceComponent } from './features/customer/pages/customer-invoice/customer-invoice.component';
 import { ServicePaymentVerificationComponent } from './features/finance/pages/service-payment-verification/service-payment-verification.component';
-import { ServiceVerifiedPaymentsComponent }    from './features/finance/pages/service-verified-payments/service-verified-payments.component';
-import { ServiceRejectedPaymentsComponent }    from './features/finance/pages/service-rejected-payments/service-rejected-payments.component';
+import { ServiceVerifiedPaymentsComponent } from './features/finance/pages/service-verified-payments/service-verified-payments.component';
+import { ServiceRejectedPaymentsComponent } from './features/finance/pages/service-rejected-payments/service-rejected-payments.component';
+import { PaymentAuditLogComponent } from './features/finance/pages/payment-audit-log/payment-audit-log.component';
+import { FinancialReportComponent } from './features/finance/pages/financial-report/financial-report.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -54,28 +57,29 @@ export const routes: Routes = [
       { path: 'invoice/payment-verification', component: InvoicePaymentVerificationComponent },
       { path: 'invoice/verified-payments', component: InvoiceVerifiedPaymentsComponent },
       { path: 'invoice/rejected-payments', component: InvoiceRejectedPaymentsComponent },
-      { path: 'services/repair-verification',        component: ServicePaymentVerificationComponent },
-{ path: 'services/repair-verified',            component: ServiceVerifiedPaymentsComponent    },
-{ path: 'services/repair-rejected',            component: ServiceRejectedPaymentsComponent    },
-{ path: 'services/maintenance-verification',   component: ServicePaymentVerificationComponent },
-{ path: 'services/maintenance-verified',       component: ServiceVerifiedPaymentsComponent    },
-{ path: 'services/maintenance-rejected',       component: ServiceRejectedPaymentsComponent    },
-
+      { path: 'services/repair-verification', component: ServicePaymentVerificationComponent },
+      { path: 'services/repair-verified', component: ServiceVerifiedPaymentsComponent },
+      { path: 'services/repair-rejected', component: ServiceRejectedPaymentsComponent },
+      { path: 'services/maintenance-verification', component: ServicePaymentVerificationComponent },
+      { path: 'services/maintenance-verified', component: ServiceVerifiedPaymentsComponent },
+      { path: 'services/maintenance-rejected', component: ServiceRejectedPaymentsComponent },
+      { path: 'payment-audit-log', component: PaymentAuditLogComponent },
+      { path: 'financial-report', component: FinancialReportComponent },
     ]
   },
-      { path: 'inspection-report', component: InspectionReportComponent },
+  { path: 'inspection-report', component: InspectionReportComponent },
   {
-  path: 'inspection-officer',
-  component: InspectionLayoutComponent,
-  children: [
-    { path: 'scheduled-inspections', component: ScheduledInspectionsComponent },
-    { path: 'ongoing-inspections', component: OngoingInspectionsComponent },
-    { path: 'completed-inspections', component: CompletedInspectionsComponent },
-    { path: 'dashboard', component: InspectionDashboardComponent },
-    { path: '**', redirectTo: '/dashboard' }//check this
-    // future pages go here
-  ]
-},
+    path: 'inspection-officer',
+    component: InspectionLayoutComponent,
+    children: [
+      { path: 'scheduled-inspections', component: ScheduledInspectionsComponent },
+      { path: 'ongoing-inspections', component: OngoingInspectionsComponent },
+      { path: 'completed-inspections', component: CompletedInspectionsComponent },
+      { path: 'dashboard', component: InspectionDashboardComponent },
+      { path: '**', redirectTo: '/dashboard' }//check this
+      // future pages go here
+    ]
+  },
   // Customer pages - no sidebar/header
   { path: 'inspection-payment', component: InspectionPaymentComponent },
   { path: 'inspection-scheduling', component: InspectionSchedulingComponent },

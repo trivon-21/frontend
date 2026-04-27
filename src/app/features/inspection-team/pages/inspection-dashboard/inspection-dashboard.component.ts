@@ -12,30 +12,30 @@ import { InspectionOfficerService } from '../../services/inspection-officer.serv
 })
 export class InspectionDashboardComponent implements OnInit {
 
-  searchQuery    = '';
+  searchQuery = '';
   selectedStatus = 'ALL';
-  selectedDate   = '';
-  currentPage    = 1;
-  itemsPerPage   = 8;
-  totalItems     = 0;
+  selectedDate = '';
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalItems = 0;
 
-  ongoingCount   = 0;
+  ongoingCount = 0;
   scheduledCount = 0;
   completedCount = 0;
   submittedCount = 0;
 
-  allInspections:      any[] = [];
+  allInspections: any[] = [];
   filteredInspections: any[] = [];
-  paginatedInspections:any[] = [];
+  paginatedInspections: any[] = [];
 
-  constructor(private officerService: InspectionOfficerService) {}
+  constructor(private officerService: InspectionOfficerService) { }
 
   ngOnInit(): void { this.loadDashboard(); }
 
   loadDashboard(): void {
     this.officerService.getDashboardStats().subscribe({
       next: (data: any) => {
-        this.ongoingCount   = data.ongoing   || 0;
+        this.ongoingCount = data.ongoing || 0;
         this.scheduledCount = data.scheduled || 0;
         this.completedCount = data.completed || 0;
         this.submittedCount = data.submitted || 0;
@@ -50,8 +50,8 @@ export class InspectionDashboardComponent implements OnInit {
     this.filteredInspections = this.allInspections.filter(i => {
       const matchesSearch = this.searchQuery
         ? i.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.customer?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        i.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        i.customer?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesStatus = this.selectedStatus === 'ALL' || i.status === this.selectedStatus;
       const matchesDate = this.selectedDate
@@ -74,7 +74,7 @@ export class InspectionDashboardComponent implements OnInit {
   }
 
   get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
-  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  get endItem() { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
 
   nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) { this.currentPage++; this.updatePaginated(); } }
   prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePaginated(); } }
@@ -82,20 +82,20 @@ export class InspectionDashboardComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'ONGOING':         return 'status-ongoing';
+      case 'ONGOING': return 'status-ongoing';
       case 'INSPECTION_SCHEDULED': return 'status-scheduled';
       case 'REPORT_RECORDED': return 'status-inspected';
-      case 'INSPECTED':       return 'status-inspected';
+      case 'INSPECTED': return 'status-inspected';
       default: return '';
     }
   }
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'ONGOING':              return 'Ongoing';
+      case 'ONGOING': return 'Ongoing';
       case 'INSPECTION_SCHEDULED': return 'Scheduled';
-      case 'REPORT_RECORDED':      return 'Inspected';
-      case 'INSPECTED':            return 'Submitted';
+      case 'REPORT_RECORDED': return 'Inspected';
+      case 'INSPECTED': return 'Submitted';
       default: return status;
     }
   }

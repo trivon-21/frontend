@@ -57,13 +57,16 @@
   height: 20px;
 }
 
-.nav-label { flex: 1; }
+.nav-label {
+  flex: 1;
+}
 
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
     z-index: 999;
   }
+
   .sidebar.active {
     transform: translateX(0);
   }

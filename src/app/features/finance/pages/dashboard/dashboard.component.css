@@ -6,6 +6,7 @@
   margin-top: 70px;
   transition: margin-left 0.3s ease;
 }
+
 .dashboard-title {
   font-size: 28px;
   font-weight: 700;
@@ -27,6 +28,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
 }
+
 .percentage {
   position: absolute;
   top: 20px;
@@ -34,6 +36,7 @@
   font-weight: 600;
   font-size: 14px;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -221,16 +224,24 @@ tbody tr:hover {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 120px;     
-  height: 32px;       
+  width: 120px;
+  height: 32px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
 }
 
-.green-text { color: #10b981; }
-.blue-text { color: #3b82f6; }
-.red-text { color: #ef4444; }
+.green-text {
+  color: #10b981;
+}
+
+.blue-text {
+  color: #3b82f6;
+}
+
+.red-text {
+  color: #ef4444;
+}
 
 .status-badge.approved {
   background: #d1fae5;
@@ -380,7 +391,7 @@ tbody tr:hover {
   background: white;
   padding: 6px;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   width: fit-content;
 }
 
@@ -402,7 +413,10 @@ tbody tr:hover {
   font-weight: 600;
 }
 
-.filter-tabs button:hover:not(.active) { background: #f3f4f6; color: #1a1a1a; }
+.filter-tabs button:hover:not(.active) {
+  background: #f3f4f6;
+  color: #1a1a1a;
+}
 
 .type-badge {
   padding: 3px 10px;
@@ -411,21 +425,41 @@ tbody tr:hover {
   font-weight: 600;
 }
 
-.type-buy        { background: #dbeafe; color: #1d4ed8; }
-.type-inspection { background: #d1fae5; color: #065f46; }
-.type-invoice    { background: #ede9fe; color: #6d28d9; }
-.type-repair       { background: #fef3c7; color: #b45309; }
-.type-maintenance  { background: #fce7f3; color: #9d174d; }
+.type-buy {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.type-inspection {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.type-invoice {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.type-repair {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.type-maintenance {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
 /* RESPONSIVE */
 @media (max-width: 1200px) {
   .main-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-section {
     flex-direction: row;
   }
-  
+
   .stat-card {
     flex: 1;
   }
@@ -459,20 +493,21 @@ tbody tr:hover {
   .top-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-wrapper {
     padding: 16px;
   }
-  
+
   .card {
     padding: 20px;
   }
-  
+
   .table-section {
     padding: 16px;
   }
-  
-  th, td {
+
+  th,
+  td {
     padding: 12px;
     font-size: 13px;
   }

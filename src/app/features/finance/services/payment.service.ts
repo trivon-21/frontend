@@ -8,7 +8,7 @@ export class PaymentService {
 
   private apiUrl = 'http://127.0.0.1:3000/api/payments';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private handleError(error: HttpErrorResponse) {
     const msg = error.error?.message || error.message || 'Request failed';

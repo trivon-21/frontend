@@ -13,30 +13,30 @@ import { ServicePaymentService } from '../../services/service-payment.service';
 })
 export class ServicePaymentVerificationComponent implements OnInit {
 
-  serviceType      = 'REPAIR';
-  pageTitle        = 'Repair Payment Verification';
-  payments:        any[] = [];
-  searchQuery      = '';
-  showRejectModal  = false;
-  showSlipModal    = false;
-  selectedPayment: any  = null;
-  rejectionReason  = '';
-  isLoading        = false;
+  serviceType = 'REPAIR';
+  pageTitle = 'Repair Payment Verification';
+  payments: any[] = [];
+  searchQuery = '';
+  showRejectModal = false;
+  showSlipModal = false;
+  selectedPayment: any = null;
+  rejectionReason = '';
+  isLoading = false;
 
   constructor(
     private servicePaymentService: ServicePaymentService,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Auto-detect from URL: /services/repair-verification or /services/maintenance-verification
     const url = this.route.snapshot.url.map(s => s.path).join('/');
     if (url.includes('maintenance')) {
       this.serviceType = 'MAINTENANCE';
-      this.pageTitle   = 'Maintenance Payment Verification';
+      this.pageTitle = 'Maintenance Payment Verification';
     } else {
       this.serviceType = 'REPAIR';
-      this.pageTitle   = 'Repair Payment Verification';
+      this.pageTitle = 'Repair Payment Verification';
     }
     this.loadPayments();
   }
@@ -44,8 +44,8 @@ export class ServicePaymentVerificationComponent implements OnInit {
   loadPayments(): void {
     this.isLoading = true;
     this.servicePaymentService.getPendingVerification(this.serviceType).subscribe({
-      next:  (data) => { this.payments = data; this.isLoading = false; },
-      error: (err)  => { console.error(err); this.isLoading = false; }
+      next: (data) => { this.payments = data; this.isLoading = false; },
+      error: (err) => { console.error(err); this.isLoading = false; }
     });
   }
 
@@ -64,8 +64,8 @@ export class ServicePaymentVerificationComponent implements OnInit {
     return url.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   }
 
-  openSlipModal(payment: any)  { this.selectedPayment = payment; this.showSlipModal = true; }
-  closeSlipModal()             { this.showSlipModal = false; this.selectedPayment = null; }
+  openSlipModal(payment: any) { this.selectedPayment = payment; this.showSlipModal = true; }
+  closeSlipModal() { this.showSlipModal = false; this.selectedPayment = null; }
 
   approvePayment(payment: any): void {
     if (!confirm(`Approve ${this.serviceType.toLowerCase()} payment for ${payment.customerName}?`)) return;

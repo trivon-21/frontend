@@ -13,16 +13,16 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class InvoiceGenerateComponent implements OnInit {
 
-  invoices:      any[] = [];
-  searchQuery    = '';
+  invoices: any[] = [];
+  searchQuery = '';
   selectedInvoice: any = null;
   showDetailsModal = false;
-  isLoading      = false;
+  isLoading = false;
 
   constructor(
     private invoiceService: InvoiceService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void { this.loadQueue(); }
 
@@ -30,7 +30,7 @@ export class InvoiceGenerateComponent implements OnInit {
     this.isLoading = true;
     this.invoiceService.getInvoiceQueue().subscribe({
       next: (data: any[]) => { this.invoices = data; this.isLoading = false; },
-      error: (err: any)   => { console.error(err); this.isLoading = false; }
+      error: (err: any) => { console.error(err); this.isLoading = false; }
     });
   }
 

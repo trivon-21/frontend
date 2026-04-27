@@ -13,19 +13,19 @@ import { InspectionOfficerService } from '../../services/inspection-officer.serv
 })
 export class ScheduledInspectionsComponent implements OnInit {
 
-  inspections: any[]    = [];
-  searchQuery           = '';
+  inspections: any[] = [];
+  searchQuery = '';
   selectedInspection: any = null;
-  showDetailsModal      = false;
-  showArrivalModal      = false;
-  arrivalTime           = '';
-  isLoading             = false;
-  startingTicketId      = '';
+  showDetailsModal = false;
+  showArrivalModal = false;
+  arrivalTime = '';
+  isLoading = false;
+  startingTicketId = '';
 
   constructor(
     private officerService: InspectionOfficerService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
@@ -33,7 +33,7 @@ export class ScheduledInspectionsComponent implements OnInit {
     this.isLoading = true;
     this.officerService.getScheduledInspections().subscribe({
       next: (data: any[]) => { this.inspections = data; this.isLoading = false; },
-      error: (err: any)   => { console.error(err); this.isLoading = false; }
+      error: (err: any) => { console.error(err); this.isLoading = false; }
     });
   }
 
@@ -47,8 +47,8 @@ export class ScheduledInspectionsComponent implements OnInit {
     );
   }
 
-  openDetails(inspection: any)  { this.selectedInspection = inspection; this.showDetailsModal = true; }
-  closeDetailsModal()           { this.showDetailsModal = false; this.selectedInspection = null; }
+  openDetails(inspection: any) { this.selectedInspection = inspection; this.showDetailsModal = true; }
+  closeDetailsModal() { this.showDetailsModal = false; this.selectedInspection = null; }
 
   openArrivalModal(inspection: any) {
     this.startingTicketId = inspection._id;

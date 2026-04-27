@@ -9,4 +9,4 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
   imports: [RouterOutlet, HeaderComponent, SidebarComponent],
   templateUrl: './finance-layout.component.html'
 })
-export class FinanceLayoutComponent {}
+export class FinanceLayoutComponent { }

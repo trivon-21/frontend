@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit {
   showSettings = false;
   showNotifications = false;
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) { }
 
   ngOnInit(): void {
     this.loadPendingPayments();

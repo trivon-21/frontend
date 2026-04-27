@@ -12,20 +12,20 @@ import { InspectionTicketService } from '../../services/inspection-ticket.servic
 })
 export class InvoiceRejectedPaymentsComponent implements OnInit {
 
-  searchQuery    = '';
+  searchQuery = '';
   selectedFilter = 'All';
-  selectedDate   = '';
-  currentPage    = 1;
-  itemsPerPage   = 8;
-  totalItems     = 0;
+  selectedDate = '';
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalItems = 0;
 
-  payments:         any[] = [];
+  payments: any[] = [];
   filteredPayments: any[] = [];
-  selectedPayment:  any   = null;
-  showModal         = false;
-  isLoading         = false;
+  selectedPayment: any = null;
+  showModal = false;
+  isLoading = false;
 
-  constructor(private ticketService: InspectionTicketService) {}
+  constructor(private ticketService: InspectionTicketService) { }
 
   ngOnInit(): void {
     this.loadPayments();
@@ -47,15 +47,15 @@ export class InvoiceRejectedPaymentsComponent implements OnInit {
     this.filteredPayments = this.payments.filter(p => {
       const matchesSearch = this.searchQuery
         ? p.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
         ? new Date(p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
         : true;
       return matchesSearch && matchesDate;
     });
-    this.totalItems  = this.filteredPayments.length;
+    this.totalItems = this.filteredPayments.length;
     this.currentPage = 1;
   }
 
@@ -69,7 +69,7 @@ export class InvoiceRejectedPaymentsComponent implements OnInit {
   }
 
   get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
-  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  get endItem() { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
   nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) this.currentPage++; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   goToPage(page: number) { this.currentPage = page; }

@@ -12,20 +12,20 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class InvoiceAcceptedComponent implements OnInit {
 
-  searchQuery    = '';
+  searchQuery = '';
   selectedFilter = 'All';
-  selectedDate   = '';
-  currentPage    = 1;
-  itemsPerPage   = 8;
-  totalItems     = 0;
+  selectedDate = '';
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalItems = 0;
 
-  invoices:         any[] = [];
+  invoices: any[] = [];
   filteredInvoices: any[] = [];
-  selectedInvoice:  any   = null;
-  showModal         = false;
-  isLoading         = false;
+  selectedInvoice: any = null;
+  showModal = false;
+  isLoading = false;
 
-  constructor(private invoiceService: InvoiceService) {}
+  constructor(private invoiceService: InvoiceService) { }
 
   ngOnInit(): void { this.loadInvoices(); }
 
@@ -45,14 +45,14 @@ export class InvoiceAcceptedComponent implements OnInit {
     this.filteredInvoices = this.invoices.filter(i => {
       const matchesSearch = this.searchQuery
         ? i.invoiceNumber?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        i.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
         ? new Date(i.acceptedAt || i.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
         : true;
       return matchesSearch && matchesDate;
     });
-    this.totalItems  = this.filteredInvoices.length;
+    this.totalItems = this.filteredInvoices.length;
     this.currentPage = 1;
   }
 
@@ -66,7 +66,7 @@ export class InvoiceAcceptedComponent implements OnInit {
   }
 
   get startItem() { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
-  get endItem()   { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  get endItem() { return Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
   nextPage() { if (this.currentPage * this.itemsPerPage < this.totalItems) this.currentPage++; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   goToPage(page: number) { this.currentPage = page; }
