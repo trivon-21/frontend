@@ -18,24 +18,7 @@
   margin: 0;
 }
 
-.btn-register {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--primary-main);
-  color: white;
-  border: none;
-  border-radius: 99px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.btn-register:hover {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-}
 
 /* Check-Out Panel */
 .checkout-card {
@@ -89,15 +72,7 @@
   background: white;
 }
 
-.btn-checkout {
-  padding: 14px 32px;
-  background: var(--primary-active);
-  color: white;
-  border: none;
-  border-radius: 99px;
-  font-weight: 600;
-  cursor: pointer;
-}
+
 
 /* Table Section */
 .table-card {
@@ -261,12 +236,4 @@ td {
   justify-content: flex-end;
 }
 
-.btn-add {
-  padding: 14px 48px;
-  background: var(--primary-main);
-  color: white;
-  border: none;
-  border-radius: 99px;
-  font-weight: 700;
-  cursor: pointer;
-}
+

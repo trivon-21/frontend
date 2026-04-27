@@ -18,18 +18,21 @@
 .grn-card {
   padding: 0;
   overflow: hidden;
-  border: none;
+  border: 1px solid rgba(34, 197, 94, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .grn-header {
-  background: var(--primary-main);
-  padding: 24px 32px;
-  color: white;
+  background: #f0fdf4; /* Very light green */
+  padding: 32px;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.1);
 }
 
 .grn-header h2 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  color: #166534; /* Darker green for contrast */
   margin: 0 0 24px 0;
 }
 
@@ -43,30 +46,35 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
 }
 
 .step.active {
   opacity: 1;
+  color: #166534;
 }
 
 .step-num {
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background: #dcfce7;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  transition: all 0.3s ease;
 }
 
 .step.active .step-num {
-  background: white;
-  color: var(--primary-main);
+  background: #16a34a;
+  color: white;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 }
 
 .step-label {
@@ -75,9 +83,10 @@
 }
 
 .step-divider {
-  width: 24px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.3);
+  width: 40px;
+  height: 2px;
+  background: #dcfce7;
+  border-radius: 2px;
 }
 
 .grn-body {
@@ -136,11 +145,11 @@
 }
 
 .info-box {
-  background: var(--primary-lighter);
-  border: 1px solid var(--primary-light);
+  background: rgba(239, 68, 68, 0.05); /* Very light red */
+  border: 1px solid rgba(239, 68, 68, 0.2);
   padding: 16px;
   border-radius: 10px;
-  color: var(--primary-main);
+  color: #b91c1c; /* Dark red for text */
   font-size: 13px;
 }
 
@@ -170,23 +179,37 @@
 .spacer { flex: 1; }
 
 .btn-next {
-  background: var(--primary-lighter);
-  color: var(--primary-main);
+  background: var(--primary-main);
+  color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 99px;
+  padding: 12px 28px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.btn-next:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+  filter: brightness(1.1);
 }
 
 .btn-back {
   background: white;
-  color: var(--text-muted);
-  border: 1.5px solid var(--border-light);
-  padding: 12px 24px;
-  border-radius: 99px;
+  color: var(--text-secondary);
+  border: 1.5px solid #e2e8f0;
+  padding: 12px 28px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* Shipments Section */
@@ -341,14 +364,20 @@
 }
 
 .btn-confirm-mini {
-  background: #22c55e;
+  background: var(--primary-main);
   color: white;
   border: none;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-confirm-mini:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .btn-cancel-mini {

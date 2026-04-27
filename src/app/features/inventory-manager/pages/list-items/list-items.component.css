@@ -18,24 +18,7 @@
   margin: 0;
 }
 
-.btn-procurement {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--primary-main);
-  color: white;
-  border: none;
-  border-radius: 99px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.btn-procurement:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
 
 /* Filters */
 .filters-row {
