@@ -44,7 +44,7 @@ export class InquiryModalComponent implements OnInit {
   constructor(private inquiryService: CustomerInquiryService, private authService: AuthService) {}
 
   ngOnInit(): void {
-    const user = this.authService.getUser();
+    const user = this.authService.getCurrentUser();
     if (user) {
       this.name = `${user.fullName}${user.lastName ? ' ' + user.lastName : ''}`.trim();
       this.email = user.email || '';

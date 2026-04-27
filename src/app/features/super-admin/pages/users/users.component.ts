@@ -100,6 +100,9 @@ export class UsersComponent implements OnInit {
     'MANAGER',
   ];
 
+  showPassword = false;
+  isCreatingUser = false;
+
   constructor(private superAdminService: SuperAdminService) {}
 
   ngOnInit(): void {
@@ -188,6 +191,7 @@ export class UsersComponent implements OnInit {
 
   closeCreateModal(): void {
     this.showCreateModal = false;
+    this.isCreatingUser = false;
     this.resetForm();
   }
 
@@ -293,7 +297,15 @@ export class UsersComponent implements OnInit {
     };
   }
 
+  toggleShowPassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
   createUser(): void {
+    if (this.isCreatingUser) {
+      return;
+    }
+
     if (!this.formData.fullName || !this.formData.role || !this.formData.password) {
       alert('Please fill in all required fields');
       return;
@@ -312,13 +324,16 @@ export class UsersComponent implements OnInit {
       password: this.formData.password,
     };
 
+    this.isCreatingUser = true;
     this.superAdminService.createUser(payload).subscribe({
       next: () => {
+        this.isCreatingUser = false;
         this.closeCreateModal();
         this.loadUsers();
         alert('User created successfully');
       },
       error: (err) => {
+        this.isCreatingUser = false;
         alert(err.error?.message || 'Failed to create user');
       },
     });

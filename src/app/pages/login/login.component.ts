@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService, AuthResponse } from '../../core/services/auth.service';
+import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { ChangePasswordModalComponent } from '../../components/modals/change-password-modal/change-password-modal.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, ChangePasswordModalComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -24,11 +26,13 @@ export class LoginComponent {
   detectedAuthType: 'email' | 'phone' | 'invalid' | null = null;
   deactivatedEmail: string | null = null;
   showDeactivationNotice = false;
+  showChangePasswordModal = false;
   private returnUrl: string;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    public maintenanceService: MaintenanceService,
     private router: Router,
     private route: ActivatedRoute,
   ) {
@@ -52,7 +56,7 @@ export class LoginComponent {
       return this.returnUrl;
     }
 
-    const user = this.authService.getUser();
+    const user = this.authService.getCurrentUser();
     if (user?.role === 'SUPER_ADMIN') {
       return '/super-admin';
     }
@@ -89,10 +93,23 @@ export class LoginComponent {
     this.authService.login(payload).subscribe({
       next: (response: AuthResponse) => {
         this.isLoading = false;
-        // Direct login successful (no OTP required for phone login)
-        this.router.navigateByUrl(this.getRedirectUrl());
+
+        // If maintenance is active and user is not SUPER_ADMIN, logout and show error
+        if (this.maintenanceService.getMaintenanceActiveSync() && response.user.role !== 'SUPER_ADMIN') {
+          this.authService.logout();
+          this.errorMessage = 'System is currently under maintenance. Only administrators can access the system.';
+          return;
+        }
+
+        // Check if user needs to change password
+        if (response.user.needsPasswordChange) {
+          this.showChangePasswordModal = true;
+        } else {
+          // Direct login successful (no OTP required for phone login)
+          this.router.navigateByUrl(this.getRedirectUrl());
+        }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading = false;
 
         // Check for account deactivation error
@@ -106,6 +123,15 @@ export class LoginComponent {
         this.errorMessage = err.error?.message ?? 'Login failed. Please try again.';
       },
     });
+  }
+
+  onPasswordChanged(): void {
+    this.showChangePasswordModal = false;
+    this.router.navigateByUrl(this.getRedirectUrl());
+  }
+
+  onPasswordModalClosed(): void {
+    this.showChangePasswordModal = false;
   }
 
   requestReactivation(): void {

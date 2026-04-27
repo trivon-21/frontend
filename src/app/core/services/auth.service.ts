@@ -34,6 +34,7 @@ export interface AuthUser {
   authMethods?: string[]; // ['email'], ['phone'], or ['email', 'phone']
   authType?: 'email' | 'phone';
   createdAt?: string;
+  needsPasswordChange?: boolean;
 }
 
 export interface AuthResponse {
@@ -48,7 +49,7 @@ export interface AuthResponse {
 export class AuthService {
   private apiUrl = 'http://localhost:5000/api/auth';
 
-  private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getUser());
+  private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getCurrentUser());
   currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {}
@@ -125,6 +126,14 @@ export class AuthService {
     );
   }
 
+  changePasswordFirstLogin(newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `http://localhost:5000/api/customer/profile/change-password-first-login`,
+      { newPassword },
+      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+    );
+  }
+
   saveSession(token: string, user: AuthUser, rememberMe = true): void {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem('token', token);
@@ -136,7 +145,7 @@ export class AuthService {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   }
 
-  getUser(): AuthUser | null {
+  getCurrentUser(): AuthUser | null {
     const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!raw) return null;
     try {

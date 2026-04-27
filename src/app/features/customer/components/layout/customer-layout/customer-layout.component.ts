@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { MaintenanceService } from '../../../../../core/services/maintenance.service';
 import { NotificationService, Notification } from '../../../../../core/services/notification.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 
@@ -12,17 +13,22 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
   templateUrl: './customer-layout.component.html',
   styleUrl: './customer-layout.component.css'
 })
-export class CustomerLayoutComponent implements OnInit {
+export class CustomerLayoutComponent implements OnInit, OnDestroy {
   showNotifications = false;
   showUserMenu = false;
   notifications: Notification[] = [];
   unreadCount = 0;
+  currentTime = new Date();
+  maintenanceCountdown = '';
+  private clockInterval: any;
+  private countdownInterval: any;
 
   constructor(
     public authService: AuthService,
     private notificationService: NotificationService,
+    private maintenanceService: MaintenanceService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.notificationService.getNotifications().subscribe((notifs) => {
@@ -32,10 +38,68 @@ export class CustomerLayoutComponent implements OnInit {
     this.notificationService.getUnreadCount().subscribe((count) => {
       this.unreadCount = count;
     });
+
+    // Monitor maintenance status and display countdown
+    this.maintenanceService.scheduledStart$.subscribe((startTime: Date | null) => {
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
+
+      if (startTime && !this.maintenanceService.isMaintenanceActiveSyncGetter()) {
+        this.updateCountdown(startTime);
+        this.countdownInterval = setInterval(() => {
+          this.updateCountdown(startTime);
+        }, 1000);
+      } else {
+        this.maintenanceCountdown = '';
+      }
+    });
+
+    // Update clock every second
+    this.clockInterval = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
+
+  private updateCountdown(startTime: Date): void {
+    const now = new Date().getTime();
+    const distance = startTime.getTime() - now;
+
+    if (distance < 0) {
+      // Maintenance has already started - hide timer for customer
+      this.maintenanceCountdown = '';
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
+      // System should redirect user to maintenance page
+      return;
+    }
+
+    // Only show banner if maintenance is within 7 days
+    if (distance > 7 * 24 * 60 * 60 * 1000) {
+      this.maintenanceCountdown = '';
+      return;
+    }
+
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // Show "Starts in: XXh XXm XXs" for upcoming maintenance only
+    this.maintenanceCountdown = `Maintenance in: ${hours}h ${minutes}m ${seconds}s`;
   }
 
   get userInitials(): string {
-    const user = this.authService.getUser();
+    const user = this.authService.getCurrentUser();
     if (!user) return 'U';
     const parts = user.fullName.trim().split(' ');
     return parts.length >= 2
@@ -44,12 +108,12 @@ export class CustomerLayoutComponent implements OnInit {
   }
 
   get userName(): string {
-    const user = this.authService.getUser();
+    const user = this.authService.getCurrentUser();
     return user?.fullName || 'User';
   }
 
   get userEmail(): string {
-    const user = this.authService.getUser();
+    const user = this.authService.getCurrentUser();
     return user?.email || '';
   }
 

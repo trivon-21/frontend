@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService, AuthResponse } from '../../core/services/auth.service';
+import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 
@@ -54,7 +55,7 @@ export class SignupComponent {
   resendingOtp = false;
   resendSuccess = '';
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(private fb: FormBuilder, private authService: AuthService, public maintenanceService: MaintenanceService, private router: Router) {
     this.form = this.fb.group(
       {
         firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -107,6 +108,13 @@ export class SignupComponent {
 
     this.isLoading = true;
     this.errorMessage = '';
+
+    // Block signup if maintenance is active
+    if (this.maintenanceService.getMaintenanceActiveSync()) {
+      this.isLoading = false;
+      this.errorMessage = 'System is currently under maintenance. New signups are temporarily disabled.';
+      return;
+    }
 
     const payload = authType === 'email'
       ? { fullName, email: identifier, password }

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { maintenanceGuard } from './core/guards/maintenance.guard';
 
 export const routes: Routes = [
   {
@@ -40,8 +41,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'maintenance',
+    loadComponent: () =>
+      import('./pages/maintenance/maintenance.component').then((m) => m.MaintenanceComponent),
+  },
+  {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, maintenanceGuard],
     loadComponent: () =>
       import('./features/customer/components/layout/customer-layout/customer-layout.component').then(
         (m) => m.CustomerLayoutComponent
@@ -86,7 +92,7 @@ export const routes: Routes = [
   },
   {
     path: 'super-admin',
-    canActivate: [authGuard, roleGuard],
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
     loadComponent: () =>
       import('./features/super-admin/components/layout/super-admin-layout/super-admin-layout.component').then(
@@ -105,6 +111,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/super-admin/pages/users/users.component').then(
             (m) => m.UsersComponent
+          ),
+      },
+      {
+        path: 'system-config',
+        loadComponent: () =>
+          import('./features/super-admin/pages/system-config/system-config.component').then(
+            (m) => m.SystemConfigComponent
           ),
       },
     ],
