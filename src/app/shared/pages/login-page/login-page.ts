@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
-import { environment } from '../../../environments/environment';
-import { API_ENDPOINTS } from '../../core/constants/api.constants';
-import { TeamSessionService, TeamSessionState } from '../service-team/services/team-session.service';
+import { environment } from '../../../../environments/environment';
+import { API_ENDPOINTS } from '../../../core/constants/api.constants';
+import { TeamSessionService, TeamSessionState } from '../../../features/service-team/services/team-session.service';
 
 interface LoginResponse {
   success: boolean;

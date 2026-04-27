@@ -61,7 +61,7 @@
   background-color: #ffffff;
 }
 .hero-content {
-  background-image: linear-gradient(to right, rgba(27, 42, 34, 0.9) 30%, rgba(27, 42, 34, 0.6)), url('../../../assets/hero-bg.jpg');
+  background-image: linear-gradient(to right, rgba(27, 42, 34, 0.9) 30%, rgba(27, 42, 34, 0.6)), url('../../../../assets/hero-bg.jpg');
   background-size: cover;
   background-position: center;
   border-radius: 12px;

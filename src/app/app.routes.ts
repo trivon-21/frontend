@@ -20,8 +20,8 @@ import { ServiceTeamAssignedJobsComponent } from './features/service-team/pages/
 import { ServiceTeamTeamDetailsComponent } from './features/service-team/pages/service-team-team-details/service-team-team-details.component';
 import { ServiceTeamServiceDetailsComponent } from './features/service-team/pages/service-team-service-details/service-team-service-details.component';
 import { ServiceTeamServiceHistoryComponent } from './features/service-team/pages/service-team-service-history/service-team-service-history.component';
-import { LandingPage } from './features/landing-page/landing-page';
-import { LoginPage } from './features/login-page/login-page';
+import { LandingPage } from './shared/pages/landing-page/landing-page';
+import { LoginPage } from './shared/pages/login-page/login-page';
 
 export const routes: Routes = [
   { path: '', component: LandingPage, pathMatch: 'full' },
