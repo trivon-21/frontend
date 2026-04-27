@@ -1,16 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface InventoryItem {
-  sku: string;
-  name: string;
-  type: 'Single' | 'Bundle';
-  available: number;
-  reserved: number;
-  location: string;
-}
+import { InventoryManagerDashboardService, InventoryItem } from '../../services/inventory-manager-dashboard.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -19,22 +11,35 @@ interface InventoryItem {
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.css']
 })
-export class InventoryListComponent {
+export class InventoryListComponent implements OnInit {
   searchQuery: string = '';
   selectedType: string = 'All Types';
   selectedBrand: string = 'All Brands';
   selectedLocation: string = 'All Locations';
+  inventoryItems: InventoryItem[] = [];
+  loading = true;
+  error: string | null = null;
 
-  inventoryItems: InventoryItem[] = [
-    { sku: 'AC-COMP-001', name: '2 Ton Split AC Compressor', type: 'Single', available: 1, reserved: 13, location: 'Logistic Area 1' },
-    { sku: 'REF-R410A-1KG', name: 'R410A Refrigerant (1kg)', type: 'Single', available: 4, reserved: 6, location: 'Logistic Area 1' },
-    { sku: 'PIPE-CU-025', name: 'Copper Tube 1/4" x 50m', type: 'Single', available: 6, reserved: 0, location: 'Logistic Area 2' },
-    { sku: 'KIT-INST-PRO', name: 'Professional Installation Kit', type: 'Bundle', available: 2, reserved: 0, location: 'Logistic Area 2' },
-    { sku: 'TOOL-DRILL-001', name: 'Cordless Drill Kit', type: 'Single', available: 2, reserved: 1, location: 'Logistic Area 3' },
-    { sku: 'FILTER-DRIER-01', name: 'Filter Drier - Standard', type: 'Single', available: 7, reserved: 4, location: 'Logistic Area 1' },
-    { sku: 'THERMOSTAT-DIG', name: 'Digital Thermostat', type: 'Single', available: 8, reserved: 6, location: 'Logistic Area 2' },
-    { sku: 'KIT-MAINT-STD', name: 'Standard Maintenance Bundle', type: 'Bundle', available: 5, reserved: 1, location: 'Logistic Area 3' }
-  ];
+  constructor(private inventoryService: InventoryManagerDashboardService) {}
+
+  ngOnInit(): void {
+    this.inventoryService.getInventory().subscribe({
+      next: (items) => {
+        // Map backend name to itemName if necessary, or just use as is
+        // Our backend returns { name, sku, type, ... }
+        // Let's ensure the frontend template uses 'name' or 'itemName'
+        this.inventoryItems = items.map(item => ({
+          ...item,
+          itemName: (item as any).name || item.itemName
+        }));
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load inventory';
+        this.loading = false;
+      }
+    });
+  }
 
   clearFilters() {
     this.searchQuery = '';
