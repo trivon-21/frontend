@@ -1,0 +1,162 @@
+<div class="dispatch-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Dispatch & Logistics</h1>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'to-pack'" (click)="setActiveTab('to-pack')">
+      To Pack <span class="badge">5</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'ready'" (click)="setActiveTab('ready')">
+      Ready to Pick up
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'in-transit'" (click)="setActiveTab('in-transit')">
+      In Transit <span class="badge">3</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
+      Completed
+    </button>
+  </div>
+
+  <!-- Table Controls -->
+  <div class="table-controls glass-panel">
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input type="text" placeholder="Search ID or Customer">
+    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <i class="icon-filter"></i>
+        <span>Filters:</span>
+        <select class="filter-select">
+          <option>All Districts</option>
+        </select>
+      </div>
+      <button class="btn-date">
+        Set Date <i class="icon-calendar"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="table-container glass-panel">
+    <table class="dispatch-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th *ngIf="activeTab === 'to-pack'">CUSTOMER</th>
+          <th *ngIf="activeTab !== 'to-pack'">CUSTOMER NAME</th>
+          <th *ngIf="activeTab === 'ready'">ORDER TYPE</th>
+          <th *ngIf="activeTab === 'in-transit'">TRACK ID</th>
+          <th class="text-right">ACTION{{ activeTab === 'to-pack' ? 'S' : '' }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of currentOrders">
+          <td>{{ order.id }}</td>
+          <td>{{ order.customer }}</td>
+          <td *ngIf="activeTab === 'ready'">{{ order.type }}</td>
+          <td *ngIf="activeTab === 'in-transit'">{{ order.trackId }}</td>
+          <td class="actions-cell">
+            <ng-container *ngIf="activeTab === 'to-pack'">
+              <button class="btn-assign" (click)="openAssignModal(order.id)">Assign Delivery</button>
+              <button class="btn-pack" (click)="openPackModal(order.id)">Pack Order</button>
+            </ng-container>
+            <ng-container *ngIf="activeTab !== 'to-pack'">
+              <button class="btn-view" (click)="openPackModal(order.id)">View Order</button>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pack Order Modal -->
+  <div class="modal-overlay" *ngIf="showPackModal">
+    <div class="modal-content pack-modal">
+      <div class="modal-header">
+        <h2>Order ID : {{ selectedOrderId }}</h2>
+        <span class="order-type">ORDER TYPE :</span>
+        <button class="btn-close" (click)="closeModals()">×</button>
+      </div>
+      
+      <div class="modal-body split">
+        <div class="customer-info">
+          <h3>CUSTOMER DETAILS</h3>
+          <div class="info-grid">
+            <span class="label">Name</span> <span class="value">: Random Name</span>
+            <span class="label">Address</span> 
+            <div class="value address">
+              : Line 1<br>Line 2<br>Line 3
+            </div>
+            <span class="label">City</span> <span class="value">: City</span>
+            <span class="label">Postal Code</span> <span class="value">: City</span>
+            <span class="label">Note</span> <span class="value">: -</span>
+          </div>
+        </div>
+
+        <div class="items-verification">
+          <h3>ITEM LIST</h3>
+          <div class="verify-list">
+            <div class="verify-item">
+              <div class="item-meta">
+                <span>LG Inverter 12k - Outdoor Unit</span>
+                <span class="qty">×1</span>
+              </div>
+              <input type="text" placeholder="Scan Item Code" class="scan-input">
+            </div>
+            <div class="verify-item">
+              <div class="item-meta">
+                <span>LG Inverter 12k - Indoor Unit</span>
+                <span class="qty">×1</span>
+              </div>
+              <input type="text" placeholder="Scan Item Code" class="scan-input">
+            </div>
+            <div class="verify-item plain">
+              <div class="item-meta">
+                <span>Copper Pipe 1/4"</span>
+                <span class="qty">×3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModals()">Print Gate Pass</button>
+        <div class="footer-right">
+          <button class="btn-primary-alt" (click)="closeModals()">View Delivery</button>
+          <button class="btn-primary" (click)="closeModals()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Delivery Modal -->
+  <div class="modal-overlay" *ngIf="showAssignModal">
+    <div class="modal-content assign-modal">
+      <div class="modal-header">
+        <h2>Order ID : {{ selectedOrderId }}</h2>
+        <button class="btn-close" (click)="closeModals()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Courier Service</label>
+          <input type="text" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Tracking / Ref ID</label>
+          <input type="text" placeholder="e.g., DMX20250217001" class="form-input">
+        </div>
+      </div>
+
+      <div class="modal-footer justify-end">
+        <button class="btn-primary-alt" (click)="closeModals()">View Packing Details</button>
+        <button class="btn-primary" (click)="closeModals()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>

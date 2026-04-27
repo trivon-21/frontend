@@ -1,0 +1,191 @@
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.order-ref-section,
+.order-status-section,
+.payment-status-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.order-ref {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b2f27;
+  font-family: 'Courier New', monospace;
+}
+
+.order-status-badge,
+.payment-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  width: fit-content;
+}
+
+.order-details {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.product-info {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.product-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b2f27;
+  margin-bottom: 4px;
+}
+
+.product-quantity {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.order-type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  width: fit-content;
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  flex: 1;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 13px;
+  color: #1b2f27;
+  font-weight: 500;
+}
+
+.tracking-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+.tracking-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.tracking-id {
+  color: #1b2f27;
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.tracking-link {
+  margin-left: auto;
+  color: #2196F3;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.tracking-link:hover {
+  color: #1976D2;
+}
+
+@media (max-width: 768px) {
+  .order-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .order-details {
+    flex-direction: column;
+  }
+
+  .order-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

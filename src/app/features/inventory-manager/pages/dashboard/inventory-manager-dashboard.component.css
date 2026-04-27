@@ -1,0 +1,459 @@
+.inventory-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: 40px;
+}
+
+/* ── Welcome Banner ── */
+.welcome-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--primary-light);
+}
+
+.status-badge .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary-main);
+  border-radius: 50%;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Header Actions ── */
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn-outline, .action-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 99px; /* Unified pill shape */
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.action-btn-outline {
+  background: var(--background-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-minimal);
+}
+
+.action-btn-outline:hover {
+  background: var(--background-hover);
+  border-color: var(--border-medium);
+}
+
+.action-btn-primary {
+  background: var(--primary-main);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-medium);
+}
+
+.action-btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-large);
+}
+
+/* ── Summary Grid ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.summary-card {
+  background: var(--background-card);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.summary-card.gold::before { background: var(--warning); }
+.summary-card.blue::before { background: var(--info); }
+.summary-card.green::before { background: var(--primary-main); }
+.summary-card.red::before { background: var(--error); }
+
+.card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.card-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-card.gold .card-icon { background: var(--warning-light); color: var(--warning); }
+.summary-card.blue .card-icon { background: var(--info-light); color: var(--info); }
+.summary-card.green .card-icon { background: var(--primary-lighter); color: var(--primary-main); }
+.summary-card.red .card-icon { background: var(--error-light); color: var(--error); }
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-page);
+}
+
+.sub-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.sub-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sub-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* ── Main Content Layout ── */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+}
+
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.content-card {
+  background: var(--background-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-standard);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--background-page);
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.view-all-link {
+  font-size: 14px;
+  color: var(--primary-main);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.count-badge {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── Activity Timeline ── */
+.timeline-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 24px;
+  position: relative;
+  padding-bottom: 32px;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 40px;
+  bottom: 0;
+  width: 2px;
+  background: var(--background-page);
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+.timeline-marker {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--background-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timeline-marker.return { background: var(--info-light); color: var(--info); }
+.timeline-marker.dispatch { background: var(--primary-lighter); color: var(--primary-main); }
+.timeline-marker.request { background: var(--warning-light); color: var(--warning); }
+.timeline-marker.alert { background: var(--error-light); color: var(--error); }
+
+.timeline-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.activity-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+  max-width: 80%;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.activity-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activity-btn:hover {
+  background: var(--background-hover);
+  border-color: var(--border-medium);
+}
+
+/* ── Reorder Table ── */
+.table-container {
+  padding: 0 24px 24px;
+}
+
+.reorder-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reorder-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--background-page);
+}
+
+.reorder-table td {
+  padding: 16px 8px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--background-page);
+}
+
+.item-name { font-weight: 600; color: var(--text-primary); }
+.item-avail.critical { color: var(--error); font-weight: 700; }
+.item-rsvd.warning { color: var(--warning); font-weight: 700; }
+
+.reorder-btn {
+  padding: 8px 16px;
+  border-radius: 99px; /* Pill shape for consistency */
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  background: white;
+  transition: all 0.2s;
+}
+
+.reorder-btn.primary {
+  background: var(--error);
+  color: white;
+  border: none;
+}
+
+/* ── Logistics Section ── */
+.logistics-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logistics-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logistics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logistics-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.logistics-stats {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.logistics-stats .total { color: var(--text-muted); }
+
+.progress-bar-container {
+  height: 8px;
+  background: var(--background-page);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--info);
+  border-radius: 4px;
+}
+
+.logistics-item:nth-child(2) .progress-bar {
+  background: var(--warning);
+}
+
+.logistics-sub {
+  font-size: 12px;
+  color: var(--warning);
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.error-icon { color: #dc2626; }
+.info-icon { color: #3b82f6; }

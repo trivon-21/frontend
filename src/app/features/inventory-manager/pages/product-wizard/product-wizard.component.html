@@ -1,0 +1,211 @@
+<div class="wizard-container">
+  <!-- Wizard Header -->
+  <div class="wizard-header">
+    <div class="title-section">
+      <h1>{{ productData.name }}</h1>
+      <span class="sku-badge">{{ productData.sku }}</span>
+    </div>
+  </div>
+
+  <!-- Step 1: General Info & Capacity -->
+  <div class="step-content" *ngIf="currentStep === 1">
+    <section class="form-section">
+      <h3>General Product Information</h3>
+      <div class="form-table glass-panel">
+        <div class="form-row header-row">
+          <div class="col-label">FIELD</div>
+          <div class="col-input">DETAIL</div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Product Name</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.name" placeholder="Enter product name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Current Price</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.price" placeholder="Enter price (e.g., 125,000 LKR)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Availability</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.availability">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Description</div>
+          <div class="col-input">
+            <textarea [(ngModel)]="productData.description" placeholder="Enter product description"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3>Capacity & Pricing Options</h3>
+      <div class="form-table glass-panel">
+        <div class="form-row header-row">
+          <div class="col-label">CAPACITY</div>
+          <div class="col-input">PRICE (LKR)</div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">
+            <input type="text" placeholder="e.g., 1.5 Ton">
+          </div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 125,000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">
+            <input type="text" placeholder="e.g., 1.5 Ton">
+          </div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 125,000">
+          </div>
+        </div>
+        <div class="action-footer">
+          <button class="btn-add-feature">Add a Feature</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Step 2: Warranty & Features -->
+  <div class="step-content" *ngIf="currentStep === 2">
+    <section class="form-section">
+      <h3>Warranty & Coverage</h3>
+      <div class="form-table glass-panel">
+        <div class="form-row header-row">
+          <div class="col-label">CATEGORY</div>
+          <div class="col-input">TERMS / DETAILS</div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Comprehensive</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 2 Years: Covers all parts and labor...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Compressor</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 5 Years: Extended coverage on the compressor...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">What is Covered</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., Manufacturing defects, Parts replacement...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">What is NOT Covered</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., Physical damage, Improper installation...">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3>Key Features</h3>
+      <div class="form-table glass-panel">
+        <div class="form-row header-row">
+          <div class="col-label">FEATURE</div>
+        </div>
+        <div class="form-row full-width">
+          <input type="text" placeholder="Enter key feature 1">
+        </div>
+        <div class="action-footer">
+          <button class="btn-add-feature">Add a Feature</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Step 3: Tech Specs -->
+  <div class="step-content" *ngIf="currentStep === 3">
+    <section class="form-section">
+      <h3>Technical Specifications</h3>
+      <div class="form-table glass-panel">
+        <div class="form-row header-row">
+          <div class="col-label">SPECIFICATION</div>
+          <div class="col-input">VALUE</div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Cooling Capacity</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 1.5 Ton (18,000 BTU)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Energy Efficiency</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 5-Star Rated">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Power Consumption</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 1.2 kW">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Refrigerant Type</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., R32 Eco-friendly">
+          </div>
+        </div>
+        <div class="form-row split">
+          <div class="col-label">Noise Level</div>
+          <div class="col-input-split">
+            <div class="split-input">
+              <label>Indoor (dB)</label>
+              <input type="text" placeholder="e.g., 28 dB">
+            </div>
+            <div class="split-input">
+              <label>Outdoor (dB)</label>
+              <input type="text" placeholder="e.g., 48 dB">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Air Flow</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 650 m³/h">
+          </div>
+        </div>
+        <div class="form-row split">
+          <div class="col-label">Dimensions</div>
+          <div class="col-input-split">
+            <div class="split-input">
+              <label>Indoor (mm)</label>
+              <input type="text" placeholder="e.g., 900 x 260 x 210">
+            </div>
+            <div class="split-input">
+              <label>Outdoor (mm)</label>
+              <input type="text" placeholder="e.g., 800 x 550 x 320">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Warranty (General)</div>
+          <div class="col-input">
+            <input type="text" placeholder="e.g., 2 Years Comprehensive + 5 Years Compressor">
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Wizard Footer -->
+  <div class="wizard-footer">
+    <button class="btn-secondary" (click)="prevStep()" *ngIf="currentStep > 1">Back</button>
+    <div class="spacer"></div>
+    <button class="btn-primary" (click)="nextStep()">
+      {{ currentStep === totalSteps ? 'Save Product' : 'Next Step' }}
+    </button>
+  </div>
+</div>
