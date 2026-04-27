@@ -48,13 +48,16 @@
     }
 
     .summary-cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
       gap: 24px;
     }
 
     .summary-card {
       display: flex;
+      flex: 1 1 0;
+      min-width: 0;
       align-items: center;
       gap: 16px;
       padding: 24px;
@@ -263,6 +266,30 @@
       font-weight: 600;
       color: #334155;
       margin-bottom: 12px;
+    }
+
+    .half-width-field {
+      width: 50%;
+      min-width: 280px;
+      margin-bottom: 16px;
+    }
+
+    .half-width-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background-color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    .half-width-field input:focus {
+      outline: none;
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
 
     textarea {

@@ -1,4 +1,4 @@
-﻿
+
     <div class="materials-container">
       <div class="search-filter-section">
         <div class="search-bar">
@@ -197,12 +197,48 @@
               >
             </div>
 
-            <div class="form-group">
-              <label>Service Description</label>
-              <textarea [(ngModel)]="newRequest.description" rows="3"></textarea>
+            <div class="form-group" *ngIf="!isInstallationTicketSelected">
+              <label>{{ detailsFieldLabel }}</label>
+              <textarea [(ngModel)]="newRequest.description" rows="3" readonly></textarea>
             </div>
 
-            <div class="warranty-status" *ngIf="newRequest.ticketId">
+            <div class="form-group" *ngIf="isInstallationTicketSelected">
+              <label>Site Details</label>
+              <div class="site-details-card">
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <p class="detail-label">Building Type</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.buildingType || '-' }}</p>
+                  </div>
+                  <div class="detail-item">
+                    <p class="detail-label">Floors</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.floors ?? '-' }}</p>
+                  </div>
+                  <div class="detail-item">
+                    <p class="detail-label">Rooms</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.rooms ?? '-' }}</p>
+                  </div>
+                  <div class="detail-item">
+                    <p class="detail-label">Ceiling Height</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.ceilingHeight || '-' }}</p>
+                  </div>
+                  <div class="detail-item">
+                    <p class="detail-label">Wall Type</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.wallType || '-' }}</p>
+                  </div>
+                  <div class="detail-item">
+                    <p class="detail-label">Power Supply</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.powerSupply || '-' }}</p>
+                  </div>
+                  <div class="detail-item full-width">
+                    <p class="detail-label">Outdoor Access</p>
+                    <p class="detail-value">{{ newRequest.siteDetails?.outdoorAccess || '-' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="warranty-status" *ngIf="newRequest.ticketId && !isInstallationTicketSelected">
               <div class="warranty-item">
                 <span class="warranty-label">Under Warranty:</span>
                 <span class="warranty-value" [class.yes]="newRequest.isUnderWarranty" [class.no]="!newRequest.isUnderWarranty">

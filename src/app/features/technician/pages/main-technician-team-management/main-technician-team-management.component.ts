@@ -34,6 +34,7 @@ interface ActiveJob {
 
 interface PendingJob {
   id: string;
+  _id: string;
   customer: string;
   location: string;
   type: 'Installation' | 'Service';
@@ -86,6 +87,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
   pendingAssignmentCount = 0;
   isLoading = false;
   error: string | null = null;
+  successMessage: string | null = null;
 
   pendingJobs: PendingJob[] = [];
   teams: Team[] = [];
@@ -160,6 +162,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
   private mapRawPendingJob(job: RawPendingJob): PendingJob {
     return {
       id: this.normalizeTicketId(job.ticketId || job._id),
+      _id: job._id || '',
       customer: job.customerName || 'Unknown Customer',
       location: job.location || '-',
       type: job.requestType || 'Service',
@@ -265,15 +268,19 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       return;
     }
 
-    const serviceRequestId = this.selectedPendingJobId.replace(/^#/, '');
     const selectedPendingJob = this.pendingJobs.find((job) => job.id === this.selectedPendingJobId);
+    if (!selectedPendingJob || !selectedPendingJob._id) {
+      return;
+    }
+
+    const serviceRequestId = selectedPendingJob._id;
     const teamId = this.selectedTeam.id;
 
     this.http
       .post<{ success: boolean; message?: string; error?: string }>(`${this.teamsApiUrl}/assign-service`, {
         serviceRequestId,
         teamId,
-        requestType: selectedPendingJob?.type || 'Service'
+        requestType: selectedPendingJob.type
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
@@ -287,6 +294,11 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
         this.selectedPendingJobId = null;
         this.loadPendingAssignments();
         this.loadTeams();
+
+        this.successMessage = 'Team Assigned & Dates Sent to CSA';
+        setTimeout(() => {
+          this.successMessage = null;
+        }, 3000);
       },
       error: (err) => {
         console.error('Error assigning service request to team:', err);

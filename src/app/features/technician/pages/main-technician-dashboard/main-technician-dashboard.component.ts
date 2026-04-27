@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { GlobalSearchService } from '../../services/global-search.service';
 
 interface DashboardSummary {
   pendingReviews: number;
@@ -48,10 +50,22 @@ export class MainTechnicianDashboardComponent implements OnInit {
     teamAvailable: 0
   };
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private globalSearchService: GlobalSearchService,
+    private destroyRef: DestroyRef
+  ) {}
 
   /** Loads dashboard summary, activity, and alerts after the component starts. */
   ngOnInit(): void {
+    this.globalSearchService.searchQuery$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        this.searchQuery = query;
+        this.applySearch();
+      });
+
     this.fetchDashboardSummary();
     this.fetchRecentActivity();
     this.fetchUrgentAlerts();
@@ -167,7 +181,7 @@ export class MainTechnicianDashboardComponent implements OnInit {
 
   /** Reapplies the dashboard search filter to activity and alerts. */
   private applySearch(): void {
-    const normalized = this.searchQuery.toLowerCase();
+    const normalized = this.searchQuery.trim().toLowerCase();
 
     if (!normalized) {
       this.filteredActivity = [...this.activity];

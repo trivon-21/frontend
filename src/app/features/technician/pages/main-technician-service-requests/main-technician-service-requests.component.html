@@ -15,6 +15,7 @@
         </span>
         <select [(ngModel)]="statusFilter" (change)="filterRequests()">
           <option value="All">All</option>
+          <option value="Assigned">Assigned</option>
           <option value="In Progress">In Progress</option>
           <option value="Scheduled">Scheduled</option>
           <option value="Completed">Completed</option>

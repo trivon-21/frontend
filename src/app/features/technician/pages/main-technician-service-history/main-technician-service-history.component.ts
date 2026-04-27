@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -33,10 +34,11 @@ interface ServiceHistoryResponse {
 @Component({
   selector: 'app-main-technician-service-history',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   templateUrl: './main-technician-service-history.component.html',
   styleUrl: './main-technician-service-history.component.css'})
 export class MainTechnicianServiceHistoryComponent implements OnInit {
+  allHistoryItems: ServiceHistoryItem[] = [];
   historyItems: ServiceHistoryItem[] = [];
   summary: ServiceHistorySummary = {
     customerName: '-',
@@ -47,6 +49,8 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   source: 'service' | 'installation' | 'inspection' = 'service';
+  searchQuery = '';
+  selectedTypeFilter: 'all' | 'inspection' | 'installation' | 'service' = 'all';
   private readonly apiUrl = `${environment.apiBaseUrl}/service-requests`;
 
   constructor(
@@ -85,13 +89,15 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
             installationDate: res.data.summary?.installationDate || null,
           };
 
-          this.historyItems = (res.data.history || [])
+          this.allHistoryItems = (res.data.history || [])
             .slice()
             .sort((a, b) => this.sortByAscendingDate(a.date, b.date))
             .map((item) => ({
               ...item,
               date: this.formatDate(item.date),
             }));
+
+          this.applyFilters();
         } else {
           this.error = 'Service history was not returned by the server.';
         }
@@ -103,6 +109,51 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
         this.isLoading = false;
       }
       });
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery = value || '';
+    this.applyFilters();
+  }
+
+  onTypeFilterChange(value: string): void {
+    const normalized = (value || 'all').trim().toLowerCase();
+
+    if (normalized === 'inspection' || normalized === 'installation' || normalized === 'service') {
+      this.selectedTypeFilter = normalized;
+    } else {
+      this.selectedTypeFilter = 'all';
+    }
+
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedTypeFilter = 'all';
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    const normalizedQuery = this.searchQuery.trim().toLowerCase();
+    const normalizedSelectedType = this.selectedTypeFilter.trim().toLowerCase();
+
+    this.historyItems = this.allHistoryItems.filter((item) => {
+      const normalizedType = item.serviceType.trim().toLowerCase();
+      const matchesType = normalizedSelectedType === 'all' || normalizedType.includes(normalizedSelectedType);
+
+      const matchesSearch = !normalizedQuery || (
+        item.ticketId.toLowerCase().includes(normalizedQuery) ||
+        item.serviceType.toLowerCase().includes(normalizedQuery) ||
+        item.productType.toLowerCase().includes(normalizedQuery) ||
+        item.status.toLowerCase().includes(normalizedQuery) ||
+        item.assignedTeam.toLowerCase().includes(normalizedQuery) ||
+        this.getDisplayWarrantyStatus(item).toLowerCase().includes(normalizedQuery) ||
+        this.summary.customerName.toLowerCase().includes(normalizedQuery)
+      );
+
+      return matchesType && matchesSearch;
+    });
   }
 
   private formatDate(value?: string | null): string {

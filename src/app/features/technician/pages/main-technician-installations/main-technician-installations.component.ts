@@ -84,7 +84,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
   }
 
   private mapApiInstallation(item: RawInstallation): InstallationTicket {
-    const ticketId = String(item.ticketId ?? item._id ?? '');
+    const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
     const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;

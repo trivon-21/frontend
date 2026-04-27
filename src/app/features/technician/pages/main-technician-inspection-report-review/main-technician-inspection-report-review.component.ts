@@ -6,17 +6,6 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 
-interface RequirementMaterial {
-  item: string;
-  quantity: string;
-}
-
-interface RequirementLabour {
-  technicians: number;
-  helpers: number;
-  duration: string;
-}
-
 @Component({
   selector: 'app-main-technician-inspection-report-review',
   standalone: true,
@@ -29,25 +18,18 @@ interface RequirementLabour {
 export class MainTechnicianInspectionReportReviewComponent implements OnInit {
   id: string = '';
   activeTab: string = 'Overview';
-  activeRequirementsTab: 'Materials' | 'Labour' = 'Materials';
   isLoading = false;
   error: string | null = null; // Fix: Property 'error' does not exist
   report: any = null;
   isSubmitting = false;
   
   // Review form states
+  recommendedProduct: string = '';
   reviewNotes: string = ''; 
-  financeNotes: string = '';
   rejectionReason = '';
-  materials: RequirementMaterial[] = [];
-  labourDetails: RequirementLabour = { technicians: 0, helpers: 0, duration: '' };
-  editableMaterials: RequirementMaterial[] = [];
-  editableLabour: RequirementLabour = { technicians: 0, helpers: 0, duration: '' };
 
   // Modal Visibility States
-  showApproveModal = false;
   showRejectModal = false;
-  showMakeChangesModal = false;
 
   private readonly apiUrl = `${environment.apiBaseUrl}/inspections-reports`;
 
@@ -68,6 +50,10 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
   }
 
   get recommendedProductType(): string {
+    if (this.recommendedProduct.trim()) {
+      return this.recommendedProduct.trim();
+    }
+
     const recommendedProducts = this.report?.inspectionMeta?.recommendedProducts;
     if (!Array.isArray(recommendedProducts) || recommendedProducts.length === 0) {
       return '-';
@@ -84,10 +70,8 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.report = res.data;
-          this.materials = res.data.requirements?.materials || [];
-          this.labourDetails = res.data.requirements?.labour || { technicians: 0, helpers: 0, duration: '' };
+          this.recommendedProduct = res.data?.inspectionMeta?.recommendedProducts?.[0] || '';
           this.reviewNotes = res.data.reviewNotes || '';
-          this.syncEditableRequirements();
           this.isLoading = false;
         },
         error: (err) => {
@@ -97,71 +81,11 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
       });
   }
 
-  // Modal Methods to fix "does not exist" errors
-  openApproveModal() { this.showApproveModal = true; }
-  closeApproveModal() { this.showApproveModal = false; }
-  
   openRejectModal() {
     this.rejectionReason = this.reviewNotes || '';
     this.showRejectModal = true;
   }
   closeRejectModal() { this.showRejectModal = false; }
-  
-  openMakeChangesModal() {
-    this.syncEditableRequirements();
-    this.activeRequirementsTab = 'Materials';
-    this.showMakeChangesModal = true;
-  }
-  closeMakeChangesModal() { this.showMakeChangesModal = false; }
-
-  private syncEditableRequirements(): void {
-    this.editableMaterials = this.materials.map(item => ({ ...item }));
-    this.editableLabour = { ...this.labourDetails };
-  }
-
-  addMaterialRow(): void {
-    this.editableMaterials = [...this.editableMaterials, { item: '', quantity: '' }];
-  }
-
-  removeMaterialRow(index: number): void {
-    this.editableMaterials = this.editableMaterials.filter((_, currentIndex) => currentIndex !== index);
-    if (this.editableMaterials.length === 0) {
-      this.addMaterialRow();
-    }
-  }
-
-  submitRequirements(): void {
-    const requirements = {
-      materials: this.editableMaterials
-        .map(item => ({ item: item.item.trim(), quantity: item.quantity.trim() }))
-        .filter(item => item.item && item.quantity),
-      labour: {
-        technicians: Number(this.editableLabour.technicians) || 0,
-        helpers: Number(this.editableLabour.helpers) || 0,
-        duration: this.editableLabour.duration.trim()
-      }
-    };
-
-    this.isSubmitting = true;
-    this.http.patch(`${this.apiUrl}/${this.id}/requirements`, {
-      requirements,
-      reviewNotes: this.reviewNotes
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.materials = requirements.materials;
-          this.labourDetails = requirements.labour;
-          this.showMakeChangesModal = false;
-          this.isSubmitting = false;
-          this.router.navigate(['/main-technician-inspection-reports']);
-        },
-        error: () => {
-          this.error = 'Failed to update requirements';
-          this.isSubmitting = false;
-        }
-      });
-  }
 
   submitRejection(): void {
     if (!this.rejectionReason.trim()) {
@@ -187,13 +111,21 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
       });
   }
 
-  submitApproval() {
+  completeReview() {
+    if (!this.recommendedProduct.trim()) {
+      this.error = 'Please add a recommended product before completing review.';
+      return;
+    }
+
+    this.error = null;
     this.isSubmitting = true;
-    this.http.patch(`${this.apiUrl}/${this.id}/approve`, { financeNotes: this.financeNotes })
+    this.http.patch(`${this.apiUrl}/${this.id}/approve`, {
+      financeNotes: this.reviewNotes.trim(),
+      recommendedProduct: this.recommendedProduct.trim(),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.closeApproveModal();
           this.isSubmitting = false;
           this.router.navigate(['/main-technician-inspection-reports']);
         },

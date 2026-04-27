@@ -72,7 +72,7 @@ export class TeamSessionService {
    * Builds a teamName query segment for API requests.
    */
   buildTeamQuery(): string {
-    const teamName = this.sessionSubject.value?.teamName;
+    const teamName = this.getTeamName();
     return teamName ? `?teamName=${encodeURIComponent(teamName)}` : '';
   }
 

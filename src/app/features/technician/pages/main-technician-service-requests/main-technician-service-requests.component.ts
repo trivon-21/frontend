@@ -119,7 +119,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
     const displayDate = this.formatDisplayDate(item.serviceDate);
     const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
-    const ticketId = String(item.ticketId ?? item._id ?? '');
+    const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
 
     const assignedTeamName = typeof item.assignedTeam === 'object'

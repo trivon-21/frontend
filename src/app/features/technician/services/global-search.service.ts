@@ -9,9 +9,9 @@ export class GlobalSearchService {
 
   readonly searchQuery$ = this.searchQuerySubject.asObservable();
 
-  /** Stores the current trimmed search query for shared consumers. */
+  /** Stores the current search query for shared consumers. */
   setQuery(query: string): void {
-    this.searchQuerySubject.next(query.trim());
+    this.searchQuerySubject.next(query);
   }
 
   /** Clears the shared search query state. */

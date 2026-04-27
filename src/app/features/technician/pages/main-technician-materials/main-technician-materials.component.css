@@ -1,4 +1,4 @@
-﻿
+
     .materials-container {
       display: flex;
       flex-direction: column;
@@ -142,6 +142,44 @@
     .warranty-value.no {
       background-color: #fee2e2;
       color: #dc2626;
+    }
+
+    .site-details-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-item.full-width {
+      grid-column: span 2;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      font-weight: 500;
+      margin-top: 0;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.4;
+      margin: 0;
     }
 
     .rejection-notice {

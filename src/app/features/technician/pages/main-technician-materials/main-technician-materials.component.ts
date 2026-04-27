@@ -54,6 +54,8 @@ type TicketDropdownItem = {
   materials?: Array<{ item?: string; quantity?: string }>;
   financeNotes?: string;
   location?: string;
+  requestType?: 'Installation' | 'Service';
+  siteDetails?: any;
 };
 
 @Component({
@@ -79,8 +81,21 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     customerContactNo: '',
     customerAddress: '',
     rejectedStatus: '',
-    rejectionReason: ''
+    rejectionReason: '',
+    siteDetails: {} as any
   };
+
+  get selectedTicket(): TicketDropdownItem | undefined {
+    return this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
+  }
+
+  get isInstallationTicketSelected(): boolean {
+    return this.selectedTicket?.requestType === 'Installation';
+  }
+
+  get detailsFieldLabel(): string {
+    return this.isInstallationTicketSelected ? 'Site Details' : 'Service Description';
+  }
 
   requests: MaterialRequest[] = [];
   filteredRequests: MaterialRequest[] = [];
@@ -181,6 +196,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
           const tickets = (response.data || [])
             .map((item: any) => ({
               id: this.normalizeTicketId(item.ticketId),
+              requestType: item.requestType || 'Service',
               productType: (item.productType || '').trim(),
               serviceDescription: (item.serviceDescription || '').trim(),
               customerName: (item.customerName || '').trim(),
@@ -192,7 +208,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
               status: item.status || 'New',
               materials: item.materials || [],
               financeNotes: item.financeNotes || '',
-              location: item.location || ''
+              location: item.location || '',
+              siteDetails: item.siteDetails || {}
             }))
             .filter((ticket) => ticket.id !== '#N/A');
 
@@ -211,6 +228,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             this.newRequest.customerEmail = '';
             this.newRequest.customerContactNo = '';
             this.newRequest.customerAddress = '';
+            this.newRequest.siteDetails = {};
           } else {
             this.syncDescriptionWithSelectedTicket(this.newRequest.ticketId);
           }
@@ -241,6 +259,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             this.newRequest.customerEmail = '';
             this.newRequest.customerContactNo = '';
             this.newRequest.customerAddress = '';
+            this.newRequest.siteDetails = {};
           } else {
             this.syncDescriptionWithSelectedTicket(this.newRequest.ticketId);
           }
@@ -315,6 +334,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.customerAddress = selectedTicket?.customerAddress || '';
     this.newRequest.rejectedStatus = selectedTicket?.status || '';
     this.newRequest.rejectionReason = selectedTicket?.financeNotes || '';
+    this.newRequest.siteDetails = selectedTicket?.siteDetails || {};
     
     // Populate materials if this is a rejected request
     if (selectedTicket?.status === 'Finance Rejected' && selectedTicket?.materials && selectedTicket.materials.length > 0) {
@@ -342,7 +362,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       customerContactNo: '',
       customerAddress: '',
       rejectedStatus: '',
-      rejectionReason: ''
+      rejectionReason: '',
+      siteDetails: {}
     };
   }
 

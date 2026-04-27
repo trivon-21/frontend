@@ -1,4 +1,4 @@
-﻿
+
     <div class="inspection-reports-container">
       <header class="table-header">
         <div class="search-box">
@@ -51,7 +51,6 @@
               <tr>
                 <th>TICKET ID</th>
                 <th>CUSTOMER NAME</th>
-                <th>PRODUCT TYPE</th>
                 <th>LOCATION</th>
                 <th>DATE</th>
                 <th>STATUS</th>
@@ -62,7 +61,6 @@
               <tr *ngFor="let ticket of filteredTickets">
                 <td class="ticket-id">{{ ticket.id }}</td>
                 <td>{{ ticket.customerName }}</td>
-                <td>{{ ticket.productType }}</td>
                 <td>{{ ticket.location }}</td>
                 <td class="date-cell">
                   {{ ticket.date }}

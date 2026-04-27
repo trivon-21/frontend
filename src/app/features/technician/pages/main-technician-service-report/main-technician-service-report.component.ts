@@ -76,7 +76,7 @@ export class MainTechnicianServiceReportsComponent implements OnInit {
   }
 
   private mapApiServiceReport(item: RawServiceReport): ServiceReportTicket {
-    const ticketId = String(item.ticketId ?? item._id ?? '');
+    const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
 
     const rawStatus = String(item.status || item.finalStatus || 'Pending').trim().toLowerCase();

@@ -95,7 +95,8 @@ export class ServiceTeamDashboardComponent implements OnInit {
    * A named limit constant avoids hidden UI behavior changes from magic numbers.
    */
   fetchRecentActivity(): void {
-    this.http.get<any>(`${environment.apiBaseUrl}/dashboard/activity?limit=5${this.teamSessionService.buildTeamQuery()}`).subscribe({
+    const teamQuery = this.teamSessionService.buildTeamQuery().replace('?', '&');
+    this.http.get<any>(`${environment.apiBaseUrl}/dashboard/activity?limit=5${teamQuery}`).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.activity = (response.data as DashboardActivityApiItem[]).map((item: DashboardActivityApiItem) => ({

@@ -17,7 +17,9 @@ interface InspectionReportTicket {
 
 type RawInspectionReport = {
   _id: string;
-  customerId?: { name?: string; address?: string }; // Populated object
+  customerId?: { name?: string; address?: string } | string;
+  customerName?: string | null;
+  customerAddress?: string | null;
   inspectionMeta?: { date?: string | Date; recommendedProducts?: string[] };
   status?: InspectionReportTicket['status'];
   updatedAt?: string;
@@ -62,12 +64,13 @@ export class MainTechnicianInspectionReportsComponent implements OnInit {
 
   private mapApiInspectionReport(item: RawInspectionReport): InspectionReportTicket {
     const inspectionDate = item.inspectionMeta?.date || item.updatedAt;
+    const populatedCustomer = item.customerId && typeof item.customerId === 'object' ? item.customerId : undefined;
 
     return {
       id: item._id, // Critical: Use _id for API consistency
-      customerName: item.customerId?.name || 'Unknown Customer',
+      customerName: populatedCustomer?.name || item.customerName || 'Unknown Customer',
       productType: item.inspectionMeta?.recommendedProducts?.[0] || 'N/A',
-      location: item.customerId?.address || 'N/A',
+      location: populatedCustomer?.address || item.customerAddress || 'N/A',
       date: this.formatInspectionDate(inspectionDate),
       status: (item.status as InspectionReportTicket['status']) || 'Pending',
     };

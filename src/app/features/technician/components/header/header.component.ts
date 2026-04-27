@@ -1,5 +1,6 @@
 ﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { GlobalSearchService } from '../../services/global-search.service';
 
 @Component({
   selector: 'app-header',
@@ -10,10 +11,11 @@ import { CommonModule } from '@angular/common';
 export class HeaderComponent {
   searchQuery = '';
 
-  constructor() {}
+  constructor(private globalSearchService: GlobalSearchService) {}
 
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery = input.value;
+    this.globalSearchService.setQuery(this.searchQuery);
   }
 }
