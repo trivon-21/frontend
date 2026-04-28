@@ -181,6 +181,26 @@ export class NewOrderFormComponent implements OnInit {
     this.resetSelection();
   }
 
+  addFromSuggested(item: InventoryItem): void {
+    const existingIndex = this.orderItems.findIndex(i => i.sku === item.sku);
+    if (existingIndex !== -1) {
+      this.orderItems[existingIndex].quantity += 1;
+      this.orderItems[existingIndex].estimatedTotal =
+        this.orderItems[existingIndex].quantity * item.unitCost;
+    } else {
+      this.orderItems.push({
+        inventoryId: item._id,
+        name: item.name,
+        sku: item.sku,
+        quantity: 1,
+        unitCost: item.unitCost,
+        estimatedTotal: item.unitCost,
+        available: item.available,
+        reserved: item.reserved
+      });
+    }
+  }
+
   private resetSelection(): void {
     this.selectedItem = null;
     this.isAddingNewItem = false;

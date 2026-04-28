@@ -23,15 +23,15 @@
     <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
   </div>
 
-  <div class="form-content-card glass-panel">
-    <!-- Top Controls -->
-    <div class="form-section-header">
-      <span class="step-num">01</span>
-      <h3>Basic Information</h3>
-    </div>
-    
-    <div class="form-grid top-controls">
-      <div class="form-group">
+  <div class="split-layout">
+    <!-- Left Column: Form Inputs -->
+    <div class="layout-left glass-panel">
+      <div class="form-section-header">
+        <span class="step-num">01</span>
+        <h3>Basic Information</h3>
+      </div>
+      
+      <div class="form-group mb-32">
         <label>Vendor / Supplier</label>
         <div class="select-wrapper">
           <select [(ngModel)]="selectedSupplier" class="form-select">
@@ -44,198 +44,226 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Order Priority</label>
-        <div class="priority-switcher">
-          <button 
-            class="p-btn" 
-            [class.active]="orderPriority === 'normal'"
-            (click)="orderPriority = 'normal'">
-            Normal
-          </button>
-          <button 
-            class="p-btn urgent" 
-            [class.active]="orderPriority === 'urgent'"
-            (click)="orderPriority = 'urgent'">
-            Urgent
-          </button>
-        </div>
+      <div class="divider"></div>
+
+      <!-- Item Selection -->
+      <div class="form-section-header">
+        <span class="step-num">02</span>
+        <h3>Item Selection</h3>
       </div>
-    </div>
 
-    <div class="divider"></div>
-
-    <!-- Item Selection -->
-    <div class="form-section-header">
-      <span class="step-num">02</span>
-      <h3>Item Selection</h3>
-    </div>
-
-    <div class="item-selection-zone">
-      <div class="selector-row">
-        <div class="autocomplete-container">
-          <div class="input-wrapper">
-            <input 
-              type="text" 
-              [(ngModel)]="itemSearchQuery" 
-              (input)="filterItems()"
-              (focus)="onItemInputFocus()"
-              (blur)="onItemInputBlur()"
-              placeholder="Search inventory items by name or SKU..."
-              class="form-input search-input"
-              [class.has-selection]="selectedItem || isAddingNewItem"
-              autocomplete="off">
-            
-            <button 
-              class="btn-clear-selection" 
-              *ngIf="selectedItem || isAddingNewItem"
-              (click)="clearSelection()"
-              title="Clear selection">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M18 6L6 18M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <!-- Dropdown Results -->
-          <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
-            <div class="dropdown-item add-new" (mousedown)="selectInventoryItem('new')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right: 8px;">
-                <path d="M12 5v14M5 12h14"></path>
-              </svg>
-              Add New Item: "{{ itemSearchQuery }}"
-            </div>
-            
-            <div 
-              class="dropdown-item" 
-              *ngFor="let item of filteredInventory" 
-              (mousedown)="selectInventoryItem(item)">
-              <div class="item-info">
-                <span class="name">{{ item.name }}</span>
-                <span class="sku">{{ item.sku }}</span>
-              </div>
-              <div class="item-stock-info">
-                Avail: <span class="avail">{{ item.available }}</span>
-              </div>
-            </div>
-
-            <div class="dropdown-no-results" *ngIf="filteredInventory.length === 0 && itemSearchQuery && !isAddingNewItem">
-              No existing items found. Click above to add as new.
-            </div>
-          </div>
-        </div>
-
-        <div class="quick-config" *ngIf="selectedItem || isAddingNewItem">
-          <div class="config-field" *ngIf="isAddingNewItem">
-            <span class="field-label">SKU</span>
-            <input type="text" [(ngModel)]="newItemSku" class="qty-field sku-input" placeholder="e.g. SKU-123">
-          </div>
-          <div class="config-field">
-            <span class="field-label">QTY</span>
-            <input type="number" [(ngModel)]="currentQuantity" class="qty-field">
-          </div>
-          <div class="config-field">
-            <span class="field-label">UNIT COST</span>
-            <div class="price-input-wrapper">
-              <span class="currency-prefix">LKR</span>
-              <input type="number" [(ngModel)]="currentPrice" class="qty-field price-input">
-            </div>
-          </div>
-          <div class="config-field">
-            <span class="field-label">SUBTOTAL</span>
-            <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
-          </div>
-          <button class="btn-add-item-row" (click)="addLineItem()">
-            ADD TO LIST
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Line Items Table -->
-    <div class="line-items-section" *ngIf="orderItems.length > 0">
-      <table class="line-items-table">
-        <thead>
-          <tr>
-            <th>ITEM DESCRIPTION</th>
-            <th>SKU</th>
-            <th class="text-center">QUANTITY</th>
-            <th class="text-right">UNIT PRICE</th>
-            <th class="text-right">TOTAL</th>
-            <th class="text-center"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of orderItems; let i = index" class="animate-row">
-            <td class="name-cell">{{ item.name }}</td>
-            <td class="sku-cell">{{ item.sku }}</td>
-            <td class="qty-cell">
-              <div class="qty-editor">
-                <button (click)="updateItemQuantity(i, item.quantity - 1)">-</button>
-                <input 
-                  type="number" 
-                  [(ngModel)]="item.quantity" 
-                  (change)="updateItemQuantity(i, item.quantity)"
-                  class="inline-qty-input">
-                <button (click)="updateItemQuantity(i, item.quantity + 1)">+</button>
-              </div>
-            </td>
-            <td class="text-right">{{ formatCurrency(item.unitCost) }}</td>
-            <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
-            <td class="text-center">
-              <button class="btn-delete-row" (click)="removeLineItem(i)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+      <div class="item-selection-zone">
+        <div class="selector-row">
+          <div class="autocomplete-container">
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                [(ngModel)]="itemSearchQuery" 
+                (input)="filterItems()"
+                (focus)="onItemInputFocus()"
+                (blur)="onItemInputBlur()"
+                placeholder="Search inventory items..."
+                class="form-input search-input"
+                [class.has-selection]="selectedItem || isAddingNewItem"
+                autocomplete="off">
+              
+              <button 
+                class="btn-clear-selection" 
+                *ngIf="selectedItem || isAddingNewItem"
+                (click)="clearSelection()"
+                title="Clear selection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
                 </svg>
               </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <div class="order-summary-row">
-        <div class="summary-notes">
-          <label>Order Notes / Justification</label>
-          <textarea 
-            [(ngModel)]="orderNotes" 
-            class="form-textarea" 
-            placeholder="Add any additional context or instructions for this order..."
-            rows="3"></textarea>
+            </div>
+            
+            <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
+              <div class="dropdown-item add-new" (mousedown)="selectInventoryItem('new')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right: 8px;">
+                  <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                Add New Item: "{{ itemSearchQuery }}"
+              </div>
+              
+              <div 
+                class="dropdown-item" 
+                *ngFor="let item of filteredInventory" 
+                (mousedown)="selectInventoryItem(item)">
+                <div class="item-info">
+                  <span class="name">{{ item.name }}</span>
+                  <span class="sku">{{ item.sku }}</span>
+                </div>
+                <div class="item-stock-info">
+                  Avail: <span class="avail">{{ item.available }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-config animate-fade" *ngIf="selectedItem || isAddingNewItem">
+            <div class="config-row">
+              <div class="config-field" *ngIf="isAddingNewItem">
+                <span class="field-label">SKU</span>
+                <input type="text" [(ngModel)]="newItemSku" class="qty-field sku-input" placeholder="SKU-123">
+              </div>
+              <div class="config-field">
+                <span class="field-label">QTY</span>
+                <input type="number" [(ngModel)]="currentQuantity" class="qty-field">
+              </div>
+              <div class="config-field">
+                <span class="field-label">UNIT COST</span>
+                <div class="price-input-wrapper">
+                  <span class="currency-prefix">LKR</span>
+                  <input type="number" [(ngModel)]="currentPrice" class="qty-field price-input">
+                </div>
+              </div>
+            </div>
+            <div class="config-footer">
+              <div class="total-display">
+                <span class="field-label">SUBTOTAL</span>
+                <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
+              </div>
+              <button class="btn-add-item-row" (click)="addLineItem()">
+                ADD TO LIST
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="summary-total">
-          <div class="total-line">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="summary-notes mt-24">
+        <label>Order Notes / Justification</label>
+        <textarea 
+          [(ngModel)]="orderNotes" 
+          class="form-textarea" 
+          placeholder="Add any additional context..."
+          rows="3"></textarea>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-cancel-page" (click)="goBack()">Discard Changes</button>
+        <div class="footer-actions">
+          <button class="btn-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0">Save Draft</button>
+          <button class="btn-submit-order" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+            <span *ngIf="!isSubmitting">Submit Order</span>
+            <span *ngIf="isSubmitting">...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Added Items List -->
+    <div class="layout-right glass-panel">
+      <div class="right-header">
+        <h3>Added Items List</h3>
+        <span class="count-badge" *ngIf="orderItems.length > 0">{{ orderItems.length }}</span>
+      </div>
+
+      <div class="added-items-scroll">
+        <div class="empty-items-state" *ngIf="orderItems.length === 0">
+          <div class="empty-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 12V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
+              <path d="M9 11h6" />
+              <path d="M9 15h4" />
+              <path d="M14 18l3 3 5-5" />
+            </svg>
+          </div>
+          <p>No items added yet.</p>
+        </div>
+
+        <table class="line-items-table" *ngIf="orderItems.length > 0">
+          <thead>
+            <tr>
+              <th>ITEM</th>
+              <th class="text-center">QTY</th>
+              <th class="text-right">PRICE</th>
+              <th class="text-right">TOTAL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of orderItems; let i = index" class="animate-row">
+              <td class="name-cell">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-sku">{{ item.sku }}</span>
+              </td>
+              <td class="qty-cell">
+                <div class="qty-editor">
+                  <button (click)="updateItemQuantity(i, item.quantity - 1)">-</button>
+                  <input type="number" [(ngModel)]="item.quantity" (change)="updateItemQuantity(i, item.quantity)" class="inline-qty-input">
+                  <button (click)="updateItemQuantity(i, item.quantity + 1)">+</button>
+                </div>
+              </td>
+              <td class="text-right">{{ formatCurrency(item.unitCost) }}</td>
+              <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
+              <td class="text-center">
+                <button class="btn-delete-row" (click)="removeLineItem(i)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary-box-fixed">
+        <div class="summary-content">
+          <div class="summary-line">
             <span class="label">Total Items</span>
             <span class="val">{{ orderItems.length }}</span>
           </div>
-          <div class="total-line grand">
+          <div class="summary-line grand">
             <span class="label">Estimated Total</span>
             <span class="val">{{ formatCurrency(orderTotal) }}</span>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="empty-items-state" *ngIf="orderItems.length === 0">
-      <div class="empty-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M20 12V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
-          <path d="M9 11h6" />
-          <path d="M9 15h4" />
-          <path d="M14 18l3 3 5-5" />
-        </svg>
+  <!-- Required Items Section -->
+  <div class="required-items-section mt-40">
+    <div class="section-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#008f5d" stroke-width="2.5">
+        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3>Required Items to Order (Low Stock)</h3>
+    </div>
+    
+    <div class="suggested-grid">
+      <div class="suggested-card glass-panel animate-fade" 
+           *ngFor="let item of suggestedItems" 
+           (click)="addFromSuggested(item)">
+        <div class="card-info">
+          <span class="item-name">{{ item.name }}</span>
+          <span class="item-sku">{{ item.sku }}</span>
+        </div>
+        <div class="card-meta">
+          <div class="stock-status">
+            <span class="label">Avail:</span>
+            <span class="val danger">{{ item.available }}</span>
+          </div>
+          <div class="price-info">
+            {{ formatCurrency(item.unitCost) }}
+          </div>
+        </div>
+        <div class="add-overlay">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          <span>ADD TO ORDER</span>
+        </div>
       </div>
-      <p>No items added yet. Search and add items to begin your request.</p>
     </div>
 
-    <div class="form-footer">
-      <button class="btn-cancel-page" (click)="goBack()">Discard Changes</button>
-      <div class="footer-actions">
-        <button class="btn-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0">Save Draft</button>
-        <button class="btn-submit-order" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
-          <span *ngIf="!isSubmitting">Submit Order Request</span>
-          <span *ngIf="isSubmitting">Submitting...</span>
-        </button>
-      </div>
+    <div class="empty-suggested" *ngIf="suggestedItems.length === 0">
+      <p>No urgent items requiring order at the moment.</p>
     </div>
   </div>
 </div>
