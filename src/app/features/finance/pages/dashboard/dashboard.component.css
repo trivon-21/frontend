@@ -90,7 +90,7 @@
 
 .main-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 220px;
   gap: 24px;
 }
 
@@ -339,7 +339,7 @@ tbody tr:hover {
 
 .stat-card {
   background: white;
-  padding: 24px;
+  padding: 16px;
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -369,15 +369,16 @@ tbody tr:hover {
   background: #ef4444;
 }
 
-.stat-label {
-  flex: 1;
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin: 0;
+  line-height: 1;
 }
 
 .stat-value {
-  font-size: 48px;
+  font-size: 36px;
   font-weight: 700;
   color: #1e1b4b;
   margin: 0;

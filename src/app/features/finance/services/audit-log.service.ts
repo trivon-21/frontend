@@ -26,4 +26,7 @@ export class AuditLogService {
   getLog(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+  getInvoiceById(invoiceId: string): Observable<any> {
+    return this.http.get<any>(`http://127.0.0.1:3000/api/invoices/by-number/${invoiceId}`);
+  }
 }

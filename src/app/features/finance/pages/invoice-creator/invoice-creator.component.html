@@ -70,14 +70,6 @@
 
       <!-- Totals -->
       <div class="totals-section">
-        <div class="total-row-item">
-          <span class="total-label">Sub Total</span>
-          <span class="total-val"><strong>LKR {{ subTotal | number }}</strong></span>
-        </div>
-        <div class="total-row-item">
-          <span class="total-label">Service Charge</span>
-          <span class="total-val">LKR {{ serviceCharge | number }}</span>
-        </div>
         <div class="total-row-item grand">
           <span class="grand-label">Grand Total</span>
           <span class="grand-val">LKR {{ grandTotal | number }}</span>
@@ -111,12 +103,5 @@
     </button>
   </div>
 
-  <!-- Pagination -->
-  <div class="form-pagination">
-    <button class="page-nav" (click)="goToPage(currentPage-1)" [disabled]="currentPage===1">Previous</button>
-    <button *ngFor="let p of [1,2,3]" class="page-num" [class.active]="currentPage===p" (click)="goToPage(p)">{{ p
-      }}</button>
-    <button class="page-nav" (click)="goToPage(currentPage+1)" [disabled]="currentPage===totalPages">Next</button>
-  </div>
 
 </div>

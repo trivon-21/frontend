@@ -35,6 +35,11 @@ export class PaymentAuditLogComponent implements OnInit {
   itemsPerPage = 15;
   totalItems = 0;
 
+  showSlipPopup = false;
+  showInvoicePopup = false;
+  slipUrlToShow = '';
+  invoiceToShow: any = null;
+
   paymentTypes = ['ALL', 'BUY_ONLY', 'INSPECTION', 'INVOICE', 'REPAIR', 'MAINTENANCE'];
   eventTypes = [
     'ALL',
@@ -106,19 +111,33 @@ export class PaymentAuditLogComponent implements OnInit {
 
   viewSlip(): void {
     if (this.selectedLog?.slipUrl) {
-      window.open(this.selectedLog.slipUrl, '_blank');
+      this.slipUrlToShow = this.selectedLog.slipUrl;
+      this.showSlipPopup = true;
     }
   }
+  closeSlipPopup(): void { this.showSlipPopup = false; this.slipUrlToShow = ''; }
 
   viewInvoice(): void {
-    if (this.selectedLog?.invoiceId) {
-      // Navigate to customer invoice page
-      window.open(
-        `http://localhost:4200/customer/invoice?invoiceId=${this.selectedLog.invoiceId}`,
-        '_blank'
-      );
-    }
+    if (!this.selectedLog?.invoiceId) return;
+    // Fetch invoice from backend
+    const http = (this as any)._http; // inject HttpClient if not already
+    // Simple approach: open a fetch via the audit log service or directly
+    this.auditLogService.getInvoiceById(this.selectedLog.invoiceId).subscribe({
+      next: (inv: any) => { this.invoiceToShow = inv; this.showInvoicePopup = true; },
+      error: () => { alert('Could not load invoice details.'); }
+    });
   }
+
+  closeInvoicePopup(): void { this.showInvoicePopup = false; this.invoiceToShow = null; }
+
+  isImage(url: string): boolean {
+    return !!url && (url.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(url) ||
+      (url.startsWith('http') && !url.includes('.pdf')));
+  }
+  isPDF(url: string): boolean {
+    return !!url && (url.includes('.pdf') || url.startsWith('data:application/pdf'));
+  }
+
   get totalPages(): number[] {
     return Array.from({ length: Math.ceil(this.totalItems / this.itemsPerPage) }, (_, i) => i + 1);
   }

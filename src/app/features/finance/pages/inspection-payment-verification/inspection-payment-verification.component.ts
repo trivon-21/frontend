@@ -85,9 +85,10 @@ export class InspectionPaymentVerificationComponent implements OnInit {
   }
 
   openRejectModal(payment: any): void {
-    this.selectedPayment = payment;
+    this.selectedPayment = {...payment};
     this.rejectionReason = '';
     this.showRejectModal = true;
+    console.log('Selected payment:', this.selectedPayment);
   }
 
   closeRejectModal(): void {

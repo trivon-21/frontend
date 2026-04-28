@@ -49,7 +49,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Inspection Details</h3>
-        <button class="modal-close" (click)="closeDetailsModal()">✕</button>
+        <button class="btn-close" (click)="closeDetailsModal()">X</button>
       </div>
       <div class="modal-body">
         <p><strong>Order ID:</strong> {{ selectedInspection?.orderId }}</p>
@@ -62,7 +62,6 @@
         <p><strong>Item:</strong> {{ selectedInspection?.itemName }}</p>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeDetailsModal()">Close</button>
         <button class="start-btn" (click)="closeDetailsModal(); openArrivalModal(selectedInspection)">
           → START INSPECTION
         </button>
@@ -75,7 +74,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Set Arrival Time</h3>
-        <button class="modal-close" (click)="closeArrivalModal()">✕</button>
+        <button class="btn-close" (click)="closeArrivalModal()">X</button>
       </div>
       <div class="modal-body">
         <p>Starting inspection for <strong>{{ selectedInspection?.customerName }}</strong></p>
@@ -89,8 +88,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeArrivalModal()" [disabled]="isLoading">Cancel</button>
-        <button class="start-btn" (click)="confirmStartInspection()" [disabled]="isLoading">
+        <br><button class="start-btn" (click)="confirmStartInspection()" [disabled]="isLoading">
           {{ isLoading ? 'Starting...' : 'Confirm & Start' }}
         </button>
       </div>

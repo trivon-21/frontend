@@ -17,12 +17,22 @@
           <input type="date" [(ngModel)]="endDate" (change)="applyDateFilter()" />
         </div>
       </div>
-      <button class="export-btn" (click)="exportCSV()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-        </svg>
-        Export CSV
-      </button>
+      <!-- export btn -->
+      <div style="display:flex; gap:8px;">
+        <button class="export-btn" (click)="exportCSV()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          CSV
+        </button>
+        <button class="export-btn pdf-btn" (click)="exportPDF()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          PDF
+        </button>
+      </div>
     </div>
   </div>
 
@@ -92,7 +102,7 @@
 
       <!-- MONTHLY BAR CHART -->
       <div class="fr-section">
-        <h3 class="fr-section-title">Monthly Invoice Revenue (Last 6 Months)</h3>
+        <h3 class="fr-section-title">Total Revenue (Last 6 Months)</h3>
         <div class="fr-chart" *ngIf="monthlyData.length > 0">
           <div class="fr-bars">
             <div class="fr-bar-group" *ngFor="let m of monthlyData">

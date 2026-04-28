@@ -36,24 +36,28 @@
       </div>
     </div>
 
-    <!-- NOTIFICATIONS -->
-    <div class="dropdown-wrapper">
-      <button class="icon-btn" (click)="toggleNotifications()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+    <!-- Notification bell button -->
+    <button class="icon-btn notif-btn" (click)="toggleNotifications()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20"
+        height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+      <span class="notif-badge" *ngIf="totalPending > 0">{{ totalPending }}</span>
+    </button>
 
-        <!-- Badge -->
-        <span class="notification-badge" *ngIf="pendingCount > 0">
-          {{ pendingCount }}
-        </span>
-      </button>
-
-      <div class="dropdown-menu" *ngIf="showNotifications">
-        <div>
-          You have {{ pendingCount }} pending payment(s) for approval.
-        </div>
+    <!-- Notification dropdown -->
+    <div class="notif-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+      <div class="notif-header">
+        <span class="notif-title">Notifications</span>
+        <span class="notif-total" *ngIf="totalPending > 0">{{ totalPending }} pending</span>
+      </div>
+      <div class="notif-empty" *ngIf="notifications.length === 0">
+        ✅ All caught up! No pending actions.
+      </div>
+      <div class="notif-item" *ngFor="let n of notifications">
+        <div class="notif-dot" [ngClass]="'dot-' + n.type"></div>
+        <span>{{ n.message }}</span>
       </div>
     </div>
 

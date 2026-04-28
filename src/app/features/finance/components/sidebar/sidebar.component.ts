@@ -18,6 +18,12 @@ interface NavSection {
   items: NavItem[];
 }
 
+interface StandaloneLink {
+  title: string;
+  icon: string;
+  route: string;
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -25,8 +31,15 @@ interface NavSection {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
+
 export class SidebarComponent {
   constructor(private sanitizer: DomSanitizer) { }
+
+  standaloneLinks: StandaloneLink[] = [
+    { title: 'Payment Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { title: 'Payment Audit Log', icon: 'audit', route: '/payment-audit-log' },
+    { title: 'Financial Reports', icon: 'report', route: '/financial-report' },
+  ];
 
   sections: NavSection[] = [
     {
@@ -101,23 +114,6 @@ export class SidebarComponent {
             { label: 'Rejected Payments', icon: 'rejected', route: '/services/maintenance-rejected' },
           ]
         },
-      ]
-    },
-    {
-      title: 'Payment Audit Log',
-      icon: 'audit',
-      isOpen: false,
-      items: [
-        { label: 'View Audit Log', icon: 'verification', route: '/payment-audit-log' },
-      ]
-    },
-
-    {
-      title: 'Financial Reports',
-      icon: 'report',
-      isOpen: false,
-      items: [
-        { label: 'Financial Report', icon: 'report', route: '/financial-report' },
       ]
     },
 

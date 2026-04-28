@@ -29,11 +29,12 @@
         <span class="stat-label">Rejected</span>
       </div>
     </div>
+
     <div class="stat-card">
-      <div class="stat-icon pending">⏳</div>
+      <div class="stat-icon total">📊</div>
       <div class="stat-info">
-        <span class="stat-value">{{ pending }}</span>
-        <span class="stat-label">Submitted</span>
+        <span class="stat-value">{{ totalLogs }}</span>
+        <span class="stat-label">Total Events</span>
       </div>
     </div>
   </div>
@@ -139,7 +140,7 @@
             <span *ngIf="log.amount === 0" class="no-amount">—</span>
           </td>
           <td class="ref-cell">{{ getReference(log) }}</td>
-          <td class="performed-cell">{{ log.performedBy }}</td>
+          <td class="performed-cell">{{ log.performedByDisplay || log.performedBy }}</td>
           <td>
             <div class="action-cell">
               <button class="view-btn" (click)="openModal(log)">View</button>
@@ -281,5 +282,85 @@
       <!-- Show both if both exist (e.g. invoice payment verification) -->
     </div>
 
+  </div>
+</div>
+<!-- SLIP POPUP -->
+<div class="modal-overlay" *ngIf="showSlipPopup" (click)="closeSlipPopup()">
+  <div class="modal" (click)="$event.stopPropagation()" style="max-width:620px;">
+    <div class="modal-header">
+      <h3>Payment Slip</h3>
+      <button class="modal-close" (click)="closeSlipPopup()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding:20px;">
+      <img *ngIf="isImage(slipUrlToShow)" [src]="slipUrlToShow"
+        style="max-width:100%; max-height:500px; border-radius:8px;" alt="Payment Slip" />
+      <iframe *ngIf="isPDF(slipUrlToShow)" [src]="slipUrlToShow" width="100%" height="450px"
+        style="border:none; border-radius:8px;"></iframe>
+      <div *ngIf="!isImage(slipUrlToShow) && !isPDF(slipUrlToShow)"
+        style="padding:16px; background:#f9fafb; border-radius:8px; word-break:break-all; text-align:left;">
+        <p style="color:#6b7280; font-size:13px; margin-bottom:8px;">Slip reference:</p>
+        <code style="font-size:12px;">{{ slipUrlToShow }}</code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeSlipPopup()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE POPUP -->
+<div class="modal-overlay" *ngIf="showInvoicePopup" (click)="closeInvoicePopup()">
+  <div class="modal" (click)="$event.stopPropagation()" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>Invoice — {{ invoiceToShow?.invoiceNumber }}</h3>
+      <button class="modal-close" (click)="closeInvoicePopup()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="invoiceToShow">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div>
+          <p class="info-label">Invoice No</p>
+          <p class="info-value">{{ invoiceToShow.invoiceNumber }}</p>
+        </div>
+        <div>
+          <p class="info-label">Status</p>
+          <p class="info-value">{{ invoiceToShow.status }}</p>
+        </div>
+        <div>
+          <p class="info-label">Customer</p>
+          <p class="info-value">{{ invoiceToShow.customerName }}</p>
+        </div>
+        <div>
+          <p class="info-label">Grand Total</p>
+          <p class="info-value" style="font-weight:700; color:#2d5a3d;">LKR {{ invoiceToShow.grandTotal | number:'1.0-0'
+            }}</p>
+        </div>
+      </div>
+      <hr style="border-color:#e5e7eb; margin:12px 0;" />
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead style="background:#eef2ff;">
+          <tr>
+            <th style="padding:8px 12px; text-align:left;">Item</th>
+            <th style="padding:8px 12px;">Qty</th>
+            <th style="padding:8px 12px;">Rate (LKR)</th>
+            <th style="padding:8px 12px;">Amount (LKR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of invoiceToShow.items" style="border-top:1px solid #f1f5f9;">
+            <td style="padding:8px 12px;">{{ item.itemName }}</td>
+            <td style="padding:8px 12px; text-align:center;">{{ item.qty }}</td>
+            <td style="padding:8px 12px; text-align:right;">{{ item.rate | number:'1.0-0' }}</td>
+            <td style="padding:8px 12px; text-align:right;">{{ item.amount | number:'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        style="display:flex; justify-content:flex-end; margin-top:12px; font-size:15px; font-weight:700; color:#2d1b69;">
+        Grand Total: LKR {{ invoiceToShow.grandTotal | number:'1.0-0' }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeInvoicePopup()">Close</button>
+    </div>
   </div>
 </div>

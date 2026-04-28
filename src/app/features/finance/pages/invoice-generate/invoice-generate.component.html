@@ -11,21 +11,20 @@
     </div>
   </div>
 
-  <div *ngIf="!isLoading && filteredInvoices.length === 0" class="empty-state">
-    <p>🎉 Nothing yet to generate</p>
-  </div>
-
   <div *ngIf="isLoading" class="empty-state">
-    <p>Loading...</p>
+    <p>⏳ Loading...</p>
+  </div>
+  <div *ngIf="!isLoading && filteredInvoices.length === 0" class="empty-state">
+    <p>🎉 No invoices ready to generate yet</p>
   </div>
 
-  <div class="invoices-grid">
+  <div class="invoices-grid" *ngIf="!isLoading">
     <div class="invoice-card" *ngFor="let invoice of filteredInvoices">
 
       <div class="card-header-bar">
         <div class="id-block">
-          <span class="order-id">ORDER ID: {{ invoice.orderId }}</span>
-          <span class="invoice-id">INVOICE ID: {{ invoice.invoiceId }}</span>
+          <span class="order-id">ORDER: {{ invoice.orderRef || invoice.orderId }}</span>
+          <span class="invoice-id">{{ invoice.materialsCount }} material(s) ready</span>
         </div>
       </div>
 
@@ -34,10 +33,17 @@
           <label class="field-label">CUSTOMER NAME:</label>
           <p class="field-value">{{ invoice.customerName }}</p>
         </div>
-
         <div class="field">
-          <label class="field-label">Date:</label>
-          <p class="field-value">{{ invoice.date }}</p>
+          <label class="field-label">AC MODEL:</label>
+          <p class="field-value">{{ invoice.itemName }}</p>
+        </div>
+        <div class="field">
+          <label class="field-label">LOCATION:</label>
+          <p class="field-value">{{ invoice.location || '—' }}</p>
+        </div>
+        <div class="field">
+          <label class="field-label">SUBMITTED DATE:</label>
+          <p class="field-value">{{ invoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
         </div>
 
         <hr class="divider" />
@@ -46,7 +52,7 @@
           <button class="view-details-btn" (click)="openDetails(invoice)">
             View Details
           </button>
-          <button class="generate-btn" (click)="generateInvoice(invoice)">
+          <button class="generate-btn" (click)="generateInvoice(invoice)" [disabled]="isLoading">
             → GENERATE INVOICE
           </button>
         </div>
@@ -55,22 +61,34 @@
     </div>
   </div>
 
-  <!-- Details Modal -->
+  <!-- Details Modal — simplified, no address/items/total -->
   <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Invoice Details</h3>
+        <h3>Order Details</h3>
         <button class="modal-close" (click)="closeModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedInvoice?.orderId }}</p>
-        <p><strong>Invoice ID:</strong> {{ selectedInvoice?.invoiceId }}</p>
+        <p><strong>Order ID:</strong> {{ selectedInvoice?.orderRef || selectedInvoice?.orderId }}</p>
         <p><strong>Customer:</strong> {{ selectedInvoice?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedInvoice?.customerEmail }}</p>
-        <p><strong>Date:</strong> {{ selectedInvoice?.date }}</p>
-        <p><strong>Address:</strong> {{ selectedInvoice?.address }}</p>
-        <p><strong>Items:</strong> {{ selectedInvoice?.items?.join(', ') }}</p>
-        <p><strong>Total Amount:</strong> LKR {{ selectedInvoice?.totalAmount | number }}</p>
+        <p><strong>AC Model:</strong> {{ selectedInvoice?.itemName }}</p>
+        <p><strong>Location:</strong> {{ selectedInvoice?.location || '—' }}</p>
+        <p><strong>Inspector:</strong> {{ selectedInvoice?.inspectorName || '—' }}</p>
+        <p><strong>Materials Count:</strong> {{ selectedInvoice?.materialsCount }}</p>
+        <p><strong>Submitted:</strong> {{ selectedInvoice?.date | date:'dd MMM yyyy, hh:mm a' }}</p>
+
+        <hr style="margin: 12px 0; border-color: #f3f4f6;" />
+
+        <p style="font-size:13px; color:#6b7280; font-style:italic;">
+          💡 Invoice amounts will be calculated automatically when you click Generate Invoice.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-close-styled" (click)="closeModal()">Close</button>
+        <button class="generate-btn" (click)="generateInvoice(selectedInvoice); closeModal()">
+          → Generate Invoice
+        </button>
       </div>
     </div>
   </div>

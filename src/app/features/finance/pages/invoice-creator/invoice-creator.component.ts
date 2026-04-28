@@ -13,8 +13,6 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class InvoiceCreatorComponent implements OnInit {
 
-  currentPage = 1;
-  totalPages = 3;
   invoiceId = '';
   isLoading = true;
   isConfirming = false;
@@ -31,7 +29,7 @@ export class InvoiceCreatorComponent implements OnInit {
   }
 
   get grandTotal(): number {
-    return this.subTotal + this.serviceCharge;
+    return this.subTotal;
   }
 
   constructor(
@@ -65,13 +63,6 @@ export class InvoiceCreatorComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      window.scrollTo(0, 0);
-    }
   }
 
   confirmAndGenerate() {

@@ -64,6 +64,14 @@
   background: white;
 }
 
+.pdf-btn {
+  background: #dc2626;
+}
+
+.pdf-btn:hover {
+  background: #b91c1c;
+}
+
 .export-btn {
   display: flex;
   align-items: center;

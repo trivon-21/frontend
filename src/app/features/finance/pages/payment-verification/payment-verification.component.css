@@ -68,6 +68,10 @@
   gap: 6px;
 }
 
+.btn-secondary:hover {
+  background: rgb(199, 197, 197);
+}
+
 .id-label {
   font-size: 15px;
   font-weight: 700;
@@ -140,12 +144,20 @@
   color: white;
 }
 
+.btn-approve:hover {
+  background: #295137;
+}
+
 .btn-reject {
   background: #e74c3c;
   color: white;
 }
 
-/* MODAL (same as inspection) */
+.btn-reject:hover {
+  background: #bc3e30;
+}
+
+/* MODAL*/
 .modal-overlay {
   position: fixed;
   inset: 0;

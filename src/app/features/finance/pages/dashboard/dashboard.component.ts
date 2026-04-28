@@ -5,6 +5,7 @@ import { forkJoin } from 'rxjs';
 import { InspectionTicketService } from '../../services/inspection-ticket.service';
 import { PaymentService } from '../../services/payment.service';
 import { ServicePaymentService } from '../../services/service-payment.service';
+import { InvoiceService } from '../../services/invoice.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,7 +42,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private ticketService: InspectionTicketService,
     private paymentService: PaymentService,
-    private servicePaymentService: ServicePaymentService
+    private servicePaymentService: ServicePaymentService,
+    private invoiceService: InvoiceService
   ) { }
 
   ngOnInit(): void { this.loadAllPayments(); }
@@ -60,6 +62,9 @@ export class DashboardComponent implements OnInit {
       maintPending: this.servicePaymentService.getPendingVerification('MAINTENANCE'),
       maintVerified: this.servicePaymentService.getVerifiedPayments('MAINTENANCE'),
       maintRejected: this.servicePaymentService.getRejectedPayments('MAINTENANCE'),
+      invoicePaid: this.invoiceService.getPaidInvoices(),
+      invoiceAccepted: this.invoiceService.getAcceptedInvoices(),
+      invoicePending: this.invoiceService.getPendingInvoices(),
     }).subscribe({
       next: (res: any) => {
         const buyPending = (res.buyPending || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'PENDING', displayDate: p.updatedAt }));
@@ -74,12 +79,45 @@ export class DashboardComponent implements OnInit {
         const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
         const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
         const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
+        const invoicePaid = (res.invoicePaid || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'APPROVED',
+          orderId: p.orderId,
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.paidAt || p.updatedAt,
+        }));
+
+        const invoiceAccepted = (res.invoiceAccepted || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'PENDING',
+          orderId: p.orderId,
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.acceptedAt || p.updatedAt,
+        }));
+
+        const invoiceDraft = (res.invoicePending || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'PENDING',
+          orderId: p.orderId,
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.createdAt,
+        }));
 
         this.allPayments = [
           ...buyPending, ...buyVerified, ...buyRejected,
           ...inspPending, ...inspVerified, ...inspRejected,
           ...repairPending, ...repairVerified, ...repairRejected,
           ...maintPending, ...maintVerified, ...maintRejected,
+          ...invoicePaid, ...invoiceAccepted, ...invoiceDraft
         ];
         this.calculateStats(this.allPayments);
         this.applyFilters();

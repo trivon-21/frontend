@@ -89,15 +89,6 @@
         </div>
         <p *ngIf="!selectedPayment?.slipUrl" style="color:#9ca3af">No slip uploaded</p>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeDetailsModal()">Close</button>
-        <button class="btn btn-approve" (click)="approvePayment(selectedPayment); closeDetailsModal()">
-          Approve
-        </button>
-        <button class="btn btn-reject" (click)="closeDetailsModal(); openRejectModal(selectedPayment)">
-          Reject
-        </button>
-      </div>
     </div>
   </div>
 

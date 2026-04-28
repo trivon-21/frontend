@@ -78,9 +78,6 @@
 
       <div class="modal-header">
         <h3>Payment Details</h3>
-        <button class="modal-close" (click)="closeSlipModal()">
-          ✕
-        </button>
       </div>
 
       <div class="modal-body">
@@ -116,13 +113,7 @@
           Close
         </button>
 
-        <button class="btn btn-approve" (click)="approvePayment(selectedPayment); closeSlipModal()">
-          Approve
-        </button>
 
-        <button class="btn btn-reject" (click)="closeSlipModal(); openRejectModal(selectedPayment)">
-          Reject
-        </button>
 
       </div>
 
@@ -136,9 +127,6 @@
 
       <div class="modal-header">
         <h3>Reject Payment</h3>
-        <button class="modal-close" (click)="closeRejectModal()" [disabled]="isLoading">
-          ✕
-        </button>
       </div>
 
       <div class="modal-body">
