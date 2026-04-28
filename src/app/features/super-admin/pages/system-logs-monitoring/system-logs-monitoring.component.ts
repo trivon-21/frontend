@@ -158,6 +158,10 @@ export class SystemLogsMonitoringComponent implements OnInit {
   }
 
   refreshAll(): void {
+    // Reset to first page to show latest data
+    this.currentPage = 1;
+    this.selectedIds.clear();
+    this.selectAllOnPage = false;
     this.loadAnalytics();
     this.loadLogs();
   }

@@ -262,7 +262,7 @@
 
       <!-- Reset link feedback -->
       <div *ngIf="resetLinkSent" class="reset-link-notice">
-        A password reset link has been sent to <strong>{{ profile.email }}</strong>. Check your inbox.
+        A password reset link has been sent to <strong>{{ selectedResetEmail }}</strong>. Check your inbox.
       </div>
       <div *ngIf="resetLinkError" class="reset-link-error-notice">{{ resetLinkError }}</div>
 

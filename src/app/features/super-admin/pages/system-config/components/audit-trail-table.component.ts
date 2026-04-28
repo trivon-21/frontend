@@ -260,6 +260,16 @@ import { AuditLog } from '../../../models/system-config.model';
         color: var(--primary-hover);
       }
 
+      .action-logging {
+        background-color: #f0f4f8;
+        color: #455a64;
+      }
+
+      .action-default {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+
       .changes-list {
         font-size: 12px;
       }
@@ -356,22 +366,37 @@ export class AuditTrailTableComponent {
   }
 
   formatAction(action: string): string {
-    const actions: { [key: string]: string } = {
-      UPDATE_BUSINESS_RULES: 'Business Rules Updated',
-      UPDATE_FEATURE_FLAGS: 'Feature Flags Updated',
-      UPDATE_MAINTENANCE_MODE: 'Maintenance Mode Updated',
-      UPDATE_SYSTEM_INFO: 'System Info Updated',
-      CREATE_CONFIG: 'Config Created',
-    };
+    // Handle new human-readable action names
+    if (typeof action === 'string') {
+      // If it's already a formatted name (contains spaces), return as-is
+      if (action.includes(' ')) {
+        return action;
+      }
+      
+      // Otherwise, map the old constant-style names
+      const actions: { [key: string]: string } = {
+        UPDATE_BUSINESS_RULES: 'Update Business Rules',
+        UPDATE_FEATURE_FLAGS: 'Update Feature Flags',
+        UPDATE_MAINTENANCE_MODE: 'Update Maintenance Settings',
+        UPDATE_SYSTEM_INFO: 'Update System Info',
+        CREATE_CONFIG: 'Config Created',
+      };
 
-    return actions[action] || action;
+      return actions[action] || action;
+    }
+    return action;
   }
 
   getActionType(action: string): string {
-    if (action.includes('BUSINESS')) return 'business';
-    if (action.includes('FEATURE')) return 'feature';
-    if (action.includes('MAINTENANCE')) return 'maintenance';
-    if (action.includes('INFO')) return 'info';
+    const lowerAction = (action || '').toLowerCase();
+    if (lowerAction.includes('business')) return 'business';
+    if (lowerAction.includes('feature')) return 'feature';
+    if (lowerAction.includes('maintenance')) return 'maintenance';
+    if (lowerAction.includes('info')) return 'info';
+    if (lowerAction.includes('logging')) return 'logging';
+    if (lowerAction.includes('schedule')) return 'maintenance';
+    if (lowerAction.includes('activate')) return 'maintenance';
+    if (lowerAction.includes('deactivate')) return 'maintenance';
     return 'default';
   }
 

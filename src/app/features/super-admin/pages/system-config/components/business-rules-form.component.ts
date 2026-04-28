@@ -50,6 +50,24 @@ import { SystemConfig, BusinessRules } from '../../../models/system-config.model
             <p class="help-text">Orders automatically cancelled if payment not received within this period</p>
           </div>
 
+          <!-- Log Retention Period -->
+          <div class="form-group">
+            <label for="logRetentionDays">
+              Log Retention Period (Days)
+              <span class="required">*</span>
+            </label>
+            <input
+              id="logRetentionDays"
+              type="number"
+              formControlName="logRetentionDays"
+              min="7"
+              max="730"
+              placeholder="e.g., 30"
+              class="form-input"
+            />
+            <p class="help-text">Number of days to retain audit logs before automatic deletion</p>
+          </div>
+
           <!-- Default Warranty Duration -->
           <div class="form-group">
             <label for="warrantyMonths">
@@ -271,6 +289,7 @@ export class BusinessRulesFormComponent {
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       quotationApprovalThreshold: [0, [Validators.required, Validators.min(0), Validators.max(10000000)]],
+      logRetentionDays: [30, [Validators.required, Validators.min(7), Validators.max(730)]],
       paymentAutoCancelDays: [14, [Validators.required, Validators.min(1), Validators.max(365)]],
       defaultWarrantyMonths: [24, [Validators.required, Validators.min(1), Validators.max(60)]],
       amcContractMonths: [12, [Validators.required, Validators.min(1), Validators.max(60)]],

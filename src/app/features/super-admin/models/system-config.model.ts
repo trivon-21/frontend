@@ -1,5 +1,6 @@
 export interface BusinessRules {
   quotationApprovalThreshold: number;
+  logRetentionDays: number;
   paymentAutoCancelDays: number;
   defaultWarrantyMonths: number;
   amcContractMonths: number;

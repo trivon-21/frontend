@@ -37,6 +37,7 @@ export class CustomerProfileComponent implements OnInit {
   sendingResetLink = false;
   resetLinkSent = false;
   resetLinkError = '';
+  selectedResetEmail = '';
 
   // Email verification
   emailVerified = false;
@@ -292,24 +293,26 @@ export class CustomerProfileComponent implements OnInit {
       return;
     }
 
-    // Check if user has an email (either primary or additional)
-    const hasEmail = this.profile.email ||
-                     (this.profile.additionalEmails && this.profile.additionalEmails.length > 0);
+    const primaryEmail = this.profile.email?.trim() || '';
+    const verifiedAdditionalEmail = this.profile.additionalEmails?.find((ae) => ae.verified)?.email || '';
+    const hasEmail = !!primaryEmail || !!verifiedAdditionalEmail;
 
     if (!hasEmail) {
-      this.resetLinkError = 'You need to add an email address to reset your password. Please add an email in your profile.';
+      this.resetLinkError = 'Add and verify an email address in your profile before requesting a password reset link.';
       return;
     }
 
-    // Use primary email if available, otherwise use first additional email
-    const resetEmail = this.profile.email || this.profile.additionalEmails?.[0]?.email;
+    // Use primary email if available; otherwise use a verified additional email.
+    const resetEmail = primaryEmail || verifiedAdditionalEmail;
 
     this.sendingResetLink = true;
     this.resetLinkSent = false;
     this.resetLinkError = '';
+    this.selectedResetEmail = '';
     this.authService.forgotPassword(resetEmail!).subscribe({
       next: () => {
         this.resetLinkSent = true;
+        this.selectedResetEmail = resetEmail;
         this.sendingResetLink = false;
       },
       error: () => {
