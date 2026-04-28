@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../../core/services/api.service';
 
 interface DispatchItem {
   name: string;
@@ -11,11 +12,13 @@ interface DispatchItem {
 
 interface DispatchOrder {
   id: string;
+  orderId?: string; // from backend
   customer: string;
   status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
   type: string;
   items: DispatchItem[];
   time?: string;
+  date?: string;
   courier?: string;
   trackId?: string;
   completedAt?: string;
@@ -47,52 +50,40 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  ordersToPack: DispatchOrder[] = [
-    { 
-      id: '#ORD-2025-099', customer: 'Saman Perera', status: 'to-pack', type: 'Installation',
-      time: '08:30 AM',
-      items: [
-        { name: 'LG Inverter 12k - Outdoor Unit', qty: 1, confirmed: false, sku: 'LG-OUT-12' },
-        { name: 'LG Inverter 12k - Indoor Unit', qty: 1, confirmed: false, sku: 'LG-IND-12' },
-        { name: 'Copper Pipe 1/4"', qty: 3, confirmed: true, sku: 'CP-14' }
-      ]
-    },
-    { 
-      id: '#ORD-2025-098', customer: 'Nimal Fernando', status: 'to-pack', type: 'Repair',
-      time: '09:15 AM',
-      items: [
-        { name: 'Compressor 1.5hp', qty: 1, confirmed: false, sku: 'COMP-15' },
-        { name: 'R410a Refrigerant', qty: 2, confirmed: false, sku: 'REF-R410' }
-      ]
-    }
-  ];
+  ordersToPack: DispatchOrder[] = [];
+  ordersReady: DispatchOrder[] = [];
+  ordersInTransit: DispatchOrder[] = [];
+  ordersCompleted: DispatchOrder[] = [];
 
-  ordersReady: DispatchOrder[] = [
-    { 
-      id: '#ORD-2025-097', customer: 'Ayesha Rashid', type: 'Installation', time: '10:00 AM', status: 'ready',
-      courier: 'DMX Logistics', trackId: 'DMX97001',
-      items: [{ name: 'Samsung WindFree 18k', qty: 1, confirmed: true, sku: 'SAM-WF-18' }]
-    }
-  ];
-
-  ordersInTransit: DispatchOrder[] = [
-    { 
-      id: '#ORD-2025-096', customer: 'Pradeep Silva', trackId: 'DMX96001', time: '11:30 AM', status: 'in-transit',
-      type: 'Repair', courier: 'Prompt Express',
-      items: [{ name: 'LG Compressor 2hp', qty: 1, confirmed: true, sku: 'LG-COMP-20' }]
-    }
-  ];
-
-  ordersCompleted: DispatchOrder[] = [
-    { 
-      id: '#ORD-2025-095', customer: 'Lakshmi Rajapaksa', completedAt: '2025-02-15', time: '12:45 PM', status: 'completed',
-      type: 'Installation', courier: 'DMX Logistics', trackId: 'DMX95001',
-      items: [{ name: 'Standard Wall Bracket', qty: 2, confirmed: true, sku: 'BRK-STD' }]
-    }
-  ];
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
-    this.selectFirstOrder();
+    this.fetchOrders();
+  }
+
+  fetchOrders() {
+    this.apiService.get<any[]>('/inventory-manager/orders').subscribe(data => {
+      // Map backend model to frontend model
+      const orders = data.map(o => ({
+        id: o.orderId,
+        customer: o.customer,
+        status: o.status,
+        type: o.type,
+        items: o.items,
+        time: o.date,
+        courier: o.courier,
+        trackId: o.trackId,
+        completedAt: o.completedAt,
+        lastMovedAt: o.lastMovedAt
+      }));
+
+      this.ordersToPack = orders.filter(o => o.status === 'to-pack');
+      this.ordersReady = orders.filter(o => o.status === 'ready');
+      this.ordersInTransit = orders.filter(o => o.status === 'in-transit');
+      this.ordersCompleted = orders.filter(o => o.status === 'completed');
+      
+      this.selectFirstOrder();
+    });
   }
 
   selectFirstOrder() {
@@ -125,9 +116,9 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       const valB = this.sortField === 'name' ? b.customer : b.time;
       
       if (this.sortDirection === 'asc') {
-        return valA.localeCompare(valB);
+        return (valA || '').localeCompare(valB || '');
       } else {
-        return valB.localeCompare(valA);
+        return (valB || '').localeCompare(valA || '');
       }
     });
   }
@@ -157,20 +148,20 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   completeAssignment() {
     if (!this.selectedOrderId) return;
     
-    // Move order from To Pack to Ready
     const index = this.ordersToPack.findIndex(o => o.id === this.selectedOrderId);
     if (index !== -1) {
-      const order = this.ordersToPack.splice(index, 1)[0];
-      this.ordersReady.unshift({
-        ...order,
+      const order = this.ordersToPack[index];
+      const updateData = {
         status: 'ready',
         courier: this.courierService,
         trackId: this.trackingId,
         lastMovedAt: new Date().toISOString()
+      };
+
+      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+        this.fetchOrders();
+        this.setActiveTab('ready');
       });
-      
-      // Auto switch to Ready tab
-      this.setActiveTab('ready');
     }
     
     this.closeModals();
@@ -214,39 +205,47 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   saveEdit() {
     const order = this.selectedOrder;
     if (order) {
-      order.courier = this.editCourier;
-      order.trackId = this.editTrackId;
-      this.isEditMode = false;
+      const updateData = {
+        courier: this.editCourier,
+        trackId: this.editTrackId
+      };
+      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+        order.courier = this.editCourier;
+        order.trackId = this.editTrackId;
+        this.isEditMode = false;
+      });
     }
   }
 
   markHandedOver() {
     if (!this.selectedOrderId) return;
-    const index = this.ordersReady.findIndex(o => o.id === this.selectedOrderId);
-    if (index !== -1) {
-      const order = this.ordersReady.splice(index, 1)[0];
-      this.ordersInTransit.unshift({
-        ...order,
+    const order = this.selectedOrder;
+    if (order) {
+      const updateData = {
         status: 'in-transit',
         lastMovedAt: new Date().toISOString()
+      };
+      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+        this.fetchOrders();
+        this.setActiveTab('in-transit');
       });
-      this.setActiveTab('in-transit');
     }
     this.closeModals();
   }
 
   markComplete() {
     if (!this.selectedOrderId) return;
-    const index = this.ordersInTransit.findIndex(o => o.id === this.selectedOrderId);
-    if (index !== -1) {
-      const order = this.ordersInTransit.splice(index, 1)[0];
-      this.ordersCompleted.unshift({
-        ...order,
+    const order = this.selectedOrder;
+    if (order) {
+      const updateData = {
         status: 'completed',
         completedAt: new Date().toISOString().split('T')[0],
         lastMovedAt: new Date().toISOString()
+      };
+      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+        this.fetchOrders();
+        this.setActiveTab('completed');
       });
-      this.setActiveTab('completed');
     }
     this.closeModals();
   }
@@ -267,35 +266,25 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     const order = this.selectedOrder;
     if (!order) return;
 
+    let updateData: any = {};
+    let targetTab: 'to-pack' | 'ready' | 'in-transit' = 'to-pack';
+
     if (order.status === 'completed') {
-      const index = this.ordersCompleted.findIndex(o => o.id === this.selectedOrderId);
-      if (index !== -1) {
-        const undoneOrder = this.ordersCompleted.splice(index, 1)[0];
-        undoneOrder.status = 'in-transit';
-        delete undoneOrder.completedAt;
-        delete undoneOrder.lastMovedAt;
-        this.ordersInTransit.unshift(undoneOrder);
-        this.setActiveTab('in-transit');
-      }
+      updateData = { status: 'in-transit', completedAt: null, lastMovedAt: null };
+      targetTab = 'in-transit';
     } else if (order.status === 'in-transit') {
-      const index = this.ordersInTransit.findIndex(o => o.id === this.selectedOrderId);
-      if (index !== -1) {
-        const undoneOrder = this.ordersInTransit.splice(index, 1)[0];
-        undoneOrder.status = 'ready';
-        delete undoneOrder.lastMovedAt;
-        this.ordersReady.unshift(undoneOrder);
-        this.setActiveTab('ready');
-      }
+      updateData = { status: 'ready', lastMovedAt: null };
+      targetTab = 'ready';
     } else if (order.status === 'ready') {
-      const index = this.ordersReady.findIndex(o => o.id === this.selectedOrderId);
-      if (index !== -1) {
-        const undoneOrder = this.ordersReady.splice(index, 1)[0];
-        undoneOrder.status = 'to-pack';
-        delete undoneOrder.lastMovedAt;
-        this.ordersToPack.unshift(undoneOrder);
-        this.setActiveTab('to-pack');
-      }
+      updateData = { status: 'to-pack', lastMovedAt: null };
+      targetTab = 'to-pack';
     }
+
+    this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+      this.fetchOrders();
+      this.setActiveTab(targetTab);
+    });
+    
     this.closeModals();
   }
 
@@ -304,7 +293,13 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   saveStatus() {
-    console.log('Status saved for', this.selectedOrderId);
+    if (!this.selectedOrderId) return;
+    const order = this.selectedOrder;
+    if (order) {
+      this.apiService.patch(`/inventory-manager/orders/${order.id}`, { items: order.items }).subscribe(() => {
+        console.log('Status saved for', this.selectedOrderId);
+      });
+    }
     this.closeModals();
   }
 

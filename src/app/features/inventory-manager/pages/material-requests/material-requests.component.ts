@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../../core/services/api.service';
 
 interface MaterialItem {
   name: string;
@@ -11,6 +12,7 @@ interface MaterialItem {
 
 interface MaterialRequest {
   id: string;
+  requestId?: string; // from backend
   requester: string;
   date: string;
   location: string;
@@ -27,7 +29,7 @@ interface MaterialRequest {
   templateUrl: './material-requests.component.html',
   styleUrls: ['./material-requests.component.css']
 })
-export class MaterialRequestsDashboardComponent {
+export class MaterialRequestsDashboardComponent implements OnInit {
   activeTab: 'pending' | 'reserved' | 'completed' = 'pending';
   
   showModal = false;
@@ -36,58 +38,35 @@ export class MaterialRequestsDashboardComponent {
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  pendingRequests: MaterialRequest[] = [
-    {
-      id: '#REQ-2025-402',
-      requester: 'Saman Perera',
-      date: '2025-02-18',
-      location: 'Colombo 03',
-      status: 'pending',
-      items: [
-        { name: 'LG Inverter 12k - Outdoor Unit', qty: 1, confirmed: false, sku: 'LG-OUT-12K' },
-        { name: 'LG Inverter 12k - Indoor Unit', qty: 1, confirmed: false, sku: 'LG-IN-12K' },
-        { name: 'Copper Pipe 1/4"', qty: 3, confirmed: false, sku: 'COP-14-1M' }
-      ]
-    },
-    {
-      id: '#REQ-2025-403',
-      requester: 'Kamal Silva',
-      date: '2025-02-18',
-      location: 'Kandy',
-      status: 'pending',
-      items: [
-        { name: 'Daikin 18k Split Unit', qty: 1, confirmed: false, sku: 'DK-SPL-18K' },
-        { name: 'Thermostat Digital', qty: 2, confirmed: false, sku: 'TH-DIG-01' }
-      ]
-    }
-  ];
+  pendingRequests: MaterialRequest[] = [];
+  reservedRequests: MaterialRequest[] = [];
+  completedRequests: MaterialRequest[] = [];
 
-  reservedRequests: MaterialRequest[] = [
-    {
-      id: '#REQ-2025-400',
-      requester: 'Nimal Fernando',
-      date: '2025-02-17',
-      location: 'Galle',
-      status: 'reserved',
-      items: [
-        { name: 'Compressor 2HP', qty: 1, confirmed: true, sku: 'COMP-2HP' }
-      ]
-    }
-  ];
+  constructor(private apiService: ApiService) {}
 
-  completedRequests: MaterialRequest[] = [
-    {
-      id: '#REQ-2025-399',
-      requester: 'Ruwan Kumara',
-      date: '2025-02-16',
-      location: 'Negombo',
-      status: 'completed',
-      completedAt: '2025-02-16',
-      items: [
-        { name: 'Capacitor 45uF', qty: 5, confirmed: true, sku: 'CAP-45UF' }
-      ]
-    }
-  ];
+  ngOnInit() {
+    this.fetchRequests();
+  }
+
+  fetchRequests() {
+    this.apiService.get<any[]>('/inventory-manager/material-requests').subscribe(data => {
+      // Map backend model to frontend model
+      const requests = data.map(r => ({
+        id: r.requestId,
+        requester: r.requester,
+        date: r.date,
+        location: r.location,
+        status: r.status,
+        items: r.items,
+        completedAt: r.completedAt,
+        lastMovedAt: r.lastMovedAt
+      }));
+
+      this.pendingRequests = requests.filter(r => r.status === 'pending');
+      this.reservedRequests = requests.filter(r => r.status === 'reserved');
+      this.completedRequests = requests.filter(r => r.status === 'completed');
+    });
+  }
 
   setActiveTab(tab: 'pending' | 'reserved' | 'completed') {
     this.activeTab = tab;
@@ -136,6 +115,13 @@ export class MaterialRequestsDashboardComponent {
   }
 
   saveStatus() {
+    if (!this.selectedRequestId) return;
+    const req = this.selectedRequest;
+    if (req) {
+      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, { items: req.items }).subscribe(() => {
+        console.log('Status saved for', this.selectedRequestId);
+      });
+    }
     this.closeModal();
   }
 
@@ -143,15 +129,15 @@ export class MaterialRequestsDashboardComponent {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req && req.items.every(i => i.confirmed)) {
-      const index = this.pendingRequests.findIndex(r => r.id === this.selectedRequestId);
-      if (index !== -1) {
-        const removed = this.pendingRequests.splice(index, 1)[0];
-        removed.status = 'reserved';
-        removed.lastMovedAt = new Date().toISOString();
-        this.reservedRequests.unshift(removed);
+      const updateData = {
+        status: 'reserved',
+        lastMovedAt: new Date().toISOString()
+      };
+      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+        this.fetchRequests();
         this.setActiveTab('reserved');
         this.closeModal();
-      }
+      });
     } else {
       alert("Please reserve all items before marking as kitted.");
     }
@@ -159,15 +145,18 @@ export class MaterialRequestsDashboardComponent {
 
   markHandedOver() {
     if (!this.selectedRequestId) return;
-    const index = this.reservedRequests.findIndex(r => r.id === this.selectedRequestId);
-    if (index !== -1) {
-      const removed = this.reservedRequests.splice(index, 1)[0];
-      removed.status = 'completed';
-      removed.completedAt = new Date().toISOString().split('T')[0];
-      removed.lastMovedAt = new Date().toISOString();
-      this.completedRequests.unshift(removed);
-      this.setActiveTab('completed');
-      this.closeModal();
+    const req = this.selectedRequest;
+    if (req) {
+      const updateData = {
+        status: 'completed',
+        completedAt: new Date().toISOString().split('T')[0],
+        lastMovedAt: new Date().toISOString()
+      };
+      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+        this.fetchRequests();
+        this.setActiveTab('completed');
+        this.closeModal();
+      });
     }
   }
 
@@ -183,27 +172,22 @@ export class MaterialRequestsDashboardComponent {
     const req = this.selectedRequest;
     if (!req) return;
 
+    let updateData: any = {};
+    let targetTab: 'pending' | 'reserved' | 'completed' = 'pending';
+
     if (req.status === 'completed') {
-      const index = this.completedRequests.findIndex(r => r.id === this.selectedRequestId);
-      if (index !== -1) {
-        const undone = this.completedRequests.splice(index, 1)[0];
-        undone.status = 'reserved';
-        delete undone.completedAt;
-        delete undone.lastMovedAt;
-        this.reservedRequests.unshift(undone);
-        this.setActiveTab('reserved');
-      }
+      updateData = { status: 'reserved', completedAt: null, lastMovedAt: null };
+      targetTab = 'reserved';
     } else if (req.status === 'reserved') {
-      const index = this.reservedRequests.findIndex(r => r.id === this.selectedRequestId);
-      if (index !== -1) {
-        const undone = this.reservedRequests.splice(index, 1)[0];
-        undone.status = 'pending';
-        delete undone.lastMovedAt;
-        this.pendingRequests.unshift(undone);
-        this.setActiveTab('pending');
-      }
+      updateData = { status: 'pending', lastMovedAt: null };
+      targetTab = 'pending';
     }
+
+    this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+      this.fetchRequests();
+      this.setActiveTab(targetTab);
+    });
+    
     this.closeModal();
   }
 }
-
