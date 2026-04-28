@@ -37,8 +37,14 @@ export interface InventoryItem extends ReorderItem {
   sku: string;
   type: 'Single' | 'Bundle';
   category: string;
+  brand: string;
   location: string;
   unit: string;
+  unitCost: number;
+  maxStockLevel: number;
+  isSerialized: boolean;
+  serialNumbers?: string[];
+  specsUrl?: string;
   time?: string;
 }
 
@@ -93,5 +99,9 @@ export class InventoryManagerDashboardService {
 
   addSupplier(name: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/suppliers`, { name });
+  }
+
+  getProcurements(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/procurements`);
   }
 }

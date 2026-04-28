@@ -91,6 +91,25 @@
               Invoice number is required
             </span>
           </div>
+
+          <div class="form-group">
+            <label>Purchase Order (PO) Link *</label>
+            <input type="text" readonly class="form-input readonly" formControlName="poNumber">
+          </div>
+
+          <div class="form-group">
+            <label>Received Date *</label>
+            <input type="date" class="form-input" formControlName="receivedDate">
+          </div>
+
+          <div class="form-group">
+            <label>Condition upon Receipt *</label>
+            <select class="form-select" formControlName="condition">
+              <option value="Good">Good</option>
+              <option value="Damaged">Damaged</option>
+              <option value="Incomplete">Incomplete</option>
+            </select>
+          </div>
         </div>
 
         <div class="info-box">
@@ -119,6 +138,13 @@
             </span>
           </div>
           <div class="form-group">
+            <label>BRAND *</label>
+            <input type="text" placeholder="e.g., LG, Samsung, Daikin" class="form-input" formControlName="brand">
+            <span class="error-text" *ngIf="grnForm.get('itemDetails.brand')?.touched && grnForm.get('itemDetails.brand')?.invalid">
+              Brand is required
+            </span>
+          </div>
+          <div class="form-group">
             <label>PRODUCT TYPE *</label>
             <select class="form-select" formControlName="type">
               <option value="Single">Single Item</option>
@@ -134,6 +160,16 @@
               <option value="Tools">Tools</option>
               <option value="General">General</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>Technical Specs Link (URL)</label>
+            <input type="text" placeholder="e.g., https://specs.com/unit-a" class="form-input" formControlName="specsUrl">
+          </div>
+          <div class="form-group toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" formControlName="isSerialized">
+              <span class="toggle-text">Is Serialized? (Track individual units)</span>
+            </label>
           </div>
         </div>
       </div>
@@ -152,6 +188,13 @@
             </span>
           </div>
           <div class="form-group">
+            <label>UNIT COST (Buying Price) *</label>
+            <div class="cost-input">
+              <span class="currency">LKR</span>
+              <input type="number" class="form-input" formControlName="unitCost">
+            </div>
+          </div>
+          <div class="form-group">
             <label>LOCATION *</label>
             <input type="text" placeholder="e.g., Warehouse A, Section 4" class="form-input" formControlName="location">
           </div>
@@ -165,10 +208,25 @@
             </select>
           </div>
           <div class="form-group">
-            <label>REORDER LEVEL *</label>
+            <label>REORDER LEVEL (Min) *</label>
             <input type="number" class="form-input" formControlName="reorderLevel">
-            <span class="error-text" *ngIf="grnForm.get('inventorySettings.reorderLevel')?.touched && grnForm.get('inventorySettings.reorderLevel')?.invalid">
-              Level must be 0 or more
+          </div>
+          <div class="form-group">
+            <label>MAXIMUM STOCK LEVEL *</label>
+            <input type="number" class="form-input" formControlName="maxStockLevel">
+          </div>
+
+          <!-- Serial Numbers Section (Dynamic) -->
+          <div class="form-group full-width serials-container animate-fade" *ngIf="grnForm.get('itemDetails.isSerialized')?.value && grnForm.get('inventorySettings.available')?.value > 0">
+            <label>SERIAL NUMBERS (Scan or Type individually) *</label>
+            <div class="serials-grid" formArrayName="serialNumbers">
+              <div class="serial-input-wrapper" *ngFor="let ctrl of serialNumbersControls; let i = index">
+                <span class="serial-index">#{{ i + 1 }}</span>
+                <input type="text" [formControlName]="i" placeholder="Scan Serial..." class="form-input mini">
+              </div>
+            </div>
+            <span class="error-text" *ngIf="grnForm.get('inventorySettings.serialNumbers')?.invalid && grnForm.get('inventorySettings.serialNumbers')?.touched">
+              All serial numbers are required for serialized items
             </span>
           </div>
         </div>
@@ -185,30 +243,36 @@
     </div>
   </div>
 
-  <!-- Recent Shipments -->
+  <!-- Recent GRN Entries -->
   <div class="shipments-section">
     <div class="section-header">
-      <h2>Recent Shipments</h2>
-      <p class="subtitle">Last entries processed</p>
+      <h2>Recent GRN Entries</h2>
+      <p class="subtitle">Latest goods received notes processed</p>
     </div>
 
     <div class="shipments-list glass-panel">
-      <div class="shipment-item" *ngFor="let s of shipments">
+      <div class="shipment-item" *ngFor="let p of procurements">
         <div class="item-main">
           <div class="item-id-row">
-            <span class="shipment-id">{{ s.id }}</span>
+            <span class="shipment-id">INV-{{ p.invoiceNumber }}</span>
             <span class="status-badge">Completed</span>
           </div>
-          <h4 class="supplier-name">{{ s.supplier }}</h4>
+          <h4 class="supplier-name">{{ p.supplierName }}</h4>
           <div class="item-meta">
-            <span>{{ s.items }} • {{ s.units }}</span>
+            <span>{{ p.itemName }} ({{ p.sku }})</span>
             <span class="divider"></span>
-            <span><i class="icon-time"></i> {{ s.date }}</span>
+            <span>{{ p.quantity }} {{ p.unit }}</span>
             <span class="divider"></span>
-            <span>By: {{ s.user }}</span>
+            <span><i class="icon-time"></i> {{ p.timestamp | date:'short' }}</span>
+            <span class="divider"></span>
+            <span>By: {{ p.receivedBy }}</span>
           </div>
         </div>
         <button class="btn-view-details">View Details</button>
+      </div>
+      
+      <div class="no-results animate-fade" *ngIf="procurements.length === 0">
+        <p>No recent GRN entries found.</p>
       </div>
     </div>
   </div>

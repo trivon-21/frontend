@@ -1,16 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-interface RecentShipment {
+interface RecentProcurement {
   id: string;
-  supplier: string;
-  items: string;
-  units: string;
-  date: string;
-  user: string;
+  invoiceNumber: string;
+  poNumber?: string;
+  supplierName: string;
+  itemName: string;
+  sku: string;
+  quantity: number;
+  unit: string;
+  receivedDate: string;
+  condition: string;
+  timestamp: string;
+  receivedBy: string;
 }
 
 @Component({
@@ -32,12 +38,7 @@ export class ProcurementDashboardComponent implements OnInit {
   showSupplierDropdown = false;
   isAddingNewSupplier = false;
 
-  shipments: RecentShipment[] = [
-    { id: 'INV-LG-2025-0421', supplier: 'LG Electronics Lanka', items: '8 items', units: '45 units', date: '2025-02-17 02:30 PM', user: 'Saman Jayawardena' },
-    { id: 'INV-SAM-2025-1204', supplier: 'Samsung Electronics', items: '5 items', units: '30 units', date: '2025-02-16 11:15 AM', user: 'Nimal Fernando' },
-    { id: 'INV-DAI-2025-0789', supplier: 'Daikin Airconditioning India', items: '12 items', units: '68 units', date: '2025-02-15 09:45 AM', user: 'Kamal Wijesinghe' },
-    { id: 'INV-ABN-2025-3312', supplier: 'Abans PLC', items: '6 items', units: '25 units', date: '2025-02-14 03:20 PM', user: 'Saman Jayawardena' }
-  ];
+  procurements: RecentProcurement[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -47,6 +48,7 @@ export class ProcurementDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadSuppliers();
+    this.loadProcurements();
     
     // Listen to supplier input changes for autocomplete
     this.grnForm.get('supplierInfo.supplier')?.valueChanges
@@ -56,27 +58,77 @@ export class ProcurementDashboardComponent implements OnInit {
           this.filterSuppliers(value);
         }
       });
+
+    // Listen to quantity changes to adjust serial number inputs
+    this.grnForm.get('inventorySettings.available')?.valueChanges
+      .subscribe(qty => {
+        this.updateSerialNumbersArray(qty);
+      });
+  }
+
+  get serialNumbersControls() {
+    return (this.grnForm.get('inventorySettings.serialNumbers') as FormArray).controls;
+  }
+
+  private updateSerialNumbersArray(qty: number) {
+    const serials = this.grnForm.get('inventorySettings.serialNumbers') as FormArray;
+    const currentLength = serials.length;
+    const targetLength = this.grnForm.get('itemDetails.isSerialized')?.value ? (qty || 0) : 0;
+
+    if (targetLength > currentLength) {
+      for (let i = currentLength; i < targetLength; i++) {
+        serials.push(this.fb.control('', Validators.required));
+      }
+    } else if (targetLength < currentLength) {
+      for (let i = currentLength; i > targetLength; i--) {
+        serials.removeAt(i - 1);
+      }
+    }
   }
 
   private initForm(): void {
     this.grnForm = this.fb.group({
       supplierInfo: this.fb.group({
         supplier: ['', Validators.required],
-        invoiceNumber: ['', Validators.required]
+        invoiceNumber: ['', Validators.required],
+        poNumber: [this.generatePoNumber(), Validators.required],
+        receivedDate: [new Date().toISOString().substring(0, 10), Validators.required],
+        condition: ['Good', Validators.required]
       }),
       itemDetails: this.fb.group({
         name: ['', Validators.required],
         sku: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9-]+$')]],
+        brand: ['', Validators.required],
         type: ['Single', Validators.required],
-        category: ['General', Validators.required]
+        category: ['General', Validators.required],
+        isSerialized: [false],
+        specsUrl: ['']
       }),
       inventorySettings: this.fb.group({
         available: [0, [Validators.required, Validators.min(0)]],
         location: ['Warehouse', Validators.required],
         unit: ['units', Validators.required],
-        reorderLevel: [10, [Validators.required, Validators.min(0)]]
+        reorderLevel: [10, [Validators.required, Validators.min(0)]],
+        maxStockLevel: [100, [Validators.required, Validators.min(0)]],
+        unitCost: [0, [Validators.required, Validators.min(0)]],
+        serialNumbers: this.fb.array([])
       })
     });
+
+    // Handle isSerialized toggle
+    this.grnForm.get('itemDetails.isSerialized')?.valueChanges.subscribe(val => {
+      this.updateSerialNumbersArray(this.grnForm.get('inventorySettings.available')?.value || 0);
+    });
+  }
+
+  private generatePoNumber(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `PO-${year}${month}${day}-${hours}${minutes}`;
   }
 
   private loadSuppliers(): void {
@@ -86,6 +138,13 @@ export class ProcurementDashboardComponent implements OnInit {
         this.filteredSuppliers = data;
       },
       error: (err) => console.error('Error loading suppliers:', err)
+    });
+  }
+
+  private loadProcurements(): void {
+    this.inventoryService.getProcurements().subscribe({
+      next: (data) => this.procurements = data,
+      error: (err) => console.error('Error loading procurements:', err)
     });
   }
 
@@ -203,14 +262,19 @@ export class ProcurementDashboardComponent implements OnInit {
 
     const formData = {
       ...this.grnForm.get('itemDetails')?.value,
-      ...this.grnForm.get('inventorySettings')?.value
+      ...this.grnForm.get('inventorySettings')?.value,
+      supplierName: this.grnForm.get('supplierInfo.supplier')?.value,
+      invoiceNumber: this.grnForm.get('supplierInfo.invoiceNumber')?.value,
+      poNumber: this.grnForm.get('supplierInfo.poNumber')?.value,
+      receivedDate: this.grnForm.get('supplierInfo.receivedDate')?.value,
+      condition: this.grnForm.get('supplierInfo.condition')?.value
     };
 
     this.inventoryService.addItem(formData).subscribe({
       next: (item) => {
         this.isSubmitting = false;
         this.successMessage = `Product "${item.name}" added successfully!`;
-        this.addRecentShipment(item);
+        this.loadProcurements(); // Refresh list from server
         this.resetForm();
       },
       error: (err) => {
@@ -220,23 +284,23 @@ export class ProcurementDashboardComponent implements OnInit {
     });
   }
 
-  private addRecentShipment(item: any) {
-    const newShipment: RecentShipment = {
-      id: `INV-NEW-${Math.floor(Math.random() * 10000)}`,
-      supplier: this.grnForm.get('supplierInfo.supplier')?.value,
-      items: '1 item',
-      units: `${item.available} units`,
-      date: new Date().toLocaleString(),
-      user: 'Current Manager'
-    };
-    this.shipments.unshift(newShipment);
-  }
+
 
   private resetForm() {
     this.currentStep = 1;
     this.grnForm.reset({
-      itemDetails: { type: 'Single', category: 'General' },
-      inventorySettings: { available: 0, location: 'Warehouse', unit: 'units', reorderLevel: 10 }
+      supplierInfo: { 
+        poNumber: this.generatePoNumber(),
+        receivedDate: new Date().toISOString().substring(0, 10), 
+        condition: 'Good' 
+      },
+      itemDetails: { type: 'Single', category: 'General', isSerialized: false },
+      inventorySettings: { available: 0, location: 'Warehouse', unit: 'units', reorderLevel: 10, maxStockLevel: 100, unitCost: 0 }
     });
+    // Clear serial numbers array
+    const serials = this.grnForm.get('inventorySettings.serialNumbers') as FormArray;
+    while (serials.length !== 0) {
+      serials.removeAt(0);
+    }
   }
 }
