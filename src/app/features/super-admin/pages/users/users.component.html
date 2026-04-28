@@ -23,14 +23,14 @@
       (click)="switchTab('deactivated')"
       class="tab-button"
     >
-      Deactivated Users
+      Deactivated Users({{ deactivatedCount }})
     </button>
     <button
       [class.tab-active]="activeTab === 'reactivation'"
       (click)="switchTab('reactivation')"
       class="tab-button"
     >
-      Reactivation Requests
+      Reactivation Requests({{ reactivationCount }})
     </button>
   </div>
 

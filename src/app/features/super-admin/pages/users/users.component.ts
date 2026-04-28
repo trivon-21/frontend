@@ -25,6 +25,10 @@ export class UsersComponent implements OnInit {
   totalUsers = 0;
   totalPages = 0;
 
+  // Counts
+  deactivatedCount = 0;
+  reactivationCount = 0;
+
   // Reactivation requests pagination
   reactivationPage = 1;
   reactivationTotalPages = 0;
@@ -106,7 +110,20 @@ export class UsersComponent implements OnInit {
   constructor(private superAdminService: SuperAdminService) {}
 
   ngOnInit(): void {
+    this.loadCounts();
     this.loadUsers();
+  }
+
+  loadCounts(): void {
+    this.superAdminService.getDashboardSummary().subscribe({
+      next: (response) => {
+        if (response?.data?.users) {
+          this.deactivatedCount = response.data.users.deactivated || 0;
+          this.reactivationCount = response.data.users.pendingReactivationRequests || 0;
+        }
+      },
+      error: (err) => console.error('Failed to load counts', err)
+    });
   }
 
   switchTab(tab: 'active' | 'deactivated' | 'reactivation'): void {
@@ -278,6 +295,7 @@ export class UsersComponent implements OnInit {
         this.closeRejectionModal();
         this.loadReactivationRequests();
         this.loadDeactivatedUsers();
+        this.loadCounts();
         alert('Reactivation request rejected. User account has been deleted.');
       },
       error: (err) => {
@@ -379,6 +397,7 @@ export class UsersComponent implements OnInit {
         this.deactivatingUserId = null;
         this.closeDeactivationModal();
         this.loadUsers();
+        this.loadCounts();
         alert('User deactivated successfully. Email sent to user.');
       },
       error: (err) => {
@@ -404,6 +423,7 @@ export class UsersComponent implements OnInit {
         } else if (this.activeTab === 'deactivated') {
           this.loadDeactivatedUsers();
         }
+        this.loadCounts();
         alert(hardDelete ? 'User permanently deleted' : 'User deactivated');
       },
       error: (err) => {
@@ -421,7 +441,8 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.approvingRequestId = null;
         this.loadDeactivatedUsers();
-        alert('User reactivated successfully');
+        this.loadCounts();
+        alert('User reactivated successfully. Email sent to user.');
       },
       error: (err) => {
         this.approvingRequestId = null;
@@ -439,6 +460,7 @@ export class UsersComponent implements OnInit {
         this.approvingRequestId = null;
         this.loadReactivationRequests();
         this.loadDeactivatedUsers();
+        this.loadCounts();
         alert('Reactivation request approved');
       },
       error: (err) => {
