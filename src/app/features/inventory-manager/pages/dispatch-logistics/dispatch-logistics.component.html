@@ -7,16 +7,16 @@
   <!-- Tabs Navigation -->
   <div class="tabs-nav">
     <button class="tab-btn" [class.active]="activeTab === 'to-pack'" (click)="setActiveTab('to-pack')">
-      To Pack <span class="badge">5</span>
+      To Pack <span class="badge" *ngIf="ordersToPack.length > 0">{{ ordersToPack.length }}</span>
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'ready'" (click)="setActiveTab('ready')">
-      Ready to Pick up
+      Ready to Pick up <span class="badge" *ngIf="ordersReady.length > 0">{{ ordersReady.length }}</span>
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'in-transit'" (click)="setActiveTab('in-transit')">
-      In Transit <span class="badge">3</span>
+      In Transit <span class="badge" *ngIf="ordersInTransit.length > 0">{{ ordersInTransit.length }}</span>
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
-      Completed
+      Completed <span class="badge" *ngIf="ordersCompleted.length > 0">{{ ordersCompleted.length }}</span>
     </button>
   </div>
 
@@ -24,19 +24,20 @@
   <div class="table-controls glass-panel">
     <div class="search-box">
       <i class="icon-search"></i>
-      <input type="text" placeholder="Search ID or Customer">
+      <input type="text" [placeholder]="
+        activeTab === 'completed' ? 'Search by Order ID, Customer, or Date (YYYY-MM-DD)' :
+        activeTab === 'to-pack' ? 'Search by Order ID or Customer Name' :
+        'Search by Order ID, Customer, or Track ID'
+      ">
     </div>
     <div class="filters">
       <div class="filter-group">
-        <i class="icon-filter"></i>
-        <span>Filters:</span>
-        <select class="filter-select">
-          <option>All Districts</option>
+        <span>Sort By:</span>
+        <select class="filter-select" (change)="toggleSort($any($event.target).value)">
+          <option value="name">Name ({{ sortField === 'name' ? sortDirection : 'asc' }})</option>
+          <option value="time">Time ({{ sortField === 'time' ? sortDirection : 'asc' }})</option>
         </select>
       </div>
-      <button class="btn-date">
-        Set Date <i class="icon-calendar"></i>
-      </button>
     </div>
   </div>
 
@@ -48,8 +49,8 @@
           <th>Order ID</th>
           <th *ngIf="activeTab === 'to-pack'">CUSTOMER</th>
           <th *ngIf="activeTab !== 'to-pack'">CUSTOMER NAME</th>
-          <th *ngIf="activeTab === 'ready'">ORDER TYPE</th>
-          <th *ngIf="activeTab === 'in-transit'">TRACK ID</th>
+          <th *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">TRACK ID</th>
+          <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
           <th class="text-right">ACTION{{ activeTab === 'to-pack' ? 'S' : '' }}</th>
         </tr>
       </thead>
@@ -59,12 +60,18 @@
             [class.selected-row]="selectedOrderId === order.id">
           <td>{{ order.id }}</td>
           <td>{{ order.customer }}</td>
-          <td *ngIf="activeTab === 'ready'">{{ order.type }}</td>
-          <td *ngIf="activeTab === 'in-transit'">{{ order.trackId }}</td>
+          <td *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">{{ order.trackId || 'N/A' }}</td>
+          <td *ngIf="activeTab === 'completed'">{{ order.completedAt }}</td>
           <td class="actions-cell">
             <ng-container *ngIf="selectedOrderId === order.id">
               <ng-container *ngIf="activeTab === 'to-pack'">
-                <button class="btn-assign" (click)="openAssignModal(order.id); $event.stopPropagation()">Assign Delivery</button>
+                <button 
+                  class="btn-assign" 
+                  [disabled]="!isOrderFullyReserved(order)"
+                  [title]="isOrderFullyReserved(order) ? '' : 'All items must be reserved before assigning delivery'"
+                  (click)="openAssignModal(order.id); $event.stopPropagation()">
+                  Assign Delivery
+                </button>
                 <button class="btn-pack" (click)="openPackModal(order.id); $event.stopPropagation()">Pack Order</button>
               </ng-container>
               <ng-container *ngIf="activeTab !== 'to-pack'">
@@ -82,58 +89,98 @@
     <div class="modal-content pack-modal">
       <div class="modal-header">
         <h2>Order ID : {{ selectedOrderId }}</h2>
-        <span class="order-type">ORDER TYPE :</span>
+        <span class="order-type">ORDER TYPE : {{ selectedOrder?.type || 'N/A' }}</span>
         <button class="btn-close" (click)="closeModals()">×</button>
       </div>
       
-      <div class="modal-body split">
-        <div class="customer-info">
-          <h3>CUSTOMER DETAILS</h3>
-          <div class="info-grid">
-            <span class="label">Name</span> <span class="value">: Random Name</span>
-            <span class="label">Address</span> 
-            <div class="value address">
-              : Line 1<br>Line 2<br>Line 3
-            </div>
-            <span class="label">City</span> <span class="value">: City</span>
-            <span class="label">Postal Code</span> <span class="value">: City</span>
-            <span class="label">Note</span> <span class="value">: -</span>
+      <div class="modal-body">
+        <div class="delivery-info-banner" *ngIf="selectedOrder?.courier || selectedOrder?.trackId || (activeTab === 'ready' && isEditMode)">
+          <div class="info-item">
+            <span class="label">COURIER SERVICE</span>
+            <span class="value" *ngIf="!isEditMode">{{ selectedOrder?.courier || 'Pending' }}</span>
+            <input *ngIf="isEditMode" type="text" class="form-input" [(ngModel)]="editCourier" placeholder="Enter Courier Service">
+          </div>
+          <div class="info-item border-left">
+            <span class="label">TRACKING / REF ID</span>
+            <span class="value" *ngIf="!isEditMode">{{ selectedOrder?.trackId || 'Not Assigned' }}</span>
+            <input *ngIf="isEditMode" type="text" class="form-input" [(ngModel)]="editTrackId" placeholder="Enter Tracking ID">
           </div>
         </div>
 
-        <div class="items-verification">
-          <h3>ITEM LIST</h3>
-          <div class="verify-list">
-            <div class="verify-item">
-              <div class="item-meta">
-                <span>LG Inverter 12k - Outdoor Unit</span>
-                <span class="qty">×1</span>
-              </div>
-              <input type="text" placeholder="Scan Item Code" class="scan-input">
-            </div>
-            <div class="verify-item">
-              <div class="item-meta">
-                <span>LG Inverter 12k - Indoor Unit</span>
-                <span class="qty">×1</span>
-              </div>
-              <input type="text" placeholder="Scan Item Code" class="scan-input">
-            </div>
-            <div class="verify-item plain">
-              <div class="item-meta">
-                <span>Copper Pipe 1/4"</span>
-                <span class="qty">×3</span>
-              </div>
-            </div>
+        <div class="items-verification-full">
+          <div class="section-header">
+            <h3>MATERIALS LIST</h3>
+            <span class="items-count">{{ selectedOrder?.items?.length || 0 }} Items</span>
           </div>
+          
+          <table class="verification-table">
+            <thead>
+              <tr>
+                <th>ITEM NAME</th>
+                <th>SKU</th>
+                <th>QTY</th>
+                <th class="text-center" *ngIf="!isViewingDetailsFromAssign && activeTab === 'to-pack'">RESERVE CONFIRMATION</th>
+                <th class="text-center" *ngIf="!isViewingDetailsFromAssign && activeTab !== 'to-pack'">RESERVATION STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder?.items">
+                <td class="item-name">{{ item.name }}</td>
+                <td class="item-sku">{{ item.sku }}</td>
+                <td class="item-qty">×{{ item.qty }}</td>
+                <td class="text-center" *ngIf="!isViewingDetailsFromAssign">
+                  <ng-container *ngIf="activeTab === 'to-pack'">
+                    <button 
+                      class="btn-confirm" 
+                      [class.confirmed]="item.confirmed"
+                      (click)="confirmItem(item)">
+                      <i class="icon-check" *ngIf="item.confirmed"></i>
+                      {{ item.confirmed ? 'Reserved' : 'Click to Reserve' }}
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="activeTab !== 'to-pack'">
+                    <div class="btn-confirm" [class.confirmed]="item.confirmed" style="pointer-events: none; display: inline-flex; width: auto; padding: 4px 12px; font-size: 12px; opacity: 0.9;">
+                      <i class="icon-check" *ngIf="item.confirmed"></i>
+                      {{ item.confirmed ? 'Reserved' : 'Pending' }}
+                    </div>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeModals()">Print Gate Pass</button>
-        <div class="footer-right">
-          <button class="btn-primary-alt" (click)="closeModals()">View Delivery</button>
-          <button class="btn-primary" (click)="closeModals()">Done</button>
+        <!-- If coming from Assign Modal, show Back regardless of tab -->
+        <div class="footer-right" *ngIf="isViewingDetailsFromAssign">
+          <button class="btn-primary" (click)="backToAssign()">← Back</button>
         </div>
+        
+        <!-- Normal view modes -->
+        <ng-container *ngIf="!isViewingDetailsFromAssign">
+          <div class="footer-right" *ngIf="activeTab === 'to-pack'">
+            <button class="btn-save" (click)="saveStatus()">Save Current Status</button>
+            <button class="btn-primary" (click)="closeModals()">Done</button>
+          </div>
+          <div class="footer-right" *ngIf="activeTab === 'ready'">
+            <button class="btn-primary btn-outline" *ngIf="!isEditMode && canUndo(selectedOrder)" (click)="undoAction()">Undo Transition</button>
+            <button class="btn-save" *ngIf="!isEditMode" (click)="markHandedOver()" style="margin-left: 12px;">Mark Handed Over</button>
+            <button class="btn-primary btn-outline" *ngIf="!isEditMode" (click)="enableEditMode()" style="margin-left: 12px;">Edit Details</button>
+            <button class="btn-primary" *ngIf="!isEditMode" (click)="closeModals()" style="margin-left: 12px;">Close</button>
+            <button class="btn-primary btn-outline" *ngIf="isEditMode" (click)="cancelEdit()">Cancel</button>
+            <button class="btn-save" *ngIf="isEditMode" (click)="saveEdit()" style="margin-left: 12px;">Save Changes</button>
+          </div>
+          <div class="footer-right" *ngIf="activeTab === 'in-transit'">
+            <button class="btn-primary btn-outline" *ngIf="canUndo(selectedOrder)" (click)="undoAction()">Undo Transition</button>
+            <button class="btn-save" (click)="markComplete()" style="margin-left: 12px;">Mark as Complete</button>
+            <button class="btn-primary" (click)="closeModals()" style="margin-left: 12px;">Close</button>
+          </div>
+          <div class="footer-right" *ngIf="activeTab === 'completed'">
+            <button class="btn-primary btn-outline" *ngIf="canUndo(selectedOrder)" (click)="undoAction()">Undo Transition</button>
+            <button class="btn-primary" (click)="closeModals()" style="margin-left: 12px;">Close</button>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -142,24 +189,42 @@
   <div class="modal-overlay" *ngIf="showAssignModal">
     <div class="modal-content assign-modal">
       <div class="modal-header">
-        <h2>Order ID : {{ selectedOrderId }}</h2>
+        <div class="header-text">
+          <h2>Assign Delivery Partner</h2>
+          <span class="order-type">ORDER {{ selectedOrderId }} • LOGISTICS PREPARATION</span>
+        </div>
         <button class="btn-close" (click)="closeModals()">×</button>
       </div>
       
       <div class="modal-body">
-        <div class="form-group">
-          <label>Courier Service</label>
-          <input type="text" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Tracking / Ref ID</label>
-          <input type="text" placeholder="e.g., DMX20250217001" class="form-input">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Courier Service</label>
+            <input type="text" class="form-input" placeholder="e.g. DMX / Prompt Express" [(ngModel)]="courierService">
+          </div>
+          <div class="form-group">
+            <label>Tracking / Ref ID</label>
+            <input type="text" placeholder="e.g., DMX20250217001" class="form-input" [(ngModel)]="trackingId">
+          </div>
+          <div class="form-group full">
+            <p class="helper-text">Please ensure all items are kitted and the gate pass is printed before finalizing the dispatch.</p>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer justify-end">
-        <button class="btn-primary-alt" (click)="closeModals()">View Packing Details</button>
-        <button class="btn-primary" (click)="closeModals()">Done</button>
+      <div class="modal-footer justify-between">
+        <div class="footer-left">
+          <button 
+            class="btn-secondary-outline" 
+            [disabled]="!isDeliveryFormValid"
+            (click)="closeModals()">
+            Print Gate Pass
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn-primary-alt" (click)="viewPackingDetails()">View Packing Details</button>
+          <button class="btn-primary" [disabled]="!isDeliveryFormValid" (click)="completeAssignment()">Done</button>
+        </div>
       </div>
     </div>
   </div>
