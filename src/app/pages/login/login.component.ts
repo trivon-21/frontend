@@ -86,6 +86,7 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
+    // Login with password for both email and phone
     const payload = authType === 'email'
       ? { email: identifier, password, rememberMe }
       : { phoneNumber: identifier, password, rememberMe };
@@ -105,7 +106,7 @@ export class LoginComponent {
         if (response.user.needsPasswordChange) {
           this.showChangePasswordModal = true;
         } else {
-          // Direct login successful (no OTP required for phone login)
+          // Direct login successful
           this.router.navigateByUrl(this.getRedirectUrl());
         }
       },

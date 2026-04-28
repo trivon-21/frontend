@@ -66,6 +66,10 @@
             </div>
           </div>
 
+          <div class="recaptcha-slot" aria-hidden="true">
+            <div id="firebase-recaptcha-container"></div>
+          </div>
+
           <div class="row two">
             <div class="field">
               <label>Password</label>
@@ -164,7 +168,11 @@
         </div>
         <h1 class="otp-title">Verify your {{ detectedAuthType }}</h1>
         <p class="otp-sub">
+          @if (detectedAuthType === 'phone') {
+          We sent a 6-digit SMS code to <strong>{{ signupIdentifier }}</strong> using Firebase.<br />
+          } @else {
           We sent a 6-digit code to <strong>{{ signupIdentifier }}</strong>.<br />
+          }
           Enter it below to verify your account.
         </p>
 

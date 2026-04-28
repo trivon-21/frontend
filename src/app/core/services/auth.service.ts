@@ -7,6 +7,8 @@ export interface SignupPayload {
   email?: string;
   identifier?: string; // Can be email or phone
   phoneNumber?: string;
+  firebaseIdToken?: string;
+  firebasePhoneNumber?: string;
   password: string;
 }
 
