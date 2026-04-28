@@ -1,7 +1,7 @@
 /* ── Reuse existing patterns from Material Requests / Dispatch ── */
 
 .dispatch-container {
-  padding: 32px;
+  padding: 32px 32px 80px;
   display: flex;
   flex-direction: column;
   gap: 24px;
