@@ -98,6 +98,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'order-creation',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/order-creation/order-creation.component').then(
+            (m) => m.OrderCreationComponent,
+          ),
+      },
+      {
         path: 'procurement',
         loadComponent: () =>
           import('./features/inventory-manager/pages/procurement/procurement.component').then(

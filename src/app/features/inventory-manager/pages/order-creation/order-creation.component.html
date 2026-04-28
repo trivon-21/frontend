@@ -1,0 +1,379 @@
+<div class="dispatch-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Order Creation</h1>
+      <p class="header-subtitle">Create and track purchase order requests for approval</p>
+    </div>
+    <button class="btn-create-order" (click)="toggleForm()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 8v8M8 12h8" />
+      </svg>
+      {{ showForm ? 'Hide Form' : 'New Order Request' }}
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert success" *ngIf="successMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12" /></svg>
+    {{ successMessage }}
+    <button class="alert-dismiss" (click)="successMessage = ''">×</button>
+  </div>
+  <div class="alert error" *ngIf="errorMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg>
+    {{ errorMessage }}
+    <button class="alert-dismiss" (click)="errorMessage = ''">×</button>
+  </div>
+
+  <!-- New Order Form (Collapsible) -->
+  <div class="order-form-panel glass-panel" *ngIf="showForm">
+    <div class="form-header">
+      <h2>New Purchase Order Request</h2>
+      <span class="form-badge">Draft</span>
+    </div>
+
+    <div class="form-body">
+      <div class="form-row">
+        <!-- Supplier Selection -->
+        <div class="form-group">
+          <label>SUPPLIER *</label>
+          <select class="form-input" [(ngModel)]="selectedSupplier">
+            <option value="">Select a Supplier</option>
+            <option *ngFor="let s of suppliers" [value]="s.name">{{ s.name }}</option>
+          </select>
+        </div>
+
+        <!-- Priority -->
+        <div class="form-group">
+          <label>PRIORITY</label>
+          <div class="priority-toggle">
+            <button class="priority-btn" [class.active]="orderPriority === 'normal'" (click)="orderPriority = 'normal'">Normal</button>
+            <button class="priority-btn urgent" [class.active]="orderPriority === 'urgent'" (click)="orderPriority = 'urgent'">Urgent</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item Selector -->
+      <div class="item-selector">
+        <label>ADD ITEMS</label>
+        <div class="item-input-row">
+          <div class="item-search-wrap">
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Search inventory by name, SKU, or category..."
+              [(ngModel)]="itemSearchQuery"
+              (input)="filterItems()"
+              (focus)="onItemInputFocus()"
+              (blur)="onItemInputBlur()"
+              autocomplete="off"
+            >
+            <!-- Dropdown -->
+            <div class="item-dropdown glass-panel" *ngIf="showItemDropdown && filteredInventory.length > 0">
+              <div
+                class="item-dropdown-row"
+                *ngFor="let item of filteredInventory.slice(0, 8)"
+                (mousedown)="selectInventoryItem(item)"
+              >
+                <div class="item-dropdown-name">
+                  {{ item.name }}
+                  <span class="item-dropdown-sku">{{ item.sku }}</span>
+                </div>
+                <div class="item-dropdown-stock">
+                  <span class="stock-avail" [class.low]="item.status !== 'normal'">{{ item.available }}</span> avail
+                  <span class="stock-sep">|</span>
+                  <span class="stock-rsvd">{{ item.reserved }}</span> rsvd
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected item context -->
+          <div class="qty-input-wrap" *ngIf="selectedItem">
+            <label class="mini-label">QTY</label>
+            <input type="number" class="form-input qty-input" [(ngModel)]="currentQuantity" min="1">
+          </div>
+          <div class="cost-display" *ngIf="selectedItem">
+            <label class="mini-label">UNIT COST</label>
+            <span class="cost-value">{{ formatCurrency(selectedItem.unitCost) }}</span>
+          </div>
+          <div class="cost-display" *ngIf="selectedItem">
+            <label class="mini-label">EST. TOTAL</label>
+            <span class="cost-value highlight">{{ formatCurrency(currentQuantity * selectedItem.unitCost) }}</span>
+          </div>
+          <button class="btn-add-item" *ngIf="selectedItem" (click)="addLineItem()" [disabled]="currentQuantity <= 0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Line Items Table -->
+      <div class="line-items-section" *ngIf="orderItems.length > 0">
+        <table class="line-items-table">
+          <thead>
+            <tr>
+              <th>ITEM</th>
+              <th>SKU</th>
+              <th>QTY</th>
+              <th>UNIT COST</th>
+              <th>EST. TOTAL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of orderItems; let i = index">
+              <td class="item-name-cell">{{ item.name }}</td>
+              <td class="sku-cell">{{ item.sku }}</td>
+              <td class="qty-cell">{{ item.quantity }}</td>
+              <td>{{ formatCurrency(item.unitCost) }}</td>
+              <td class="total-cell">{{ formatCurrency(item.estimatedTotal) }}</td>
+              <td>
+                <button class="btn-remove-item" (click)="removeLineItem(i)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="total-label">Order Total</td>
+              <td class="total-cell grand-total">{{ formatCurrency(orderTotal) }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group full-width" *ngIf="orderItems.length > 0">
+        <label>NOTES / JUSTIFICATION</label>
+        <textarea class="form-input notes-input" [(ngModel)]="orderNotes" placeholder="Add any notes for the Finance Officer..." rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- Form Footer -->
+    <div class="form-footer" *ngIf="orderItems.length > 0">
+      <button class="btn-reset" (click)="resetForm()">Clear All</button>
+      <button class="btn-submit" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+        <span *ngIf="!isSubmitting">Submit for Approval</span>
+        <span *ngIf="isSubmitting">Submitting...</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Suggested Orders Section -->
+  <div class="suggested-section glass-panel" *ngIf="suggestedItems.length > 0">
+    <div class="suggested-header">
+      <div class="suggested-title-row">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+        </svg>
+        <h3>Suggested Orders</h3>
+        <span class="suggested-count">{{ suggestedItems.length }} items below reorder level</span>
+      </div>
+    </div>
+    <div class="suggested-list">
+      <div class="suggested-item" *ngFor="let item of suggestedItems">
+        <div class="suggested-info">
+          <span class="suggested-name">{{ item.name }}</span>
+          <span class="suggested-sku">{{ item.sku }}</span>
+        </div>
+        <div class="suggested-stock">
+          <span class="stock-badge" [class.critical]="item.status === 'critical'" [class.warning]="item.status === 'warning'">
+            {{ item.available }} / {{ item.reorderLevel }}
+          </span>
+        </div>
+        <button class="btn-add-suggested" (click)="addSuggestedItem(item)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+          Add to Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'pending-approval'" (click)="setActiveTab('pending-approval')">
+      Pending Approval <span class="badge" *ngIf="pendingOrders.length > 0">{{ pendingOrders.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'approved'" (click)="setActiveTab('approved')">
+      Approved <span class="badge approved-badge" *ngIf="approvedOrders.length > 0">{{ approvedOrders.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'rejected'" (click)="setActiveTab('rejected')">
+      Rejected <span class="badge rejected-badge" *ngIf="rejectedOrders.length > 0">{{ rejectedOrders.length }}</span>
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="table-controls glass-panel">
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search by Order ID, Supplier, or Requester...">
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="table-container glass-panel">
+    <table class="dispatch-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>SUPPLIER</th>
+          <th>ITEMS</th>
+          <th>ESTIMATED TOTAL</th>
+          <th>PRIORITY</th>
+          <th>DATE</th>
+          <th class="text-right">ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of currentOrders">
+          <td class="order-id-cell">{{ order.requestId }}</td>
+          <td>{{ order.supplierName }}</td>
+          <td>{{ order.items.length }} item{{ order.items.length !== 1 ? 's' : '' }}</td>
+          <td class="total-cell">{{ formatCurrency(order.totalEstimate) }}</td>
+          <td>
+            <span class="priority-badge" [class.urgent]="order.priority === 'urgent'">
+              {{ order.priority === 'urgent' ? 'Urgent' : 'Normal' }}
+            </span>
+          </td>
+          <td>{{ formatDate(order.createdAt) }}</td>
+          <td class="actions-cell">
+            <button class="btn-view" (click)="openDetail(order)">
+              View Details
+            </button>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="currentOrders.length === 0">
+          <td colspan="7" class="text-center" style="padding: 40px; color: var(--text-muted);">
+            No {{ getStatusLabel(activeTab) | lowercase }} orders found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" *ngIf="showDetailModal && selectedOrder">
+    <div class="modal-content pack-modal">
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedOrder.requestId }}</h2>
+          <span class="order-type">
+            SUPPLIER: {{ selectedOrder.supplierName }}
+            <span class="priority-badge modal-priority" [class.urgent]="selectedOrder.priority === 'urgent'">
+              {{ selectedOrder.priority === 'urgent' ? 'URGENT' : 'NORMAL' }}
+            </span>
+          </span>
+        </div>
+        <button class="btn-close" (click)="closeDetail()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Order Meta -->
+        <div class="delivery-info-banner">
+          <div class="info-item">
+            <span class="label">REQUESTED BY</span>
+            <span class="value">{{ selectedOrder.requestedBy }}</span>
+          </div>
+          <div class="info-item border-left">
+            <span class="label">DATE</span>
+            <span class="value">{{ formatDate(selectedOrder.createdAt) }}</span>
+          </div>
+          <div class="info-item border-left">
+            <span class="label">STATUS</span>
+            <span class="value" [class.status-pending]="selectedOrder.status === 'pending-approval'"
+                  [class.status-approved]="selectedOrder.status === 'approved'"
+                  [class.status-rejected]="selectedOrder.status === 'rejected'">
+              {{ getStatusLabel(selectedOrder.status) }}
+            </span>
+          </div>
+          <div class="info-item border-left">
+            <span class="label">TOTAL ESTIMATE</span>
+            <span class="value">{{ formatCurrency(selectedOrder.totalEstimate) }}</span>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="section-header">
+          <h3>ORDER ITEMS</h3>
+          <span class="items-count">{{ selectedOrder.items.length }} Items</span>
+        </div>
+        <table class="verification-table">
+          <thead>
+            <tr>
+              <th>ITEM NAME</th>
+              <th>SKU</th>
+              <th>QTY</th>
+              <th>UNIT COST</th>
+              <th>EST. TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedOrder.items">
+              <td class="item-name">{{ item.name }}</td>
+              <td class="item-sku">{{ item.sku }}</td>
+              <td class="item-qty">×{{ item.quantity }}</td>
+              <td>{{ formatCurrency(item.unitCost) }}</td>
+              <td class="total-cell">{{ formatCurrency(item.estimatedTotal) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Notes -->
+        <div class="order-notes-section" *ngIf="selectedOrder.notes">
+          <h3>NOTES</h3>
+          <p class="order-notes-text">{{ selectedOrder.notes }}</p>
+        </div>
+
+        <!-- Rejection Reason (for rejected) -->
+        <div class="rejection-section" *ngIf="selectedOrder.status === 'rejected'">
+          <h3>REJECTION REASON</h3>
+          <p class="rejection-text">{{ selectedOrder.rejectionReason }}</p>
+          <p class="rejection-meta">Rejected on {{ formatDate(selectedOrder.rejectedAt) }}</p>
+        </div>
+
+        <!-- Approval Info (for approved) -->
+        <div class="approval-section" *ngIf="selectedOrder.status === 'approved'">
+          <h3>APPROVAL DETAILS</h3>
+          <p class="approval-text">Approved by <strong>{{ selectedOrder.approvedBy }}</strong> on {{ formatDate(selectedOrder.approvedAt) }}</p>
+          <p class="approval-note">Procurement records have been automatically generated.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-right">
+          <button class="btn-primary" (click)="closeDetail()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejection Reason Modal -->
+  <div class="modal-overlay" *ngIf="showRejectModal">
+    <div class="modal-content assign-modal">
+      <div class="modal-header">
+        <h2>Reject Order</h2>
+        <button class="btn-close" (click)="closeRejectModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>REASON FOR REJECTION *</label>
+          <textarea class="form-input notes-input" [(ngModel)]="rejectionReason" placeholder="Provide a reason for rejection..." rows="4"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="footer-right">
+          <button class="btn-primary btn-outline" (click)="closeRejectModal()">Cancel</button>
+          <button class="btn-reject-confirm" [disabled]="!rejectionReason.trim()" (click)="confirmReject()">Confirm Rejection</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

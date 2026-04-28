@@ -37,6 +37,13 @@
     <div class="time-date-section">
       <div class="live-time">{{ formatTime(data.currentDate) }}</div>
       <div class="live-date">{{ formatDate(data.currentDate) }}</div>
+      <button class="btn-new-order" routerLink="/inventory-manager/order-creation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+        Create New Order
+      </button>
     </div>
   </div>
 
