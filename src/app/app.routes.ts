@@ -99,10 +99,22 @@ export const routes: Routes = [
       },
       {
         path: 'order-creation',
-        loadComponent: () =>
-          import('./features/inventory-manager/pages/order-creation/order-creation.component').then(
-            (m) => m.OrderCreationComponent,
-          ),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/inventory-manager/pages/order-creation/order-creation.component').then(
+                (m) => m.OrderCreationComponent,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./features/inventory-manager/pages/order-creation/new-order-form/new-order-form.component').then(
+                (m) => m.NewOrderFormComponent,
+              ),
+          }
+        ]
       },
       {
         path: 'procurement',
