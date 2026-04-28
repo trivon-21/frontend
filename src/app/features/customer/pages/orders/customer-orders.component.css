@@ -148,7 +148,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--primary-lighter);
   font-size: 13px;
 }
 
@@ -165,14 +165,14 @@
 
 .tracking-link {
   margin-left: auto;
-  color: #2196F3;
+  color: var(--primary-main);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .tracking-link:hover {
-  color: #1976D2;
+  color: var(--primary-hover);
 }
 
 @media (max-width: 768px) {

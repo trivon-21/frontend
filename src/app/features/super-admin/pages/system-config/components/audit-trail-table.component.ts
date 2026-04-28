@@ -128,7 +128,7 @@ import { AuditLog } from '../../../models/system-config.model';
         width: 40px;
         height: 40px;
         border: 4px solid #e0e0e0;
-        border-top-color: #0066cc;
+        border-top-color: var(--primary-main);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-bottom: 20px;
@@ -242,7 +242,7 @@ import { AuditLog } from '../../../models/system-config.model';
 
       .action-business {
         background-color: #e3f2fd;
-        color: #1976d2;
+        color: var(--primary-main);
       }
 
       .action-feature {
@@ -257,7 +257,7 @@ import { AuditLog } from '../../../models/system-config.model';
 
       .action-info {
         background-color: #e8f5e9;
-        color: #2e7d32;
+        color: var(--primary-hover);
       }
 
       .changes-list {

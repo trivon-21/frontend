@@ -179,8 +179,8 @@ import { SystemConfig, BusinessRules } from '../../../models/system-config.model
 
       .form-input:focus {
         outline: none;
-        border-color: #0066cc;
-        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        border-color: var(--primary-main);
+        box-shadow: 0 0 0 3px rgba(0, 132, 61, 0.1);
       }
 
       .form-input:disabled {
@@ -214,12 +214,12 @@ import { SystemConfig, BusinessRules } from '../../../models/system-config.model
       }
 
       .btn-primary {
-        background-color: #0066cc;
+        background-color: var(--primary-main);
         color: #fff;
       }
 
       .btn-primary:hover:not(:disabled) {
-        background-color: #0052a3;
+        background-color: var(--primary-hover);
       }
 
       .btn-primary:disabled {

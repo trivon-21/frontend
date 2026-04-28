@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   color: var(--text);
-  background: #0f231b;
+  background: var(--primary-active);
 }
 
 /* Background */
@@ -99,7 +99,7 @@ h1 {
   color: #6b7470;
 }
 .link {
-  color: #1f5b45;
+  color: var(--primary-main);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -167,17 +167,17 @@ h1 {
 .btn.big {
   padding: 12px 20px;
   border-radius: 999px;
-  background: #1f5b45;
+  background: var(--primary-main);
   color: white;
   border: none;
   min-width: 220px;
 }
-.btn.big:hover { background: #184a38; }
+.btn.big:hover { background: var(--primary-hover); }
 .btn.big:disabled { opacity: 0.65; cursor: not-allowed; }
 
 .error-msg {
   margin-top: 12px;
-  color: #c0392b;
+  color: var(--error);
   font-size: 13px;
   text-align: center;
 }
@@ -211,14 +211,14 @@ h1 {
   display: flex;
   align-items: center;
 }
-.eye-btn:hover { color: #1f5b45; }
+.eye-btn:hover { color: var(--primary-main); }
 
 /* ── Field-level error ── */
 .field-error {
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: #c0392b;
+  color: var(--error);
 }
 
 /* ── Password strength rules ── */
@@ -240,8 +240,8 @@ h1 {
   align-items: center;
   gap: 5px;
 }
-.pw-rules li.ok { color: #1f5b45; }
-.pw-rules li.fail { color: #c0392b; }
+.pw-rules li.ok { color: var(--primary-main); }
+.pw-rules li.fail { color: var(--error); }
 .rule-icon { font-size: 12px; font-weight: 700; }
 
 /* ── Terms check ── */
@@ -302,7 +302,7 @@ h1 {
 }
 
 .otp-input:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
   box-shadow: 0 0 0 4px rgba(31, 91, 69, 0.10);
 }
 
@@ -328,7 +328,7 @@ h1 {
 .otp-resend-btn {
   background: none;
   border: none;
-  color: #1f5b45;
+  color: var(--primary-main);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

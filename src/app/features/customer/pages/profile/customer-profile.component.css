@@ -51,7 +51,7 @@
 }
 
 .page-search:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
 }
 
 .page-search::placeholder {
@@ -153,9 +153,9 @@
 .btn-remove-photo {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #1f5b45;
+  border: 1px solid var(--primary-main);
   background: #fff;
-  color: #1f5b45;
+  color: var(--primary-main);
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
@@ -165,7 +165,7 @@
 }
 
 .btn-edit-photo:hover:not(:disabled) {
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
 }
 
@@ -295,7 +295,7 @@
 }
 
 .form-input:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
   background: #fff;
   box-shadow: 0 0 0 3px rgba(31, 91, 69, 0.07);
 }
@@ -416,7 +416,7 @@
 
 .btn-confirm-email {
   padding: 9px 18px;
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -428,7 +428,7 @@
 }
 
 .btn-confirm-email:hover:not(:disabled) {
-  background: #184a38;
+  background: var(--primary-hover);
 }
 
 .btn-confirm-email:disabled {
@@ -461,9 +461,9 @@
 .add-email-btn {
   margin-top: 14px;
   padding: 9px 18px;
-  background: #edf5f0;
-  color: #1f5b45;
-  border: 1.5px solid #c3ddd3;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  border: 1.5px solid var(--primary-light);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -493,7 +493,7 @@
 
 .btn-edit-details {
   padding: 10px 24px;
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -505,12 +505,12 @@
 }
 
 .btn-edit-details:hover {
-  background: #184a38;
+  background: var(--primary-hover);
 }
 
 .btn-save-details {
   padding: 10px 24px;
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -522,7 +522,7 @@
 }
 
 .btn-save-details:hover:not(:disabled) {
-  background: #184a38;
+  background: var(--primary-hover);
 }
 
 .btn-save-details:disabled {
@@ -617,8 +617,8 @@
   align-items: center;
   padding: 10px 20px;
   background: #fff;
-  color: #1f5b45;
-  border: 1.5px solid #1f5b45;
+  color: var(--primary-main);
+  border: 1.5px solid var(--primary-main);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -628,7 +628,7 @@
 }
 
 .btn-change-password:hover:not(:disabled) {
-  background: #edf5f0;
+  background: var(--primary-lighter);
 }
 
 .btn-change-password:disabled {
@@ -718,8 +718,8 @@
   margin-left: auto;
   padding: 6px 14px;
   background: #fff;
-  color: #1f5b45;
-  border: 1.5px solid #1f5b45;
+  color: var(--primary-main);
+  border: 1.5px solid var(--primary-main);
   border-radius: 7px;
   font-size: 12.5px;
   font-weight: 600;
@@ -730,7 +730,7 @@
 }
 
 .btn-verify-email:hover {
-  background: #edf5f0;
+  background: var(--primary-lighter);
 }
 
 /* ── OTP Panel ── */
@@ -774,7 +774,7 @@
 }
 
 .otp-panel-input:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
   box-shadow: 0 0 0 3px rgba(31, 91, 69, 0.08);
 }
 
@@ -785,7 +785,7 @@
 
 .btn-otp-confirm {
   padding: 9px 18px;
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 8px;

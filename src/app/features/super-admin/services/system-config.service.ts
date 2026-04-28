@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import {
@@ -8,7 +7,6 @@ import {
   MaintenanceMode,
   SystemInfo,
   SystemConfig,
-  AuditLogResponse,
   SystemConfigResponse,
 } from '../models/system-config.model';
 
@@ -77,22 +75,5 @@ export class SystemConfigService {
       systemInfo,
       reason,
     });
-  }
-
-  /**
-   * Get audit logs for system configuration
-   */
-  getAuditLogs(
-    page: number = 1,
-    limit: number = 20
-  ): Observable<{ success: boolean; data: AuditLogResponse }> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
-
-    return this.apiService.get<{ success: boolean; data: AuditLogResponse }>(
-      `${this.baseUrl}/audit-logs`,
-      params
-    );
   }
 }

@@ -67,17 +67,17 @@
   padding: 6px 14px; font-size: 12.5px; font-weight: 500;
   font-family: 'Inter', sans-serif; color: #3a4a43; cursor: pointer; transition: all 0.13s;
 }
-.type-chip:hover { border-color: #1f5b45; color: #1f5b45; }
-.type-chip--active { background: #1f5b45; border-color: #1f5b45; color: #fff; }
+.type-chip:hover { border-color: var(--primary-main); color: var(--primary-main); }
+.type-chip--active { background: var(--primary-main); border-color: var(--primary-main); color: #fff; }
 
 /* ── Buttons ── */
 .btn-primary {
-  background: #1f5b45; color: #fff; border: none; border-radius: 10px;
+  background: var(--primary-main); color: #fff; border: none; border-radius: 10px;
   padding: 11px 24px; font-size: 14px; font-weight: 600;
   font-family: 'Inter', sans-serif; cursor: pointer;
   display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s;
 }
-.btn-primary:hover:not(:disabled) { background: #184a38; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
 .btn-full { width: 100%; justify-content: center; }
 .btn-ghost {
@@ -157,7 +157,7 @@
 .back-btn {
   display: inline-flex; align-items: center; gap: 5px; background: none; border: none;
   cursor: pointer; font-size: 12.5px; font-family: 'Inter', sans-serif;
-  color: #1f5b45; font-weight: 600; padding: 0;
+  color: var(--primary-main); font-weight: 600; padding: 0;
 }
 .back-btn:hover { text-decoration: underline; }
 .inq-detail-header {

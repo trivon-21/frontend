@@ -219,8 +219,8 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
 
       .form-input:focus {
         outline: none;
-        border-color: #0066cc;
-        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        border-color: var(--primary-main);
+        box-shadow: 0 0 0 3px rgba(0, 132, 61, 0.1);
       }
 
       .form-input:disabled {
@@ -267,7 +267,7 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
       }
 
       .toggle-button.active .toggle-track {
-        background-color: #4caf50;
+        background-color: var(--primary-main);
       }
 
       .toggle-circle {
@@ -291,7 +291,7 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
       }
 
       .toggle-button.active .toggle-text {
-        color: #4caf50;
+        color: var(--primary-main);
       }
 
       /* Radio Group */
@@ -371,7 +371,7 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
 
       .status-badge.active {
         background-color: #ffebee;
-        color: #d32f2f;
+        color: var(--error);
       }
 
       .status-value {
@@ -402,12 +402,12 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
       }
 
       .btn-primary {
-        background-color: #0066cc;
+        background-color: var(--primary-main);
         color: #fff;
       }
 
       .btn-primary:hover:not(:disabled) {
-        background-color: #0052a3;
+        background-color: var(--primary-hover);
       }
 
       .btn-primary:disabled {

@@ -1,11 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  --green: #1f5b45;
-  --green-2: #184a38;
-  --text: #1b1f1d;
-  --muted: #6b7470;
-  --stroke: rgba(0, 0, 0, 0.10);
+  /* Core Colors (Airlux Premium Palette) */
+  --primary-main: #00843D;
+  --primary-hover: #006B32;
+  --primary-active: #1A2421;
+  --primary-light: #B9FBC0;
+  --primary-lighter: #E8FDF0;
+
+  /* Neutral & Text Colors */
+  --text-primary: #2D3139;
+  --text-secondary: #5C646D;
+  --text-muted: #D1D5DB;
+  --background-page: #F9FAFB;
+
+  /* Feedback Colors */
+  --error: #C20E0E;
+  --warning: #f59e0b;
+  --info: #1D61FF;
+
+  /* Legacy variable mappings (to be replaced) */
+  --green: var(--primary-main);
+  --green-2: var(--primary-hover);
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+  --stroke: var(--text-muted);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

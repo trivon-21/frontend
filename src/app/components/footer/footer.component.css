@@ -1,7 +1,7 @@
 .footer {
   position: relative;
   z-index: 2;
-  background: #0f231b;
+  background: var(--primary-active);
   color: rgba(255,255,255,0.9);
   padding: 42px 18px 18px;
 }

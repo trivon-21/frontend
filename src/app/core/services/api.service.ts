@@ -22,6 +22,16 @@ export class ApiService {
   }
 
   /**
+   * GET request for binary content (CSV, PDF, etc.)
+   */
+  getBlob(endpoint: string, params?: HttpParams): Observable<Blob> {
+    return this.http.get(`${this.apiBaseUrl}${endpoint}`, {
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  /**
    * POST request
    */
   post<T = any>(endpoint: string, body: any = {}): Observable<T> {

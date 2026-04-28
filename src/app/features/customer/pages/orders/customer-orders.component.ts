@@ -40,21 +40,21 @@ export class CustomerOrdersComponent implements OnInit {
     const colors: { [key: string]: string } = {
       'Order Placed': '#FFA500',
       'Payment Uploaded': '#1E90FF',
-      'Payment Confirmed': '#32CD32',
-      'Inventory Approved': '#32CD32',
+      'Payment Confirmed': 'var(--primary-main)',
+      'Inventory Approved': 'var(--primary-main)',
       'Shipped': '#4169E1',
-      'Delivered': '#228B22',
+      'Delivered': 'var(--primary-hover)',
       'Installation Scheduled': '#FF6347',
-      'Installation Completed': '#006400'
+      'Installation Completed': 'var(--primary-active)'
     };
     return colors[status] || '#666';
   }
 
   getPaymentStatusColor(status: string): string {
-    if (status === 'Confirmed') return '#228B22';
+    if (status === 'Confirmed') return 'var(--primary-main)';
     if (status === 'Pending Payment') return '#FFA500';
     if (status === 'Under Review') return '#1E90FF';
-    if (status === 'Rejected') return '#DC143C';
+    if (status === 'Rejected') return 'var(--error)';
     return '#666';
   }
 }

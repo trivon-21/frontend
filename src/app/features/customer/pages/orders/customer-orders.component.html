@@ -1,6 +1,6 @@
-<div style="font-family:'Inter',sans-serif;">
+<div>
   <!-- Page Header -->
-  <h2 style="font-size:22px;font-weight:700;color:#1b2f27;margin:0 0 20px;">My Orders</h2>
+  <h2 style="font-size:26px;font-weight:700;color:var(--primary-main);margin:0 0 24px;">My Orders</h2>
 
   <!-- Loading State -->
   <div *ngIf="loading" style="padding: 40px; text-align: center; color: #666;">
@@ -8,7 +8,7 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" style="padding: 20px; background: #fee; border: 1px solid #fcc; border-radius: 6px; color: #c33; margin-bottom: 20px;">
+  <div *ngIf="error && !loading" style="padding: 20px; background: #fee; border: 1px solid #fcc; border-radius: 6px; color: var(--error); margin-bottom: 20px;">
     {{ error }}
   </div>
 
@@ -49,7 +49,7 @@
           <div class="product-text">
             <div class="product-name">{{ order.itemName }}</div>
             <div class="product-quantity">Quantity: {{ order.quantity }}</div>
-            <div class="order-type-badge" [style.background-color]="order.orderType === 'Buy & Install' ? '#E8F5E9' : '#F3E5F5'">
+            <div class="order-type-badge" [style.background-color]="order.orderType === 'Buy & Install' ? 'var(--primary-lighter)' : '#F3E5F5'">
               {{ order.orderType }}
             </div>
           </div>
@@ -69,7 +69,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">AMC Status</span>
-            <span class="info-value" [style.color]="order.amcStatus === 'Active' ? '#228B22' : order.amcStatus === 'Expired' ? '#DC143C' : '#999'">
+            <span class="info-value" [style.color]="order.amcStatus === 'Active' ? 'var(--primary-main)' : order.amcStatus === 'Expired' ? 'var(--error)' : '#999'">
               {{ order.amcStatus }}
             </span>
           </div>

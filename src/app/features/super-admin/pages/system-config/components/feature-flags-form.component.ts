@@ -87,8 +87,8 @@ interface FlagOption {
       }
 
       .flag-item:hover {
-        border-color: #0066cc;
-        box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+        border-color: var(--primary-main);
+        box-shadow: 0 2px 8px rgba(0, 132, 61, 0.1);
       }
 
       .flag-header {
@@ -133,8 +133,8 @@ interface FlagOption {
       }
 
       .flag-status.enabled {
-        background-color: #e8f5e9;
-        color: #2e7d32;
+        background-color: var(--primary-lighter);
+        color: var(--primary-main);
       }
 
       .flag-description {
@@ -166,12 +166,12 @@ interface FlagOption {
       }
 
       .btn-primary {
-        background-color: #0066cc;
+        background-color: var(--primary-main);
         color: #fff;
       }
 
       .btn-primary:hover:not(:disabled) {
-        background-color: #0052a3;
+        background-color: var(--primary-hover);
       }
 
       .btn-primary:disabled {

@@ -1,58 +1,70 @@
-<div>
+<div class="users-container">
   <!-- Page Header -->
-  <div class="page-header">
-    <h2 class="page-title">User Management</h2>
-  </div>
+  <header class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">User Management</h1>
+    </div>
+
+    <div class="hero-actions">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+        Add New User
+      </button>
+    </div>
+  </header>
 
   <!-- Error Message -->
-  <div class="alert alert-error" *ngIf="error">
-    {{ error }}
+  <div class="alert-banner" *ngIf="error">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ error }}</span>
+    </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
+  <!-- Tabs Navigation -->
+  <div class="tabs-navigation">
     <button
-      [class.tab-active]="activeTab === 'active'"
+      [class.active]="activeTab === 'active'"
       (click)="switchTab('active')"
       class="tab-button"
     >
-      Active Users
+      Active Directory
     </button>
     <button
-      [class.tab-active]="activeTab === 'deactivated'"
+      [class.active]="activeTab === 'deactivated'"
       (click)="switchTab('deactivated')"
       class="tab-button"
     >
-      Deactivated Users({{ deactivatedCount }})
+      Deactivated ({{ deactivatedCount }})
     </button>
     <button
-      [class.tab-active]="activeTab === 'reactivation'"
+      [class.active]="activeTab === 'reactivation'"
       (click)="switchTab('reactivation')"
       class="tab-button"
     >
-      Reactivation Requests({{ reactivationCount }})
+      Reactivation Requests ({{ reactivationCount }})
     </button>
   </div>
 
   <!-- Active Users Tab -->
-  <div *ngIf="activeTab === 'active'">
-    <!-- Filters Section -->
-    <div class="filters-section">
+  <div *ngIf="activeTab === 'active'" class="tab-content">
+    <!-- Filters Panel -->
+    <div class="filters-panel">
       <div class="filters-grid">
         <div class="filter-group">
-          <label>Search</label>
+          <label>Search Users</label>
           <input
             type="text"
             [(ngModel)]="searchQuery"
-            placeholder="Search by name or email..."
-            class="input"
+            placeholder="Name or email address..."
+            class="filter-input"
           />
         </div>
 
         <div class="filter-group">
-          <label>Role</label>
-          <select [(ngModel)]="roleFilter" class="input">
-            <option value="">All Roles</option>
+          <label>Assign Role</label>
+          <select [(ngModel)]="roleFilter" class="filter-input">
+            <option value="">All Functional Roles</option>
             <option value="CUSTOMER">Customer</option>
             <option value="CSA">CSA</option>
             <option value="INSPECTION">Inspection</option>
@@ -65,69 +77,72 @@
         </div>
 
         <div class="filter-group">
-          <label>Email Verified</label>
-          <select [(ngModel)]="emailVerifiedFilter" class="input">
+          <label>Email Status</label>
+          <select [(ngModel)]="emailVerifiedFilter" class="filter-input">
             <option value="">All</option>
-            <option value="true">Verified</option>
-            <option value="false">Not Verified</option>
+            <option value="true">Verified Only</option>
+            <option value="false">Unverified Only</option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label>Phone Verified</label>
-          <select [(ngModel)]="phoneVerifiedFilter" class="input">
+          <label>Phone Status</label>
+          <select [(ngModel)]="phoneVerifiedFilter" class="filter-input">
             <option value="">All</option>
-            <option value="true">Verified</option>
-            <option value="false">Not Verified</option>
+            <option value="true">Verified Only</option>
+            <option value="false">Unverified Only</option>
           </select>
         </div>
       </div>
 
-      <div class="filter-buttons">
+      <div class="filter-actions">
         <button class="btn btn-primary" (click)="applyFilters()">Apply Filters</button>
-        <button class="btn btn-outline" (click)="clearFilters()">Clear</button>
-        <button class="btn btn-success" (click)="openCreateModal()">Create User</button>
+        <button class="btn btn-outline" (click)="clearFilters()">Clear All</button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div class="loading" *ngIf="loading">
-      <p>Loading users...</p>
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Synchronizing users...</p>
     </div>
 
     <!-- Users Table -->
-    <div class="table-container" *ngIf="!loading && users.length > 0">
+    <div class="table-wrap" *ngIf="!loading && users.length > 0">
       <table class="users-table">
         <thead>
           <tr>
             <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
+            <th>Contact Details</th>
             <th>Role</th>
             <th>Status</th>
-            <th>Created</th>
+            <th>Joined At</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of users" (click)="openUserDetailsModal(user)" class="clickable-row">
-            <td>{{ user.fullName }}</td>
-            <td>{{ user.email || '-' }}</td>
-            <td>{{ user.phoneNumber || '-' }}</td>
+            <td><strong>{{ user.fullName }}</strong></td>
+            <td>
+              <div style="display: flex; flex-direction: column;">
+                <span>{{ user.email || '-' }}</span>
+                <small style="color: #8a9e96;">{{ user.phoneNumber || '-' }}</small>
+              </div>
+            </td>
             <td>
               <span class="badge badge-role">{{ user.role }}</span>
             </td>
             <td>
-              <span [class]="'status-badge ' + getStatusBadgeClass(user)">
+              <span class="status-badge" [class]="getStatusBadgeClass(user)">
                 {{ getStatusText(user) }}
               </span>
             </td>
-            <td>{{ user.createdAt | date: 'short' }}</td>
+            <td>{{ user.createdAt | date: 'MMM d, yyyy' }}</td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <button class="btn btn-sm btn-edit" (click)="openEditModal(user)">Edit</button>
-              <button class="btn btn-sm btn-delete" (click)="openDeactivationModal(user)">
-                Deactivate
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-outline" (click)="openEditModal(user)">Edit</button>
+                <button class="btn btn-sm btn-delete" (click)="openDeactivationModal(user)">Deactivate</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -136,223 +151,171 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && users.length === 0">
-      <p>No users found</p>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <p>No active users match your criteria.</p>
     </div>
 
     <!-- Pagination -->
-    <div class="pagination" *ngIf="!loading && totalPages > 1">
-      <button class="btn btn-outline" (click)="previousPage()" [disabled]="currentPage === 1">
-        Previous
-      </button>
-      <span class="page-info">Page {{ currentPage }} of {{ totalPages }} (Total: {{ totalUsers }})</span>
-      <button class="btn btn-outline" (click)="nextPage()" [disabled]="currentPage === totalPages">
-        Next
-      </button>
+    <div class="pagination-bar" *ngIf="!loading && totalPages > 1">
+      <button class="btn btn-outline btn-sm" (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
+      <span>Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+      <button class="btn btn-outline btn-sm" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
     </div>
   </div>
 
   <!-- Deactivated Users Tab -->
-  <div *ngIf="activeTab === 'deactivated'">
-    <!-- Loading State -->
-    <div class="loading" *ngIf="loading">
-      <p>Loading deactivated users...</p>
+  <div *ngIf="activeTab === 'deactivated'" class="tab-content">
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading restricted accounts...</p>
     </div>
 
-    <!-- Deactivated Users Table -->
-    <div class="table-container" *ngIf="!loading && deactivatedUsers.length > 0">
+    <div class="table-wrap" *ngIf="!loading && deactivatedUsers.length > 0">
       <table class="users-table">
         <thead>
           <tr>
             <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
             <th>Role</th>
-            <th>Deactivation Reason</th>
-            <th>Deactivated At</th>
+            <th>Reason</th>
+            <th>Restricted On</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of deactivatedUsers">
-            <td>{{ user.fullName }}</td>
-            <td>{{ user.email || '-' }}</td>
-            <td>{{ user.phoneNumber || '-' }}</td>
-            <td>
-              <span class="badge badge-role">{{ user.role }}</span>
-            </td>
-            <td>{{ user.deactivationReason || '-' }}</td>
-            <td>{{ user.deactivatedAt | date: 'short' }}</td>
+            <td><strong>{{ user.fullName }}</strong><br/><small>{{ user.email }}</small></td>
+            <td><span class="badge badge-role">{{ user.role }}</span></td>
+            <td>{{ user.deactivationReason || 'Administrative' }}</td>
+            <td>{{ user.deactivatedAt | date: 'MMM d, yyyy' }}</td>
             <td class="actions-cell">
-              <button
-                class="btn btn-sm btn-primary"
-                (click)="reactivateUserDirectly(user)"
-                [disabled]="approvingRequestId === user._id"
-              >
-                {{ approvingRequestId === user._id ? 'Reactivating...' : 'Reactivate' }}
-              </button>
-              <button
-                class="btn btn-sm btn-delete"
-                (click)="deleteUser(user, true)"
-                [disabled]="deletingUserId === user._id"
-              >
-                {{ deletingUserId === user._id ? 'Deleting...' : 'Delete' }}
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button
+                  class="btn btn-sm btn-primary"
+                  (click)="reactivateUserDirectly(user)"
+                  [disabled]="approvingRequestId === user._id"
+                >
+                  {{ approvingRequestId === user._id ? 'Processing...' : 'Reactivate' }}
+                </button>
+                <button
+                  class="btn btn-sm btn-delete"
+                  (click)="deleteUser(user, true)"
+                  [disabled]="deletingUserId === user._id"
+                >
+                  {{ deletingUserId === user._id ? 'Removing...' : 'Delete' }}
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && deactivatedUsers.length === 0">
-      <p>No deactivated users</p>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="!loading && totalPages > 1">
-      <button class="btn btn-outline" (click)="previousPage()" [disabled]="currentPage === 1">
-        Previous
-      </button>
-      <span class="page-info">Page {{ currentPage }} of {{ totalPages }} (Total: {{ totalUsers }})</span>
-      <button class="btn btn-outline" (click)="nextPage()" [disabled]="currentPage === totalPages">
-        Next
-      </button>
+      <p>No deactivated accounts found.</p>
     </div>
   </div>
 
   <!-- Reactivation Requests Tab -->
-  <div *ngIf="activeTab === 'reactivation'">
-    <!-- Loading State -->
-    <div class="loading" *ngIf="loading">
-      <p>Loading reactivation requests...</p>
+  <div *ngIf="activeTab === 'reactivation'" class="tab-content">
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Fetching requests...</p>
     </div>
 
-    <!-- Reactivation Requests Table -->
-    <div class="table-container" *ngIf="!loading && reactivationRequests.length > 0">
+    <div class="table-wrap" *ngIf="!loading && reactivationRequests.length > 0">
       <table class="users-table">
         <thead>
           <tr>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Deactivation Reason</th>
-            <th>User's Reason</th>
-            <th>Requested At</th>
+            <th>User</th>
+            <th>Restriction Reason</th>
+            <th>Request Note</th>
+            <th>Submitted At</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let request of reactivationRequests">
-            <td>{{ request.fullName }}</td>
-            <td>{{ request.email || '-' }}</td>
+            <td><strong>{{ request.fullName }}</strong><br/><small>{{ request.email }}</small></td>
             <td>{{ request.deactivationReason || '-' }}</td>
             <td class="reason-cell">
               <div class="reason-container">
                 <p class="reason-text">
-                  {{ request.userReason.length > 50 ? (request.userReason | slice: 0:50) + '...' : request.userReason }}
+                  {{ request.userReason.length > 40 ? (request.userReason | slice: 0:40) + '...' : request.userReason }}
                 </p>
-                <button *ngIf="request.userReason.length > 50" class="btn-view-more" (click)="openViewMoreModal(request)">
-                  View More
+                <button *ngIf="request.userReason.length > 40" class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" (click)="openViewMoreModal(request)">
+                  Detail
                 </button>
               </div>
             </td>
-            <td>{{ request.requestedAt | date: 'short' }}</td>
+            <td>{{ request.requestedAt | date: 'MMM d, HH:mm' }}</td>
             <td class="actions-cell">
-              <button
-                class="btn btn-sm btn-primary"
-                (click)="approveReactivationRequest(request)"
-                [disabled]="approvingRequestId === request._id"
-              >
-                {{ approvingRequestId === request._id ? 'Approving...' : 'Approve' }}
-              </button>
-              <button
-                class="btn btn-sm btn-delete"
-                (click)="rejectReactivationRequest(request)"
-                [disabled]="rejectingRequestId === request._id"
-              >
-                {{ rejectingRequestId === request._id ? 'Rejecting...' : 'Reject' }}
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button
+                  class="btn btn-sm btn-primary"
+                  (click)="approveReactivationRequest(request)"
+                  [disabled]="approvingRequestId === request._id"
+                >
+                  Approve
+                </button>
+                <button
+                  class="btn btn-sm btn-delete"
+                  (click)="rejectReactivationRequest(request)"
+                  [disabled]="rejectingRequestId === request._id"
+                >
+                  Reject
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && reactivationRequests.length === 0">
-      <p>No reactivation requests</p>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="!loading && reactivationTotalPages > 1">
-      <button
-        class="btn btn-outline"
-        (click)="previousReactivationPage()"
-        [disabled]="reactivationPage === 1"
-      >
-        Previous
-      </button>
-      <span class="page-info">
-        Page {{ reactivationPage }} of {{ reactivationTotalPages }} (Total: {{ reactivationTotalRequests }})
-      </span>
-      <button
-        class="btn btn-outline"
-        (click)="nextReactivationPage()"
-        [disabled]="reactivationPage === reactivationTotalPages"
-      >
-        Next
-      </button>
+      <p>No pending reactivation requests.</p>
     </div>
   </div>
 </div>
 
 <!-- Create User Modal -->
-<div class="modal" *ngIf="showCreateModal">
-  <div class="modal-content">
+<div class="modal-overlay" *ngIf="showCreateModal">
+  <div class="modal-container">
     <div class="modal-header">
-      <h2>Create New User</h2>
+      <h2>Add New Account</h2>
       <button class="btn-close" (click)="closeCreateModal()">×</button>
     </div>
 
     <div class="modal-body">
       <div class="form-group">
-        <label>Full Name *</label>
-        <input type="text" [(ngModel)]="formData.fullName" class="input" placeholder="Full name" />
+        <label>Full Name</label>
+        <input type="text" [(ngModel)]="formData.fullName" class="filter-input" placeholder="Enter full name" />
       </div>
 
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" [(ngModel)]="formData.email" class="input" placeholder="Email" />
+        <label>Email Address</label>
+        <input type="email" [(ngModel)]="formData.email" class="filter-input" placeholder="user@airlux.com" />
       </div>
 
       <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" [(ngModel)]="formData.phoneNumber" class="input" placeholder="0XXXXXXXXX" />
+        <label>Mobile Number</label>
+        <input type="tel" [(ngModel)]="formData.phoneNumber" class="filter-input" placeholder="0XXXXXXXXX" />
       </div>
 
       <div class="form-group">
-        <label>Role *</label>
-        <select [(ngModel)]="formData.role" class="input">
-          <option value="">Select role</option>
+        <label>System Role</label>
+        <select [(ngModel)]="formData.role" class="filter-input">
+          <option value="">Select organizational role</option>
           <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Password *</label>
+        <label>Temporary Password</label>
         <div class="input-wrap">
-          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formData.password" class="input" placeholder="Password" />
-          <button type="button" class="eye-btn" (click)="toggleShowPassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
-            @if (!showPassword) {
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            } @else {
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
-            }
+          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formData.password" class="filter-input" placeholder="Minimum 8 characters" />
+          <button type="button" class="eye-btn" (click)="toggleShowPassword()">
+            <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
           </button>
         </div>
       </div>
@@ -361,76 +324,74 @@
     <div class="modal-footer">
       <button class="btn btn-outline" (click)="closeCreateModal()">Cancel</button>
       <button class="btn btn-primary" (click)="createUser()" [disabled]="isCreatingUser">
-        {{ isCreatingUser ? 'Creating...' : 'Create User' }}
+        {{ isCreatingUser ? 'Processing...' : 'Create Account' }}
       </button>
     </div>
   </div>
 </div>
 
 <!-- Edit User Modal -->
-<div class="modal" *ngIf="showEditModal">
-  <div class="modal-content">
+<div class="modal-overlay" *ngIf="showEditModal">
+  <div class="modal-container">
     <div class="modal-header">
-      <h2>Edit User</h2>
+      <h2>Modify Account Details</h2>
       <button class="btn-close" (click)="closeEditModal()">×</button>
     </div>
 
     <div class="modal-body">
       <div class="form-group">
-        <label>Full Name *</label>
-        <input type="text" [(ngModel)]="formData.fullName" class="input" />
+        <label>Full Name</label>
+        <input type="text" [(ngModel)]="formData.fullName" class="filter-input" />
       </div>
 
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" [(ngModel)]="formData.email" class="input" />
+        <label>Email Address</label>
+        <input type="email" [(ngModel)]="formData.email" class="filter-input" />
       </div>
 
       <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" [(ngModel)]="formData.phoneNumber" class="input" />
+        <label>Mobile Number</label>
+        <input type="tel" [(ngModel)]="formData.phoneNumber" class="filter-input" />
       </div>
 
       <div class="form-group">
-        <label>Role *</label>
-        <select [(ngModel)]="formData.role" class="input">
+        <label>System Role</label>
+        <select [(ngModel)]="formData.role" class="filter-input">
           <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
         </select>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-outline" (click)="closeEditModal()">Cancel</button>
-      <button class="btn btn-primary" (click)="updateUser()">Update User</button>
+      <button class="btn btn-outline" (click)="closeEditModal()">Discard</button>
+      <button class="btn btn-primary" (click)="updateUser()">Update Details</button>
     </div>
   </div>
 </div>
 
 <!-- Deactivation Modal -->
-<div class="modal" *ngIf="showDeactivationModal">
-  <div class="modal-content">
+<div class="modal-overlay" *ngIf="showDeactivationModal">
+  <div class="modal-container">
     <div class="modal-header">
-      <h2>Deactivate User</h2>
+      <h2>Restrict Access</h2>
       <button class="btn-close" (click)="closeDeactivationModal()">×</button>
     </div>
 
     <div class="modal-body">
-      <p class="deactivation-user">
-        <strong>User:</strong> {{ selectedUser?.fullName }}
+      <p style="margin-bottom: 16px; color: #566463;">
+        You are about to deactivate <strong>{{ selectedUser?.fullName }}</strong>. Please specify a reason.
       </p>
 
       <div class="form-group">
-        <label>Deactivation Reason *</label>
-        <select [(ngModel)]="deactivationForm.reason" class="input">
-          <option value="">Select a reason</option>
-          <option *ngFor="let reason of deactivationReasons" [value]="reason">
-            {{ reason }}
-          </option>
+        <label>Deactivation Category</label>
+        <select [(ngModel)]="deactivationForm.reason" class="filter-input">
+          <option value="">Select a category</option>
+          <option *ngFor="let reason of deactivationReasons" [value]="reason">{{ reason }}</option>
         </select>
       </div>
 
-      <p class="info-text">
-        The user will receive an email notification with the deactivation reason and a link to request reactivation.
+      <p style="font-size: 12px; color: #8a9e96; margin-top: 12px;">
+        The user will be notified via email and provided with reactivation instructions.
       </p>
     </div>
 
@@ -441,224 +402,57 @@
         (click)="deactivateUser()"
         [disabled]="deactivatingUserId === selectedUser?._id"
       >
-        {{ deactivatingUserId === selectedUser?._id ? 'Deactivating...' : 'Deactivate User' }}
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- View More Modal -->
-<div class="modal" *ngIf="showViewMoreModal && selectedReactivationRequest">
-  <div class="modal-content modal-large">
-    <div class="modal-header">
-      <h2>Reactivation Request Details</h2>
-      <button class="btn-close" (click)="closeViewMoreModal()">×</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="detail-section">
-        <h3 class="detail-label">User Name</h3>
-        <p class="detail-value">{{ selectedReactivationRequest.fullName }}</p>
-      </div>
-
-      <div class="detail-section">
-        <h3 class="detail-label">Email</h3>
-        <p class="detail-value">{{ selectedReactivationRequest.email }}</p>
-      </div>
-
-      <div class="detail-section">
-        <h3 class="detail-label">Phone</h3>
-        <p class="detail-value">{{ selectedReactivationRequest.phoneNumber || '-' }}</p>
-      </div>
-
-      <div class="detail-section">
-        <h3 class="detail-label">Deactivation Reason</h3>
-        <p class="detail-value">{{ selectedReactivationRequest.deactivationReason || '-' }}</p>
-      </div>
-
-      <div class="detail-section">
-        <h3 class="detail-label">User's Reactivation Reason</h3>
-        <div class="detail-value full-text">{{ selectedReactivationRequest.userReason }}</div>
-      </div>
-
-      <div class="detail-section">
-        <h3 class="detail-label">Requested At</h3>
-        <p class="detail-value">{{ selectedReactivationRequest.requestedAt | date: 'medium' }}</p>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-outline" (click)="closeViewMoreModal()">Close</button>
-      <button
-        class="btn btn-primary"
-        (click)="closeViewMoreModal(); approveReactivationRequest(selectedReactivationRequest)"
-        [disabled]="approvingRequestId === selectedReactivationRequest._id"
-      >
-        {{ approvingRequestId === selectedReactivationRequest._id ? 'Approving...' : 'Approve' }}
-      </button>
-      <button
-        class="btn btn-delete"
-        (click)="closeViewMoreModal(); rejectReactivationRequest(selectedReactivationRequest)"
-        [disabled]="rejectingRequestId === selectedReactivationRequest._id"
-      >
-        {{ rejectingRequestId === selectedReactivationRequest._id ? 'Rejecting...' : 'Reject' }}
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Rejection Reason Modal -->
-<div class="modal" *ngIf="showRejectionModal && selectedReactivationRequest">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Reject Reactivation Request</h2>
-      <button class="btn-close" (click)="closeRejectionModal()">×</button>
-    </div>
-
-    <div class="modal-body">
-      <p class="rejection-user">
-        <strong>User:</strong> {{ selectedReactivationRequest.fullName }}
-      </p>
-
-      <div class="form-group">
-        <label>Reason for Rejection *</label>
-        <select [(ngModel)]="rejectionForm.reason" class="input">
-          <option value="">Select a reason</option>
-          <option *ngFor="let reason of rejectionReasons" [value]="reason">
-            {{ reason }}
-          </option>
-        </select>
-      </div>
-
-      <div *ngIf="rejectionForm.reason === 'Other'" class="form-group">
-        <label>Custom Reason *</label>
-        <textarea
-          [(ngModel)]="rejectionForm.customReason"
-          class="textarea"
-          placeholder="Enter your reason for rejection..."
-          rows="4"
-        ></textarea>
-      </div>
-
-      <p class="info-text">
-        The user will receive an email with your rejection reason.
-      </p>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-outline" (click)="closeRejectionModal()">Cancel</button>
-      <button
-        class="btn btn-delete"
-        (click)="submitRejection()"
-        [disabled]="rejectingRequestId === selectedReactivationRequest._id"
-      >
-        {{ rejectingRequestId === selectedReactivationRequest._id ? 'Rejecting...' : 'Reject Request' }}
+        {{ deactivatingUserId === selectedUser?._id ? 'Restricting...' : 'Confirm Deactivation' }}
       </button>
     </div>
   </div>
 </div>
 
 <!-- User Details Modal -->
-<div class="modal" *ngIf="showUserDetailsModal && selectedUser">
-  <div class="modal-content modal-large">
+<div class="modal-overlay" *ngIf="showUserDetailsModal && selectedUser">
+  <div class="modal-container modal-large">
     <div class="modal-header">
-      <h2>User Details</h2>
+      <h2>Comprehensive Profile</h2>
       <button class="btn-close" (click)="closeUserDetailsModal()">×</button>
     </div>
 
     <div class="modal-body">
-      <div class="details-grid">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
         <div class="detail-section">
-          <h3 class="detail-label">Full Name</h3>
-          <p class="detail-value">{{ selectedUser.fullName }}</p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Email</h3>
-          <p class="detail-value">{{ selectedUser.email || '-' }}</p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Identity</label></h3>
+          <p style="font-size: 16px; font-weight: 700; color: #1b2f27;">{{ selectedUser.fullName }}</p>
         </div>
 
         <div class="detail-section">
-          <h3 class="detail-label">Phone Number</h3>
-          <p class="detail-value">{{ selectedUser.phoneNumber || '-' }}</p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Assigned Role</label></h3>
+          <p><span class="badge badge-role">{{ selectedUser.role }}</span></p>
         </div>
 
         <div class="detail-section">
-          <h3 class="detail-label">Role</h3>
-          <p class="detail-value"><span class="badge badge-role">{{ selectedUser.role }}</span></p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Primary Email</label></h3>
+          <p>{{ selectedUser.email || '-' }}</p>
         </div>
 
         <div class="detail-section">
-          <h3 class="detail-label">Status</h3>
-          <p class="detail-value">
-            <span [class]="'status-badge ' + getStatusBadgeClass(selectedUser)">
-              {{ getStatusText(selectedUser) }}
-            </span>
-          </p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Contact Number</label></h3>
+          <p>{{ selectedUser.phoneNumber || '-' }}</p>
         </div>
 
         <div class="detail-section">
-          <h3 class="detail-label">Address</h3>
-          <p class="detail-value">{{ selectedUser.address || '-' }}</p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Status</label></h3>
+          <span class="status-badge" [class]="getStatusBadgeClass(selectedUser)">{{ getStatusText(selectedUser) }}</span>
         </div>
 
         <div class="detail-section">
-          <h3 class="detail-label">Gender</h3>
-          <p class="detail-value">{{ selectedUser.gender || '-' }}</p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Account Status</h3>
-          <p class="detail-value">
-            <span [class]="selectedUser.isActive ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
-              {{ selectedUser.isActive ? 'Active' : 'Inactive' }}
-            </span>
-          </p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Email Verified</h3>
-          <p class="detail-value">
-            <span [class]="selectedUser.emailVerified ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
-              {{ selectedUser.emailVerified ? 'Yes' : 'No' }}
-            </span>
-          </p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Phone Verified</h3>
-          <p class="detail-value">
-            <span [class]="selectedUser.phoneVerified ? 'badge status-badge--verified' : 'badge status-badge--unverified'">
-              {{ selectedUser.phoneVerified ? 'Yes' : 'No' }}
-            </span>
-          </p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Created At</h3>
-          <p class="detail-value">{{ selectedUser.createdAt | date: 'medium' }}</p>
-        </div>
-
-        <div class="detail-section">
-          <h3 class="detail-label">Last Updated</h3>
-          <p class="detail-value">{{ selectedUser.updatedAt | date: 'medium' }}</p>
-        </div>
-
-        <div *ngIf="!selectedUser.isActive" class="detail-section">
-          <h3 class="detail-label">Deactivation Reason</h3>
-          <p class="detail-value">{{ selectedUser.deactivationReason || '-' }}</p>
-        </div>
-
-        <div *ngIf="!selectedUser.isActive" class="detail-section">
-          <h3 class="detail-label">Deactivated At</h3>
-          <p class="detail-value">{{ selectedUser.deactivatedAt | date: 'medium' }}</p>
+          <h3 class="filter-group" style="margin-bottom: 4px;"><label>Joined Platform</label></h3>
+          <p>{{ selectedUser.createdAt | date: 'MMM d, yyyy' }}</p>
         </div>
       </div>
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-outline" (click)="closeUserDetailsModal()">Close</button>
-      <button class="btn btn-primary" (click)="closeUserDetailsModal(); openEditModal(selectedUser)">Edit User</button>
+      <button class="btn btn-primary" (click)="closeUserDetailsModal(); openEditModal(selectedUser)">Edit Profile</button>
     </div>
   </div>
 </div>

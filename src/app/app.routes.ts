@@ -120,6 +120,13 @@ export const routes: Routes = [
             (m) => m.SystemConfigComponent
           ),
       },
+      {
+        path: 'system-logs',
+        loadComponent: () =>
+          import('./features/super-admin/pages/system-logs-monitoring/system-logs-monitoring.component').then(
+            (m) => m.SystemLogsMonitoringComponent
+          ),
+      },
     ],
   },
 ];

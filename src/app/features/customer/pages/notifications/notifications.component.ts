@@ -109,7 +109,7 @@ import { NotificationService, Notification } from '../../../../core/services/not
 
     .btn-danger {
       background: #ffebee;
-      color: #c0392b;
+      color: var(--error);
     }
 
     .btn-danger:hover {
@@ -206,7 +206,7 @@ import { NotificationService, Notification } from '../../../../core/services/not
       display: inline-block;
       padding: 4px 8px;
       background: rgba(31,91,69,0.1);
-      color: #1f5b45;
+      color: var(--primary-main);
       border-radius: 4px;
       font-size: 11px;
       font-weight: 600;

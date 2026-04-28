@@ -25,7 +25,7 @@
 }
 
 .track-order-btn {
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -39,7 +39,7 @@
 }
 
 .track-order-btn:hover {
-  background: #184a38;
+  background: var(--primary-hover);
 }
 
 .page-search-wrap {
@@ -70,7 +70,7 @@
 }
 
 .page-search:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
 }
 
 .page-search::placeholder {
@@ -107,8 +107,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #e8f5ee;
-  color: #1f5b45;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
 }
 
 .more-btn {
@@ -192,8 +192,8 @@
 .stat-badge-up {
   font-size: 11px;
   font-weight: 600;
-  color: #1f5b45;
-  background: #e8f5ee;
+  color: var(--primary-main);
+  background: var(--primary-lighter);
   padding: 2px 8px;
   border-radius: 999px;
   font-family: 'Inter', sans-serif;
@@ -252,7 +252,7 @@
 }
 
 .oh-search:focus {
-  border-color: #1f5b45;
+  border-color: var(--primary-main);
   background: #fff;
 }
 
@@ -362,8 +362,8 @@
 }
 
 .status-badge--completed {
-  background: #e8f5ee;
-  color: #1f5b45;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
 }
 
 .status-badge--pending {
@@ -389,7 +389,7 @@
 }
 
 .panel-action-btn {
-  background: #1f5b45;
+  background: var(--primary-main);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -404,7 +404,7 @@
 }
 
 .panel-action-btn:hover {
-  background: #184a38;
+  background: var(--primary-hover);
 }
 
 .panel-card {
@@ -566,7 +566,7 @@
 .order-amount {
   font-size: 13.5px;
   font-weight: 600;
-  color: #1f5b45;
+  color: var(--primary-main);
   font-family: 'Inter', sans-serif;
   min-width: 70px;
   text-align: right;
@@ -615,7 +615,7 @@
   width: 36px;
   height: 36px;
   border: 3px solid rgba(31, 91, 69, 0.15);
-  border-top-color: #1f5b45;
+  border-top-color: var(--primary-main);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

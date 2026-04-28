@@ -8,15 +8,13 @@ import {
   FeatureFlags,
   MaintenanceMode,
   SystemInfo,
-  AuditLogResponse,
 } from '../../models/system-config.model';
 import { BusinessRulesFormComponent } from './components/business-rules-form.component';
 import { FeatureFlagsFormComponent } from './components/feature-flags-form.component';
 import { MaintenanceFormComponent } from './components/maintenance-form.component';
 import { SystemInfoFormComponent } from './components/system-info-form.component';
-import { AuditTrailTableComponent } from './components/audit-trail-table.component';
 
-type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 'audit-logs';
+type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
 
 @Component({
   selector: 'app-system-config',
@@ -27,13 +25,13 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
     FeatureFlagsFormComponent,
     MaintenanceFormComponent,
     SystemInfoFormComponent,
-    AuditTrailTableComponent,
   ],
   template: `
     <div class="system-config-container">
-      <div class="config-header">
-        <h1>System Configuration</h1>
-        <p class="subtitle">Manage platform settings, features, and maintenance mode</p>
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">System Configuration</h1>
+        </div>
       </div>
 
       <div class="config-content">
@@ -50,15 +48,18 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
         </div>
 
         <!-- Error Message -->
-        <div *ngIf="error" class="alert alert-error">
-          <span>{{ error }}</span>
+        <div *ngIf="error" class="alert-banner">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ error }}</span>
+          </div>
           <button (click)="error = null" class="close-btn">&times;</button>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-state">
           <div class="spinner"></div>
-          <p>Loading configuration...</p>
+          <p>Fetching platform settings...</p>
         </div>
 
         <!-- Tabs Content -->
@@ -102,17 +103,6 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
               (error)="handleError($event)"
             ></app-system-info-form>
           </section>
-
-          <!-- Audit Trail Tab -->
-          <section *ngIf="activeTab === 'audit-logs'" class="tab-section">
-            <app-audit-trail-table
-              [auditLogs]="auditLogs"
-              [totalPages]="auditPages"
-              [currentPage]="auditCurrentPage"
-              [loading]="auditLoading"
-              (pageChange)="onAuditPageChange($event)"
-            ></app-audit-trail-table>
-          </section>
         </div>
       </div>
     </div>
@@ -120,72 +110,92 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
   styles: [
     `
       .system-config-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
 
-      .config-header {
-        margin-bottom: 30px;
+      /* ── Page Header ── */
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
       }
 
-      .config-header h1 {
-        font-size: 28px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin: 0 0 8px 0;
+      .page-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
 
-      .subtitle {
-        font-size: 14px;
-        color: #666;
+      .page-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #1b2f27;
         margin: 0;
+      }
+
+      .eyebrow {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8a9e96;
+      }
+
+      .config-content {
+        display: flex;
+        flex-direction: column;
       }
 
       .tabs-navigation {
         display: flex;
-        gap: 10px;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #e0e0e0;
+        gap: 8px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #f0f0ee;
         overflow-x: auto;
       }
 
       .tab-button {
-        padding: 12px 20px;
+        padding: 12px 16px;
         background: none;
         border: none;
-        font-size: 14px;
-        font-weight: 500;
-        color: #666;
+        font-family: 'Inter', sans-serif;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #8a9e96;
         cursor: pointer;
         border-bottom: 3px solid transparent;
         margin-bottom: -2px;
         white-space: nowrap;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
       }
 
       .tab-button:hover {
-        color: #1a1a1a;
+        color: #1b2f27;
       }
 
       .tab-button.active {
-        color: #0066cc;
-        border-bottom-color: #0066cc;
+        color: var(--primary-main);
+        border-bottom-color: var(--primary-main);
       }
 
-      .alert {
-        padding: 15px 20px;
-        margin-bottom: 20px;
-        border-radius: 6px;
+      .alert-banner {
         display: flex;
         justify-content: space-between;
         align-items: center;
-      }
-
-      .alert-error {
-        background-color: #fee;
-        color: #c00;
-        border: 1px solid #fcc;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: #fde8e8;
+        color: var(--error);
+        border: 1px solid rgba(214, 64, 64, 0.2);
+        font-size: 13.5px;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 24px;
       }
 
       .close-btn {
@@ -194,7 +204,7 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
         font-size: 20px;
         color: inherit;
         cursor: pointer;
-        padding: 0;
+        padding: 0 4px;
       }
 
       .loading-state {
@@ -203,17 +213,18 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
         align-items: center;
         justify-content: center;
         padding: 60px 20px;
-        color: #666;
+        color: #8a9e96;
+        font-family: 'Inter', sans-serif;
       }
 
       .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #e0e0e0;
-        border-top-color: #0066cc;
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(31, 91, 69, 0.15);
+        border-top-color: var(--primary-main);
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin-bottom: 20px;
+        animation: spin 0.7s linear infinite;
+        margin-bottom: 12px;
       }
 
       @keyframes spin {
@@ -236,10 +247,10 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
       }
 
       .tab-section {
-        animation: slideIn 0.3s ease;
+        animation: slideUp 0.3s ease;
       }
 
-      @keyframes slideIn {
+      @keyframes slideUp {
         from {
           opacity: 0;
           transform: translateY(10px);
@@ -259,17 +270,11 @@ export class SystemConfigComponent implements OnInit {
   activeTab: Tab = 'business-rules';
   isSaving: { [key: string]: boolean } = {};
 
-  auditLogs: any[] = [];
-  auditPages = 1;
-  auditCurrentPage = 1;
-  auditLoading = false;
-
   tabs = [
     { id: 'business-rules' as Tab, label: 'Business Rules' },
     { id: 'feature-flags' as Tab, label: 'Feature Flags' },
     { id: 'maintenance' as Tab, label: 'Maintenance Mode' },
     { id: 'system-info' as Tab, label: 'System Info' },
-    { id: 'audit-logs' as Tab, label: 'Audit Trail' },
   ];
 
   constructor(private systemConfigService: SystemConfigService, private maintenanceService: MaintenanceService) {}
@@ -280,9 +285,6 @@ export class SystemConfigComponent implements OnInit {
 
   switchTab(tab: Tab): void {
     this.activeTab = tab;
-    if (tab === 'audit-logs' && this.auditLogs.length === 0) {
-      this.loadAuditLogs();
-    }
   }
 
   loadConfig(): void {
@@ -310,7 +312,6 @@ export class SystemConfigComponent implements OnInit {
       next: (response: any) => {
         this.config = response.data;
         this.isSaving['business-rules'] = false;
-        this.auditLogs = []; // Clear audit logs to force reload
       },
       error: (error: any) => {
         console.error('Error saving business rules:', error);
@@ -328,7 +329,6 @@ export class SystemConfigComponent implements OnInit {
       next: (response: any) => {
         this.config = response.data;
         this.isSaving['feature-flags'] = false;
-        this.auditLogs = []; // Clear audit logs to force reload
       },
       error: (error: any) => {
         console.error('Error saving feature flags:', error);
@@ -350,7 +350,6 @@ export class SystemConfigComponent implements OnInit {
       next: (response: any) => {
         this.config = response.data;
         this.isSaving['maintenance'] = false;
-        this.auditLogs = []; // Clear audit logs to force reload
         // Refresh maintenance service to update all subscribers
         this.maintenanceService.refreshStatus();
       },
@@ -370,7 +369,6 @@ export class SystemConfigComponent implements OnInit {
       next: (response: any) => {
         this.config = response.data;
         this.isSaving['system-info'] = false;
-        this.auditLogs = []; // Clear audit logs to force reload
       },
       error: (error: any) => {
         console.error('Error saving system info:', error);
@@ -378,28 +376,6 @@ export class SystemConfigComponent implements OnInit {
         this.isSaving['system-info'] = false;
       },
     });
-  }
-
-  loadAuditLogs(): void {
-    this.auditLoading = true;
-
-    this.systemConfigService.getAuditLogs(this.auditCurrentPage).subscribe({
-      next: (response: any) => {
-        this.auditLogs = response.data.logs;
-        this.auditPages = response.data.pages;
-        this.auditLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading audit logs:', error);
-        this.error = error.error?.message || 'Failed to load audit logs';
-        this.auditLoading = false;
-      },
-    });
-  }
-
-  onAuditPageChange(page: number): void {
-    this.auditCurrentPage = page;
-    this.loadAuditLogs();
   }
 
   handleError(error: string): void {

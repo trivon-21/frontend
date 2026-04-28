@@ -86,14 +86,14 @@
 }
 
 .btn-primary {
-  background: #e7f6e8;
-  color: #123023;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 }
 
 .btn-outline {
   background: transparent;
-  color: #e7f6e8;
+  color: var(--primary-lighter);
   border: 2px solid rgba(231, 246, 232, 0.55);
 }
 
@@ -219,7 +219,7 @@
 .card-link {
   margin-top: auto;
   text-decoration: none;
-  color: #2a5c3f;
+  color: var(--primary-main);
   font-weight: 700;
   font-size: 14px;
 }
@@ -359,13 +359,13 @@
 }
 
 .icon-dark {
-  background: #2b4f38;
+  background: var(--primary-main);
   color: #ffffff;
 }
 
 .icon-light {
-  background: #e5f7e3;
-  color: #2b4f38;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   border-radius: 14px;
 }
 

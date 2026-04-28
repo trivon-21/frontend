@@ -26,6 +26,12 @@
         </svg>
         <span>System Config</span>
       </a>
+      <a routerLink="/super-admin/system-logs" routerLinkActive="active" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
+        </svg>
+        <span>System Logs</span>
+      </a>
     </nav>
   </aside>
 
@@ -46,7 +52,7 @@
         <!-- Clock Section -->
         <div class="clock-and-maintenance">
           <div class="header-clock">
-            <span class="clock-time">{{ currentTime | date: 'HH:mm:ss' }}</span>
+            <span class="clock-time">{{ currentTime | date: 'h:mm:ss a' }}</span>
             <span class="clock-date">{{ currentTime | date: 'MMM d, yyyy' }}</span>
           </div>
         </div>
@@ -84,6 +90,12 @@
                 <circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6"/><path d="M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24"/><path d="M1 12h6m6 0h6"/><path d="M4.22 19.78l4.24-4.24m2.12-2.12l4.24-4.24"/><path d="M19.78 19.78l-4.24-4.24m-2.12-2.12l-4.24-4.24"/>
               </svg>
               System Config
+            </a>
+            <a routerLink="/super-admin/system-logs" class="menu-item" (click)="closeUserMenu()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
+              </svg>
+              System Logs
             </a>
             <div class="menu-divider"></div>
             <button class="menu-item logout" (click)="logout()">

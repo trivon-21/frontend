@@ -16,7 +16,7 @@
 .brand {
   font-weight: 800;
   letter-spacing: 0.3px;
-  color: #1f5b45;
+  color: var(--primary-main);
   font-size: 26px;
   text-decoration: none;
 }
@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(31, 91, 69, 0.35);
+  border: 1px solid var(--primary-main);
   border-radius: 999px;
   padding: 8px 14px;
   background: rgba(255,255,255,0.9);
@@ -63,17 +63,17 @@
 }
 .btn.ghost { background: white; color: #10251c; }
 .btn.solid {
-  background: #1f5b45;
+  background: var(--primary-main);
   color: white;
   border-color: transparent;
 }
-.btn.solid:hover { background: #184a38; }
+.btn.solid:hover { background: var(--primary-hover); }
 
 /* Dashboard button */
 .btn.dashboard-btn {
-  background: #e7f6e8;
-  color: #1f5b45;
-  border-color: rgba(31,91,69,0.25);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  border-color: var(--primary-light);
   font-weight: 700;
 }
 .btn.dashboard-btn:hover { background: #d2efd5; }
@@ -109,7 +109,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1f5b45 0%, #00c2d1 100%);
+  background: linear-gradient(135deg, var(--primary-main) 0%, #00c2d1 100%);
   color: #fff;
   font-weight: 800;
   font-size: 13px;
@@ -196,8 +196,8 @@
 .dropdown-item:hover { background: rgba(0,0,0,0.04); }
 .dropdown-item svg { flex-shrink: 0; color: #566463; }
 
-.logout-item { color: #c0392b; }
-.logout-item svg { color: #c0392b; }
+.logout-item { color: var(--error); }
+.logout-item svg { color: var(--error); }
 .logout-item:hover { background: rgba(192,57,43,0.06); }
 
 @media (max-width: 980px) {
