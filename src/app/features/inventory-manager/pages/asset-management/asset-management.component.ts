@@ -34,6 +34,7 @@ interface ReturnLog {
 export class AssetManagementDashboardComponent implements OnInit {
   showModal = false;
   activeTab: 'loans' | 'logs' = 'loans';
+  searchQuery: string = '';
   
   technicians: any[] = [];
   tools: any[] = [];
@@ -47,6 +48,26 @@ export class AssetManagementDashboardComponent implements OnInit {
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
+  }
+
+  get filteredLoans() {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (!query) return this.loans;
+    return this.loans.filter(l => 
+      l.toolName?.toLowerCase().includes(query) || 
+      l.assetTag?.toLowerCase().includes(query) ||
+      l.technicianName?.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredReturnLogs() {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (!query) return this.returnLogs;
+    return this.returnLogs.filter(l => 
+      l.toolName?.toLowerCase().includes(query) || 
+      l.assetTag?.toLowerCase().includes(query) ||
+      l.technicianName?.toLowerCase().includes(query)
+    );
   }
 
   constructor(private apiService: ApiService) {}

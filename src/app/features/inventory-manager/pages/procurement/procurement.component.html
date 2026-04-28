@@ -247,11 +247,15 @@
   <div class="shipments-section">
     <div class="section-header">
       <h2>Recent GRN Entries</h2>
+      <div class="search-box">
+        <i class="icon-search"></i>
+        <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search by Invoice, Supplier, Item or SKU...">
+      </div>
       <p class="subtitle">Latest goods received notes processed</p>
     </div>
 
     <div class="shipments-list glass-panel">
-      <div class="shipment-item" *ngFor="let p of procurements">
+      <div class="shipment-item" *ngFor="let p of filteredProcurements">
         <div class="item-main">
           <div class="item-id-row">
             <span class="shipment-id">INV-{{ p.invoiceNumber }}</span>
@@ -271,8 +275,8 @@
         <button class="btn-view-details">View Details</button>
       </div>
       
-      <div class="no-results animate-fade" *ngIf="procurements.length === 0">
-        <p>No recent GRN entries found.</p>
+      <div class="no-results animate-fade" *ngIf="filteredProcurements.length === 0">
+        <p>No matching GRN entries found.</p>
       </div>
     </div>
   </div>

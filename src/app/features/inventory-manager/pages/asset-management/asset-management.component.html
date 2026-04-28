@@ -36,14 +36,21 @@
     </div>
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs-nav">
-    <button class="tab-btn" [class.active]="activeTab === 'loans'" (click)="setActiveTab('loans')">
-      Active Loans <span class="badge" *ngIf="loans.length > 0">{{ loans.length }}</span>
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
-      Return Logs <span class="badge" *ngIf="returnLogs.length > 0">{{ returnLogs.length }}</span>
-    </button>
+  <!-- Search and Tabs Bar -->
+  <div class="tabs-nav-container">
+    <div class="tabs-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'loans'" (click)="setActiveTab('loans')">
+        Active Loans <span class="badge" *ngIf="loans.length > 0">{{ loans.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
+        Return Logs <span class="badge" *ngIf="returnLogs.length > 0">{{ returnLogs.length }}</span>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search by tool, tag or technician...">
+    </div>
   </div>
 
   <div class="tab-content glass-panel">
@@ -67,7 +74,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let loan of loans">
+          <tr *ngFor="let loan of filteredLoans">
             <td class="tool-name">{{ loan.toolName }}</td>
             <td class="asset-tag">{{ loan.assetTag }}</td>
             <td class="held-by">{{ loan.technicianName }}</td>
@@ -82,8 +89,8 @@
               <button class="btn-action" (click)="markReturned(loan._id!)">Mark Returned</button>
             </td>
           </tr>
-          <tr *ngIf="loans.length === 0">
-            <td colspan="7" class="empty-state">No active loans found.</td>
+          <tr *ngIf="filteredLoans.length === 0">
+            <td colspan="7" class="empty-state">No loans matching your search.</td>
           </tr>
         </tbody>
       </table>
@@ -116,7 +123,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let log of returnLogs">
+          <tr *ngFor="let log of filteredReturnLogs">
             <td>
               <div class="tool-info">
                 <span class="name">{{ log.toolName }}</span>
@@ -127,8 +134,8 @@
             <td class="date-cell">{{ log.checkedOutAt | date:'short' }}</td>
             <td class="date-cell">{{ log.returnedAt | date:'short' }}</td>
           </tr>
-          <tr *ngIf="returnLogs.length === 0">
-            <td colspan="4" class="empty-state">No return logs found.</td>
+          <tr *ngIf="filteredReturnLogs.length === 0">
+            <td colspan="4" class="empty-state">No return logs matching your search.</td>
           </tr>
         </tbody>
       </table>

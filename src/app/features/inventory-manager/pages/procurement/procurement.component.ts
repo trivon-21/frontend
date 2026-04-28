@@ -37,6 +37,7 @@ export class ProcurementDashboardComponent implements OnInit {
   filteredSuppliers: any[] = [];
   showSupplierDropdown = false;
   isAddingNewSupplier = false;
+  searchQuery: string = '';
 
   procurements: RecentProcurement[] = [];
 
@@ -146,6 +147,18 @@ export class ProcurementDashboardComponent implements OnInit {
       next: (data) => this.procurements = data,
       error: (err) => console.error('Error loading procurements:', err)
     });
+  }
+
+  get filteredProcurements() {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (!query) return this.procurements;
+    return this.procurements.filter(p => 
+      p.invoiceNumber?.toLowerCase().includes(query) || 
+      p.supplierName?.toLowerCase().includes(query) ||
+      p.itemName?.toLowerCase().includes(query) ||
+      p.sku?.toLowerCase().includes(query) ||
+      p.receivedBy?.toLowerCase().includes(query)
+    );
   }
 
   filterSuppliers(query: string) {

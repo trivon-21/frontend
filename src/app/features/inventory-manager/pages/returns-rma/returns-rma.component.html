@@ -2,6 +2,10 @@
   <!-- Header -->
   <div class="header">
     <h1>Return & RMA</h1>
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search RMA logs or Quarantine items...">
+    </div>
   </div>
 
   <div class="main-grid">
@@ -61,7 +65,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let log of rmaLogs">
+            <tr *ngFor="let log of filteredRmaLogs">
               <td>
                 <div class="serial-cell">
                   <span class="serial">{{ log.serial }}</span>
@@ -113,7 +117,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of quarantineItems; let i = index">
+          <tr *ngFor="let item of filteredQuarantineItems; let i = index">
             <td>{{ item.name }}</td>
             <td>{{ item.qty }}</td>
             <td>{{ item.reason }}</td>

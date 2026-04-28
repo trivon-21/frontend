@@ -32,6 +32,7 @@ interface MaterialRequest {
 })
 export class MaterialRequestsDashboardComponent implements OnInit {
   activeTab: 'pending' | 'reserved' | 'completed' = 'pending';
+  searchQuery: string = '';
   
   showModal = false;
   selectedRequestId: string | null = null;
@@ -81,6 +82,15 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     let list = this.activeTab === 'pending' ? this.pendingRequests :
                this.activeTab === 'reserved' ? this.reservedRequests :
                this.completedRequests;
+               
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (query) {
+      list = list.filter(r => 
+        (r.id?.toLowerCase().includes(query) || 
+         r.requester?.toLowerCase().includes(query) ||
+         r.location?.toLowerCase().includes(query))
+      );
+    }
                
     return list.sort((a, b) => {
       if (this.sortField === 'name') {

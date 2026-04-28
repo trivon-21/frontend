@@ -20,14 +20,14 @@
   <div class="filters-card glass-panel">
     <div class="search-box">
       <i class="icon-search"></i>
-      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" placeholder="Search Inventory...">
+      <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Search Inventory...">
     </div>
     
     <div class="filter-group">
       <span class="filter-label">Filters:</span>
       
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedType" (ngModelChange)="applyFilters()">
+        <select [(ngModel)]="selectedType" (change)="applyFilters()">
           <option>All Types</option>
           <option>Single</option>
           <option>Bundle</option>
@@ -35,7 +35,7 @@
       </div>
 
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
+        <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
           <option>All Categories</option>
           <option>Tools</option>
           <option>Components</option>
@@ -46,7 +46,7 @@
       </div>
 
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedBrand" (ngModelChange)="applyFilters()">
+        <select [(ngModel)]="selectedBrand" (change)="applyFilters()">
           <option>All Brands</option>
           <option>LG</option>
           <option>Daikin</option>
@@ -59,7 +59,7 @@
       </div>
 
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedLocation" (ngModelChange)="applyFilters()">
+        <select [(ngModel)]="selectedLocation" (change)="applyFilters()">
           <option>All Locations</option>
           <option>Warehouse</option>
           <option>Logistic Area 1</option>

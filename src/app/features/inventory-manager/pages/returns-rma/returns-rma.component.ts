@@ -26,6 +26,7 @@ interface QuarantineItem {
   styleUrls: ['./returns-rma.component.css']
 })
 export class ReturnsRmaDashboardComponent {
+  searchQuery: string = '';
   rmaLogs: RmaLog[] = [
     { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-14', status: 'Single' },
     { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-12', status: 'Bundle' },
@@ -41,5 +42,25 @@ export class ReturnsRmaDashboardComponent {
 
   disposeItem(index: number) {
     this.quarantineItems.splice(index, 1);
+  }
+
+  get filteredRmaLogs() {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (!query) return this.rmaLogs;
+    return this.rmaLogs.filter(l => 
+      l.serial?.toLowerCase().includes(query) || 
+      l.user?.toLowerCase().includes(query) ||
+      l.fault?.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredQuarantineItems() {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (!query) return this.quarantineItems;
+    return this.quarantineItems.filter(i => 
+      i.name?.toLowerCase().includes(query) || 
+      i.reason?.toLowerCase().includes(query) ||
+      i.location?.toLowerCase().includes(query)
+    );
   }
 }

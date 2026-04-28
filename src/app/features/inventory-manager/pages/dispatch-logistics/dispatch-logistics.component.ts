@@ -34,6 +34,7 @@ interface DispatchOrder {
 })
 export class DispatchLogisticsDashboardComponent implements OnInit {
   activeTab: 'to-pack' | 'ready' | 'in-transit' | 'completed' = 'to-pack';
+  searchQuery: string = '';
   showPackModal = false;
   showAssignModal = false;
   isViewingDetailsFromAssign = false;
@@ -110,6 +111,16 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     else if (this.activeTab === 'ready') orders = [...this.ordersReady];
     else if (this.activeTab === 'in-transit') orders = [...this.ordersInTransit];
     else orders = [...this.ordersCompleted];
+    
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    if (query) {
+      orders = orders.filter(o => 
+        (o.id?.toLowerCase().includes(query) || 
+         o.customer?.toLowerCase().includes(query) ||
+         o.trackId?.toLowerCase().includes(query) ||
+         o.courier?.toLowerCase().includes(query))
+      );
+    }
 
     return orders.sort((a, b) => {
       const valA = this.sortField === 'name' ? a.customer : a.time;

@@ -39,10 +39,13 @@ export class InventoryListComponent implements OnInit {
   }
 
   applyFilters() {
+    const query = this.searchQuery.toLowerCase().trim();
     this.inventoryItems = this.allInventoryItems.filter(item => {
-      const matchesSearch = !this.searchQuery || 
-        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        item.sku.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchesSearch = !query || 
+        (item.name?.toLowerCase().includes(query) ||
+         item.sku?.toLowerCase().includes(query) ||
+         item.brand?.toLowerCase().includes(query) ||
+         item.category?.toLowerCase().includes(query));
       
       const matchesType = this.selectedType === 'All Types' || item.type === this.selectedType;
       const matchesBrand = this.selectedBrand === 'All Brands' || item.brand === this.selectedBrand;

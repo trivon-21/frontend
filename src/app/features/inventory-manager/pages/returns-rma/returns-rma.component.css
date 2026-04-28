@@ -12,6 +12,30 @@
   margin: 0;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--border-light);
+  width: 400px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;

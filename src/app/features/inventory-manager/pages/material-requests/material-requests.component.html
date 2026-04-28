@@ -21,7 +21,7 @@
   <div class="table-controls glass-panel">
     <div class="search-box">
       <i class="icon-search"></i>
-      <input type="text" [placeholder]="
+      <input type="text" [(ngModel)]="searchQuery" (input)="$event" [placeholder]="
         activeTab === 'completed' ? 'Search by Request ID, Requester, or Date' :
         'Search by Request ID or Requester Name'
       ">
