@@ -159,6 +159,18 @@
         </div>
       </div>
 
+      <div class="table-actions" *ngIf="hasResults">
+        <label class="table-select-inline">
+          <input type="checkbox" [checked]="selectAllOnPage" (change)="toggleSelectAllOnPage()" />
+          <small>Select visible</small>
+        </label>
+        <div class="table-actions-right">
+          <button type="button" class="secondary-action" (click)="deleteSelected()" [disabled]="selectedIds.size===0">
+            Delete Selected ({{ selectedIds.size }})
+          </button>
+        </div>
+      </div>
+
       <!-- Table Section -->
       <div *ngIf="loadingLogs" class="loading-state">
         <div class="spinner"></div>
@@ -179,15 +191,20 @@
         <table class="logs-table">
           <thead>
             <tr>
+              <th></th>
               <th>Timestamp</th>
               <th>Action</th>
               <th>Actor</th>
               <th>Status</th>
               <th>Details</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let log of logs">
+              <td>
+                <input type="checkbox" [checked]="selectedIds.has(log._id)" (change)="toggleSelect(log)" />
+              </td>
               <td>
                 <div class="timestamp-cell">
                   <span>{{ log.createdAt | date : 'MMM d, yyyy' }}</span>
@@ -218,6 +235,11 @@
                   <small *ngIf="!log.reason && !log.errorDetails?.errorMessage">{{ log.requestDetails?.endpoint || '-'
                     }}</small>
                 </div>
+              </td>
+              <td style="width: 90px; text-align: right;">
+                <button type="button" class="ghost-action" (click)="deleteSingle(log)" title="Delete log">
+                  &times;
+                </button>
               </td>
             </tr>
           </tbody>

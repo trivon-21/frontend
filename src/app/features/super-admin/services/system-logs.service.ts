@@ -198,6 +198,14 @@ export class SystemLogsService {
     return this.apiService.getBlob('/super-admin/logs/export/csv', params);
   }
 
+  deleteLog(id: string): Observable<any> {
+    return this.apiService.delete(`/super-admin/logs/${id}`);
+  }
+
+  bulkDelete(ids: string[]): Observable<any> {
+    return this.apiService.post(`/super-admin/logs/bulk-delete`, { ids });
+  }
+
   getDashboardAnalytics(days: number = 30): Observable<DashboardAnalyticsResponse> {
     const params = new HttpParams().set('days', days.toString());
     return this.apiService.get<DashboardAnalyticsResponse>('/super-admin/logs/analytics/dashboard', params);

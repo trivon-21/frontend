@@ -49,6 +49,10 @@ export class SystemLogsMonitoringComponent implements OnInit {
     statuses: [] as string[],
   };
 
+  // Selection state for deletion
+  selectedIds: Set<string> = new Set();
+  selectAllOnPage = false;
+
   filters: LogFilters = {
     performedByRole: '',
     module: '',
@@ -269,5 +273,60 @@ export class SystemLogsMonitoringComponent implements OnInit {
 
   get hasResults(): boolean {
     return this.logs.length > 0;
+  }
+
+  toggleSelectAllOnPage(): void {
+    this.selectAllOnPage = !this.selectAllOnPage;
+    if (this.selectAllOnPage) {
+      this.logs.forEach((l) => this.selectedIds.add(l._id));
+    } else {
+      this.logs.forEach((l) => this.selectedIds.delete(l._id));
+    }
+  }
+
+  toggleSelect(log: SystemLog): void {
+    if (this.selectedIds.has(log._id)) {
+      this.selectedIds.delete(log._id);
+    } else {
+      this.selectedIds.add(log._id);
+    }
+  }
+
+  deleteSingle(log: SystemLog): void {
+    const confirmed = confirm(`Delete log ${log._id}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    this.systemLogsService.deleteLog(log._id).subscribe({
+      next: () => {
+        this.selectedIds.delete(log._id);
+        this.loadLogs();
+      },
+      error: (err) => {
+        console.error('Error deleting log:', err);
+        this.error = err.error?.message || 'Failed to delete log';
+      },
+    });
+  }
+
+  deleteSelected(): void {
+    const ids = Array.from(this.selectedIds);
+    if (ids.length === 0) {
+      alert('No logs selected');
+      return;
+    }
+    const confirmMsg = `Delete ${ids.length} selected log(s)? This action cannot be undone.`;
+    if (!confirm(confirmMsg)) return;
+
+    this.systemLogsService.bulkDelete(ids).subscribe({
+      next: () => {
+        this.selectedIds.clear();
+        this.selectAllOnPage = false;
+        this.loadLogs();
+      },
+      error: (err) => {
+        console.error('Error bulk deleting logs:', err);
+        this.error = err.error?.message || 'Failed to delete selected logs';
+      },
+    });
   }
 }
