@@ -53,7 +53,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   fetchRequests() {
-    this.apiService.get<any[]>('/inventory-manager/material-requests').subscribe((data: any[]) => {
+    this.apiService.get<any[]>('/inventory/material-requests').subscribe((data: any[]) => {
       // Map backend model to frontend model
       const requests: MaterialRequest[] = data.map((r: any) => ({
         id: r.requestId,
@@ -129,7 +129,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req) {
-      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, { items: req.items }).subscribe(() => {
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, { items: req.items }).subscribe(() => {
         console.log('Status saved for', this.selectedRequestId);
       });
     }
@@ -152,7 +152,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req) {
-      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam }).subscribe(() => {
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam }).subscribe(() => {
         this.fetchRequests();
         this.isEditingTeam = false;
       });
@@ -167,7 +167,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         status: 'reserved',
         lastMovedAt: new Date().toISOString()
       };
-      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
         this.fetchRequests();
         this.setActiveTab('reserved');
         this.closeModal();
@@ -190,7 +190,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         completedAt: new Date().toISOString().split('T')[0],
         lastMovedAt: new Date().toISOString()
       };
-      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
         this.fetchRequests();
         this.setActiveTab('completed');
         this.closeModal();
@@ -221,7 +221,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       targetTab = 'pending';
     }
 
-    this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, updateData).subscribe(() => {
+    this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
       this.fetchRequests();
       this.setActiveTab(targetTab);
     });

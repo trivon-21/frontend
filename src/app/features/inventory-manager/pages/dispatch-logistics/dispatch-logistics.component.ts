@@ -62,7 +62,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   fetchOrders() {
-    this.apiService.get<any[]>('/inventory-manager/orders').subscribe((data: any[]) => {
+    this.apiService.get<any[]>('/inventory/orders').subscribe((data: any[]) => {
       // Map backend model to frontend model
       const orders: DispatchOrder[] = data.map((o: any) => ({
         id: o.orderId,
@@ -158,7 +158,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         lastMovedAt: new Date().toISOString()
       };
 
-      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         this.fetchOrders();
         this.setActiveTab('ready');
       });
@@ -209,7 +209,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         courier: this.editCourier,
         trackId: this.editTrackId
       };
-      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         order.courier = this.editCourier;
         order.trackId = this.editTrackId;
         this.isEditMode = false;
@@ -225,7 +225,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         status: 'in-transit',
         lastMovedAt: new Date().toISOString()
       };
-      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         this.fetchOrders();
         this.setActiveTab('in-transit');
       });
@@ -242,7 +242,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         completedAt: new Date().toISOString().split('T')[0],
         lastMovedAt: new Date().toISOString()
       };
-      this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         this.fetchOrders();
         this.setActiveTab('completed');
       });
@@ -280,7 +280,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       targetTab = 'to-pack';
     }
 
-    this.apiService.patch(`/inventory-manager/orders/${order.id}`, updateData).subscribe(() => {
+    this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
       this.fetchOrders();
       this.setActiveTab(targetTab);
     });
@@ -296,7 +296,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (!this.selectedOrderId) return;
     const order = this.selectedOrder;
     if (order) {
-      this.apiService.patch(`/inventory-manager/orders/${order.id}`, { items: order.items }).subscribe(() => {
+      this.apiService.patch(`/inventory/orders/${order.id}`, { items: order.items }).subscribe(() => {
         console.log('Status saved for', this.selectedOrderId);
       });
     }
