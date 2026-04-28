@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 export interface SubStat {
   label: string;
@@ -85,6 +85,24 @@ export class InventoryManagerDashboardService {
         }));
         data.currentDate = new Date(data.currentDate);
         return data;
+      }),
+      catchError(err => {
+        console.error('Backend connection failed. Switching to Offline mode.', err);
+        // Fallback object so the dashboard shell still renders
+        return of({
+          managerName: 'Manager',
+          currentDate: new Date(),
+          status: 'Offline',
+          stats: {
+            materialReservations: { total: 0, subStats: [] },
+            dispatchQueue: { total: 0, subStats: [] },
+            assetHealth: { total: 0, subStats: [] },
+            stockAlerts: { total: 0, subStats: [] }
+          },
+          recentActivity: [],
+          reorderList: [],
+          logistics: []
+        });
       })
     );
   }

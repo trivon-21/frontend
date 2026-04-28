@@ -10,12 +10,25 @@
 </div>
 
 <div class="inventory-dashboard" *ngIf="!loading && !error && data">
+  <!-- Offline Warning Banner -->
+  <div class="offline-banner" *ngIf="data.status === 'Offline'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>
+    <div class="banner-text">
+      <strong>Database Offline</strong>
+      <span>The system is currently running in local mode. Live data and updates are unavailable.</span>
+    </div>
+  </div>
+
   <!-- Header Section -->
   <div class="welcome-banner">
     <div class="banner-content">
       <div class="title-row">
         <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
-        <span class="status-badge">
+        <span class="status-badge" [class.offline]="data.status === 'Offline'">
           <span class="dot"></span>
           {{ data.status }}
         </span>

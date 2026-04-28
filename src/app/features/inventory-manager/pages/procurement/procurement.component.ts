@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -22,7 +22,7 @@ interface RecentProcurement {
 @Component({
   selector: 'app-procurement-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './procurement.component.html',
   styleUrls: ['./procurement.component.css']
 })
