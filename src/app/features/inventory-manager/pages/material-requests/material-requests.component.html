@@ -128,6 +128,28 @@
             </tbody>
           </table>
         </div>
+
+        <div class="assignment-section" *ngIf="activeTab === 'reserved'" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <div class="section-header">
+            <h3>SERVICE TEAM ASSIGNMENT</h3>
+          </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-muted); font-size: 13px;">Assign Team</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <ng-container *ngIf="!selectedRequest?.serviceTeam || isEditingTeam">
+                <input type="text" class="form-control" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: rgba(0,0,0,0.2); color: white;" placeholder="Enter Service Team Name" [(ngModel)]="editServiceTeam">
+                <button class="btn-save" (click)="saveServiceTeam()" [disabled]="!editServiceTeam.trim()" [style.opacity]="!editServiceTeam.trim() ? 0.5 : 1" [style.cursor]="!editServiceTeam.trim() ? 'not-allowed' : 'pointer'">Save Team</button>
+                <button class="btn-primary btn-outline" *ngIf="isEditingTeam" (click)="cancelEditTeam()">Cancel</button>
+              </ng-container>
+              <ng-container *ngIf="selectedRequest?.serviceTeam && !isEditingTeam">
+                <div style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: rgba(0,0,0,0.1); color: white; border-left: 3px solid var(--primary-color);">
+                  {{ selectedRequest?.serviceTeam }}
+                </div>
+                <button class="btn-primary btn-outline" (click)="enableEditTeam()">Edit</button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -137,7 +159,7 @@
         </div>
         <div class="footer-right" *ngIf="activeTab === 'reserved'">
           <button class="btn-primary btn-outline" *ngIf="canUndo(selectedRequest)" (click)="undoAction()">Undo Transition</button>
-          <button class="btn-save" (click)="markHandedOver()" style="margin-left: 12px;">Mark Handed Over</button>
+          <button class="btn-save" (click)="markHandedOver()" style="margin-left: 12px;" [disabled]="!selectedRequest?.serviceTeam" [style.opacity]="!selectedRequest?.serviceTeam ? 0.5 : 1" [style.cursor]="!selectedRequest?.serviceTeam ? 'not-allowed' : 'pointer'">Mark Completed</button>
           <button class="btn-primary" (click)="closeModal()" style="margin-left: 12px;">Close</button>
         </div>
         <div class="footer-right" *ngIf="activeTab === 'completed'">

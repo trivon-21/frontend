@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 interface MaterialItem {
   name: string;
@@ -18,6 +18,7 @@ interface MaterialRequest {
   location: string;
   status: 'pending' | 'reserved' | 'completed';
   items: MaterialItem[];
+  serviceTeam?: string;
   completedAt?: string;
   lastMovedAt?: string;
 }
@@ -38,6 +39,9 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+  isEditingTeam = false;
+  editServiceTeam = '';
+
   pendingRequests: MaterialRequest[] = [];
   reservedRequests: MaterialRequest[] = [];
   completedRequests: MaterialRequest[] = [];
@@ -49,22 +53,23 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   fetchRequests() {
-    this.apiService.get<any[]>('/inventory-manager/material-requests').subscribe(data => {
+    this.apiService.get<any[]>('/inventory-manager/material-requests').subscribe((data: any[]) => {
       // Map backend model to frontend model
-      const requests = data.map(r => ({
+      const requests: MaterialRequest[] = data.map((r: any) => ({
         id: r.requestId,
         requester: r.requester,
         date: r.date,
         location: r.location,
         status: r.status,
         items: r.items,
+        serviceTeam: r.serviceTeam,
         completedAt: r.completedAt,
         lastMovedAt: r.lastMovedAt
       }));
 
-      this.pendingRequests = requests.filter(r => r.status === 'pending');
-      this.reservedRequests = requests.filter(r => r.status === 'reserved');
-      this.completedRequests = requests.filter(r => r.status === 'completed');
+      this.pendingRequests = requests.filter((r: MaterialRequest) => r.status === 'pending');
+      this.reservedRequests = requests.filter((r: MaterialRequest) => r.status === 'reserved');
+      this.completedRequests = requests.filter((r: MaterialRequest) => r.status === 'completed');
     });
   }
 
@@ -102,6 +107,12 @@ export class MaterialRequestsDashboardComponent implements OnInit {
 
   openModal(id: string) {
     this.selectedRequestId = id;
+    this.isEditingTeam = false;
+    this.editServiceTeam = '';
+    const req = this.selectedRequest;
+    if (req && req.serviceTeam) {
+      this.editServiceTeam = req.serviceTeam;
+    }
     this.showModal = true;
   }
 
@@ -123,6 +134,29 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       });
     }
     this.closeModal();
+  }
+
+  enableEditTeam() {
+    const req = this.selectedRequest;
+    if (req) {
+      this.isEditingTeam = true;
+      this.editServiceTeam = req.serviceTeam || '';
+    }
+  }
+
+  cancelEditTeam() {
+    this.isEditingTeam = false;
+  }
+
+  saveServiceTeam() {
+    if (!this.selectedRequestId) return;
+    const req = this.selectedRequest;
+    if (req) {
+      this.apiService.patch(`/inventory-manager/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam }).subscribe(() => {
+        this.fetchRequests();
+        this.isEditingTeam = false;
+      });
+    }
   }
 
   markKitted() {
@@ -147,6 +181,10 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req) {
+      if (!req.serviceTeam) {
+        alert("Please assign a service team first.");
+        return;
+      }
       const updateData = {
         status: 'completed',
         completedAt: new Date().toISOString().split('T')[0],

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 interface DispatchItem {
   name: string;
@@ -62,9 +62,9 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   fetchOrders() {
-    this.apiService.get<any[]>('/inventory-manager/orders').subscribe(data => {
+    this.apiService.get<any[]>('/inventory-manager/orders').subscribe((data: any[]) => {
       // Map backend model to frontend model
-      const orders = data.map(o => ({
+      const orders: DispatchOrder[] = data.map((o: any) => ({
         id: o.orderId,
         customer: o.customer,
         status: o.status,
@@ -77,10 +77,10 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         lastMovedAt: o.lastMovedAt
       }));
 
-      this.ordersToPack = orders.filter(o => o.status === 'to-pack');
-      this.ordersReady = orders.filter(o => o.status === 'ready');
-      this.ordersInTransit = orders.filter(o => o.status === 'in-transit');
-      this.ordersCompleted = orders.filter(o => o.status === 'completed');
+      this.ordersToPack = orders.filter((o: DispatchOrder) => o.status === 'to-pack');
+      this.ordersReady = orders.filter((o: DispatchOrder) => o.status === 'ready');
+      this.ordersInTransit = orders.filter((o: DispatchOrder) => o.status === 'in-transit');
+      this.ordersCompleted = orders.filter((o: DispatchOrder) => o.status === 'completed');
       
       this.selectFirstOrder();
     });
