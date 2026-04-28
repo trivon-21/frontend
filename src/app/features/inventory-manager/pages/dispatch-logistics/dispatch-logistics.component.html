@@ -54,18 +54,22 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let order of currentOrders">
+        <tr *ngFor="let order of currentOrders" 
+            (click)="selectOrder(order.id)" 
+            [class.selected-row]="selectedOrderId === order.id">
           <td>{{ order.id }}</td>
           <td>{{ order.customer }}</td>
           <td *ngIf="activeTab === 'ready'">{{ order.type }}</td>
           <td *ngIf="activeTab === 'in-transit'">{{ order.trackId }}</td>
           <td class="actions-cell">
-            <ng-container *ngIf="activeTab === 'to-pack'">
-              <button class="btn-assign" (click)="openAssignModal(order.id)">Assign Delivery</button>
-              <button class="btn-pack" (click)="openPackModal(order.id)">Pack Order</button>
-            </ng-container>
-            <ng-container *ngIf="activeTab !== 'to-pack'">
-              <button class="btn-view" (click)="openPackModal(order.id)">View Order</button>
+            <ng-container *ngIf="selectedOrderId === order.id">
+              <ng-container *ngIf="activeTab === 'to-pack'">
+                <button class="btn-assign" (click)="openAssignModal(order.id); $event.stopPropagation()">Assign Delivery</button>
+                <button class="btn-pack" (click)="openPackModal(order.id); $event.stopPropagation()">Pack Order</button>
+              </ng-container>
+              <ng-container *ngIf="activeTab !== 'to-pack'">
+                <button class="btn-view" (click)="openPackModal(order.id); $event.stopPropagation()">View Order</button>
+              </ng-container>
             </ng-container>
           </td>
         </tr>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -15,11 +15,11 @@ interface DispatchOrder {
   templateUrl: './dispatch-logistics.component.html',
   styleUrls: ['./dispatch-logistics.component.css']
 })
-export class DispatchLogisticsDashboardComponent {
+export class DispatchLogisticsDashboardComponent implements OnInit {
   activeTab: 'to-pack' | 'ready' | 'in-transit' | 'completed' = 'to-pack';
   showPackModal = false;
   showAssignModal = false;
-  selectedOrderId = '#54816';
+  selectedOrderId: string | null = null;
 
   ordersToPack: any[] = [
     { id: '#ORD-2025-099', customer: 'Saman Perera', status: 'to-pack' },
@@ -53,8 +53,26 @@ export class DispatchLogisticsDashboardComponent {
     { id: '#ORD-2025-095', customer: 'Lakshmi Rajapaksa' }
   ];
 
+  ngOnInit() {
+    this.selectFirstOrder();
+  }
+
+  selectFirstOrder() {
+    const orders = this.currentOrders;
+    if (orders.length > 0) {
+      this.selectedOrderId = orders[0].id;
+    } else {
+      this.selectedOrderId = null;
+    }
+  }
+
+  selectOrder(id: string) {
+    this.selectedOrderId = id;
+  }
+
   setActiveTab(tab: 'to-pack' | 'ready' | 'in-transit' | 'completed') {
     this.activeTab = tab;
+    this.selectFirstOrder();
   }
 
   get currentOrders() {

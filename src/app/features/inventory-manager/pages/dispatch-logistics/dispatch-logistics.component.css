@@ -138,16 +138,34 @@
 }
 
 .dispatch-table td {
-  padding: 20px 24px;
+  height: 64px; /* Fixed height for all rows to ensure stability */
+  padding: 0 24px;
   border-bottom: 1px solid var(--border-light);
   font-size: 14px;
   color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.dispatch-table tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dispatch-table tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dispatch-table tr.selected-row {
+  background-color: var(--primary-lighter) !important;
 }
 
 .actions-cell {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 12px;
+  min-width: 280px;
+  height: 100%;
 }
 
 .btn-assign, .btn-pack, .btn-view {
