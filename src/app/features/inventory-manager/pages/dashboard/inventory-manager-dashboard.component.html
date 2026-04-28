@@ -1,4 +1,15 @@
-<div class="inventory-dashboard" *ngIf="data">
+<div class="loading-container" *ngIf="loading">
+  <div class="loader">Loading dashboard...</div>
+</div>
+
+<div class="error-container" *ngIf="error">
+  <div class="alert error">
+    <i class="icon-error"></i>
+    {{ error }}
+  </div>
+</div>
+
+<div class="inventory-dashboard" *ngIf="!loading && !error && data">
   <!-- Header Section -->
   <div class="welcome-banner">
     <div class="banner-content">

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface SubStat {
   label: string;
@@ -74,7 +75,29 @@ export class InventoryManagerDashboardService {
   constructor(private http: HttpClient) {}
 
   getDashboard(): Observable<InventoryDashboardData> {
-    return this.http.get<InventoryDashboardData>(`${this.apiUrl}/dashboard`);
+    return this.http.get<InventoryDashboardData>(`${this.apiUrl}/dashboard`).pipe(
+      map(data => {
+        // Convert timestamp strings to Date objects and add timeAgo
+        data.recentActivity = data.recentActivity.map(activity => ({
+          ...activity,
+          timestamp: new Date(activity.timestamp),
+          timeAgo: this.getTimeAgo(new Date(activity.timestamp))
+        }));
+        data.currentDate = new Date(data.currentDate);
+        return data;
+      })
+    );
+  }
+
+  private getTimeAgo(date: Date): string {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
   }
 
   getInventory(): Observable<InventoryItem[]> {
