@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ApiService } from '../../../../core/services/api.service';
+import { ApiService } from '../../../../../core/services/api.service';
 
 interface OrderItem {
   inventoryId: string;
@@ -49,10 +49,10 @@ export class NewOrderFormComponent implements OnInit {
   // Form data
   orderItems: OrderItem[] = [];
   selectedSupplier = '';
-  orderPriority: 'normal' | 'urgent' = 'normal';
   orderNotes = '';
   
-  // Item search
+  // Suggested Items
+  suggestedItems: InventoryItem[] = [];
   itemSearchQuery = '';
   showItemDropdown = false;
   selectedItem: InventoryItem | null = null;
@@ -72,22 +72,30 @@ export class NewOrderFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadInventory();
     this.loadSuppliers();
+    this.loadSuggestedItems();
   }
 
   loadInventory(): void {
     this.apiService.get<InventoryItem[]>('/inventory/list').subscribe({
-      next: (data) => {
+      next: (data: InventoryItem[]) => {
         this.inventoryItems = data;
         this.filteredInventory = data;
       },
-      error: (err) => console.error('Failed to load inventory:', err)
+      error: (err: any) => console.error('Failed to load inventory:', err)
     });
   }
 
   loadSuppliers(): void {
     this.apiService.get<Supplier[]>('/inventory/suppliers').subscribe({
-      next: (data) => this.suppliers = data,
-      error: (err) => console.error('Failed to load suppliers:', err)
+      next: (data: Supplier[]) => this.suppliers = data,
+      error: (err: any) => console.error('Failed to load suppliers:', err)
+    });
+  }
+
+  loadSuggestedItems(): void {
+    this.apiService.get<InventoryItem[]>('/inventory/suggested-orders').subscribe({
+      next: (data: InventoryItem[]) => this.suggestedItems = data,
+      error: (err: any) => console.error('Failed to load suggested items:', err)
     });
   }
 
@@ -219,7 +227,6 @@ export class NewOrderFormComponent implements OnInit {
         unitCost: i.unitCost
       })),
       supplierName: this.selectedSupplier,
-      priority: this.orderPriority,
       notes: this.orderNotes,
       source: 'manual'
     };
@@ -232,7 +239,7 @@ export class NewOrderFormComponent implements OnInit {
           queryParams: { success: `Order ${data.requestId} submitted successfully!` } 
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isSubmitting = false;
         this.errorMessage = err.error?.message || 'Failed to submit order request';
       }

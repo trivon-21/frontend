@@ -115,6 +115,10 @@ export class OrderCreationComponent implements OnInit {
     });
   }
 
+  addSuggestedItem(item: InventoryItem): void {
+    this.router.navigate(['/inventory-manager/order-creation/new']);
+  }
+
   createNewOrder(): void {
     this.router.navigate(['/inventory-manager/order-creation/new']);
   }
