@@ -106,8 +106,13 @@
 
 .filter-input:focus {
   border-color: var(--primary-main);
-  flex: 1;
-  padding-right: 40px;
+  background: #fff;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .eye-btn {
@@ -369,7 +374,7 @@
 }
 
 /* Modal */
-.modal {
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -382,7 +387,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.modal-container {
   background: white;
   border-radius: 12px;
   max-width: 500px;
