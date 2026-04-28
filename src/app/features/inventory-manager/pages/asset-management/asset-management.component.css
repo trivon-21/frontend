@@ -11,6 +11,11 @@
   align-items: center;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .header h1 {
   font-size: 32px;
   font-weight: 700;
@@ -18,7 +23,54 @@
   margin: 0;
 }
 
+/* Tabs Navigation */
+.tabs-nav {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: -1px;
+}
 
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: var(--primary-main);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary-main);
+}
+
+.badge {
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.tab-content {
+  padding: 0;
+}
 
 /* Check-Out Panel */
 .checkout-card {
@@ -51,39 +103,46 @@
   color: var(--text-primary);
 }
 
-.search-input {
-  position: relative;
-}
-
-.search-input i {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #64748b;
-}
-
-.search-input input {
+.form-select,
+.form-input {
   width: 100%;
-  padding: 12px 16px 12px 40px;
+  padding: 12px 16px;
   border: 1px solid var(--border-light);
   border-radius: 10px;
   font-size: 14px;
   background: white;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-
+.form-select:focus,
+.form-input:focus {
+  border-color: var(--primary-main);
+}
 
 /* Table Section */
-.table-card {
-  padding: 0;
-}
-
 .table-header {
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.header-with-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auto-delete-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--info);
+  background: var(--info-light);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .table-header h3 {
@@ -105,8 +164,8 @@ table {
 
 th {
   text-align: left;
-  padding: 16px 24px;
-  background: var(--background-page);
+  padding: 12px 24px;
+  background: #f8fafc;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
@@ -149,6 +208,13 @@ td {
   cursor: pointer;
 }
 
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .table-footer {
   padding: 16px 24px;
   display: flex;
@@ -173,16 +239,6 @@ td {
   height: 8px;
   background: var(--error);
   border-radius: 50%;
-}
-
-.view-all {
-  color: var(--primary-main);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 13px;
-  padding: 8px 16px;
-  background: var(--primary-lighter);
-  border-radius: 20px;
 }
 
 /* Modal Styling */
@@ -215,25 +271,22 @@ td {
   gap: 24px;
 }
 
-.input-group.half {
-  flex: 0 0 50%;
-}
-
-.date-picker {
-  position: relative;
-}
-
-.date-picker i {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #64748b;
-}
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
 }
 
+.tool-info {
+  display: flex;
+  flex-direction: column;
+}
 
+.tool-info .name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tool-info .tag {
+  font-size: 11px;
+  color: var(--text-muted);
+}

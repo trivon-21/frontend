@@ -2,10 +2,12 @@
   <!-- Header Section -->
   <div class="header">
     <h1>Asset Management</h1>
-    <button class="btn-primary" (click)="openRegisterModal()">
-      <i class="icon-plus"></i>
-      Register New Tool
-    </button>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openRegisterModal()">
+        <i class="icon-plus"></i>
+        Register New Tool
+      </button>
+    </div>
   </div>
 
   <!-- Check-Out Panel -->
@@ -14,73 +16,122 @@
     <div class="checkout-form">
       <div class="input-group">
         <label>Select Technician</label>
-        <div class="search-input">
-          <i class="icon-search"></i>
-          <input type="text" placeholder="Search Inventory...">
-        </div>
+        <select class="form-select" [(ngModel)]="selectedTechnicianId">
+          <option value="">Choose Technician...</option>
+          <option *ngFor="let tech of technicians" [value]="tech._id">{{ tech.name }} ({{ tech.role }})</option>
+        </select>
       </div>
       <div class="input-group">
         <label>Select Tool</label>
-        <div class="search-input">
-          <i class="icon-scan"></i>
-          <input type="text" placeholder="Scan Barcode">
-        </div>
+        <select class="form-select" [(ngModel)]="selectedToolId">
+          <option value="">Choose Tool...</option>
+          <option *ngFor="let tool of tools" [value]="tool._id">{{ tool.name }} - {{ tool.sku }}</option>
+        </select>
       </div>
       <div class="input-group">
         <label>Expected Return</label>
-        <div class="search-input">
-          <i class="icon-search"></i>
-          <input type="text" placeholder="Search Inventory...">
-        </div>
+        <input type="date" class="form-input" [(ngModel)]="dueDate">
       </div>
-      <button class="btn-primary">Check Out</button>
+      <button class="btn-primary" (click)="checkOut()">Check Out</button>
     </div>
   </div>
 
-  <!-- Active Loans Section -->
-  <div class="table-card glass-panel">
-    <div class="table-header">
-      <h3>Active Loans</h3>
-      <span class="loan-count">7 tools currently checked out</span>
-    </div>
-    
-    <table>
-      <thead>
-        <tr>
-          <th>TOOL NAME</th>
-          <th>ASSET TAG</th>
-          <th>HELD BY</th>
-          <th>CHECKED OUT</th>
-          <th>DUE DATE</th>
-          <th>STATUS</th>
-          <th>ACTIONS</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let loan of loans">
-          <td class="tool-name">{{ loan.toolName }}</td>
-          <td class="asset-tag">{{ loan.assetTag }}</td>
-          <td class="held-by">{{ loan.heldBy }}</td>
-          <td class="date-cell">{{ loan.checkedOut }}</td>
-          <td class="date-cell">{{ loan.dueDate }}</td>
-          <td>
-            <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
-              {{ loan.status }}
-            </span>
-          </td>
-          <td>
-            <button class="btn-action" (click)="markReturned(loan.id)">Mark Returned</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'loans'" (click)="setActiveTab('loans')">
+      Active Loans <span class="badge" *ngIf="loans.length > 0">{{ loans.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
+      Return Logs <span class="badge" *ngIf="returnLogs.length > 0">{{ returnLogs.length }}</span>
+    </button>
+  </div>
 
-    <div class="table-footer">
-      <div class="warning-badge">
-        <span class="dot"></span>
-        2 overdue items require attention
+  <div class="tab-content glass-panel">
+    <!-- Active Loans Table -->
+    <div *ngIf="activeTab === 'loans'">
+      <div class="table-header">
+        <h3>Active Loans</h3>
+        <span class="loan-count">Tools currently checked out by technicians</span>
       </div>
-      <a href="#" class="view-all">View All Assets →</a>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>TOOL NAME</th>
+            <th>ASSET TAG</th>
+            <th>HELD BY</th>
+            <th>CHECKED OUT</th>
+            <th>DUE DATE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let loan of loans">
+            <td class="tool-name">{{ loan.toolName }}</td>
+            <td class="asset-tag">{{ loan.assetTag }}</td>
+            <td class="held-by">{{ loan.technicianName }}</td>
+            <td class="date-cell">{{ loan.checkedOutAt | date:'medium' }}</td>
+            <td class="date-cell">{{ loan.dueDate | date:'mediumDate' }}</td>
+            <td>
+              <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
+                {{ loan.status }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action" (click)="markReturned(loan._id!)">Mark Returned</button>
+            </td>
+          </tr>
+          <tr *ngIf="loans.length === 0">
+            <td colspan="7" class="empty-state">No active loans found.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="table-footer" *ngIf="loans.length > 0">
+        <div class="warning-badge">
+          <span class="dot"></span>
+          {{ loans.length }} items currently out
+        </div>
+      </div>
+    </div>
+
+    <!-- Return Logs Table -->
+    <div *ngIf="activeTab === 'logs'">
+      <div class="table-header">
+        <div class="header-with-note">
+          <h3>Return Logs</h3>
+          <span class="auto-delete-text">Auto-deletes in 14 days</span>
+        </div>
+        <span class="loan-count">Tools recently returned by technicians</span>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>TOOL NAME</th>
+            <th>TECHNICIAN</th>
+            <th>CHECKED OUT</th>
+            <th>RETURNED AT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of returnLogs">
+            <td>
+              <div class="tool-info">
+                <span class="name">{{ log.toolName }}</span>
+                <span class="tag">{{ log.assetTag }}</span>
+              </div>
+            </td>
+            <td class="held-by">{{ log.technicianName }}</td>
+            <td class="date-cell">{{ log.checkedOutAt | date:'short' }}</td>
+            <td class="date-cell">{{ log.returnedAt | date:'short' }}</td>
+          </tr>
+          <tr *ngIf="returnLogs.length === 0">
+            <td colspan="4" class="empty-state">No return logs found.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

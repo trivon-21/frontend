@@ -1,15 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../../../core/services/api.service';
 
 interface ActiveLoan {
-  id: string;
+  _id?: string;
+  id?: string;
+  toolId: string;
   toolName: string;
   assetTag: string;
-  heldBy: string;
-  checkedOut: string;
+  technicianId: string;
+  technicianName: string;
+  checkedOutAt: string;
   dueDate: string;
-  status: 'On Time' | 'Overdue';
+  status?: 'On Time' | 'Overdue';
+}
+
+interface ReturnLog {
+  toolName: string;
+  assetTag: string;
+  technicianName: string;
+  checkedOutAt: string;
+  returnedAt: string;
 }
 
 @Component({
@@ -19,18 +31,49 @@ interface ActiveLoan {
   templateUrl: './asset-management.component.html',
   styleUrls: ['./asset-management.component.css']
 })
-export class AssetManagementDashboardComponent {
+export class AssetManagementDashboardComponent implements OnInit {
   showModal = false;
+  activeTab: 'loans' | 'logs' = 'loans';
   
-  loans: ActiveLoan[] = [
-    { id: '1', toolName: 'Vacuum Pump (Professional)', assetTag: 'VCP-004', heldBy: 'Sunil Bandara', checkedOut: '2025-02-15 09:30 AM', dueDate: '2025-02-18', status: 'On Time' },
-    { id: '2', toolName: 'Cordless Drill Kit (Makita 18V)', assetTag: 'DRL-012', heldBy: 'Kamal Wijesinghe', checkedOut: '2025-02-14 02:15 PM', dueDate: '2025-02-17', status: 'On Time' },
-    { id: '3', toolName: 'Refrigerant Recovery Machine', assetTag: 'RRM-008', heldBy: 'Nimal Fernando', checkedOut: '2025-02-12 11:00 AM', dueDate: '2025-02-16', status: 'Overdue' },
-    { id: '4', toolName: 'Digital Manifold Gauge Set', assetTag: 'MGS-015', heldBy: 'Pradeep Silva', checkedOut: '2025-02-16 08:45 AM', dueDate: '2025-02-19', status: 'On Time' },
-    { id: '5', toolName: 'Pipe Bender Kit', assetTag: 'PBK-003', heldBy: 'Ranjith Perera', checkedOut: '2025-02-13 01:30 PM', dueDate: '2025-02-16', status: 'Overdue' },
-    { id: '6', toolName: 'Leak Detector (Electronic)', assetTag: 'LKD-007', heldBy: 'Lakshmi Rajapaksa', checkedOut: '2025-02-17 10:00 AM', dueDate: '2025-02-20', status: 'On Time' },
-    { id: '7', toolName: 'Torque Wrench Set', assetTag: 'TWS-021', heldBy: 'Ayesha Rashid', checkedOut: '2025-02-15 03:20 PM', dueDate: '2025-02-18', status: 'On Time' }
-  ];
+  technicians: any[] = [];
+  tools: any[] = [];
+  loans: ActiveLoan[] = [];
+  returnLogs: ReturnLog[] = [];
+
+  // Form states
+  selectedTechnicianId: string = '';
+  selectedToolId: string = '';
+  dueDate: string = '';
+
+  setActiveTab(tab: 'loans' | 'logs') {
+    this.activeTab = tab;
+  }
+
+  constructor(private apiService: ApiService) {}
+
+  ngOnInit() {
+    this.fetchData();
+  }
+
+  fetchData() {
+    this.apiService.get('/inventory/technicians').subscribe(data => this.technicians = data);
+    this.apiService.get('/inventory/list').subscribe(data => this.tools = data.filter((t: any) => t.isSerialized || t.category === 'Tools'));
+    this.fetchLoans();
+    this.fetchReturnLogs();
+  }
+
+  fetchLoans() {
+    this.apiService.get('/inventory/asset-loans').subscribe(data => {
+      this.loans = data.map((loan: any) => ({
+        ...loan,
+        status: new Date(loan.dueDate) < new Date() ? 'Overdue' : 'On Time'
+      }));
+    });
+  }
+
+  fetchReturnLogs() {
+    this.apiService.get('/inventory/asset-return-logs').subscribe(data => this.returnLogs = data);
+  }
 
   openRegisterModal() {
     this.showModal = true;
@@ -40,7 +83,36 @@ export class AssetManagementDashboardComponent {
     this.showModal = false;
   }
 
+  checkOut() {
+    if (!this.selectedTechnicianId || !this.selectedToolId || !this.dueDate) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    const technician = this.technicians.find(t => t._id.toString() === this.selectedTechnicianId);
+    const tool = this.tools.find(t => t._id === this.selectedToolId);
+
+    const loanData = {
+      toolId: tool._id,
+      toolName: tool.name,
+      assetTag: tool.sku, // Using SKU as asset tag if not specific
+      technicianId: technician._id.toString(),
+      technicianName: technician.name,
+      dueDate: this.dueDate
+    };
+
+    this.apiService.post('/inventory/asset-loans', loanData).subscribe(() => {
+      this.fetchLoans();
+      this.selectedToolId = '';
+      this.selectedTechnicianId = '';
+      this.dueDate = '';
+    });
+  }
+
   markReturned(id: string) {
-    this.loans = this.loans.filter(l => l.id !== id);
+    this.apiService.post(`/inventory/asset-loans/return/${id}`).subscribe(() => {
+      this.fetchLoans();
+      this.fetchReturnLogs();
+    });
   }
 }
