@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 import {
   InventoryManagerDashboardService,
   InventoryDashboardData,
@@ -9,18 +10,35 @@ import {
 @Component({
   selector: 'app-inventory-manager-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './inventory-manager-dashboard.component.html',
   styleUrl: './inventory-manager-dashboard.component.css',
 })
-export class InventoryManagerDashboardComponent implements OnInit {
+export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
   data: InventoryDashboardData | null = null;
   loading = true;
   error: string | null = null;
+  private timer: any;
 
   constructor(private dashboardService: InventoryManagerDashboardService) {}
 
   ngOnInit(): void {
+    this.loadData();
+    // Update time every minute for real-world accuracy
+    this.timer = setInterval(() => {
+      if (this.data) {
+        this.data.currentDate = new Date();
+      }
+    }, 60000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
+
+  loadData(): void {
     this.dashboardService.getDashboard().subscribe({
       next: (data: InventoryDashboardData) => {
         this.data = data;
@@ -39,6 +57,14 @@ export class InventoryManagerDashboardComponent implements OnInit {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+    });
+  }
+
+  formatTime(date: Date): string {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   }
 

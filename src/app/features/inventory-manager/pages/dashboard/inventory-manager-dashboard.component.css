@@ -96,10 +96,26 @@
   background: #dc2626;
 }
 
-.subtitle {
-  font-size: 14px;
+.time-date-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 4px;
+}
+
+.live-time {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--primary-main);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.live-date {
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text-muted);
-  margin: 0;
 }
 
 /* ── Header Actions ── */
