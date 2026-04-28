@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { GlobalSearchService } from '../../services/global-search.service';
 
 interface ServiceRequest {
   id: string;
@@ -39,6 +40,7 @@ interface ServiceRequestApiItem {
 export class MainTechnicianServiceRequestsComponent implements OnInit {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
+  private globalSearchService = inject(GlobalSearchService);
 
   searchQuery: string = '';
   statusFilter: string = 'All';
@@ -51,6 +53,12 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
 
   /** Loads service requests on component initialization. */
   ngOnInit(): void {
+    this.globalSearchService.searchQuery$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        this.searchQuery = query;
+        this.filterRequests();
+      });
     this.loadRequests();
   }
 
@@ -88,12 +96,28 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
   filterRequests(): void {
     const query = this.searchQuery.trim().toLowerCase();
 
-    this.filteredRequests = this.serviceRequests.filter((request) => {
-      const matchesSearch = request.id.toLowerCase().includes(query) ||
-        request.customerName.toLowerCase().includes(query);
-      const matchesStatus = this.statusFilter === 'All' || request.status === this.statusFilter;
-      return matchesSearch && matchesStatus;
-    });
+    this.filteredRequests = this.serviceRequests
+      .filter((request) => {
+        const matchesSearch = request.id.toLowerCase().includes(query) ||
+          request.customerName.toLowerCase().includes(query);
+        const matchesStatus = this.statusFilter === 'All' || request.status === this.statusFilter;
+        return matchesSearch && matchesStatus;
+      })
+      .sort((a, b) => {
+        const aCompleted = this.isCompletedStatus(a.status);
+        const bCompleted = this.isCompletedStatus(b.status);
+
+        if (aCompleted === bCompleted) {
+          return 0;
+        }
+
+        return aCompleted ? 1 : -1;
+      });
+  }
+
+  /** Keeps completed requests at the bottom of the table. */
+  private isCompletedStatus(status: string): boolean {
+    return status.trim().toLowerCase() === 'completed';
   }
 
   /** Resets the search and status filters back to their defaults. */

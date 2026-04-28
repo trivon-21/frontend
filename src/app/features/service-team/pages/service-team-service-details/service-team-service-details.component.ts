@@ -148,14 +148,15 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
   }
 
   updateTicketStatus(newStatus: string): void {
-    if (!this.ticketId || this.isUpdatingStatus) return;
+    const recordId = this.ticket?.sourceId || this.ticket?._id || this.ticket?.id || this.ticketId;
+    if (!recordId || this.isUpdatingStatus) return;
 
     this.isUpdatingStatus = true;
     this.statusUpdateError = '';
     this.statusUpdateSuccess = '';
     const normalizedStatus = this.normalizeStatus(newStatus);
 
-    this.taskService.updateTaskStatus(this.ticketId, normalizedStatus).subscribe({
+    this.taskService.updateTaskStatus(String(recordId), normalizedStatus).subscribe({
       next: (res) => {
         if (this.ticket) {
           this.ticket['status'] = (res as any)?.status || normalizedStatus;
@@ -223,6 +224,8 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
       _id: this.ticket.sourceId || this.ticket._id || this.ticket.id,
       serviceRequestId: this.ticket.sourceId || this.ticket._id || this.ticket.id,
       onModel: this.ticket.type === 'Installation' ? 'Installation' : 'ServiceRequest',
+      materialsUsed: Array.isArray(this.ticket.materials) ? this.ticket.materials : [],
+      notesFromMainTechnician: note,
       technicianComment: note,
     };
 

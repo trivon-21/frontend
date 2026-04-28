@@ -13,12 +13,10 @@ interface ReviewMaterial {
 
 interface RawServiceReportReview {
   id: string;
-  customerInfo: {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-  };
+  customerName: string;
+  phoneNumber: string;
+  emailAddress: string;
+  address: string;
   location: string;
   serviceDate: string;
   productType: string;
@@ -31,6 +29,7 @@ interface RawServiceReportReview {
   };
   status: string;
   reviewNotes?: string;
+  serviceTeam?: string;
 }
 
 @Component({
@@ -70,42 +69,12 @@ export class MainTechnicianServiceReportReviewComponent implements OnInit {
     // Mocking for now to match Image 2, as we need certain fields not in the base report
     // In a real app, this would be a single API call to get full details
     this.http
-      .get<{ success: boolean; data: any }>(`${this.apiUrl}/${this.id}`)
+      .get<{ success: boolean; data: RawServiceReportReview }>(`${this.apiUrl}/${this.id}`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            // Map the API data to our review structure
-            // Using mock data for missing fields to match Image 2 exactly
-            this.report = {
-              id: this.id,
-              customerInfo: {
-                name: response.data.customerName || 'John Anderson',
-                phone: response.data.phone || '+94 77 253 5432',
-                email: response.data.email || 'john.anderson@gmail.com',
-                address: response.data.address || 'No.45 , Galle Road, Colombo 03, Sri Lanka'
-              },
-              location: response.data.location || 'Logistic Area 1',
-              serviceDate: response.data.serviceDate || '10 March 2026',
-              productType: response.data.productType || 'Split AC - 3 Units',
-              requiredMaterials: response.data.requiredMaterials || [
-                { item: 'Copper piping (3/8" + 5/8")', quantity: '45 meters' },
-                { item: 'Electrical cable (3-core, 4mm²)', quantity: '60 meters' },
-                { item: 'Wall mounting brackets (heavy duty)', quantity: '6 units' },
-                { item: 'Drainage PVC pipes & fittings', quantity: '1 set' },
-                { item: 'Circuit breakers (32A)', quantity: '3 units' },
-                { item: 'Insulation foam tape', quantity: '30 meters' },
-                { item: 'Wall covers & wire conduits', quantity: '1 set' }
-              ],
-              serviceDetails: {
-                team: response.data.serviceTeam || 'Service Team A',
-                date: response.data.date || '10 March 2026',
-                time: response.data.time || '10:00 AM - 11:30 AM',
-                note: response.data.serviceNote || 'cause of fault'
-              },
-              status: response.data.status || 'Pending',
-              reviewNotes: response.data.reviewNotes || ''
-            };
+            this.report = response.data;
             this.reviewNotes = this.report.reviewNotes || '';
           } else {
             this.error = 'Failed to load service report details';
@@ -114,42 +83,10 @@ export class MainTechnicianServiceReportReviewComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error loading service report:', err);
-          // Fallback to mock data for demonstration if API fails
-          this.mockData();
+          this.error = err?.error?.message || 'Failed to load service report details';
           this.isLoading = false;
         }
       });
-  }
-
-  private mockData() {
-    this.report = {
-      id: this.id || '2134',
-      customerInfo: {
-        name: 'John Anderson',
-        phone: '+94 77 253 5432',
-        email: 'john.anderson@gmail.com',
-        address: 'No.45 , Galle Road, Colombo 03, Sri Lanka'
-      },
-      location: 'Logistic Area 1',
-      serviceDate: '10 March 2026',
-      productType: 'Split AC - 3 Units',
-      requiredMaterials: [
-        { item: 'Copper piping (3/8" + 5/8")', quantity: '45 meters' },
-        { item: 'Electrical cable (3-core, 4mm²)', quantity: '60 meters' },
-        { item: 'Wall mounting brackets (heavy duty)', quantity: '6 units' },
-        { item: 'Drainage PVC pipes & fittings', quantity: '1 set' },
-        { item: 'Circuit breakers (32A)', quantity: '3 units' },
-        { item: 'Insulation foam tape', quantity: '30 meters' },
-        { item: 'Wall covers & wire conduits', quantity: '1 set' }
-      ],
-      serviceDetails: {
-        team: 'Service Team A',
-        date: '10 March 2026',
-        time: '10:00 AM - 11:30 AM',
-        note: 'cause of fault'
-      },
-      status: 'Pending'
-    };
   }
 
   completeReview() {

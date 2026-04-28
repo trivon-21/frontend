@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { GlobalSearchService } from '../../services/global-search.service';
 
 interface MaterialItem {
   name: string;
@@ -110,10 +111,17 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private globalSearchService: GlobalSearchService
   ) {}
 
   ngOnInit(): void {
+    this.globalSearchService.searchQuery$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        this.searchQuery = query;
+        this.applyFilters();
+      });
     this.loadMaterialRequests();
     this.loadNewStatusTicketIds();
   }

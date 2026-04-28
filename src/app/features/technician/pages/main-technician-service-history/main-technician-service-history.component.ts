@@ -91,7 +91,7 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
 
           this.allHistoryItems = (res.data.history || [])
             .slice()
-            .sort((a, b) => this.sortByAscendingDate(a.date, b.date))
+            .sort((a, b) => this.sortByDescendingDate(a.date, b.date))
             .map((item) => ({
               ...item,
               date: this.formatDate(item.date),
@@ -173,7 +173,7 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
     });
   }
 
-  private sortByAscendingDate(leftValue?: string | null, rightValue?: string | null): number {
+  private sortByDescendingDate(leftValue?: string | null, rightValue?: string | null): number {
     const leftTime = this.parseDateValue(leftValue);
     const rightTime = this.parseDateValue(rightValue);
 
@@ -189,7 +189,7 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
       return -1;
     }
 
-    return leftTime - rightTime;
+    return rightTime - leftTime;
   }
 
   private parseDateValue(value?: string | null): number | null {

@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { GlobalSearchService } from '../../services/global-search.service';
 
 interface InspectionTicket {
   id: string;
@@ -48,10 +49,17 @@ export class MainTechnicianInspectionsComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private globalSearchService: GlobalSearchService
   ) {}
 
   ngOnInit(): void {
+    this.globalSearchService.searchQuery$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((query) => {
+        this.searchQuery = query;
+        this.applyFilters();
+      });
     this.loadInspections();
   }
 
