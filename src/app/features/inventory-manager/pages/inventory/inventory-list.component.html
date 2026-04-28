@@ -20,14 +20,14 @@
   <div class="filters-card glass-panel">
     <div class="search-box">
       <i class="icon-search"></i>
-      <input type="text" [(ngModel)]="searchQuery" placeholder="Search Inventory...">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" placeholder="Search Inventory...">
     </div>
     
     <div class="filter-group">
       <span class="filter-label">Filters:</span>
       
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedType">
+        <select [(ngModel)]="selectedType" (ngModelChange)="applyFilters()">
           <option>All Types</option>
           <option>Single</option>
           <option>Bundle</option>
@@ -35,17 +35,33 @@
       </div>
 
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedBrand">
-          <option>All Brands</option>
-          <option>Samsung</option>
-          <option>LG</option>
-          <option>Daikin</option>
+        <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
+          <option>All Categories</option>
+          <option>Tools</option>
+          <option>Components</option>
+          <option>Parts</option>
+          <option>Installation Kits</option>
+          <option>Repair Parts</option>
         </select>
       </div>
 
       <div class="select-wrapper">
-        <select [(ngModel)]="selectedLocation">
+        <select [(ngModel)]="selectedBrand" (ngModelChange)="applyFilters()">
+          <option>All Brands</option>
+          <option>LG</option>
+          <option>Daikin</option>
+          <option>Samsung</option>
+          <option>Yellow Jacket</option>
+          <option>Fieldpiece</option>
+          <option>Appion</option>
+          <option>Testo</option>
+        </select>
+      </div>
+
+      <div class="select-wrapper">
+        <select [(ngModel)]="selectedLocation" (ngModelChange)="applyFilters()">
           <option>All Locations</option>
+          <option>Warehouse</option>
           <option>Logistic Area 1</option>
           <option>Logistic Area 2</option>
           <option>Logistic Area 3</option>
