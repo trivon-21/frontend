@@ -1,16 +1,7 @@
 /**
  * Theme Provider Service
- * Manages dynamic theme loading and CSS injection
- *
- * Responsibilities:
- * - Load complete theme CSS on app initialization
- * - Inject CSS into DOM as <style> tag
- * - Support theme switching at runtime
- * - Track current active theme
- * - Validate tokens before injection
- * - Handle SSR and browser compatibility
+ * Manages the generation and injection of CSS variables and global styles.
  */
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, take } from 'rxjs';
 import { generateCompleteThemeCSS } from './generators/component-styles.generator';
@@ -21,10 +12,8 @@ import { TokenValidator } from './validators/tokens.validator';
 export type ThemeName = 'default';
 
 /**
- * Injectable service for theme management
- * Usage:
- * - In AppComponent: this.themeProvider.loadTheme()
- * - From any component: this.themeProvider.updateVariable('primary-main', '#ffffff')
+ * Service for central theme management.
+ * Injects CSS into the DOM and provides runtime style updates.
  */
 @Injectable({
   providedIn: 'root',
@@ -41,42 +30,41 @@ export class ThemeProvider {
   private styleHistory: { timestamp: number; size: number }[] = [];
 
   constructor() {
-    // Early browser support check
+    // Initial browser capability check
     if (!this.isSSR) {
       CSSSupport.logBrowserInfo();
     }
   }
 
   /**
-   * Load complete theme CSS and inject into DOM
-   * Called once on app initialization
-   * RECOVERY: Validates tokens, handles SSR, validates browser support
+   * Initializes the theme by generating CSS and injecting it into the DOM.
+   * Handles server-side rendering and browser compatibility checks.
    */
   public loadTheme(theme: ThemeName = 'default'): void {
     try {
-      // RECOVERY 1.1: Guard DOM access for SSR
+      // Defer injection if running in SSR environment
       if (this.isSSR) {
-        console.warn('⚠  DOM not available (SSR mode). Theme CSS injection deferred to client.');
+        console.warn('DOM not available (SSR mode). Theme injection deferred to client.');
         this.isReady = false;
         return;
       }
 
-      // RECOVERY 4.1: Check browser support
+      // Verify browser support for CSS custom properties
       if (!CSSSupport.CSS_VARIABLES_SUPPORTED) {
-        console.error('❌ CSS Custom Properties not supported in this browser');
-        throw new Error('Browser does not support CSS Custom Properties (IE 11 or older)');
+        console.error('CSS Custom Properties not supported in this browser');
+        throw new Error('Browser does not support CSS Custom Properties');
       }
 
-      // RECOVERY 6.1: Validate all tokens before injection
+      // Execute token validation if enabled
       if (this.enableValidation) {
         TokenValidator.logValidationStatus();
         TokenValidator.throwIfInvalid();
       }
 
-      // Generate complete CSS from all tokens
+      // Generate complete CSS bundle from design tokens
       const css = generateCompleteThemeCSS();
 
-      // RECOVERY 3.1: Track CSS size for memory monitoring
+      // Track CSS size for performance monitoring
       const sizeKB = new Blob([css]).size / 1024;
       this.styleHistory.push({
         timestamp: Date.now(),
@@ -84,27 +72,26 @@ export class ThemeProvider {
       });
 
       if (sizeKB > 500) {
-        console.warn(`⚠  Generated CSS is ${sizeKB}KB - unusually large`);
+        console.warn(`Generated CSS bundle size (${sizeKB}KB) exceeds performance threshold`);
       }
 
-      // Keep only last 10 entries
+      // Maintain limited history of style generations
       if (this.styleHistory.length > 10) {
         this.styleHistory.shift();
       }
 
-      // Inject into DOM
+      // Inject generated styles into the document head
       this.styleElement = injectThemeCSS(css, this.elementId);
 
-      // Track current theme
       this.currentTheme = theme;
       this.isReady = true;
       this.readySubject.next(true);
 
-      console.log(`✓ Theme loaded: ${theme}`);
+      console.log(`Theme initialized: ${theme}`);
     } catch (error) {
       this.isReady = false;
       this.readySubject.next(false);
-      console.error('❌ Failed to load theme:', error);
+      console.error('Theme initialization failed:', error);
       throw error;
     }
   }
@@ -130,39 +117,24 @@ export class ThemeProvider {
   }
 
   /**
-   * Update a single CSS variable at runtime
-   * More efficient than reloading entire theme
-   * RECOVERY 8.1: Forces reflow to ensure updates apply
-   *
-   * @param variableName - Name without '--' prefix (e.g., 'primary-main')
-   * @param value - CSS value (e.g., '#ffffff')
-   *
-   * Example:
-   * this.themeProvider.updateVariable('primary-main', '#00ff00');
+   * Updates a single CSS variable at runtime.
+   * Forces a browser reflow to ensure the update is rendered immediately.
    */
   public updateVariable(variableName: string, value: string): void {
     try {
       updateCSSVariable(variableName, value);
 
-      // RECOVERY 8.1: Force browser reflow to ensure update is applied
+      // Trigger reflow for immediate rendering
       void document.documentElement.offsetHeight;
 
-      console.log(`✓ Variable updated: --${variableName} = ${value}`);
+      console.log(`Variable updated: --${variableName} = ${value}`);
     } catch (error) {
-      console.error(`❌ Failed to update variable ${variableName}:`, error);
+      console.error(`Failed to update variable ${variableName}:`, error);
     }
   }
 
   /**
-   * Update multiple CSS variables at once
-   *
-   * @param updates - Object with variable names as keys and values as CSS values
-   *
-   * Example:
-   * this.themeProvider.updateVariables({
-   *   'primary-main': '#00ff00',
-   *   'text-primary': '#000000'
-   * });
+   * Batch updates multiple CSS variables.
    */
   public updateVariables(updates: Record<string, string>): void {
     Object.entries(updates).forEach(([key, value]) => {
@@ -171,40 +143,19 @@ export class ThemeProvider {
   }
 
   /**
-   * Get reference to the style element for advanced manipulation
-   */
-  public getStyleElement(): HTMLStyleElement | null {
-    return this.styleElement;
-  }
-
-  /**
-   * Check if theme is currently loaded
-   */
-  public isThemeLoaded(): boolean {
-    return this.styleElement !== null && this.styleElement.innerHTML.length > 0;
-  }
-
-  /**
-   * Reload current theme (useful after token updates)
-   */
-  public reloadTheme(): void {
-    this.loadTheme(this.currentTheme);
-  }
-
-  /**
-   * Clear injected theme CSS from DOM
+   * Removes the injected theme styles from the document head.
    */
   public clearTheme(): void {
     if (this.styleElement && this.styleElement.parentNode) {
       this.styleElement.parentNode.removeChild(this.styleElement);
       this.styleElement = null;
-      console.log('✓ Theme cleared from DOM');
+      console.log('Theme styles removed from DOM');
     }
   }
 
   /**
-   * RECOVERY 5.1: Wait for theme to be ready
-   * Prevents race conditions when components access theme before initialization
+   * Returns a promise that resolves when the theme is initialized.
+   * Prevents race conditions during application startup.
    */
   public waitForReady(): Promise<void> {
     return new Promise((resolve) => {
@@ -222,27 +173,7 @@ export class ThemeProvider {
   }
 
   /**
-   * RECOVERY 5.1: Wait for theme ready with timeout protection
-   */
-  public async waitForReadyWithTimeout(ms: number = 5000): Promise<void> {
-    return Promise.race([
-      this.waitForReady(),
-      new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error('Theme loading timeout')), ms),
-      ),
-    ]);
-  }
-
-  /**
-   * Check if theme is ready for use
-   */
-  public isThemeReady(): boolean {
-    return this.isReady;
-  }
-
-  /**
-   * RECOVERY 3.1: Garbage collection for memory monitoring
-   * Removes duplicate style elements if they somehow exist
+   * Periodically cleans up any duplicate style elements found in the DOM.
    */
   public collectGarbage(): void {
     if (this.isSSR) return;
@@ -252,12 +183,31 @@ export class ThemeProvider {
       for (let i = 0; i < elements.length - 1; i++) {
         elements[i].remove();
       }
-      console.log(`✓ Cleaned up ${elements.length - 1} duplicate style elements`);
+      console.log(`Cleaned up ${elements.length - 1} duplicate style elements`);
     }
   }
 
   /**
-   * Get memory monitoring statistics
+   * Generates a status report of the current theme provider state.
+   */
+  public getStatusReport(): string {
+    const stats = this.getMemoryStats();
+    let report = '-----------------------------------\n';
+    report += '  THEME PROVIDER STATUS\n';
+    report += '-----------------------------------\n';
+    report += `Current Theme: ${this.currentTheme}\n`;
+    report += `Theme Ready: ${this.isReady ? 'Yes' : 'No'}\n`;
+    report += `SSR Mode: ${this.isSSR ? 'Yes' : 'No'}\n`;
+    report += `Browser Support: ${CSSSupport.CSS_VARIABLES_SUPPORTED ? 'Full' : 'Limited'}\n`;
+    report += `Validation Enabled: ${this.enableValidation ? 'Yes' : 'No'}\n`;
+    report += `CSS Size (Avg): ${stats.averageSize}KB\n`;
+    report += `CSS Size (Max): ${stats.maxSize}KB\n`;
+    report += '-----------------------------------\n';
+    return report;
+  }
+
+  /**
+   * Retrieves performance and memory usage statistics for the theme generator.
    */
   public getMemoryStats(): { averageSize: number; maxSize: number; samples: number } {
     if (this.styleHistory.length === 0) {
@@ -276,8 +226,7 @@ export class ThemeProvider {
   }
 
   /**
-   * Enable/disable token validation
-   * Disable for performance if tokens are guaranteed valid
+   * Enables or disables runtime token validation.
    */
   public setValidationEnabled(enabled: boolean): void {
     this.enableValidation = enabled;
@@ -285,33 +234,7 @@ export class ThemeProvider {
   }
 
   /**
-   * Get current validation status
-   */
-  public isValidationEnabled(): boolean {
-    return this.enableValidation;
-  }
-
-  /**
-   * Get detailed status report
-   */
-  public getStatusReport(): string {
-    const stats = this.getMemoryStats();
-    let report = '═══════════════════════════════════\n';
-    report += '  THEME PROVIDER STATUS\n';
-    report += '═══════════════════════════════════\n';
-    report += `Current Theme: ${this.currentTheme}\n`;
-    report += `Theme Ready: ${this.isReady ? '✓ Yes' : '✗ No'}\n`;
-    report += `SSR Mode: ${this.isSSR ? 'Yes' : 'No'}\n`;
-    report += `Browser Support: ${CSSSupport.CSS_VARIABLES_SUPPORTED ? '✓ Full' : '✗ Limited'}\n`;
-    report += `Validation Enabled: ${this.enableValidation ? 'Yes' : 'No'}\n`;
-    report += `CSS Size (Avg): ${stats.averageSize}KB\n`;
-    report += `CSS Size (Max): ${stats.maxSize}KB\n`;
-    report += '═══════════════════════════════════\n';
-    return report;
-  }
-
-  /**
-   * Log status report to console
+   * Logs the current status report to the console.
    */
   public logStatusReport(): void {
     console.log(this.getStatusReport());

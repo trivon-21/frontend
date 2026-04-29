@@ -1,22 +1,7 @@
 /**
- * Button Design Tokens
- * UNIFIED button styling for entire application
- *
- * Single source of truth for all button variants across:
- * - Customer portal
- * - Technician portal
- * - Inventory Manager
- * - All other applications
- *
- * Button Types:
- * - primary: Main action button
- * - secondary: Alternative action button
- * - success: Positive action (green)
- * - danger: Destructive action (red)
- * - icon: Icon-only button
- * - text: Text/link button
+ * Configuration for a single button variant.
+ * Defines visual properties for all interaction states.
  */
-
 export interface ButtonVariant {
   background: string;
   color: string;
@@ -50,6 +35,9 @@ export interface ButtonVariant {
   };
 }
 
+/**
+ * Collection of all button variants supported by the system.
+ */
 export interface ButtonTokens {
   primary: ButtonVariant;
   secondary: ButtonVariant;
@@ -63,9 +51,8 @@ export interface ButtonTokens {
 }
 
 /**
- * UNIVERSAL Button Tokens
- * Primary Color: Forest Green (#41603d)
- * Used everywhere
+ * Universal button definitions.
+ * Centralized styles applied across all application portals.
  */
 const universalButtonTokens: ButtonTokens = {
   primary: {

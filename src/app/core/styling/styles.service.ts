@@ -1,15 +1,7 @@
 /**
  * Styles Service
- * Provides utilities for runtime CSS customization
- *
- * Responsibilities:
- * - Update individual CSS variables dynamically
- * - Batch update multiple variables
- * - Get current variable values
- * - Reset variables to defaults
- * - Validate variable names and values
+ * Provides utility methods for managing CSS custom properties at runtime.
  */
-
 import { Injectable } from '@angular/core';
 
 export interface CSSVariableUpdate {
@@ -26,13 +18,8 @@ export interface VariableNamespaces {
 }
 
 /**
- * Service for runtime CSS variable management
- * Works in conjunction with ThemeProvider
- *
- * Usage:
- * - this.stylesService.setColor('primary-main', '#ffffff')
- * - this.stylesService.setSpacing('lg', '20px')
- * - this.stylesService.setVariable('custom-var', 'value')
+ * Service for runtime manipulation of CSS variables.
+ * Enables dynamic updates to colors, spacing, and other design tokens.
  */
 @Injectable({
   providedIn: 'root',
