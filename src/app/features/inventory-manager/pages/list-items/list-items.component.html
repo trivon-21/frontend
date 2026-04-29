@@ -3,7 +3,7 @@
   <div class="header">
     <h1>List Items</h1>
     <button class="btn-primary" [routerLink]="['/inventory-manager/procurement']">
-      <i class="icon-procurement"></i>
+      <lucide-angular name="shopping-cart" [size]="16" class="inline-icon"></lucide-angular>
       Procurement
     </button>
   </div>
@@ -11,7 +11,7 @@
   <!-- Filters Section -->
   <div class="filters-row">
     <div class="search-box">
-      <i class="icon-search"></i>
+      <lucide-angular name="search" class="inline-icon"></lucide-angular>
       <input type="text" [(ngModel)]="searchQuery" placeholder="Search Inventory...">
     </div>
     
@@ -50,7 +50,7 @@
       <div class="items-list">
         <div class="item-card" *ngFor="let item of pendingItems">
           <div class="item-icon pending">
-            <i class="icon-box"></i>
+            <lucide-angular name="box" [size]="18"></lucide-angular>
           </div>
           <div class="item-info">
             <span class="item-name">{{ item.name }}</span>
@@ -69,14 +69,14 @@
       <div class="items-list">
         <div class="item-card" *ngFor="let item of listedItems">
           <div class="item-icon success">
-            <i class="icon-check"></i>
+            <lucide-angular name="check" [size]="18"></lucide-angular>
           </div>
           <div class="item-info">
             <span class="item-name">{{ item.name }}</span>
             <span class="item-sku">{{ item.sku }}</span>
           </div>
           <div class="item-meta">
-            <i class="icon-clock"></i>
+            <lucide-angular name="clock" [size]="14"></lucide-angular>
             <span>{{ item.time }}</span>
           </div>
         </div>

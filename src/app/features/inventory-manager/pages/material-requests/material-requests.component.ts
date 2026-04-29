@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -23,20 +23,22 @@ interface MaterialRequest {
   lastMovedAt?: string;
 }
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-material-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './material-requests.component.html',
-  styleUrls: ['./material-requests.component.css']
+  styleUrls: ['./material-requests.component.css'],
 })
 export class MaterialRequestsDashboardComponent implements OnInit {
   activeTab: 'pending' | 'reserved' | 'completed' = 'pending';
   searchQuery: string = '';
-  
+
   showModal = false;
   selectedRequestId: string | null = null;
-  
+
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -65,7 +67,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         items: r.items,
         serviceTeam: r.serviceTeam,
         completedAt: r.completedAt,
-        lastMovedAt: r.lastMovedAt
+        lastMovedAt: r.lastMovedAt,
       }));
 
       this.pendingRequests = requests.filter((r: MaterialRequest) => r.status === 'pending');
@@ -79,31 +81,39 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   get currentRequests() {
-    let list = this.activeTab === 'pending' ? this.pendingRequests :
-               this.activeTab === 'reserved' ? this.reservedRequests :
-               this.completedRequests;
-               
+    let list =
+      this.activeTab === 'pending'
+        ? this.pendingRequests
+        : this.activeTab === 'reserved'
+          ? this.reservedRequests
+          : this.completedRequests;
+
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (query) {
-      list = list.filter(r => 
-        (r.id?.toLowerCase().includes(query) || 
-         r.requester?.toLowerCase().includes(query) ||
-         r.location?.toLowerCase().includes(query))
+      list = list.filter(
+        (r) =>
+          r.id?.toLowerCase().includes(query) ||
+          r.requester?.toLowerCase().includes(query) ||
+          r.location?.toLowerCase().includes(query),
       );
     }
-               
+
     return list.sort((a, b) => {
       if (this.sortField === 'name') {
-        return this.sortDirection === 'asc' ? a.requester.localeCompare(b.requester) : b.requester.localeCompare(a.requester);
+        return this.sortDirection === 'asc'
+          ? a.requester.localeCompare(b.requester)
+          : b.requester.localeCompare(a.requester);
       } else {
-        return this.sortDirection === 'asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+        return this.sortDirection === 'asc'
+          ? a.date.localeCompare(b.date)
+          : b.date.localeCompare(a.date);
       }
     });
   }
 
   get selectedRequest() {
     const allReqs = [...this.pendingRequests, ...this.reservedRequests, ...this.completedRequests];
-    return allReqs.find(r => r.id === this.selectedRequestId);
+    return allReqs.find((r) => r.id === this.selectedRequestId);
   }
 
   toggleSort(field: 'name' | 'time') {
@@ -139,9 +149,11 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req) {
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, { items: req.items }).subscribe(() => {
-        console.log('Status saved for', this.selectedRequestId);
-      });
+      this.apiService
+        .patch(`/inventory/material-requests/${req.id}`, { items: req.items })
+        .subscribe(() => {
+          console.log('Status saved for', this.selectedRequestId);
+        });
     }
     this.closeModal();
   }
@@ -162,20 +174,22 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
     if (req) {
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam }).subscribe(() => {
-        this.fetchRequests();
-        this.isEditingTeam = false;
-      });
+      this.apiService
+        .patch(`/inventory/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam })
+        .subscribe(() => {
+          this.fetchRequests();
+          this.isEditingTeam = false;
+        });
     }
   }
 
   markKitted() {
     if (!this.selectedRequestId) return;
     const req = this.selectedRequest;
-    if (req && req.items.every(i => i.confirmed)) {
+    if (req && req.items.every((i) => i.confirmed)) {
       const updateData = {
         status: 'reserved',
-        lastMovedAt: new Date().toISOString()
+        lastMovedAt: new Date().toISOString(),
       };
       this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
         this.fetchRequests();
@@ -183,7 +197,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         this.closeModal();
       });
     } else {
-      alert("Please reserve all items before marking as kitted.");
+      alert('Please reserve all items before marking as kitted.');
     }
   }
 
@@ -192,13 +206,13 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     const req = this.selectedRequest;
     if (req) {
       if (!req.serviceTeam) {
-        alert("Please assign a service team first.");
+        alert('Please assign a service team first.');
         return;
       }
       const updateData = {
         status: 'completed',
         completedAt: new Date().toISOString().split('T')[0],
-        lastMovedAt: new Date().toISOString()
+        lastMovedAt: new Date().toISOString(),
       };
       this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
         this.fetchRequests();
@@ -212,7 +226,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!req || !req.lastMovedAt) return false;
     const movedTime = new Date(req.lastMovedAt).getTime();
     const currentTime = new Date().getTime();
-    return (currentTime - movedTime) <= 3600000;
+    return currentTime - movedTime <= 3600000;
   }
 
   undoAction() {
@@ -235,7 +249,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       this.fetchRequests();
       this.setActiveTab(targetTab);
     });
-    
+
     this.closeModal();
   }
 }

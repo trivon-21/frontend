@@ -1,6 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormArray,
+} from '@angular/forms';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -19,12 +26,14 @@ interface RecentProcurement {
   receivedBy: string;
 }
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-procurement-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './procurement.component.html',
-  styleUrls: ['./procurement.component.css']
+  styleUrls: ['./procurement.component.css'],
 })
 export class ProcurementDashboardComponent implements OnInit {
   currentStep = 1;
@@ -43,28 +52,28 @@ export class ProcurementDashboardComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private inventoryService: InventoryManagerDashboardService
+    private inventoryService: InventoryManagerDashboardService,
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadSuppliers();
     this.loadProcurements();
-    
+
     // Listen to supplier input changes for autocomplete
-    this.grnForm.get('supplierInfo.supplier')?.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged())
-      .subscribe(value => {
+    this.grnForm
+      .get('supplierInfo.supplier')
+      ?.valueChanges.pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe((value) => {
         if (typeof value === 'string') {
           this.filterSuppliers(value);
         }
       });
 
     // Listen to quantity changes to adjust serial number inputs
-    this.grnForm.get('inventorySettings.available')?.valueChanges
-      .subscribe(qty => {
-        this.updateSerialNumbersArray(qty);
-      });
+    this.grnForm.get('inventorySettings.available')?.valueChanges.subscribe((qty) => {
+      this.updateSerialNumbersArray(qty);
+    });
   }
 
   get serialNumbersControls() {
@@ -74,7 +83,7 @@ export class ProcurementDashboardComponent implements OnInit {
   private updateSerialNumbersArray(qty: number) {
     const serials = this.grnForm.get('inventorySettings.serialNumbers') as FormArray;
     const currentLength = serials.length;
-    const targetLength = this.grnForm.get('itemDetails.isSerialized')?.value ? (qty || 0) : 0;
+    const targetLength = this.grnForm.get('itemDetails.isSerialized')?.value ? qty || 0 : 0;
 
     if (targetLength > currentLength) {
       for (let i = currentLength; i < targetLength; i++) {
@@ -94,7 +103,7 @@ export class ProcurementDashboardComponent implements OnInit {
         invoiceNumber: ['', Validators.required],
         poNumber: [this.generatePoNumber(), Validators.required],
         receivedDate: [new Date().toISOString().substring(0, 10), Validators.required],
-        condition: ['Good', Validators.required]
+        condition: ['Good', Validators.required],
       }),
       itemDetails: this.fb.group({
         name: ['', Validators.required],
@@ -103,7 +112,7 @@ export class ProcurementDashboardComponent implements OnInit {
         type: ['Single', Validators.required],
         category: ['General', Validators.required],
         isSerialized: [false],
-        specsUrl: ['']
+        specsUrl: [''],
       }),
       inventorySettings: this.fb.group({
         available: [0, [Validators.required, Validators.min(0)]],
@@ -112,12 +121,12 @@ export class ProcurementDashboardComponent implements OnInit {
         reorderLevel: [10, [Validators.required, Validators.min(0)]],
         maxStockLevel: [100, [Validators.required, Validators.min(0)]],
         unitCost: [0, [Validators.required, Validators.min(0)]],
-        serialNumbers: this.fb.array([])
-      })
+        serialNumbers: this.fb.array([]),
+      }),
     });
 
     // Handle isSerialized toggle
-    this.grnForm.get('itemDetails.isSerialized')?.valueChanges.subscribe(val => {
+    this.grnForm.get('itemDetails.isSerialized')?.valueChanges.subscribe((val) => {
       this.updateSerialNumbersArray(this.grnForm.get('inventorySettings.available')?.value || 0);
     });
   }
@@ -138,26 +147,27 @@ export class ProcurementDashboardComponent implements OnInit {
         this.suppliers = data;
         this.filteredSuppliers = data;
       },
-      error: (err) => console.error('Error loading suppliers:', err)
+      error: (err) => console.error('Error loading suppliers:', err),
     });
   }
 
   private loadProcurements(): void {
     this.inventoryService.getProcurements().subscribe({
-      next: (data) => this.procurements = data,
-      error: (err) => console.error('Error loading procurements:', err)
+      next: (data) => (this.procurements = data),
+      error: (err) => console.error('Error loading procurements:', err),
     });
   }
 
   get filteredProcurements() {
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (!query) return this.procurements;
-    return this.procurements.filter(p => 
-      p.invoiceNumber?.toLowerCase().includes(query) || 
-      p.supplierName?.toLowerCase().includes(query) ||
-      p.itemName?.toLowerCase().includes(query) ||
-      p.sku?.toLowerCase().includes(query) ||
-      p.receivedBy?.toLowerCase().includes(query)
+    return this.procurements.filter(
+      (p) =>
+        p.invoiceNumber?.toLowerCase().includes(query) ||
+        p.supplierName?.toLowerCase().includes(query) ||
+        p.itemName?.toLowerCase().includes(query) ||
+        p.sku?.toLowerCase().includes(query) ||
+        p.receivedBy?.toLowerCase().includes(query),
     );
   }
 
@@ -167,9 +177,7 @@ export class ProcurementDashboardComponent implements OnInit {
       return;
     }
     const lowQuery = query.toLowerCase();
-    this.filteredSuppliers = this.suppliers.filter(s => 
-      s.name.toLowerCase().includes(lowQuery)
-    );
+    this.filteredSuppliers = this.suppliers.filter((s) => s.name.toLowerCase().includes(lowQuery));
   }
 
   selectSupplier(supplier: any) {
@@ -211,7 +219,7 @@ export class ProcurementDashboardComponent implements OnInit {
       error: (err) => {
         this.isSubmitting = false;
         this.errorMessage = err.error?.message || 'Failed to add supplier';
-      }
+      },
     });
   }
 
@@ -259,10 +267,14 @@ export class ProcurementDashboardComponent implements OnInit {
 
   private getStepGroupName(step: number): string {
     switch (step) {
-      case 1: return 'supplierInfo';
-      case 2: return 'itemDetails';
-      case 3: return 'inventorySettings';
-      default: return '';
+      case 1:
+        return 'supplierInfo';
+      case 2:
+        return 'itemDetails';
+      case 3:
+        return 'inventorySettings';
+      default:
+        return '';
     }
   }
 
@@ -280,7 +292,7 @@ export class ProcurementDashboardComponent implements OnInit {
       invoiceNumber: this.grnForm.get('supplierInfo.invoiceNumber')?.value,
       poNumber: this.grnForm.get('supplierInfo.poNumber')?.value,
       receivedDate: this.grnForm.get('supplierInfo.receivedDate')?.value,
-      condition: this.grnForm.get('supplierInfo.condition')?.value
+      condition: this.grnForm.get('supplierInfo.condition')?.value,
     };
 
     this.inventoryService.addItem(formData).subscribe({
@@ -292,23 +304,29 @@ export class ProcurementDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.errorMessage = err.error?.message || 'Failed to add product. Please check SKU uniqueness.';
-      }
+        this.errorMessage =
+          err.error?.message || 'Failed to add product. Please check SKU uniqueness.';
+      },
     });
   }
-
-
 
   private resetForm() {
     this.currentStep = 1;
     this.grnForm.reset({
-      supplierInfo: { 
+      supplierInfo: {
         poNumber: this.generatePoNumber(),
-        receivedDate: new Date().toISOString().substring(0, 10), 
-        condition: 'Good' 
+        receivedDate: new Date().toISOString().substring(0, 10),
+        condition: 'Good',
       },
       itemDetails: { type: 'Single', category: 'General', isSerialized: false },
-      inventorySettings: { available: 0, location: 'Warehouse', unit: 'units', reorderLevel: 10, maxStockLevel: 100, unitCost: 0 }
+      inventorySettings: {
+        available: 0,
+        location: 'Warehouse',
+        unit: 'units',
+        reorderLevel: 10,
+        maxStockLevel: 100,
+        unitCost: 0,
+      },
     });
     // Clear serial numbers array
     const serials = this.grnForm.get('inventorySettings.serialNumbers') as FormArray;

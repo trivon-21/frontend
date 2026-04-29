@@ -48,10 +48,12 @@ interface InventoryItem {
 
 
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-order-creation',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './order-creation.component.html',
   styleUrls: ['./order-creation.component.css']
 })

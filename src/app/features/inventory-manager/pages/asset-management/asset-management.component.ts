@@ -24,18 +24,20 @@ interface ReturnLog {
   returnedAt: string;
 }
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-asset-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './asset-management.component.html',
-  styleUrls: ['./asset-management.component.css']
+  styleUrls: ['./asset-management.component.css'],
 })
 export class AssetManagementDashboardComponent implements OnInit {
   showModal = false;
   activeTab: 'loans' | 'logs' = 'loans';
   searchQuery: string = '';
-  
+
   technicians: any[] = [];
   tools: any[] = [];
   loans: ActiveLoan[] = [];
@@ -53,20 +55,22 @@ export class AssetManagementDashboardComponent implements OnInit {
   get filteredLoans() {
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (!query) return this.loans;
-    return this.loans.filter(l => 
-      l.toolName?.toLowerCase().includes(query) || 
-      l.assetTag?.toLowerCase().includes(query) ||
-      l.technicianName?.toLowerCase().includes(query)
+    return this.loans.filter(
+      (l) =>
+        l.toolName?.toLowerCase().includes(query) ||
+        l.assetTag?.toLowerCase().includes(query) ||
+        l.technicianName?.toLowerCase().includes(query),
     );
   }
 
   get filteredReturnLogs() {
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (!query) return this.returnLogs;
-    return this.returnLogs.filter(l => 
-      l.toolName?.toLowerCase().includes(query) || 
-      l.assetTag?.toLowerCase().includes(query) ||
-      l.technicianName?.toLowerCase().includes(query)
+    return this.returnLogs.filter(
+      (l) =>
+        l.toolName?.toLowerCase().includes(query) ||
+        l.assetTag?.toLowerCase().includes(query) ||
+        l.technicianName?.toLowerCase().includes(query),
     );
   }
 
@@ -77,23 +81,29 @@ export class AssetManagementDashboardComponent implements OnInit {
   }
 
   fetchData() {
-    this.apiService.get('/inventory/technicians').subscribe(data => this.technicians = data);
-    this.apiService.get('/inventory/list').subscribe(data => this.tools = data.filter((t: any) => t.isSerialized || t.category === 'Tools'));
+    this.apiService.get('/inventory/technicians').subscribe((data) => (this.technicians = data));
+    this.apiService
+      .get('/inventory/list')
+      .subscribe(
+        (data) => (this.tools = data.filter((t: any) => t.isSerialized || t.category === 'Tools')),
+      );
     this.fetchLoans();
     this.fetchReturnLogs();
   }
 
   fetchLoans() {
-    this.apiService.get('/inventory/asset-loans').subscribe(data => {
+    this.apiService.get('/inventory/asset-loans').subscribe((data) => {
       this.loans = data.map((loan: any) => ({
         ...loan,
-        status: new Date(loan.dueDate) < new Date() ? 'Overdue' : 'On Time'
+        status: new Date(loan.dueDate) < new Date() ? 'Overdue' : 'On Time',
       }));
     });
   }
 
   fetchReturnLogs() {
-    this.apiService.get('/inventory/asset-return-logs').subscribe(data => this.returnLogs = data);
+    this.apiService
+      .get('/inventory/asset-return-logs')
+      .subscribe((data) => (this.returnLogs = data));
   }
 
   openRegisterModal() {
@@ -110,8 +120,8 @@ export class AssetManagementDashboardComponent implements OnInit {
       return;
     }
 
-    const technician = this.technicians.find(t => t._id.toString() === this.selectedTechnicianId);
-    const tool = this.tools.find(t => t._id === this.selectedToolId);
+    const technician = this.technicians.find((t) => t._id.toString() === this.selectedTechnicianId);
+    const tool = this.tools.find((t) => t._id === this.selectedToolId);
 
     const loanData = {
       toolId: tool._id,
@@ -119,7 +129,7 @@ export class AssetManagementDashboardComponent implements OnInit {
       assetTag: tool.sku, // Using SKU as asset tag if not specific
       technicianId: technician._id.toString(),
       technicianName: technician.name,
-      dueDate: this.dueDate
+      dueDate: this.dueDate,
     };
 
     this.apiService.post('/inventory/asset-loans', loanData).subscribe(() => {

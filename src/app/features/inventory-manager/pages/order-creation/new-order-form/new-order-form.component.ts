@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 import { ApiService } from '../../../../../core/services/api.service';
 
 interface OrderItem {
@@ -37,7 +38,7 @@ interface Supplier {
 @Component({
   selector: 'app-new-order-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   templateUrl: './new-order-form.component.html',
   styleUrls: ['./new-order-form.component.css']
 })

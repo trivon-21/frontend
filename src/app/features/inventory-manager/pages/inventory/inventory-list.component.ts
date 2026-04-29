@@ -2,14 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { InventoryManagerDashboardService, InventoryItem } from '../../services/inventory-manager-dashboard.service';
+import {
+  InventoryManagerDashboardService,
+  InventoryItem,
+} from '../../services/inventory-manager-dashboard.service';
+
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule],
   templateUrl: './inventory-list.component.html',
-  styleUrls: ['./inventory-list.component.css']
+  styleUrls: ['./inventory-list.component.css'],
 })
 export class InventoryListComponent implements OnInit {
   searchQuery: string = '';
@@ -34,23 +39,26 @@ export class InventoryListComponent implements OnInit {
       error: (err) => {
         this.error = 'Failed to load inventory';
         this.loading = false;
-      }
+      },
     });
   }
 
   applyFilters() {
     const query = this.searchQuery.toLowerCase().trim();
-    this.inventoryItems = this.allInventoryItems.filter(item => {
-      const matchesSearch = !query || 
-        (item.name?.toLowerCase().includes(query) ||
-         item.sku?.toLowerCase().includes(query) ||
-         item.brand?.toLowerCase().includes(query) ||
-         item.category?.toLowerCase().includes(query));
-      
+    this.inventoryItems = this.allInventoryItems.filter((item) => {
+      const matchesSearch =
+        !query ||
+        item.name?.toLowerCase().includes(query) ||
+        item.sku?.toLowerCase().includes(query) ||
+        item.brand?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query);
+
       const matchesType = this.selectedType === 'All Types' || item.type === this.selectedType;
       const matchesBrand = this.selectedBrand === 'All Brands' || item.brand === this.selectedBrand;
-      const matchesCategory = this.selectedCategory === 'All Categories' || item.category === this.selectedCategory;
-      const matchesLocation = this.selectedLocation === 'All Locations' || item.location === this.selectedLocation;
+      const matchesCategory =
+        this.selectedCategory === 'All Categories' || item.category === this.selectedCategory;
+      const matchesLocation =
+        this.selectedLocation === 'All Locations' || item.location === this.selectedLocation;
 
       return matchesSearch && matchesType && matchesBrand && matchesCategory && matchesLocation;
     });

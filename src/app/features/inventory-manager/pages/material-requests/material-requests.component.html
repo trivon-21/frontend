@@ -1,7 +1,7 @@
 <div class="dispatch-container">
   <!-- Header -->
   <div class="header">
-    <h1>Material Requests</h1>
+    <h1>Stock Requests</h1>
   </div>
 
   <!-- Tabs Navigation -->
@@ -20,7 +20,7 @@
   <!-- Table Controls -->
   <div class="table-controls glass-panel">
     <div class="search-box">
-      <i class="icon-search"></i>
+      <lucide-angular name="search" class="inline-icon"></lucide-angular>
       <input type="text" [(ngModel)]="searchQuery" (input)="$event" [placeholder]="
         activeTab === 'completed' ? 'Search by Request ID, Requester, or Date' :
         'Search by Request ID or Requester Name'
@@ -58,7 +58,7 @@
           <td *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
           <td class="actions-cell">
             <button class="btn-view" (click)="openModal(req.id)">
-              <i class="icon-eye"></i>
+              <lucide-angular name="eye" [size]="14"></lucide-angular>
               View Request
             </button>
           </td>
@@ -82,7 +82,9 @@
           <h2>Request ID : {{ selectedRequest?.id }}</h2>
           <span class="order-type">REQUESTER : {{ selectedRequest?.requester }}</span>
         </div>
-        <button class="btn-close" (click)="closeModal()">×</button>
+        <button class="btn-close" (click)="closeModal()">
+          <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
+        </button>
       </div>
       
       <div class="modal-body">
@@ -106,20 +108,22 @@
               <tr *ngFor="let item of selectedRequest?.items">
                 <td class="item-name">{{ item.name }}</td>
                 <td class="item-sku">{{ item.sku }}</td>
-                <td class="item-qty">×{{ item.qty }}</td>
+                <td class="item-qty">
+                  <span class="qty-symbol">×</span>{{ item.qty }}
+                </td>
                 <td class="text-center">
                   <ng-container *ngIf="activeTab === 'pending'">
                     <button 
                       class="btn-confirm" 
                       [class.confirmed]="item.confirmed"
                       (click)="confirmItem(item)">
-                      <i class="icon-check" *ngIf="item.confirmed"></i>
+                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
                       {{ item.confirmed ? 'Reserved' : 'Click to Reserve' }}
                     </button>
                   </ng-container>
                   <ng-container *ngIf="activeTab !== 'pending'">
                     <div class="btn-confirm" [class.confirmed]="item.confirmed" style="pointer-events: none; display: inline-flex; width: auto; padding: 4px 12px; font-size: 12px; opacity: 0.9;">
-                      <i class="icon-check" *ngIf="item.confirmed"></i>
+                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
                       {{ item.confirmed ? 'Reserved' : 'Pending' }}
                     </div>
                   </ng-container>

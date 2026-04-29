@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -25,12 +25,14 @@ interface DispatchOrder {
   lastMovedAt?: string;
 }
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-dispatch-logistics',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './dispatch-logistics.component.html',
-  styleUrls: ['./dispatch-logistics.component.css']
+  styleUrls: ['./dispatch-logistics.component.css'],
 })
 export class DispatchLogisticsDashboardComponent implements OnInit {
   activeTab: 'to-pack' | 'ready' | 'in-transit' | 'completed' = 'to-pack';
@@ -39,7 +41,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   showAssignModal = false;
   isViewingDetailsFromAssign = false;
   selectedOrderId: string | null = null;
-  
+
   // Edit mode state
   isEditMode = false;
   editCourier = '';
@@ -75,14 +77,14 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         courier: o.courier,
         trackId: o.trackId,
         completedAt: o.completedAt,
-        lastMovedAt: o.lastMovedAt
+        lastMovedAt: o.lastMovedAt,
       }));
 
       this.ordersToPack = orders.filter((o: DispatchOrder) => o.status === 'to-pack');
       this.ordersReady = orders.filter((o: DispatchOrder) => o.status === 'ready');
       this.ordersInTransit = orders.filter((o: DispatchOrder) => o.status === 'in-transit');
       this.ordersCompleted = orders.filter((o: DispatchOrder) => o.status === 'completed');
-      
+
       this.selectFirstOrder();
     });
   }
@@ -111,21 +113,22 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     else if (this.activeTab === 'ready') orders = [...this.ordersReady];
     else if (this.activeTab === 'in-transit') orders = [...this.ordersInTransit];
     else orders = [...this.ordersCompleted];
-    
+
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (query) {
-      orders = orders.filter(o => 
-        (o.id?.toLowerCase().includes(query) || 
-         o.customer?.toLowerCase().includes(query) ||
-         o.trackId?.toLowerCase().includes(query) ||
-         o.courier?.toLowerCase().includes(query))
+      orders = orders.filter(
+        (o) =>
+          o.id?.toLowerCase().includes(query) ||
+          o.customer?.toLowerCase().includes(query) ||
+          o.trackId?.toLowerCase().includes(query) ||
+          o.courier?.toLowerCase().includes(query),
       );
     }
 
     return orders.sort((a, b) => {
       const valA = this.sortField === 'name' ? a.customer : a.time;
       const valB = this.sortField === 'name' ? b.customer : b.time;
-      
+
       if (this.sortDirection === 'asc') {
         return (valA || '').localeCompare(valB || '');
       } else {
@@ -149,7 +152,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   isOrderFullyReserved(order: DispatchOrder): boolean {
-    return order.items && order.items.length > 0 && order.items.every(item => item.confirmed);
+    return order.items && order.items.length > 0 && order.items.every((item) => item.confirmed);
   }
 
   get isDeliveryFormValid(): boolean {
@@ -158,15 +161,15 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
 
   completeAssignment() {
     if (!this.selectedOrderId) return;
-    
-    const index = this.ordersToPack.findIndex(o => o.id === this.selectedOrderId);
+
+    const index = this.ordersToPack.findIndex((o) => o.id === this.selectedOrderId);
     if (index !== -1) {
       const order = this.ordersToPack[index];
       const updateData = {
         status: 'ready',
         courier: this.courierService,
         trackId: this.trackingId,
-        lastMovedAt: new Date().toISOString()
+        lastMovedAt: new Date().toISOString(),
       };
 
       this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
@@ -174,7 +177,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         this.setActiveTab('ready');
       });
     }
-    
+
     this.closeModals();
   }
 
@@ -200,8 +203,13 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   get selectedOrder() {
-    const allOrders = [...this.ordersToPack, ...this.ordersReady, ...this.ordersInTransit, ...this.ordersCompleted];
-    return allOrders.find(o => o.id === this.selectedOrderId);
+    const allOrders = [
+      ...this.ordersToPack,
+      ...this.ordersReady,
+      ...this.ordersInTransit,
+      ...this.ordersCompleted,
+    ];
+    return allOrders.find((o) => o.id === this.selectedOrderId);
   }
 
   enableEditMode() {
@@ -218,7 +226,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       const updateData = {
         courier: this.editCourier,
-        trackId: this.editTrackId
+        trackId: this.editTrackId,
       };
       this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         order.courier = this.editCourier;
@@ -234,7 +242,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       const updateData = {
         status: 'in-transit',
-        lastMovedAt: new Date().toISOString()
+        lastMovedAt: new Date().toISOString(),
       };
       this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         this.fetchOrders();
@@ -251,7 +259,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       const updateData = {
         status: 'completed',
         completedAt: new Date().toISOString().split('T')[0],
-        lastMovedAt: new Date().toISOString()
+        lastMovedAt: new Date().toISOString(),
       };
       this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
         this.fetchOrders();
@@ -269,7 +277,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (!order || !order.lastMovedAt) return false;
     const movedTime = new Date(order.lastMovedAt).getTime();
     const currentTime = new Date().getTime();
-    return (currentTime - movedTime) <= 3600000;
+    return currentTime - movedTime <= 3600000;
   }
 
   undoAction() {
@@ -295,7 +303,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       this.fetchOrders();
       this.setActiveTab(targetTab);
     });
-    
+
     this.closeModals();
   }
 
@@ -307,9 +315,11 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (!this.selectedOrderId) return;
     const order = this.selectedOrder;
     if (order) {
-      this.apiService.patch(`/inventory/orders/${order.id}`, { items: order.items }).subscribe(() => {
-        console.log('Status saved for', this.selectedOrderId);
-      });
+      this.apiService
+        .patch(`/inventory/orders/${order.id}`, { items: order.items })
+        .subscribe(() => {
+          console.log('Status saved for', this.selectedOrderId);
+        });
     }
     this.closeModals();
   }

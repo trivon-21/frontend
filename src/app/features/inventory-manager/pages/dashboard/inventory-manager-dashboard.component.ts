@@ -6,11 +6,13 @@ import {
   InventoryDashboardData,
   ActivityItem,
 } from '../../services/inventory-manager-dashboard.service';
+import { IconMappingService } from '../../../../shared/services/icon-mapping.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-inventory-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './inventory-manager-dashboard.component.html',
   styleUrl: './inventory-manager-dashboard.component.css',
 })
@@ -20,7 +22,10 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
   error: string | null = null;
   private timer: any;
 
-  constructor(private dashboardService: InventoryManagerDashboardService) {}
+  constructor(
+    private dashboardService: InventoryManagerDashboardService,
+    private iconMappingService: IconMappingService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -64,23 +69,12 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
   }
 
   getActivityIcon(type: string): string {
-    switch (type) {
-      case 'return':
-      case 'dispatch':
-      case 'grn':
-        return '✓';
-      case 'request':
-        return '📋';
-      case 'alert':
-        return '⏱';
-      default:
-        return '•';
-    }
+    return this.iconMappingService.getActivityIcon(type);
   }
 
   onScanQR(): void {

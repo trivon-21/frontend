@@ -1,10 +1,10 @@
 <div class="asset-container">
   <!-- Header Section -->
   <div class="header">
-    <h1>Asset Management</h1>
+    <h1>Tool Lending</h1>
     <div class="header-actions">
       <button class="btn-primary" (click)="openRegisterModal()">
-        <i class="icon-plus"></i>
+        <lucide-angular name="plus" class="inline-icon"></lucide-angular>
         Register New Tool
       </button>
     </div>
@@ -12,44 +12,65 @@
 
   <!-- Check-Out Panel -->
   <div class="checkout-card glass-panel">
-    <h3>Check-Out Tool</h3>
+    <div class="card-header-with-icon">
+      <lucide-angular name="wrench" [size]="20" class="header-icon"></lucide-angular>
+      <h3>Check-Out Tool</h3>
+    </div>
     <div class="checkout-form">
       <div class="input-group">
         <label>Select Technician</label>
         <select class="form-select" [(ngModel)]="selectedTechnicianId">
           <option value="">Choose Technician...</option>
-          <option *ngFor="let tech of technicians" [value]="tech._id">{{ tech.name }} ({{ tech.role }})</option>
+          <option *ngFor="let tech of technicians" [value]="tech._id">
+            {{ tech.name }} ({{ tech.role }})
+          </option>
         </select>
       </div>
       <div class="input-group">
         <label>Select Tool</label>
         <select class="form-select" [(ngModel)]="selectedToolId">
           <option value="">Choose Tool...</option>
-          <option *ngFor="let tool of tools" [value]="tool._id">{{ tool.name }} - {{ tool.sku }}</option>
+          <option *ngFor="let tool of tools" [value]="tool._id">
+            {{ tool.name }} - {{ tool.sku }}
+          </option>
         </select>
       </div>
       <div class="input-group">
         <label>Expected Return</label>
-        <input type="date" class="form-input" [(ngModel)]="dueDate">
+        <input type="date" class="form-input" [(ngModel)]="dueDate" />
       </div>
-      <button class="btn-primary" (click)="checkOut()">Check Out</button>
+      <button class="btn-primary" (click)="checkOut()">
+        <lucide-angular name="arrow-right-left" [size]="16" class="inline-icon"></lucide-angular>
+        Check Out
+      </button>
     </div>
   </div>
 
   <!-- Search and Tabs Bar -->
   <div class="tabs-nav-container">
     <div class="tabs-nav">
-      <button class="tab-btn" [class.active]="activeTab === 'loans'" (click)="setActiveTab('loans')">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'loans'"
+        (click)="setActiveTab('loans')"
+      >
+        <lucide-angular name="activity" [size]="16" class="tab-icon"></lucide-angular>
         Active Loans <span class="badge" *ngIf="loans.length > 0">{{ loans.length }}</span>
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
+        <lucide-angular name="history" [size]="16" class="tab-icon"></lucide-angular>
         Return Logs <span class="badge" *ngIf="returnLogs.length > 0">{{ returnLogs.length }}</span>
       </button>
     </div>
 
     <div class="search-box">
-      <i class="icon-search"></i>
-      <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search by tool, tag or technician...">
+      <lucide-angular name="search" class="inline-icon"></lucide-angular>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="($event)"
+        placeholder="Search by tool, tag or technician..."
+      />
     </div>
   </div>
 
@@ -60,7 +81,7 @@
         <h3>Active Loans</h3>
         <span class="loan-count">Tools currently checked out by technicians</span>
       </div>
-      
+
       <table>
         <thead>
           <tr>
@@ -78,15 +99,18 @@
             <td class="tool-name">{{ loan.toolName }}</td>
             <td class="asset-tag">{{ loan.assetTag }}</td>
             <td class="held-by">{{ loan.technicianName }}</td>
-            <td class="date-cell">{{ loan.checkedOutAt | date:'medium' }}</td>
-            <td class="date-cell">{{ loan.dueDate | date:'mediumDate' }}</td>
+            <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
+            <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
             <td>
               <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
                 {{ loan.status }}
               </span>
             </td>
             <td>
-              <button class="btn-action" (click)="markReturned(loan._id!)">Mark Returned</button>
+              <button class="btn-action" (click)="markReturned(loan._id!)">
+                <lucide-angular name="rotate-ccw" [size]="14" class="inline-icon"></lucide-angular>
+                Mark Returned
+              </button>
             </td>
           </tr>
           <tr *ngIf="filteredLoans.length === 0">
@@ -112,7 +136,7 @@
         </div>
         <span class="loan-count">Tools recently returned by technicians</span>
       </div>
-      
+
       <table>
         <thead>
           <tr>
@@ -131,8 +155,8 @@
               </div>
             </td>
             <td class="held-by">{{ log.technicianName }}</td>
-            <td class="date-cell">{{ log.checkedOutAt | date:'short' }}</td>
-            <td class="date-cell">{{ log.returnedAt | date:'short' }}</td>
+            <td class="date-cell">{{ log.checkedOutAt | date: 'short' }}</td>
+            <td class="date-cell">{{ log.returnedAt | date: 'short' }}</td>
           </tr>
           <tr *ngIf="filteredReturnLogs.length === 0">
             <td colspan="4" class="empty-state">No return logs matching your search.</td>
@@ -149,19 +173,19 @@
         <div class="form-row">
           <div class="input-group">
             <label>ITEM NAME</label>
-            <input type="text" placeholder="Enter Name">
+            <input type="text" placeholder="Enter Name" />
           </div>
           <div class="input-group">
             <label>ASSET TAG</label>
-            <input type="text" placeholder="Enter Number">
+            <input type="text" placeholder="Enter Number" />
           </div>
         </div>
         <div class="form-row">
           <div class="input-group half">
             <label>DATE</label>
             <div class="date-picker">
-              <input type="text" placeholder="Set Date">
-              <i class="icon-calendar"></i>
+              <input type="text" placeholder="Set Date" />
+              <lucide-angular name="calendar" class="inline-icon"></lucide-angular>
             </div>
           </div>
         </div>

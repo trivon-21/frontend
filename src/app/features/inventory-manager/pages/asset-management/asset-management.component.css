@@ -86,17 +86,38 @@
   padding: 24px;
 }
 
-.checkout-card h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 20px 0;
+.card-header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card-header-with-icon h3 {
+  margin: 0 !important;
+}
+
+.header-icon {
+  color: var(--primary-main);
 }
 
 .checkout-form {
   display: flex;
   align-items: flex-end;
   gap: 20px;
+}
+
+.inline-icon {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.tab-icon {
+  opacity: 0.7;
+}
+
+.tab-btn.active .tab-icon {
+  opacity: 1;
 }
 
 .input-group {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -18,26 +18,70 @@ interface QuarantineItem {
   location: string;
 }
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-returns-rma-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './returns-rma.component.html',
-  styleUrls: ['./returns-rma.component.css']
+  styleUrls: ['./returns-rma.component.css'],
 })
 export class ReturnsRmaDashboardComponent {
   searchQuery: string = '';
   rmaLogs: RmaLog[] = [
-    { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-14', status: 'Single' },
-    { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-12', status: 'Bundle' },
-    { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-10', status: 'Single' },
-    { serial: 'CAR-IND-2024-2234', user: 'Pradeep Silva', fault: 'Fan motor defective, not rotating', date: '2025-02-05', status: 'Bundle' }
+    {
+      serial: 'CAR-IND-2024-2234',
+      user: 'Pradeep Silva',
+      fault: 'Fan motor defective, not rotating',
+      date: '2025-02-14',
+      status: 'Single',
+    },
+    {
+      serial: 'CAR-IND-2024-2234',
+      user: 'Pradeep Silva',
+      fault: 'Fan motor defective, not rotating',
+      date: '2025-02-12',
+      status: 'Bundle',
+    },
+    {
+      serial: 'CAR-IND-2024-2234',
+      user: 'Pradeep Silva',
+      fault: 'Fan motor defective, not rotating',
+      date: '2025-02-10',
+      status: 'Single',
+    },
+    {
+      serial: 'CAR-IND-2024-2234',
+      user: 'Pradeep Silva',
+      fault: 'Fan motor defective, not rotating',
+      date: '2025-02-05',
+      status: 'Bundle',
+    },
   ];
 
   quarantineItems: QuarantineItem[] = [
-    { name: 'Copper Pipe 1/4" (Dented)', qty: '15 units', reason: 'Physical damage during transport', dateAdded: '2025-02-10', location: 'Zone C - Shelf 4' },
-    { name: 'Installation Kit - Standard (Incomplete)', qty: '3 units', reason: 'Missing components, cannot be sold as complete kit', dateAdded: '2025-02-08', location: 'Zone C - Shelf 2' },
-    { name: 'Wall Mounting Brackets (Rusted)', qty: '8 units', reason: 'Water damage, surface rust detected', dateAdded: '2025-02-12', location: 'Zone C - Shelf 1' }
+    {
+      name: 'Copper Pipe 1/4" (Dented)',
+      qty: '15 units',
+      reason: 'Physical damage during transport',
+      dateAdded: '2025-02-10',
+      location: 'Zone C - Shelf 4',
+    },
+    {
+      name: 'Installation Kit - Standard (Incomplete)',
+      qty: '3 units',
+      reason: 'Missing components, cannot be sold as complete kit',
+      dateAdded: '2025-02-08',
+      location: 'Zone C - Shelf 2',
+    },
+    {
+      name: 'Wall Mounting Brackets (Rusted)',
+      qty: '8 units',
+      reason: 'Water damage, surface rust detected',
+      dateAdded: '2025-02-12',
+      location: 'Zone C - Shelf 1',
+    },
   ];
 
   disposeItem(index: number) {
@@ -47,20 +91,22 @@ export class ReturnsRmaDashboardComponent {
   get filteredRmaLogs() {
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (!query) return this.rmaLogs;
-    return this.rmaLogs.filter(l => 
-      l.serial?.toLowerCase().includes(query) || 
-      l.user?.toLowerCase().includes(query) ||
-      l.fault?.toLowerCase().includes(query)
+    return this.rmaLogs.filter(
+      (l) =>
+        l.serial?.toLowerCase().includes(query) ||
+        l.user?.toLowerCase().includes(query) ||
+        l.fault?.toLowerCase().includes(query),
     );
   }
 
   get filteredQuarantineItems() {
     const query = (this.searchQuery || '').toLowerCase().trim();
     if (!query) return this.quarantineItems;
-    return this.quarantineItems.filter(i => 
-      i.name?.toLowerCase().includes(query) || 
-      i.reason?.toLowerCase().includes(query) ||
-      i.location?.toLowerCase().includes(query)
+    return this.quarantineItems.filter(
+      (i) =>
+        i.name?.toLowerCase().includes(query) ||
+        i.reason?.toLowerCase().includes(query) ||
+        i.location?.toLowerCase().includes(query),
     );
   }
 }

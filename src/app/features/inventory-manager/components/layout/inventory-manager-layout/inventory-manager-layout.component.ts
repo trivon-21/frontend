@@ -1,17 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../../core/services/auth.service';
 import {
   NotificationService,
   Notification,
 } from '../../../../../core/services/notification.service';
+import { IconMappingService } from '../../../../../shared/services/icon-mapping.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-inventory-manager-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ClickOutsideDirective],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    CommonModule,
+    LucideAngularModule,
+    ClickOutsideDirective,
+  ],
   templateUrl: './inventory-manager-layout.component.html',
   styleUrl: './inventory-manager-layout.component.css',
 })
@@ -25,6 +34,7 @@ export class InventoryManagerLayoutComponent implements OnInit {
     public authService: AuthService,
     private notificationService: NotificationService,
     private router: Router,
+    private iconMappingService: IconMappingService,
   ) {}
 
   ngOnInit(): void {
@@ -106,13 +116,6 @@ export class InventoryManagerLayoutComponent implements OnInit {
   }
 
   getNotificationIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      order: '📦',
-      inquiry: '💬',
-      service: '🔧',
-      feedback: '⭐',
-      general: '🔔',
-    };
-    return icons[type] || '🔔';
+    return this.iconMappingService.getNotificationIcon(type);
   }
 }

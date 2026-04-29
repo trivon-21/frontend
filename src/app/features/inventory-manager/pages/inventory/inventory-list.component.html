@@ -6,11 +6,11 @@
     </div>
     <div class="header-actions">
       <button class="btn-primary" [routerLink]="['/inventory-manager/procurement']">
-        <i class="icon-procurement"></i>
+        <lucide-angular name="clipboard-check" [size]="16" class="inline-icon"></lucide-angular>
         Procurement
       </button>
       <button class="btn-primary" [routerLink]="['/inventory-manager/list-items']">
-        <i class="icon-list"></i>
+        <lucide-angular name="list" [size]="16" class="inline-icon"></lucide-angular>
         List Items
       </button>
     </div>
@@ -19,7 +19,7 @@
   <!-- Filters Section -->
   <div class="filters-card glass-panel">
     <div class="search-box">
-      <i class="icon-search"></i>
+      <lucide-angular name="search" class="inline-icon"></lucide-angular>
       <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Search Inventory...">
     </div>
     

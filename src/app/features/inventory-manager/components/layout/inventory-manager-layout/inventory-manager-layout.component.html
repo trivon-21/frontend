@@ -1,7 +1,10 @@
 <div class="dashboard-wrapper">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <a routerLink="/inventory-manager" class="sidebar-brand">AirLux</a>
+    <a routerLink="/inventory-manager" class="sidebar-brand">
+      <lucide-angular name="wind" class="brand-icon" [size]="24"></lucide-angular>
+      AirLux
+    </a>
     <nav class="sidebar-nav">
       <a
         routerLink="/inventory-manager"
@@ -9,36 +12,11 @@
         [routerLinkActiveOptions]="{ exact: true }"
         class="nav-item"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
-          <path d="M9 21V12h6v9" />
-        </svg>
+        <lucide-angular name="layout-dashboard" [size]="20" strokeWidth="1.8"></lucide-angular>
         <span>Dashboard</span>
       </a>
       <a routerLink="/inventory-manager/inventory" routerLinkActive="active" class="nav-item">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <path d="M16 10a4 4 0 0 1-8 0" />
-        </svg>
+        <lucide-angular name="package" [size]="20" strokeWidth="1.8"></lucide-angular>
         <span>Inventory</span>
       </a>
       <a
@@ -46,117 +24,36 @@
         routerLinkActive="active"
         class="nav-item"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-        </svg>
-        <span>Asset Management</span>
+        <lucide-angular name="wrench" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Tool Lending</span>
       </a>
       <a
         routerLink="/inventory-manager/material-requests"
         routerLinkActive="active"
         class="nav-item"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-        </svg>
-        <span>Material Requests</span>
+        <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Stock Requests</span>
       </a>
       <a
         routerLink="/inventory-manager/dispatch-logistics"
         routerLinkActive="active"
         class="nav-item"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M18 9h-4V5H4c-1 0-2 1-2 2v12c0 1 1 2 2 2h14c1 0 2-1 2-2v-8c0-1-1-2-2-2zm-2 0V7"
-          />
-        </svg>
-        <span>Dispatch & Logistics</span>
+        <lucide-angular name="truck" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Logistics</span>
       </a>
-      <a
-        routerLink="/inventory-manager/order-creation"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-          <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-          <path d="M12 11h4" />
-          <path d="M12 16h4" />
-          <path d="M8 11h.01" />
-          <path d="M8 16h.01" />
-        </svg>
+      <a routerLink="/inventory-manager/order-creation" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="shopping-cart" [size]="20" strokeWidth="1.8"></lucide-angular>
         <span>Order Creation</span>
       </a>
       <a routerLink="/inventory-manager/procurement" routerLinkActive="active" class="nav-item">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-          />
-        </svg>
+        <lucide-angular name="clipboard-check" [size]="20" strokeWidth="1.8"></lucide-angular>
         <span>Procurement</span>
       </a>
       <a routerLink="/inventory-manager/returns-rma" routerLinkActive="active" class="nav-item">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9" />
-          <path d="M17 13H7" />
-        </svg>
-        <span>Returns & RMA</span>
+        <lucide-angular name="rotate-ccw" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Returns</span>
       </a>
     </nav>
   </aside>
@@ -165,22 +62,8 @@
   <div class="dashboard-main">
     <!-- Header -->
     <header class="dashboard-header">
-
       <div class="header-search-wrap">
-        <svg
-          class="search-icon"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
+        <lucide-angular name="search" class="search-icon" [size]="18" strokeWidth="2"></lucide-angular>
         <input class="header-search" type="text" placeholder="Search product, supplier, order" />
       </div>
       <div class="header-actions">
@@ -192,19 +75,7 @@
             (click)="toggleNotifications()"
             title="Notifications"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
+            <lucide-angular name="bell" [size]="20" strokeWidth="1.8"></lucide-angular>
             <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
           </button>
 
@@ -219,16 +90,7 @@
                   *ngIf="unreadCount > 0"
                   title="Mark all as read"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <lucide-angular name="check" [size]="14" strokeWidth="2"></lucide-angular>
                 </button>
                 <button
                   class="action-link"
@@ -236,17 +98,7 @@
                   *ngIf="notifications.length > 0"
                   title="Clear all"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
+                  <lucide-angular name="x" [size]="14" strokeWidth="2"></lucide-angular>
                 </button>
               </div>
             </div>
@@ -261,7 +113,10 @@
                 [class.unread]="!notif.read"
                 (click)="navigateToNotification(notif)"
               >
-                <span class="notif-icon">{{ getNotificationIcon(notif.type) }}</span>
+                <lucide-angular
+                  [name]="getNotificationIcon(notif.type)"
+                  class="notif-icon"
+                ></lucide-angular>
                 <div class="notif-content">
                   <div class="notif-title">{{ notif.title }}</div>
                   <div class="notif-message">{{ notif.message }}</div>
@@ -271,7 +126,7 @@
                   (click)="deleteNotification(notif.id, $event)"
                   aria-label="Delete"
                 >
-                  ✕
+                  <lucide-angular name="x" [size]="14"></lucide-angular>
                 </button>
               </div>
             </div>
@@ -301,18 +156,7 @@
             <div class="menu-divider"></div>
 
             <button class="menu-item logout" (click)="logout()">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
+              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
               Sign out
             </button>
           </div>

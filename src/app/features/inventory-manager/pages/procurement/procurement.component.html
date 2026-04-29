@@ -8,7 +8,7 @@
   <div class="grn-card glass-panel" [formGroup]="grnForm">
     <div class="grn-header">
       <h2>Goods Received Note (GRN) Entry</h2>
-      
+
       <div class="stepper">
         <div class="step" [class.active]="currentStep >= 1" (click)="setStep(1)">
           <span class="step-num">1</span>
@@ -30,11 +30,11 @@
     <div class="grn-body">
       <!-- Success/Error Messages -->
       <div class="alert success animate-fade" *ngIf="successMessage">
-        <i class="icon-check"></i>
+        <lucide-angular name="check" [size]="16" class="inline-icon"></lucide-angular>
         {{ successMessage }}
       </div>
       <div class="alert error animate-fade" *ngIf="errorMessage">
-        <i class="icon-error"></i>
+        <lucide-angular name="circle-alert" class="inline-icon"></lucide-angular>
         {{ errorMessage }}
       </div>
 
@@ -42,32 +42,39 @@
       <div *ngIf="currentStep === 1" class="step-content animate-fade" formGroupName="supplierInfo">
         <h3>Supplier Information</h3>
         <p class="step-desc">Select the supplier and enter invoice details</p>
-        
+
         <div class="form-grid">
           <!-- Supplier Autocomplete Field -->
           <div class="form-group supplier-group">
             <label>Select/Add Supplier *</label>
             <div class="autocomplete-container">
-              <input 
-                type="text" 
-                placeholder="Type supplier name..." 
-                class="form-input" 
+              <input
+                type="text"
+                placeholder="Type supplier name..."
+                class="form-input"
                 formControlName="supplier"
                 (focus)="onSupplierInputFocus()"
                 (blur)="onSupplierInputBlur()"
-                autocomplete="off">
-              
+                autocomplete="off"
+              />
+
               <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
                 <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
-                  <i class="icon-plus"></i> Add New Supplier
+                  <lucide-angular name="plus" class="inline-icon"></lucide-angular> Add New Supplier
                 </div>
-                <div 
-                  class="dropdown-item" 
+                <div
+                  class="dropdown-item"
                   *ngFor="let supplier of filteredSuppliers"
-                  (mousedown)="selectSupplier(supplier)">
+                  (mousedown)="selectSupplier(supplier)"
+                >
                   {{ supplier.name }}
                 </div>
-                <div class="dropdown-no-results" *ngIf="filteredSuppliers.length === 0 && grnForm.get('supplierInfo.supplier')?.value">
+                <div
+                  class="dropdown-no-results"
+                  *ngIf="
+                    filteredSuppliers.length === 0 && grnForm.get('supplierInfo.supplier')?.value
+                  "
+                >
                   No existing suppliers found. Click above to add.
                 </div>
               </div>
@@ -75,31 +82,60 @@
 
             <!-- New Supplier Confirmation -->
             <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
-              <button class="btn-confirm-mini" (click)="confirmNewSupplier()" [disabled]="isSubmitting">Confirm Supplier</button>
-              <button class="btn-cancel-mini" (click)="cancelNewSupplier()" [disabled]="isSubmitting">Cancel</button>
+              <button
+                class="btn-confirm-mini"
+                (click)="confirmNewSupplier()"
+                [disabled]="isSubmitting"
+              >
+                Confirm Supplier
+              </button>
+              <button
+                class="btn-cancel-mini"
+                (click)="cancelNewSupplier()"
+                [disabled]="isSubmitting"
+              >
+                Cancel
+              </button>
             </div>
 
-            <span class="error-text" *ngIf="grnForm.get('supplierInfo.supplier')?.touched && grnForm.get('supplierInfo.supplier')?.invalid">
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('supplierInfo.supplier')?.touched &&
+                grnForm.get('supplierInfo.supplier')?.invalid
+              "
+            >
               Supplier is required
             </span>
           </div>
 
           <div class="form-group">
             <label>Invoice Number *</label>
-            <input type="text" placeholder="e.g., INV-2025-001" class="form-input" formControlName="invoiceNumber">
-            <span class="error-text" *ngIf="grnForm.get('supplierInfo.invoiceNumber')?.touched && grnForm.get('supplierInfo.invoiceNumber')?.invalid">
+            <input
+              type="text"
+              placeholder="e.g., INV-2025-001"
+              class="form-input"
+              formControlName="invoiceNumber"
+            />
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('supplierInfo.invoiceNumber')?.touched &&
+                grnForm.get('supplierInfo.invoiceNumber')?.invalid
+              "
+            >
               Invoice number is required
             </span>
           </div>
 
           <div class="form-group">
             <label>Purchase Order (PO) Link *</label>
-            <input type="text" readonly class="form-input readonly" formControlName="poNumber">
+            <input type="text" readonly class="form-input readonly" formControlName="poNumber" />
           </div>
 
           <div class="form-group">
             <label>Received Date *</label>
-            <input type="date" class="form-input" formControlName="receivedDate">
+            <input type="date" class="form-input" formControlName="receivedDate" />
           </div>
 
           <div class="form-group">
@@ -113,7 +149,10 @@
         </div>
 
         <div class="info-box">
-          <p><i class="icon-info"></i> Note: Make sure the invoice number matches the delivery documentation exactly.</p>
+          <p>
+            <lucide-angular name="info" [size]="14"></lucide-angular> Note: Make sure the invoice number matches the delivery
+            documentation exactly.
+          </p>
         </div>
       </div>
 
@@ -121,26 +160,57 @@
       <div *ngIf="currentStep === 2" class="step-content animate-fade" formGroupName="itemDetails">
         <h3>Product Details</h3>
         <p class="step-desc">Define the product being received</p>
-        
+
         <div class="form-grid">
           <div class="form-group">
             <label>PRODUCT NAME *</label>
-            <input type="text" placeholder="Enter Product Name" class="form-input" formControlName="name">
-            <span class="error-text" *ngIf="grnForm.get('itemDetails.name')?.touched && grnForm.get('itemDetails.name')?.invalid">
+            <input
+              type="text"
+              placeholder="Enter Product Name"
+              class="form-input"
+              formControlName="name"
+            />
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('itemDetails.name')?.touched && grnForm.get('itemDetails.name')?.invalid
+              "
+            >
               Product name is required
             </span>
           </div>
           <div class="form-group">
             <label>SKU (Unique Code) *</label>
-            <input type="text" placeholder="e.g., AC-LG-12000-INV" class="form-input" formControlName="sku">
-            <span class="error-text" *ngIf="grnForm.get('itemDetails.sku')?.touched && grnForm.get('itemDetails.sku')?.invalid">
+            <input
+              type="text"
+              placeholder="e.g., AC-LG-12000-INV"
+              class="form-input"
+              formControlName="sku"
+            />
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('itemDetails.sku')?.touched && grnForm.get('itemDetails.sku')?.invalid
+              "
+            >
               Valid alphanumeric SKU is required
             </span>
           </div>
           <div class="form-group">
             <label>BRAND *</label>
-            <input type="text" placeholder="e.g., LG, Samsung, Daikin" class="form-input" formControlName="brand">
-            <span class="error-text" *ngIf="grnForm.get('itemDetails.brand')?.touched && grnForm.get('itemDetails.brand')?.invalid">
+            <input
+              type="text"
+              placeholder="e.g., LG, Samsung, Daikin"
+              class="form-input"
+              formControlName="brand"
+            />
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('itemDetails.brand')?.touched &&
+                grnForm.get('itemDetails.brand')?.invalid
+              "
+            >
               Brand is required
             </span>
           </div>
@@ -163,11 +233,16 @@
           </div>
           <div class="form-group">
             <label>Technical Specs Link (URL)</label>
-            <input type="text" placeholder="e.g., https://specs.com/unit-a" class="form-input" formControlName="specsUrl">
+            <input
+              type="text"
+              placeholder="e.g., https://specs.com/unit-a"
+              class="form-input"
+              formControlName="specsUrl"
+            />
           </div>
           <div class="form-group toggle-group">
             <label class="toggle-label">
-              <input type="checkbox" formControlName="isSerialized">
+              <input type="checkbox" formControlName="isSerialized" />
               <span class="toggle-text">Is Serialized? (Track individual units)</span>
             </label>
           </div>
@@ -175,15 +250,25 @@
       </div>
 
       <!-- Step 3: Inventory Settings -->
-      <div *ngIf="currentStep === 3" class="step-content animate-fade" formGroupName="inventorySettings">
+      <div
+        *ngIf="currentStep === 3"
+        class="step-content animate-fade"
+        formGroupName="inventorySettings"
+      >
         <h3>Inventory & Stock Settings</h3>
         <p class="step-desc">Configure storage and initial quantities</p>
-        
+
         <div class="form-grid">
           <div class="form-group">
             <label>INITIAL QUANTITY *</label>
-            <input type="number" class="form-input" formControlName="available">
-            <span class="error-text" *ngIf="grnForm.get('inventorySettings.available')?.touched && grnForm.get('inventorySettings.available')?.invalid">
+            <input type="number" class="form-input" formControlName="available" />
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('inventorySettings.available')?.touched &&
+                grnForm.get('inventorySettings.available')?.invalid
+              "
+            >
               Quantity must be 0 or more
             </span>
           </div>
@@ -191,12 +276,17 @@
             <label>UNIT COST (Buying Price) *</label>
             <div class="cost-input">
               <span class="currency">LKR</span>
-              <input type="number" class="form-input" formControlName="unitCost">
+              <input type="number" class="form-input" formControlName="unitCost" />
             </div>
           </div>
           <div class="form-group">
             <label>LOCATION *</label>
-            <input type="text" placeholder="e.g., Warehouse A, Section 4" class="form-input" formControlName="location">
+            <input
+              type="text"
+              placeholder="e.g., Warehouse A, Section 4"
+              class="form-input"
+              formControlName="location"
+            />
           </div>
           <div class="form-group">
             <label>UNIT OF MEASURE *</label>
@@ -209,23 +299,43 @@
           </div>
           <div class="form-group">
             <label>REORDER LEVEL (Min) *</label>
-            <input type="number" class="form-input" formControlName="reorderLevel">
+            <input type="number" class="form-input" formControlName="reorderLevel" />
           </div>
           <div class="form-group">
             <label>MAXIMUM STOCK LEVEL *</label>
-            <input type="number" class="form-input" formControlName="maxStockLevel">
+            <input type="number" class="form-input" formControlName="maxStockLevel" />
           </div>
 
           <!-- Serial Numbers Section (Dynamic) -->
-          <div class="form-group full-width serials-container animate-fade" *ngIf="grnForm.get('itemDetails.isSerialized')?.value && grnForm.get('inventorySettings.available')?.value > 0">
+          <div
+            class="form-group full-width serials-container animate-fade"
+            *ngIf="
+              grnForm.get('itemDetails.isSerialized')?.value &&
+              grnForm.get('inventorySettings.available')?.value > 0
+            "
+          >
             <label>SERIAL NUMBERS (Scan or Type individually) *</label>
             <div class="serials-grid" formArrayName="serialNumbers">
-              <div class="serial-input-wrapper" *ngFor="let ctrl of serialNumbersControls; let i = index">
+              <div
+                class="serial-input-wrapper"
+                *ngFor="let ctrl of serialNumbersControls; let i = index"
+              >
                 <span class="serial-index">#{{ i + 1 }}</span>
-                <input type="text" [formControlName]="i" placeholder="Scan Serial..." class="form-input mini">
+                <input
+                  type="text"
+                  [formControlName]="i"
+                  placeholder="Scan Serial..."
+                  class="form-input mini"
+                />
               </div>
             </div>
-            <span class="error-text" *ngIf="grnForm.get('inventorySettings.serialNumbers')?.invalid && grnForm.get('inventorySettings.serialNumbers')?.touched">
+            <span
+              class="error-text"
+              *ngIf="
+                grnForm.get('inventorySettings.serialNumbers')?.invalid &&
+                grnForm.get('inventorySettings.serialNumbers')?.touched
+              "
+            >
               All serial numbers are required for serialized items
             </span>
           </div>
@@ -235,8 +345,14 @@
       <div class="grn-footer">
         <button class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">Back</button>
         <div class="spacer"></div>
-        <button class="btn-next" [disabled]="isSubmitting || (currentStep === 1 && isAddingNewSupplier)" (click)="nextStep()">
-          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Complete Entry' : 'Next Step' }}</span>
+        <button
+          class="btn-next"
+          [disabled]="isSubmitting || (currentStep === 1 && isAddingNewSupplier)"
+          (click)="nextStep()"
+        >
+          <span *ngIf="!isSubmitting">{{
+            currentStep === 3 ? 'Complete Entry' : 'Next Step'
+          }}</span>
           <span *ngIf="isSubmitting" class="loader-small"></span>
         </button>
       </div>
@@ -248,8 +364,13 @@
     <div class="section-header">
       <h2>Recent GRN Entries</h2>
       <div class="search-box">
-        <i class="icon-search"></i>
-        <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search by Invoice, Supplier, Item or SKU...">
+        <lucide-angular name="search" class="inline-icon"></lucide-angular>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="($event)"
+          placeholder="Search by Invoice, Supplier, Item or SKU..."
+        />
       </div>
       <p class="subtitle">Latest goods received notes processed</p>
     </div>
@@ -267,14 +388,14 @@
             <span class="divider"></span>
             <span>{{ p.quantity }} {{ p.unit }}</span>
             <span class="divider"></span>
-            <span><i class="icon-time"></i> {{ p.timestamp | date:'short' }}</span>
+            <span><lucide-angular name="clock" [size]="14"></lucide-angular> {{ p.timestamp | date: 'short' }}</span>
             <span class="divider"></span>
             <span>By: {{ p.receivedBy }}</span>
           </div>
         </div>
         <button class="btn-view-details">View Details</button>
       </div>
-      
+
       <div class="no-results animate-fade" *ngIf="filteredProcurements.length === 0">
         <p>No matching GRN entries found.</p>
       </div>
