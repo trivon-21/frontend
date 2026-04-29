@@ -145,10 +145,12 @@
           </div>
 
           <div class="filter-group">
-            <label>Module</label>
-            <select [(ngModel)]="filters.module" class="filter-input">
-              <option value="">All Modules</option>
-              <option *ngFor="let option of filterOptions.modules" [value]="option">{{ formatLabel(option) }}</option>
+            <label>Log Type</label>
+            <select [(ngModel)]="filters.logType" class="filter-input">
+              <option value="">Total Logs</option>
+              <option value="ACTIVITY">Operational Activity</option>
+              <option value="ERROR">System Errors</option>
+              <option value="SECURITY">Security Events</option>
             </select>
           </div>
 
@@ -161,8 +163,8 @@
 
       <div class="table-actions" *ngIf="hasResults">
         <label class="table-select-inline">
-          <input type="checkbox" [checked]="selectAllOnPage" (change)="toggleSelectAllOnPage()" />
-          <small>Select visible</small>
+          <input type="checkbox" [checked]="areAllFilteredSelected" (change)="toggleSelectAllFiltered()" />
+          <small>Select all matching filters</small>
         </label>
         <div class="table-actions-right">
           <button type="button" class="secondary-action" (click)="deleteSelected()" [disabled]="selectedIds.size===0">

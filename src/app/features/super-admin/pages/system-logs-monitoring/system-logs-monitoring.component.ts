@@ -10,7 +10,7 @@ import {
 
 type LogFilters = {
   performedByRole: string;
-  module?: string;
+  logType?: string;
   status: string;
   startDate: string;
   search: string;
@@ -51,11 +51,11 @@ export class SystemLogsMonitoringComponent implements OnInit {
 
   // Selection state for deletion
   selectedIds: Set<string> = new Set();
-  selectAllOnPage = false;
+  selectAllFiltered = false;
 
   filters: LogFilters = {
     performedByRole: '',
-    module: '',
+    logType: '',
     status: '',
     startDate: '',
     search: '',
@@ -112,7 +112,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
 
     const baseFilters = {
       performedByRole: this.filters.performedByRole || undefined,
-      module: this.filters.module || undefined,
+      logType: this.filters.logType || undefined,
       status: this.filters.status || undefined,
       startDate: this.filters.startDate || undefined,
     };
@@ -120,6 +120,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
     const request$ = this.filters.search.trim()
       ? this.systemLogsService.searchLogs(this.filters.search.trim(), this.currentPage, this.pageSize, {
         performedByRole: baseFilters.performedByRole,
+        logType: baseFilters.logType,
         status: baseFilters.status,
         startDate: baseFilters.startDate,
       })
@@ -149,6 +150,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
   clearFilters(): void {
     this.filters = {
       performedByRole: '',
+      logType: '',
       status: '',
       startDate: '',
       search: '',
@@ -161,7 +163,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
     // Reset to first page to show latest data
     this.currentPage = 1;
     this.selectedIds.clear();
-    this.selectAllOnPage = false;
+    this.selectAllFiltered = false;
     this.loadAnalytics();
     this.loadLogs();
   }
@@ -172,7 +174,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
 
     const exportFilters = {
       performedByRole: this.filters.performedByRole || undefined,
-      module: this.filters.module || undefined,
+      logType: this.filters.logType || undefined,
       status: this.filters.status || undefined,
       startDate: this.filters.startDate || undefined,
     };
@@ -279,13 +281,40 @@ export class SystemLogsMonitoringComponent implements OnInit {
     return this.logs.length > 0;
   }
 
-  toggleSelectAllOnPage(): void {
-    this.selectAllOnPage = !this.selectAllOnPage;
-    if (this.selectAllOnPage) {
-      this.logs.forEach((l) => this.selectedIds.add(l._id));
-    } else {
-      this.logs.forEach((l) => this.selectedIds.delete(l._id));
+  get areAllFilteredSelected(): boolean {
+    return this.totalLogs > 0 && this.selectedIds.size === this.totalLogs;
+  }
+
+  toggleSelectAllFiltered(): void {
+    if (this.areAllFilteredSelected) {
+      this.selectedIds.clear();
+      this.selectAllFiltered = false;
+      return;
     }
+
+    this.selectAllFiltered = true;
+    const filters = {
+      performedByRole: this.filters.performedByRole || undefined,
+      logType: this.filters.logType || undefined,
+      status: this.filters.status || undefined,
+      startDate: this.filters.startDate || undefined,
+    };
+
+    const selected$ = this.filters.search.trim()
+      ? this.systemLogsService.searchLogs(this.filters.search.trim(), 1, Math.max(this.totalLogs, this.pageSize), filters)
+      : this.systemLogsService.getLogs(1, Math.max(this.totalLogs, this.pageSize), filters);
+
+    selected$.subscribe({
+      next: (response) => {
+        this.selectedIds = new Set((response.data || []).map((log) => log._id));
+        this.selectAllFiltered = this.areAllFilteredSelected;
+      },
+      error: (error) => {
+        console.error('Error selecting filtered logs:', error);
+        this.error = error.error?.message || 'Failed to select filtered logs';
+        this.selectAllFiltered = false;
+      },
+    });
   }
 
   toggleSelect(log: SystemLog): void {
@@ -294,6 +323,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
     } else {
       this.selectedIds.add(log._id);
     }
+    this.selectAllFiltered = this.areAllFilteredSelected;
   }
 
   deleteSingle(log: SystemLog): void {
@@ -324,7 +354,7 @@ export class SystemLogsMonitoringComponent implements OnInit {
     this.systemLogsService.bulkDelete(ids).subscribe({
       next: () => {
         this.selectedIds.clear();
-        this.selectAllOnPage = false;
+        this.selectAllFiltered = false;
         this.loadLogs();
       },
       error: (err) => {
