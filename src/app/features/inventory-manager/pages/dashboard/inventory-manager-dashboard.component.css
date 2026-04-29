@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: 32px;
   padding-bottom: 80px;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 /* ── Offline Banner ── */

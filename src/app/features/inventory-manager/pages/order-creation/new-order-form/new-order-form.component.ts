@@ -54,11 +54,18 @@ export class NewOrderFormComponent implements OnInit {
   
   // Suggested Items
   suggestedItems: InventoryItem[] = [];
+  // Item Selection
   itemSearchQuery = '';
   showItemDropdown = false;
   selectedItem: InventoryItem | null = null;
   currentQuantity = 1;
   currentPrice = 0;
+
+  // Supplier Autocomplete
+  supplierSearchQuery = '';
+  filteredSuppliers: Supplier[] = [];
+  showSupplierDropdown = false;
+  isAddingNewSupplier = false;
 
   // For suggested items interactions
   suggestedItemsState: any[] = [];
@@ -104,6 +111,7 @@ export class NewOrderFormComponent implements OnInit {
         const order = requests.find(r => r.requestId === id);
         if (order) {
           this.selectedSupplier = order.supplierName;
+          this.supplierSearchQuery = order.supplierName;
           this.orderNotes = order.notes;
           this.orderItems = order.items.map((i: any) => ({
             ...i,
@@ -129,9 +137,8 @@ export class NewOrderFormComponent implements OnInit {
     this.apiService.get<Supplier[]>('/inventory/suppliers').subscribe({
       next: (data: Supplier[]) => {
         this.suppliers = data;
-        if (this.suppliers.length > 0 && !this.selectedSupplier) {
-          this.selectedSupplier = this.suppliers[0].name;
-        }
+        this.filteredSuppliers = data;
+        // Don't auto-select first supplier anymore, let user search/select
       },
       error: (err: any) => console.error('Failed to load suppliers:', err)
     });
@@ -156,6 +163,62 @@ export class NewOrderFormComponent implements OnInit {
       },
       error: (err: any) => console.error('Failed to load suggested items:', err)
     });
+  }
+
+  filterSuppliers(): void {
+    const q = (this.supplierSearchQuery || '').toLowerCase().trim();
+    if (!q) {
+      this.filteredSuppliers = this.suppliers;
+    } else {
+      this.filteredSuppliers = this.suppliers.filter(s => 
+        s.name.toLowerCase().includes(q)
+      );
+    }
+    
+    // Auto-select if exact match found while typing
+    const exactMatch = this.suppliers.find(s => s.name.toLowerCase() === q);
+    if (exactMatch) {
+      this.selectedSupplier = exactMatch.name;
+    } else if (!this.isAddingNewSupplier) {
+      this.selectedSupplier = ''; // Clear if doesn't match and not adding new
+    }
+    
+    this.showSupplierDropdown = true;
+  }
+
+  onSupplierInputFocus(): void {
+    this.showSupplierDropdown = true;
+    this.filterSuppliers();
+  }
+
+  onSupplierInputBlur(): void {
+    // Increase delay slightly to ensure clicks register on slower devices
+    setTimeout(() => { this.showSupplierDropdown = false; }, 300);
+  }
+
+  selectSupplier(supplier: Supplier | 'new'): void {
+    if (supplier === 'new') {
+      this.isAddingNewSupplier = true;
+      this.showSupplierDropdown = false;
+      return;
+    }
+
+    this.selectedSupplier = supplier.name;
+    this.supplierSearchQuery = supplier.name;
+    this.isAddingNewSupplier = false;
+    this.showSupplierDropdown = false;
+    this.errorMessage = ''; // Clear errors if any
+  }
+
+  confirmNewSupplier(): void {
+    if (!this.supplierSearchQuery.trim()) return;
+    this.selectedSupplier = this.supplierSearchQuery.trim();
+    this.isAddingNewSupplier = false;
+  }
+
+  cancelNewSupplier(): void {
+    this.isAddingNewSupplier = false;
+    this.supplierSearchQuery = this.selectedSupplier || '';
   }
 
   filterItems(): void {

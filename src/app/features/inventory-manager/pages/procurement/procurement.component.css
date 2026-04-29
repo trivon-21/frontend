@@ -5,6 +5,8 @@
   gap: 32px;
   background: var(--background-page);
   min-height: 100vh;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .header h1 {
