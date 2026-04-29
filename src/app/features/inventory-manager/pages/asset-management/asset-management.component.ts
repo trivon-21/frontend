@@ -34,7 +34,6 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrls: ['./asset-management.component.css'],
 })
 export class AssetManagementDashboardComponent implements OnInit {
-  showModal = false;
   activeTab: 'loans' | 'logs' = 'loans';
   searchQuery: string = '';
 
@@ -106,13 +105,6 @@ export class AssetManagementDashboardComponent implements OnInit {
       .subscribe((data) => (this.returnLogs = data));
   }
 
-  openRegisterModal() {
-    this.showModal = true;
-  }
-
-  closeModal() {
-    this.showModal = false;
-  }
 
   checkOut() {
     if (!this.selectedTechnicianId || !this.selectedToolId || !this.dueDate) {

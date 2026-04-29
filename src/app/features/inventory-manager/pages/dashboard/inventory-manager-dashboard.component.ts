@@ -17,8 +17,21 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrl: './inventory-manager-dashboard.component.css',
 })
 export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
-  data: InventoryDashboardData | null = null;
-  loading = true;
+  data: InventoryDashboardData = {
+    managerName: 'Manager',
+    currentDate: new Date(),
+    status: 'Syncing...',
+    stats: {
+      materialReservations: { total: 0, subStats: [] },
+      dispatchQueue: { total: 0, subStats: [] },
+      assetHealth: { total: 0, subStats: [] },
+      stockAlerts: { total: 0, subStats: [] }
+    },
+    recentActivity: [],
+    reorderList: [],
+    logistics: []
+  };
+  loading = false; // Structure should load immediately
   error: string | null = null;
   private timer: any;
 
@@ -44,6 +57,7 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    this.loading = true;
     this.dashboardService.getDashboard().subscribe({
       next: (data: InventoryDashboardData) => {
         this.data = data;

@@ -99,22 +99,98 @@
           <td class="num-cell">{{ item.reserved }}</td>
           <td>{{ item.location }}</td>
           <td>
-            <button class="btn-table" [routerLink]="['/inventory-manager/product-wizard', item.id]">Edit</button>
+            <button class="btn-table" (click)="openDetailModal(item)">View Product</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div class="pagination">
-      <span class="pagination-info">Showing 1-8 of 247 items</span>
+    <div class="pagination" *ngIf="totalItems > 0">
+      <span class="pagination-info">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
+      </span>
       <div class="pagination-controls">
-        <button class="btn-page">Previous</button>
-        <button class="btn-page active">1</button>
-        <button class="btn-page">2</button>
-        <button class="btn-page">3</button>
-        <span class="dots">...</span>
-        <button class="btn-page">31</button>
-        <button class="btn-page">Next</button>
+        <button class="btn-page" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+        
+        <ng-container *ngIf="totalPages > 0">
+          <button 
+            *ngFor="let page of getPageNumbers()" 
+            class="btn-page" 
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <span class="dots" *ngIf="totalPages > 5 && currentPage < totalPages - 2">...</span>
+          <button 
+            *ngIf="totalPages > 5 && currentPage < totalPages - 2" 
+            class="btn-page" 
+            (click)="goToPage(totalPages)">
+            {{ totalPages }}
+          </button>
+        </ng-container>
+
+        <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
+    <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-title-group">
+          <h2>Product Details</h2>
+          <span class="sku-badge">{{ selectedItem.sku }}</span>
+        </div>
+        <button class="btn-close" (click)="closeDetailModal()">
+          <lucide-angular name="x" [size]="20"></lucide-angular>
+        </button>
+      </div>
+
+      <div class="modal-body detail-view">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Product Name</span>
+            <span class="value">{{ selectedItem.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Type</span>
+            <span class="value">{{ selectedItem.type }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Category</span>
+            <span class="value">{{ selectedItem.category }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Brand</span>
+            <span class="value">{{ selectedItem.brand }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Location</span>
+            <span class="value">{{ selectedItem.location }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Available Stock</span>
+            <span class="value">{{ selectedItem.available }} {{ selectedItem.unit }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Reserved Stock</span>
+            <span class="value">{{ selectedItem.reserved }} {{ selectedItem.unit }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Unit Cost</span>
+            <span class="value">${{ selectedItem.unitCost }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="closeDetailModal()">Close</button>
+        <button class="btn-primary" [routerLink]="['/inventory-manager/product-wizard', selectedItem.id]" (click)="closeDetailModal()">
+          <lucide-angular name="edit" [size]="16" class="inline-icon"></lucide-angular>
+          Edit Product
+        </button>
       </div>
     </div>
   </div>

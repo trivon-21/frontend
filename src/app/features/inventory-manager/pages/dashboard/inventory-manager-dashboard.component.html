@@ -1,15 +1,4 @@
-<div class="loading-container" *ngIf="loading">
-  <div class="loader">Loading dashboard...</div>
-</div>
-
-<div class="error-container" *ngIf="error">
-  <div class="alert error">
-    <lucide-angular name="circle-alert" class="inline-icon"></lucide-angular>
-    {{ error }}
-  </div>
-</div>
-
-<div class="inventory-dashboard" *ngIf="!loading && !error && data">
+<div class="inventory-dashboard">
   <!-- Offline Warning Banner -->
   <div class="offline-banner" *ngIf="data.status === 'Offline'">
     <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
@@ -27,8 +16,8 @@
       <div class="title-row">
         <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
         <span class="status-badge" [class.offline]="data.status === 'Offline'">
-          <span class="dot"></span>
-          {{ data.status }}
+          <span class="dot" [class.syncing]="loading"></span>
+          {{ loading ? 'Syncing...' : data.status }}
         </span>
       </div>
     </div>

@@ -28,10 +28,12 @@ interface RecentProcurement {
 
 import { LucideAngularModule } from 'lucide-angular';
 
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-procurement-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, RouterModule],
   templateUrl: './procurement.component.html',
   styleUrls: ['./procurement.component.css'],
 })
@@ -41,6 +43,8 @@ export class ProcurementDashboardComponent implements OnInit {
   isSubmitting = false;
   successMessage = '';
   errorMessage = '';
+  showDetailsModal = false;
+  selectedProcurement: RecentProcurement | null = null;
 
   suppliers: any[] = [];
   filteredSuppliers: any[] = [];
@@ -101,7 +105,6 @@ export class ProcurementDashboardComponent implements OnInit {
       supplierInfo: this.fb.group({
         supplier: ['', Validators.required],
         invoiceNumber: ['', Validators.required],
-        poNumber: [this.generatePoNumber(), Validators.required],
         receivedDate: [new Date().toISOString().substring(0, 10), Validators.required],
         condition: ['Good', Validators.required],
       }),
@@ -131,15 +134,6 @@ export class ProcurementDashboardComponent implements OnInit {
     });
   }
 
-  private generatePoNumber(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `PO-${year}${month}${day}-${hours}${minutes}`;
-  }
 
   private loadSuppliers(): void {
     this.inventoryService.getSuppliers().subscribe({
@@ -277,6 +271,15 @@ export class ProcurementDashboardComponent implements OnInit {
         return '';
     }
   }
+  viewProcurementDetails(p: RecentProcurement) {
+    this.selectedProcurement = p;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedProcurement = null;
+  }
 
   onSubmit() {
     if (this.grnForm.invalid) return;
@@ -290,7 +293,6 @@ export class ProcurementDashboardComponent implements OnInit {
       ...this.grnForm.get('inventorySettings')?.value,
       supplierName: this.grnForm.get('supplierInfo.supplier')?.value,
       invoiceNumber: this.grnForm.get('supplierInfo.invoiceNumber')?.value,
-      poNumber: this.grnForm.get('supplierInfo.poNumber')?.value,
       receivedDate: this.grnForm.get('supplierInfo.receivedDate')?.value,
       condition: this.grnForm.get('supplierInfo.condition')?.value,
     };
@@ -314,7 +316,6 @@ export class ProcurementDashboardComponent implements OnInit {
     this.currentStep = 1;
     this.grnForm.reset({
       supplierInfo: {
-        poNumber: this.generatePoNumber(),
         receivedDate: new Date().toISOString().substring(0, 10),
         condition: 'Good',
       },

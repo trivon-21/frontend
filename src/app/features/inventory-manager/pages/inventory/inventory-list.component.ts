@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   InventoryManagerDashboardService,
@@ -17,23 +17,46 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrls: ['./inventory-list.component.css'],
 })
 export class InventoryListComponent implements OnInit {
+  Math = Math;
   searchQuery: string = '';
   selectedType: string = 'All Types';
   selectedBrand: string = 'All Brands';
   selectedCategory: string = 'All Categories';
   selectedLocation: string = 'All Locations';
   allInventoryItems: InventoryItem[] = [];
-  inventoryItems: InventoryItem[] = [];
+  filteredItems: InventoryItem[] = []; // Store filtered items separately
+  inventoryItems: InventoryItem[] = []; // Current page items
   loading = true;
   error: string | null = null;
 
-  constructor(private inventoryService: InventoryManagerDashboardService) {}
+  // Modal State
+  showDetailModal = false;
+  selectedItem: InventoryItem | null = null;
+
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+  totalItems: number = 0;
+
+  constructor(
+    private inventoryService: InventoryManagerDashboardService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.inventoryService.getInventory().subscribe({
       next: (items) => {
         this.allInventoryItems = items;
-        this.applyFilters();
+        
+        // Check for search query param
+        this.route.queryParams.subscribe(params => {
+          if (params['search']) {
+            this.searchQuery = params['search'];
+          }
+          this.applyFilters();
+        });
+        
         this.loading = false;
       },
       error: (err) => {
@@ -45,7 +68,7 @@ export class InventoryListComponent implements OnInit {
 
   applyFilters() {
     const query = this.searchQuery.toLowerCase().trim();
-    this.inventoryItems = this.allInventoryItems.filter((item) => {
+    this.filteredItems = this.allInventoryItems.filter((item) => {
       const matchesSearch =
         !query ||
         item.name?.toLowerCase().includes(query) ||
@@ -62,6 +85,64 @@ export class InventoryListComponent implements OnInit {
 
       return matchesSearch && matchesType && matchesBrand && matchesCategory && matchesLocation;
     });
+
+    this.totalItems = this.filteredItems.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage) || 1;
+    this.currentPage = 1; // Reset to first page on filter change
+    this.updatePaginatedItems();
+  }
+
+  updatePaginatedItems() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.inventoryItems = this.filteredItems.slice(startIndex, endIndex);
+  }
+
+  openDetailModal(item: InventoryItem) {
+    this.selectedItem = item;
+    this.showDetailModal = true;
+  }
+
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.selectedItem = null;
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePaginatedItems();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedItems();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedItems();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.currentPage - 2);
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   clearFilters() {

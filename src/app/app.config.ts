@@ -46,7 +46,8 @@ import {
   Trash2,
   Minus,
   CircleHelp,
-  Circle
+  Circle,
+  Edit
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -101,7 +102,8 @@ export const appConfig: ApplicationConfig = {
       Trash2,
       Minus,
       CircleHelp,
-      Circle
+      Circle,
+      Edit
     }))
   ],
 };
