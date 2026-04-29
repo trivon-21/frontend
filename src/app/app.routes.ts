@@ -113,6 +113,13 @@ export const routes: Routes = [
               import('./features/inventory-manager/pages/order-creation/new-order-form/new-order-form.component').then(
                 (m) => m.NewOrderFormComponent,
               ),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('./features/inventory-manager/pages/order-creation/new-order-form/new-order-form.component').then(
+                (m) => m.NewOrderFormComponent,
+              ),
           }
         ]
       },

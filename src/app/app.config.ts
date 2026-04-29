@@ -1,8 +1,9 @@
+import { importProvidersFrom } from '@angular/core';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { 
-  provideLucideAngular, 
+  LucideAngularModule, 
   Plus, 
   Search, 
   Calendar, 
@@ -57,7 +58,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
-    provideLucideAngular({ 
+    importProvidersFrom(LucideAngularModule.pick({ 
       Plus, 
       Search, 
       Calendar, 
@@ -101,6 +102,6 @@ export const appConfig: ApplicationConfig = {
       Minus,
       CircleHelp,
       Circle
-    })
+    }))
   ],
 };

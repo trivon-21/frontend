@@ -6,12 +6,13 @@
         <lucide-angular name="arrow-left" [size]="20" strokeWidth="2.5"></lucide-angular>
       </button>
       <div class="title-group">
-        <h1>New Purchase Order Request</h1>
-        <p class="subtitle">Fill in the details below to request a new purchase order for approval.</p>
+        <h1 *ngIf="!isEditMode">New Purchase Order Request</h1>
+        <h1 *ngIf="isEditMode">Edit Purchase Order Request</h1>
+        <p class="subtitle">Fill in the details below to {{ isEditMode ? 'update your draft' : 'request a new purchase order' }} for approval.</p>
       </div>
     </div>
-    <div class="header-actions">
-      <span class="draft-badge">DRAFT MODE</span>
+    <div class="header-actions" *ngIf="isEditMode">
+      <span class="draft-badge">DRAFT: {{ orderId }}</span>
     </div>
   </div>
 
@@ -153,7 +154,9 @@
       <div class="form-footer-actions">
         <button class="btn-discard" (click)="goBack()">Discard Changes</button>
         <div class="action-group">
-          <button class="btn-save-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0">Save Draft</button>
+          <button class="btn-save-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+            {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
+          </button>
           <button class="btn-submit" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>

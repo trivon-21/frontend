@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ApiService } from '../../../../../core/services/api.service';
 
@@ -75,12 +75,44 @@ export class NewOrderFormComponent implements OnInit {
   selectedLineItemIndex: number | null = null;
   selectedSuggestedIndex: number | null = null;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  isEditMode = false;
+  orderId: string | null = null;
+
+  constructor(
+    private apiService: ApiService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.loadInventory();
     this.loadSuppliers();
     this.loadSuggestedItems();
+
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.isEditMode = true;
+        this.orderId = params['id'];
+        this.loadOrder(this.orderId!);
+      }
+    });
+  }
+
+  loadOrder(id: string): void {
+    this.apiService.get<any>('/inventory/order-requests').subscribe({
+      next: (requests: any[]) => {
+        const order = requests.find(r => r.requestId === id);
+        if (order) {
+          this.selectedSupplier = order.supplierName;
+          this.orderNotes = order.notes;
+          this.orderItems = order.items.map((i: any) => ({
+            ...i,
+            inventoryId: i.inventoryId || ''
+          }));
+        }
+      },
+      error: (err: any) => console.error('Failed to load order:', err)
+    });
   }
 
   loadInventory(): void {
@@ -310,27 +342,87 @@ export class NewOrderFormComponent implements OnInit {
       })),
       supplierName: this.selectedSupplier,
       notes: this.orderNotes,
+      status: 'pending-approval',
       source: 'manual'
     };
 
-    this.apiService.post('/inventory/order-requests', payload).subscribe({
-      next: (data: any) => {
-        this.isSubmitting = false;
-        // Redirect back to dashboard on success
-        this.router.navigate(['/inventory-manager/order-creation'], { 
-          queryParams: { success: `Order ${data.requestId} submitted successfully!` } 
-        });
-      },
-      error: (err: any) => {
-        this.isSubmitting = false;
-        this.errorMessage = err.error?.message || 'Failed to submit order request';
-      }
-    });
+    if (this.isEditMode && this.orderId) {
+      this.apiService.patch(`/inventory/order-requests/${this.orderId}`, payload).subscribe({
+        next: (data: any) => {
+          this.isSubmitting = false;
+          this.router.navigate(['/inventory-manager/order-creation'], { 
+            queryParams: { success: `Order ${this.orderId} submitted successfully!` } 
+          });
+        },
+        error: (err: any) => {
+          this.isSubmitting = false;
+          this.errorMessage = err.error?.message || 'Failed to submit order request';
+        }
+      });
+    } else {
+      this.apiService.post('/inventory/order-requests', payload).subscribe({
+        next: (data: any) => {
+          this.isSubmitting = false;
+          this.router.navigate(['/inventory-manager/order-creation'], { 
+            queryParams: { success: `Order ${data.requestId} submitted successfully!` } 
+          });
+        },
+        error: (err: any) => {
+          this.isSubmitting = false;
+          this.errorMessage = err.error?.message || 'Failed to submit order request';
+        }
+      });
+    }
   }
 
   saveDraft(): void {
-    this.successMessage = 'Draft request saved successfully.';
-    setTimeout(() => this.successMessage = '', 3000);
+    if (this.orderItems.length === 0 || !this.selectedSupplier) {
+      this.errorMessage = 'Please add at least one item and select a supplier before saving a draft.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    const payload = {
+      items: this.orderItems.map(i => ({
+        inventoryId: i.inventoryId,
+        name: i.name,
+        sku: i.sku,
+        quantity: i.quantity,
+        unitCost: i.unitCost
+      })),
+      supplierName: this.selectedSupplier,
+      notes: this.orderNotes,
+      status: 'draft',
+      source: 'manual'
+    };
+
+    if (this.isEditMode && this.orderId) {
+      this.apiService.patch(`/inventory/order-requests/${this.orderId}`, payload).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.successMessage = 'Draft updated successfully.';
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.errorMessage = 'Failed to update draft.';
+        }
+      });
+    } else {
+      this.apiService.post('/inventory/order-requests', payload).subscribe({
+        next: (data: any) => {
+          this.isSubmitting = false;
+          this.isEditMode = true;
+          this.orderId = data.requestId;
+          this.successMessage = 'Draft saved successfully.';
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.errorMessage = 'Failed to save draft.';
+        }
+      });
+    }
   }
 
   formatCurrency(val: number): string {

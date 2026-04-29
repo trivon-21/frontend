@@ -20,7 +20,7 @@ interface OrderRequest {
   items: OrderItem[];
   supplierName: string;
   totalEstimate: number;
-  status: 'pending-approval' | 'approved' | 'rejected';
+  status: 'draft' | 'pending-approval' | 'approved' | 'rejected';
   requestedBy: string;
   priority: 'normal' | 'urgent';
   notes: string;
@@ -66,40 +66,7 @@ export class OrderCreationComponent implements OnInit {
   pendingOrders: OrderRequest[] = [];
   approvedOrders: OrderRequest[] = [];
   rejectedOrders: OrderRequest[] = [];
-  draftOrders: OrderRequest[] = [
-    {
-      requestId: 'DRFT-1001',
-      supplierName: 'Global Electronics',
-      totalEstimate: 145000,
-      status: 'pending-approval', // Using existing status for type safety, but will label as draft
-      requestedBy: 'Dassana',
-      priority: 'normal',
-      notes: 'Initial stock replenishment draft.',
-      rejectionReason: '',
-      approvedBy: '',
-      approvedAt: '',
-      rejectedAt: '',
-      source: 'Internal',
-      createdAt: new Date().toISOString(),
-      items: []
-    },
-    {
-      requestId: 'DRFT-1002',
-      supplierName: 'Airlux Logistics',
-      totalEstimate: 89000,
-      status: 'pending-approval',
-      requestedBy: 'Dassana',
-      priority: 'urgent',
-      notes: 'Urgent packaging materials.',
-      rejectionReason: '',
-      approvedBy: '',
-      approvedAt: '',
-      rejectedAt: '',
-      source: 'Internal',
-      createdAt: new Date().toISOString(),
-      items: []
-    }
-  ];
+  draftOrders: OrderRequest[] = [];
 
   suggestedItems: InventoryItem[] = [];
 
@@ -136,6 +103,7 @@ export class OrderCreationComponent implements OnInit {
   fetchOrders(): void {
     this.apiService.get<OrderRequest[]>('/inventory/order-requests').subscribe({
       next: (data) => {
+        this.draftOrders = data.filter(o => o.status === 'draft');
         this.pendingOrders = data.filter(o => o.status === 'pending-approval');
         this.approvedOrders = data.filter(o => o.status === 'approved');
         this.rejectedOrders = data.filter(o => o.status === 'rejected');
@@ -182,8 +150,16 @@ export class OrderCreationComponent implements OnInit {
   // ── Detail Modal ──
 
   openDetail(order: OrderRequest): void {
+    if (order.status === 'draft') {
+      this.editDraft(order);
+      return;
+    }
     this.selectedOrder = order;
     this.showDetailModal = true;
+  }
+
+  editDraft(order: OrderRequest): void {
+    this.router.navigate(['/inventory-manager/order-creation/edit', order.requestId]);
   }
 
   closeDetail(): void {
@@ -233,6 +209,7 @@ export class OrderCreationComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     switch (status) {
+      case 'draft': return 'Draft';
       case 'pending-approval': return 'Pending Approval';
       case 'approved': return 'Approved';
       case 'rejected': return 'Rejected';
