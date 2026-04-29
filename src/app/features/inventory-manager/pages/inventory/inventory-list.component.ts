@@ -38,6 +38,7 @@ export class InventoryListComponent implements OnInit {
   itemsPerPage: number = 10;
   totalPages: number = 1;
   totalItems: number = 0;
+  selectedRowId: string | null = null; // Track currently selected row for button visibility
 
   constructor(
     private inventoryService: InventoryManagerDashboardService,
@@ -90,6 +91,13 @@ export class InventoryListComponent implements OnInit {
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage) || 1;
     this.currentPage = 1; // Reset to first page on filter change
     this.updatePaginatedItems();
+    
+    // Default select first item
+    if (this.inventoryItems.length > 0) {
+      this.selectedRowId = this.inventoryItems[0].id || this.inventoryItems[0].sku || null;
+    } else {
+      this.selectedRowId = null;
+    }
   }
 
   updatePaginatedItems() {
@@ -112,7 +120,16 @@ export class InventoryListComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.updatePaginatedItems();
+      
+      // Auto-select first item on new page
+      if (this.inventoryItems.length > 0) {
+        this.selectedRowId = this.inventoryItems[0].id || this.inventoryItems[0].sku || null;
+      }
     }
+  }
+
+  selectRow(item: InventoryItem) {
+    this.selectedRowId = item.id || item.sku || null;
   }
 
   nextPage() {

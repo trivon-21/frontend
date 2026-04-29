@@ -146,6 +146,24 @@ td {
   font-weight: 600;
 }
 
+.clickable-row {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clickable-row:hover {
+  background-color: var(--background-hover);
+}
+
+.selected-row {
+  background-color: var(--primary-lighter) !important;
+}
+
+.selected-row td {
+  color: var(--primary-main);
+  font-weight: 500;
+}
+
 
 
 /* Pagination */

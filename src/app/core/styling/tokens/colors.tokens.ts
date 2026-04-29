@@ -65,7 +65,7 @@ export interface ColorPalette {
  * UNIVERSAL Color Palette
  * Primary: Forest Green (#41603d)
  * Used everywhere: Customer portal, Technician portal, Inventory Manager, all applications
- * 
+ * #00843D
  */
 const universalColors: ColorPalette = {
   primary: {

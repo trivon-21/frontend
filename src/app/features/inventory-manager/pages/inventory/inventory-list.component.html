@@ -87,7 +87,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of inventoryItems">
+        <tr 
+          *ngFor="let item of inventoryItems" 
+          (click)="selectRow(item)"
+          class="clickable-row"
+          [class.selected-row]="selectedRowId === (item.id || item.sku)">
           <td class="sku-cell">{{ item.sku }}</td>
           <td class="name-cell">{{ item.name }}</td>
           <td>
@@ -98,8 +102,13 @@
           <td class="num-cell">{{ item.available }}</td>
           <td class="num-cell">{{ item.reserved }}</td>
           <td>{{ item.location }}</td>
-          <td>
-            <button class="btn-small" (click)="openDetailModal(item)">View Product</button>
+          <td class="actions-cell">
+            <button 
+              class="btn-small" 
+              (click)="openDetailModal(item); $event.stopPropagation()"
+              *ngIf="selectedRowId === (item.id || item.sku)">
+              View Product
+            </button>
           </td>
         </tr>
       </tbody>
