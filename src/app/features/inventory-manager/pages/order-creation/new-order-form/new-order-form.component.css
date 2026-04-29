@@ -76,8 +76,8 @@
 }
 
 .layout-left {
-  flex: 0 0 460px;
-  padding: 32px;
+  flex: 0 0 420px;
+  padding: 28px;
 }
 
 .layout-right {
@@ -105,17 +105,9 @@
   margin-bottom: 20px;
 }
 
-.step-num {
-  font-size: 11px;
-  font-weight: 800;
-  background: #008f5d;
-  color: white;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
+.autocomplete-container {
+  position: relative;
+  width: 100%;
 }
 
 .form-section-header h3 {
@@ -159,10 +151,11 @@
 
 /* Item Selection Zone */
 .item-selection-zone {
-  background: #f8fafc;
-  padding: 24px;
+  background: #ffffff;
+  padding: 20px;
   border-radius: 16px;
-  border: 1.5px dashed #e2e8f0;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .search-input {
@@ -572,6 +565,8 @@
   overflow-y: auto;
   z-index: 100;
   padding: 6px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .dropdown-item {
