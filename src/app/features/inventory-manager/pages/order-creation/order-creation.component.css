@@ -389,6 +389,8 @@
 .suggested-list {
   display: flex;
   flex-direction: column;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .suggested-item {

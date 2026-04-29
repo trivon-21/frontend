@@ -155,8 +155,8 @@
             <thead>
               <tr>
                 <th>Item</th>
-                <th>Available</th>
-                <th>Reserved</th>
+                <th class="text-right">Available</th>
+                <th class="text-right">Reserved</th>
               </tr>
             </thead>
             <tbody>
@@ -169,10 +169,10 @@
                     <span class="item-name">{{ item.name }}</span>
                   </div>
                 </td>
-                <td class="item-avail" [class.critical]="item.available === 0">
+                <td class="item-avail text-right" [class.critical]="item.available === 0">
                   {{ item.available }}
                 </td>
-                <td class="item-rsvd" [class.warning]="item.available <= item.reserved && item.available > 0">
+                <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
                   {{ item.reserved }}
                 </td>
               </tr>
