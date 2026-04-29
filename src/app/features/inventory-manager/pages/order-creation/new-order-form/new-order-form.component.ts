@@ -59,6 +59,9 @@ export class NewOrderFormComponent implements OnInit {
   currentQuantity = 1;
   currentPrice = 0;
 
+  // For suggested items interactions
+  suggestedItemsState: any[] = [];
+
   // New Item State
   isAddingNewItem = false;
   newItemSku = '';
@@ -66,6 +69,10 @@ export class NewOrderFormComponent implements OnInit {
   isSubmitting = false;
   successMessage = '';
   errorMessage = '';
+
+  // Row selection states
+  selectedLineItemIndex: number | null = null;
+  selectedSuggestedIndex: number | null = null;
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -87,14 +94,33 @@ export class NewOrderFormComponent implements OnInit {
 
   loadSuppliers(): void {
     this.apiService.get<Supplier[]>('/inventory/suppliers').subscribe({
-      next: (data: Supplier[]) => this.suppliers = data,
+      next: (data: Supplier[]) => {
+        this.suppliers = data;
+        if (this.suppliers.length > 0 && !this.selectedSupplier) {
+          this.selectedSupplier = this.suppliers[0].name;
+        }
+      },
       error: (err: any) => console.error('Failed to load suppliers:', err)
     });
   }
 
   loadSuggestedItems(): void {
     this.apiService.get<InventoryItem[]>('/inventory/suggested-orders').subscribe({
-      next: (data: InventoryItem[]) => this.suggestedItems = data,
+      next: (data: InventoryItem[]) => {
+        this.suggestedItems = data;
+        this.suggestedItemsState = data.map(item => ({
+          ...item,
+          isEditingPrice: false,
+          isConfiguring: false,
+          editPrice: item.unitCost,
+          editQty: 1
+        }));
+        
+        // Per user request: first option should be automatically selected
+        if (this.suggestedItemsState.length > 0) {
+          this.selectedSuggestedIndex = 0;
+        }
+      },
       error: (err: any) => console.error('Failed to load suggested items:', err)
     });
   }
@@ -136,10 +162,14 @@ export class NewOrderFormComponent implements OnInit {
   }
 
   onItemInputBlur(): void {
-    setTimeout(() => { this.showItemDropdown = false; }, 200);
+    // Slight delay to allow mousedown to trigger selectInventoryItem
+    setTimeout(() => { 
+      this.showItemDropdown = false; 
+    }, 250);
   }
 
   onItemInputFocus(): void {
+    this.showItemDropdown = true;
     this.filterItems();
   }
 
@@ -181,24 +211,55 @@ export class NewOrderFormComponent implements OnInit {
     this.resetSelection();
   }
 
-  addFromSuggested(item: InventoryItem): void {
-    const existingIndex = this.orderItems.findIndex(i => i.sku === item.sku);
+  addFromSuggested(itemState: any): void {
+    const existingIndex = this.orderItems.findIndex(i => i.sku === itemState.sku);
+    const qty = itemState.editQty || 1;
+    const price = itemState.editPrice || 0;
+
     if (existingIndex !== -1) {
-      this.orderItems[existingIndex].quantity += 1;
+      this.orderItems[existingIndex].quantity += qty;
+      this.orderItems[existingIndex].unitCost = price; // Update to latest price
       this.orderItems[existingIndex].estimatedTotal =
-        this.orderItems[existingIndex].quantity * item.unitCost;
+        this.orderItems[existingIndex].quantity * price;
     } else {
       this.orderItems.push({
-        inventoryId: item._id,
-        name: item.name,
-        sku: item.sku,
-        quantity: 1,
-        unitCost: item.unitCost,
-        estimatedTotal: item.unitCost,
-        available: item.available,
-        reserved: item.reserved
+        inventoryId: itemState._id,
+        name: itemState.name,
+        sku: itemState.sku,
+        quantity: qty,
+        unitCost: price,
+        estimatedTotal: qty * price,
+        available: itemState.available,
+        reserved: itemState.reserved
       });
     }
+    
+    // Reset state after adding
+    itemState.isConfiguring = false;
+    itemState.editQty = 1;
+  }
+
+  togglePriceEdit(itemState: any): void {
+    itemState.isEditingPrice = !itemState.isEditingPrice;
+  }
+
+  startConfiguring(itemState: any): void {
+    // If already configuring, this acts as "Confirm" or we can have a separate confirm button
+    // But per user request "add to order should be visible to edit when clicked"
+    itemState.isConfiguring = true;
+  }
+
+  cancelConfiguring(itemState: any): void {
+    itemState.isConfiguring = false;
+    itemState.editQty = 1;
+  }
+
+  selectLineItem(index: number): void {
+    this.selectedLineItemIndex = index;
+  }
+
+  selectSuggestedItem(index: number): void {
+    this.selectedSuggestedIndex = index;
   }
 
   private resetSelection(): void {

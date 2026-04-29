@@ -25,127 +25,147 @@
 
   <div class="split-layout">
     <!-- Left Column: Form Inputs -->
-    <div class="layout-left glass-panel">
-      <div class="form-section-header">
-        <h3>Select Supplier</h3>
-      </div>
-      
-      <div class="form-group mb-32">
-        <label>Vendor / Supplier</label>
-        <div class="select-wrapper">
-          <select [(ngModel)]="selectedSupplier" class="form-select">
-            <option value="" disabled selected>Choose a supplier...</option>
-            <option *ngFor="let s of suppliers" [value]="s.name">{{ s.name }}</option>
-          </select>
-          <svg class="select-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m6 9 6 6 6-6"></path>
-          </svg>
+    <div class="layout-left white-panel">
+      <!-- Step 1: Select Supplier -->
+      <div class="form-step">
+        <div class="step-header">
+          <span class="step-badge">1</span>
+          <h3>Select Supplier</h3>
         </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Item Selection -->
-      <div class="form-section-header">
-        <h3>Items Selection</h3>
-      </div>
-
-      <div class="item-selection-zone">
-        <div class="selector-row">
-          <div class="autocomplete-container">
-            <div class="input-wrapper">
-              <input 
-                type="text" 
-                [(ngModel)]="itemSearchQuery" 
-                (input)="filterItems()"
-                (focus)="onItemInputFocus()"
-                (blur)="onItemInputBlur()"
-                placeholder="Search inventory items..."
-                class="form-input search-input"
-                [class.has-selection]="selectedItem || isAddingNewItem"
-                autocomplete="off">
-              
-              <button 
-                class="btn-clear-selection" 
-                *ngIf="selectedItem || isAddingNewItem"
-                (click)="clearSelection()"
-                title="Clear selection">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
-              <div class="dropdown-item add-new" (mousedown)="selectInventoryItem('new')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right: 8px;">
-                  <path d="M12 5v14M5 12h14"></path>
-                </svg>
-                Add New Item: "{{ itemSearchQuery }}"
-              </div>
-              
-              <div 
-                class="dropdown-item" 
-                *ngFor="let item of filteredInventory" 
-                (mousedown)="selectInventoryItem(item)">
-                <div class="item-info">
-                  <span class="name">{{ item.name }}</span>
-                  <span class="sku">{{ item.sku }}</span>
-                </div>
-                <div class="item-stock-info">
-                  Avail: <span class="avail">{{ item.available }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="quick-config animate-fade" *ngIf="selectedItem || isAddingNewItem">
-            <div class="config-row">
-              <div class="config-field" *ngIf="isAddingNewItem">
-                <span class="field-label">SKU</span>
-                <input type="text" [(ngModel)]="newItemSku" class="qty-field sku-input" placeholder="SKU-123">
-              </div>
-              <div class="config-field">
-                <span class="field-label">QTY</span>
-                <input type="number" [(ngModel)]="currentQuantity" class="qty-field">
-              </div>
-              <div class="config-field">
-                <span class="field-label">UNIT COST</span>
-                <div class="price-input-wrapper">
-                  <span class="currency-prefix">LKR</span>
-                  <input type="number" [(ngModel)]="currentPrice" class="qty-field price-input">
-                </div>
-              </div>
-            </div>
-            <div class="config-footer">
-              <div class="total-display">
-                <span class="field-label">SUBTOTAL</span>
-                <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
-              </div>
-              <button class="btn-add-item-row" (click)="addLineItem()">
-                ADD TO LIST
-              </button>
+        <div class="step-content">
+          <div class="form-group">
+            <label>Vendor / Supplier</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="selectedSupplier" class="form-select">
+                <option value="" disabled selected>Choose a supplier...</option>
+                <option *ngFor="let s of suppliers" [value]="s.name">{{ s.name }}</option>
+              </select>
+              <svg class="select-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="divider"></div>
+      <div class="step-divider"></div>
 
-      <div class="summary-notes mt-24">
-        <label>Order Notes / Justification</label>
-        <textarea 
-          [(ngModel)]="orderNotes" 
-          class="form-textarea" 
-          placeholder="Add any additional context..."
-          rows="3"></textarea>
+      <!-- Step 2: Items Selection -->
+      <div class="form-step">
+        <div class="step-header">
+          <span class="step-badge">2</span>
+          <h3>Items Selection</h3>
+        </div>
+        <div class="step-content">
+          <div class="item-selection-zone">
+            <div class="autocomplete-container">
+              <div class="input-wrapper search-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input 
+                  type="text" 
+                  [(ngModel)]="itemSearchQuery" 
+                  (input)="filterItems()"
+                  (focus)="onItemInputFocus()"
+                  (blur)="onItemInputBlur()"
+                  placeholder="Search inventory items to add..."
+                  class="form-input search-input"
+                  [class.has-selection]="selectedItem || isAddingNewItem"
+                  autocomplete="off">
+                
+                <button 
+                  class="btn-clear-selection" 
+                  *ngIf="selectedItem || isAddingNewItem"
+                  (click)="clearSelection()"
+                  title="Clear selection">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
+                <div class="dropdown-item add-new" (mousedown)="selectInventoryItem('new')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right: 8px;">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                  Add New Item: "{{ itemSearchQuery }}"
+                </div>
+                
+                <div 
+                  class="dropdown-item" 
+                  *ngFor="let item of filteredInventory" 
+                  (mousedown)="selectInventoryItem(item)">
+                  <div class="item-info">
+                    <span class="name">{{ item.name }}</span>
+                    <span class="sku">{{ item.sku }}</span>
+                  </div>
+                  <div class="item-stock-info">
+                    Avail: <span class="avail">{{ item.available }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-config animate-fade" *ngIf="selectedItem || isAddingNewItem">
+              <div class="config-row">
+                <div class="config-field" *ngIf="isAddingNewItem">
+                  <span class="field-label">SKU</span>
+                  <input type="text" [(ngModel)]="newItemSku" class="qty-field sku-input" placeholder="SKU-123">
+                </div>
+                <div class="config-field">
+                  <span class="field-label">QTY</span>
+                  <input type="number" [(ngModel)]="currentQuantity" class="qty-field no-spinner">
+                </div>
+                <div class="config-field">
+                  <span class="field-label">UNIT COST</span>
+                  <div class="price-input-wrapper">
+                    <span class="currency-prefix">LKR</span>
+                    <input type="number" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
+                  </div>
+                </div>
+              </div>
+              <div class="config-footer">
+                <div class="total-display">
+                  <span class="field-label">SUBTOTAL</span>
+                  <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
+                </div>
+                <button class="btn-add-item-row" (click)="addLineItem()">
+                  ADD TO LIST
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="form-footer">
-        <button class="btn-cancel-page" (click)="goBack()">Discard Changes</button>
-        <div class="footer-actions">
-          <button class="btn-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0">Save Draft</button>
-          <button class="btn-submit-order" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+      <div class="step-divider"></div>
+
+      <!-- Step 3: Additional Details -->
+      <div class="form-step">
+        <div class="step-header">
+          <span class="step-badge">3</span>
+          <h3>Additional Details</h3>
+        </div>
+        <div class="step-content">
+          <div class="form-group">
+            <label>Order Notes / Justification</label>
+            <textarea 
+              [(ngModel)]="orderNotes" 
+              class="form-textarea" 
+              placeholder="Add any additional context for the approver..."
+              rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer-actions">
+        <button class="btn-discard" (click)="goBack()">Discard Changes</button>
+        <div class="action-group">
+          <button class="btn-save-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0">Save Draft</button>
+          <button class="btn-submit" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>
           </button>
@@ -154,114 +174,158 @@
     </div>
 
     <!-- Right Column: Added Items List -->
-    <div class="layout-right glass-panel">
+    <div class="layout-right white-panel">
       <div class="right-header">
         <h3>Added Items List</h3>
-        <span class="count-badge" *ngIf="orderItems.length > 0">{{ orderItems.length }}</span>
       </div>
 
-      <div class="added-items-scroll">
+      <div class="added-items-content">
         <div class="empty-items-state" *ngIf="orderItems.length === 0">
           <div class="empty-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M20 12V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
-              <path d="M9 11h6" />
-              <path d="M9 15h4" />
-              <path d="M14 18l3 3 5-5" />
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+              <path d="m3.3 7 8.7 5 8.7-5" />
+              <path d="M12 22V12" />
             </svg>
           </div>
-          <p>No items added yet.</p>
+          <p class="empty-text">No items added yet.</p>
         </div>
 
-        <table class="line-items-table" *ngIf="orderItems.length > 0">
-          <thead>
-            <tr>
-              <th>ITEM</th>
-              <th class="text-center">QTY</th>
-              <th class="text-right">PRICE</th>
-              <th class="text-right">TOTAL</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of orderItems; let i = index" class="animate-row">
-              <td class="name-cell">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="item-sku">{{ item.sku }}</span>
-              </td>
-              <td class="qty-cell">
-                <div class="qty-editor">
-                  <button (click)="updateItemQuantity(i, item.quantity - 1)">-</button>
-                  <input type="number" [(ngModel)]="item.quantity" (change)="updateItemQuantity(i, item.quantity)" class="inline-qty-input">
-                  <button (click)="updateItemQuantity(i, item.quantity + 1)">+</button>
-                </div>
-              </td>
-              <td class="text-right">{{ formatCurrency(item.unitCost) }}</td>
-              <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
-              <td class="text-center">
-                <button class="btn-delete-row" (click)="removeLineItem(i)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="line-items-container" *ngIf="orderItems.length > 0">
+          <table class="line-items-table">
+            <thead>
+              <tr>
+                <th>ITEM</th>
+                <th class="text-center">QTY</th>
+                <th class="text-right">TOTAL</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of orderItems; let i = index" 
+                  class="animate-row clickable-row"
+                  [class.selected-row]="selectedLineItemIndex === i"
+                  (click)="selectLineItem(i)">
+                <td class="name-cell">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-sku">{{ item.sku }}</span>
+                </td>
+                <td class="qty-cell">
+                  <div class="qty-editor" *ngIf="selectedLineItemIndex === i">
+                    <button (click)="updateItemQuantity(i, item.quantity - 1); $event.stopPropagation()">-</button>
+                    <input type="number" [(ngModel)]="item.quantity" (change)="updateItemQuantity(i, item.quantity)" class="inline-qty-input no-spinner">
+                    <button (click)="updateItemQuantity(i, item.quantity + 1); $event.stopPropagation()">+</button>
+                  </div>
+                  <span class="qty-static" *ngIf="selectedLineItemIndex !== i">×{{ item.quantity }}</span>
+                </td>
+                <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
+                <td class="text-center">
+                  <button class="btn-delete-row" *ngIf="selectedLineItemIndex === i" (click)="removeLineItem(i); $event.stopPropagation()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="summary-box-fixed">
-        <div class="summary-content">
-          <div class="summary-line">
-            <span class="label">Total Items</span>
-            <span class="val">{{ orderItems.length }}</span>
-          </div>
-          <div class="summary-line grand">
-            <span class="label">Estimated Total</span>
-            <span class="val">{{ formatCurrency(orderTotal) }}</span>
-          </div>
+      <div class="summary-footer">
+        <div class="summary-row">
+          <span class="label">Total Items</span>
+          <span class="value">{{ orderItems.length }}</span>
+        </div>
+        <div class="summary-row grand-total">
+          <span class="label">Estimated Total</span>
+          <span class="value">{{ formatCurrency(orderTotal) }}</span>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Required Items Section -->
-  <div class="required-items-section mt-40">
-    <div class="section-title">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#008f5d" stroke-width="2.5">
-        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
+  <div class="required-items-table-section mt-40">
+    <div class="section-header">
+      <div class="status-dot-wrapper">
+        <div class="status-dot warning">!</div>
+      </div>
       <h3>Required Items to Order (Low Stock)</h3>
     </div>
     
-    <div class="suggested-grid">
-      <div class="suggested-card glass-panel animate-fade" 
-           *ngFor="let item of suggestedItems" 
-           (click)="addFromSuggested(item)">
-        <div class="card-info">
-          <span class="item-name">{{ item.name }}</span>
-          <span class="item-sku">{{ item.sku }}</span>
-        </div>
-        <div class="card-meta">
-          <div class="stock-status">
-            <span class="label">Avail:</span>
-            <span class="val danger">{{ item.available }}</span>
-          </div>
-          <div class="price-info">
-            {{ formatCurrency(item.unitCost) }}
-          </div>
-        </div>
-        <div class="add-overlay">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          <span>ADD TO ORDER</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="empty-suggested" *ngIf="suggestedItems.length === 0">
-      <p>No urgent items requiring order at the moment.</p>
+    <div class="table-container white-panel">
+      <table class="required-items-grid">
+        <thead>
+          <tr>
+            <th>ITEM DETAILS</th>
+            <th>SKU / CODE</th>
+            <th>AVAILABLE STOCK</th>
+            <th class="text-right">EST. UNIT PRICE</th>
+            <th class="text-center">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of suggestedItemsState; let i = index"
+              class="clickable-row"
+              [class.selected-row]="selectedSuggestedIndex === i"
+              (click)="selectSuggestedItem(i)">
+            <td>
+              <span class="item-name-bold">{{ item.name }}</span>
+            </td>
+            <td>
+              <span class="sku-code">{{ item.sku }}</span>
+            </td>
+            <td>
+              <div class="stock-info">
+                <span class="label">Avail</span>
+                <span class="val danger">{{ item.available }}</span>
+              </div>
+            </td>
+            <td class="text-right price-cell">
+              <div class="price-edit-wrap" *ngIf="selectedSuggestedIndex === i">
+                <span class="currency-prefix">LKR</span>
+                <input type="number" [(ngModel)]="item.editPrice" class="inline-price-input no-spinner" (click)="$event.stopPropagation()">
+              </div>
+              <span class="price-bold" *ngIf="selectedSuggestedIndex !== i">{{ formatCurrency(item.editPrice) }}</span>
+            </td>
+            <td class="text-center action-cell">
+              <div class="config-action-wrap" *ngIf="selectedSuggestedIndex === i">
+                <div class="config-action-inner" *ngIf="item.isConfiguring; else addBtn">
+                  <div class="qty-input-wrap">
+                    <span class="qty-label">Qty:</span>
+                    <input type="number" [(ngModel)]="item.editQty" class="inline-qty-input-mini no-spinner" (click)="$event.stopPropagation()">
+                  </div>
+                  <div class="config-btns">
+                    <button class="btn-confirm-mini" (click)="addFromSuggested(item); $event.stopPropagation()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </button>
+                    <button class="btn-cancel-mini" (click)="cancelConfiguring(item); $event.stopPropagation()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <ng-template #addBtn>
+                  <button class="btn-add-table" (click)="startConfiguring(item); $event.stopPropagation()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    <span>Add to Order</span>
+                  </button>
+                </ng-template>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="suggestedItems.length === 0">
+            <td colspan="5" class="empty-table-row">No urgent items requiring order at the moment.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
