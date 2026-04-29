@@ -145,4 +145,15 @@ export class InventoryManagerDashboardService {
   getProcurements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/procurements`);
   }
+
+  getActivityLog(): Observable<ActivityItem[]> {
+    return this.http.get<ActivityItem[]>(`${this.apiUrl}/activity`).pipe(
+      map(activities => activities.map(activity => ({
+        ...activity,
+        timestamp: new Date(activity.timestamp),
+        timeAgo: this.getTimeAgo(new Date(activity.timestamp))
+      }))),
+      catchError(() => of([]))
+    );
+  }
 }

@@ -131,6 +131,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'activity-log',
+        loadComponent: () =>
+          import('./features/inventory-manager/pages/activity-log/activity-log.component').then(
+            (m) => m.ActivityLogComponent,
+          ),
+      },
+      {
         path: 'reports',
         loadComponent: () =>
           import('./features/inventory-manager/pages/dashboard/inventory-manager-dashboard.component').then(
