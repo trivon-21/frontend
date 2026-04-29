@@ -64,6 +64,40 @@ export class OrderCreationComponent implements OnInit {
   pendingOrders: OrderRequest[] = [];
   approvedOrders: OrderRequest[] = [];
   rejectedOrders: OrderRequest[] = [];
+  draftOrders: OrderRequest[] = [
+    {
+      requestId: 'DRFT-1001',
+      supplierName: 'Global Electronics',
+      totalEstimate: 145000,
+      status: 'pending-approval', // Using existing status for type safety, but will label as draft
+      requestedBy: 'Dassana',
+      priority: 'normal',
+      notes: 'Initial stock replenishment draft.',
+      rejectionReason: '',
+      approvedBy: '',
+      approvedAt: '',
+      rejectedAt: '',
+      source: 'Internal',
+      createdAt: new Date().toISOString(),
+      items: []
+    },
+    {
+      requestId: 'DRFT-1002',
+      supplierName: 'Airlux Logistics',
+      totalEstimate: 89000,
+      status: 'pending-approval',
+      requestedBy: 'Dassana',
+      priority: 'urgent',
+      notes: 'Urgent packaging materials.',
+      rejectionReason: '',
+      approvedBy: '',
+      approvedAt: '',
+      rejectedAt: '',
+      source: 'Internal',
+      createdAt: new Date().toISOString(),
+      items: []
+    }
+  ];
 
   suggestedItems: InventoryItem[] = [];
 

@@ -28,40 +28,64 @@
     </div>
   </div>
 
-  <!-- Suggested Orders Card -->
-  <div class="suggested-card" *ngIf="suggestedItems.length > 0">
-    <div class="card-header">
-      <div class="title-row">
-        <svg class="warning-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-          <path d="M12 9v4" />
-          <path d="M12 17h.01" />
-        </svg>
-        <h2>Suggested Orders</h2>
-      </div>
-      <span class="status-info">{{ suggestedItems.length }} items below reorder level</span>
-    </div>
-    
-    <div class="suggested-list">
-      <div class="suggested-item" *ngFor="let item of suggestedItems">
-        <div class="item-main">
-          <span class="item-name">{{ item.name }}</span>
-          <span class="item-sku">{{ item.sku }}</span>
+  <div class="dashboard-top-grid">
+    <!-- Suggested Orders Card -->
+    <div class="suggested-card" *ngIf="suggestedItems.length > 0">
+      <div class="card-header">
+        <div class="title-row">
+          <svg class="warning-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <h2>Suggested Orders</h2>
         </div>
-        <div class="item-stock">
-          <div class="stock-label-group">
-            <span class="label">Stock Level</span>
-            <span class="value" [class.critical]="item.available <= item.reorderLevel/2">
-              {{ item.available }} / {{ item.reorderLevel }}
-            </span>
+        <span class="status-info">{{ suggestedItems.length }} Low Stock Items</span>
+      </div>
+      
+      <div class="suggested-list">
+        <div class="suggested-item" *ngFor="let item of suggestedItems">
+          <div class="item-main">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-sku">{{ item.sku }}</span>
           </div>
-          <button class="btn-add-suggested" (click)="addSuggestedItem(item)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add
-          </button>
+          <div class="item-stock">
+            <div class="stock-label-group">
+              <span class="label">Stock Level</span>
+              <span class="value" [class.critical]="item.available <= item.reorderLevel/2">
+                {{ item.available }} / {{ item.reorderLevel }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Drafts Card -->
+    <div class="drafts-card">
+      <div class="card-header">
+        <div class="title-row">
+          <svg class="draft-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <h2>Saved Drafts</h2>
+        </div>
+        <span class="status-info">{{ draftOrders.length }} Drafts Found</span>
+      </div>
+      <div class="drafts-list">
+        <div class="draft-item" *ngFor="let draft of draftOrders" (click)="openDetail(draft)">
+          <div class="draft-main">
+            <span class="draft-id">{{ draft.requestId }}</span>
+            <span class="draft-vendor">{{ draft.supplierName }}</span>
+          </div>
+          <div class="draft-meta">
+            <span class="draft-price">{{ formatCurrency(draft.totalEstimate) }}</span>
+            <span class="draft-date">{{ formatDate(draft.createdAt) }}</span>
+          </div>
+        </div>
+        <div class="empty-mini-state" *ngIf="draftOrders.length === 0">
+          <p>No drafts saved at the moment.</p>
         </div>
       </div>
     </div>
