@@ -23,40 +23,40 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #64748b;
+  border: 1px solid var(--border-light);
+  background: var(--background-paper);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-minimal);
 }
 
 .btn-back:hover {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--background-hover);
+  color: var(--text-primary);
   transform: translateX(-2px);
 }
 
 .title-group h1 {
   font-size: 26px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.5px;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 4px 0 0;
 }
 
 .draft-badge {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--background-page);
+  color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
   padding: 6px 14px;
@@ -110,7 +110,7 @@
 .step-badge {
   width: 28px;
   height: 28px;
-  background: #008f5d;
+  background: var(--primary-main);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -123,13 +123,13 @@
 .step-header h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .step-divider {
   height: 1px;
-  background: #f1f5f9;
+  background: var(--border-light);
   margin-bottom: 32px;
 }
 
@@ -138,25 +138,25 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
 .form-select, .form-input, .form-textarea {
   width: 100%;
   padding: 14px 18px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 14px;
   font-size: 15px;
-  background: #ffffff;
+  background: var(--background-paper);
   transition: all 0.2s;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .form-select:focus, .form-input:focus, .form-textarea:focus {
   outline: none;
-  border-color: #008f5d;
-  box-shadow: 0 0 0 4px rgba(0, 143, 93, 0.05);
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 4px var(--primary-lighter);
 }
 
 .select-wrapper {
@@ -291,24 +291,7 @@
   color: #008f5d;
 }
 
-.btn-add-item-row {
-  height: 46px;
-  padding: 0 28px;
-  background: #0f172a;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.btn-add-item-row:hover {
-  background: #1e293b;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
 
 /* Left Panel Footer */
 .form-footer-actions {
@@ -338,46 +321,7 @@
   color: #ef4444;
 }
 
-.btn-save-draft {
-  padding: 12px 24px;
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.btn-save-draft:hover:not(:disabled) {
-  background: #e2e8f0;
-}
-
-.btn-submit {
-  padding: 12px 32px;
-  background: #008f5d;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 143, 93, 0.2);
-  transition: all 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background: #007a4f;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 143, 93, 0.25);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
 
 /* Right Panel - Added Items */
 .layout-right {
@@ -461,21 +405,21 @@
 
 .item-name {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 14px;
   display: block;
 }
 
 .item-sku {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-family: monospace;
 }
 
 .qty-editor {
   display: flex;
   align-items: center;
-  background: #f1f5f9;
+  background: var(--background-page);
   border-radius: 8px;
   padding: 2px;
 }
@@ -578,7 +522,7 @@
 .status-dot-wrapper {
   width: 24px;
   height: 24px;
-  background: #fee2e2;
+  background: var(--error-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -586,7 +530,7 @@
 }
 
 .status-dot.warning {
-  color: #ef4444;
+  color: var(--error);
   font-weight: 900;
   font-size: 14px;
 }
@@ -594,7 +538,7 @@
 .section-header h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -632,13 +576,13 @@
 
 .item-name-bold {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .sku-code {
   font-family: monospace;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -650,36 +594,17 @@
 }
 
 .stock-info .val.danger {
-  color: #ef4444;
+  color: var(--error);
   font-weight: 800;
 }
 
 .price-bold {
   font-weight: 700;
-  color: #008f5d;
+  color: var(--primary-main);
   font-size: 14px;
 }
 
-.btn-add-table {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  color: #0f172a;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.btn-add-table:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  transform: translateY(-1px);
-}
 
 /* Autocomplete Dropdown */
 .dropdown-list {
@@ -708,19 +633,20 @@
 }
 
 .dropdown-item:hover {
-  background: #f8fafc;
+  background: var(--background-hover);
 }
 
 .dropdown-item.add-new {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--border-light);
   font-weight: 700;
-  color: #008f5d;
-  background: #f0fdf4;
+  color: var(--primary-main);
+  background: var(--primary-lighter);
   margin-bottom: 4px;
 }
 
 .dropdown-item.add-new:hover {
-  background: #dcfce7;
+  background: var(--primary-lighter);
+  opacity: 0.8;
 }
 
 /* Animations */
@@ -750,7 +676,7 @@ input[type=number].no-spinner {
 }
 
 .selected-row {
-  background-color: #f0fdf4 !important; /* var(--primary-lighter) equivalent */
+  background-color: var(--primary-lighter) !important;
 }
 
 .clickable-row {
@@ -778,13 +704,13 @@ input[type=number].no-spinner {
 .inline-price-input {
   width: 90px;
   padding: 6px 10px;
-  border: 1px solid #008f5d;
+  border: 1px solid var(--primary-main);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   outline: none;
-  background: #f0fdf4;
+  background: var(--primary-lighter);
 }
 
 .edit-icon {
@@ -817,7 +743,7 @@ input[type=number].no-spinner {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f1f5f9;
+  background: var(--background-page);
   padding: 4px 8px;
   border-radius: 8px;
 }
@@ -825,7 +751,7 @@ input[type=number].no-spinner {
 .qty-label {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .inline-qty-input-mini {
@@ -834,7 +760,7 @@ input[type=number].no-spinner {
   background: transparent;
   font-weight: 700;
   font-size: 13px;
-  color: #0f172a;
+  color: var(--text-primary);
   text-align: center;
 }
 
@@ -843,43 +769,7 @@ input[type=number].no-spinner {
   gap: 6px;
 }
 
-.btn-confirm-mini {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #008f5d;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.btn-confirm-mini:hover {
-  background: #007a4f;
-  transform: scale(1.05);
-}
-
-.btn-cancel-mini {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #f1f5f9;
-  color: #64748b;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-cancel-mini:hover {
-  background: #e2e8f0;
-  color: #ef4444;
-}
 
 .empty-table-row {
   text-align: center;
@@ -899,9 +789,9 @@ input[type=number].no-spinner {
   gap: 12px;
   margin-top: 12px;
   padding: 12px;
-  background: #f0fdf4;
+  background: var(--primary-lighter);
   border-radius: 12px;
-  border: 1px solid #dcfce7;
+  border: 1px solid var(--primary-light);
 }
 
 .btn-confirm-mini.wide {

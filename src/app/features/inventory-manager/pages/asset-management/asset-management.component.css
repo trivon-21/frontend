@@ -195,7 +195,7 @@ table {
 th {
   text-align: left;
   padding: 12px 24px;
-  background: #f8fafc;
+  background: var(--background-page);
   font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
@@ -210,10 +210,10 @@ td {
   font-size: 13px;
 }
 
-.tool-name { font-weight: 500; color: #1e293b; }
-.asset-tag { color: #64748b; }
-.held-by { font-weight: 600; color: #1e293b; }
-.date-cell { color: #475569; }
+.tool-name { font-weight: 500; color: var(--text-primary); }
+.asset-tag { color: var(--text-secondary); }
+.held-by { font-weight: 600; color: var(--text-primary); }
+.date-cell { color: var(--text-muted); }
 
 .status-pill {
   padding: 4px 12px;
@@ -229,14 +229,7 @@ td {
   color: var(--error);
 }
 
-.btn-action {
-  background: none;
-  border: none;
-  color: var(--info);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-}
+
 
 .empty-state {
   text-align: center;
@@ -287,7 +280,9 @@ td {
   width: 100%;
   max-width: 600px;
   padding: 48px;
-  background: white;
+  background: var(--background-paper);
+  border-radius: 24px;
+  box-shadow: var(--shadow-modal);
 }
 
 .modal-form {

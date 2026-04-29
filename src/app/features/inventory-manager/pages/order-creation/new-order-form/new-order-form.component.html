@@ -68,10 +68,10 @@
 
             <!-- New Supplier Confirmation -->
             <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
-              <button class="btn-confirm-mini wide" (click)="confirmNewSupplier()">
+              <button class="btn-primary" (click)="confirmNewSupplier()">
                 Confirm Supplier
               </button>
-              <button class="btn-cancel-mini wide" (click)="cancelNewSupplier()">
+              <button class="btn-secondary" (click)="cancelNewSupplier()">
                 Cancel
               </button>
             </div>
@@ -156,7 +156,7 @@
                   <span class="field-label">SUBTOTAL</span>
                   <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
                 </div>
-                <button class="btn-add-item-row" (click)="addLineItem()">
+                <button class="btn-primary" (click)="addLineItem()">
                   ADD TO LIST
                 </button>
               </div>
@@ -188,10 +188,10 @@
       <div class="form-footer-actions">
         <button class="btn-discard" (click)="goBack()">Discard Changes</button>
         <div class="action-group">
-          <button class="btn-save-draft" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+          <button class="btn-secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
             {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
           </button>
-          <button class="btn-submit" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+          <button class="btn-primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>
           </button>
@@ -339,7 +339,7 @@
                   </div>
                 </div>
                 <ng-template #addBtn>
-                  <button class="btn-add-table" (click)="startConfiguring(item); $event.stopPropagation()">
+                  <button class="btn-small" (click)="startConfiguring(item); $event.stopPropagation()">
                     <lucide-angular name="plus" [size]="14" strokeWidth="3"></lucide-angular>
                     <span>Add to Order</span>
                   </button>

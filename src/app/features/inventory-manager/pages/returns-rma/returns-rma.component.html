@@ -36,7 +36,7 @@
           <input type="text" class="form-input">
         </div>
 
-        <button class="btn-add">Add back to Stock</button>
+        <button class="btn-primary">Add back to Stock</button>
 
         <div class="note-box">
           <p>Note: Items marked as "Scrap" will be automatically moved to the Quarantine Zone below.</p>
@@ -95,7 +95,7 @@
   <div class="quarantine-section">
     <div class="quarantine-header">
       <div class="header-left">
-        <lucide-angular name="circle-alert" [size]="24" class="inline-icon" style="color: #ef4444;"></lucide-angular>
+        <lucide-angular name="circle-alert" [size]="24" class="inline-icon" style="color: var(--error);"></lucide-angular>
         <div class="title-group">
           <h2>Quarantine Zone</h2>
           <span class="subtitle">Items damaged or incomplete - pending disposal decision</span>
@@ -124,7 +124,7 @@
             <td>{{ item.dateAdded }}</td>
             <td>{{ item.location }}</td>
             <td>
-              <button class="btn-dispose" (click)="disposeItem(i)">Dispose</button>
+              <button class="btn-danger" (click)="disposeItem(i)">Dispose</button>
             </td>
           </tr>
         </tbody>

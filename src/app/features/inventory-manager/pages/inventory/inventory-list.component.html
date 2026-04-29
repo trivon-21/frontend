@@ -99,7 +99,7 @@
           <td class="num-cell">{{ item.reserved }}</td>
           <td>{{ item.location }}</td>
           <td>
-            <button class="btn-table" (click)="openDetailModal(item)">View Product</button>
+            <button class="btn-small" (click)="openDetailModal(item)">View Product</button>
           </td>
         </tr>
       </tbody>
@@ -186,7 +186,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-outline" (click)="closeDetailModal()">Close</button>
+        <button class="btn-secondary" (click)="closeDetailModal()">Close</button>
         <button class="btn-primary" [routerLink]="['/inventory-manager/product-wizard', selectedItem.id]" (click)="closeDetailModal()">
           <lucide-angular name="edit" [size]="16" class="inline-icon"></lucide-angular>
           Edit Product
