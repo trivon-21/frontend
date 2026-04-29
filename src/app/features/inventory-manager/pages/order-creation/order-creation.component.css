@@ -579,20 +579,6 @@
 .id-cell { font-weight: 700; color: #1a202c; }
 .total-cell { font-weight: 700; color: #2d3748; }
 
-.priority-pill {
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 700;
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.priority-pill.urgent {
-  background: #fff5f5;
-  color: #e53e3e;
-}
-
 .btn-action-view {
   padding: 6px 16px;
   background: #f7fafc;
@@ -763,33 +749,6 @@
   background: #fcfcfc;
   border-radius: 16px;
   border: 1px dashed #e2e8f0;
-}
-
-.priority-switcher {
-  display: flex;
-  background: #f1f5f9;
-  padding: 4px;
-  border-radius: 12px;
-  width: 100%;
-}
-
-.p-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: none;
-  font-size: 13px;
-  font-weight: 700;
-  color: #64748b;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.p-btn.active {
-  background: white;
-  color: #008f5d;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .item-selection-zone {

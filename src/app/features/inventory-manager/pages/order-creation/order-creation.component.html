@@ -102,7 +102,6 @@
             <th>SUPPLIER</th>
             <th>ITEMS</th>
             <th>ESTIMATED TOTAL</th>
-            <th>PRIORITY</th>
             <th>DATE</th>
             <th>ACTION</th>
           </tr>
@@ -113,11 +112,6 @@
             <td>{{ order.supplierName }}</td>
             <td>{{ order.items.length }} Items</td>
             <td class="total-cell">{{ formatCurrency(order.totalEstimate) }}</td>
-            <td>
-              <span class="priority-pill" [class.urgent]="order.priority === 'urgent'">
-                {{ order.priority | titlecase }}
-              </span>
-            </td>
             <td>{{ formatDate(order.createdAt) }}</td>
             <td>
               <button class="btn-action-view">View</button>
@@ -160,12 +154,6 @@
           <div class="summary-box">
             <span class="label">Vendor</span>
             <span class="value">{{ selectedOrder.supplierName }}</span>
-          </div>
-          <div class="summary-box">
-            <span class="label">Priority</span>
-            <span class="value" [class.urgent]="selectedOrder.priority === 'urgent'">
-              {{ selectedOrder.priority | uppercase }}
-            </span>
           </div>
           <div class="summary-box">
             <span class="label">Total Estimate</span>
