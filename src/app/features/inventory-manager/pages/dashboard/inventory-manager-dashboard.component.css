@@ -225,6 +225,23 @@
   border-color: var(--primary-light);
 }
 
+.summary-card.clickable {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.summary-card.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-light);
+}
+
+.summary-card.clickable:hover .card-icon {
+  background: var(--primary-main);
+  color: white;
+  transform: scale(1.1);
+}
+
 .summary-card::before {
   content: '';
   position: absolute;
@@ -302,12 +319,16 @@
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 24px;
+  align-items: stretch; /* Force columns to be same height */
 }
 
-.side-column {
+.left-column, .side-column {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+}
+
+.left-column .content-card, .side-column .content-card {
+  flex: 1; /* Stretch cards to fill the height */
 }
 
 .content-card {
@@ -354,6 +375,12 @@
   border-radius: 10px;
   font-size: 12px;
   font-weight: 700;
+}
+
+/* Red hue for Reorder List badge */
+.reorder-card .count-badge {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--error);
 }
 
 /* ── Activity Timeline ── */
@@ -468,94 +495,69 @@
   border-bottom: 1px solid var(--background-page);
 }
 
-.reorder-table td {
-  padding: 16px 8px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--background-page);
-}
-
-.item-name { font-weight: 600; color: var(--text-primary); }
-.item-avail.critical { color: var(--error); font-weight: 700; }
-.item-rsvd.warning { color: var(--warning); font-weight: 700; }
-
-.reorder-btn {
-  padding: 8px 16px;
-  border-radius: 99px; /* Pill shape for consistency */
-  font-size: 12px;
-  font-weight: 700;
+.reorder-table tr.clickable-row {
   cursor: pointer;
-  border: 1px solid var(--border-light);
-  background: white;
-  transition: all 0.2s;
+  transition: background 0.2s ease;
 }
 
-.reorder-btn.primary {
-  background: var(--primary-main);
-  color: white;
-  border: none;
+.reorder-table tr.clickable-row:hover {
+  background: var(--background-hover) !important;
 }
 
-/* ── Logistics Section ── */
-.logistics-content {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+.reorder-table th:nth-child(1) { width: 50%; }
+.reorder-table th:nth-child(2) { width: 25%; }
+.reorder-table th:nth-child(3) { width: 25%; }
 
-.logistics-item {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.logistics-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logistics-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.reorder-table td {
+  padding: 16px 12px;
   font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+/* ── Clean Status Styling ── */
+.item-cell-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.critical { background: var(--error); }
+.status-dot.warning { background: var(--warning); }
+
+.item-name {
   font-weight: 600;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.logistics-stats {
-  font-size: 14px;
+.item-avail, .item-rsvd {
+  font-family: 'Inter', sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.item-avail.critical {
+  color: var(--error);
   font-weight: 700;
 }
 
-.logistics-stats .total { color: var(--text-muted); }
-
-.progress-bar-container {
-  height: 8px;
-  background: var(--background-page);
-  border-radius: 4px;
-  overflow: hidden;
+.item-rsvd.warning {
+  color: var(--warning);
+  font-weight: 700;
 }
 
-.progress-bar {
-  height: 100%;
-  background: var(--primary-main);
-  border-radius: 4px;
-}
 
-.logistics-item:nth-child(2) .progress-bar {
-  background: var(--primary-light);
-}
-
-.logistics-sub {
-  font-size: 12px;
-  color: var(--primary-main);
-  font-weight: 600;
-  margin: 0;
-  text-align: center;
-  opacity: 0.8;
-}
 
 .error-icon { color: var(--primary-main); }
 .info-icon { color: var(--primary-main); }

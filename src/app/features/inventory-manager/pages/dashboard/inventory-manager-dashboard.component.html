@@ -14,7 +14,7 @@
   <div class="welcome-banner">
     <div class="banner-content">
       <div class="title-row">
-        <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
+        <h1 class="welcome-title">Welcome back!</h1>
         <span class="status-badge" [class.offline]="data.status === 'Offline'">
           <span class="dot" [class.syncing]="loading"></span>
           {{ loading ? 'Syncing...' : data.status }}
@@ -34,7 +34,7 @@
   <!-- Summary Cards Section -->
   <div class="summary-grid">
     <!-- Material Reservations -->
-    <div class="summary-card gold">
+    <div class="summary-card clickable" routerLink="/inventory-manager/material-requests">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Stock Reservations</span>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Dispatch Queue -->
-    <div class="summary-card blue">
+    <div class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Dispatch Queue</span>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Asset Health -->
-    <div class="summary-card green">
+    <div class="summary-card clickable" routerLink="/inventory-manager/asset-management">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Tool Status</span>
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Stock Alerts -->
-    <div class="summary-card red">
+    <div class="summary-card clickable" routerLink="/inventory-manager/inventory">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Stock Alerts</span>
@@ -116,7 +116,7 @@
     <div class="content-card activity-card">
       <div class="card-header">
         <h2 class="card-title">Recent Activity</h2>
-        <a href="#" class="view-all-link">View All</a>
+        <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
       </div>
       <div class="timeline-container">
         <div *ngFor="let activity of data.recentActivity" class="timeline-item">
@@ -130,7 +130,7 @@
               <span class="activity-time">{{ activity.timeAgo }}</span>
             </div>
             <div class="activity-actions" *ngIf="activity.actionLabel">
-              <button class="activity-btn" (click)="onReorder(activity.id)">
+              <button class="activity-btn">
                 {{ activity.actionLabel }}
               </button>
             </div>
@@ -155,28 +155,25 @@
             <thead>
               <tr>
                 <th>Item</th>
-                <th>Avail</th>
-                <th>Rsvd</th>
-                <th>Action</th>
+                <th>Available</th>
+                <th>Reserved</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of data.reorderList">
-                <td class="item-name">{{ item.name }}</td>
-                <td class="item-avail" [class.critical]="item.available < item.reserved">
+              <tr *ngFor="let item of data.reorderList" 
+                  class="clickable-row" 
+                  routerLink="/inventory-manager/order-creation/new">
+                <td class="item-name-cell">
+                  <div class="item-cell-wrapper">
+                    <div class="status-dot" [ngClass]="item.status"></div>
+                    <span class="item-name">{{ item.name }}</span>
+                  </div>
+                </td>
+                <td class="item-avail" [class.critical]="item.available === 0">
                   {{ item.available }}
                 </td>
-                <td class="item-rsvd" [class.warning]="item.available <= item.reserved">
+                <td class="item-rsvd" [class.warning]="item.available <= item.reserved && item.available > 0">
                   {{ item.reserved }}
-                </td>
-                <td>
-                  <button
-                    class="reorder-btn"
-                    [class.primary]="item.status === 'critical'"
-                    (click)="onReorder(item.id)"
-                  >
-                    Reorder
-                  </button>
                 </td>
               </tr>
             </tbody>
@@ -184,36 +181,6 @@
         </div>
       </div>
 
-      <!-- Today's Logistics -->
-      <div class="content-card logistics-card">
-        <div class="card-header">
-          <div class="title-with-icon">
-            <lucide-angular name="clock" class="info-icon" [size]="18"></lucide-angular>
-            <h2 class="card-title">Today's Logistics</h2>
-          </div>
-        </div>
-        <div class="logistics-content">
-          <div *ngFor="let item of data.logistics" class="logistics-item">
-            <div class="logistics-header">
-              <div class="logistics-label">
-                <lucide-angular name="truck" [size]="14"></lucide-angular>
-                {{ item.label }}
-              </div>
-              <div class="logistics-stats">
-                <span class="current">{{ item.current }}</span> /
-                <span class="total">{{ item.total }}</span>
-              </div>
-            </div>
-            <div class="progress-bar-container">
-              <div
-                class="progress-bar"
-                [style.width]="getProgressBarWidth(item.current, item.total)"
-              ></div>
-            </div>
-            <p class="logistics-sub" *ngIf="item.subLabel">{{ item.subLabel }}</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </div>

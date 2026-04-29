@@ -91,28 +91,6 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
     return this.iconMappingService.getActivityIcon(type);
   }
 
-  onScanQR(): void {
-    console.log('Open QR Scanner');
-  }
-
-  onProcurement(): void {
-    console.log('Navigate to Procurement');
-  }
-
-  onFindSerial(): void {
-    // TODO: Navigate to find serial
-    console.log('Navigate to Find Serial');
-  }
-
-  onLendItem(): void {
-    // TODO: Navigate to lend item
-    console.log('Navigate to Lend Item');
-  }
-
-  onReorder(alertId: string): void {
-    console.log('Reorder for item:', alertId);
-  }
-
   getProgressBarWidth(current: number, total: number): string {
     return `${(current / total) * 100}%`;
   }
