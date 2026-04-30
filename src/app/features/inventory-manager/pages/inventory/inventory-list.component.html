@@ -17,7 +17,7 @@
   </div>
 
   <!-- Filters Section -->
-  <div class="filters-card glass-panel">
+  <div class="filters-card">
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
       <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Search Inventory...">
@@ -73,7 +73,7 @@
   </div>
 
   <!-- Inventory Table -->
-  <div class="table-container glass-panel">
+  <div class="table-container">
     <table>
       <thead>
         <tr>
@@ -91,9 +91,9 @@
           *ngFor="let item of inventoryItems" 
           (click)="selectRow(item)"
           class="clickable-row"
-          [class.selected-row]="selectedRowId === (item.id || item.sku)">
+          [class.selected-row]="isRowSelected(item)">
           <td class="sku-cell">{{ item.sku }}</td>
-          <td class="name-cell">{{ item.name }}</td>
+          <td class="name-cell" (click)="openDetailModal(item); $event.stopPropagation()">{{ item.name }}</td>
           <td>
             <span class="status-pill" [class.bundle]="item.type === 'Bundle'">
               {{ item.type }}
@@ -106,7 +106,7 @@
             <button 
               class="btn-small" 
               (click)="openDetailModal(item); $event.stopPropagation()"
-              *ngIf="selectedRowId === (item.id || item.sku)">
+              *ngIf="isRowSelected(item)">
               View Product
             </button>
           </td>
@@ -146,7 +146,7 @@
 
   <!-- Product Detail Modal -->
   <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
-    <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="header-title-group">
           <h2>Product Details</h2>

@@ -108,6 +108,7 @@ export class InventoryListComponent implements OnInit {
 
   openDetailModal(item: InventoryItem) {
     this.selectedItem = item;
+    this.selectedRowId = this.getItemId(item);
     this.showDetailModal = true;
   }
 
@@ -123,13 +124,22 @@ export class InventoryListComponent implements OnInit {
       
       // Auto-select first item on new page
       if (this.inventoryItems.length > 0) {
-        this.selectedRowId = this.inventoryItems[0].id || this.inventoryItems[0].sku || null;
+        this.selectRow(this.inventoryItems[0]);
       }
     }
   }
 
   selectRow(item: InventoryItem) {
-    this.selectedRowId = item.id || item.sku || null;
+    this.selectedRowId = this.getItemId(item);
+    this.selectedItem = item;
+  }
+
+  getItemId(item: InventoryItem): string | null {
+    return item.id || item.sku || null;
+  }
+
+  isRowSelected(item: InventoryItem): boolean {
+    return this.selectedRowId === this.getItemId(item);
   }
 
   nextPage() {

@@ -32,12 +32,25 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg, 12px);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-standard);
 }
 
 .search-box {
   flex: 1;
   position: relative;
   max-width: 400px;
+}
+
+.search-box lucide-angular {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .search-box input {
@@ -92,6 +105,10 @@
 .table-container {
   overflow: hidden;
   padding: 0;
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg, 12px);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-standard);
 }
 
 table {
@@ -224,19 +241,18 @@ td {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  right: 0;
+  bottom: 0;
+  background: var(--surface-overlay, rgba(0, 0, 0, 0.4));
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 10000;
   animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
-  background: var(--background-paper);
+  background: var(--background-card);
   width: 90%;
   max-width: 600px;
   border-radius: 24px;
