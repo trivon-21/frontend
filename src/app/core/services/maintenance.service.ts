@@ -1,8 +1,10 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { switchMap, catchError, tap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export interface Maintenance {
   isActive: boolean;
@@ -42,8 +44,13 @@ export class MaintenanceService implements OnDestroy {
   scheduledStart$: Observable<Date | null> = this.scheduledStartSubject.asObservable();
 
   private pollSubscription: Subscription | null = null;
+  private previousMaintenanceActive = false;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router
+  ) {
     // Fetch immediately on init, then poll
     this.fetchMaintenanceStatus();
     this.startPolling();
@@ -76,6 +83,8 @@ export class MaintenanceService implements OnDestroy {
               ? new Date(maintenance.scheduledStartTime)
               : null
           );
+
+          this.handleMaintenanceStatusChange(isActive);
         }
       });
   }
@@ -114,10 +123,26 @@ export class MaintenanceService implements OnDestroy {
                 ? new Date(maintenance.scheduledStartTime)
                 : null
             );
+
+            this.handleMaintenanceStatusChange(isActive);
           }
         })
       )
       .subscribe();
+  }
+
+  /**
+   * Handle maintenance status changes and logout non-super-admin users
+   */
+  private handleMaintenanceStatusChange(isActive: boolean): void {
+    if (isActive && !this.previousMaintenanceActive) {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser && currentUser.role !== 'SUPER_ADMIN') {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }
+    }
+    this.previousMaintenanceActive = isActive;
   }
 
   /**
