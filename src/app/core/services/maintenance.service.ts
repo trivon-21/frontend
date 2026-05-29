@@ -8,6 +8,7 @@ export interface Maintenance {
   isActive: boolean;
   message: string;
   reason: string;
+  type?: 'instant' | 'scheduled';
   startTime: Date | null;
   endTime: Date | null;
   scheduledStartTime: Date | null;
