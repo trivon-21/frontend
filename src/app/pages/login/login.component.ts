@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService, AuthResponse } from '../../core/services/auth.service';
+import { FirebaseGoogleAuthService } from '../../core/services/firebase-google-auth.service';
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
@@ -19,6 +20,7 @@ export class LoginComponent {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
+  googleLoading = false;
   form!: FormGroup;
   showOtpStep = false;
   otpForm!: FormGroup;
@@ -32,6 +34,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private googleAuthService: FirebaseGoogleAuthService,
     public maintenanceService: MaintenanceService,
     private router: Router,
     private route: ActivatedRoute,
@@ -124,6 +127,45 @@ export class LoginComponent {
         this.errorMessage = err.error?.message ?? 'Login failed. Please try again.';
       },
     });
+  }
+
+  async signInWithGoogle() {
+    if (this.maintenanceService.getMaintenanceActiveSync()) {
+      this.errorMessage = 'System is currently under maintenance. Only administrators can access the system.';
+      return;
+    }
+
+    this.googleLoading = true;
+    this.isLoading = false;
+    this.errorMessage = '';
+
+    try {
+      const session = await this.googleAuthService.signInWithGoogle();
+
+      this.authService.googleAuth({
+        idToken: session.idToken,
+        rememberMe: this.form.get('rememberMe')?.value !== false,
+      }).subscribe({
+        next: (response: AuthResponse) => {
+          this.googleLoading = false;
+
+          if (this.maintenanceService.getMaintenanceActiveSync() && response.user.role !== 'SUPER_ADMIN') {
+            this.authService.logout();
+            this.errorMessage = 'System is currently under maintenance. Only administrators can access the system.';
+            return;
+          }
+
+          this.router.navigateByUrl(this.getRedirectUrl());
+        },
+        error: (err: any) => {
+          this.googleLoading = false;
+          this.errorMessage = err.error?.message ?? 'Google sign-in failed. Please try again.';
+        },
+      });
+    } catch (err: any) {
+      this.googleLoading = false;
+      this.errorMessage = err?.message ?? 'Google sign-in failed. Please try again.';
+    }
   }
 
   onPasswordChanged(): void {

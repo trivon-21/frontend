@@ -16,6 +16,10 @@ export interface AuthUser {
   fullName?: string;
   role: UserRole;
   avatar?: string;
+  profilePhoto?: string;
+  authMethods?: Array<'email' | 'phone' | 'google'>;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
   isActive?: boolean;
   createdAt?: Date;
 }

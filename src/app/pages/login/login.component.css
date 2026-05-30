@@ -59,11 +59,20 @@ h1 {
   letter-spacing: 0.2px;
   text-align: left;
 }
+
 .sub {
   margin: 0 0 26px;
   text-align: left;
   color: #6b7470;
 }
+
+.link {
+  color: var(--primary-main);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link.small { font-size: 14px; }
 .link {
   color: var(--primary-main);
   text-decoration: underline;

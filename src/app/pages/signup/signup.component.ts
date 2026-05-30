@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService, AuthResponse } from '../../core/services/auth.service';
+import { FirebaseGoogleAuthService } from '../../core/services/firebase-google-auth.service';
 import { FirebasePhoneAuthService, PhoneVerificationSession } from '../../core/services/firebase-phone-auth.service';
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -44,6 +45,7 @@ export class SignupComponent {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
+  googleLoading = false;
   form!: FormGroup;
 
   step: 'form' | 'otp' = 'form';
@@ -60,6 +62,7 @@ export class SignupComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private googleAuthService: FirebaseGoogleAuthService,
     private firebasePhoneAuth: FirebasePhoneAuthService,
     public maintenanceService: MaintenanceService,
     private router: Router
@@ -159,6 +162,38 @@ export class SignupComponent {
         this.errorMessage = err.error?.message ?? 'Signup failed. Please try again.';
       },
     });
+  }
+
+  async continueWithGoogle() {
+    if (this.maintenanceService.getMaintenanceActiveSync()) {
+      this.errorMessage = 'System is currently under maintenance. New signups are temporarily disabled.';
+      return;
+    }
+
+    this.googleLoading = true;
+    this.isLoading = false;
+    this.errorMessage = '';
+
+    try {
+      const session = await this.googleAuthService.signInWithGoogle();
+
+      this.authService.googleAuth({
+        idToken: session.idToken,
+        rememberMe: true,
+      }).subscribe({
+        next: () => {
+          this.googleLoading = false;
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.googleLoading = false;
+          this.errorMessage = err.error?.message ?? 'Google sign-up failed. Please try again.';
+        },
+      });
+    } catch (err: any) {
+      this.googleLoading = false;
+      this.errorMessage = err?.message ?? 'Google sign-up failed. Please try again.';
+    }
   }
 
   async verifyOtp() {

@@ -30,10 +30,11 @@ export interface AuthUser {
   gender?: string;
   address?: string;
   profilePhoto?: string;
+  googleUid?: string;
   additionalEmails?: { _id: string; email: string; addedAt: string; verified: boolean }[];
   emailVerified?: boolean;
   phoneVerified?: boolean;
-  authMethods?: string[]; // ['email'], ['phone'], or ['email', 'phone']
+  authMethods?: string[]; // ['email'], ['phone'], ['google'], or combinations
   authType?: 'email' | 'phone';
   createdAt?: string;
   needsPasswordChange?: boolean;
@@ -83,6 +84,14 @@ export class AuthService {
           this.saveSession(res.token, res.user, payload.rememberMe !== false);
         }
       })
+    );
+  }
+
+  googleAuth(payload: { idToken: string; rememberMe?: boolean }): Observable<AuthResponse> {
+    const rememberMe = payload.rememberMe !== false;
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/google`, payload).pipe(
+      tap((res) => this.saveSession(res.token, res.user, rememberMe))
     );
   }
 
