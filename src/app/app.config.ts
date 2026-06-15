@@ -2,16 +2,16 @@ import { importProvidersFrom } from '@angular/core';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { 
-  LucideAngularModule, 
-  Plus, 
-  Search, 
-  Calendar, 
-  Check, 
-  CircleAlert, 
-  TriangleAlert, 
-  Eye, 
-  X, 
+import {
+  LucideAngularModule,
+  Plus,
+  Search,
+  Calendar,
+  Check,
+  CircleAlert,
+  TriangleAlert,
+  Eye,
+  X,
   ChevronRight,
   FileText,
   History,
@@ -47,7 +47,10 @@ import {
   Minus,
   CircleHelp,
   Circle,
-  Edit
+  Edit,
+  Users,
+  BarChart3,
+  ShoppingBag
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -59,15 +62,15 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
-    importProvidersFrom(LucideAngularModule.pick({ 
-      Plus, 
-      Search, 
-      Calendar, 
-      Check, 
-      CircleAlert, 
-      TriangleAlert, 
-      Eye, 
-      X, 
+    importProvidersFrom(LucideAngularModule.pick({
+      Plus,
+      Search,
+      Calendar,
+      Check,
+      CircleAlert,
+      TriangleAlert,
+      Eye,
+      X,
       ChevronRight,
       FileText,
       History,
@@ -103,7 +106,10 @@ export const appConfig: ApplicationConfig = {
       Minus,
       CircleHelp,
       Circle,
-      Edit
+      Edit,
+      Users,
+      BarChart3,
+      ShoppingBag
     }))
   ],
 };

@@ -146,6 +146,73 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'manager',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['MANAGER'] },
+    loadComponent: () =>
+      import('./features/manager/components/layout/manager-layout/manager-layout.component').then(
+        (m) => m.ManagerLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'vehicle-assignment',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'tickets',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'customers',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'analytics',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+    ],
+  },
 ];
 
 

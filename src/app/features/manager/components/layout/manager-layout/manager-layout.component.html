@@ -1,0 +1,93 @@
+<div class="dashboard-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a routerLink="/manager" class="sidebar-brand">
+      AirLux
+    </a>
+    <nav class="sidebar-nav">
+      <a
+        routerLink="/manager"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+      >
+        <lucide-angular name="layout-dashboard" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/manager/vehicle-assignment" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="truck" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Vehicle Assignment</span>
+      </a>
+      <a routerLink="/manager/orders" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="shopping-bag" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Orders</span>
+      </a>
+      <a routerLink="/manager/tickets" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Tickets</span>
+      </a>
+      <a routerLink="/manager/customers" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="users" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Customers</span>
+      </a>
+      <a routerLink="/manager/analytics" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="bar-chart-3" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Analytics</span>
+      </a>
+      <a routerLink="/manager/notifications" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="bell" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Notifications</span>
+      </a>
+      <a routerLink="/manager/settings" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="settings" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Settings</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main area -->
+  <div class="dashboard-main">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-search-wrap">
+        <lucide-angular name="search" class="search-icon" [size]="18" strokeWidth="2"></lucide-angular>
+        <input class="header-search" type="text" placeholder="Search orders, tickets, customers" />
+      </div>
+      <div class="header-actions">
+        <!-- User Menu -->
+        <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">
+          <button
+            class="user-avatar"
+            (click)="toggleUserMenu(); $event.stopPropagation()"
+            aria-label="User menu"
+            title="User menu"
+          >
+            {{ userInitials }}
+          </button>
+
+          <!-- User Dropdown -->
+          <div class="user-dropdown" *ngIf="showUserMenu">
+            <div class="user-header">
+              <div class="user-avatar-lg">{{ userInitials }}</div>
+              <div>
+                <div class="user-name">{{ userName }}</div>
+                <div class="user-email">{{ userEmail }}</div>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+
+            <button class="menu-item logout" (click)="logout()">
+              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="dashboard-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
