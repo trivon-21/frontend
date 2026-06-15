@@ -20,7 +20,7 @@
 
     <!-- Logged-in user area -->
     <div class="user-area" *ngIf="currentUser">
-      <a routerLink="/inventory-manager" class="btn dashboard-btn">Dashboard</a>
+      <a [routerLink]="getHomeLink()" class="btn dashboard-btn">Dashboard</a>
       <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
         <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
           <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
@@ -43,7 +43,7 @@
             </div>
           </div>
           <div class="dropdown-divider"></div>
-          <a routerLink="/inventory-manager" class="dropdown-item" (click)="closeDropdown()">
+          <a [routerLink]="getHomeLink()" class="dropdown-item" (click)="closeDropdown()">
             <lucide-angular name="layout-grid" [size]="16" strokeWidth="2"></lucide-angular>
             My Dashboard
           </a>

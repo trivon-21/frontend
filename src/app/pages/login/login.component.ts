@@ -43,7 +43,12 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      this.router.navigateByUrl(this.returnUrl);
+      let redirectUrl = this.returnUrl;
+      const user = this.authService.getUser();
+      if (redirectUrl === '/inventory-manager' && user?.role === 'MANAGER') {
+        redirectUrl = '/manager';
+      }
+      this.router.navigateByUrl(redirectUrl);
     }
   }
 
@@ -81,7 +86,11 @@ export class LoginComponent implements OnInit {
       next: (response: AuthResponse) => {
         this.isLoading = false;
         // Direct login successful (no OTP required for phone login)
-        this.router.navigateByUrl(this.returnUrl);
+        let redirectUrl = this.returnUrl;
+        if (redirectUrl === '/inventory-manager' && response.user?.role === 'MANAGER') {
+          redirectUrl = '/manager';
+        }
+        this.router.navigateByUrl(redirectUrl);
       },
       error: (err) => {
         this.isLoading = false;
@@ -107,7 +116,12 @@ export class LoginComponent implements OnInit {
     verifyMethod.subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigateByUrl(this.returnUrl);
+        let redirectUrl = this.returnUrl;
+        const user = this.authService.getUser();
+        if (redirectUrl === '/inventory-manager' && user?.role === 'MANAGER') {
+          redirectUrl = '/manager';
+        }
+        this.router.navigateByUrl(redirectUrl);
       },
       error: (err) => {
         this.isLoading = false;

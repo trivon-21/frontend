@@ -28,7 +28,9 @@ export class NavbarComponent implements OnInit {
   }
 
   getHomeLink(): string {
-    return this.currentUser ? '/inventory-manager' : '/login';
+    if (!this.currentUser) return '/login';
+    if (this.currentUser.role === 'MANAGER') return '/manager';
+    return '/inventory-manager';
   }
 
   getInitials(name: string): string {
