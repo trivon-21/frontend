@@ -1,15 +1,74 @@
 <div class="rma-container">
+  <!-- Success Toast -->
+  <div class="toast toast-success" *ngIf="successMessage">
+    <lucide-angular name="check" [size]="16" class="inline-icon"></lucide-angular>
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Toast -->
+  <div class="toast toast-error" *ngIf="error">
+    <lucide-angular name="triangle-alert" [size]="16" class="inline-icon"></lucide-angular>
+    {{ error }}
+  </div>
+
   <!-- Header -->
   <div class="header">
     <h1>Returns</h1>
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <input type="text" [(ngModel)]="searchQuery" (input)="$event" placeholder="Search RMA logs or Quarantine items...">
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search returns, RMA or quarantine items...">
     </div>
   </div>
 
-  <div class="main-grid">
-    <!-- Left: Leftover Entry -->
+  <!-- Summary Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-blue">
+        <lucide-angular name="rotate-ccw" [size]="20"></lucide-angular>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ summary.leftoverReturns.total }}</span>
+        <span class="stat-label">Total Returns</span>
+      </div>
+      <div class="stat-footer">
+        <span>{{ summary.leftoverReturns.restoredToStock }} restored</span>
+        <span>{{ summary.leftoverReturns.movedToQuarantine }} quarantined</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-amber">
+        <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ summary.rmaCases.active }}</span>
+        <span class="stat-label">Active RMA Cases</span>
+      </div>
+      <div class="stat-footer">
+        <span>{{ summary.rmaCases.total }} total cases</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-red">
+        <lucide-angular name="circle-alert" [size]="20"></lucide-angular>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ summary.quarantine.active }}</span>
+        <span class="stat-label">Quarantined Items</span>
+      </div>
+      <div class="stat-footer">
+        <span>{{ summary.quarantine.disposed }} disposed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Skeleton -->
+  <div class="skeleton-container" *ngIf="loading">
+    <div class="skeleton-block skeleton-lg"></div>
+    <div class="skeleton-block skeleton-md"></div>
+  </div>
+
+  <div class="main-grid" *ngIf="!loading">
+    <!-- Left: Leftover Entry Form -->
     <div class="card-panel glass-panel">
       <div class="panel-header">
         <lucide-angular name="clipboard-list" [size]="20" class="inline-icon"></lucide-angular>
@@ -19,27 +78,73 @@
       <div class="form-body">
         <div class="form-group">
           <label>Job ID</label>
-          <input type="text" placeholder="e.g., #402" class="form-input">
+          <input type="text" [(ngModel)]="leftoverForm.jobId" placeholder="e.g., #402" class="form-input">
         </div>
         <div class="form-group">
           <label>Item Name</label>
-          <div class="search-input">
-            <input type="text" placeholder="Search or scan item...">
+          <div class="autocomplete-wrapper">
+            <input 
+              type="text" 
+              [ngModel]="leftoverForm.itemName"
+              (ngModelChange)="onItemSearch($event)"
+              (blur)="hideItemDropdown()"
+              placeholder="Search or scan item..."
+              class="form-input"
+            >
+            <div class="autocomplete-dropdown" *ngIf="showItemDropdown">
+              <div 
+                class="autocomplete-item" 
+                *ngFor="let item of filteredInventoryItems"
+                (mousedown)="selectItem(item)"
+              >
+                <span class="ac-name">{{ item.name }}</span>
+                <span class="ac-sku">{{ item.sku }}</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="form-group">
           <label>Quantity Returned</label>
-          <input type="number" value="0" class="form-input">
+          <input type="number" [(ngModel)]="leftoverForm.quantityReturned" min="1" class="form-input">
         </div>
         <div class="form-group">
           <label>Condition</label>
-          <input type="text" class="form-input">
+          <select [(ngModel)]="leftoverForm.condition" class="form-input">
+            <option value="good">Good — Restock</option>
+            <option value="damaged">Damaged — Quarantine</option>
+            <option value="scrap">Scrap — Quarantine</option>
+          </select>
+        </div>
+        <div class="form-group" *ngIf="leftoverForm.condition !== 'good'">
+          <label>Notes</label>
+          <textarea [(ngModel)]="leftoverForm.notes" placeholder="Describe the damage or reason..." class="form-input form-textarea"></textarea>
         </div>
 
-        <button class="btn-primary">Add back to Stock</button>
+        <button 
+          class="btn-primary" 
+          [disabled]="!isLeftoverFormValid || submitting"
+          (click)="submitLeftoverReturn()"
+        >
+          <lucide-angular name="plus" [size]="16" class="inline-icon" *ngIf="!submitting"></lucide-angular>
+          {{ submitting ? 'Processing...' : (leftoverForm.condition === 'good' ? 'Add back to Stock' : 'Move to Quarantine') }}
+        </button>
 
         <div class="note-box">
-          <p>Note: Items marked as "Scrap" will be automatically moved to the Quarantine Zone below.</p>
+          <p>Note: Items marked as "Damaged" or "Scrap" will be automatically moved to the Quarantine Zone below.</p>
+        </div>
+      </div>
+
+      <!-- Recent Returns Log -->
+      <div class="recent-returns" *ngIf="filteredLeftoverReturns.length > 0">
+        <h3>Recent Returns</h3>
+        <div class="return-item" *ngFor="let ret of filteredLeftoverReturns.slice(0, 5)">
+          <div class="return-info">
+            <span class="return-name">{{ ret.itemName }}</span>
+            <span class="return-meta">{{ ret.quantityReturned }} units • Job {{ ret.jobId }}</span>
+          </div>
+          <span class="condition-badge" [ngClass]="ret.condition">
+            {{ ret.condition }}
+          </span>
         </div>
       </div>
     </div>
@@ -50,39 +155,63 @@
         <lucide-angular name="triangle-alert" [size]="20" class="inline-icon"></lucide-angular>
         <div class="title-group">
           <h2>Defective / RMA Log</h2>
-          <span class="subtitle">5 active RMA cases</span>
+          <span class="subtitle">{{ summary.rmaCases.active }} active RMA cases</span>
         </div>
+        <button class="btn-new-rma" (click)="openRmaModal()">
+          <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
+          New RMA
+        </button>
       </div>
 
-      <div class="log-table-container">
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="filteredRmaCases.length === 0">
+        <lucide-angular name="clipboard-list" [size]="40" class="empty-icon"></lucide-angular>
+        <p>No RMA cases found</p>
+        <span>Create a new RMA case to track defective items</span>
+      </div>
+
+      <div class="log-table-container" *ngIf="filteredRmaCases.length > 0">
         <table class="log-table">
           <thead>
             <tr>
-              <th>SERIAL NUMBER</th>
+              <th>RMA / SERIAL</th>
               <th>FAULT DESCRIPTION</th>
               <th>DATE</th>
               <th>STATUS</th>
+              <th>ACTION</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let log of filteredRmaLogs">
+            <tr *ngFor="let rma of filteredRmaCases">
               <td>
                 <div class="serial-cell">
-                  <span class="serial">{{ log.serial }}</span>
-                  <span class="by">By: {{ log.user }}</span>
+                  <span class="serial">{{ rma.serialNumber }}</span>
+                  <span class="by">{{ rma.rmaId }} • By: {{ rma.reportedBy }}</span>
                 </div>
               </td>
               <td>
                 <div class="fault-cell">
-                  <span class="fault">{{ log.fault }}</span>
-                  <span class="by">By: {{ log.user }}</span>
+                  <span class="fault">{{ rma.faultDescription }}</span>
+                  <span class="by" *ngIf="rma.itemName">Item: {{ rma.itemName }}</span>
                 </div>
               </td>
-              <td class="date">{{ log.date }}</td>
+              <td class="date">{{ formatDate(rma.createdAt) }}</td>
               <td>
-                <span class="status-badge" [class.bundle]="log.status === 'Bundle'">
-                  {{ log.status }}
+                <span class="rma-status-badge" [ngClass]="'status-' + rma.status">
+                  {{ rmaStatusLabels[rma.status] }}
                 </span>
+              </td>
+              <td>
+                <button 
+                  class="btn-advance" 
+                  *ngIf="rmaNextStatus[rma.status]"
+                  (click)="advanceRmaStatus(rma)"
+                  [title]="'Move to ' + getNextStatusLabel(rma.status)"
+                >
+                  <lucide-angular name="chevron-right" [size]="14" class="inline-icon"></lucide-angular>
+                  {{ getNextStatusLabel(rma.status) }}
+                </button>
+                <span class="closed-label" *ngIf="!rmaNextStatus[rma.status]">Closed</span>
               </td>
             </tr>
           </tbody>
@@ -92,19 +221,25 @@
   </div>
 
   <!-- Bottom: Quarantine Zone -->
-  <div class="quarantine-section">
+  <div class="quarantine-section" *ngIf="!loading">
     <div class="quarantine-header">
       <div class="header-left">
         <lucide-angular name="circle-alert" [size]="24" class="inline-icon" style="color: var(--error);"></lucide-angular>
         <div class="title-group">
           <h2>Quarantine Zone</h2>
-          <span class="subtitle">Items damaged or incomplete - pending disposal decision</span>
+          <span class="subtitle">Items damaged or incomplete — pending disposal decision</span>
         </div>
       </div>
-      <span class="items-badge">3 items • Cannot be sold</span>
+      <span class="items-badge">{{ filteredQuarantineItems.length }} items • Cannot be sold</span>
     </div>
 
-    <div class="quarantine-table-container">
+    <!-- Empty state -->
+    <div class="quarantine-empty" *ngIf="filteredQuarantineItems.length === 0">
+      <lucide-angular name="check" [size]="32" class="empty-icon-green"></lucide-angular>
+      <p>No items in quarantine</p>
+    </div>
+
+    <div class="quarantine-table-container" *ngIf="filteredQuarantineItems.length > 0">
       <table class="quarantine-table">
         <thead>
           <tr>
@@ -117,18 +252,64 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of filteredQuarantineItems; let i = index">
-            <td>{{ item.name }}</td>
-            <td>{{ item.qty }}</td>
+          <tr *ngFor="let item of filteredQuarantineItems">
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.quantity }} {{ item.unit }}</td>
             <td>{{ item.reason }}</td>
-            <td>{{ item.dateAdded }}</td>
-            <td>{{ item.location }}</td>
+            <td>{{ formatDate(item.createdAt) }}</td>
+            <td>{{ item.location || '—' }}</td>
             <td>
-              <button class="btn-danger" (click)="disposeItem(i)">Dispose</button>
+              <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId">
+                <button class="btn-danger" (click)="confirmDispose(item.quarantineId)">Dispose</button>
+              </div>
+              <div class="confirm-actions" *ngIf="confirmDisposeId === item.quarantineId">
+                <span class="confirm-text">Confirm?</span>
+                <button class="btn-danger-sm" (click)="disposeItem(item.quarantineId)">Yes</button>
+                <button class="btn-cancel-sm" (click)="cancelDispose()">No</button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- New RMA Modal -->
+  <div class="modal-overlay" *ngIf="showRmaModal" (click)="closeRmaModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>New RMA Case</h2>
+        <button class="modal-close" (click)="closeRmaModal()">
+          <lucide-angular name="x" [size]="20"></lucide-angular>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Serial Number *</label>
+          <input type="text" [(ngModel)]="rmaForm.serialNumber" placeholder="e.g., CAR-IND-2024-2234" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Item Name</label>
+          <input type="text" [(ngModel)]="rmaForm.itemName" placeholder="Product name (optional)" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Fault Description *</label>
+          <textarea [(ngModel)]="rmaForm.faultDescription" placeholder="Describe the defect..." class="form-input form-textarea"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select [(ngModel)]="rmaForm.type" class="form-input">
+            <option value="Single">Single Unit</option>
+            <option value="Bundle">Bundle</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeRmaModal()">Cancel</button>
+        <button class="btn-primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
+          {{ submitting ? 'Creating...' : 'Create RMA Case' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

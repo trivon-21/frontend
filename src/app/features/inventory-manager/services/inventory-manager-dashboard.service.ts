@@ -156,4 +156,109 @@ export class InventoryManagerDashboardService {
       catchError(() => of([]))
     );
   }
+
+  // ── Returns & RMA Methods ──
+
+  getReturnsSummary(): Observable<ReturnsSummary> {
+    return this.http.get<ReturnsSummary>(`${this.apiUrl}/returns-summary`).pipe(
+      catchError(() => of({
+        leftoverReturns: { total: 0, restoredToStock: 0, movedToQuarantine: 0 },
+        rmaCases: { total: 0, active: 0 },
+        quarantine: { active: 0, disposed: 0 },
+      }))
+    );
+  }
+
+  getLeftoverReturns(): Observable<LeftoverReturnItem[]> {
+    return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  createLeftoverReturn(data: any): Observable<LeftoverReturnItem> {
+    return this.http.post<LeftoverReturnItem>(`${this.apiUrl}/leftover-returns`, data);
+  }
+
+  getRmaCases(): Observable<RmaCaseItem[]> {
+    return this.http.get<RmaCaseItem[]>(`${this.apiUrl}/rma-cases`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  createRmaCase(data: any): Observable<RmaCaseItem> {
+    return this.http.post<RmaCaseItem>(`${this.apiUrl}/rma-cases`, data);
+  }
+
+  updateRmaCase(rmaId: string, data: any): Observable<RmaCaseItem> {
+    return this.http.patch<RmaCaseItem>(`${this.apiUrl}/rma-cases/${rmaId}`, data);
+  }
+
+  getQuarantineItems(): Observable<QuarantineItemData[]> {
+    return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  createQuarantineItem(data: any): Observable<QuarantineItemData> {
+    return this.http.post<QuarantineItemData>(`${this.apiUrl}/quarantine`, data);
+  }
+
+  disposeQuarantineItem(quarantineId: string): Observable<QuarantineItemData> {
+    return this.http.patch<QuarantineItemData>(`${this.apiUrl}/quarantine/${quarantineId}/dispose`, {});
+  }
+}
+
+// ── Returns & RMA Interfaces ──
+
+export interface ReturnsSummary {
+  leftoverReturns: { total: number; restoredToStock: number; movedToQuarantine: number };
+  rmaCases: { total: number; active: number };
+  quarantine: { active: number; disposed: number };
+}
+
+export interface LeftoverReturnItem {
+  _id: string;
+  returnId: string;
+  jobId: string;
+  itemId?: string;
+  itemName: string;
+  itemSku?: string;
+  quantityReturned: number;
+  condition: 'good' | 'damaged' | 'scrap';
+  returnedBy: string;
+  notes: string;
+  restoredToStock: boolean;
+  movedToQuarantine: boolean;
+  createdAt: string;
+}
+
+export interface RmaCaseItem {
+  _id: string;
+  rmaId: string;
+  serialNumber: string;
+  itemName: string;
+  itemSku: string;
+  faultDescription: string;
+  reportedBy: string;
+  status: 'reported' | 'under-review' | 'sent-to-supplier' | 'resolved' | 'closed';
+  type: 'Single' | 'Bundle';
+  resolution: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
+export interface QuarantineItemData {
+  _id: string;
+  quarantineId: string;
+  itemName: string;
+  quantity: number;
+  unit: string;
+  reason: string;
+  location: string;
+  source: 'leftover-return' | 'rma' | 'manual';
+  sourceRefId: string;
+  status: 'quarantined' | 'disposed' | 'returned-to-supplier';
+  disposedAt?: string;
+  disposedBy?: string;
+  createdAt: string;
 }
