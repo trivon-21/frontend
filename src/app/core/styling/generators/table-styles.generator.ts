@@ -1,34 +1,94 @@
 /**
  * Table Styles Generator
- * Generates complete CSS for table components
+ * Generates complete CSS for table components.
+ *
+ * IMPORTANT: This generator emits CSS variable references (e.g. `var(--text-secondary)`)
+ * for all color properties that have a corresponding CSS custom property.
+ * Non-color properties (padding, font-size, border-radius) use resolved token values.
  *
  * Creates classes like:
- * table, th, td
- * .status-pill-approved, .status-pill-rejected, etc.
- * .pagination
+ *   table, th, td
+ *   .status-pill-approved, .status-pill-rejected, etc.
+ *   .pagination
  */
 
 import { TableTokens } from '../tokens/tables.tokens';
 
+// ---------------------------------------------------------------------------
+// CSS Variable Maps
+// ---------------------------------------------------------------------------
+
 /**
- * Main function: Generate all table styles
+ * Maps each table color property to its CSS variable name.
+ * The generator uses these to emit `var(--x)` instead of raw hex strings.
+ */
+const TABLE_HEADER_VAR_MAP = {
+  background: 'background-page',
+  color: 'info',
+};
+
+const TABLE_CELL_VAR_MAP = {
+  color: 'text-secondary',
+};
+
+const TABLE_ROW_VAR_MAP = {
+  hoverBackground: 'background-hover',
+  selectedBackground: 'background-selected',
+};
+
+const TABLE_PAGINATION_VAR_MAP = {
+  color: 'text-muted',
+};
+
+/**
+ * Maps each status pill to { background, color } CSS variable names.
+ * The key matches the status pill key in TableTokens.statusPills.
+ */
+const STATUS_PILL_VAR_MAP: Record<string, { background: string; color: string }> = {
+  approved: { background: 'success-light', color: 'success' },
+  draft: { background: 'background-hover', color: 'text-secondary' },
+  pending: { background: 'warning-light', color: 'warning' },
+  inProgress: { background: 'info-light', color: 'info' },
+  rejected: { background: 'error-light', color: 'error' },
+  completed: { background: 'success-light', color: 'success' },
+  onHold: { background: 'error-light', color: 'error' },
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Returns `var(--name)` when a variable mapping exists, otherwise the fallback value. */
+function cssVar(varName: string | undefined, fallback: string): string {
+  return varName ? `var(--${varName})` : fallback;
+}
+
+// ---------------------------------------------------------------------------
+// Generator
+// ---------------------------------------------------------------------------
+
+/**
+ * Main function: Generate all table styles.
  */
 export function generateTableStyles(tableTokens: TableTokens): string {
   let css = `\n/* Table Styles */\n\n`;
 
-  // Table header
+  // Table wrapper
   css += `table {\n`;
   css += `  width: 100%;\n`;
   css += `  border-collapse: collapse;\n`;
   css += `}\n\n`;
 
+  // Table header
   css += `th {\n`;
   css += `  text-align: ${tableTokens.header.textAlign || 'left'};\n`;
   css += `  padding: ${tableTokens.header.padding};\n`;
-  css += `  background-color: ${tableTokens.header.background};\n`;
-  css += `  color: ${tableTokens.header.color};\n`;
+  css += `  background-color: ${cssVar(TABLE_HEADER_VAR_MAP.background, tableTokens.header.background)};\n`;
+  css += `  color: ${cssVar(TABLE_HEADER_VAR_MAP.color, tableTokens.header.color)};\n`;
   css += `  font-size: ${tableTokens.header.fontSize};\n`;
   css += `  font-weight: ${tableTokens.header.fontWeight};\n`;
+  // border-bottom includes a color segment — emit the full border value; the token already
+  // contains a CSS variable reference via the template string in tables.tokens.ts.
   css += `  border-bottom: ${tableTokens.header.borderBottom};\n`;
   if (tableTokens.header.letterSpacing) {
     css += `  letter-spacing: ${tableTokens.header.letterSpacing};\n`;
@@ -42,24 +102,26 @@ export function generateTableStyles(tableTokens: TableTokens): string {
   css += `td {\n`;
   css += `  padding: ${tableTokens.cell.padding};\n`;
   css += `  font-size: ${tableTokens.cell.fontSize};\n`;
-  css += `  color: ${tableTokens.cell.color};\n`;
+  css += `  color: ${cssVar(TABLE_CELL_VAR_MAP.color, tableTokens.cell.color)};\n`;
+  // Same as header.borderBottom — value from token already contains resolved color reference
   css += `  border-bottom: ${tableTokens.cell.borderBottom};\n`;
   css += `  vertical-align: ${tableTokens.cell.verticalAlign};\n`;
   css += `}\n\n`;
 
-  // Table row
+  // Table row hover
   if (tableTokens.row.hover) {
     css += `tr:hover td {\n`;
-    if (tableTokens.row.hover.background) {
-      css += `  background-color: ${tableTokens.row.hover.background};\n`;
+    if (tableTokens.row.hover.background !== undefined) {
+      css += `  background-color: ${cssVar(TABLE_ROW_VAR_MAP.hoverBackground, tableTokens.row.hover.background)};\n`;
     }
     css += `}\n\n`;
   }
 
+  // Table row selected
   if (tableTokens.row.selected) {
     css += `tr.selected td {\n`;
-    if (tableTokens.row.selected.background) {
-      css += `  background-color: ${tableTokens.row.selected.background};\n`;
+    if (tableTokens.row.selected.background !== undefined) {
+      css += `  background-color: ${cssVar(TABLE_ROW_VAR_MAP.selectedBackground, tableTokens.row.selected.background)};\n`;
     }
     css += `}\n\n`;
   }
@@ -73,9 +135,11 @@ export function generateTableStyles(tableTokens: TableTokens): string {
       .toLowerCase()
       .replace(/^-/, '');
 
+    const varMap = STATUS_PILL_VAR_MAP[statusName];
+
     css += `.status-pill-${className} {\n`;
-    css += `  background-color: ${statusConfig.background};\n`;
-    css += `  color: ${statusConfig.color};\n`;
+    css += `  background-color: ${cssVar(varMap?.background, statusConfig.background)};\n`;
+    css += `  color: ${cssVar(varMap?.color, statusConfig.color)};\n`;
     css += `  padding: ${statusConfig.padding};\n`;
     css += `  border-radius: ${statusConfig.borderRadius};\n`;
     css += `  font-size: ${statusConfig.fontSize};\n`;
@@ -97,13 +161,13 @@ export function generateTableStyles(tableTokens: TableTokens): string {
   css += `  display: flex;\n`;
   css += `  justify-content: space-between;\n`;
   css += `  align-items: center;\n`;
-  css += `  color: ${tableTokens.pagination.color};\n`;
+  css += `  color: ${cssVar(TABLE_PAGINATION_VAR_MAP.color, tableTokens.pagination.color)};\n`;
   css += `  font-size: ${tableTokens.pagination.fontSize};\n`;
   css += `  margin-top: 16px;\n`;
   css += `}\n\n`;
 
   css += `.pagination-info {\n`;
-  css += `  color: ${tableTokens.pagination.color};\n`;
+  css += `  color: ${cssVar(TABLE_PAGINATION_VAR_MAP.color, tableTokens.pagination.color)};\n`;
   css += `  font-size: ${tableTokens.pagination.fontSize};\n`;
   css += `}\n\n`;
 

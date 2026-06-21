@@ -28,10 +28,13 @@ export interface ColorPalette {
     success: string;
     successLight: string;
     error: string;
+    errorDark: string;
     errorLight: string;
     warning: string;
+    warningDark: string;
     warningLight: string;
     info: string;
+    infoDark: string;
     infoLight: string;
   };
   text: {
@@ -83,11 +86,14 @@ const universalColors: ColorPalette = {
   semantic: {
     success: '#00843D',
     successLight: '#E8FDF0',
-    error: '#C20E0E',      // Vibrant Red (Bottom Left)
-    errorLight: '#FEF2F2', // Very Pale Red (Bottom 3rd)
-    warning: '#f59e0b',    // standard orange
-    warningLight: '#FECACA', // Pale Red/Pink (Bottom 2nd)
-    info: '#1D61FF',       // Vibrant Blue (Bottom Right)
+    error: '#C20E0E',        // Vibrant Red (Bottom Left)
+    errorDark: '#9e0b0b',   // Darker Red — used for danger button hover
+    errorLight: '#FEF2F2',  // Very Pale Red (Bottom 3rd)
+    warning: '#f59e0b',     // Standard orange
+    warningDark: '#d97706', // Darker orange — used for warning button hover
+    warningLight: '#FECACA',// Pale Red/Pink (Bottom 2nd)
+    info: '#1D61FF',        // Vibrant Blue (Bottom Right)
+    infoDark: '#0047e0',    // Darker Blue — used for text/link button hover
     infoLight: '#eff6ff',
   },
   text: {

@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, take } from 'rxjs';
 import { generateCompleteThemeCSS } from './generators/component-styles.generator';
 import { injectThemeCSS, updateCSSVariable } from './generators/component-styles.generator';
+import { getThemeByName } from './themes/default.theme';
 import { CSSSupport } from './compat/css-support';
 import { TokenValidator } from './validators/tokens.validator';
 
@@ -61,8 +62,11 @@ export class ThemeProvider {
         TokenValidator.throwIfInvalid();
       }
 
-      // Generate complete CSS bundle from design tokens
-      const css = generateCompleteThemeCSS();
+      // Resolve the full UnifiedTheme object from the registry
+      const themeObject = getThemeByName(theme);
+
+      // Generate complete CSS bundle from the resolved theme
+      const css = generateCompleteThemeCSS(themeObject);
 
       // Track CSS size for performance monitoring
       const sizeKB = new Blob([css]).size / 1024;

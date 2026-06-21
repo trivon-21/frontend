@@ -1,4 +1,18 @@
 /**
+ * Button Design Tokens
+ * Configuration for all button variants.
+ *
+ * IMPORTANT: All color values reference colorTokens — the Single Source of Truth.
+ * If the brand palette changes, update colors.tokens.ts and all buttons update automatically.
+ *
+ * Note: Structural / layout values (padding, border-radius, font-size, font-weight)
+ * are kept as literal strings here because they are button-specific design decisions,
+ * not entries in the shared spacing or typography scale.
+ */
+
+import { colorTokens } from './colors.tokens';
+
+/**
  * Configuration for a single button variant.
  * Defines visual properties for all interaction states.
  */
@@ -52,12 +66,12 @@ export interface ButtonTokens {
 
 /**
  * Universal button definitions.
- * Centralized styles applied across all application portals.
+ * All colors reference colorTokens — no raw hex strings.
  */
 const universalButtonTokens: ButtonTokens = {
   primary: {
-    background: '#00843D', // primary-main
-    color: '#ffffff',
+    background: colorTokens.primary.main,
+    color: colorTokens.text.inverse,
     padding: '14px 32px',
     borderRadius: '99px',
     fontSize: '16px',
@@ -66,16 +80,16 @@ const universalButtonTokens: ButtonTokens = {
     border: 'none',
     minWidth: '200px',
     hover: {
-      background: '#006B32',
+      background: colorTokens.primary.hover,
       transform: 'translateY(-2px)',
       shadow: '0 8px 16px rgba(0, 132, 61, 0.25)',
     },
     active: {
-      background: '#1A2421',
+      background: colorTokens.primary.active,
     },
     disabled: {
-      background: '#D1D5DB',
-      color: '#ffffff',
+      background: colorTokens.secondary.light,
+      color: colorTokens.text.inverse,
       cursor: 'not-allowed',
       opacity: 0.6,
     },
@@ -85,28 +99,28 @@ const universalButtonTokens: ButtonTokens = {
     },
   },
   secondary: {
-    background: '#ffffff',
-    color: '#2D3139',
+    background: colorTokens.backgrounds.card,
+    color: colorTokens.text.primary,
     padding: '12px 24px',
     borderRadius: '99px',
     fontSize: '14px',
     fontWeight: 600,
     fontFamily: 'Inter, system-ui, sans-serif',
-    border: '1px solid #D1D5DB',
+    border: `1px solid ${colorTokens.borders.medium}`,
     hover: {
-      background: '#F9FAFB',
-      border: '1px solid #00843D',
-      color: '#00843D',
+      background: colorTokens.backgrounds.page,
+      border: `1px solid ${colorTokens.primary.main}`,
+      color: colorTokens.primary.main,
     },
     disabled: {
-      background: '#F9FAFB',
-      color: '#D1D5DB',
+      background: colorTokens.backgrounds.page,
+      color: colorTokens.secondary.light,
       cursor: 'not-allowed',
     },
   },
   success: {
-    background: '#00843D',
-    color: '#ffffff',
+    background: colorTokens.semantic.success,
+    color: colorTokens.text.inverse,
     padding: '12px 32px',
     borderRadius: '99px',
     fontSize: '16px',
@@ -114,20 +128,20 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#006B32',
+      background: colorTokens.primary.hover,
     },
     active: {
-      background: '#1A2421',
+      background: colorTokens.primary.active,
     },
     disabled: {
-      background: '#D1D5DB',
+      background: colorTokens.secondary.light,
       cursor: 'not-allowed',
       opacity: 0.6,
     },
   },
   danger: {
-    background: '#C20E0E',
-    color: '#ffffff',
+    background: colorTokens.semantic.error,
+    color: colorTokens.text.inverse,
     padding: '12px 32px',
     borderRadius: '99px',
     fontSize: '16px',
@@ -135,17 +149,17 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#9e0b0b',
+      background: colorTokens.semantic.errorDark,
     },
     disabled: {
-      background: '#D1D5DB',
+      background: colorTokens.secondary.light,
       cursor: 'not-allowed',
       opacity: 0.6,
     },
   },
   warning: {
-    background: '#f59e0b',
-    color: '#ffffff',
+    background: colorTokens.semantic.warning,
+    color: colorTokens.text.inverse,
     padding: '12px 32px',
     borderRadius: '99px',
     fontSize: '16px',
@@ -153,17 +167,17 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#d97706',
+      background: colorTokens.semantic.warningDark,
     },
     disabled: {
-      background: '#D1D5DB',
+      background: colorTokens.secondary.light,
       cursor: 'not-allowed',
       opacity: 0.6,
     },
   },
   icon: {
     background: 'none',
-    color: '#5C646D',
+    color: colorTokens.text.secondary,
     padding: '10px',
     borderRadius: '50%',
     fontSize: '20px',
@@ -171,17 +185,17 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#F9FAFB',
-      color: '#2D3139',
+      background: colorTokens.backgrounds.page,
+      color: colorTokens.text.primary,
     },
     disabled: {
-      color: '#D1D5DB',
+      color: colorTokens.secondary.light,
       cursor: 'not-allowed',
     },
   },
   text: {
     background: 'transparent',
-    color: '#1D61FF',
+    color: colorTokens.semantic.info,
     padding: '0',
     borderRadius: '0',
     fontSize: '14px',
@@ -189,12 +203,12 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      color: '#0047e0',
+      color: colorTokens.semantic.infoDark,
     },
   },
   review: {
-    background: '#E8FDF0',
-    color: '#00843D',
+    background: colorTokens.semantic.successLight,
+    color: colorTokens.semantic.success,
     padding: '8px 24px',
     borderRadius: '99px',
     fontSize: '14px',
@@ -202,13 +216,13 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#00843D',
-      color: '#ffffff',
+      background: colorTokens.semantic.success,
+      color: colorTokens.text.inverse,
     },
   },
   small: {
-    background: '#00843D',
-    color: '#ffffff',
+    background: colorTokens.primary.main,
+    color: colorTokens.text.inverse,
     padding: '8px 16px',
     borderRadius: '99px',
     fontSize: '13px',
@@ -216,14 +230,15 @@ const universalButtonTokens: ButtonTokens = {
     fontFamily: 'Inter, system-ui, sans-serif',
     border: 'none',
     hover: {
-      background: '#006B32',
+      background: colorTokens.primary.hover,
     },
   },
 };
 
 /**
  * Button Token System - UNIVERSAL
- * Single set of button styles for entire application
+ * Single set of button styles for entire application.
+ * All colors derive from colorTokens (colors.tokens.ts).
  */
 export const buttonTokens: ButtonTokens = universalButtonTokens;
 

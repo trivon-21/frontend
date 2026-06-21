@@ -58,7 +58,7 @@ export const defaultTheme: UnifiedTheme = {
 
   // All token groups
   colors: colorTokens,
-  typography: typographyTokens.customer,
+  typography: typographyTokens,
   spacing: spacingTokens,
   shadows: shadowTokens,
   buttons: buttonTokens,

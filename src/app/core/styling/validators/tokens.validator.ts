@@ -31,7 +31,7 @@ export class TokenValidator {
     errors.push(...colorValidation.errors);
     warnings.push(...colorValidation.warnings);
 
-    const typographyValidation = this.validateTypographyTokens(typographyTokens.customer);
+    const typographyValidation = this.validateTypographyTokens(typographyTokens);
     errors.push(...typographyValidation.errors);
     warnings.push(...typographyValidation.warnings);
 

@@ -25,15 +25,15 @@
 }
 
 .toast-success {
-  background: var(--success-light, #ecfdf5);
-  color: var(--success, #059669);
-  border: 1px solid var(--success, #059669);
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success);
 }
 
 .toast-error {
-  background: var(--error-light, #fef2f2);
-  color: var(--error, #dc2626);
-  border: 1px solid var(--error, #dc2626);
+  background: var(--error-light);
+  color: var(--error);
+  border: 1px solid var(--error);
 }
 
 @keyframes slideInRight {
@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   padding: 8px 16px;
   border-radius: 99px;
   border: 1px solid var(--border-light);
@@ -83,7 +83,7 @@
 }
 
 .stat-card {
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-lg, 16px);
   padding: 20px 24px;
@@ -108,18 +108,18 @@
 }
 
 .stat-icon-blue {
-  background: var(--primary-lighter, #eff6ff);
-  color: var(--primary-main, #3b82f6);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
 }
 
 .stat-icon-amber {
-  background: var(--warning-light, #fffbeb);
-  color: var(--warning, #f59e0b);
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .stat-icon-red {
-  background: var(--error-light, #fef2f2);
-  color: var(--error, #dc2626);
+  background: var(--error-light);
+  color: var(--error);
 }
 
 .stat-info {
@@ -158,7 +158,7 @@
 }
 
 .skeleton-block {
-  background: linear-gradient(90deg, var(--background-hover, #f3f4f6) 25%, var(--background-card, #e5e7eb) 50%, var(--background-hover, #f3f4f6) 75%);
+  background: linear-gradient(90deg, var(--background-hover) 25%, var(--background-card) 50%, var(--background-hover) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--border-radius-lg, 16px);
@@ -188,7 +188,7 @@
 }
 
 .glass-panel {
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-lg, 16px);
   box-shadow: var(--shadow-light, 0 1px 4px rgba(0,0,0,0.04));
@@ -243,7 +243,7 @@
   padding: 11px 14px;
   border-radius: var(--border-radius-md, 10px);
   border: 1px solid var(--border-light);
-  background: var(--background-page, #fafafa);
+  background: var(--background-page);
   outline: none;
   font-size: 14px;
   color: var(--text-primary);
@@ -252,7 +252,7 @@
 }
 
 .form-input:focus {
-  border-color: var(--primary-main, #3b82f6);
+  border-color: var(--primary-main);
   box-shadow: 0 0 0 3px var(--primary-lighter, rgba(59,130,246,0.15));
 }
 
@@ -281,7 +281,7 @@ select.form-input {
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md, 10px);
   box-shadow: var(--shadow-medium, 0 4px 16px rgba(0,0,0,0.1));
@@ -301,7 +301,7 @@ select.form-input {
 }
 
 .autocomplete-item:hover {
-  background: var(--background-hover, #f3f4f6);
+  background: var(--background-hover);
 }
 
 .ac-name {
@@ -321,8 +321,8 @@ select.form-input {
   padding: 12px 20px;
   border: none;
   border-radius: var(--border-radius-md, 10px);
-  background: var(--primary-main, #1d5d44);
-  color: white;
+  background: var(--primary-main);
+  color: var(--background-card);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -334,7 +334,7 @@ select.form-input {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover, #184a38);
+  background: var(--primary-hover);
 }
 
 .btn-primary:disabled {
@@ -346,7 +346,7 @@ select.form-input {
   padding: 10px 20px;
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md, 10px);
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 14px;
@@ -355,15 +355,15 @@ select.form-input {
 }
 
 .btn-secondary:hover {
-  background: var(--background-hover, #f3f4f6);
+  background: var(--background-hover);
 }
 
 .btn-danger {
   padding: 7px 16px;
   border: none;
   border-radius: var(--border-radius-sm, 8px);
-  background: var(--error, #dc2626);
-  color: white;
+  background: var(--error);
+  color: var(--background-card);
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -371,15 +371,15 @@ select.form-input {
 }
 
 .btn-danger:hover {
-  background: #b91c1c;
+  background: var(--error);
 }
 
 .btn-danger-sm {
   padding: 5px 12px;
   border: none;
   border-radius: var(--border-radius-sm, 6px);
-  background: var(--error, #dc2626);
-  color: white;
+  background: var(--error);
+  color: var(--background-card);
   font-weight: 600;
   font-size: 11px;
   cursor: pointer;
@@ -389,7 +389,7 @@ select.form-input {
   padding: 5px 12px;
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-sm, 6px);
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 11px;
@@ -399,10 +399,10 @@ select.form-input {
 .btn-new-rma {
   margin-left: auto;
   padding: 8px 16px;
-  border: 1px solid var(--primary-main, #1d5d44);
+  border: 1px solid var(--primary-main);
   border-radius: var(--border-radius-md, 10px);
   background: transparent;
-  color: var(--primary-main, #1d5d44);
+  color: var(--primary-main);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -413,15 +413,15 @@ select.form-input {
 }
 
 .btn-new-rma:hover {
-  background: var(--primary-main, #1d5d44);
-  color: white;
+  background: var(--primary-main);
+  color: var(--background-card);
 }
 
 .btn-advance {
   padding: 5px 12px;
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-sm, 6px);
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 11px;
@@ -434,9 +434,9 @@ select.form-input {
 }
 
 .btn-advance:hover {
-  background: var(--primary-lighter, #eff6ff);
-  border-color: var(--primary-main, #3b82f6);
-  color: var(--primary-main, #3b82f6);
+  background: var(--primary-lighter);
+  border-color: var(--primary-main);
+  color: var(--primary-main);
 }
 
 .closed-label {
@@ -447,11 +447,11 @@ select.form-input {
 
 /* ── Note Box ── */
 .note-box {
-  background: var(--info-light, #eff6ff);
+  background: var(--info-light);
   border-radius: var(--border-radius-md, 10px);
   padding: 14px 16px;
   font-size: 13px;
-  color: var(--info, #2563eb);
+  color: var(--info);
   line-height: 1.5;
 }
 
@@ -501,18 +501,18 @@ select.form-input {
 }
 
 .condition-badge.good {
-  background: var(--success-light, #ecfdf5);
-  color: var(--success, #059669);
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .condition-badge.damaged {
-  background: var(--warning-light, #fffbeb);
-  color: var(--warning, #d97706);
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .condition-badge.scrap {
-  background: var(--error-light, #fef2f2);
-  color: var(--error, #dc2626);
+  background: var(--error-light);
+  color: var(--error);
 }
 
 /* ── RMA Log Table ── */
@@ -563,28 +563,28 @@ select.form-input {
 }
 
 .status-reported {
-  background: var(--info-light, #eff6ff);
-  color: var(--info, #2563eb);
+  background: var(--info-light);
+  color: var(--info);
 }
 
 .status-under-review {
-  background: var(--warning-light, #fffbeb);
-  color: var(--warning, #d97706);
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .status-sent-to-supplier {
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: var(--info-light);
+  color: var(--info);
 }
 
 .status-resolved {
-  background: var(--success-light, #ecfdf5);
-  color: var(--success, #059669);
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .status-closed {
-  background: var(--background-page, #f3f4f6);
-  color: var(--text-muted, #9ca3af);
+  background: var(--background-page);
+  color: var(--text-muted);
 }
 
 /* ── Confirm Actions ── */
@@ -599,7 +599,7 @@ select.form-input {
 .confirm-text {
   font-size: 11px;
   font-weight: 600;
-  color: var(--error, #dc2626);
+  color: var(--error);
 }
 
 /* ── Empty States ── */
@@ -613,7 +613,7 @@ select.form-input {
 }
 
 .empty-state .empty-icon {
-  color: var(--text-muted, #d1d5db);
+  color: var(--text-muted);
 }
 
 .empty-state p {
@@ -634,7 +634,7 @@ select.form-input {
   align-items: center;
   padding: 32px;
   gap: 8px;
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
 }
 
 .quarantine-empty p {
@@ -644,12 +644,12 @@ select.form-input {
 }
 
 .empty-icon-green {
-  color: var(--success, #059669);
+  color: var(--success);
 }
 
 /* ── Quarantine Zone ── */
 .quarantine-section {
-  background: var(--error-light, #fef2f2);
+  background: var(--error-light);
   border: 1px solid var(--error-light);
   border-radius: var(--border-radius-lg, 16px);
   overflow: hidden;
@@ -657,7 +657,7 @@ select.form-input {
 
 .quarantine-header {
   padding: 18px 24px;
-  background: var(--error-light, #fef2f2);
+  background: var(--error-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -672,20 +672,20 @@ select.form-input {
 .quarantine-header h2 {
   font-size: 18px;
   font-weight: 700;
-  color: var(--error, #dc2626);
+  color: var(--error);
   margin: 0;
 }
 
-.quarantine-header .subtitle { color: var(--error, #dc2626); opacity: 0.8; }
+.quarantine-header .subtitle { color: var(--error); opacity: 0.8; }
 
 .items-badge {
   font-size: 12px;
   font-weight: 700;
-  color: var(--error, #dc2626);
+  color: var(--error);
 }
 
 .quarantine-table-container {
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   padding-bottom: 8px;
 }
 
@@ -699,9 +699,9 @@ select.form-input {
   padding: 14px 24px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--error, #dc2626);
+  color: var(--error);
   border-bottom: 1px solid var(--error-light);
-  background: var(--error-light, #fef2f2);
+  background: var(--error-light);
 }
 
 .quarantine-table td {
@@ -733,7 +733,7 @@ select.form-input {
 }
 
 .modal-content {
-  background: var(--background-card, white);
+  background: var(--background-card, var(--background-card));
   border-radius: var(--border-radius-lg, 16px);
   width: 100%;
   max-width: 520px;
@@ -772,7 +772,7 @@ select.form-input {
 }
 
 .modal-close:hover {
-  background: var(--background-hover, #f3f4f6);
+  background: var(--background-hover);
 }
 
 .modal-body {

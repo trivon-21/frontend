@@ -1,38 +1,29 @@
-/**
- * Component Styles Generator
- * Master generator that combines all CSS generators
- *
- * Generates complete theme CSS that can be injected into DOM:
- * - CSS variables for all tokens
- * - Global styles
- * - Button styles
- * - Table styles
- * - All component CSS in one string
- */
-
 import { generateAllCSSVariables, generateGlobalStyles } from './css-variables.generator';
 import { generateButtonStyles } from './button-styles.generator';
 import { generateTableStyles } from './table-styles.generator';
-import { colorTokens, getColorTokens } from '../tokens/colors.tokens';
-import { typographyTokens, getTypographyTokens } from '../tokens/typography.tokens';
-import { spacingTokens } from '../tokens/spacing.tokens';
-import { shadowTokens } from '../tokens/shadows.tokens';
-import { buttonTokens, getButtonTokens } from '../tokens/buttons.tokens';
-import { tableTokens, getTableTokens } from '../tokens/tables.tokens';
+import { defaultTheme } from '../themes/default.theme';
+import type { UnifiedTheme } from '../themes/default.theme';
+import type { ColorPalette } from '../tokens/colors.tokens';
+import type { TypographyScale } from '../tokens/typography.tokens';
+import type { Spacing } from '../tokens/spacing.tokens';
+import type { Shadows } from '../tokens/shadows.tokens';
+import type { ButtonTokens } from '../tokens/buttons.tokens';
+import type { TableTokens } from '../tokens/tables.tokens';
 
 /**
- * Generate complete theme CSS from all tokens
- * This creates a single CSS string with everything needed
+ * Generate complete theme CSS from a UnifiedTheme object.
+ * Defaults to defaultTheme when no theme is provided.
+ * ThemeProvider passes the active theme here, making switchTheme() functional.
  */
-export function generateCompleteThemeCSS(): string {
+export function generateCompleteThemeCSS(theme: UnifiedTheme = defaultTheme): string {
   let css = '';
 
-  // 1. CSS Variables from all tokens
+  // 1. CSS Variables from theme tokens
   css += generateAllCSSVariables(
-    getColorTokens(),
-    getTypographyTokens(),
-    spacingTokens,
-    shadowTokens,
+    theme.colors,
+    theme.typography,
+    theme.spacing,
+    theme.shadows,
   );
 
   // 2. Global styles
@@ -41,11 +32,11 @@ export function generateCompleteThemeCSS(): string {
 
   // 3. Button styles
   css += '\n';
-  css += generateButtonStyles(getButtonTokens());
+  css += generateButtonStyles(theme.buttons);
 
   // 4. Table styles
   css += '\n';
-  css += generateTableStyles(getTableTokens());
+  css += generateTableStyles(theme.tables);
 
   // 5. Additional utility styles
   css += generateUtilityStyles();
@@ -139,16 +130,17 @@ function generateUtilityStyles(): string {
 }
 
 /**
- * Generate CSS for a specific set of tokens
- * Useful for dynamic theme switching
+ * Generate CSS for an explicit set of typed token objects.
+ * Prefer generateCompleteThemeCSS(theme) for standard usage.
+ * This overload is available for advanced cases needing granular token control.
  */
 export function generateThemeCSSFromTokens(
-  colors: any,
-  typography: any,
-  spacing: any,
-  shadows: any,
-  buttons: any,
-  tables: any,
+  colors: ColorPalette,
+  typography: TypographyScale,
+  spacing: Spacing,
+  shadows: Shadows,
+  buttons: ButtonTokens,
+  tables: TableTokens,
 ): string {
   let css = '';
 
@@ -174,13 +166,13 @@ export function generateThemeCSSFromTokens(
 }
 
 /**
- * Generates just the CSS variables (for incremental styling)
+ * Generates just the CSS variable block (for incremental / partial updates).
  */
 export function generateVariablesOnly(
-  colors: any,
-  typography: any,
-  spacing: any,
-  shadows: any,
+  colors: ColorPalette,
+  typography: TypographyScale,
+  spacing: Spacing,
+  shadows: Shadows,
 ): string {
   return generateAllCSSVariables(colors, typography, spacing, shadows);
 }

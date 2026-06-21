@@ -3,6 +3,8 @@
  * Provides utility methods for managing CSS custom properties at runtime.
  */
 import { Injectable } from '@angular/core';
+import { filter, take } from 'rxjs';
+import { ThemeProvider } from './theme.provider';
 
 export interface CSSVariableUpdate {
   name: string;
@@ -28,17 +30,28 @@ export class StylesService {
   private readonly root = document.documentElement;
   private variableHistory: Map<string, string> = new Map();
 
-  constructor() {
-    this.cacheCurrentVariables();
+  constructor(private themeProvider: ThemeProvider) {
+    // Cache the initial CSS variable values AFTER the theme has been injected into the DOM.
+    // ThemeProvider.loadTheme() is called in AppComponent.ngOnInit(), which runs after Angular
+    // dependency injection completes. Subscribing to ready$ guarantees cacheCurrentVariables()
+    // executes only once the :root variables are actually present, making resetAll() reliable.
+    this.themeProvider.ready$
+      .pipe(
+        filter((ready) => ready),
+        take(1),
+      )
+      .subscribe(() => this.cacheCurrentVariables());
   }
 
   /**
-   * Set a CSS color variable
-   * @param colorName - Variable name without '--color-' prefix
-   * @param value - Color value (hex, rgb, etc.)
+   * Set a CSS color variable.
+   * Pass the full token name as it appears in CSS (e.g. 'primary-main', 'text-primary').
+   * The '--' prefix is handled internally by setVariable().
+   * @param colorName - Variable name without '--' prefix (e.g. 'primary-main')
+   * @param value - Color value (hex, rgb, hsl, etc.)
    */
   public setColor(colorName: string, value: string): void {
-    this.setVariable(`color-${colorName}`, value);
+    this.setVariable(colorName, value);
   }
 
   /**
