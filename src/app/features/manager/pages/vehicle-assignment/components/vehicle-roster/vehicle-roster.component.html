@@ -1,0 +1,18 @@
+
+<div class="roster-grid">
+  <div class="vehicle-card" *ngFor="let v of vehicles">
+    <div class="card-header">
+      <div class="icon-wrap" [ngClass]="v.status.toLowerCase().replace(' ', '-')">
+        <lucide-angular name="truck" [size]="20"></lucide-angular>
+      </div>
+      <span class="status-badge" [ngClass]="v.status.toLowerCase().replace(' ', '-')">{{ v.status }}</span>
+    </div>
+    <div class="card-body">
+      <h4>{{ v.name }}</h4>
+      <p class="plate">{{ v.licensePlate }}</p>
+    </div>
+    <div class="card-footer">
+      <div class="location"><lucide-angular name="map-pin" [size]="14"></lucide-angular> {{ v.location }}</div>
+    </div>
+  </div>
+</div>

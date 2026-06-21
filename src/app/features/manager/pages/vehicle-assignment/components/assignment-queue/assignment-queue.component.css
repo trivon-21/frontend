@@ -1,0 +1,19 @@
+
+.queue-container { display: flex; flex-direction: column; height: 100%; }
+.queue-header { padding-bottom: 20px; border-bottom: 1px solid var(--border-light); margin-bottom: 20px; }
+.queue-header h3 { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.job-list { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+.job-card { background: var(--background-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 20px; transition: all 0.2s; cursor: pointer; }
+.job-card:hover { border-color: var(--primary-light); box-shadow: 0 4px 12px rgba(0,0,0,0.03); transform: translateX(4px); }
+.job-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.priority-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
+.priority-badge.high { background: var(--error-light); color: var(--error); }
+.priority-badge.medium { background: var(--warning-light); color: var(--warning); }
+.priority-badge.low { background: var(--success-light); color: var(--success); }
+.ticket-id { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.job-card h4 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.address { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.job-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-light); padding-top: 16px; }
+.time { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.btn-assign { background: var(--primary-lighter); color: var(--primary-main); border: none; padding: 6px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-assign:hover { background: var(--primary-light); }

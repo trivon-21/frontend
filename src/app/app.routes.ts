@@ -165,50 +165,50 @@ export const routes: Routes = [
       {
         path: 'vehicle-assignment',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/vehicle-assignment/vehicle-assignment.component').then(
+            (m) => m.VehicleAssignmentComponent,
           ),
       },
       {
         path: 'orders',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/orders/orders.component').then(
+            (m) => m.OrdersComponent,
           ),
       },
       {
         path: 'tickets',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/tickets/tickets.component').then(
+            (m) => m.TicketsComponent,
           ),
       },
       {
         path: 'customers',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/customers/customers.component').then(
+            (m) => m.CustomersComponent,
           ),
       },
       {
         path: 'analytics',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/analytics/analytics.component').then(
+            (m) => m.AnalyticsComponent,
           ),
       },
       {
         path: 'notifications',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/notifications/notifications.component').then(
+            (m) => m.NotificationsComponent,
           ),
       },
       {
         path: 'settings',
         loadComponent: () =>
-          import('./features/manager/pages/dashboard/manager-dashboard.component').then(
-            (m) => m.ManagerDashboardComponent,
+          import('./features/manager/pages/settings/settings.component').then(
+            (m) => m.SettingsComponent,
           ),
       },
     ],
