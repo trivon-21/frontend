@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: var(--background-card);
   padding: 8px 16px;
   border-radius: 99px;
   border: 1px solid var(--border-light);
@@ -99,7 +99,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
-  background: white;
+  background: var(--background-card);
   outline: none;
 }
 
@@ -108,7 +108,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: white;
+  background: var(--background-card);
   border: 1px solid var(--border-light);
   border-radius: 99px;
   font-size: 14px;
@@ -184,7 +184,7 @@
 
 .btn-assign {
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   border: none;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -201,7 +201,7 @@
 }
 
 .btn-view {
-  background: white;
+  background: var(--background-card);
   color: var(--text-primary);
   border-color: var(--border-light);
 }
@@ -226,7 +226,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--background-card);
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 900px;
@@ -238,7 +238,7 @@
 
 .modal-header {
   padding: 24px 32px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--background-hover);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -279,7 +279,7 @@
 
 .delivery-info-banner {
   display: flex;
-  background: #f8fafc;
+  background: var(--background-page);
   border: 1px solid var(--border-light);
   border-radius: 12px;
   margin-bottom: 24px;
@@ -365,7 +365,7 @@
   padding: 8px 20px;
   border-radius: 99px;
   border: 1px solid var(--border-light);
-  background: white;
+  background: var(--background-card);
   font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
@@ -385,28 +385,28 @@
 .btn-confirm.confirmed {
   background: var(--primary-main);
   border-color: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-confirm:disabled {
   cursor: not-allowed;
   opacity: 0.7;
-  background: #f8fafc;
+  background: var(--background-page);
   border-color: #e2e8f0;
 }
 
 .btn-confirm.confirmed:disabled {
   background: var(--primary-main);
   opacity: 0.6;
-  color: white;
+  color: var(--background-card);
 }
 
 .helper-text {
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.6;
-  background: #f1f5f9;
+  background: var(--background-hover);
   padding: 12px 16px;
   border-radius: 8px;
   border-left: 4px solid var(--primary-main);
@@ -415,7 +415,7 @@
 /* Modal Footer Buttons */
 .btn-secondary-outline {
   padding: 12px 24px;
-  background: white;
+  background: var(--background-card);
   border: 1px solid var(--primary-main);
   border-radius: 99px;
   font-weight: 600;
@@ -492,7 +492,7 @@
 /* Modal Footer */
 .modal-footer {
   padding: 24px 32px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--background-hover);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -506,7 +506,7 @@
 .btn-secondary {
   padding: 12px 24px;
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   border: none;
   border-radius: 99px;
   font-weight: 600;
@@ -516,7 +516,7 @@
 .btn-primary {
   padding: 12px 28px;
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   border: none;
   border-radius: 99px;
   font-weight: 700;
@@ -578,12 +578,12 @@
   outline: none;
   font-size: 14px;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--background-page);
 }
 
 .form-input:focus {
   border-color: var(--primary-main);
-  background: white;
+  background: var(--background-card);
   box-shadow: 0 0 0 4px var(--primary-lighter);
 }
 

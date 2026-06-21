@@ -1,0 +1,116 @@
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { InventoryItem, OrderItem } from '../../../../../services/order-creation.service';
+
+@Component({
+  selector: 'app-order-item-search',
+  standalone: true,
+  imports: [CommonModule, FormsModule, LucideAngularModule],
+  templateUrl: './order-item-search.component.html',
+  styleUrl: './order-item-search.component.css',
+  encapsulation: ViewEncapsulation.None
+})
+export class OrderItemSearchComponent implements OnChanges {
+  @Input() inventoryItems: InventoryItem[] = [];
+  @Output() itemAdded = new EventEmitter<OrderItem>();
+
+  filteredInventory: InventoryItem[] = [];
+  itemSearchQuery = '';
+  showItemDropdown = false;
+  selectedItem: InventoryItem | null = null;
+  currentQuantity = 1;
+  currentPrice = 0;
+
+  isAddingNewItem = false;
+  newItemSku = '';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['inventoryItems']) {
+      this.filteredInventory = this.inventoryItems;
+    }
+  }
+
+  filterItems(): void {
+    const q = (this.itemSearchQuery || '').toLowerCase().trim();
+    if (!q) {
+      this.filteredInventory = this.inventoryItems;
+    } else {
+      this.filteredInventory = this.inventoryItems.filter(i => i && (
+        (i.name?.toLowerCase() || '').includes(q) ||
+        (i.sku?.toLowerCase() || '').includes(q) ||
+        (i.category?.toLowerCase() || '').includes(q)
+      ));
+    }
+    this.showItemDropdown = true;
+  }
+
+  selectInventoryItem(item: InventoryItem | 'new'): void {
+    if (item === 'new') {
+      this.isAddingNewItem = true;
+      this.selectedItem = null;
+      this.newItemSku = '';
+      this.currentPrice = 0;
+      this.showItemDropdown = false;
+      return;
+    }
+    this.selectedItem = item;
+    this.itemSearchQuery = item.name;
+    this.currentQuantity = 1;
+    this.currentPrice = item.unitCost;
+    this.isAddingNewItem = false;
+    this.showItemDropdown = false;
+  }
+
+  clearSelection(): void {
+    this.selectedItem = null;
+    this.isAddingNewItem = false;
+    this.itemSearchQuery = '';
+    this.currentQuantity = 1;
+    this.newItemSku = '';
+    this.currentPrice = 0;
+  }
+
+  onItemInputBlur(): void {
+    setTimeout(() => { this.showItemDropdown = false; }, 250);
+  }
+
+  onItemInputFocus(): void {
+    this.showItemDropdown = true;
+    this.filterItems();
+  }
+
+  addLineItem(): void {
+    if (this.isAddingNewItem) {
+      if (!this.itemSearchQuery || !this.newItemSku || this.currentQuantity <= 0) return;
+      this.itemAdded.emit({
+        inventoryId: '',
+        name: this.itemSearchQuery,
+        sku: this.newItemSku,
+        quantity: this.currentQuantity,
+        unitCost: this.currentPrice,
+        estimatedTotal: this.currentQuantity * this.currentPrice,
+        available: 0,
+        reserved: 0
+      });
+    } else {
+      if (!this.selectedItem || this.currentQuantity <= 0) return;
+      this.itemAdded.emit({
+        inventoryId: this.selectedItem._id,
+        name: this.selectedItem.name,
+        sku: this.selectedItem.sku,
+        quantity: this.currentQuantity,
+        unitCost: this.currentPrice,
+        estimatedTotal: this.currentQuantity * this.currentPrice,
+        available: this.selectedItem.available,
+        reserved: this.selectedItem.reserved
+      });
+    }
+    this.clearSelection();
+  }
+
+  formatCurrency(val: number): string {
+    return `LKR ${(val || 0).toLocaleString()}`;
+  }
+}

@@ -140,7 +140,7 @@
   border: 1px solid var(--border-light);
   border-radius: 10px;
   font-size: 14px;
-  background: white;
+  background: var(--background-card);
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.2s;

@@ -59,7 +59,7 @@
   padding-left: 44px;
   border: 1px solid var(--border-light);
   border-radius: 10px;
-  background: white;
+  background: var(--background-card);
   font-size: 14px;
   transition: all 0.2s ease;
 }
@@ -86,7 +86,7 @@
   padding: 10px 16px;
   border: 1px solid var(--border-light);
   border-radius: 10px;
-  background: white;
+  background: var(--background-card);
   font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;

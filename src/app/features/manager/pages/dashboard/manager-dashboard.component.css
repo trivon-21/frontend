@@ -137,7 +137,7 @@
   gap: 8px;
   padding: 10px 22px;
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   border: none;
   border-radius: 99px;
   font-size: 13px;
@@ -194,7 +194,7 @@
 
 .summary-card.clickable:hover .card-icon {
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   transform: scale(1.1);
 }
 
@@ -515,7 +515,7 @@
 
 .activity-btn {
   padding: 8px 16px;
-  background: white;
+  background: var(--background-card);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 13px;
@@ -617,7 +617,7 @@
 .action-btn-primary {
   padding: 6px 14px;
   background: var(--primary-main);
-  color: white;
+  color: var(--background-card);
   border: none;
   border-radius: 6px;
   font-size: 12px;
