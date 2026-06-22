@@ -94,7 +94,7 @@ export class InventoryListComponent implements OnInit {
     
     // Default select first item
     if (this.inventoryItems.length > 0) {
-      this.selectedRowId = this.inventoryItems[0].id || this.inventoryItems[0].sku || null;
+      this.selectedRowId = this.getItemId(this.inventoryItems[0]);
     } else {
       this.selectedRowId = null;
     }
@@ -135,7 +135,11 @@ export class InventoryListComponent implements OnInit {
   }
 
   getItemId(item: InventoryItem): string | null {
-    return item.id || item.sku || null;
+    return item._id || item.id || item.sku || null;
+  }
+
+  trackByItem(_index: number, item: InventoryItem): string {
+    return item._id || item.id || item.sku || String(_index);
   }
 
   isRowSelected(item: InventoryItem): boolean {

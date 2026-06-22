@@ -73,8 +73,8 @@
   </div>
 
   <!-- Inventory Table -->
-  <div class="table-container">
-    <table>
+  <div class="table-container alx-table-container">
+    <table class="alx-table">
       <thead>
         <tr>
           <th>SKU /Asset Tag</th>
@@ -88,7 +88,7 @@
       </thead>
       <tbody>
         <tr 
-          *ngFor="let item of inventoryItems" 
+          *ngFor="let item of inventoryItems; trackBy: trackByItem" 
           (click)="selectRow(item)"
           class="clickable-row"
           [class.selected-row]="isRowSelected(item)">
@@ -114,7 +114,7 @@
       </tbody>
     </table>
 
-    <div class="pagination" *ngIf="totalItems > 0">
+    <div class="pagination alx-pagination" *ngIf="totalItems > 0">
       <span class="pagination-info">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
       </span>

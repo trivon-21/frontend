@@ -97,3 +97,154 @@ lucide-angular {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* ═══════════════════════════════════════════════════════
+   AirLux Standard Table System (alx-*)
+   Single source of truth for all data tables.
+   Apply these classes to opt any page into the standard UI.
+   ═══════════════════════════════════════════════════════ */
+
+/* Table Container — card wrapper */
+.alx-table-container {
+  overflow: hidden;
+  padding: 0;
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg, 12px);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-standard);
+}
+
+/* Table element */
+.alx-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Header cells */
+.alx-table th {
+  text-align: left;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--background-page);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+/* Body cells */
+.alx-table td {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--border-light);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* Clickable rows */
+.alx-table .clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.alx-table .clickable-row:hover {
+  background-color: var(--background-hover);
+}
+
+/* Selected row */
+.alx-table .selected-row {
+  background-color: var(--primary-lighter) !important;
+}
+
+.alx-table .selected-row td {
+  color: var(--primary-main);
+  font-weight: 500;
+}
+
+/* Cell variants */
+.alx-table .sku-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.alx-table .name-cell {
+  font-weight: 500;
+}
+
+.alx-table .num-cell {
+  font-weight: 600;
+}
+
+.alx-table .actions-cell {
+  text-align: right;
+}
+
+/* Status pill */
+.alx-table .status-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+}
+
+.alx-table .status-pill.bundle {
+  background: var(--background-hover);
+  color: var(--text-secondary);
+}
+
+/* ── Pagination ── */
+.alx-pagination {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alx-pagination .pagination-info {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.alx-pagination .pagination-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.alx-pagination .btn-page {
+  padding: var(--spacing-sm) 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-card);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.alx-pagination .btn-page.active {
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  border-color: var(--primary-main);
+  font-weight: 600;
+}
+
+.alx-pagination .btn-page:hover:not(.active):not(:disabled) {
+  background: var(--background-hover);
+}
+
+.alx-pagination .btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-page);
+}
+
+.alx-pagination .dots {
+  color: var(--text-muted);
+  padding: 0 4px;
+}

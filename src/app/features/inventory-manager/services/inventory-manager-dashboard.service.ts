@@ -27,6 +27,7 @@ export interface ActivityItem {
 }
 
 export interface ReorderItem {
+  _id?: string;
   id: string;
   name: string;
   available: number;

@@ -101,140 +101,26 @@
   cursor: pointer;
 }
 
-/* Table Section */
-.table-container {
-  overflow: hidden;
-  padding: 0;
+/* Table Section — component-specific overrides only */
+/* Standard table/pagination styles are in global styles.css (alx-*) */
+
+.btn-small {
+  padding: 8px 16px;
+  border: 1px solid var(--primary-main);
+  border-radius: var(--border-radius-sm, 8px);
   background: var(--background-card);
-  border-radius: var(--border-radius-lg, 12px);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-standard);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  text-align: left;
-  padding: 20px 24px;
-  background: var(--background-page);
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-light);
-}
-
-td {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.sku-cell {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.name-cell {
-  font-weight: 500;
-}
-
-.status-pill {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--primary-lighter);
   color: var(--primary-main);
-}
-
-.status-pill.bundle {
-  background: var(--background-hover);
-  color: var(--text-secondary);
-}
-
-.num-cell {
+  font-size: 13px;
   font-weight: 600;
-}
-
-.clickable-row {
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.clickable-row:hover {
-  background-color: var(--background-hover);
-}
-
-.selected-row {
-  background-color: var(--primary-lighter) !important;
-}
-
-.selected-row td {
-  color: var(--primary-main);
-  font-weight: 500;
-}
-
-
-
-/* Pagination */
-.pagination {
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.pagination-controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn-page {
-  padding: 8px 14px;
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  background: var(--background-paper);
-  font-size: 14px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-page.active {
+.btn-small:hover {
   background: var(--primary-lighter);
-  color: var(--primary-main);
-  border-color: var(--primary-main);
-  font-weight: 600;
 }
 
-.btn-page:hover:not(.active):not(:disabled) {
-  background: var(--background-hover);
-  border-color: var(--secondary-light);
-}
-
-.btn-page:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: var(--background-page);
-}
-
-.dots {
-  color: var(--text-muted);
-  padding: 0 4px;
-}
 
 /* Base Modal Styles */
 .modal-overlay {
