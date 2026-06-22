@@ -33,37 +33,15 @@
   margin: 0;
 }
 
-.table-container {
-  overflow: hidden;
-}
+/* Table — base styles from global alx-* system in styles.css */
+/* Component-specific overrides only */
 
-.required-items-grid {
-  width: 100%;
-  border-collapse: collapse;
+.alx-table {
   table-layout: fixed;
-  border-spacing: 0;
 }
 
-.required-items-grid th,
-.required-items-grid td {
-  padding: 16px 24px;
-  text-align: left;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--background-hover);
-  box-sizing: border-box;
-}
-
-.required-items-grid th {
-  background: var(--background-page);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.required-items-grid .text-right { text-align: right; }
-.required-items-grid .text-center { text-align: center; }
+.alx-table .text-right { text-align: right; }
+.alx-table .text-center { text-align: center; }
 
 .item-name-bold {
   font-weight: 700;

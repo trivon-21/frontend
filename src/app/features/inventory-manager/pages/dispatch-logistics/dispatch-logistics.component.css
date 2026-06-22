@@ -116,47 +116,13 @@
   cursor: pointer;
 }
 
-/* Table */
-.table-container {
-  padding: 0;
-  overflow: hidden;
-}
+/* Table — base styles from global alx-* system in styles.css */
+/* Component-specific overrides only */
 
-.dispatch-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.dispatch-table th {
-  background: var(--background-page);
-  padding: 16px 24px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-}
-
-.dispatch-table td {
-  height: 64px; /* Fixed height for all rows to ensure stability */
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 14px;
-  color: var(--text-primary);
+.alx-table td {
+  height: 64px;
+  padding: 0 var(--spacing-xl);
   vertical-align: middle;
-}
-
-.dispatch-table tr {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.dispatch-table tr:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.dispatch-table tr.selected-row {
-  background-color: var(--primary-lighter) !important;
 }
 
 .actions-cell {
