@@ -29,7 +29,6 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
     },
     recentActivity: [],
     reorderList: [],
-    logistics: []
   };
   loading = false; // Structure should load immediately
   error: string | null = null;
@@ -38,6 +37,7 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: InventoryManagerDashboardService,
     private iconMappingService: IconMappingService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +91,20 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
     return this.iconMappingService.getActivityIcon(type);
   }
 
-  getProgressBarWidth(current: number, total: number): string {
-    return `${(current / total) * 100}%`;
+  handleActivityAction(activity: ActivityItem): void {
+    const routes: Record<string, string> = {
+      'View GRN': '/inventory-manager/procurement',
+      'View Asset': '/inventory-manager/asset-management',
+      'View Log': '/inventory-manager/asset-management',
+      'View Order': '/inventory-manager/order-creation',
+      'View Procurement': '/inventory-manager/procurement',
+      'View Returns': '/inventory-manager/returns-rma',
+      'View RMA': '/inventory-manager/returns-rma',
+      'View Quarantine': '/inventory-manager/returns-rma',
+    };
+    const route = routes[activity.actionLabel || ''];
+    if (route) {
+      this.router.navigate([route]);
+    }
   }
 }

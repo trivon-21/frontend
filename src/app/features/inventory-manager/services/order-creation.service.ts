@@ -50,7 +50,7 @@ export class OrderCreationService {
     return this.apiService.get<InventoryItem[]>('/inventory/suggested-orders');
   }
 
-  getOrderRequest(id: string): Observable<any[]> {
+  getOrderRequests(): Observable<any[]> {
     return this.apiService.get<any[]>('/inventory/order-requests');
   }
 

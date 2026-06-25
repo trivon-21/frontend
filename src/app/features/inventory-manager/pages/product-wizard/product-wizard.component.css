@@ -222,3 +222,22 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Inline Messages */
+.success-banner {
+  background: var(--success-light);
+  color: var(--success);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.error-banner {
+  background: var(--error-light);
+  color: var(--error);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+}

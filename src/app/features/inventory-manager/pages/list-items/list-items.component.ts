@@ -18,10 +18,7 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class ListItemsComponent implements OnInit {
   searchQuery: string = '';
-  selectedType: string = 'Tools';
-  selectedBrand: string = 'All Brands';
-  selectedLocation: string = 'Location';
-
+  allItems: InventoryItem[] = [];
   pendingItems: InventoryItem[] = [];
   listedItems: InventoryItem[] = [];
   loading = true;
@@ -31,22 +28,34 @@ export class ListItemsComponent implements OnInit {
   ngOnInit(): void {
     this.inventoryService.getInventory().subscribe({
       next: (items) => {
-        // For demonstration, splitting items into pending and listed
-        // In a real scenario, this would be based on a status field
-        this.pendingItems = items.filter(
-          (item) => item.status === 'warning' || item.status === 'critical',
-        );
-        this.listedItems = items.filter((item) => item.status === 'normal');
+        this.allItems = items;
+        this.applySearch();
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Error loading items:', err);
+      error: () => {
         this.loading = false;
       },
     });
   }
 
-  clearFilters() {
+  applySearch(): void {
+    const query = (this.searchQuery || '').toLowerCase().trim();
+    const filtered = query
+      ? this.allItems.filter(
+          (item) =>
+            item.name?.toLowerCase().includes(query) ||
+            item.sku?.toLowerCase().includes(query),
+        )
+      : this.allItems;
+
+    this.pendingItems = filtered.filter(
+      (item) => item.status === 'warning' || item.status === 'critical',
+    );
+    this.listedItems = filtered.filter((item) => item.status === 'normal');
+  }
+
+  clearFilters(): void {
     this.searchQuery = '';
+    this.applySearch();
   }
 }

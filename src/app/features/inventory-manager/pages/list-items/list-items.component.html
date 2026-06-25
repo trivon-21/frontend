@@ -8,36 +8,13 @@
     </button>
   </div>
 
-  <!-- Filters Section -->
+  <!-- Search Section -->
   <div class="filters-row">
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <input type="text" [(ngModel)]="searchQuery" placeholder="Search Inventory...">
+      <input type="text" [(ngModel)]="searchQuery" (input)="applySearch()" placeholder="Search Inventory...">
     </div>
-    
-    <div class="filter-group">
-      <span class="filter-label">Filters:</span>
-      
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedType">
-          <option>Tools</option>
-        </select>
-      </div>
-
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedBrand">
-          <option>All Brands</option>
-        </select>
-      </div>
-
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedLocation">
-          <option>Location</option>
-        </select>
-      </div>
-
-      <button class="btn-clear" (click)="clearFilters()">Clear Filters</button>
-    </div>
+    <button class="btn-clear" (click)="clearFilters()" *ngIf="searchQuery">Clear</button>
   </div>
 
   <!-- Dual Lists Layout -->
@@ -56,7 +33,7 @@
             <span class="item-name">{{ item.name }}</span>
             <span class="item-sku">{{ item.sku }}</span>
           </div>
-          <button class="btn-add-details" [routerLink]="['/inventory-manager/product-wizard', item.id]">Add Details</button>
+          <button class="btn-add-details" [routerLink]="['/inventory-manager/product-wizard', item._id || item.id]">Add Details</button>
         </div>
       </div>
     </div>

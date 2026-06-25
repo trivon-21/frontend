@@ -51,6 +51,20 @@ export class NewOrderFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
 
+    // Check for suggested item passed via router state
+    const navState = history.state;
+    if (navState?.suggestedItem) {
+      const item = navState.suggestedItem;
+      this.orderItems.push({
+        inventoryId: item._id,
+        name: item.name,
+        sku: item.sku,
+        quantity: item.reorderLevel || 10,
+        unitCost: item.unitCost || 0,
+        estimatedTotal: (item.reorderLevel || 10) * (item.unitCost || 0),
+      });
+    }
+
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
@@ -76,7 +90,7 @@ export class NewOrderFormComponent implements OnInit {
   }
 
   loadOrder(id: string): void {
-    this.orderCreationService.getOrderRequest(id).subscribe({
+    this.orderCreationService.getOrderRequests().subscribe({
       next: (requests) => {
         const order = requests.find((r: any) => r.requestId === id);
         if (order) {

@@ -200,6 +200,14 @@
     </section>
   </div>
 
+  <!-- Messages -->
+  <div class="success-banner" *ngIf="successMessage">
+    <span>{{ successMessage }}</span>
+  </div>
+  <div class="error-banner" *ngIf="errorMessage">
+    <span>{{ errorMessage }}</span>
+  </div>
+
   <!-- Wizard Footer -->
   <div class="wizard-footer">
     <button class="btn-secondary" (click)="prevStep()" *ngIf="currentStep > 1">Back</button>

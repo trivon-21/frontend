@@ -120,7 +120,9 @@ export class OrderCreationComponent implements OnInit {
   }
 
   addSuggestedItem(item: InventoryItem): void {
-    this.router.navigate(['/inventory-manager/order-creation/new']);
+    this.router.navigate(['/inventory-manager/order-creation/new'], {
+      state: { suggestedItem: item }
+    });
   }
 
   createNewOrder(): void {

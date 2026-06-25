@@ -156,6 +156,12 @@
         </div>
       </div>
 
+      <div class="validation-banner" *ngIf="validationMessage"
+        style="background: var(--warning-light); color: var(--warning); padding: 10px 16px;
+        border-radius: 8px; font-size: 13px; font-weight: 500; margin: 0 24px;">
+        {{ validationMessage }}
+      </div>
+
       <div class="modal-footer">
         <div class="footer-right" *ngIf="activeTab === 'pending'">
           <button class="btn-save" (click)="saveStatus()">Save Current Status</button>

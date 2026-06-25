@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -317,9 +317,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       this.apiService
         .patch(`/inventory/orders/${order.id}`, { items: order.items })
-        .subscribe(() => {
-          console.log('Status saved for', this.selectedOrderId);
-        });
+        .subscribe();
     }
     this.closeModals();
   }

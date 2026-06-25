@@ -16,6 +16,8 @@ export class ProductWizardComponent implements OnInit {
   totalSteps: number = 3;
   itemId: string | null = null;
   loading = false;
+  successMessage = '';
+  errorMessage = '';
 
   productData: any = {
     name: '',
@@ -85,14 +87,26 @@ export class ProductWizardComponent implements OnInit {
       // Update
       this.inventoryService.updateItem(this.itemId, this.productData).subscribe({
         next: () => {
-          alert('Product updated successfully!');
-          this.router.navigate(['/inventory-manager/inventory']);
+          this.successMessage = 'Product updated successfully!';
+          setTimeout(() => this.router.navigate(['/inventory-manager/inventory']), 1500);
         },
-        error: (err) => alert('Error updating product')
+        error: () => {
+          this.errorMessage = 'Failed to update product. Please try again.';
+          setTimeout(() => this.errorMessage = '', 5000);
+        }
       });
     } else {
-      // Create (not implemented in backend yet, but pattern is same)
-      console.log('Create new product:', this.productData);
+      // Create
+      this.inventoryService.addItem(this.productData).subscribe({
+        next: () => {
+          this.successMessage = 'Product created successfully!';
+          setTimeout(() => this.router.navigate(['/inventory-manager/inventory']), 1500);
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Failed to create product. Please check SKU uniqueness.';
+          setTimeout(() => this.errorMessage = '', 5000);
+        }
+      });
     }
   }
 }

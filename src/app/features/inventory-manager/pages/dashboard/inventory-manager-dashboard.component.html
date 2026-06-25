@@ -130,7 +130,7 @@
               <span class="activity-time">{{ activity.timeAgo }}</span>
             </div>
             <div class="activity-actions" *ngIf="activity.actionLabel">
-              <button class="activity-btn">
+              <button class="activity-btn" (click)="handleActivityAction(activity)">
                 {{ activity.actionLabel }}
               </button>
             </div>

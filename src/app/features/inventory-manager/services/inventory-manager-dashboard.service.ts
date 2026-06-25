@@ -50,12 +50,6 @@ export interface InventoryItem extends ReorderItem {
   time?: string;
 }
 
-export interface LogisticsItem {
-  label: string;
-  current: number;
-  total: number;
-  subLabel?: string;
-}
 
 export interface InventoryDashboardData {
   managerName: string;
@@ -64,7 +58,6 @@ export interface InventoryDashboardData {
   stats: SummaryStats;
   recentActivity: ActivityItem[];
   reorderList: ReorderItem[];
-  logistics: LogisticsItem[];
 }
 
 @Injectable({
@@ -102,7 +95,6 @@ export class InventoryManagerDashboardService {
           },
           recentActivity: [],
           reorderList: [],
-          logistics: []
         });
       })
     );

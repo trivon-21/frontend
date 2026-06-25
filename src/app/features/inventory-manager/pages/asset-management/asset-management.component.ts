@@ -46,6 +46,7 @@ export class AssetManagementDashboardComponent implements OnInit {
   selectedTechnicianId: string = '';
   selectedToolId: string = '';
   dueDate: string = '';
+  validationMessage = '';
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
@@ -108,7 +109,8 @@ export class AssetManagementDashboardComponent implements OnInit {
 
   checkOut() {
     if (!this.selectedTechnicianId || !this.selectedToolId || !this.dueDate) {
-      alert('Please fill all fields');
+      this.validationMessage = 'Please fill all fields before checking out.';
+      setTimeout(() => this.validationMessage = '', 4000);
       return;
     }
 

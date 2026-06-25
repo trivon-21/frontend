@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -44,6 +44,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
 
   isEditingTeam = false;
   editServiceTeam = '';
+  validationMessage = '';
 
   pendingRequests: MaterialRequest[] = [];
   reservedRequests: MaterialRequest[] = [];
@@ -151,9 +152,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (req) {
       this.apiService
         .patch(`/inventory/material-requests/${req.id}`, { items: req.items })
-        .subscribe(() => {
-          console.log('Status saved for', this.selectedRequestId);
-        });
+        .subscribe();
     }
     this.closeModal();
   }
@@ -197,7 +196,8 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         this.closeModal();
       });
     } else {
-      alert('Please reserve all items before marking as kitted.');
+      this.validationMessage = 'Please reserve all items before marking as kitted.';
+      setTimeout(() => this.validationMessage = '', 4000);
     }
   }
 
@@ -206,7 +206,8 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     const req = this.selectedRequest;
     if (req) {
       if (!req.serviceTeam) {
-        alert('Please assign a service team first.');
+        this.validationMessage = 'Please assign a service team first.';
+        setTimeout(() => this.validationMessage = '', 4000);
         return;
       }
       const updateData = {
