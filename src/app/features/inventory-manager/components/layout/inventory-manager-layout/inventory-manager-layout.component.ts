@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../../core/services/auth.service';
 import {
   NotificationService,
@@ -20,7 +19,6 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
     RouterLinkActive,
     CommonModule,
     LucideAngularModule,
-    FormsModule,
     ClickOutsideDirective,
   ],
   templateUrl: './inventory-manager-layout.component.html',
@@ -31,7 +29,6 @@ export class InventoryManagerLayoutComponent implements OnInit {
   showUserMenu = false;
   notifications: Notification[] = [];
   unreadCount = 0;
-  searchQuery = '';
 
   constructor(
     public authService: AuthService,
@@ -120,15 +117,5 @@ export class InventoryManagerLayoutComponent implements OnInit {
 
   getNotificationIcon(type: string): string {
     return this.iconMappingService.getNotificationIcon(type);
-  }
-
-  handleGlobalSearch(): void {
-    const query = this.searchQuery.trim();
-    if (query) {
-      this.router.navigate(['/inventory-manager/inventory'], {
-        queryParams: { search: query }
-      });
-      this.searchQuery = '';
-    }
   }
 }

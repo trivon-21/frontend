@@ -61,13 +61,7 @@
   <div class="dashboard-main">
     <!-- Header -->
     <header class="dashboard-header">
-      <div class="header-search-wrap">
-        <lucide-angular name="search" class="search-icon" [size]="18" strokeWidth="2"></lucide-angular>
-        <input class="header-search" type="text"
-          placeholder="Search product, supplier, order"
-          [(ngModel)]="searchQuery"
-          (keyup.enter)="handleGlobalSearch()" />
-      </div>
+      <!-- Search removed -->
       <div class="header-actions">
         <!-- User Menu -->
         <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">

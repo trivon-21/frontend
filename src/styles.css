@@ -87,12 +87,7 @@ lucide-angular {
   color: currentColor;
 }
 
-.search-icon {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2;
-  color: currentColor;
-}
+/* .search-icon removed - defined locally where needed */
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
