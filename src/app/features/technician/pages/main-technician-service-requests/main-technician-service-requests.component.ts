@@ -104,20 +104,24 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
         return matchesSearch && matchesStatus;
       })
       .sort((a, b) => {
-        const aCompleted = this.isCompletedStatus(a.status);
-        const bCompleted = this.isCompletedStatus(b.status);
+        // Priority order: Assigned (top) -> other statuses (middle) -> Completed (bottom)
+        const aStatusPriority = this.getStatusPriority(a.status);
+        const bStatusPriority = this.getStatusPriority(b.status);
 
-        if (aCompleted === bCompleted) {
-          return 0;
-        }
-
-        return aCompleted ? 1 : -1;
+        return aStatusPriority - bStatusPriority;
       });
   }
 
-  /** Keeps completed requests at the bottom of the table. */
-  private isCompletedStatus(status: string): boolean {
-    return status.trim().toLowerCase() === 'completed';
+  /** Returns priority order for status sorting: Assigned (0) -> Others (1) -> Completed (2) */
+  private getStatusPriority(status: string): number {
+    const normalizedStatus = status.trim().toLowerCase();
+    if (normalizedStatus === 'assigned') {
+      return 0; // Assigned at top
+    }
+    if (normalizedStatus === 'completed') {
+      return 2; // Completed at bottom
+    }
+    return 1; // All other statuses in middle (Scheduled, etc.)
   }
 
   /** Resets the search and status filters back to their defaults. */

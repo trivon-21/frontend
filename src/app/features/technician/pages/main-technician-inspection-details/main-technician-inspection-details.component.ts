@@ -72,7 +72,7 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
   }
 
   get assignedTeamName(): string {
-    return 'Inspection Team A';
+    return this.resolvedInspectionTeamName || 'Inspection Team A';
   }
 
   get teamLeadLabel(): string {
@@ -90,6 +90,26 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
   }
 
   private loadInspectionTeamADetails(): void {
+    const assignedTeam = this.inspectionData?.assignedTeam;
+    const targetTeamId = String(
+      (assignedTeam && typeof assignedTeam === 'object' ? assignedTeam._id : null)
+      || this.inspectionData?.assignedTeamId
+      || (typeof assignedTeam === 'string' ? assignedTeam : '')
+      || ''
+    ).trim();
+
+    const teamNameCandidates = [
+      assignedTeam && typeof assignedTeam === 'object' ? assignedTeam.teamName : '',
+      this.inspectionData?.assignedTeamName,
+      this.inspectionData?.teamName,
+      this.inspectionData?.inspectionMeta?.team,
+      'Inspection Team A',
+    ]
+      .map((value) => String(value || '').trim())
+      .filter(Boolean);
+
+    const normalizedNameCandidates = teamNameCandidates.map((value) => value.toLowerCase());
+
     this.http
       .get<{ success: boolean; data: Array<{ _id?: string; teamName?: string; teamType?: string; members?: Array<{ name?: string; role?: string }> }> }>(this.teamsApiUrl)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -101,18 +121,30 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
             return;
           }
 
-          const matchedTeam = response.data.find((team) => {
-            const teamName = String(team.teamName || '').toLowerCase();
-            const teamType = String(team.teamType || '').toLowerCase();
-            return teamType === 'inspection team' && teamName.includes('team a');
-          }) || response.data.find((team) => String(team.teamType || '').toLowerCase() === 'inspection team');
+          const inspectionTeams = response.data.filter((team) => String(team.teamType || '').toLowerCase() === 'inspection team');
+
+          const matchedById = targetTeamId
+            ? inspectionTeams.find((team) => String(team._id || '').trim() === targetTeamId)
+            : undefined;
+
+          const matchedByExactName = inspectionTeams.find((team) => {
+            const name = String(team.teamName || '').trim().toLowerCase();
+            return normalizedNameCandidates.includes(name);
+          });
+
+          const matchedByContains = inspectionTeams.find((team) => {
+            const name = String(team.teamName || '').trim().toLowerCase();
+            return normalizedNameCandidates.some((candidate) => name.includes(candidate) || candidate.includes(name));
+          });
+
+          const matchedTeam = matchedById || matchedByExactName || matchedByContains || inspectionTeams[0];
 
           this.assignedTeamMembers = matchedTeam?.members || [];
-          this.resolvedInspectionTeamName = 'Inspection Team A';
+          this.resolvedInspectionTeamName = matchedTeam?.teamName || teamNameCandidates[0] || 'Inspection Team A';
         },
         error: () => {
           this.assignedTeamMembers = [];
-          this.resolvedInspectionTeamName = 'Inspection Team A';
+          this.resolvedInspectionTeamName = teamNameCandidates[0] || 'Inspection Team A';
         }
       });
   }

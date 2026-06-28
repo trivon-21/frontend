@@ -37,7 +37,7 @@ interface PendingJob {
   _id: string;
   customer: string;
   location: string;
-  type: 'Installation' | 'Service';
+  type: 'Installation' | 'Service' | 'Maintenance';
   productType: string;
 }
 
@@ -69,7 +69,7 @@ type RawPendingJob = {
   ticketId?: string | number;
   customerName?: string;
   location?: string;
-  requestType?: 'Installation' | 'Service';
+  requestType?: 'Installation' | 'Service' | 'Maintenance';
   productType?: string;
 };
 

@@ -56,6 +56,7 @@ type TicketDropdownItem = {
   financeNotes?: string;
   location?: string;
   requestType?: 'Installation' | 'Service';
+  serviceType?: string;
   siteDetails?: any;
 };
 
@@ -83,6 +84,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     customerAddress: '',
     rejectedStatus: '',
     rejectionReason: '',
+    serviceType: '',
     siteDetails: {} as any
   };
 
@@ -205,6 +207,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             .map((item: any) => ({
               id: this.normalizeTicketId(item.ticketId),
               requestType: item.requestType || 'Service',
+              serviceType: item.serviceType || '',
               productType: (item.productType || '').trim(),
               serviceDescription: (item.serviceDescription || '').trim(),
               customerName: (item.customerName || '').trim(),
@@ -236,6 +239,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             this.newRequest.customerEmail = '';
             this.newRequest.customerContactNo = '';
             this.newRequest.customerAddress = '';
+            this.newRequest.serviceType = '';
             this.newRequest.siteDetails = {};
           } else {
             this.syncDescriptionWithSelectedTicket(this.newRequest.ticketId);
@@ -267,6 +271,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             this.newRequest.customerEmail = '';
             this.newRequest.customerContactNo = '';
             this.newRequest.customerAddress = '';
+            this.newRequest.serviceType = '';
             this.newRequest.siteDetails = {};
           } else {
             this.syncDescriptionWithSelectedTicket(this.newRequest.ticketId);
@@ -342,10 +347,11 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.customerAddress = selectedTicket?.customerAddress || '';
     this.newRequest.rejectedStatus = selectedTicket?.status || '';
     this.newRequest.rejectionReason = selectedTicket?.financeNotes || '';
+    this.newRequest.serviceType = selectedTicket?.serviceType || '';
     this.newRequest.siteDetails = selectedTicket?.siteDetails || {};
     
-    // Populate materials if this is a rejected request
-    if (selectedTicket?.status === 'Finance Rejected' && selectedTicket?.materials && selectedTicket.materials.length > 0) {
+    // Populate materials if they exist on the selected ticket (e.g. Finance Rejected or Company Initiated Maintenance default materials)
+    if (selectedTicket?.materials && selectedTicket.materials.length > 0) {
       this.newRequest.items = selectedTicket.materials.map((material) => ({
         name: material.item || '',
         quantity: material.quantity || ''
@@ -371,6 +377,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       customerAddress: '',
       rejectedStatus: '',
       rejectionReason: '',
+      serviceType: '',
       siteDetails: {}
     };
   }
