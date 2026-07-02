@@ -1,5 +1,5 @@
 .procurement-container {
-  padding: 32px;
+  padding: var(--spacing-xxl);
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -21,12 +21,12 @@
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--success-light);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 5%);
 }
 
 .grn-header {
   background: var(--success-light); /* Very light green */
-  padding: 32px;
+  padding: var(--spacing-xxl);
   color: var(--text-primary);
   border-bottom: 1px solid var(--success-light);
 }
@@ -35,7 +35,7 @@
   font-size: 20px;
   font-weight: 700;
   color: var(--success); /* Darker green for contrast */
-  margin: 0 0 24px 0;
+  margin: 0 0 var(--spacing-xl);
 }
 
 .stepper {
@@ -76,7 +76,7 @@
 .step.active .step-num {
   background: var(--success);
   color: var(--background-card);
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 4px 12px rgb(22 163 74 / 20%);
 }
 
 .step-label {
@@ -92,7 +92,7 @@
 }
 
 .grn-body {
-  padding: 40px 32px;
+  padding: var(--spacing-xxxl) var(--spacing-xxl);
   background: var(--background-card);
   min-height: 300px;
 }
@@ -101,7 +101,7 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-sm);
 }
 
 .step-desc {
@@ -133,7 +133,7 @@
 
 .form-input, .form-select, .date-picker input, .scan-input input {
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: 10px;
   border: 1.5px solid var(--border-light);
   background: var(--background-card);
@@ -149,7 +149,7 @@
 .info-box {
   background: var(--error-light); /* Very light red */
   border: 1px solid var(--error-light);
-  padding: 16px;
+  padding: var(--spacing-lg);
   border-radius: 10px;
   color: var(--error); /* Dark red for text */
   font-size: 13px;
@@ -184,7 +184,7 @@
   background: var(--primary-main);
   color: var(--background-card);
   border: none;
-  padding: 12px 28px;
+  padding: var(--spacing-md) var(--spacing-xxl);
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -202,7 +202,7 @@
   background: var(--background-card);
   color: var(--text-secondary);
   border: 1.5px solid var(--border-light);
-  padding: 12px 28px;
+  padding: var(--spacing-md) var(--spacing-xxl);
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -237,11 +237,11 @@
   align-items: center;
   gap: 12px;
   background: var(--background-card);
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 99px;
   border: 1px solid var(--border-light);
   width: 400px;
-  margin: 12px 0;
+  margin: var(--spacing-md) 0;
 }
 
 .search-box input {
@@ -254,14 +254,14 @@
 .shipments-list {
   background: var(--background-card);
   border-radius: 20px;
-  padding: 8px;
+  padding: var(--spacing-sm);
 }
 
 .shipment-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: var(--spacing-xl);
   border-bottom: 1px solid var(--background-hover);
 }
 
@@ -286,7 +286,7 @@
 .status-badge {
   background: var(--success-light);
   color: var(--success);
-  padding: 4px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -301,7 +301,7 @@
 }
 
 .alert {
-  padding: 12px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: 8px;
   margin-bottom: 20px;
   display: flex;
@@ -337,19 +337,19 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(0 0 0 / 10%);
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
   margin-top: 4px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%);
 }
 
 .dropdown-item {
-  padding: 10px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   cursor: pointer;
   font-size: 0.875rem;
   transition: background 0.2s;
@@ -362,14 +362,14 @@
 }
 
 .dropdown-item.add-new {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
   font-weight: 600;
   color: var(--success);
   background: var(--success-light);
 }
 
 .dropdown-no-results {
-  padding: 10px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   font-size: 0.75rem;
   color: var(--text-muted);
   font-style: italic;
@@ -380,7 +380,7 @@
   align-items: center;
   gap: 12px;
   margin-top: 8px;
-  padding: 4px;
+  padding: var(--spacing-xs);
   border-radius: 6px;
 }
 
@@ -388,7 +388,7 @@
   background: var(--primary-main);
   color: var(--background-card);
   border: none;
-  padding: 6px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -405,7 +405,7 @@
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border-light);
-  padding: 4px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -415,7 +415,7 @@
 .loader-small {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-radius: 50%;
   border-top-color: var(--background-card);
   animation: spin 0.8s linear infinite;
@@ -435,7 +435,7 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-sm);
 }
 
 .item-meta {
@@ -472,7 +472,7 @@
   background: var(--background-card);
   border: 1.5px solid var(--border-light);
   color: var(--text-secondary);
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
@@ -487,16 +487,23 @@
 }
 
 .animate-fade {
-  animation: fadeIn 0.3s ease-out;
+  animation: fade-in 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .no-results {
-  padding: 40px;
+  padding: var(--spacing-xxxl);
   text-align: center;
   color: var(--text-muted);
   font-style: italic;
@@ -506,7 +513,7 @@
 .toggle-group {
   flex-direction: row;
   align-items: center;
-  padding: 12px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--background-page);
   border-radius: 10px;
   border: 1.5px dashed var(--border-medium);
@@ -559,7 +566,7 @@
 
 .serials-container {
   margin-top: 16px;
-  padding: 24px;
+  padding: var(--spacing-xl);
   background: var(--success-light);
   border: 1.5px solid var(--success-light);
   border-radius: 16px;
@@ -582,7 +589,7 @@
 }
 
 .serial-index {
-  padding: 8px 10px;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--background-hover);
   font-size: 10px;
   font-weight: 700;
@@ -594,7 +601,7 @@
 
 .form-input.mini {
   border: none;
-  padding: 8px 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
   font-size: 13px;
   background: transparent;
 }
@@ -641,13 +648,13 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: fadeIn 0.2s ease-out;
+  animation: fade-in 0.2s ease-out;
 }
 
 .modal-content {
@@ -655,13 +662,13 @@
   width: 90%;
   max-width: 600px;
   border-radius: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 10px 10px -5px rgb(0 0 0 / 4%);
   overflow: hidden;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {
-  padding: 24px 32px;
+  padding: var(--spacing-xl) var(--spacing-xxl);
   border-bottom: 1px solid var(--background-hover);
   display: flex;
   justify-content: space-between;
@@ -669,11 +676,11 @@
 }
 
 .modal-body {
-  padding: 32px;
+  padding: var(--spacing-xxl);
 }
 
 .modal-footer {
-  padding: 20px 32px;
+  padding: var(--spacing-xl) var(--spacing-xxl);
   border-top: 1px solid var(--background-hover);
   display: flex;
   justify-content: flex-end;
@@ -700,20 +707,27 @@
   transform: rotate(90deg);
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* GRN Detail Modal Specific Styles */
 .detail-view {
-  padding: 8px 0;
+  padding: var(--spacing-sm) 0;
 }
 
 .invoice-badge {
   background: var(--background-hover);
   color: var(--text-secondary);
-  padding: 4px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
@@ -725,7 +739,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   background: var(--background-page);
-  padding: 24px;
+  padding: var(--spacing-xl);
   border-radius: 16px;
   border: 1px solid var(--border-light);
 }
@@ -752,7 +766,7 @@
 
 .status-val {
   display: inline-block;
-  padding: 4px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 12px;
   width: fit-content;
@@ -775,7 +789,7 @@
 
 .detail-meta-footer {
   margin-top: 24px;
-  padding: 20px;
+  padding: var(--spacing-xl);
   border-top: 1px solid var(--background-hover);
   display: flex;
   justify-content: space-between;

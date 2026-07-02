@@ -2,11 +2,13 @@
     "extends": "stylelint-config-standard",
     "rules": {
         "color-no-hex": true,
+        "no-descending-specificity": null,
         "declaration-property-value-allowed-list": {
             "margin": [
                 "/var\\(/",
                 "0",
-                "auto"
+                "auto",
+                "0 auto"
             ],
             "padding": [
                 "/var\\(/",

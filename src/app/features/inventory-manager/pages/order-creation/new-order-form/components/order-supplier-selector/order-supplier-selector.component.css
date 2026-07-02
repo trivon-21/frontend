@@ -7,15 +7,15 @@
   max-height: 320px;
   overflow-y: auto;
   z-index: 2000; /* Ensure it stays above everything */
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--background-card);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 15%);
 }
 
 .dropdown-item {
-  padding: 12px 16px;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
@@ -43,12 +43,19 @@
 
 /* Animations */
 .animate-fade {
-  animation: fadeIn 0.3s ease-out;
+  animation: fade-in 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Inline Editing in Table */
@@ -57,14 +64,14 @@
 }
 
 /* Hide number spinners for monetary/numeric inputs */
-input[type=number].no-spinner::-webkit-outer-spin-button,
-input[type=number].no-spinner::-webkit-inner-spin-button {
-  -webkit-appearance: none;
+input[type="number"].no-spinner::-webkit-outer-spin-button,
+input[type="number"].no-spinner::-webkit-inner-spin-button {
+  appearance: none;
   margin: 0;
 }
 
-input[type=number].no-spinner {
-  -moz-appearance: textfield;
+input[type="number"].no-spinner {
+  appearance: textfield;
 }
 
 .selected-row {
@@ -95,7 +102,7 @@ input[type=number].no-spinner {
 
 .inline-price-input {
   width: 90px;
-  padding: 6px 10px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--primary-main);
   border-radius: 8px;
   font-size: 13px;
@@ -107,7 +114,7 @@ input[type=number].no-spinner {
 
 .edit-icon {
   margin-left: 8px;
-  color: #cbd5e1;
+  color: var(--border-medium);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -123,12 +130,19 @@ input[type=number].no-spinner {
   align-items: center;
   gap: 12px;
   justify-content: center;
-  animation: slideInRight 0.2s ease-out;
+  animation: slide-in-right 0.2s ease-out;
 }
 
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(10px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .qty-input-wrap {
@@ -136,7 +150,7 @@ input[type=number].no-spinner {
   align-items: center;
   gap: 6px;
   background: var(--background-page);
-  padding: 4px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: 8px;
 }
 
@@ -165,7 +179,7 @@ input[type=number].no-spinner {
 
 .empty-table-row {
   text-align: center;
-  padding: 40px !important;
+  padding: var(--spacing-xxxl) !important;
   color: var(--text-muted);
   font-style: italic;
 }
@@ -180,7 +194,7 @@ input[type=number].no-spinner {
   align-items: center;
   gap: 12px;
   margin-top: 12px;
-  padding: 12px;
+  padding: var(--spacing-md);
   background: var(--primary-lighter);
   border-radius: 12px;
   border: 1px solid var(--primary-light);
@@ -188,10 +202,10 @@ input[type=number].no-spinner {
 
 .btn-confirm-mini.wide {
   width: auto;
-  padding: 0 16px;
+  padding: 0 var(--spacing-lg);
 }
 
 .btn-cancel-mini.wide {
   width: auto;
-  padding: 0 16px;
+  padding: 0 var(--spacing-lg);
 }

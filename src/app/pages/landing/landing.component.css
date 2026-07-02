@@ -8,7 +8,7 @@
 .hero-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 18px;
+  padding: 0 var(--spacing-lg);
 }
 
 /* ---------- HERO (Figma style) ---------- */
@@ -26,11 +26,11 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(12, 26, 20, 0.92) 0%,
-    rgba(12, 26, 20, 0.78) 35%,
-    rgba(12, 26, 20, 0.35) 60%,
-    rgba(12, 26, 20, 0.10) 80%,
-    rgba(12, 26, 20, 0) 100%
+    rgb(12 26 20 / 92%) 0%,
+    rgb(12 26 20 / 78%) 35%,
+    rgb(12 26 20 / 35%) 60%,
+    rgb(12 26 20 / 10%) 80%,
+    rgb(12 26 20 / 0%) 100%
   );
   pointer-events: none;
 }
@@ -54,14 +54,14 @@
   font-size: clamp(40px, 4.2vw, 74px);
   line-height: 1.05;
   letter-spacing: -0.5px;
-  margin: 0 0 18px 0;
+  margin: 0 0 var(--spacing-lg);
 }
 
 .hero-sub {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--text-inverse);
   font-size: 16px;
   line-height: 1.55;
-  margin: 0 0 22px 0;
+  margin: 0 0 var(--spacing-xl);
 }
 
 .hero-btns {
@@ -75,7 +75,7 @@
   border: none;
   cursor: pointer;
   border-radius: 10px;
-  padding: 12px 26px;
+  padding: var(--spacing-md) var(--spacing-xl);
   font-weight: 700;
   font-size: 14px;
   transition: transform 0.08s ease, background 0.18s ease, border-color 0.18s ease;
@@ -88,17 +88,17 @@
 .btn-primary {
   background: var(--success-light);
   color: var(--text-primary);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 18px rgb(0 0 0 / 18%);
 }
 
 .btn-outline {
   background: transparent;
   color: var(--success-light);
-  border: 2px solid rgba(231, 246, 232, 0.55);
+  border: 2px solid rgb(231 246 232 / 55%);
 }
 
 .btn-outline:hover {
-  background: rgba(231, 246, 232, 0.10);
+  background: rgb(231 246 232 / 10%);
 }
 
 .hero-inquiry {
@@ -108,7 +108,7 @@
 }
 
 .inquiry-label {
-  color: rgba(255, 255, 255, 0.70);
+  color: var(--text-inverse);
   font-size: 14px;
   margin: 0;
 }
@@ -119,14 +119,14 @@
 
 /* ---------- SECTIONS (spacing like Figma) ---------- */
 .section {
-  padding: 88px 0 92px;
+  padding: calc(var(--spacing-xxxl) * 2) 0 calc(var(--spacing-huge) * 2);
 }
 
 .services-section {
   /* subtle grey/green wash */
   background:
-    radial-gradient(1000px 520px at 15% 30%, rgba(168, 190, 176, 0.25), transparent 60%),
-    radial-gradient(900px 520px at 85% 70%, rgba(168, 190, 176, 0.18), transparent 55%),
+    radial-gradient(1000px 520px at 15% 30%, rgb(168 190 176 / 25%), transparent 60%),
+    radial-gradient(900px 520px at 85% 70%, rgb(168 190 176 / 18%), transparent 55%),
     #eef0ee;
 }
 
@@ -142,7 +142,7 @@
   text-align: center;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 50px 0;
+  margin: 0 0 var(--spacing-huge);
   font-size: clamp(34px, 3.8vw, 54px);
   letter-spacing: -0.4px;
 }
@@ -191,9 +191,9 @@
 
 /* Services card: green border + clean layout */
 .service-card {
-  border: 1.6px solid rgba(27, 82, 52, 0.45);
-  box-shadow: 0 18px 24px rgba(0, 0, 0, 0.10);
-  padding: 26px 24px 22px;
+  border: 1.6px solid rgb(27 82 52 / 45%);
+  box-shadow: 0 18px 24px rgb(0 0 0 / 10%);
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,7 +213,7 @@
   color: var(--text-muted);
   line-height: 1.8;
   font-size: 15px;
-  margin: 0 0 22px 0;
+  margin: 0 0 var(--spacing-xl);
 }
 
 .card-link {
@@ -236,9 +236,9 @@
 
 /* Tracking card: big padding + soft shadow like Figma */
 .tracking-card {
-  border: 1px solid rgba(10, 20, 18, 0.08);
-  box-shadow: 0 18px 26px rgba(0, 0, 0, 0.16);
-  padding: 34px 34px 30px;
+  border: 1px solid rgb(10 20 18 / 8%);
+  box-shadow: 0 18px 26px rgb(0 0 0 / 16%);
+  padding: var(--spacing-xxl) var(--spacing-xxl) var(--spacing-xxl);
   min-height: 420px;
 }
 
@@ -260,8 +260,8 @@
 
 /* Review cards */
 .review-card {
-  border: 1px solid rgba(10, 20, 18, 0.10);
-  padding: 28px 28px 24px;
+  border: 1px solid rgb(10 20 18 / 10%);
+  padding: var(--spacing-xxl) var(--spacing-xxl) var(--spacing-xl);
   min-height: 360px;
 }
 
@@ -277,7 +277,7 @@
   font-size: 22px;
   line-height: 1.8;
   color: var(--text-secondary);
-  margin: 0 0 26px 0;
+  margin: 0 0 var(--spacing-xl);
 }
 
 .reviewer {
@@ -295,7 +295,7 @@
   place-items: center;
   color: var(--background-card);
   font-weight: 800;
-  background: radial-gradient(circle at 30% 30%, #00c2d1 0%, #00354a 70%);
+  background: radial-gradient(circle at 30% 30%, var(--info) 0%, #00354a 70%);
 }
 
 .reviewer-name {
@@ -370,7 +370,7 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1000px) {
+@media (width <= 1000px) {
   .four-col {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -380,7 +380,7 @@
   }
 }
 
-@media (max-width: 680px) {
+@media (width <= 680px) {
   .four-col,
   .three-col {
     grid-template-columns: 1fr;

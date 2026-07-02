@@ -1,5 +1,5 @@
 .new-order-container {
-  padding: 32px;
+  padding: var(--spacing-xxl);
   max-width: 1800px;
   margin: 0 auto;
   min-height: 100vh;
@@ -51,7 +51,7 @@
 .subtitle {
   color: var(--text-secondary);
   font-size: 14px;
-  margin: 4px 0 0;
+  margin: var(--spacing-xs) 0 0;
 }
 
 .draft-badge {
@@ -59,7 +59,7 @@
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
-  padding: 6px 14px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 99px;
   letter-spacing: 0.8px;
 }
@@ -67,9 +67,9 @@
 /* Panels */
 .white-panel {
   background: var(--background-card);
-  border: 1px solid #eef2f6;
+  border: 1px solid var(--background-hover);
   border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 3%);
 }
 
 /* Split Layout */
@@ -81,7 +81,7 @@
 
 .layout-left {
   flex: 2;
-  padding: 48px;
+  padding: var(--spacing-huge);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -144,7 +144,7 @@
 
 .form-select, .form-input, .form-textarea {
   width: 100%;
-  padding: 14px 18px;
+  padding: var(--spacing-lg) var(--spacing-lg);
   border: 1px solid var(--border-light);
   border-radius: 14px;
   font-size: 15px;
@@ -214,15 +214,15 @@
 }
 
 .btn-clear-selection:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 /* Quick Config */
 .quick-config {
   margin-top: 24px;
   background: var(--background-page);
-  padding: 24px;
+  padding: var(--spacing-xl);
   border-radius: 18px;
   border: 1px solid var(--background-hover);
 }
@@ -250,8 +250,8 @@
 
 .qty-field {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #e2e8f0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   text-align: center;
   font-weight: 600;
@@ -264,15 +264,15 @@
   align-items: center;
   gap: 8px;
   background: var(--background-card);
-  padding: 0 16px;
-  border: 1px solid #e2e8f0;
+  padding: 0 var(--spacing-lg);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
 .price-input-wrapper .price-input {
   border: none;
   background: transparent;
-  padding: 12px 0;
+  padding: var(--spacing-md) 0;
   text-align: right;
   width: 100%;
 }
@@ -282,7 +282,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 20px;
-  border-top: 1px solid #eef2f6;
+  border-top: 1px solid var(--background-hover);
 }
 
 .field-value.total {
@@ -318,7 +318,7 @@
 }
 
 .btn-discard:hover {
-  color: #ef4444;
+  color: var(--error);
 }
 
 

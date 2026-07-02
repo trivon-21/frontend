@@ -12,18 +12,25 @@
   background: var(--error-light);
   border: 1px solid var(--error-light);
   border-radius: 12px;
-  padding: 16px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   display: flex;
   align-items: center;
   gap: 16px;
   color: var(--error);
   margin-bottom: -8px; /* Reduce gap to header */
-  animation: slideDown 0.3s ease-out;
+  animation: slide-down 0.3s ease-out;
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .offline-banner svg {
@@ -53,9 +60,20 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.2); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .welcome-banner {
@@ -85,7 +103,7 @@
   gap: 8px;
   background: var(--primary-lighter);
   color: var(--primary-main);
-  padding: 4px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
@@ -135,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+  padding: var(--spacing-md) var(--spacing-xl);
   background: var(--primary-main);
   color: var(--background-card);
   border: none;
@@ -144,7 +162,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
   margin-top: 8px;
   white-space: nowrap;
 }
@@ -152,7 +170,7 @@
 .btn-new-order:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px -2px rgb(0 0 0 / 15%);
 }
 
 /* ── Summary Grid ── */
@@ -165,7 +183,7 @@
 .summary-card {
   background: var(--background-card);
   border-radius: 20px;
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -188,7 +206,7 @@
 
 .summary-card.clickable:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 20px -5px rgb(0 0 0 / 10%);
   border-color: var(--primary-light);
 }
 
@@ -281,7 +299,7 @@
 .kpi-mini-card {
   background: var(--background-card);
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -355,7 +373,7 @@
   font-weight: 600;
   color: var(--text-muted);
   background: var(--background-page);
-  padding: 4px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   white-space: nowrap;
 }
@@ -387,7 +405,7 @@
 }
 
 .card-header {
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -417,7 +435,7 @@
 .count-badge {
   background: var(--primary-lighter);
   color: var(--primary-main);
-  padding: 4px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 10px;
   font-size: 12px;
   font-weight: 700;
@@ -425,7 +443,7 @@
 
 /* ── Activity Timeline ── */
 .timeline-container {
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -471,12 +489,35 @@
   transition: all 0.2s;
 }
 
-.timeline-marker.ticket { color: var(--info); background: var(--info-light); }
-.timeline-marker.vehicle { color: var(--success); background: var(--success-light); }
-.timeline-marker.order { color: var(--primary-main); background: var(--primary-lighter); }
-.timeline-marker.customer { color: var(--warning); background: var(--warning-light); }
-.timeline-marker.alert { color: var(--error); background: var(--error-light); }
-.timeline-marker.escalation { color: var(--error); background: var(--error-light); }
+.timeline-marker.ticket {
+  color: var(--info);
+  background: var(--info-light);
+}
+
+.timeline-marker.vehicle {
+  color: var(--success);
+  background: var(--success-light);
+}
+
+.timeline-marker.order {
+  color: var(--primary-main);
+  background: var(--primary-lighter);
+}
+
+.timeline-marker.customer {
+  color: var(--warning);
+  background: var(--warning-light);
+}
+
+.timeline-marker.alert {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+.timeline-marker.escalation {
+  color: var(--error);
+  background: var(--error-light);
+}
 
 .timeline-content {
   flex: 1;
@@ -514,7 +555,7 @@
 }
 
 .activity-btn {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--background-card);
   border: 1px solid var(--border-light);
   border-radius: 8px;
@@ -534,7 +575,7 @@
 
 /* ── Actions List ── */
 .actions-list {
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -546,7 +587,7 @@
   background: var(--background-page);
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  padding: 16px;
+  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -567,7 +608,7 @@
 .priority-badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: 4px;
   text-transform: uppercase;
 }
@@ -615,7 +656,7 @@
 }
 
 .action-btn-primary {
-  padding: 6px 14px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--primary-main);
   color: var(--background-card);
   border: none;
@@ -635,7 +676,7 @@
 
 .empty-state {
   text-align: center;
-  padding: 40px var(--spacing-xl);
+  padding: var(--spacing-xxxl) var(--spacing-xl);
   color: var(--text-muted);
   font-size: 14px;
   font-weight: 500;

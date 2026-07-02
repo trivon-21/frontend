@@ -1,5 +1,5 @@
 .rma-container {
-  padding: 32px 32px 80px;
+  padding: var(--spacing-xxl) var(--spacing-xxl) calc(var(--spacing-xxxl) * 2);
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -12,15 +12,15 @@
   top: 100px;
   right: 32px;
   z-index: 1000;
-  padding: 14px 20px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-radius: var(--border-radius-md, 10px);
   font-size: 13px;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 10px;
-  animation: slideInRight 0.3s ease;
-  box-shadow: var(--shadow-large, 0 8px 24px rgba(0,0,0,0.12));
+  animation: slide-in-right 0.3s ease;
+  box-shadow: var(--shadow-large, 0 8px 24px rgb(0 0 0 / 12%));
   max-width: 420px;
 }
 
@@ -36,9 +36,16 @@
   border: 1px solid var(--error);
 }
 
-@keyframes slideInRight {
-  from { transform: translateX(100px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* ── Header ── */
@@ -60,7 +67,7 @@
   align-items: center;
   gap: 12px;
   background: var(--background-card, var(--background-card));
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 99px;
   border: 1px solid var(--border-light);
   width: 400px;
@@ -86,7 +93,7 @@
   background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-lg, 16px);
-  padding: 20px 24px;
+  padding: var(--spacing-xl) var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -94,7 +101,7 @@
 }
 
 .stat-card:hover {
-  box-shadow: var(--shadow-medium, 0 4px 16px rgba(0,0,0,0.08));
+  box-shadow: var(--shadow-medium, 0 4px 16px rgb(0 0 0 / 8%));
   transform: translateY(-2px);
 }
 
@@ -181,7 +188,7 @@
 
 /* ── Card Panel / Glass ── */
 .card-panel {
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -191,7 +198,7 @@
   background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-lg, 16px);
-  box-shadow: var(--shadow-light, 0 1px 4px rgba(0,0,0,0.04));
+  box-shadow: var(--shadow-light, 0 1px 4px rgb(0 0 0 / 4%));
 }
 
 .panel-header {
@@ -240,7 +247,7 @@
 
 .form-input {
   width: 100%;
-  padding: 11px 14px;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--border-radius-md, 10px);
   border: 1px solid var(--border-light);
   background: var(--background-page);
@@ -253,7 +260,7 @@
 
 .form-input:focus {
   border-color: var(--primary-main);
-  box-shadow: 0 0 0 3px var(--primary-lighter, rgba(59,130,246,0.15));
+  box-shadow: 0 0 0 3px var(--primary-lighter, rgb(59 130 246 / 15%));
 }
 
 select.form-input {
@@ -284,7 +291,7 @@ select.form-input {
   background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md, 10px);
-  box-shadow: var(--shadow-medium, 0 4px 16px rgba(0,0,0,0.1));
+  box-shadow: var(--shadow-medium, 0 4px 16px rgb(0 0 0 / 10%));
   z-index: 100;
   margin-top: 4px;
   max-height: 240px;
@@ -292,7 +299,7 @@ select.form-input {
 }
 
 .autocomplete-item {
-  padding: 10px 14px;
+  padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -318,7 +325,7 @@ select.form-input {
 
 /* ── Buttons ── */
 .btn-primary {
-  padding: 12px 20px;
+  padding: var(--spacing-md) var(--spacing-xl);
   border: none;
   border-radius: var(--border-radius-md, 10px);
   background: var(--primary-main);
@@ -343,7 +350,7 @@ select.form-input {
 }
 
 .btn-secondary {
-  padding: 10px 20px;
+  padding: var(--spacing-md) var(--spacing-xl);
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md, 10px);
   background: var(--background-card, var(--background-card));
@@ -359,7 +366,7 @@ select.form-input {
 }
 
 .btn-danger {
-  padding: 7px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: none;
   border-radius: var(--border-radius-sm, 8px);
   background: var(--error);
@@ -375,7 +382,7 @@ select.form-input {
 }
 
 .btn-danger-sm {
-  padding: 5px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border: none;
   border-radius: var(--border-radius-sm, 6px);
   background: var(--error);
@@ -386,7 +393,7 @@ select.form-input {
 }
 
 .btn-cancel-sm {
-  padding: 5px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-sm, 6px);
   background: var(--background-card, var(--background-card));
@@ -398,7 +405,7 @@ select.form-input {
 
 .btn-new-rma {
   margin-left: auto;
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: 1px solid var(--primary-main);
   border-radius: var(--border-radius-md, 10px);
   background: transparent;
@@ -418,7 +425,7 @@ select.form-input {
 }
 
 .btn-advance {
-  padding: 5px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-sm, 6px);
   background: var(--background-card, var(--background-card));
@@ -449,7 +456,7 @@ select.form-input {
 .note-box {
   background: var(--info-light);
   border-radius: var(--border-radius-md, 10px);
-  padding: 14px 16px;
+  padding: var(--spacing-lg) var(--spacing-lg);
   font-size: 13px;
   color: var(--info);
   line-height: 1.5;
@@ -462,14 +469,14 @@ select.form-input {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
-  margin: 0 0 12px;
+  margin: 0 0 var(--spacing-md);
 }
 
 .return-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: var(--spacing-md) 0;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -493,7 +500,7 @@ select.form-input {
 }
 
 .condition-badge {
-  padding: 3px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
@@ -526,14 +533,25 @@ select.form-input {
   gap: 3px;
 }
 
-.serial { font-weight: 600; color: var(--text-primary); }
+.serial {
+  font-weight: 600;
+  color: var(--text-primary);
+}
 .fault { color: var(--text-secondary); }
-.by { font-size: 11px; color: var(--text-muted); }
-.date { white-space: nowrap; color: var(--text-secondary); }
+
+.by {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.date {
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
 
 /* ── RMA Status Badges ── */
 .rma-status-badge {
-  padding: 4px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
@@ -586,7 +604,7 @@ select.form-input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: var(--spacing-huge) var(--spacing-xl);
   gap: 12px;
 }
 
@@ -610,7 +628,7 @@ select.form-input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px;
+  padding: var(--spacing-xxl);
   gap: 8px;
   background: var(--background-card, var(--background-card));
 }
@@ -634,7 +652,7 @@ select.form-input {
 }
 
 .quarantine-header {
-  padding: 18px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   background: var(--error-light);
   display: flex;
   justify-content: space-between;
@@ -654,7 +672,10 @@ select.form-input {
   margin: 0;
 }
 
-.quarantine-header .subtitle { color: var(--error); opacity: 0.8; }
+.quarantine-header .subtitle {
+  color: var(--error);
+  opacity: 0.8;
+}
 
 .items-badge {
   font-size: 12px;
@@ -674,7 +695,7 @@ select.form-input {
 
 .quarantine-table th {
   text-align: left;
-  padding: 14px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   font-size: 11px;
   font-weight: 700;
   color: var(--error);
@@ -683,7 +704,7 @@ select.form-input {
 }
 
 .quarantine-table td {
-  padding: 16px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
   color: var(--text-secondary);
@@ -692,20 +713,17 @@ select.form-input {
 /* ── Modal ── */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
+  inset: 0;
+  background: rgb(0 0 0 / 45%);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fade-in 0.2s ease;
 }
 
-@keyframes fadeIn {
+@keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
@@ -715,20 +733,27 @@ select.form-input {
   border-radius: var(--border-radius-lg, 16px);
   width: 100%;
   max-width: 520px;
-  box-shadow: var(--shadow-xl, 0 20px 60px rgba(0,0,0,0.2));
-  animation: slideUp 0.25s ease;
+  box-shadow: var(--shadow-xl, 0 20px 60px rgb(0 0 0 / 20%));
+  animation: slide-up 0.25s ease;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: var(--spacing-xl) var(--spacing-xl);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -744,7 +769,7 @@ select.form-input {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: var(--spacing-xs);
   border-radius: var(--border-radius-sm, 6px);
   transition: background 0.2s ease;
 }
@@ -754,7 +779,7 @@ select.form-input {
 }
 
 .modal-body {
-  padding: 24px;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -764,6 +789,6 @@ select.form-input {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 24px;
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-top: 1px solid var(--border-light);
 }

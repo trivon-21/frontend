@@ -1,5 +1,5 @@
 .activity-log-container {
-  padding: 40px;
+  padding: var(--spacing-xxxl);
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -58,7 +58,7 @@
   border-radius: 24px;
   padding: 0;
   border: 1px solid var(--border-light);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 5%), 0 8px 10px -6px rgb(0 0 0 / 5%);
   min-height: 500px;
   overflow: hidden;
 }
@@ -75,13 +75,13 @@
 }
 
 .activity-table th {
-  padding: 24px 32px;
+  padding: var(--spacing-xl) var(--spacing-xxl);
   font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #fafafa;
+  background: var(--background-page);
   border-bottom: 1px solid var(--background-hover);
 }
 
@@ -90,7 +90,7 @@
 .activity-table th:nth-child(3) { width: 25%; }
 
 .activity-table td {
-  padding: 24px 32px;
+  padding: var(--spacing-xl) var(--spacing-xxl);
   font-size: 15px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--background-hover);
@@ -152,7 +152,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px;
+  padding: calc(var(--spacing-xxxl) * 2);
   gap: 16px;
   color: var(--text-muted);
 }
@@ -171,10 +171,17 @@
 }
 
 .animate-fade {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fade-in 0.4s ease-out forwards;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

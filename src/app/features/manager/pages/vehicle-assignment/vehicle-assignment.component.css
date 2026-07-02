@@ -2,22 +2,25 @@
 .assignment-layout {
   display: flex;
   gap: 32px;
-  padding: 32px;
+  padding: var(--spacing-xxl);
   min-height: calc(100vh - 80px);
 }
+
 .glass-panel {
   background: var(--background-paper);
   border-radius: 24px;
-  padding: 24px;
+  padding: var(--spacing-xl);
   box-shadow: var(--shadow-minimal);
   border: 1px solid var(--border-light);
 }
+
 .sidebar-queue {
   width: 360px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
 }
+
 .main-content {
   flex: 1;
   display: flex;
@@ -25,6 +28,7 @@
   gap: 32px;
   min-width: 0;
 }
+
 .header-section h1 {
   font-size: 28px;
   font-weight: 800;
@@ -32,34 +36,40 @@
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 }
+
 .header-section p {
   font-size: 15px;
   color: var(--text-secondary);
 }
+
 .map-section {
   flex: 1;
   min-height: 400px;
-  padding: 16px;
+  padding: var(--spacing-lg);
 }
+
 .roster-section {
   flex: 1;
 }
+
 .section-title {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
 }
+
 .section-title h2 {
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
 }
+
 .badge {
   background: var(--background-page);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 99px;
 }

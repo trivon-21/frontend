@@ -5,14 +5,14 @@
 }
 
 .right-header {
-  padding: 32px;
+  padding: var(--spacing-xxl);
   border-bottom: 1px solid var(--background-hover);
 }
 
 .right-header h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -27,7 +27,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 40px;
+  padding: calc(var(--spacing-xxxl) * 2) var(--spacing-xxxl);
   text-align: center;
 }
 
@@ -49,7 +49,7 @@
 }
 
 .line-items-container {
-  padding: 24px;
+  padding: var(--spacing-xl);
 }
 
 .line-items-table {
@@ -68,7 +68,7 @@
 }
 
 .line-items-table td {
-  padding: 16px 0;
+  padding: var(--spacing-lg) 0;
   border-bottom: 1px solid var(--background-page);
 }
 
@@ -96,7 +96,7 @@
   align-items: center;
   background: var(--background-page);
   border-radius: 8px;
-  padding: 2px;
+  padding: var(--spacing-xs);
 }
 
 .qty-editor button {
@@ -124,28 +124,28 @@
 
 .total-val {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .btn-delete-row {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--border-medium);
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .btn-delete-row:hover {
-  color: #ef4444;
+  color: var(--error);
 }
 
 
 /* Summary Footer */
 .summary-footer {
-  padding: 32px;
+  padding: var(--spacing-xxl);
   border-top: 1px solid var(--background-hover);
-  background: #fafbfc;
+  background: var(--background-page);
 }
 
 .summary-row {
@@ -161,20 +161,20 @@
 }
 
 .summary-row .value {
-  color: #0f172a;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .summary-row.grand-total {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 2px solid #eef2f6;
+  border-top: 2px solid var(--background-hover);
 }
 
 .summary-row.grand-total .label {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .summary-row.grand-total .value {

@@ -12,7 +12,7 @@
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(rgba(0,0,0,0.40), rgba(0,0,0,0.40)),
+    linear-gradient(rgb(0 0 0 / 40%), rgb(0 0 0 / 40%)),
     url("/assets/Background.png") center/cover no-repeat;
   filter: saturate(0.95);
 }
@@ -24,7 +24,7 @@
   flex: 1;
   display: grid;
   place-items: center;
-  padding: 48px 16px 60px;
+  padding: var(--spacing-huge) var(--spacing-lg) calc(var(--spacing-xxl) * 2);
 }
 
 .card {
@@ -32,8 +32,8 @@
   min-height: 520px;
   border-radius: 18px;
   background: var(--background-card);
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  border: 1px solid rgb(255 255 255 / 35%);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   overflow: hidden;
@@ -42,28 +42,31 @@
 .card-left {
   display: grid;
   place-items: center;
-  padding: 28px;
+  padding: var(--spacing-xxl);
 }
+
 .illus {
   width: min(420px, 95%);
   height: auto;
 }
 
 .card-right {
-  padding: 42px 44px;
+  padding: var(--spacing-xxxl) var(--spacing-huge);
 }
 
 h1 {
-  margin: 0 0 6px;
+  margin: 0 0 var(--spacing-sm);
   font-size: 34px;
   letter-spacing: 0.2px;
   text-align: left;
 }
+
 .sub {
-  margin: 0 0 26px;
+  margin: 0 0 var(--spacing-xl);
   text-align: left;
   color: var(--text-muted);
 }
+
 .link {
   color: var(--primary-main);
   text-decoration: underline;
@@ -74,32 +77,36 @@ h1 {
 .form { margin-top: 6px; }
 
 .row { margin-bottom: 14px; }
+
 .row.two {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
+
 .field label {
   display: block;
   color: var(--text-secondary);
   font-size: 13px;
   margin-bottom: 6px;
 }
+
 .field input {
   width: 100%;
-  padding: 12px 12px;
+  padding: var(--spacing-md);
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgb(0 0 0 / 12%);
   outline: none;
   background: var(--background-card);
 }
+
 .field input:focus {
-  border-color: rgba(31, 91, 69, 0.55);
-  box-shadow: 0 0 0 4px rgba(31, 91, 69, 0.10);
+  border-color: rgb(31 91 69 / 55%);
+  box-shadow: 0 0 0 4px rgb(31 91 69 / 10%);
 }
 
 .hint {
-  margin: 10px 0 12px;
+  margin: var(--spacing-md) 0 var(--spacing-md);
   color: var(--text-muted);
   font-size: 13px;
 }
@@ -120,16 +127,18 @@ h1 {
   align-items: center;
   justify-content: space-between;
 }
+
 .btn {
-  border: 1px solid rgba(0,0,0,0.10);
+  border: 1px solid rgb(0 0 0 / 10%);
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: var(--spacing-md) var(--spacing-lg);
   cursor: pointer;
   font-weight: 600;
   background: transparent;
 }
+
 .btn.big {
-  padding: 12px 20px;
+  padding: var(--spacing-md) var(--spacing-xl);
   border-radius: 999px;
   background: var(--primary-main);
   color: var(--background-card);
@@ -150,19 +159,22 @@ h1 {
 .input-wrap {
   position: relative;
 }
+
 .input-wrap input {
   width: 100%;
-  padding: 12px 40px 12px 12px;
+  padding: var(--spacing-md) var(--spacing-xxxl) var(--spacing-md) var(--spacing-md);
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgb(0 0 0 / 12%);
   outline: none;
   background: var(--background-card);
   box-sizing: border-box;
 }
+
 .input-wrap input:focus {
-  border-color: rgba(31, 91, 69, 0.55);
-  box-shadow: 0 0 0 4px rgba(31, 91, 69, 0.10);
+  border-color: rgb(31 91 69 / 55%);
+  box-shadow: 0 0 0 4px rgb(31 91 69 / 10%);
 }
+
 .eye-btn {
   position: absolute;
   right: 10px;
@@ -172,7 +184,7 @@ h1 {
   border: none;
   cursor: pointer;
   color: var(--text-muted);
-  padding: 4px;
+  padding: var(--spacing-xs);
   display: flex;
   align-items: center;
 }
@@ -189,8 +201,8 @@ h1 {
 /* ── Password strength rules ── */
 .pw-rules {
   list-style: none;
-  margin: 10px 0 14px;
-  padding: 12px 14px;
+  margin: var(--spacing-md) 0 var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--background-hover);
   border: 1px solid var(--border-light);
   border-radius: 10px;
@@ -198,6 +210,7 @@ h1 {
   grid-template-columns: 1fr 1fr;
   gap: 6px 16px;
 }
+
 .pw-rules li {
   font-size: 12.5px;
   color: var(--text-muted);
@@ -235,13 +248,13 @@ h1 {
 
 .otp-title {
   font-size: 28px;
-  margin: 0 0 10px;
+  margin: 0 0 var(--spacing-md);
 }
 
 .otp-sub {
   color: var(--text-muted);
   font-size: 14px;
-  margin: 0 0 24px;
+  margin: 0 0 var(--spacing-xl);
   line-height: 1.6;
 }
 
@@ -252,9 +265,9 @@ h1 {
 
 .otp-input {
   width: 100%;
-  padding: 14px 16px;
+  padding: var(--spacing-lg) var(--spacing-lg);
   border-radius: 12px;
-  border: 1.5px solid rgba(0,0,0,0.15);
+  border: 1.5px solid rgb(0 0 0 / 15%);
   outline: none;
   font-size: 26px;
   letter-spacing: 10px;
@@ -268,7 +281,7 @@ h1 {
 
 .otp-input:focus {
   border-color: var(--primary-main);
-  box-shadow: 0 0 0 4px rgba(31, 91, 69, 0.10);
+  box-shadow: 0 0 0 4px rgb(31 91 69 / 10%);
 }
 
 .otp-input::placeholder {
@@ -337,13 +350,14 @@ h1 {
 }
 
 /* Responsive */
-@media (max-width: 980px) {
+@media (width <= 980px) {
   .card { grid-template-columns: 1fr; }
-  .card-left { padding: 18px; }
-  .card-right { padding: 30px 22px; }
+  .card-left { padding: var(--spacing-lg); }
+  .card-right { padding: var(--spacing-xxl) var(--spacing-xl); }
   h1 { font-size: 30px; }
 }
-@media (max-width: 560px) {
+
+@media (width <= 560px) {
   .row.two { grid-template-columns: 1fr; }
   .actions { flex-direction: column; gap: 14px; align-items: stretch; }
   .btn.big { width: 100%; }
