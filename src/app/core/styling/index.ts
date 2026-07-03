@@ -1,60 +1,11 @@
 /**
- * Styling System - Public API
+ * Styling System — Public API
  *
- * Central export point for all styling utilities, tokens, and services
- * Usage:
- * import { ThemeProvider, colorTokens, getSpacing } from '@app/core/styling';
+ * Two things to know:
+ *   1. Edit values in `theme.tokens.ts` to re-theme the app.
+ *   2. `ThemeProvider.loadTheme()` (called once in app.ts) injects them.
+ *
+ * Components just use the CSS variables, e.g. `var(--primary-main)`.
  */
-
-// Services
-export { ThemeProvider, type ThemeName } from './theme.provider';
-export { StylesService, type CSSVariableUpdate, type VariableNamespaces } from './styles.service';
-
-// Token Objects & Utilities
-export { colorTokens, getColorTokens, type ColorPalette } from './tokens/colors.tokens';
-export {
-  typographyTokens,
-  getTypographyTokens,
-  type TypographyScale,
-} from './tokens/typography.tokens';
-export { spacingTokens, getSpacing, getBorderRadius, type Spacing } from './tokens/spacing.tokens';
-export { shadowTokens, getShadow, type Shadows } from './tokens/shadows.tokens';
-export { buttonTokens, getButtonTokens, type ButtonTokens } from './tokens/buttons.tokens';
-export { tableTokens, getTableTokens, type TableTokens } from './tokens/tables.tokens';
-
-// Themes
-export {
-  defaultTheme,
-  getDefaultTheme,
-  getThemeByName,
-  getAvailableThemes,
-  themeExists,
-  registerTheme,
-  updateTheme,
-  removeTheme,
-  createCustomTheme,
-  exportThemeAsJSON,
-  importThemeFromJSON,
-  type UnifiedTheme,
-} from './themes/default.theme';
-
-// Generators
-export {
-  generateCompleteThemeCSS,
-  generateThemeCSSFromTokens,
-  generateVariablesOnly,
-  injectThemeCSS,
-  updateCSSVariable,
-} from './generators/component-styles.generator';
-
-export {
-  generateAllCSSVariables,
-  generateColorVariables,
-  generateTypographyVariables,
-  generateSpacingVariables,
-  generateShadowVariables,
-  generateGlobalStyles,
-} from './generators/css-variables.generator';
-
-export { generateButtonStyles } from './generators/button-styles.generator';
-export { generateTableStyles } from './generators/table-styles.generator';
+export { ThemeProvider } from './theme.provider';
+export { TOKENS } from './theme.tokens';
