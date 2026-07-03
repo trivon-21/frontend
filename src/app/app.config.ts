@@ -50,7 +50,14 @@ import {
   Edit,
   Users,
   BarChart3,
-  ShoppingBag
+  ShoppingBag,
+  Download,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  CircleCheckBig,
+  Timer,
+  Smile
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -109,7 +116,14 @@ export const appConfig: ApplicationConfig = {
       Edit,
       Users,
       BarChart3,
-      ShoppingBag
+      ShoppingBag,
+      Download,
+      TrendingUp,
+      TrendingDown,
+      DollarSign,
+      CircleCheckBig,
+      Timer,
+      Smile
     }))
   ],
 };

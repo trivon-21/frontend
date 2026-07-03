@@ -1,13 +1,278 @@
-<div class="dummy-page-container">
-  <div class="glass-card">
-    <div class="icon-wrapper" style="background: #fdf4ff; color: #c026d3;">
-      <lucide-angular name="bar-chart-2" [size]="40" strokeWidth="2.5"></lucide-angular>
+<div class="analytics-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-titles">
+      <h1 class="page-title">Analytics &amp; Reports</h1>
+      <p class="page-subtitle">
+        Operational performance across service, revenue and field teams.
+      </p>
     </div>
-    <h1 class="title">Analytics & Reports</h1>
-    <p class="description">Advanced data visualizations and reporting metrics for managerial oversight.</p>
-    <button class="back-btn" routerLink="/manager">
-      <lucide-angular name="arrow-left" [size]="18"></lucide-angular>
-      Back to Dashboard
-    </button>
+
+    <div class="header-controls">
+      <span
+        class="status-chip"
+        [class.offline]="data.status === 'Offline'"
+        *ngIf="data as data"
+      >
+        <span class="dot" [class.syncing]="loading"></span>
+        {{ loading ? 'Syncing…' : data.status }}
+      </span>
+
+      <div class="period-toggle" role="tablist" aria-label="Reporting period">
+        <button
+          *ngFor="let p of periods"
+          class="period-btn"
+          [class.active]="p.key === activePeriod"
+          (click)="selectPeriod(p.key)"
+        >
+          {{ p.label }}
+        </button>
+      </div>
+
+      <button class="export-btn" (click)="exportCsv()" [disabled]="!data">
+        <lucide-angular name="download" [size]="16"></lucide-angular>
+        Export
+      </button>
+    </div>
   </div>
+
+  <!-- Loading skeleton -->
+  <div class="skeleton-grid" *ngIf="loading && !data">
+    <div class="skeleton-card" *ngFor="let s of [1, 2, 3, 4]"></div>
+  </div>
+
+  <ng-container *ngIf="data as d">
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div
+        class="kpi-card"
+        *ngFor="let kpi of [d.kpis.revenue, d.kpis.jobsCompleted, d.kpis.avgResolution, d.kpis.csat]"
+      >
+        <div class="kpi-top">
+          <span class="kpi-label">{{ kpi.label }}</span>
+          <div class="kpi-icon">
+            <lucide-angular [name]="kpi.icon" [size]="18"></lucide-angular>
+          </div>
+        </div>
+        <div class="kpi-value">{{ formatKpi(kpi.value, kpi.unit) }}</div>
+        <div class="kpi-delta" [class.positive]="kpi.positive" [class.negative]="!kpi.positive">
+          <lucide-angular
+            [name]="kpi.trend === 'up' ? 'trending-up' : 'trending-down'"
+            [size]="14"
+          ></lucide-angular>
+          <span>{{ kpi.delta > 0 ? '+' : '' }}{{ kpi.delta }}%</span>
+          <span class="kpi-delta-note">vs previous</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row: Trend (wide) + Ticket donut -->
+    <div class="chart-grid">
+      <!-- Revenue trend -->
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Revenue Trend</h2>
+            <p class="chart-sub">Revenue over the selected {{ periodLabel() | lowercase }}</p>
+          </div>
+          <div class="legend">
+            <span class="legend-item">
+              <span class="swatch" [style.background]="color(0)"></span>
+              Revenue
+            </span>
+          </div>
+        </div>
+
+        <div class="trend-wrap">
+          <svg
+            class="trend-svg"
+            [attr.viewBox]="'0 0 ' + chart.w + ' ' + chart.h"
+            (mousemove)="onTrendMove($event)"
+            (mouseleave)="onTrendLeave()"
+          >
+            <defs>
+              <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" [attr.stop-color]="color(0)" stop-opacity="0.28" />
+                <stop offset="100%" [attr.stop-color]="color(0)" stop-opacity="0.02" />
+              </linearGradient>
+            </defs>
+
+            <!-- Gridlines + y labels -->
+            <g class="grid">
+              <line
+                *ngFor="let t of yTicks"
+                [attr.x1]="chart.padX"
+                [attr.x2]="chart.w - chart.padX"
+                [attr.y1]="t.y"
+                [attr.y2]="t.y"
+              ></line>
+              <text
+                *ngFor="let t of yTicks"
+                class="axis-label"
+                [attr.x]="chart.padX - 10"
+                [attr.y]="t.y + 4"
+                text-anchor="end"
+              >
+                {{ t.label }}
+              </text>
+            </g>
+
+            <!-- Area + line -->
+            <path [attr.d]="areaPath" fill="url(#revFill)"></path>
+            <path
+              [attr.d]="linePath"
+              fill="none"
+              [attr.stroke]="color(0)"
+              stroke-width="2.5"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            ></path>
+
+            <!-- x labels -->
+            <text
+              *ngFor="let p of trendPoints"
+              class="axis-label"
+              [attr.x]="p.x"
+              [attr.y]="chart.h - 12"
+              text-anchor="middle"
+            >
+              {{ p.label }}
+            </text>
+
+            <!-- Hover crosshair + marker -->
+            <g *ngIf="hover as hp">
+              <line
+                class="crosshair"
+                [attr.x1]="hp.x"
+                [attr.x2]="hp.x"
+                [attr.y1]="chart.padTop"
+                [attr.y2]="chart.h - chart.padBottom"
+              ></line>
+              <circle
+                [attr.cx]="hp.x"
+                [attr.cy]="hp.y"
+                r="5"
+                [attr.fill]="color(0)"
+                stroke="var(--background-card, #fff)"
+                stroke-width="2"
+              ></circle>
+            </g>
+          </svg>
+
+          <!-- Tooltip -->
+          <div
+            class="trend-tooltip"
+            *ngIf="hover as hp"
+            [style.left.%]="(hp.x / chart.w) * 100"
+          >
+            <span class="tt-label">{{ hp.label }}</span>
+            <span class="tt-row">
+              <span class="tt-swatch" [style.background]="color(0)"></span>
+              Revenue <strong>{{ formatCurrency(hp.revenue) }}</strong>
+            </span>
+            <span class="tt-row muted">Jobs <strong>{{ hp.jobs }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ticket status donut -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Ticket Status</h2>
+            <p class="chart-sub">Current distribution</p>
+          </div>
+        </div>
+
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 140 140">
+            <circle class="donut-track" cx="70" cy="70" r="54" fill="none" stroke-width="16"></circle>
+            <circle
+              *ngFor="let seg of donutSegments"
+              cx="70"
+              cy="70"
+              r="54"
+              fill="none"
+              [attr.stroke]="seg.color"
+              stroke-width="16"
+              [attr.stroke-dasharray]="seg.dash"
+              [attr.stroke-dashoffset]="seg.offset"
+              transform="rotate(-90 70 70)"
+              stroke-linecap="butt"
+            ></circle>
+            <text x="70" y="66" text-anchor="middle" class="donut-total">{{ ticketTotal }}</text>
+            <text x="70" y="84" text-anchor="middle" class="donut-total-label">Tickets</text>
+          </svg>
+
+          <ul class="donut-legend">
+            <li *ngFor="let seg of donutSegments">
+              <span class="swatch" [style.background]="seg.color"></span>
+              <span class="legend-name">{{ seg.label }}</span>
+              <span class="legend-val">{{ seg.value }}</span>
+              <span class="legend-pct">{{ seg.percent }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row: Service types + Technicians -->
+    <div class="chart-grid two">
+      <!-- Service type distribution -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Service Type Distribution</h2>
+            <p class="chart-sub">Jobs by category</p>
+          </div>
+        </div>
+        <div class="bar-list">
+          <div class="bar-row" *ngFor="let s of serviceTypes">
+            <span class="bar-label">{{ s.label }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="s.pct" [style.background]="s.color"></div>
+            </div>
+            <span class="bar-value">{{ s.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technician performance -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Top Technicians</h2>
+            <p class="chart-sub">Jobs completed &amp; rating</p>
+          </div>
+        </div>
+        <div class="tech-list">
+          <div class="tech-row" *ngFor="let t of d.technicians; let i = index">
+            <span class="tech-rank">{{ i + 1 }}</span>
+            <div class="tech-body">
+              <div class="tech-top">
+                <span class="tech-name">{{ t.name }}</span>
+                <span class="tech-rating">
+                  <lucide-angular name="star" [size]="12"></lucide-angular>
+                  {{ t.rating }}
+                </span>
+              </div>
+              <div class="tech-track">
+                <div
+                  class="tech-fill"
+                  [style.width.%]="(t.jobs / maxTechJobs) * 100"
+                  [style.background]="color(1)"
+                ></div>
+              </div>
+            </div>
+            <span class="tech-jobs">{{ t.jobs }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="footnote" *ngIf="d.status === 'Offline'">
+      <lucide-angular name="info" [size]="14"></lucide-angular>
+      Showing representative data — live analytics service is offline.
+    </p>
+  </ng-container>
 </div>
