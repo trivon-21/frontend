@@ -57,7 +57,10 @@ import {
   DollarSign,
   CircleCheckBig,
   Timer,
-  Smile
+  Smile,
+  Mail,
+  Phone,
+  MapPin
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -123,7 +126,10 @@ export const appConfig: ApplicationConfig = {
       DollarSign,
       CircleCheckBig,
       Timer,
-      Smile
+      Smile,
+      Mail,
+      Phone,
+      MapPin
     }))
   ],
 };

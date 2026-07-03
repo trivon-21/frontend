@@ -1,13 +1,93 @@
-<div class="dummy-page-container">
-  <div class="glass-card">
-    <div class="icon-wrapper" style="background: #f0fdf4; color: #16a34a;">
-      <lucide-angular name="users" [size]="40" strokeWidth="2.5"></lucide-angular>
+<div class="mgr-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Customer Directory</h1>
+      <p class="page-subtitle">{{ total }} registered customer{{ total === 1 ? '' : 's' }}.</p>
     </div>
-    <h1 class="title">Customer Directory</h1>
-    <p class="description">View and manage customer profiles, service history, and contact information.</p>
-    <button class="back-btn" routerLink="/manager">
-      <lucide-angular name="arrow-left" [size]="18"></lucide-angular>
-      Back to Dashboard
-    </button>
+    <span class="status-chip" [class.offline]="status === 'Offline'">
+      <span class="dot" [class.syncing]="loading"></span>
+      {{ loading ? 'Syncing…' : status }}
+    </span>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <lucide-angular name="search" [size]="18" class="search-icon"></lucide-angular>
+    <input
+      type="text"
+      placeholder="Search by name, email or phone…"
+      [(ngModel)]="search"
+      (ngModelChange)="onSearchChange()"
+    />
+  </div>
+
+  <div class="dir-layout" [class.has-detail]="selected">
+    <!-- Table -->
+    <div class="alx-table-container">
+      <table class="alx-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let c of customers"
+            class="clickable-row"
+            [class.selected-row]="selected?._id === c._id"
+            (click)="select(c)"
+          >
+            <td>
+              <div class="cust-cell">
+                <span class="avatar">{{ initials(c.fullName) }}</span>
+                <span class="name-cell">{{ c.fullName }}</span>
+              </div>
+            </td>
+            <td>{{ c.email || '—' }}</td>
+            <td>{{ c.phoneNumber || '—' }}</td>
+            <td>{{ c.address || '—' }}</td>
+            <td>{{ joined(c.createdAt) }}</td>
+          </tr>
+          <tr *ngIf="!loading && customers.length === 0">
+            <td colspan="5" class="empty-cell">No customers found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Detail panel -->
+    <aside class="detail-panel" *ngIf="selected as c">
+      <button class="close-btn" (click)="select(c)" aria-label="Close">
+        <lucide-angular name="x" [size]="18"></lucide-angular>
+      </button>
+      <div class="detail-avatar">{{ initials(c.fullName) }}</div>
+      <h2 class="detail-name">{{ c.fullName }}</h2>
+      <p class="detail-since">Customer since {{ joined(c.createdAt) }}</p>
+
+      <div class="detail-section">
+        <div class="detail-row">
+          <lucide-angular name="mail" [size]="15"></lucide-angular>
+          <span>{{ c.email || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <lucide-angular name="phone" [size]="15"></lucide-angular>
+          <span>{{ c.phoneNumber || '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <lucide-angular name="map-pin" [size]="15"></lucide-angular>
+          <span>{{ c.address || '—' }}</span>
+        </div>
+      </div>
+
+      <div class="detail-note">
+        <lucide-angular name="info" [size]="14"></lucide-angular>
+        Service history integration is coming soon.
+      </div>
+    </aside>
   </div>
 </div>

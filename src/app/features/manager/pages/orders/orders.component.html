@@ -1,13 +1,112 @@
-<div class="dummy-page-container">
-  <div class="glass-card">
-    <div class="icon-wrapper" style="background: #eef2ff; color: var(--primary-main);">
-      <lucide-angular name="shopping-cart" [size]="40" strokeWidth="2.5"></lucide-angular>
+<div class="mgr-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Order Approvals</h1>
+      <p class="page-subtitle">Review and approve purchase requests raised from inventory.</p>
     </div>
-    <h1 class="title">Order Management</h1>
-    <p class="description">Review, approve, and track purchase orders generated from the inventory system.</p>
-    <button class="back-btn" routerLink="/manager">
-      <lucide-angular name="arrow-left" [size]="18"></lucide-angular>
-      Back to Dashboard
-    </button>
+    <span class="status-chip" [class.offline]="status === 'Offline'">
+      <span class="dot" [class.syncing]="loading"></span>
+      {{ loading ? 'Syncing…' : status }}
+    </span>
+  </div>
+
+  <!-- Summary tiles -->
+  <div class="summary-row">
+    <div class="summary-tile">
+      <span class="tile-value">{{ summary.pending }}</span>
+      <span class="tile-label">Pending Approval</span>
+    </div>
+    <div class="summary-tile">
+      <span class="tile-value">{{ formatCurrency(summary.pendingValue) }}</span>
+      <span class="tile-label">Pending Value</span>
+    </div>
+    <div class="summary-tile">
+      <span class="tile-value">{{ summary.approved }}</span>
+      <span class="tile-label">Approved</span>
+    </div>
+    <div class="summary-tile">
+      <span class="tile-value">{{ summary.rejected }}</span>
+      <span class="tile-label">Rejected</span>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="chip-group">
+      <button
+        *ngFor="let f of filters"
+        class="chip"
+        [class.active]="activeFilter === f.key"
+        (click)="setFilter(f.key)"
+      >
+        {{ f.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="alx-table-container">
+    <table class="alx-table">
+      <thead>
+        <tr>
+          <th>Request</th>
+          <th>Supplier</th>
+          <th>Items</th>
+          <th>Est. Total</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th class="actions-cell">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let o of orders">
+          <tr class="clickable-row" [class.row-updating]="updatingId === o._id" (click)="toggleExpand(o)">
+            <td class="sku-cell">{{ o.requestId }}</td>
+            <td class="name-cell">{{ o.supplierName }}</td>
+            <td>{{ o.items.length }} line{{ o.items.length === 1 ? '' : 's' }}</td>
+            <td class="num-cell">{{ formatCurrency(o.totalEstimate) }}</td>
+            <td>
+              <span class="pill priority" [ngClass]="o.priority">{{ o.priority | uppercase }}</span>
+            </td>
+            <td>
+              <span class="pill status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
+            </td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <div class="row-actions" *ngIf="o.status === 'pending-approval'">
+                <button class="mini-btn ok" (click)="approve(o)">Approve</button>
+                <button class="mini-btn warn" (click)="reject(o)">Reject</button>
+              </div>
+              <span class="muted" *ngIf="o.status === 'approved'">by {{ o.approvedBy || 'Manager' }}</span>
+              <span class="muted" *ngIf="o.status === 'rejected'" [title]="o.rejectionReason || ''">Rejected</span>
+            </td>
+          </tr>
+          <!-- Expandable line-item detail -->
+          <tr *ngIf="expandedId === o._id" class="detail-row">
+            <td colspan="7">
+              <div class="detail-box">
+                <div class="detail-title">
+                  Requested by {{ o.requestedBy }} · {{ o.items.length }} item(s)
+                  <span *ngIf="o.status === 'rejected' && o.rejectionReason" class="reject-note">
+                    Reason: {{ o.rejectionReason }}
+                  </span>
+                </div>
+                <table class="detail-table">
+                  <tr *ngFor="let it of o.items">
+                    <td class="di-name">{{ it.name }}</td>
+                    <td class="di-sku">{{ it.sku }}</td>
+                    <td class="di-qty">×{{ it.quantity }}</td>
+                    <td class="di-total">{{ formatCurrency(it.estimatedTotal || 0) }}</td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="!loading && orders.length === 0">
+          <td colspan="7" class="empty-cell">No purchase requests in this view.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

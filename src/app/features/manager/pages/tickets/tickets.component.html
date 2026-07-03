@@ -1,13 +1,110 @@
-<div class="dummy-page-container">
-  <div class="glass-card">
-    <div class="icon-wrapper" style="background: var(--warning-light); color: var(--warning);">
-      <lucide-angular name="ticket" [size]="40" strokeWidth="2.5"></lucide-angular>
+<div class="mgr-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Support Tickets</h1>
+      <p class="page-subtitle">Assign, escalate and resolve field-service tickets.</p>
     </div>
-    <h1 class="title">Support Tickets</h1>
-    <p class="description">Manage and escalate field technician support tickets and customer inquiries.</p>
-    <button class="back-btn" routerLink="/manager">
-      <lucide-angular name="arrow-left" [size]="18"></lucide-angular>
-      Back to Dashboard
+    <span class="status-chip" [class.offline]="status === 'Offline'">
+      <span class="dot" [class.syncing]="loading"></span>
+      {{ loading ? 'Syncing…' : status }}
+    </span>
+  </div>
+
+  <!-- Summary tiles -->
+  <div class="summary-row">
+    <button class="summary-tile" [class.active]="activeStatus === 'all'" (click)="setStatus('all')">
+      <span class="tile-value">{{ summary.total }}</span>
+      <span class="tile-label">Total</span>
     </button>
+    <button class="summary-tile" [class.active]="activeStatus === 'open'" (click)="setStatus('open')">
+      <span class="tile-value">{{ summary.open }}</span>
+      <span class="tile-label">Open</span>
+    </button>
+    <button class="summary-tile" [class.active]="activeStatus === 'in-progress'" (click)="setStatus('in-progress')">
+      <span class="tile-value">{{ summary.inProgress }}</span>
+      <span class="tile-label">In Progress</span>
+    </button>
+    <button class="summary-tile alert" [class.active]="activeStatus === 'escalated'" (click)="setStatus('escalated')">
+      <span class="tile-value">{{ summary.escalated }}</span>
+      <span class="tile-label">Escalated</span>
+    </button>
+    <button class="summary-tile" [class.active]="activeStatus === 'resolved'" (click)="setStatus('resolved')">
+      <span class="tile-value">{{ summary.resolved }}</span>
+      <span class="tile-label">Resolved</span>
+    </button>
+  </div>
+
+  <!-- Priority filter -->
+  <div class="filter-bar">
+    <span class="filter-label">Priority</span>
+    <div class="chip-group">
+      <button
+        *ngFor="let p of priorityFilters"
+        class="chip"
+        [class.active]="activePriority === p.key"
+        (click)="setPriority(p.key)"
+      >
+        {{ p.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="alx-table-container">
+    <table class="alx-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Subject</th>
+          <th>Customer</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>SLA</th>
+          <th>Assignee</th>
+          <th class="actions-cell">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of tickets" [class.row-updating]="updatingId === t._id">
+          <td class="sku-cell">{{ t.ticketId }}</td>
+          <td class="name-cell">{{ t.subject }}</td>
+          <td>{{ t.customer }}</td>
+          <td class="cap">{{ t.category }}</td>
+          <td>
+            <span class="pill priority" [ngClass]="t.priority">{{ t.priority | uppercase }}</span>
+          </td>
+          <td>
+            <span class="pill status" [ngClass]="t.status">{{ statusLabel(t.status) }}</span>
+          </td>
+          <td>
+            <span class="sla" [class.overdue]="slaOverdue(t)">{{ slaText(t) }}</span>
+          </td>
+          <td>
+            <span *ngIf="t.assignedTo; else unassigned">{{ t.assignedTo }}</span>
+            <ng-template #unassigned><span class="muted">Unassigned</span></ng-template>
+          </td>
+          <td class="actions-cell">
+            <div class="row-actions" *ngIf="t.status !== 'resolved'">
+              <button class="mini-btn" (click)="assign(t)" title="Assign technician">Assign</button>
+              <button
+                class="mini-btn warn"
+                *ngIf="t.status !== 'escalated'"
+                (click)="escalate(t)"
+                title="Escalate"
+              >
+                Escalate
+              </button>
+              <button class="mini-btn ok" (click)="resolve(t)" title="Mark resolved">Resolve</button>
+            </div>
+            <span class="muted" *ngIf="t.status === 'resolved'">—</span>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && tickets.length === 0">
+          <td colspan="9" class="empty-cell">No tickets match the current filters.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
