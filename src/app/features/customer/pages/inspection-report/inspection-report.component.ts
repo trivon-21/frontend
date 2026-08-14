@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 interface Room {
   name: string;
@@ -85,7 +86,8 @@ export class InspectionReportComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private officerService: InspectionOfficerService
+    private officerService: InspectionOfficerService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -165,7 +167,7 @@ export class InspectionReportComponent implements OnInit {
 
   confirmPhoto() {
     if (!this.pendingPhotoName.trim()) {
-      alert('Please enter a name for the photo.');
+      this.notificationService.show('Please enter a name for the photo.', 'warning');
       return;
     }
     this.photoEntries.push({
@@ -194,7 +196,7 @@ export class InspectionReportComponent implements OnInit {
 
   submitReport() {
     if (!this.ticketId) {
-      alert('No ticket ID found. Please navigate from Ongoing Inspections.');
+      this.notificationService.show('No ticket ID found. Please navigate from Ongoing Inspections.', 'error');
       return;
     }
 
@@ -217,12 +219,12 @@ export class InspectionReportComponent implements OnInit {
 
     this.officerService.recordReport(this.ticketId, reportData).subscribe({
       next: () => {
-        alert('✅ Inspection report recorded successfully!');
+        this.notificationService.show('✅ Inspection report recorded successfully!', 'success');
         window.history.back();
       },
       error: (err: any) => {
         console.error(err);
-        alert('❌ Failed to record report: ' + err.message);
+        this.notificationService.show('❌ Failed to record report: ' + err.message, 'error');
       }
     });
   }

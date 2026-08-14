@@ -377,6 +377,19 @@
 .btn-send:hover {
   background: #1a3a2a;
 }
+.inv-tabs {
+  display: flex; gap: 8px; margin-bottom: 24px;
+  background: white; padding: 6px; border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); width: fit-content;
+}
+.inv-tab {
+  padding: 8px 20px; border: none; background: transparent;
+  border-radius: 8px; font-size: 14px; font-weight: 500;
+  color: #6b7280; cursor: pointer; transition: all 0.2s;
+}
+.inv-tab.active { background: #1e3a2a; color: white; font-weight: 600; }
+.inv-tab:hover:not(.active) { background: #f3f4f6; color: #1a1a1a; }
+.cancelled-badge { color: #b45309; font-weight: 700; }
 
 @media (max-width: 768px) {
   .page-container {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-scheduled-inspections',
@@ -24,7 +25,8 @@ export class ScheduledInspectionsComponent implements OnInit {
 
   constructor(
     private officerService: InspectionOfficerService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void { this.loadInspections(); }
@@ -60,18 +62,18 @@ export class ScheduledInspectionsComponent implements OnInit {
   closeArrivalModal() { this.showArrivalModal = false; this.arrivalTime = ''; }
 
   confirmStartInspection(): void {
-    if (!this.arrivalTime.trim()) { alert('Please enter arrival time.'); return; }
+    if (!this.arrivalTime.trim()) { this.notificationService.show('Please enter arrival time.', 'warning'); return; }
     this.isLoading = true;
     this.officerService.startInspection(this.startingTicketId, this.arrivalTime).subscribe({
       next: () => {
-        alert('✅ Inspection started! Arrival time email sent to customer.');
+        this.notificationService.show('✅ Inspection started! Arrival time email sent to customer.', 'success');
         this.closeArrivalModal();
         this.loadInspections();
       },
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        alert('❌ Failed to start inspection.');
+        this.notificationService.show('❌ Failed to start inspection.', 'error');
       }
     });
   }

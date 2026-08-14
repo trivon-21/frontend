@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-completed-inspections',
@@ -29,7 +31,11 @@ export class CompletedInspectionsComponent implements OnInit {
   itemsPerPage = 8;
   totalItems = 0;
 
-  constructor(private officerService: InspectionOfficerService) { }
+  constructor(
+    private officerService: InspectionOfficerService,
+    private notificationService: NotificationService,
+    private confirmService: ConfirmService
+  ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
@@ -90,7 +96,7 @@ export class CompletedInspectionsComponent implements OnInit {
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        alert('Failed to load report.');
+        this.notificationService.show('❌ Failed to load report.', 'error');
       }
     });
   }
@@ -111,22 +117,28 @@ export class CompletedInspectionsComponent implements OnInit {
         this.reportData = JSON.parse(JSON.stringify(this.editedReport));
         this.isEditing = false;
         this.isLoading = false;
-        alert('✅ Report updated successfully!');
+        this.notificationService.show('✅ Report updated successfully!', 'success');
       },
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        alert('❌ Failed to save changes.');
+        this.notificationService.show('❌ Failed to save changes.', 'error');
       }
     });
   }
 
-  submitToTechnician(inspection: any): void {
-    if (!confirm('Submit this report to the Main Technician?')) return;
+  async submitToTechnician(inspection: any): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Submit Report',
+      message: 'Submit this report to the Main Technician?',
+      confirmText: 'Submit',
+      cancelText: 'Cancel'
+    });
+    if (!confirmed) return;
     this.isSubmitting = true;
     this.officerService.submitReport(inspection._id).subscribe({
       next: () => {
-        alert('✅ Report submitted to Main Technician via email!');
+        this.notificationService.show('✅ Report submitted to Main Technician via email!', 'success');
         this.closeModal();
         this.loadInspections();
         this.isSubmitting = false;
@@ -134,7 +146,7 @@ export class CompletedInspectionsComponent implements OnInit {
       error: (err: any) => {
         console.error(err);
         this.isSubmitting = false;
-        alert('❌ Failed to submit report.');
+        this.notificationService.show('❌ Failed to submit report.', 'error');
       }
     });
   }

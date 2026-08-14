@@ -141,6 +141,10 @@
   color: #1a1a1a;
 }
 
+.modal-close:hover {
+  color: #1a1a1a;
+  font-weight: bolder;
+}
 .generate-btn {
   background: #2d5a3d;
   color: white;
@@ -205,6 +209,53 @@
   font-size: 14px;
   color: #374151;
 }
+/* TABS */
+.inv-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  width: fit-content;
+}
+
+.inv-tab {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inv-tab.active {
+  background: #1e3a2a;
+  color: white;
+  font-weight: 600;
+}
+
+.inv-tab:hover:not(.active) {
+  background: #f3f4f6;
+  color: #1a1a1a;
+}
+
+.repair-type-badge { font-size: 13px; }
+
+.btn-close-styled {
+  padding: 8px 20px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.btn-close-styled:hover { background: #f3f4f6; }
 
 @media (max-width: 1200px) {
   .invoices-grid {

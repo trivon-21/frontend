@@ -91,6 +91,20 @@
             <span class="fr-card-value">LKR {{ summary.salesRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
+        <div class="fr-card red">
+          <div class="fr-card-icon">📦</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Purchase Expenses</span>
+            <span class="fr-card-value">LKR {{ summary.purchaseExpenses | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card teal">
+          <div class="fr-card-icon">📊</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Net Revenue</span>
+            <span class="fr-card-value">LKR {{ summary.netRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
         <div class="fr-card grey">
           <div class="fr-card-icon">⏳</div>
           <div class="fr-card-info">
@@ -154,7 +168,9 @@
                 <td><span class="type-pill">{{ c.type }}</span></td>
                 <td class="mono">{{ c.reference }}</td>
                 <td>{{ c.customer }}</td>
-                <td class="amount-cell">LKR {{ c.amount | number:'1.0-0' }}</td>
+                <td class="amount-cell" [style.color]="c.amount < 0 ? '#dc2626' : ''">
+                  LKR {{ c.amount | number:'1.0-0' }}
+                </td>
                 <td>{{ c.method }}</td>
                 <td><span class="badge badge-paid">{{ c.status }}</span></td>
               </tr>
@@ -164,7 +180,7 @@
 
         <!-- Simple total below table -->
         <div class="fr-total-bar" *ngIf="collections.length > 0">
-          <span>Total Collected:</span>
+          <span>Net Total:</span>
           <strong>LKR {{ getCollectionsTotal() | number:'1.0-0' }}</strong>
         </div>
       </div>

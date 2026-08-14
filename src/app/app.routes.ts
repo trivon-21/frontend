@@ -32,6 +32,9 @@ import { ServiceVerifiedPaymentsComponent } from './features/finance/pages/servi
 import { ServiceRejectedPaymentsComponent } from './features/finance/pages/service-rejected-payments/service-rejected-payments.component';
 import { PaymentAuditLogComponent } from './features/finance/pages/payment-audit-log/payment-audit-log.component';
 import { FinancialReportComponent } from './features/finance/pages/financial-report/financial-report.component';
+import { PurchaseRequestVerificationComponent } from './features/finance/pages/purchase-request-verification/purchase-request-verification.component';
+import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
+import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
 
 export const routes: Routes = [
   {
@@ -65,6 +68,9 @@ export const routes: Routes = [
       { path: 'services/maintenance-rejected', component: ServiceRejectedPaymentsComponent },
       { path: 'payment-audit-log', component: PaymentAuditLogComponent },
       { path: 'financial-report', component: FinancialReportComponent },
+      { path: 'purchase-requests/pending', component: PurchaseRequestVerificationComponent },
+      { path: 'purchase-requests/approved', component: PurchaseRequestApprovedComponent },
+      { path: 'purchase-requests/rejected', component: PurchaseRequestRejectedComponent },
     ]
   },
   { path: 'inspection-report', component: InspectionReportComponent },

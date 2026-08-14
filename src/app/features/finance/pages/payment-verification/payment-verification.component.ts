@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-payment-verification',
@@ -20,7 +22,11 @@ export class PaymentVerificationComponent implements OnInit {
   rejectionReason = '';
   isLoading = false;
 
-  constructor(private paymentService: PaymentService) { }
+  constructor(
+    private paymentService: PaymentService,
+    private notificationService: NotificationService,
+    private confirmService: ConfirmService
+  ) { }
 
   ngOnInit(): void { this.loadPayments(); }
 
@@ -51,17 +57,23 @@ export class PaymentVerificationComponent implements OnInit {
   openSlipModal(payment: any) { this.selectedPayment = payment; this.showSlipModal = true; }
   closeSlipModal() { this.showSlipModal = false; this.selectedPayment = null; }
 
-  approvePayment(payment: any): void {
-    if (!confirm(`Approve payment for Order ${payment.orderId}?`)) return;
+  async approvePayment(payment: any): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Approve Payment',
+      message: `Approve payment for Order ${payment.orderId}?`,
+      confirmText: 'Approve',
+      cancelText: 'Cancel'
+    });
+    if (!confirmed) return;
     this.isLoading = true;
     this.paymentService.approvePayment(payment._id).subscribe({
       next: (response: any) => {
-        alert('✅ Payment approved! Confirmation email sent to customer.');
+        this.notificationService.show('✅ Payment approved! Confirmation email sent to customer.', 'success');
         // Remove from list immediately
         this.payments = this.payments.filter(p => p._id !== payment._id);
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Approval failed.'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Approval failed.', 'error'); }
     });
   }
 
@@ -74,17 +86,17 @@ export class PaymentVerificationComponent implements OnInit {
   }
 
   rejectPayment(): void {
-    if (!this.rejectionReason.trim()) { alert('Please enter a rejection reason.'); return; }
+    if (!this.rejectionReason.trim()) { this.notificationService.show('Please enter a rejection reason.', 'warning'); return; }
     this.isLoading = true;
     this.paymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
       next: (response: any) => {
-        alert('✅ Payment rejected. Email with re-upload link sent to customer.');
+        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent to customer.', 'success');
         // Remove from list immediately
         this.payments = this.payments.filter(p => p._id !== this.selectedPayment._id);
         this.closeRejectModal();
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Rejection failed.'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Rejection failed.', 'error'); }
     });
   }
 }

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../../../../services/notification.service';
 
 interface NotificationItem {
   message: string;
@@ -29,7 +30,10 @@ export class HeaderComponent implements OnInit {
 
   private api = 'http://127.0.0.1:3000/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void { this.loadNotifications(); }
 
@@ -41,6 +45,8 @@ export class HeaderComponent implements OnInit {
       invPayment: this.http.get<any[]>(`${this.api}/invoices/pending`).pipe(catchError(() => of([]))),
       repair: this.http.get<any[]>(`${this.api}/service-payments/pending/REPAIR`).pipe(catchError(() => of([]))),
       maintenance: this.http.get<any[]>(`${this.api}/service-payments/pending/MAINTENANCE`).pipe(catchError(() => of([]))),
+      repairInvoiceQ: this.http.get<any[]>(`${this.api}/invoices/repair/queue`).pipe(catchError(() => of([]))),
+      repairInvPayment: this.http.get<any[]>(`${this.api}/invoices/repair/pending`).pipe(catchError(() => of([]))),
     }).subscribe({
       next: (data) => {
         this.notifications = [];
@@ -81,6 +87,18 @@ export class HeaderComponent implements OnInit {
             message: `${data.maintenance.length} pending Maintenance payment(s) for approval`
           });
 
+        if (data.repairInvoiceQ.length > 0)
+          this.notifications.push({
+            type: 'repairinvoiceq', count: data.repairInvoiceQ.length,
+            message: `${data.repairInvoiceQ.length} repair invoice(s) ready to generate`
+          });
+
+        if (data.repairInvPayment.length > 0)
+          this.notifications.push({
+            type: 'repairinvpay', count: data.repairInvPayment.length,
+            message: `${data.repairInvPayment.length} repair invoice(s) pending to send to customer`
+          });
+
         this.totalPending = this.notifications.reduce((s, n) => s + n.count, 0);
       },
       error: (err) => console.error(err)
@@ -90,6 +108,6 @@ export class HeaderComponent implements OnInit {
   onSearch() { console.log('Searching:', this.searchQuery); }
   toggleSettings() { this.showSettings = !this.showSettings; this.showNotifications = false; }
   toggleNotifications() { this.showNotifications = !this.showNotifications; this.showSettings = false; }
-  logout() { alert('Logged out (Demo)'); }
-  manageProfile() { alert('Manage Profile clicked (Demo)'); }
+  logout() { this.notificationService.show('Logged out (Demo)', 'info'); }
+  manageProfile() { this.notificationService.show('Manage Profile clicked (Demo)', 'info'); }
 }

@@ -319,6 +319,22 @@
   color: #b45309;
 }
 
+.inv-tabs {
+  display: flex; gap: 8px; margin-bottom: 24px;
+  background: white; padding: 6px; border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); width: fit-content;
+}
+.inv-tab {
+  padding: 8px 20px; border: none; background: transparent;
+  border-radius: 8px; font-size: 14px; font-weight: 500;
+  color: #6b7280; cursor: pointer; transition: all 0.2s;
+}
+.inv-tab.active { background: #1e3a2a; color: white; font-weight: 600; }
+.inv-tab:hover:not(.active) { background: #f3f4f6; color: #1a1a1a; }
+.repair-type-label {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; background: #fce7f3; color: #9d174d;
+}
 @media (max-width: 1200px) {
   .top-cards {
     grid-template-columns: repeat(2, 1fr);

@@ -97,4 +97,36 @@ export class InvoiceService {
     return this.http.put<any>(`${this.apiUrl}/cancel-rejection/${invoiceId}`, {})
       .pipe(catchError(this.handleError));
   }
+
+getRepairInvoiceQueue(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/queue`);
+}
+
+generateRepairInvoice(repairId: string): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/repair/generate/${repairId}`, {});
+}
+
+getRepairPendingInvoices(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/pending`);
+}
+
+getRepairAcceptedInvoices(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/accepted`);
+}
+
+getRepairRejectedInvoices(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/rejected`);
+}
+
+getRepairPaidInvoices(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/paid`);
+}
+
+getRepairAutoCancelledInvoices(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/auto-cancelled`);
+}
+
+getRepairDashboardStats(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/repair/dashboard`);
+}
 }

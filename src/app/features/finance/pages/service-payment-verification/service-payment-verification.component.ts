@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ServicePaymentService } from '../../services/service-payment.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-service-payment-verification',
@@ -25,7 +27,9 @@ export class ServicePaymentVerificationComponent implements OnInit {
 
   constructor(
     private servicePaymentService: ServicePaymentService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private notificationService: NotificationService,
+    private confirmService: ConfirmService
   ) { }
 
   ngOnInit(): void {
@@ -67,15 +71,21 @@ export class ServicePaymentVerificationComponent implements OnInit {
   openSlipModal(payment: any) { this.selectedPayment = payment; this.showSlipModal = true; }
   closeSlipModal() { this.showSlipModal = false; this.selectedPayment = null; }
 
-  approvePayment(payment: any): void {
-    if (!confirm(`Approve ${this.serviceType.toLowerCase()} payment for ${payment.customerName}?`)) return;
+  async approvePayment(payment: any): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Approve Payment',
+      message: `Approve ${this.serviceType.toLowerCase()} payment for ${payment.customerName}?`,
+      confirmText: 'Approve',
+      cancelText: 'Cancel'
+    });
+    if (!confirmed) return;
     this.isLoading = true;
     this.servicePaymentService.approvePayment(payment._id).subscribe({
       next: () => {
-        alert('✅ Payment approved! Email sent to customer.');
+        this.notificationService.show('✅ Payment approved! Email sent to customer.', 'success');
         this.loadPayments();
       },
-      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Approval failed.'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Approval failed.', 'error'); }
     });
   }
 
@@ -88,14 +98,14 @@ export class ServicePaymentVerificationComponent implements OnInit {
   }
 
   rejectPayment(): void {
-    if (!this.rejectionReason.trim()) { alert('Please enter a rejection reason.'); return; }
+    if (!this.rejectionReason.trim()) { this.notificationService.show('Please enter a rejection reason.', 'warning'); return; }
     this.isLoading = true;
     this.servicePaymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
       next: () => {
-        alert('✅ Payment rejected. Email with re-upload link sent to customer.');
+        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent to customer.', 'success');
         this.closeRejectModal(); this.loadPayments();
       },
-      error: (err) => { console.error(err); this.isLoading = false; alert('❌ Rejection failed.'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Rejection failed.', 'error'); }
     });
   }
 }

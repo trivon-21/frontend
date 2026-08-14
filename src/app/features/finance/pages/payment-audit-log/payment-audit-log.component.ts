@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService } from '../../services/audit-log.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-payment-audit-log',
@@ -49,7 +50,7 @@ export class PaymentAuditLogComponent implements OnInit {
     'SERVICE_PAYMENT_SUBMITTED', 'SERVICE_PAYMENT_APPROVED', 'SERVICE_PAYMENT_REJECTED',
   ];
 
-  constructor(private auditLogService: AuditLogService) { }
+  constructor(private auditLogService: AuditLogService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
     this.loadStats();
@@ -124,7 +125,7 @@ export class PaymentAuditLogComponent implements OnInit {
     // Simple approach: open a fetch via the audit log service or directly
     this.auditLogService.getInvoiceById(this.selectedLog.invoiceId).subscribe({
       next: (inv: any) => { this.invoiceToShow = inv; this.showInvoicePopup = true; },
-      error: () => { alert('Could not load invoice details.'); }
+      error: () => { this.notificationService.show('❌ Could not load invoice details.', 'error'); }
     });
   }
 

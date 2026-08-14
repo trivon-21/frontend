@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -18,7 +19,7 @@ export class HeaderComponent implements OnInit {
   showSettings = false;
   showNotifications = false;
 
-  constructor(private inspectionOfficerService: InspectionOfficerService) { }
+  constructor(private inspectionOfficerService: InspectionOfficerService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
     this.loadScheduledInspections();
@@ -48,10 +49,10 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
-    alert('Logged out (Demo)');
+    this.notificationService.show('Logged out (Demo)', 'info');
   }
 
   manageProfile() {
-    alert('Manage Profile clicked (Demo)');
+    this.notificationService.show('Manage Profile clicked (Demo)', 'info');
   }
 }

@@ -19,7 +19,7 @@ export class FinancialReportComponent implements OnInit {
   endDate = this.today();
 
   // Summary tab
-  summary: any = {};
+  summary: any = { purchaseExpenses: 0, netRevenue: 0 };
   monthlyData: any[] = [];
   isLoadingSummary = false;
 
@@ -134,6 +134,8 @@ export class FinancialReportComponent implements OnInit {
         `Service Revenue,${this.summary.serviceRevenue || 0}\n` +
         `Invoice Payments,${this.summary.salesRevenue || 0}\n` +
         `Total Collected,${this.summary.totalCollected || 0}\n` +
+        `Purchase Expenses,-${this.summary.purchaseExpenses || 0}\n` +
+        `Net Revenue,${this.summary.netRevenue || 0}\n` +
         `Pending Collection,${this.summary.pendingRevenue || 0}`;
     } else if (this.activeTab === 'collections') {
       csv = 'Date,Type,Reference,Customer,Amount (LKR),Status\n' +
@@ -175,12 +177,14 @@ export class FinancialReportComponent implements OnInit {
       title = 'Revenue Summary';
       headers = ['Category', 'Amount (LKR)'];
       rows = [
-        ['Buy Only Revenue', (this.summary.buyOnlyRevenue || 0).toLocaleString()],
-        ['Inspection Fees', (this.summary.inspectionRevenue || 0).toLocaleString()],
-        ['Service Revenue', (this.summary.serviceRevenue || 0).toLocaleString()],
-        ['Invoice Payments', (this.summary.salesRevenue || 0).toLocaleString()],
-        ['Total Collected', (this.summary.totalCollected || 0).toLocaleString()],
-        ['Pending Collection', (this.summary.pendingRevenue || 0).toLocaleString()],
+        ['Buy Only Revenue',   (this.summary.buyOnlyRevenue    || 0).toLocaleString()],
+        ['Inspection Fees',    (this.summary.inspectionRevenue || 0).toLocaleString()],
+        ['Service Revenue',    (this.summary.serviceRevenue    || 0).toLocaleString()],
+        ['Invoice Payments',   (this.summary.salesRevenue      || 0).toLocaleString()],
+        ['Total Collected',    (this.summary.totalCollected    || 0).toLocaleString()],
+        ['Purchase Expenses',  '-' + (this.summary.purchaseExpenses || 0).toLocaleString()],
+        ['Net Revenue',        (this.summary.netRevenue        || 0).toLocaleString()],
+        ['Pending Collection', (this.summary.pendingRevenue    || 0).toLocaleString()],
       ];
     } else if (this.activeTab === 'collections') {
       title = 'Payment Collections';

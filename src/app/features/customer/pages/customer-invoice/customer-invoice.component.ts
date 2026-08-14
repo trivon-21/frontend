@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InvoiceService } from '../../../finance/services/invoice.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 
 @Component({
   selector: 'app-customer-invoice',
@@ -29,7 +31,9 @@ export class CustomerInvoiceComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private invoiceService: InvoiceService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService,
+    private confirmService: ConfirmService
   ) { }
 
   ngOnInit(): void {
@@ -78,7 +82,7 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        alert('❌ ' + err.message);
+        this.notificationService.show('❌ ' + err.message, 'error');
       }
     });
   }
@@ -91,7 +95,7 @@ export class CustomerInvoiceComponent implements OnInit {
   closeRejectModal(): void { this.showRejectModal = false; this.rejectionReason = ''; }
 
   confirmReject(): void {
-    if (!this.rejectionReason.trim()) { alert('Please provide a reason.'); return; }
+    if (!this.rejectionReason.trim()) { this.notificationService.show('Please provide a reason.', 'warning'); return; }
     this.isSubmitting = true;
     this.invoiceService.rejectInvoice(this.invoiceId, this.rejectionReason).subscribe({
       next: () => {
@@ -103,13 +107,19 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        alert('❌ ' + err.message);
+        this.notificationService.show('❌ ' + err.message, 'error');
       }
     });
   }
 
-  cancelRejection(): void {
-    if (!confirm('Cancel your rejection and accept this invoice?')) return;
+  async cancelRejection(): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Cancel Rejection',
+      message: 'Cancel your rejection and accept this invoice?',
+      confirmText: 'Yes, accept',
+      cancelText: 'No'
+    });
+    if (!confirmed) return;
     this.isSubmitting = true;
     this.invoiceService.cancelRejection(this.invoiceId).subscribe({
       next: () => {
@@ -121,7 +131,7 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        alert('❌ ' + err.message);
+        this.notificationService.show('❌ ' + err.message, 'error');
       }
     });
   }

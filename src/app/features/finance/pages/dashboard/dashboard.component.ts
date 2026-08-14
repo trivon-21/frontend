@@ -65,6 +65,9 @@ export class DashboardComponent implements OnInit {
       invoicePaid: this.invoiceService.getPaidInvoices(),
       invoiceAccepted: this.invoiceService.getAcceptedInvoices(),
       invoicePending: this.invoiceService.getPendingInvoices(),
+      repairInvoicePaid: this.invoiceService.getRepairPaidInvoices(),
+      repairInvoiceAccepted: this.invoiceService.getRepairAcceptedInvoices(),
+      repairInvoicePending: this.invoiceService.getRepairPendingInvoices(),
     }).subscribe({
       next: (res: any) => {
         const buyPending = (res.buyPending || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'PENDING', displayDate: p.updatedAt }));
@@ -79,6 +82,7 @@ export class DashboardComponent implements OnInit {
         const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
         const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
         const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
+
         const invoicePaid = (res.invoicePaid || []).map((p: any) => ({
           ...p,
           paymentType: 'INVOICE',
@@ -112,12 +116,47 @@ export class DashboardComponent implements OnInit {
           displayDate: p.createdAt,
         }));
 
+        // Repair invoices — shown under the INVOICE tab alongside installation invoices
+        const repairInvoicePaid = (res.repairInvoicePaid || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'APPROVED',
+          orderId: p.orderId || '—',
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.paidAt || p.updatedAt,
+        }));
+
+        const repairInvoiceAccepted = (res.repairInvoiceAccepted || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'PENDING',
+          orderId: p.orderId || '—',
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.acceptedAt || p.updatedAt,
+        }));
+
+        const repairInvoiceDraft = (res.repairInvoicePending || []).map((p: any) => ({
+          ...p,
+          paymentType: 'INVOICE',
+          status: 'PENDING',
+          orderId: p.orderId || '—',
+          invoiceId: p.invoiceNumber,
+          customerName: p.customerName,
+          amount: p.grandTotal || 0,
+          displayDate: p.createdAt,
+        }));
+
         this.allPayments = [
           ...buyPending, ...buyVerified, ...buyRejected,
           ...inspPending, ...inspVerified, ...inspRejected,
           ...repairPending, ...repairVerified, ...repairRejected,
           ...maintPending, ...maintVerified, ...maintRejected,
-          ...invoicePaid, ...invoiceAccepted, ...invoiceDraft
+          ...invoicePaid, ...invoiceAccepted, ...invoiceDraft,
+          ...repairInvoicePaid, ...repairInvoiceAccepted, ...repairInvoiceDraft,
         ];
         this.calculateStats(this.allPayments);
         this.applyFilters();
@@ -125,7 +164,6 @@ export class DashboardComponent implements OnInit {
       error: (err: any) => console.error('Dashboard load failed:', err)
     });
   }
-
 
   calculateStats(payments: any[]) {
     this.totalBalance = payments.reduce((s, p) => s + (p.amount || 0), 0);
