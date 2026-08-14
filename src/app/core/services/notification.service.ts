@@ -28,21 +28,6 @@ export class NotificationService {
     return this.unreadCount$.asObservable();
   }
 
-  addNotification(notification: Omit<Notification, 'id' | 'createdAt'>): void {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
-
-    const current = this.notifications$.value;
-    this.notifications$.next([newNotification, ...current]);
-    this.updateUnreadCount();
-
-    // Save to localStorage
-    this.saveNotifications();
-  }
-
   markAsRead(id: string): void {
     const notifications = this.notifications$.value.map(n =>
       n.id === id ? { ...n, read: true } : n
@@ -87,54 +72,5 @@ export class NotificationService {
       this.notifications$.next(JSON.parse(saved));
     }
     this.updateUnreadCount();
-  }
-
-  // Helper methods for specific notification types
-  notifyOrderUpdate(orderRef: string, status: string): void {
-    this.addNotification({
-      type: 'order',
-      title: `Order ${orderRef} Updated`,
-      message: `Your order status is now: ${status}`,
-      read: false,
-      actionUrl: '/dashboard/orders'
-    });
-  }
-
-  notifyInquiryResponse(inquiryId: string): void {
-    this.addNotification({
-      type: 'inquiry',
-      title: 'New Response',
-      message: 'You have a new response to your inquiry',
-      read: false,
-      actionUrl: `/dashboard`
-    });
-  }
-
-  notifyServiceRequest(requestId: string, status: string): void {
-    this.addNotification({
-      type: 'service',
-      title: 'Service Request Update',
-      message: `Your service request status: ${status}`,
-      read: false,
-      actionUrl: '/dashboard'
-    });
-  }
-
-  notifyFeedback(message: string): void {
-    this.addNotification({
-      type: 'feedback',
-      title: 'Feedback Submitted',
-      message,
-      read: false
-    });
-  }
-
-  notifyGeneral(title: string, message: string): void {
-    this.addNotification({
-      type: 'general',
-      title,
-      message,
-      read: false
-    });
   }
 }

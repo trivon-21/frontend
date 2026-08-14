@@ -2,14 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-export interface SignupPayload {
-  fullName: string;
-  email?: string;
-  identifier?: string; // Can be email or phone
-  phoneNumber?: string;
-  password: string;
-}
-
 export interface LoginPayload {
   email?: string;
   identifier?: string; // Can be email or phone
@@ -64,12 +56,6 @@ export class AuthService {
       return 'phone';
     }
     return 'invalid';
-  }
-
-  signup(payload: SignupPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/signup`, payload).pipe(
-      tap((res) => this.saveSession(res.token, res.user, true))
-    );
   }
 
   login(payload: LoginPayload): Observable<AuthResponse> {
