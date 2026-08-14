@@ -1,0 +1,402 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <span class="logo">AirLux</span>
+  </div>
+  <div class="navbar-center">
+    <div class="search-bar">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input type="text" placeholder="Search" id="navbar-search">
+    </div>
+  </div>
+  <div class="navbar-links">
+    <a href="/catalog" class="nav-link">Home</a>
+    <a href="/catalog" class="nav-link nav-active">Catalog</a>
+    <a href="#" class="nav-link">Services</a>
+  </div>
+  <div class="navbar-actions">
+    <button class="btn btn-outline" id="btn-account">Account</button>
+    <button class="btn btn-primary" id="btn-cart">Cart</button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<section class="hero-banner">
+  <div class="hero-banner-content">
+    <h1>Premium Cooling<br>Solutions</h1>
+    <p>Discover our curated collection of high-performance air conditioning systems</p>
+  </div>
+  <div class="hero-banner-image">
+    <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=700&q=80"
+      alt="Premium AC Unit">
+  </div>
+</section>
+
+<!-- LOADING STATE -->
+<div class="bi-container" *ngIf="loading">
+  <div class="bi-status-box">
+    <div class="bi-spinner"></div>
+    <p>Loading product details…</p>
+  </div>
+</div>
+
+<!-- ERROR STATE -->
+<div class="bi-container" *ngIf="!loading && error">
+  <div class="bi-status-box bi-error-box">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e53e3e"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    <p>{{ error }}</p>
+    <a href="/catalog" class="bi-back-link">← Back to Catalog</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="bi-container" *ngIf="!loading && !error && product">
+  <div class="bi-layout">
+
+    <!-- LEFT: Image Gallery + Description Tabs -->
+    <div class="bi-left">
+
+      <!-- Main image -->
+      <div class="bi-main-image">
+        <img [src]="getImageUrl(galleryImages[selectedImageIdx])" [alt]="product.name" id="main-product-img">
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="bi-thumbnails">
+        <div class="bi-thumb" *ngFor="let img of galleryImages; let i = index"
+          [class.active]="selectedImageIdx === i" (click)="selectImage(i)">
+          <img [src]="getImageUrl(img)" [alt]="'View ' + (i + 1)">
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bi-tabs-bar">
+        <button class="bi-tab" [class.active]="activeTab === 'description'" (click)="switchTab('description')"
+          id="tab-description">Description</button>
+        <button class="bi-tab" [class.active]="activeTab === 'spec'" (click)="switchTab('spec')"
+          id="tab-spec">Specifications</button>
+        <button class="bi-tab" [class.active]="activeTab === 'warranty'" (click)="switchTab('warranty')"
+          id="tab-warranty">Warranty Info</button>
+        <button class="bi-tab" [class.active]="activeTab === 'reviews'" (click)="switchTab('reviews')"
+          id="tab-reviews">Reviews({{ product.reviewCount || 28 }})</button>
+      </div>
+
+      <!-- Description Panel -->
+      <div class="bi-tab-panel" *ngIf="activeTab === 'description'" id="panel-description">
+        <p class="bi-desc-text">{{ product.description || 'No description available.' }}</p>
+        <ul class="bi-features" *ngIf="product.features && product.features.length > 0">
+          <li *ngFor="let feat of product.features">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="#10A760" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {{ feat }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Specifications Panel -->
+      <div class="bi-tab-panel" *ngIf="activeTab === 'spec'" id="panel-spec">
+        <table class="bi-spec-table" *ngIf="product.specs && product.specs.length > 0">
+          <tr *ngFor="let spec of product.specs">
+            <td class="bi-spec-key">{{ spec.key }}:</td>
+            <td class="bi-spec-val">{{ spec.value }}</td>
+          </tr>
+        </table>
+        <p class="bi-no-data" *ngIf="!product.specs || product.specs.length === 0">
+          Specifications have not been added for this product yet.
+        </p>
+      </div>
+
+      <!-- Warranty Panel -->
+      <div class="bi-tab-panel" *ngIf="activeTab === 'warranty'" id="panel-warranty">
+        <div *ngIf="product.warrantyInfo && (product.warrantyInfo.comprehensive || product.warrantyInfo.compressor)">
+          <div *ngIf="product.warrantyInfo.comprehensive">
+            <div class="bi-warranty-label">Comprehensive Warranty:</div>
+            <div class="bi-warranty-desc">{{ product.warrantyInfo.comprehensive }}</div>
+          </div>
+          <div *ngIf="product.warrantyInfo.compressor">
+            <div class="bi-warranty-label">Compressor Warranty:</div>
+            <div class="bi-warranty-desc">{{ product.warrantyInfo.compressor }}</div>
+          </div>
+          <div *ngIf="product.warrantyInfo.covered && product.warrantyInfo.covered.length > 0">
+            <div class="bi-warranty-list-label">What's Covered:</div>
+            <ul class="bi-warranty-list">
+              <li *ngFor="let item of product.warrantyInfo.covered">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+        <p class="bi-no-data"
+          *ngIf="!product.warrantyInfo || (!product.warrantyInfo.comprehensive && !product.warrantyInfo.compressor)">
+          Warranty information has not been added yet.
+        </p>
+      </div>
+
+      <!-- Reviews Panel -->
+      <div class="bi-tab-panel" *ngIf="activeTab === 'reviews'" id="panel-reviews">
+        <p class="bi-no-data">No reviews have been added yet.</p>
+      </div>
+
+    </div><!-- /.bi-left -->
+
+    <!-- RIGHT: Product Info & Purchase Options -->
+    <div class="bi-right">
+
+      <!-- Status Badges -->
+      <div class="bi-badges">
+        <span class="bi-badge bi-badge-stock" [class.bi-badge-outstock]="!product.inStock">
+          {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+        </span>
+        <span class="bi-badge bi-badge-outline">Warranty Eligible</span>
+        <span class="bi-badge bi-badge-outline">{{ product.category || 'Residential AC' }}</span>
+      </div>
+
+      <!-- Brand & Category -->
+      <div class="bi-brand-line">{{ product.brand }} · {{ product.category || 'Split AC' }}</div>
+
+      <!-- Product Name + Rating -->
+      <div class="bi-name-rating">
+        <h2 class="bi-product-name">{{ product.name }}</h2>
+        <div class="bi-rating">
+          <span class="bi-stars">
+            <svg *ngFor="let s of getStars(product.rating || 4); let i = index"
+              xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+              [attr.fill]="s ? '#f5a623' : 'none'" stroke="#f5a623" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <span class="bi-rating-text">{{ product.rating || 4.0 }} ({{ product.reviewCount || 28 }} Reviews)</span>
+        </div>
+      </div>
+
+      <!-- Capacity & Model -->
+      <div class="bi-meta">Capacity: {{ product.capacity }} BTU</div>
+      <div class="bi-meta">Model:{{ product.modelNumber || product.model || 'XYZABC-2024' }}</div>
+
+      <!-- Price -->
+      <div class="bi-price-block">
+        <span class="bi-price">LKR {{ selectedPrice | number:'1.0-0' }}</span>
+        <div class="bi-price-note">Product price only. Installation is quoted separately.</div>
+      </div>
+
+      <hr class="bi-divider">
+
+      <!-- Before you add to cart -->
+      <div class="bi-section-label">Before you add to cart:</div>
+      <div class="bi-option-group">
+
+        <div class="bi-option-card" [class.bi-option-selected]="awarenessOption === 'know'"
+          (click)="setAwareness('know')" id="option-know">
+          <div class="bi-option-row">
+            <span class="bi-radio-dot" [class.bi-radio-dot-filled]="awarenessOption === 'know'">
+              <svg *ngIf="awarenessOption === 'know'" xmlns="http://www.w3.org/2000/svg" width="10" height="10"
+                viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </span>
+            <span class="bi-option-title">I know what I need</span>
+          </div>
+          <div class="bi-option-sub">I'm confident this product fits my requirements.</div>
+        </div>
+
+        <div class="bi-option-card" [class.bi-option-selected]="awarenessOption === 'unsure'"
+          (click)="setAwareness('unsure')" id="option-unsure">
+          <div class="bi-option-row">
+            <span class="bi-radio-dot" [class.bi-radio-dot-filled]="awarenessOption === 'unsure'">
+              <svg *ngIf="awarenessOption === 'unsure'" xmlns="http://www.w3.org/2000/svg" width="10" height="10"
+                viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </span>
+            <span class="bi-option-title">I'm not sure about my selection</span>
+          </div>
+          <div class="bi-option-sub">I'd like a technician to confirm before proceeding.</div>
+        </div>
+
+      </div>
+
+      <hr class="bi-divider">
+
+      <!-- Purchase Options -->
+      <div class="bi-section-label">Purchase Options:</div>
+      <div class="bi-option-group">
+
+        <div class="bi-option-card" [class.bi-option-selected]="purchaseOption === 'buy'"
+          (click)="setPurchase('buy')" id="option-buy">
+          <div class="bi-option-row">
+            <span class="bi-radio-dot" [class.bi-radio-dot-filled]="purchaseOption === 'buy'">
+              <svg *ngIf="purchaseOption === 'buy'" xmlns="http://www.w3.org/2000/svg" width="10" height="10"
+                viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </span>
+            <span class="bi-option-title">Buy Only</span>
+            <span class="bi-check-icon" *ngIf="purchaseOption === 'buy'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="#10A760" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+            </span>
+            <span class="bi-empty-circle" *ngIf="purchaseOption !== 'buy'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+            </span>
+          </div>
+          <div class="bi-option-sub">Pack &amp; delivered to you. Islandwide delivery available.</div>
+        </div>
+
+        <div class="bi-option-card" [class.bi-option-selected]="purchaseOption === 'install'"
+          (click)="setPurchase('install')" id="option-install">
+          <div class="bi-option-row">
+            <span class="bi-radio-dot" [class.bi-radio-dot-filled]="purchaseOption === 'install'">
+              <svg *ngIf="purchaseOption === 'install'" xmlns="http://www.w3.org/2000/svg" width="10" height="10"
+                viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </span>
+            <span class="bi-option-title">Buy &amp; Install</span>
+            <span class="bi-check-icon" *ngIf="purchaseOption === 'install'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="#10A760" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+            </span>
+            <span class="bi-empty-circle" *ngIf="purchaseOption !== 'install'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+            </span>
+          </div>
+          <div class="bi-option-sub">Requires site inspection first. Service limited to specific area</div>
+        </div>
+
+      </div>
+
+      <hr class="bi-divider">
+
+      <!-- Quantity -->
+      <div class="bi-qty-row">
+        <span class="bi-qty-label">Quantity:</span>
+        <div class="bi-qty-ctrl">
+          <button class="bi-qty-btn" (click)="changeQty(1)" id="qty-plus">+</button>
+          <span class="bi-qty-val">{{ quantity }}</span>
+          <button class="bi-qty-btn" (click)="changeQty(-1)" id="qty-minus">-</button>
+        </div>
+      </div>
+
+      <hr class="bi-divider">
+
+      <!-- Action Buttons -->
+      <div class="bi-actions" *ngIf="awarenessOption === 'know'">
+        <button class="bi-btn-primary" (click)="addToCart()" id="btn-add-to-cart">Add to Cart</button>
+        <a class="bi-btn-secondary" href="/catalog">← Go back to catalog</a>
+      </div>
+
+      <div class="bi-actions" *ngIf="awarenessOption === 'unsure'">
+        <button class="bi-btn-primary" (click)="onGetExpertAdvice()">Get Expert Advice</button>
+        <a class="bi-btn-secondary" href="/catalog">← Go back to catalog</a>
+      </div>
+
+    </div><!-- /.bi-right -->
+
+  </div><!-- /.bi-layout -->
+</div><!-- /.bi-container -->
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-content">
+      <!-- Brand -->
+      <div class="footer-col footer-brand">
+        <span class="footer-logo">AirLux</span>
+        <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
+      </div>
+      <!-- Contact -->
+      <div class="footer-col footer-contact">
+        <h3>Contact Us</h3>
+        <p>
+          <span class="footer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </span>
+          123 Galle Road, Colombo 03, Sri Lanka
+        </p>
+        <p>
+          <span class="footer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.68 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 1.2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-.8a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+          </span>
+          +94 11 234 5678
+        </p>
+        <p>
+          <span class="footer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+          </span>
+          support&#64;airlux.lk
+        </p>
+      </div>
+      <!-- Social -->
+      <div class="footer-col footer-social">
+        <h3>Follow Us</h3>
+        <div class="social-icons">
+          <a href="#" class="social-btn" title="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+            </svg>
+          </a>
+          <a href="#" class="social-btn" title="Twitter">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+            </svg>
+          </a>
+          <a href="#" class="social-btn" title="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+          </a>
+          <a href="#" class="social-btn" title="LinkedIn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+              <rect x="2" y="9" width="4" height="12" />
+              <circle cx="4" cy="4" r="2" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 AirLux. All rights reserved. &nbsp;|&nbsp; AC Service Management System
+    </div>
+  </div>
+</footer>
