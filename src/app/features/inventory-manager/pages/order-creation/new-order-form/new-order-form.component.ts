@@ -8,6 +8,7 @@ import { OrderSupplierSelectorComponent } from './components/order-supplier-sele
 import { OrderItemSearchComponent } from './components/order-item-search/order-item-search.component';
 import { OrderCartListComponent } from './components/order-cart-list/order-cart-list.component';
 import { OrderSuggestedGridComponent } from './components/order-suggested-grid/order-suggested-grid.component';
+import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
 
 @Component({
   selector: 'app-new-order-form',
@@ -59,10 +60,17 @@ export class NewOrderFormComponent implements OnInit {
         inventoryId: item._id,
         name: item.name,
         sku: item.sku,
-        quantity: item.reorderLevel || 10,
+        quantity: item.suggestedQuantity || 1,
         unitCost: item.unitCost || 0,
-        estimatedTotal: (item.reorderLevel || 10) * (item.unitCost || 0),
+        estimatedTotal: (item.suggestedQuantity || 1) * (item.unitCost || 0),
+        itemClass: item.itemClass || 'Unclassified',
+        subcategory: item.subcategory || 'Unclassified',
+        unit: item.unit || 'units',
+        manufacturerPartNumber: item.manufacturerPartNumber || '',
+        supplierId: supplierIdOf(item),
+        supplierName: supplierNameOf(item),
       });
+      this.selectPreferredSupplier(item);
     }
 
     this.route.params.subscribe(params => {
@@ -98,7 +106,8 @@ export class NewOrderFormComponent implements OnInit {
           this.orderNotes = order.notes;
           this.orderItems = order.items.map((i: any) => ({
             ...i,
-            inventoryId: i.inventoryId || ''
+            inventoryId: typeof i.inventoryId === 'object' ? i.inventoryId._id : i.inventoryId || '',
+            supplierId: typeof i.supplierId === 'object' ? i.supplierId._id : i.supplierId || '',
           }));
         }
       },
@@ -108,10 +117,23 @@ export class NewOrderFormComponent implements OnInit {
 
   // Event Handlers from Dumb Components
   onSupplierSelected(supplierName: string): void {
+    const supplier = this.suppliers.find((candidate) => candidate.name === supplierName);
+    const conflictingItem = this.orderItems.find((item) => item.supplierId && item.supplierId !== supplier?._id);
+    if (conflictingItem) {
+      this.errorMessage = `${conflictingItem.name} is assigned to a different preferred supplier.`;
+      return;
+    }
     this.selectedSupplier = supplierName;
   }
 
   onItemAdded(newItem: OrderItem): void {
+    const preferredSupplier = this.suppliers.find((supplier) => supplier._id === newItem.supplierId);
+    const preferredSupplierName = preferredSupplier?.name || newItem.supplierName;
+    if (preferredSupplierName && this.selectedSupplier && preferredSupplierName !== this.selectedSupplier) {
+      this.errorMessage = `This item is assigned to ${preferredSupplierName}. Create a separate order for that supplier.`;
+      return;
+    }
+    if (preferredSupplierName && !this.selectedSupplier) this.selectedSupplier = preferredSupplierName;
     const existingIndex = this.orderItems.findIndex(i => i.sku === newItem.sku);
     if (existingIndex !== -1) {
       this.orderItems[existingIndex].quantity += newItem.quantity;
@@ -196,13 +218,23 @@ export class NewOrderFormComponent implements OnInit {
         name: i.name,
         sku: i.sku,
         quantity: i.quantity,
-        unitCost: i.unitCost
+        unitCost: i.unitCost,
+        itemClass: i.itemClass || 'Unclassified',
+        subcategory: i.subcategory || 'Unclassified',
+        unit: i.unit || 'units',
+        manufacturerPartNumber: i.manufacturerPartNumber || '',
+        supplierId: i.supplierId || undefined,
       })),
       supplierName: this.selectedSupplier,
       notes: this.orderNotes,
       status: status,
       source: 'manual'
     };
+  }
+
+  private selectPreferredSupplier(item: InventoryItem): void {
+    const supplierName = supplierNameOf(item);
+    if (supplierName && !this.selectedSupplier) this.selectedSupplier = supplierName;
   }
 
   goBack(): void {

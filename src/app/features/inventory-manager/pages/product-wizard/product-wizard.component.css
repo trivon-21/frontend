@@ -85,13 +85,27 @@
 }
 
 .col-input input,
-.col-input textarea {
+.col-input textarea,
+.col-input select {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 14px;
   background: var(--background-card);
+}
+
+.checkbox-input {
+  gap: var(--spacing-sm);
+}
+
+.checkbox-input input {
+  width: auto;
+}
+
+.checkbox-input label {
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 .col-input textarea {

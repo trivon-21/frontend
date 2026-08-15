@@ -40,7 +40,11 @@ export class OrderItemSearchComponent implements OnChanges {
       this.filteredInventory = this.inventoryItems.filter(i => i && (
         (i.name?.toLowerCase() || '').includes(q) ||
         (i.sku?.toLowerCase() || '').includes(q) ||
-        (i.category?.toLowerCase() || '').includes(q)
+        (i.itemClass?.toLowerCase() || '').includes(q) ||
+        (i.subcategory?.toLowerCase() || '').includes(q) ||
+        (i.brand?.toLowerCase() || '').includes(q) ||
+        (i.manufacturerPartNumber?.toLowerCase() || '').includes(q) ||
+        (i.compatibleModels || []).some((model) => model.toLowerCase().includes(q))
       ));
     }
     this.showItemDropdown = true;
@@ -97,14 +101,24 @@ export class OrderItemSearchComponent implements OnChanges {
     } else {
       if (!this.selectedItem || this.currentQuantity <= 0) return;
       this.itemAdded.emit({
-        inventoryId: this.selectedItem._id,
+        inventoryId: this.selectedItem._id || this.selectedItem.id || '',
         name: this.selectedItem.name,
         sku: this.selectedItem.sku,
         quantity: this.currentQuantity,
         unitCost: this.currentPrice,
         estimatedTotal: this.currentQuantity * this.currentPrice,
         available: this.selectedItem.available,
-        reserved: this.selectedItem.reserved
+        reserved: this.selectedItem.reserved,
+        itemClass: this.selectedItem.itemClass || 'Unclassified',
+        subcategory: this.selectedItem.subcategory || 'Unclassified',
+        unit: this.selectedItem.unit,
+        manufacturerPartNumber: this.selectedItem.manufacturerPartNumber,
+        supplierId: typeof this.selectedItem.supplierId === 'object'
+          ? this.selectedItem.supplierId._id
+          : this.selectedItem.supplierId,
+        supplierName: typeof this.selectedItem.supplierId === 'object'
+          ? this.selectedItem.supplierId.name
+          : this.selectedItem.supplierName,
       });
     }
     this.clearSelection();

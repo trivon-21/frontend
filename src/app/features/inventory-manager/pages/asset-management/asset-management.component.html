@@ -24,11 +24,18 @@
       </div>
       <div class="input-group">
         <label>Select Tool</label>
-        <select class="form-select" [(ngModel)]="selectedToolId">
+        <select class="form-select" [(ngModel)]="selectedToolId" (change)="onToolSelected()">
           <option value="">Choose Tool...</option>
           <option *ngFor="let tool of tools" [value]="tool._id">
             {{ tool.name }} - {{ tool.sku }}
           </option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Select Asset Tag</label>
+        <select class="form-select" [(ngModel)]="selectedAssetTag" [disabled]="!selectedToolId">
+          <option value="">Choose Asset Tag...</option>
+          <option *ngFor="let assetTag of selectedToolAssetTags" [value]="assetTag">{{ assetTag }}</option>
         </select>
       </div>
       <div class="input-group">

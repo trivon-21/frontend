@@ -8,7 +8,17 @@ import {
   Validators,
   FormArray,
 } from '@angular/forms';
-import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
+import {
+  InventoryItem,
+  InventoryItemClass,
+  InventoryManagerDashboardService,
+  InventorySystemType,
+} from '../../services/inventory-manager-dashboard.service';
+import {
+  INVENTORY_ITEM_CLASSES,
+  INVENTORY_SUBCATEGORIES,
+  INVENTORY_SYSTEM_TYPES,
+} from '../../services/inventory-domain';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface RecentProcurement {
@@ -50,7 +60,18 @@ export class ProcurementDashboardComponent implements OnInit {
   filteredSuppliers: any[] = [];
   showSupplierDropdown = false;
   isAddingNewSupplier = false;
+  selectedSupplierId = '';
   searchQuery: string = '';
+  existingItemQuery = '';
+  inventoryItems: InventoryItem[] = [];
+  filteredInventoryItems: InventoryItem[] = [];
+  selectedExistingItem: InventoryItem | null = null;
+  showExistingItemDropdown = false;
+  showTechnicalFields = false;
+
+  readonly itemClasses: InventoryItemClass[] = INVENTORY_ITEM_CLASSES;
+  readonly subcategories = INVENTORY_SUBCATEGORIES;
+  readonly systemTypes: InventorySystemType[] = INVENTORY_SYSTEM_TYPES;
 
   procurements: RecentProcurement[] = [];
 
@@ -63,6 +84,7 @@ export class ProcurementDashboardComponent implements OnInit {
     this.initForm();
     this.loadSuppliers();
     this.loadProcurements();
+    this.loadInventory();
 
     // Listen to supplier input changes for autocomplete
     this.grnForm
@@ -70,6 +92,8 @@ export class ProcurementDashboardComponent implements OnInit {
       ?.valueChanges.pipe(debounceTime(200), distinctUntilChanged())
       .subscribe((value) => {
         if (typeof value === 'string') {
+          const selectedSupplier = this.suppliers.find((supplier) => supplier._id === this.selectedSupplierId);
+          if (selectedSupplier && selectedSupplier.name !== value) this.selectedSupplierId = '';
           this.filterSuppliers(value);
         }
       });
@@ -113,13 +137,22 @@ export class ProcurementDashboardComponent implements OnInit {
         sku: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9-]+$')]],
         brand: ['', Validators.required],
         type: ['Single', Validators.required],
-        category: ['General', Validators.required],
+        itemClass: ['Unclassified', Validators.required],
+        subcategory: ['Unclassified', Validators.required],
+        manufacturerPartNumber: [''],
+        compatibleModels: [''],
+        systemType: ['Not Applicable'],
+        refrigerants: [''],
+        capacityBtu: [null, Validators.min(0)],
+        voltage: [''],
+        phase: ['Not Applicable'],
         isSerialized: [false],
         specsUrl: [''],
       }),
       inventorySettings: this.fb.group({
         available: [0, [Validators.required, Validators.min(0)]],
         location: ['Warehouse', Validators.required],
+        binLocation: [''],
         unit: ['units', Validators.required],
         reorderLevel: [10, [Validators.required, Validators.min(0)]],
         maxStockLevel: [100, [Validators.required, Validators.min(0)]],
@@ -132,6 +165,17 @@ export class ProcurementDashboardComponent implements OnInit {
     this.grnForm.get('itemDetails.isSerialized')?.valueChanges.subscribe((val) => {
       this.updateSerialNumbersArray(this.grnForm.get('inventorySettings.available')?.value || 0);
     });
+    this.grnForm.get('itemDetails.itemClass')?.valueChanges.subscribe((itemClass) => {
+      if (!this.selectedExistingItem) {
+        const first = this.subcategories[itemClass as InventoryItemClass]?.[0] || 'Unclassified';
+        this.grnForm.get('itemDetails.subcategory')?.setValue(first);
+      }
+    });
+  }
+
+  get availableSubcategories(): string[] {
+    const itemClass = this.grnForm?.get('itemDetails.itemClass')?.value as InventoryItemClass;
+    return this.subcategories[itemClass] || ['Unclassified'];
   }
 
 
@@ -142,6 +186,16 @@ export class ProcurementDashboardComponent implements OnInit {
         this.filteredSuppliers = data;
       },
       error: (err) => console.error('Error loading suppliers:', err),
+    });
+  }
+
+  private loadInventory(): void {
+    this.inventoryService.getInventory().subscribe({
+      next: (items) => {
+        this.inventoryItems = items;
+        this.filteredInventoryItems = items.slice(0, 8);
+      },
+      error: (err) => console.error('Error loading inventory:', err),
     });
   }
 
@@ -181,6 +235,7 @@ export class ProcurementDashboardComponent implements OnInit {
       return;
     }
     this.grnForm.get('supplierInfo.supplier')?.setValue(supplier.name, { emitEvent: false });
+    this.selectedSupplierId = supplier._id;
     this.showSupplierDropdown = false;
     this.isAddingNewSupplier = false;
   }
@@ -207,6 +262,7 @@ export class ProcurementDashboardComponent implements OnInit {
         this.suppliers.push(supplier);
         this.suppliers.sort((a, b) => a.name.localeCompare(b.name));
         this.isAddingNewSupplier = false;
+        this.selectedSupplierId = supplier._id;
         this.isSubmitting = false;
         this.successMessage = `Supplier "${supplier.name}" added successfully!`;
       },
@@ -220,6 +276,76 @@ export class ProcurementDashboardComponent implements OnInit {
   cancelNewSupplier() {
     this.isAddingNewSupplier = false;
     this.grnForm.get('supplierInfo.supplier')?.setValue('');
+  }
+
+  filterExistingItems(query: string): void {
+    this.existingItemQuery = query;
+    const value = query.toLowerCase().trim();
+    this.filteredInventoryItems = this.inventoryItems
+      .filter((item) => !value || item.name.toLowerCase().includes(value) || item.sku.toLowerCase().includes(value))
+      .slice(0, 8);
+    this.showExistingItemDropdown = true;
+  }
+
+  selectExistingItem(item: InventoryItem): void {
+    this.selectedExistingItem = item;
+    this.existingItemQuery = `${item.sku} — ${item.name}`;
+    this.showExistingItemDropdown = false;
+    this.grnForm.get('itemDetails')?.patchValue({
+      name: item.name,
+      sku: item.sku,
+      brand: item.brand,
+      type: item.type,
+      itemClass: item.itemClass || 'Unclassified',
+      subcategory: item.subcategory || 'Unclassified',
+      manufacturerPartNumber: item.manufacturerPartNumber || '',
+      compatibleModels: (item.compatibleModels || []).join(', '),
+      systemType: item.systemType || 'Not Applicable',
+      refrigerants: (item.refrigerants || []).join(', '),
+      capacityBtu: item.capacityBtu || null,
+      voltage: item.voltage || '',
+      phase: item.phase || 'Not Applicable',
+      isSerialized: item.isSerialized,
+      specsUrl: item.specsUrl || '',
+    });
+    this.grnForm.get('inventorySettings')?.patchValue({
+      location: item.location,
+      binLocation: item.binLocation || '',
+      unit: item.unit,
+      reorderLevel: item.reorderLevel,
+      maxStockLevel: item.maxStockLevel,
+      unitCost: item.unitCost,
+    });
+  }
+
+  clearExistingItem(): void {
+    this.selectedExistingItem = null;
+    this.existingItemQuery = '';
+    this.grnForm.get('itemDetails')?.reset({
+      name: '',
+      sku: '',
+      brand: '',
+      type: 'Single',
+      itemClass: 'Unclassified',
+      subcategory: 'Unclassified',
+      manufacturerPartNumber: '',
+      compatibleModels: '',
+      systemType: 'Not Applicable',
+      refrigerants: '',
+      capacityBtu: null,
+      voltage: '',
+      phase: 'Not Applicable',
+      isSerialized: false,
+      specsUrl: '',
+    });
+    this.grnForm.get('inventorySettings')?.patchValue({
+      location: 'Warehouse',
+      binLocation: '',
+      unit: 'units',
+      reorderLevel: 10,
+      maxStockLevel: 100,
+      unitCost: 0,
+    });
   }
 
   nextStep() {
@@ -248,7 +374,7 @@ export class ProcurementDashboardComponent implements OnInit {
 
   canGoNext(): boolean {
     if (this.currentStep === 1) {
-      return this.grnForm.get('supplierInfo')!.valid && !this.isAddingNewSupplier;
+      return this.grnForm.get('supplierInfo')!.valid && !!this.selectedSupplierId && !this.isAddingNewSupplier;
     }
     if (this.currentStep === 2) return this.grnForm.get('itemDetails')!.valid;
     return this.grnForm.valid;
@@ -289,16 +415,26 @@ export class ProcurementDashboardComponent implements OnInit {
     this.errorMessage = '';
 
     const formData = {
-      ...this.grnForm.get('itemDetails')?.value,
-      ...this.grnForm.get('inventorySettings')?.value,
-      supplierName: this.grnForm.get('supplierInfo.supplier')?.value,
+      inventoryId: this.selectedExistingItem?._id,
+      item: this.selectedExistingItem ? undefined : {
+        ...this.grnForm.get('itemDetails')?.value,
+        ...this.grnForm.get('inventorySettings')?.value,
+        compatibleModels: this.toList(this.grnForm.get('itemDetails.compatibleModels')?.value),
+        refrigerants: this.toList(this.grnForm.get('itemDetails.refrigerants')?.value),
+      },
+      quantity: this.grnForm.get('inventorySettings.available')?.value,
+      serialNumbers: this.grnForm.get('inventorySettings.serialNumbers')?.value,
+      supplierId: this.selectedSupplierId,
       invoiceNumber: this.grnForm.get('supplierInfo.invoiceNumber')?.value,
       receivedDate: this.grnForm.get('supplierInfo.receivedDate')?.value,
       condition: this.grnForm.get('supplierInfo.condition')?.value,
+      location: this.grnForm.get('inventorySettings.location')?.value,
+      binLocation: this.grnForm.get('inventorySettings.binLocation')?.value,
+      unitCost: this.grnForm.get('inventorySettings.unitCost')?.value,
     };
 
-    this.inventoryService.addItem(formData).subscribe({
-      next: (item) => {
+    this.inventoryService.receiveInventory(formData).subscribe({
+      next: ({ item }) => {
         this.isSubmitting = false;
         this.successMessage = `Product "${item.name}" added successfully!`;
         this.loadProcurements(); // Refresh list from server
@@ -319,10 +455,11 @@ export class ProcurementDashboardComponent implements OnInit {
         receivedDate: new Date().toISOString().substring(0, 10),
         condition: 'Good',
       },
-      itemDetails: { type: 'Single', category: 'General', isSerialized: false },
+      itemDetails: { type: 'Single', itemClass: 'Unclassified', subcategory: 'Unclassified', systemType: 'Not Applicable', phase: 'Not Applicable', isSerialized: false },
       inventorySettings: {
         available: 0,
         location: 'Warehouse',
+        binLocation: '',
         unit: 'units',
         reorderLevel: 10,
         maxStockLevel: 100,
@@ -334,5 +471,13 @@ export class ProcurementDashboardComponent implements OnInit {
     while (serials.length !== 0) {
       serials.removeAt(0);
     }
+    this.selectedSupplierId = '';
+    this.selectedExistingItem = null;
+    this.existingItemQuery = '';
+    this.showTechnicalFields = false;
+  }
+
+  private toList(value: string): string[] {
+    return [...new Set((value || '').split(',').map((entry) => entry.trim()).filter(Boolean))];
   }
 }

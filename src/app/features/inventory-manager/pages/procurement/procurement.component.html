@@ -155,7 +155,31 @@
       <!-- Step 2: Item Entry -->
       <div *ngIf="currentStep === 2" class="step-content animate-fade" formGroupName="itemDetails">
         <h3>Product Details</h3>
-        <p class="step-desc">Define the product being received</p>
+        <p class="step-desc">Select an existing SKU to replenish it, or enter a new classified product</p>
+
+        <div class="form-group supplier-group">
+          <label>FIND EXISTING SKU</label>
+          <div class="input-with-icon">
+            <input
+              type="text"
+              class="form-input"
+              [ngModel]="existingItemQuery"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="filterExistingItems($event)"
+              (focus)="filterExistingItems(existingItemQuery)"
+              (blur)="showExistingItemDropdown = false"
+              placeholder="Search by SKU or product name"
+            />
+            <button type="button" class="btn-icon" *ngIf="selectedExistingItem" (mousedown)="clearExistingItem()">×</button>
+          </div>
+          <div class="supplier-dropdown" *ngIf="showExistingItemDropdown && !selectedExistingItem">
+            <div class="supplier-option" *ngFor="let item of filteredInventoryItems" (mousedown)="selectExistingItem(item)">
+              <strong>{{ item.sku }}</strong> — {{ item.name }}
+              <small>{{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</small>
+            </div>
+          </div>
+          <small *ngIf="selectedExistingItem">Receiving into existing stock. Product identity remains unchanged.</small>
+        </div>
 
         <div class="form-grid">
           <div class="form-group">
@@ -165,6 +189,7 @@
               placeholder="Enter Product Name"
               class="form-input"
               formControlName="name"
+              [readonly]="selectedExistingItem"
             />
             <span
               class="error-text"
@@ -182,6 +207,7 @@
               placeholder="e.g., AC-LG-12000-INV"
               class="form-input"
               formControlName="sku"
+              [readonly]="selectedExistingItem"
             />
             <span
               class="error-text"
@@ -199,6 +225,7 @@
               placeholder="e.g., LG, Samsung, Daikin"
               class="form-input"
               formControlName="brand"
+              [readonly]="selectedExistingItem"
             />
             <span
               class="error-text"
@@ -214,18 +241,25 @@
             <label>PRODUCT TYPE *</label>
             <select class="form-select" formControlName="type">
               <option value="Single">Single Item</option>
+              <option value="Kit">Kit</option>
               <option value="Bundle">Bundle Pack</option>
             </select>
           </div>
           <div class="form-group">
-            <label>CATEGORY *</label>
-            <select class="form-select" formControlName="category">
-              <option value="Air Conditioners">Air Conditioners</option>
-              <option value="Installation Kits">Installation Kits</option>
-              <option value="Repair Parts">Repair Parts</option>
-              <option value="Tools">Tools</option>
-              <option value="General">General</option>
+            <label>PRODUCT CLASS *</label>
+            <select class="form-select" formControlName="itemClass">
+              <option *ngFor="let itemClass of itemClasses" [value]="itemClass">{{ itemClass }}</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>SUBCATEGORY *</label>
+            <select class="form-select" formControlName="subcategory">
+              <option *ngFor="let subcategory of availableSubcategories" [value]="subcategory">{{ subcategory }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>OEM PART / MODEL NUMBER</label>
+            <input type="text" class="form-input" formControlName="manufacturerPartNumber" />
           </div>
           <div class="form-group">
             <label>Technical Specs Link (URL)</label>
@@ -241,6 +275,28 @@
               <input type="checkbox" formControlName="isSerialized" />
               <span class="toggle-text">Is Serialized? (Track individual units)</span>
             </label>
+          </div>
+        </div>
+
+        <button type="button" class="btn-link" (click)="showTechnicalFields = !showTechnicalFields">
+          {{ showTechnicalFields ? 'Hide' : 'Add' }} technical compatibility
+        </button>
+        <div class="form-grid" *ngIf="showTechnicalFields">
+          <div class="form-group">
+            <label>COMPATIBLE SYSTEM</label>
+            <select class="form-select" formControlName="systemType">
+              <option *ngFor="let systemType of systemTypes" [value]="systemType">{{ systemType }}</option>
+            </select>
+          </div>
+          <div class="form-group"><label>COMPATIBLE MODELS</label><input class="form-input" formControlName="compatibleModels" placeholder="Comma-separated" /></div>
+          <div class="form-group"><label>REFRIGERANTS</label><input class="form-input" formControlName="refrigerants" placeholder="R32, R410A" /></div>
+          <div class="form-group"><label>CAPACITY (BTU/h)</label><input type="number" min="0" class="form-input" formControlName="capacityBtu" /></div>
+          <div class="form-group"><label>VOLTAGE</label><input class="form-input" formControlName="voltage" placeholder="230 V" /></div>
+          <div class="form-group">
+            <label>PHASE</label>
+            <select class="form-select" formControlName="phase">
+              <option>Single Phase</option><option>Three Phase</option><option>Not Applicable</option>
+            </select>
           </div>
         </div>
       </div>
@@ -283,6 +339,10 @@
               class="form-input"
               formControlName="location"
             />
+          </div>
+          <div class="form-group">
+            <label>SHELF / BIN</label>
+            <input type="text" class="form-input" formControlName="binLocation" placeholder="e.g., SP-A01" />
           </div>
           <div class="form-group">
             <label>UNIT OF MEASURE *</label>

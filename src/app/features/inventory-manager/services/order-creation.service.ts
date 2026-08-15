@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { Observable } from 'rxjs';
+import { InventoryItem } from './inventory-domain';
+export type { InventoryItem } from './inventory-domain';
 
 export interface OrderItem {
   inventoryId: string;
@@ -11,20 +13,12 @@ export interface OrderItem {
   estimatedTotal: number;
   available?: number;
   reserved?: number;
-}
-
-export interface InventoryItem {
-  _id: string;
-  name: string;
-  sku: string;
-  available: number;
-  reserved: number;
-  unitCost: number;
-  unit: string;
-  status: string;
-  category: string;
-  brand: string;
-  reorderLevel: number;
+  itemClass?: string;
+  subcategory?: string;
+  unit?: string;
+  manufacturerPartNumber?: string;
+  supplierId?: string;
+  supplierName?: string;
 }
 
 export interface Supplier {

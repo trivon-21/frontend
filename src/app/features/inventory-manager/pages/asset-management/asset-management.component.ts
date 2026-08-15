@@ -45,6 +45,7 @@ export class AssetManagementDashboardComponent implements OnInit {
   // Form states
   selectedTechnicianId: string = '';
   selectedToolId: string = '';
+  selectedAssetTag: string = '';
   dueDate: string = '';
   validationMessage = '';
 
@@ -82,13 +83,21 @@ export class AssetManagementDashboardComponent implements OnInit {
 
   fetchData() {
     this.apiService.get('/inventory/technicians').subscribe((data) => (this.technicians = data));
-    this.apiService
-      .get('/inventory/list')
-      .subscribe(
-        (data) => (this.tools = data.filter((t: any) => t.isSerialized || t.category === 'Tools')),
-      );
+    this.fetchAvailableTools();
     this.fetchLoans();
     this.fetchReturnLogs();
+  }
+
+  fetchAvailableTools() {
+    this.apiService.get('/inventory/available-tools').subscribe((data) => (this.tools = data));
+  }
+
+  get selectedToolAssetTags(): string[] {
+    return this.tools.find((tool) => tool._id === this.selectedToolId)?.availableSerialNumbers || [];
+  }
+
+  onToolSelected(): void {
+    this.selectedAssetTag = '';
   }
 
   fetchLoans() {
@@ -108,7 +117,7 @@ export class AssetManagementDashboardComponent implements OnInit {
 
 
   checkOut() {
-    if (!this.selectedTechnicianId || !this.selectedToolId || !this.dueDate) {
+    if (!this.selectedTechnicianId || !this.selectedToolId || !this.selectedAssetTag || !this.dueDate) {
       this.validationMessage = 'Please fill all fields before checking out.';
       setTimeout(() => this.validationMessage = '', 4000);
       return;
@@ -120,17 +129,24 @@ export class AssetManagementDashboardComponent implements OnInit {
     const loanData = {
       toolId: tool._id,
       toolName: tool.name,
-      assetTag: tool.sku, // Using SKU as asset tag if not specific
+      assetTag: this.selectedAssetTag,
       technicianId: technician._id.toString(),
       technicianName: technician.name,
       dueDate: this.dueDate,
     };
 
-    this.apiService.post('/inventory/asset-loans', loanData).subscribe(() => {
-      this.fetchLoans();
-      this.selectedToolId = '';
-      this.selectedTechnicianId = '';
-      this.dueDate = '';
+    this.apiService.post('/inventory/asset-loans', loanData).subscribe({
+      next: () => {
+        this.fetchLoans();
+        this.fetchAvailableTools();
+        this.selectedToolId = '';
+        this.selectedAssetTag = '';
+        this.selectedTechnicianId = '';
+        this.dueDate = '';
+      },
+      error: (err) => {
+        this.validationMessage = err.error?.message || 'Failed to check out tool.';
+      },
     });
   }
 
@@ -138,6 +154,7 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.apiService.post(`/inventory/asset-loans/return/${id}`).subscribe(() => {
       this.fetchLoans();
       this.fetchReturnLogs();
+      this.fetchAvailableTools();
     });
   }
 }

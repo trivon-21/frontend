@@ -32,7 +32,7 @@
           <div class="dropdown-item" *ngFor="let item of filteredInventory" (mousedown)="selectInventoryItem(item)">
             <div class="item-info">
               <span class="name">{{ item.name }}</span>
-              <span class="sku">{{ item.sku }}</span>
+              <span class="sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</span>
             </div>
             <div class="item-stock-info">
               Avail: <span class="avail">{{ item.available }}</span>

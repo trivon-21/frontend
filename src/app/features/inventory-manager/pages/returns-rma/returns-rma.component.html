@@ -287,10 +287,15 @@
         <div class="form-group">
           <label>Serial Number *</label>
           <input type="text" [(ngModel)]="rmaForm.serialNumber" placeholder="e.g., CAR-IND-2024-2234" class="form-input">
+          <div class="autocomplete-results" *ngIf="matchingRmaAssets.length">
+            <button type="button" *ngFor="let asset of matchingRmaAssets" (click)="selectRmaAsset(asset.item, asset.serial)">
+              {{ asset.serial }} — {{ asset.item.name }} ({{ asset.item.sku }})
+            </button>
+          </div>
         </div>
         <div class="form-group">
           <label>Item Name</label>
-          <input type="text" [(ngModel)]="rmaForm.itemName" placeholder="Product name (optional)" class="form-input">
+          <input type="text" [(ngModel)]="rmaForm.itemName" placeholder="Select a serial number" class="form-input" readonly>
         </div>
         <div class="form-group">
           <label>Fault Description *</label>
@@ -300,6 +305,7 @@
           <label>Type</label>
           <select [(ngModel)]="rmaForm.type" class="form-input">
             <option value="Single">Single Unit</option>
+            <option value="Kit">Kit</option>
             <option value="Bundle">Bundle</option>
           </select>
         </div>

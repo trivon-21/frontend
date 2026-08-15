@@ -7,10 +7,10 @@
     </div>
   </div>
 
-  <!-- Step 1: General Info & Capacity -->
+  <!-- Step 1: Inventory identity and stock -->
   <div class="step-content" *ngIf="currentStep === 1">
     <section class="form-section">
-      <h3>General Product Information</h3>
+      <h3>Inventory Classification</h3>
       <div class="form-table glass-panel">
         <div class="form-row header-row">
           <div class="col-label">FIELD</div>
@@ -23,15 +23,47 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Current Price</div>
+          <div class="col-label">SKU / Asset Tag</div>
           <div class="col-input">
-            <input type="text" [(ngModel)]="productData.price" placeholder="Enter price (e.g., 125,000 LKR)">
+            <input type="text" [(ngModel)]="productData.sku" placeholder="e.g., AC-COMP-001">
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Availability</div>
+          <div class="col-label">Product Class</div>
           <div class="col-input">
-            <input type="text" [(ngModel)]="productData.availability">
+            <select [(ngModel)]="productData.itemClass" (change)="onItemClassChange()">
+              <option *ngFor="let itemClass of itemClasses" [value]="itemClass">{{ itemClass }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Subcategory</div>
+          <div class="col-input">
+            <select [(ngModel)]="productData.subcategory">
+              <option *ngFor="let subcategory of availableSubcategories" [value]="subcategory">{{ subcategory }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Brand / Manufacturer</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.brand" placeholder="e.g., Daikin, Copeland, Fieldpiece">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">OEM Part / Model Number</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.manufacturerPartNumber" placeholder="Manufacturer part or model number">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Item Form</div>
+          <div class="col-input">
+            <select [(ngModel)]="productData.type">
+              <option value="Single">Single</option>
+              <option value="Kit">Kit</option>
+              <option value="Bundle">Bundle</option>
+            </select>
           </div>
         </div>
         <div class="form-row">
@@ -44,30 +76,81 @@
     </section>
 
     <section class="form-section">
-      <h3>Capacity & Pricing Options</h3>
+      <h3>Stock and Storage</h3>
       <div class="form-table glass-panel">
         <div class="form-row header-row">
-          <div class="col-label">CAPACITY</div>
-          <div class="col-input">PRICE (LKR)</div>
+          <div class="col-label">FIELD</div>
+          <div class="col-input">DETAIL</div>
         </div>
         <div class="form-row">
-          <div class="col-label">
-            <input type="text" placeholder="e.g., 1.5 Ton">
-          </div>
+          <div class="col-label">Available Quantity</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 125,000">
+            <input type="number" min="0" [(ngModel)]="productData.availability">
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">
-            <input type="text" placeholder="e.g., 1.5 Ton">
-          </div>
+          <div class="col-label">Reserved Quantity</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 125,000">
+            <input type="number" min="0" [(ngModel)]="productData.reserved">
           </div>
         </div>
-        <div class="action-footer">
-          <button class="btn-add-feature">Add a Feature</button>
+        <div class="form-row">
+          <div class="col-label">Reorder Level</div>
+          <div class="col-input">
+            <input type="number" min="0" [(ngModel)]="productData.reorderLevel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Maximum Stock Level</div>
+          <div class="col-input">
+            <input type="number" min="0" [(ngModel)]="productData.maxStockLevel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Unit of Measure</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.unit" placeholder="units, kg, m, cylinders">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Unit Cost (LKR)</div>
+          <div class="col-input">
+            <input type="number" min="0" [(ngModel)]="productData.unitCost">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Warehouse / Area</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.location" placeholder="e.g., Main Warehouse">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Shelf / Bin</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="productData.binLocation" placeholder="e.g., A-03-02">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Supplier</div>
+          <div class="col-input">
+            <select [(ngModel)]="productData.supplierId">
+              <option value="">Not assigned</option>
+              <option *ngFor="let supplier of suppliers" [value]="supplier._id">{{ supplier.name }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Tracking</div>
+          <div class="col-input checkbox-input">
+            <input id="serialized" type="checkbox" [(ngModel)]="productData.isSerialized">
+            <label for="serialized">Track individual serial numbers / asset tags</label>
+          </div>
+        </div>
+        <div class="form-row" *ngIf="productData.isSerialized">
+          <div class="col-label">Serial Numbers / Asset Tags</div>
+          <div class="col-input">
+            <input type="text" [(ngModel)]="serialNumbersText" placeholder="Comma-separated serial numbers or asset tags">
+          </div>
         </div>
       </div>
     </section>
@@ -135,46 +218,45 @@
           <div class="col-input">VALUE</div>
         </div>
         <div class="form-row">
-          <div class="col-label">Cooling Capacity</div>
+          <div class="col-label">Compatible System</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 1.5 Ton (18,000 BTU)">
+            <select [(ngModel)]="productData.systemType">
+              <option *ngFor="let systemType of systemTypes" [value]="systemType">{{ systemType }}</option>
+            </select>
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Energy Efficiency</div>
+          <div class="col-label">Compatible Models</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 5-Star Rated">
+            <input type="text" [(ngModel)]="compatibleModelsText" placeholder="Comma-separated model numbers">
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Power Consumption</div>
+          <div class="col-label">Cooling Capacity (BTU/h)</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 1.2 kW">
+            <input type="number" min="0" [(ngModel)]="productData.capacityBtu" placeholder="e.g., 18000">
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Refrigerant Type</div>
+          <div class="col-label">Refrigerant Compatibility</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., R32 Eco-friendly">
-          </div>
-        </div>
-        <div class="form-row split">
-          <div class="col-label">Noise Level</div>
-          <div class="col-input-split">
-            <div class="split-input">
-              <label>Indoor (dB)</label>
-              <input type="text" placeholder="e.g., 28 dB">
-            </div>
-            <div class="split-input">
-              <label>Outdoor (dB)</label>
-              <input type="text" placeholder="e.g., 48 dB">
-            </div>
+            <input type="text" [(ngModel)]="refrigerantsText" placeholder="e.g., R32, R410A">
           </div>
         </div>
         <div class="form-row">
-          <div class="col-label">Air Flow</div>
+          <div class="col-label">Voltage</div>
           <div class="col-input">
-            <input type="text" placeholder="e.g., 650 m³/h">
+            <input type="text" [(ngModel)]="productData.voltage" placeholder="e.g., 230 V">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-label">Phase</div>
+          <div class="col-input">
+            <select [(ngModel)]="productData.phase">
+              <option>Single Phase</option>
+              <option>Three Phase</option>
+              <option>Not Applicable</option>
+            </select>
           </div>
         </div>
         <div class="form-row split">

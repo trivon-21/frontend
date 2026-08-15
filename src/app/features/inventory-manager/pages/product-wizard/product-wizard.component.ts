@@ -2,7 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
+import {
+  InventoryItemClass,
+  InventoryManagerDashboardService,
+  InventorySystemType,
+} from '../../services/inventory-manager-dashboard.service';
+import {
+  INVENTORY_ITEM_CLASSES,
+  INVENTORY_SUBCATEGORIES,
+  INVENTORY_SYSTEM_TYPES,
+} from '../../services/inventory-domain';
 
 @Component({
   selector: 'app-product-wizard',
@@ -18,14 +27,42 @@ export class ProductWizardComponent implements OnInit {
   loading = false;
   successMessage = '';
   errorMessage = '';
+  compatibleModelsText = '';
+  refrigerantsText = '';
+  serialNumbersText = '';
+  suppliers: Array<{ _id: string; name: string }> = [];
+
+  readonly itemClasses: InventoryItemClass[] = INVENTORY_ITEM_CLASSES;
+  readonly subcategories: Record<InventoryItemClass, string[]> = INVENTORY_SUBCATEGORIES;
+  readonly systemTypes: InventorySystemType[] = INVENTORY_SYSTEM_TYPES;
 
   productData: any = {
     name: '',
     sku: '',
-    price: '',
+    itemClass: 'Unclassified',
+    subcategory: 'Unclassified',
+    category: 'Unclassified',
+    brand: '',
+    manufacturerPartNumber: '',
+    compatibleModels: [],
+    systemType: 'Not Applicable',
+    refrigerants: [],
+    capacityBtu: null,
+    voltage: '',
+    phase: 'Not Applicable',
+    type: 'Single',
     availability: 0,
     available: 0,
     reserved: 0,
+    reorderLevel: 10,
+    maxStockLevel: 100,
+    unitCost: 0,
+    unit: 'units',
+    location: 'Warehouse',
+    binLocation: '',
+    supplierId: '',
+    isSerialized: false,
+    serialNumbers: [],
     description: '',
     specifications: {
       coolingCapacity: '',
@@ -52,14 +89,24 @@ export class ProductWizardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.inventoryService.getSuppliers().subscribe({
+      next: (suppliers) => (this.suppliers = suppliers),
+      error: () => (this.suppliers = []),
+    });
+
     this.itemId = this.route.snapshot.paramMap.get('id');
     if (this.itemId) {
       this.loading = true;
       this.inventoryService.getItem(this.itemId).subscribe({
         next: (item) => {
           this.productData = { ...this.productData, ...item };
-          // Ensure availability matches available for the form if needed
           this.productData.availability = item.available;
+          this.productData.itemClass = item.itemClass || 'Unclassified';
+          this.productData.subcategory = item.subcategory || 'Unclassified';
+          this.compatibleModelsText = (item.compatibleModels || []).join(', ');
+          this.refrigerantsText = (item.refrigerants || []).join(', ');
+          this.serialNumbersText = (item.serialNumbers || []).join(', ');
+          if (typeof item.supplierId === 'object') this.productData.supplierId = item.supplierId._id;
           this.loading = false;
         },
         error: (err) => {
@@ -68,6 +115,14 @@ export class ProductWizardComponent implements OnInit {
         }
       });
     }
+  }
+
+  get availableSubcategories(): string[] {
+    return this.subcategories[this.productData.itemClass as InventoryItemClass] || ['Unclassified'];
+  }
+
+  onItemClassChange(): void {
+    this.productData.subcategory = this.availableSubcategories[0] || 'Unclassified';
   }
 
   nextStep() {
@@ -83,6 +138,15 @@ export class ProductWizardComponent implements OnInit {
   }
 
   saveProduct() {
+    this.productData.available = Number(this.productData.availability) || 0;
+    this.productData.category = this.productData.itemClass || 'Unclassified';
+    this.productData.compatibleModels = this.toList(this.compatibleModelsText);
+    this.productData.refrigerants = this.toList(this.refrigerantsText);
+    this.productData.serialNumbers = this.productData.isSerialized
+      ? this.toList(this.serialNumbersText)
+      : [];
+    if (!this.productData.supplierId) delete this.productData.supplierId;
+
     if (this.itemId) {
       // Update
       this.inventoryService.updateItem(this.itemId, this.productData).subscribe({
@@ -108,5 +172,9 @@ export class ProductWizardComponent implements OnInit {
         }
       });
     }
+  }
+
+  private toList(value: string): string[] {
+    return [...new Set(value.split(',').map((entry) => entry.trim()).filter(Boolean))];
   }
 }

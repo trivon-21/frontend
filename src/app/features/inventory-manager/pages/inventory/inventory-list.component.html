@@ -1,8 +1,8 @@
 <div class="inventory-container">
-  <!-- Action Header -->
   <div class="action-header">
     <div class="page-title">
       <h1>Inventory</h1>
+      <p>Equipment, parts, materials, consumables and tools</p>
     </div>
     <div class="header-actions">
       <button class="btn-primary" [routerLink]="['/inventory-manager/procurement']">
@@ -16,135 +16,277 @@
     </div>
   </div>
 
-  <!-- Filters Section -->
   <div class="filters-card">
-    <div class="search-box">
-      <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Search Inventory...">
-    </div>
-    
-    <div class="filter-group">
-      <span class="filter-label">Filters:</span>
-      
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedType" (change)="applyFilters()">
-          <option>All Types</option>
-          <option>Single</option>
-          <option>Bundle</option>
-        </select>
-      </div>
+    <div class="quick-filters">
+      <label class="search-box">
+        <lucide-angular name="search" class="inline-icon"></lucide-angular>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()"
+          placeholder="Search name, SKU, model, OEM part or asset tag..."
+        >
+      </label>
 
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
-          <option>All Categories</option>
-          <option>Tools</option>
-          <option>Components</option>
-          <option>Parts</option>
-          <option>Installation Kits</option>
-          <option>Repair Parts</option>
+      <label class="filter-field">
+        <span>Product class</span>
+        <select [(ngModel)]="selectedItemClass" (change)="onItemClassChange()">
+          <option>All Product Classes</option>
+          <option *ngFor="let itemClass of itemClassOptions" [value]="itemClass">{{ itemClass }}</option>
         </select>
-      </div>
+      </label>
 
-      <div class="select-wrapper">
-        <select [(ngModel)]="selectedBrand" (change)="applyFilters()">
-          <option>All Brands</option>
-          <option>LG</option>
-          <option>Daikin</option>
-          <option>Samsung</option>
-          <option>Yellow Jacket</option>
-          <option>Fieldpiece</option>
-          <option>Appion</option>
-          <option>Testo</option>
+      <label class="filter-field">
+        <span>Subcategory</span>
+        <select [(ngModel)]="selectedSubcategory" (change)="applyFilters()">
+          <option>All Subcategories</option>
+          <option *ngFor="let subcategory of subcategoryOptions" [value]="subcategory">
+            {{ subcategory }}
+          </option>
         </select>
-      </div>
+      </label>
 
-      <div class="select-wrapper">
+      <label class="filter-field">
+        <span>Stock status</span>
+        <select [(ngModel)]="selectedStockStatus" (change)="applyFilters()">
+          <option value="all">All Stock</option>
+          <option value="in-stock">In stock</option>
+          <option value="low-stock">Low stock</option>
+          <option value="out-of-stock">Out of stock</option>
+          <option value="reserved">Reserved</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Location</span>
         <select [(ngModel)]="selectedLocation" (change)="applyFilters()">
           <option>All Locations</option>
-          <option>Warehouse</option>
-          <option>Logistic Area 1</option>
-          <option>Logistic Area 2</option>
-          <option>Logistic Area 3</option>
+          <option *ngFor="let location of locationOptions" [value]="location">{{ location }}</option>
         </select>
-      </div>
+      </label>
+    </div>
 
-      <button class="btn-link" (click)='clearFilters()'>Clear Filters</button>
+    <div class="filter-actions">
+      <button
+        class="btn-advanced"
+        type="button"
+        [class.active]="showAdvancedFilters || hasAdvancedFilters"
+        (click)="showAdvancedFilters = !showAdvancedFilters"
+      >
+        <lucide-angular name="sliders-horizontal" [size]="16"></lucide-angular>
+        Advanced
+        <span class="active-dot" *ngIf="hasAdvancedFilters"></span>
+      </button>
+
+      <label class="sort-field">
+        <span>Sort</span>
+        <select [(ngModel)]="sortField" (change)="applyFilters()">
+          <option value="name">Product name</option>
+          <option value="sku">SKU</option>
+          <option value="available">Available quantity</option>
+          <option value="stockStatus">Stock status</option>
+          <option value="unitCost">Unit cost</option>
+          <option value="updatedAt">Recently updated</option>
+        </select>
+      </label>
+
+      <button class="btn-icon" type="button" (click)="toggleSortDirection()" title="Change sort direction">
+        <lucide-angular [name]="sortDirection === 'asc' ? 'arrow-up-narrow-wide' : 'arrow-down-wide-narrow'" [size]="17"></lucide-angular>
+      </button>
+      <button class="btn-link" type="button" (click)="clearFilters()">Clear filters</button>
+    </div>
+
+    <div class="advanced-filters" *ngIf="showAdvancedFilters">
+      <label class="filter-field">
+        <span>Brand</span>
+        <select [(ngModel)]="selectedBrand" (change)="applyFilters()">
+          <option>All Brands</option>
+          <option *ngFor="let brand of brandOptions" [value]="brand">{{ brand }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Compatible system</span>
+        <select [(ngModel)]="selectedSystemType" (change)="applyFilters()">
+          <option>All Systems</option>
+          <option *ngFor="let systemType of systemTypeOptions" [value]="systemType">{{ systemType }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Refrigerant</span>
+        <select [(ngModel)]="selectedRefrigerant" (change)="applyFilters()">
+          <option>All Refrigerants</option>
+          <option *ngFor="let refrigerant of refrigerantOptions" [value]="refrigerant">{{ refrigerant }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Voltage</span>
+        <select [(ngModel)]="selectedVoltage" (change)="applyFilters()">
+          <option>All Voltages</option>
+          <option *ngFor="let voltage of voltageOptions" [value]="voltage">{{ voltage }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Phase</span>
+        <select [(ngModel)]="selectedPhase" (change)="applyFilters()">
+          <option>All Phases</option>
+          <option *ngFor="let phase of phaseOptions" [value]="phase">{{ phase }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Tracking</span>
+        <select [(ngModel)]="selectedSerialization" (change)="applyFilters()">
+          <option>All Tracking</option>
+          <option>Serialized</option>
+          <option>Non-serialized</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Item form</span>
+        <select [(ngModel)]="selectedType" (change)="applyFilters()">
+          <option>All Item Forms</option>
+          <option>Single</option>
+          <option>Kit</option>
+          <option>Bundle</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Supplier</span>
+        <select [(ngModel)]="selectedSupplier" (change)="applyFilters()">
+          <option>All Suppliers</option>
+          <option *ngFor="let supplier of supplierOptions" [value]="supplier">{{ supplier }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Unit</span>
+        <select [(ngModel)]="selectedUnit" (change)="applyFilters()">
+          <option>All Units</option>
+          <option *ngFor="let unit of unitOptions" [value]="unit">{{ unit }}</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Minimum BTU/h</span>
+        <input type="number" min="0" [(ngModel)]="capacityMin" (input)="applyFilters()" placeholder="Any">
+      </label>
+
+      <label class="filter-field">
+        <span>Maximum BTU/h</span>
+        <input type="number" min="0" [(ngModel)]="capacityMax" (input)="applyFilters()" placeholder="Any">
+      </label>
+
+      <label class="filter-field">
+        <span>Updated from</span>
+        <input type="date" [(ngModel)]="updatedFrom" (change)="applyFilters()">
+      </label>
+
+      <label class="filter-field">
+        <span>Updated to</span>
+        <input type="date" [(ngModel)]="updatedTo" (change)="applyFilters()">
+      </label>
     </div>
   </div>
 
-  <!-- Inventory Table -->
-  <div class="table-container alx-table-container">
+  <div class="result-summary" *ngIf="!loading && !error">
+    <span>{{ totalItems }} {{ totalItems === 1 ? 'item' : 'items' }}</span>
+    <span *ngIf="hasAdvancedFilters">Advanced filters active</span>
+  </div>
+
+  <div class="state-card" *ngIf="loading">Loading inventory…</div>
+  <div class="state-card error-state" *ngIf="error">{{ error }}</div>
+
+  <div class="table-container alx-table-container" *ngIf="!loading && !error">
     <table class="alx-table">
       <thead>
         <tr>
-          <th>SKU /Asset Tag</th>
-          <th>PRODUCT NAME</th>
-          <th>TYPE</th>
-          <th>AVAILABLE</th>
-          <th>RESERVED</th>
-          <th>LOCATION</th>
-          <th>ACTIONS</th>
+          <th>SKU / Asset Tag</th>
+          <th>Product</th>
+          <th>Class</th>
+          <th>Brand</th>
+          <th>Available</th>
+          <th>Reserved</th>
+          <th>Stock Status</th>
+          <th>Location</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr 
-          *ngFor="let item of inventoryItems; trackBy: trackByItem" 
+        <tr
+          *ngFor="let item of inventoryItems; trackBy: trackByItem"
           (click)="selectRow(item)"
           class="clickable-row"
-          [class.selected-row]="isRowSelected(item)">
+          [class.selected-row]="isRowSelected(item)"
+        >
           <td class="sku-cell">{{ item.sku }}</td>
-          <td class="name-cell" (click)="openDetailModal(item); $event.stopPropagation()">{{ item.name }}</td>
+          <td class="name-cell" (click)="openDetailModal(item); $event.stopPropagation()">
+            <strong>{{ item.name }}</strong>
+            <small *ngIf="item.manufacturerPartNumber">{{ item.manufacturerPartNumber }}</small>
+          </td>
           <td>
-            <span class="status-pill" [class.bundle]="item.type === 'Bundle'">
-              {{ item.type }}
+            <strong>{{ item.itemClass || 'Unclassified' }}</strong>
+            <small>{{ item.subcategory || 'Unclassified' }}</small>
+          </td>
+          <td>{{ item.brand || '—' }}</td>
+          <td class="num-cell">{{ item.available }} {{ item.unit }}</td>
+          <td class="num-cell">{{ item.reserved }} {{ item.unit }}</td>
+          <td>
+            <span class="stock-pill" [ngClass]="getStockStatus(item)">
+              {{ getStockStatusLabel(item) }}
             </span>
           </td>
-          <td class="num-cell">{{ item.available }}</td>
-          <td class="num-cell">{{ item.reserved }}</td>
-          <td>{{ item.location }}</td>
+          <td>{{ getDisplayLocation(item) }}</td>
           <td class="actions-cell">
-            <button 
-              class="btn-small" 
+            <button
+              class="btn-small"
               (click)="openDetailModal(item); $event.stopPropagation()"
-              *ngIf="isRowSelected(item)">
-              View Product
+              *ngIf="isRowSelected(item)"
+            >
+              View
             </button>
           </td>
+        </tr>
+        <tr *ngIf="inventoryItems.length === 0">
+          <td colspan="9" class="empty-row">No inventory items match the selected filters.</td>
         </tr>
       </tbody>
     </table>
 
     <div class="pagination alx-pagination" *ngIf="totalItems > 0">
       <span class="pagination-info">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
       </span>
       <div class="pagination-controls">
         <button class="btn-page" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
-        
         <ng-container *ngIf="totalPages > 0">
-          <button 
-            *ngFor="let page of getPageNumbers()" 
-            class="btn-page" 
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="btn-page"
             [class.active]="page === currentPage"
-            (click)="goToPage(page)">
+            (click)="goToPage(page)"
+          >
             {{ page }}
           </button>
-          
-          <span class="dots" *ngIf="totalPages > 5 && currentPage < totalPages - 2">...</span>
-          <button 
-            *ngIf="totalPages > 5 && currentPage < totalPages - 2" 
-            class="btn-page" 
-            (click)="goToPage(totalPages)">
+          <span class="dots" *ngIf="totalPages > 5 && currentPage < totalPages - 2">…</span>
+          <button
+            *ngIf="totalPages > 5 && currentPage < totalPages - 2"
+            class="btn-page"
+            (click)="goToPage(totalPages)"
+          >
             {{ totalPages }}
           </button>
         </ng-container>
-
         <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </div>
   </div>
 
-  <!-- Product Detail Modal -->
   <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -159,44 +301,32 @@
 
       <div class="modal-body detail-view">
         <div class="detail-grid">
-          <div class="detail-item">
-            <span class="label">Product Name</span>
-            <span class="value">{{ selectedItem.name }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Type</span>
-            <span class="value">{{ selectedItem.type }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Category</span>
-            <span class="value">{{ selectedItem.category }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Brand</span>
-            <span class="value">{{ selectedItem.brand }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Location</span>
-            <span class="value">{{ selectedItem.location }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Available Stock</span>
-            <span class="value">{{ selectedItem.available }} {{ selectedItem.unit }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Reserved Stock</span>
-            <span class="value">{{ selectedItem.reserved }} {{ selectedItem.unit }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Unit Cost</span>
-            <span class="value">${{ selectedItem.unitCost }}</span>
-          </div>
+          <div class="detail-item"><span class="label">Product</span><span class="value">{{ selectedItem.name }}</span></div>
+          <div class="detail-item"><span class="label">OEM Part / Model</span><span class="value">{{ selectedItem.manufacturerPartNumber || '—' }}</span></div>
+          <div class="detail-item"><span class="label">Class</span><span class="value">{{ selectedItem.itemClass || 'Unclassified' }}</span></div>
+          <div class="detail-item"><span class="label">Subcategory</span><span class="value">{{ selectedItem.subcategory || 'Unclassified' }}</span></div>
+          <div class="detail-item"><span class="label">Brand</span><span class="value">{{ selectedItem.brand }}</span></div>
+          <div class="detail-item"><span class="label">Item Form</span><span class="value">{{ selectedItem.type }}</span></div>
+          <div class="detail-item"><span class="label">System</span><span class="value">{{ selectedItem.systemType || 'Not Applicable' }}</span></div>
+          <div class="detail-item"><span class="label">Refrigerant</span><span class="value">{{ selectedItem.refrigerants?.join(', ') || 'Not Applicable' }}</span></div>
+          <div class="detail-item"><span class="label">Capacity</span><span class="value">{{ selectedItem.capacityBtu ? (selectedItem.capacityBtu + ' BTU/h') : '—' }}</span></div>
+          <div class="detail-item"><span class="label">Power</span><span class="value">{{ selectedItem.voltage || '—' }} · {{ selectedItem.phase || 'Not Applicable' }}</span></div>
+          <div class="detail-item"><span class="label">Location</span><span class="value">{{ getDisplayLocation(selectedItem) }}</span></div>
+          <div class="detail-item"><span class="label">Stock Status</span><span class="value">{{ getStockStatusLabel(selectedItem) }}</span></div>
+          <div class="detail-item"><span class="label">Available</span><span class="value">{{ selectedItem.available }} {{ selectedItem.unit }}</span></div>
+          <div class="detail-item"><span class="label">Reserved</span><span class="value">{{ selectedItem.reserved }} {{ selectedItem.unit }}</span></div>
+          <div class="detail-item"><span class="label">Unit Cost</span><span class="value">LKR {{ selectedItem.unitCost | number:'1.2-2' }}</span></div>
+          <div class="detail-item"><span class="label">Tracking</span><span class="value">{{ selectedItem.isSerialized ? 'Serialized' : 'Non-serialized' }}</span></div>
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeDetailModal()">Close</button>
-        <button class="btn-primary" [routerLink]="['/inventory-manager/product-wizard', selectedItem.id]" (click)="closeDetailModal()">
+        <button
+          class="btn-primary"
+          [routerLink]="['/inventory-manager/product-wizard', getItemId(selectedItem)]"
+          (click)="closeDetailModal()"
+        >
           <lucide-angular name="edit" [size]="16" class="inline-icon"></lucide-angular>
           Edit Product
         </button>

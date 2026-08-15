@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { InventoryItem } from './inventory-domain';
+export type {
+  InventoryItem,
+  InventoryItemClass,
+  InventoryItemForm,
+  InventorySystemType,
+  StockStatus,
+} from './inventory-domain';
 
 export interface SubStat {
   label: string;
@@ -28,28 +36,12 @@ export interface ActivityItem {
 
 export interface ReorderItem {
   _id?: string;
-  id: string;
+  id?: string;
   name: string;
   available: number;
   reserved: number;
   status: 'critical' | 'warning' | 'normal';
 }
-
-export interface InventoryItem extends ReorderItem {
-  sku: string;
-  type: 'Single' | 'Bundle';
-  category: string;
-  brand: string;
-  location: string;
-  unit: string;
-  unitCost: number;
-  maxStockLevel: number;
-  isSerialized: boolean;
-  serialNumbers?: string[];
-  specsUrl?: string;
-  time?: string;
-}
-
 
 export interface InventoryDashboardData {
   managerName: string;
@@ -125,6 +117,10 @@ export class InventoryManagerDashboardService {
 
   addItem(data: any): Observable<InventoryItem> {
     return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
+  }
+
+  receiveInventory(data: any): Observable<{ item: InventoryItem; procurement: any }> {
+    return this.http.post<{ item: InventoryItem; procurement: any }>(`${this.apiUrl}/receipts`, data);
   }
 
   getSuppliers(): Observable<any[]> {
@@ -234,7 +230,7 @@ export interface RmaCaseItem {
   faultDescription: string;
   reportedBy: string;
   status: 'reported' | 'under-review' | 'sent-to-supplier' | 'resolved' | 'closed';
-  type: 'Single' | 'Bundle';
+  type: 'Single' | 'Kit' | 'Bundle';
   resolution: string;
   resolvedAt?: string;
   createdAt: string;

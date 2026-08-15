@@ -33,6 +33,7 @@
             (click)="selectSuggestedItem(i)">
           <td>
             <span class="item-name-bold">{{ item.name }}</span>
+            <small>{{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</small>
           </td>
           <td>
             <span class="sku-code">{{ item.sku }}</span>

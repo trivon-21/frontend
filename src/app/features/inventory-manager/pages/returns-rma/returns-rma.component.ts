@@ -62,7 +62,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     itemName: '',
     itemSku: '',
     faultDescription: '',
-    type: 'Single' as 'Single' | 'Bundle',
+    type: 'Single' as 'Single' | 'Kit' | 'Bundle',
   };
 
   // Quarantine
@@ -209,6 +209,24 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       type: 'Single',
     };
     this.showRmaModal = true;
+  }
+
+  get matchingRmaAssets(): Array<{ item: InventoryItem; serial: string }> {
+    const query = this.rmaForm.serialNumber.toLowerCase().trim();
+    if (!query) return [];
+    return this.inventoryItems
+      .flatMap((item) => (item.serialNumbers || []).map((serial) => ({ item, serial })))
+      .filter(({ item, serial }) => serial.toLowerCase().includes(query)
+        || item.name.toLowerCase().includes(query)
+        || item.sku.toLowerCase().includes(query))
+      .slice(0, 8);
+  }
+
+  selectRmaAsset(item: InventoryItem, serial: string): void {
+    this.rmaForm.serialNumber = serial;
+    this.rmaForm.itemName = item.name;
+    this.rmaForm.itemSku = item.sku;
+    this.rmaForm.type = item.type;
   }
 
   closeRmaModal(): void {

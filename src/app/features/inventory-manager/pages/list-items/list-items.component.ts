@@ -8,6 +8,7 @@ import {
 } from '../../services/inventory-manager-dashboard.service';
 
 import { LucideAngularModule } from 'lucide-angular';
+import { deriveStockStatus } from '../../services/inventory-domain';
 
 @Component({
   selector: 'app-list-items',
@@ -49,9 +50,9 @@ export class ListItemsComponent implements OnInit {
       : this.allItems;
 
     this.pendingItems = filtered.filter(
-      (item) => item.status === 'warning' || item.status === 'critical',
+      (item) => deriveStockStatus(item) !== 'in-stock',
     );
-    this.listedItems = filtered.filter((item) => item.status === 'normal');
+    this.listedItems = filtered.filter((item) => deriveStockStatus(item) === 'in-stock');
   }
 
   clearFilters(): void {

@@ -792,3 +792,32 @@ select.form-input {
   padding: var(--spacing-lg) var(--spacing-xl);
   border-top: 1px solid var(--border-light);
 }
+
+.autocomplete-results {
+  display: grid;
+  max-height: 180px;
+  margin-top: var(--spacing-xs);
+  overflow-y: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  background: var(--background-card);
+  box-shadow: var(--shadow-standard);
+}
+
+.autocomplete-results button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 0;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.autocomplete-results button:last-child {
+  border-bottom: 0;
+}
+
+.autocomplete-results button:hover {
+  background: var(--primary-lighter);
+}
