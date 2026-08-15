@@ -16,19 +16,19 @@
             (blur)="onItemInputBlur()"
             placeholder="Search inventory items to add..."
             class="form-input search-input"
-            [class.has-selection]="selectedItem || isAddingNewItem"
+            [class.has-selection]="selectedItem"
             autocomplete="off">
           
-          <button class="btn-clear-selection" *ngIf="selectedItem || isAddingNewItem" (click)="clearSelection()" title="Clear selection">
+          <button class="btn-clear-selection" *ngIf="selectedItem" (click)="clearSelection()" title="Clear selection">
             <lucide-angular name="x" [size]="18" strokeWidth="2.5"></lucide-angular>
           </button>
         </div>
         
         <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
-          <div class="dropdown-item add-new" (mousedown)="selectInventoryItem('new')">
+          <a class="dropdown-item add-new" routerLink="/inventory-manager/product-wizard">
             <lucide-angular name="plus" [size]="14" strokeWidth="3" style="margin-right: 8px;"></lucide-angular>
-            Add New Item
-          </div>
+            Create catalog product first
+          </a>
           <div class="dropdown-item" *ngFor="let item of filteredInventory" (mousedown)="selectInventoryItem(item)">
             <div class="item-info">
               <span class="name">{{ item.name }}</span>
@@ -41,12 +41,8 @@
         </div>
       </div>
 
-      <div class="quick-config animate-fade" *ngIf="selectedItem || isAddingNewItem">
+      <div class="quick-config animate-fade" *ngIf="selectedItem">
         <div class="config-row">
-          <div class="config-field" *ngIf="isAddingNewItem">
-            <span class="field-label">SKU</span>
-            <input type="text" [(ngModel)]="newItemSku" class="qty-field sku-input" placeholder="SKU-123">
-          </div>
           <div class="config-field">
             <span class="field-label">QTY</span>
             <input type="number" [(ngModel)]="currentQuantity" class="qty-field no-spinner">

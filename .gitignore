@@ -20,6 +20,11 @@ jspm_packages/
 *.sublime-workspace
 .history/
 .vscode/
+!.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Visual Studio
 *.suo
@@ -38,6 +43,9 @@ testem.log
 # Testing
 /coverage
 /.nyc_output
+/test-results
+/playwright-report
+/reports
 
 # System Files
 .DS_Store
@@ -53,10 +61,15 @@ Thumbs.db
 .env.production
 .env.test
 .env.*.local
+.env.*
+!.env.example
 
 # Misc
 *.swp
 *.bak
+*.tmp
+*.tsbuildinfo
+.cache/
 
 # Personal Documentation / Dev Notes
 src/app/core/styling/FAILURE_POINTS*
