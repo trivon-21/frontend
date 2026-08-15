@@ -29,6 +29,7 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
     },
     recentActivity: [],
     reorderList: [],
+    procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
   };
   loading = false; // Structure should load immediately
   error: string | null = null;

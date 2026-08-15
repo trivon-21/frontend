@@ -2,8 +2,8 @@
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Order Approvals</h1>
-      <p class="page-subtitle">Review and approve purchase requests raised from inventory.</p>
+      <h1 class="page-title">Approvals</h1>
+      <p class="page-subtitle">Review operational purchase needs and controlled Non-PO exceptions.</p>
     </div>
     <span class="status-chip" [class.offline]="status === 'Offline'">
       <span class="dot" [class.syncing]="loading"></span>
@@ -34,6 +34,10 @@
   <!-- Filter -->
   <div class="filter-bar">
     <div class="chip-group">
+      <button class="chip" [class.active]="activeType === 'purchase'" (click)="activeType = 'purchase'">Purchase Requests</button>
+      <button class="chip" [class.active]="activeType === 'non-po'" (click)="activeType = 'non-po'">Non-PO Authorizations</button>
+    </div>
+    <div class="chip-group" *ngIf="activeType === 'purchase'">
       <button
         *ngFor="let f of filters"
         class="chip"
@@ -46,7 +50,7 @@
   </div>
 
   <!-- Table -->
-  <div class="alx-table-container">
+  <div class="alx-table-container" *ngIf="activeType === 'purchase'">
     <table class="alx-table">
       <thead>
         <tr>
@@ -73,7 +77,7 @@
               <span class="pill status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
             </td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions" *ngIf="o.status === 'pending-approval'">
+              <div class="row-actions" *ngIf="o.status === 'pending-manager'">
                 <button class="mini-btn ok" (click)="approve(o)">Approve</button>
                 <button class="mini-btn warn" (click)="reject(o)">Reject</button>
               </div>
@@ -106,6 +110,41 @@
         <tr *ngIf="!loading && orders.length === 0">
           <td colspan="7" class="empty-cell">No purchase requests in this view.</td>
         </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alx-table-container" *ngIf="activeType === 'non-po'">
+    <table class="alx-table">
+      <thead><tr><th>Authorization</th><th>Reason / Item</th><th>Supplier</th><th>Quantity</th><th>Est. Total</th><th>Status</th><th class="actions-cell">Actions</th></tr></thead>
+      <tbody>
+        <ng-container *ngFor="let authorization of authorizations">
+          <tr class="clickable-row" (click)="authorizationExpandedId = authorizationExpandedId === authorization._id ? null : authorization._id">
+            <td class="sku-cell">{{ authorization.authorizationNumber }}</td>
+            <td><strong>{{ authorization.nonPoReason.replace('_', ' ') }}</strong><br><span class="muted">{{ authorizationItem(authorization) }}</span></td>
+            <td>{{ authorization.supplierName }}</td>
+            <td>{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
+            <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
+            <td><span class="pill status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <div class="row-actions" *ngIf="authorization.status === 'pending'">
+                <button class="mini-btn ok" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
+                <button class="mini-btn warn" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
+              </div>
+              <span class="muted" *ngIf="authorization.status !== 'pending'">{{ authorization.financeReviewStatus }}</span>
+            </td>
+          </tr>
+          <tr class="detail-row" *ngIf="authorizationExpandedId === authorization._id">
+            <td colspan="7"><div class="detail-box">
+              <div class="detail-title">Requested by {{ authorization.requestedByName }}</div>
+              <p>{{ authorization.explanation }}</p>
+              <p><strong>Affected work:</strong> {{ authorization.affectedWorkReference || 'Not linked' }} · <strong>Source:</strong> {{ authorization.sourceDocumentNumber }}</p>
+              <p *ngIf="authorization.inventoryId"><strong>Stock:</strong> {{ authorization.inventoryId.available || 0 }} available · reorder {{ authorization.inventoryId.reorderLevel || 0 }} · max {{ authorization.inventoryId.maxStockLevel || 0 }}</p>
+              <a *ngIf="authorization.supportingDocumentUrl" [href]="authorization.supportingDocumentUrl" target="_blank" rel="noopener">Open supporting document</a>
+            </div></td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="authorizations.length === 0"><td colspan="7" class="empty-cell">No Non-PO authorizations in this view.</td></tr>
       </tbody>
     </table>
   </div>

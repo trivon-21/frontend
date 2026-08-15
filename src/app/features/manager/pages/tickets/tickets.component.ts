@@ -1,156 +1,122 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import {
-  TicketsService,
-  Ticket,
-  TicketSummary,
-  TicketStatus,
-} from '../../services/tickets.service';
-
-interface FilterChip {
-  key: string;
-  label: string;
-}
+import { Technician, Ticket, TicketStatus, TicketSummary, TicketUpdate, TicketsService } from '../../services/tickets.service';
 
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css'],
 })
 export class TicketsComponent implements OnInit {
   tickets: Ticket[] = [];
+  technicians: Technician[] = [];
+  selectedTicket: Ticket | null = null;
+  selectedTechnicianId = '';
   summary: TicketSummary = { total: 0, open: 0, inProgress: 0, escalated: 0, resolved: 0 };
   status = 'Syncing…';
   loading = false;
   updatingId: string | null = null;
-
-  statusFilters: FilterChip[] = [
-    { key: 'all', label: 'All' },
-    { key: 'open', label: 'Open' },
-    { key: 'in-progress', label: 'In Progress' },
-    { key: 'escalated', label: 'Escalated' },
-    { key: 'resolved', label: 'Resolved' },
-  ];
-  priorityFilters: FilterChip[] = [
-    { key: 'all', label: 'All' },
-    { key: 'high', label: 'High' },
-    { key: 'medium', label: 'Medium' },
-    { key: 'low', label: 'Low' },
-  ];
+  errorMessage = '';
+  readonly statusFilters = ['all', 'open', 'in-progress', 'escalated', 'resolved'];
+  readonly priorityFilters = ['all', 'high', 'medium', 'low'];
   activeStatus = 'all';
   activePriority = 'all';
 
-  constructor(private ticketsService: TicketsService) {}
+  constructor(private ticketsService: TicketsService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const status = params.get('status');
+      const priority = params.get('priority');
+      if (status && this.statusFilters.includes(status)) this.activeStatus = status;
+      if (priority && this.priorityFilters.includes(priority)) this.activePriority = priority;
+      this.load();
+    });
+    this.ticketsService.getTechnicians().subscribe((technicians) => this.technicians = technicians);
   }
 
   load(): void {
     this.loading = true;
-    this.ticketsService
-      .getTickets({ status: this.activeStatus, priority: this.activePriority })
-      .subscribe({
-        next: (res) => {
-          this.tickets = res.tickets;
-          this.summary = res.summary;
-          this.status = res.status;
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        },
-      });
-  }
-
-  setStatus(key: string): void {
-    this.activeStatus = key;
-    this.load();
-  }
-
-  setPriority(key: string): void {
-    this.activePriority = key;
-    this.load();
-  }
-
-  // ── Row actions (optimistic) ──
-
-  assign(ticket: Ticket): void {
-    const name = window.prompt(`Assign ${ticket.ticketId} to technician:`, ticket.assignedTo || '');
-    if (name === null) return;
-    const trimmed = name.trim();
-    this.patch(ticket, {
-      assignedTo: trimmed,
-      status: trimmed && ticket.status === 'open' ? 'in-progress' : ticket.status,
+    this.ticketsService.getTickets({ status: this.activeStatus, priority: this.activePriority }).subscribe((response) => {
+      this.tickets = response.tickets;
+      this.summary = response.summary;
+      this.status = response.status;
+      this.loading = false;
     });
   }
 
-  escalate(ticket: Ticket): void {
-    this.patch(ticket, { status: 'escalated' });
+  setStatus(status: string): void { this.activeStatus = status; this.load(); }
+  setPriority(priority: string): void { this.activePriority = priority; this.load(); }
+
+  openDetails(ticket: Ticket): void {
+    this.selectedTicket = ticket;
+    const assigned = ticket.assignedTechnicianId;
+    this.selectedTechnicianId = typeof assigned === 'object' ? assigned._id : assigned || '';
+    this.errorMessage = '';
   }
 
-  resolve(ticket: Ticket): void {
-    this.patch(ticket, { status: 'resolved' });
+  closeDetails(): void { this.selectedTicket = null; }
+
+  assignSelected(): void {
+    if (!this.selectedTicket || !this.selectedTechnicianId) return;
+    this.patch(this.selectedTicket, { assignedTechnicianId: this.selectedTechnicianId });
   }
 
-  private patch(ticket: Ticket, changes: Partial<Ticket>): void {
-    const previous = { ...ticket };
-    Object.assign(ticket, changes);
-    this.recomputeSummary();
+  escalate(ticket: Ticket): void { this.patch(ticket, { status: 'escalated' }); }
+  resolve(ticket: Ticket): void { this.patch(ticket, { status: 'resolved' }); }
+  reopen(ticket: Ticket): void { this.patch(ticket, { status: 'open' }); }
+
+  customer(ticket: Ticket): SafeCustomer | null {
+    return typeof ticket.customerId === 'object' ? ticket.customerId : null;
+  }
+
+  private patch(ticket: Ticket, changes: TicketUpdate): void {
     this.updatingId = ticket._id;
-
+    this.errorMessage = '';
     this.ticketsService.updateTicket(ticket._id, changes).subscribe({
       next: (updated) => {
+        const index = this.tickets.findIndex((item) => item._id === updated._id);
+        if (index >= 0) this.tickets[index] = updated;
+        if (this.selectedTicket?._id === updated._id) this.openDetails(updated);
         this.updatingId = null;
-        // If the server rejected (null) while online, roll back the optimistic change.
-        if (!updated && this.status !== 'Offline') {
-          Object.assign(ticket, previous);
-          this.recomputeSummary();
-        }
+        this.load();
       },
-      error: () => {
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Ticket update failed.';
         this.updatingId = null;
-        Object.assign(ticket, previous);
-        this.recomputeSummary();
       },
     });
   }
 
-  private recomputeSummary(): void {
-    this.summary = {
-      total: this.tickets.length,
-      open: this.tickets.filter((t) => t.status === 'open').length,
-      inProgress: this.tickets.filter((t) => t.status === 'in-progress').length,
-      escalated: this.tickets.filter((t) => t.status === 'escalated').length,
-      resolved: this.tickets.filter((t) => t.status === 'resolved').length,
-    };
+  statusLabel(status: TicketStatus): string {
+    return status === 'in-progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1);
   }
 
-  // ── View helpers ──
-
-  statusLabel(status: TicketStatus): string {
-    return status === 'in-progress'
-      ? 'In Progress'
-      : status.charAt(0).toUpperCase() + status.slice(1);
+  filterLabel(value: string): string {
+    return value === 'in-progress' ? 'In Progress' : value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   slaText(ticket: Ticket): string {
     if (!ticket.slaDueAt) return '—';
-    const due = new Date(ticket.slaDueAt).getTime();
-    const diff = due - Date.now();
     if (ticket.status === 'resolved') return 'Met';
-    if (diff <= 0) return 'Overdue';
-    const hours = Math.round(diff / (3600 * 1000));
-    if (hours < 24) return `${hours}h left`;
-    return `${Math.round(hours / 24)}d left`;
+    const hours = Math.ceil((new Date(ticket.slaDueAt).getTime() - Date.now()) / 3600000);
+    if (hours <= 0) return 'Overdue';
+    return hours < 24 ? `${hours}h left` : `${Math.ceil(hours / 24)}d left`;
   }
 
   slaOverdue(ticket: Ticket): boolean {
-    if (!ticket.slaDueAt || ticket.status === 'resolved') return false;
-    return new Date(ticket.slaDueAt).getTime() - Date.now() <= 0;
+    return Boolean(ticket.slaDueAt && ticket.status !== 'resolved' && new Date(ticket.slaDueAt).getTime() <= Date.now());
   }
+}
+
+interface SafeCustomer {
+  fullName: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
 }

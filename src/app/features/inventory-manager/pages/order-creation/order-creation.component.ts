@@ -3,50 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
-
-interface OrderItem {
-  inventoryId: string;
-  name: string;
-  sku: string;
-  quantity: number;
-  unitCost: number;
-  estimatedTotal: number;
-  available?: number;
-  reserved?: number;
-}
-
-interface OrderRequest {
-  requestId: string;
-  items: OrderItem[];
-  supplierName: string;
-  totalEstimate: number;
-  status: 'draft' | 'pending-approval' | 'approved' | 'rejected';
-  requestedBy: string;
-  priority: 'normal' | 'urgent';
-  notes: string;
-  rejectionReason: string;
-  approvedBy: string;
-  approvedAt: string;
-  rejectedAt: string;
-  source: string;
-  createdAt: string;
-}
-
-interface InventoryItem {
-  _id: string;
-  name: string;
-  sku: string;
-  available: number;
-  reserved: number;
-  unitCost: number;
-  unit: string;
-  status: string;
-  category: string;
-  brand: string;
-  reorderLevel: number;
-}
-
-
+import { InventoryItem, supplierNameOf } from '../../services/inventory-domain';
+import { PurchaseRequest, PurchaseStatus, purchaseStatusLabel } from '../../services/purchase-workflow';
+import { OrderCreationService } from '../../services/order-creation.service';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -59,14 +18,16 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class OrderCreationComponent implements OnInit {
   // Tab state
-  activeTab: 'pending-approval' | 'approved' | 'rejected' = 'pending-approval';
+  activeTab: 'pending' | 'approved' | 'receiving' | 'received' | 'rejected' = 'pending';
   searchQuery = '';
 
   // Orders data
-  pendingOrders: OrderRequest[] = [];
-  approvedOrders: OrderRequest[] = [];
-  rejectedOrders: OrderRequest[] = [];
-  draftOrders: OrderRequest[] = [];
+  pendingOrders: PurchaseRequest[] = [];
+  approvedOrders: PurchaseRequest[] = [];
+  rejectedOrders: PurchaseRequest[] = [];
+  draftOrders: PurchaseRequest[] = [];
+  receivingOrders: PurchaseRequest[] = [];
+  receivedOrders: PurchaseRequest[] = [];
 
   suggestedItems: InventoryItem[] = [];
 
@@ -75,14 +36,11 @@ export class OrderCreationComponent implements OnInit {
 
   // Detail modal
   showDetailModal = false;
-  selectedOrder: OrderRequest | null = null;
-
-  // Rejection modal
-  showRejectModal = false;
-  rejectionReason = '';
+  selectedOrder: PurchaseRequest | null = null;
 
   constructor(
     private apiService: ApiService,
+    private orderService: OrderCreationService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -101,11 +59,13 @@ export class OrderCreationComponent implements OnInit {
   }
 
   fetchOrders(): void {
-    this.apiService.get<OrderRequest[]>('/inventory/order-requests').subscribe({
+    this.apiService.get<PurchaseRequest[]>('/inventory/order-requests').subscribe({
       next: (data) => {
         this.draftOrders = data.filter(o => o.status === 'draft');
-        this.pendingOrders = data.filter(o => o.status === 'pending-approval');
+        this.pendingOrders = data.filter(o => ['pending-manager', 'pending-finance'].includes(o.status));
         this.approvedOrders = data.filter(o => o.status === 'approved');
+        this.receivingOrders = data.filter(o => ['ordered', 'partially-received'].includes(o.status));
+        this.receivedOrders = data.filter(o => o.status === 'received');
         this.rejectedOrders = data.filter(o => o.status === 'rejected');
       },
       error: (err) => console.error('Failed to load order requests:', err)
@@ -125,17 +85,23 @@ export class OrderCreationComponent implements OnInit {
     });
   }
 
+  supplierName(item: InventoryItem): string {
+    return supplierNameOf(item) || 'No preferred supplier';
+  }
+
   createNewOrder(): void {
     this.router.navigate(['/inventory-manager/order-creation/new']);
   }
 
-  setActiveTab(tab: 'pending-approval' | 'approved' | 'rejected'): void {
+  setActiveTab(tab: 'pending' | 'approved' | 'receiving' | 'received' | 'rejected'): void {
     this.activeTab = tab;
   }
 
-  get currentOrders(): OrderRequest[] {
-    let list = this.activeTab === 'pending-approval' ? this.pendingOrders :
+  get currentOrders(): PurchaseRequest[] {
+    let list = this.activeTab === 'pending' ? this.pendingOrders :
                this.activeTab === 'approved' ? this.approvedOrders :
+               this.activeTab === 'receiving' ? this.receivingOrders :
+               this.activeTab === 'received' ? this.receivedOrders :
                this.rejectedOrders;
 
     const query = (this.searchQuery || '').toLowerCase().trim();
@@ -151,7 +117,7 @@ export class OrderCreationComponent implements OnInit {
 
   // ── Detail Modal ──
 
-  openDetail(order: OrderRequest): void {
+  openDetail(order: PurchaseRequest): void {
     if (order.status === 'draft') {
       this.editDraft(order);
       return;
@@ -160,7 +126,7 @@ export class OrderCreationComponent implements OnInit {
     this.showDetailModal = true;
   }
 
-  editDraft(order: OrderRequest): void {
+  editDraft(order: PurchaseRequest): void {
     this.router.navigate(['/inventory-manager/order-creation/edit', order.requestId]);
   }
 
@@ -169,57 +135,27 @@ export class OrderCreationComponent implements OnInit {
     this.selectedOrder = null;
   }
 
-  // ── Approval / Rejection (for demonstration - will be used by Finance) ──
-
-  approveOrder(order: OrderRequest): void {
-    this.apiService.patch(`/inventory/order-requests/${order.requestId}/approve`, {}).subscribe({
+  issuePurchaseOrder(order: PurchaseRequest): void {
+    this.orderService.issuePurchaseOrder(order.requestId).subscribe({
       next: () => {
         this.fetchOrders();
         this.loadSuggestedOrders();
-        this.closeDetail();
+        this.selectedOrder = null;
+        this.showDetailModal = false;
       },
-      error: (err) => console.error('Approval failed:', err)
+      error: (err) => this.errorMessage = err.error?.message || 'Failed to issue purchase order',
     });
-  }
-
-  openRejectModal(order: OrderRequest): void {
-    this.selectedOrder = order;
-    this.rejectionReason = '';
-    this.showRejectModal = true;
-  }
-
-  confirmReject(): void {
-    if (!this.selectedOrder || !this.rejectionReason.trim()) return;
-    this.apiService.patch(`/inventory/order-requests/${this.selectedOrder.requestId}/reject`, {
-      reason: this.rejectionReason
-    }).subscribe({
-      next: () => {
-        this.fetchOrders();
-        this.showRejectModal = false;
-        this.closeDetail();
-      },
-      error: (err) => console.error('Rejection failed:', err)
-    });
-  }
-
-  closeRejectModal(): void {
-    this.showRejectModal = false;
-    this.rejectionReason = '';
   }
 
   // ── Helpers ──
 
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'draft': return 'Draft';
-      case 'pending-approval': return 'Pending Approval';
-      case 'approved': return 'Approved';
-      case 'rejected': return 'Rejected';
-      default: return status;
-    }
+  getStatusLabel(status: PurchaseStatus | typeof this.activeTab): string {
+    if (status === 'pending') return 'Awaiting Approval';
+    if (status === 'receiving') return 'Ordered / Receiving';
+    return purchaseStatusLabel(status as PurchaseStatus);
   }
 
-  formatDate(dateStr: string): string {
+  formatDate(dateStr?: string | Date): string {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric'

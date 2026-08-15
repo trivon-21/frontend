@@ -7,6 +7,7 @@ import {
   FormGroup,
   Validators,
   FormArray,
+  AbstractControl,
 } from '@angular/forms';
 import {
   InventoryItem,
@@ -18,8 +19,19 @@ import {
   INVENTORY_ITEM_CLASSES,
   INVENTORY_SUBCATEGORIES,
   INVENTORY_SYSTEM_TYPES,
+  INVENTORY_UNITS,
+  isValidSubcategory,
+  supplierIdOf,
 } from '../../services/inventory-domain';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import {
+  NonPoReason,
+  PurchaseLine,
+  PurchaseRequest,
+  ReceiptAuthorization,
+  ReceiptMode,
+  outstanding,
+} from '../../services/purchase-workflow';
 
 interface RecentProcurement {
   id: string;
@@ -34,11 +46,16 @@ interface RecentProcurement {
   condition: string;
   timestamp: string;
   receivedBy: string;
+  receiptMode: ReceiptMode;
+  nonPoReason?: NonPoReason;
+  sourceDocumentNumber?: string;
+  financeReviewStatus?: string;
+  receiptAuthorizationId?: { financeReviewStatus?: string; authorizationNumber?: string };
 }
 
 import { LucideAngularModule } from 'lucide-angular';
 
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-procurement-dashboard',
@@ -68,23 +85,44 @@ export class ProcurementDashboardComponent implements OnInit {
   selectedExistingItem: InventoryItem | null = null;
   showExistingItemDropdown = false;
   showTechnicalFields = false;
+  receiptMode: 'PO' | 'NON_PO' = 'PO';
+  purchaseOrders: PurchaseRequest[] = [];
+  selectedPurchaseOrder: PurchaseRequest | null = null;
+  selectedPurchaseLine: PurchaseLine | null = null;
+  authorizations: ReceiptAuthorization[] = [];
+  selectedAuthorization: ReceiptAuthorization | null = null;
+  grnFilter: 'all' | 'PO' | 'NON_PO' | 'EMERGENCY' | 'REPLACEMENT' | 'FINANCE' = 'all';
+  readonly nonPoReasons: Array<{ value: NonPoReason; label: string }> = [
+    { value: 'EMERGENCY_REPAIR', label: 'Emergency repair' },
+    { value: 'LOCAL_PURCHASE', label: 'Local purchase' },
+    { value: 'WARRANTY_REPLACEMENT', label: 'Warranty replacement' },
+    { value: 'SUPPLIER_REPLACEMENT', label: 'Supplier replacement' },
+    { value: 'OTHER', label: 'Other' },
+  ];
+  private pendingReceiptEventId = '';
 
   readonly itemClasses: InventoryItemClass[] = INVENTORY_ITEM_CLASSES;
   readonly subcategories = INVENTORY_SUBCATEGORIES;
   readonly systemTypes: InventorySystemType[] = INVENTORY_SYSTEM_TYPES;
+  readonly units = INVENTORY_UNITS;
+  private readonly preselectedInventoryId: string | null;
 
   procurements: RecentProcurement[] = [];
 
   constructor(
     private fb: FormBuilder,
     private inventoryService: InventoryManagerDashboardService,
-  ) {}
+    route: ActivatedRoute,
+  ) {
+    this.preselectedInventoryId = route.snapshot.queryParamMap.get('inventoryId');
+  }
 
   ngOnInit(): void {
     this.initForm();
     this.loadSuppliers();
     this.loadProcurements();
     this.loadInventory();
+    this.loadWorkflowRecords();
 
     // Listen to supplier input changes for autocomplete
     this.grnForm
@@ -111,7 +149,7 @@ export class ProcurementDashboardComponent implements OnInit {
   private updateSerialNumbersArray(qty: number) {
     const serials = this.grnForm.get('inventorySettings.serialNumbers') as FormArray;
     const currentLength = serials.length;
-    const targetLength = this.grnForm.get('itemDetails.isSerialized')?.value ? qty || 0 : 0;
+    const targetLength = this.grnForm.get('itemDetails.isSerialized')?.value && this.isFinalReceipt ? qty || 0 : 0;
 
     if (targetLength > currentLength) {
       for (let i = currentLength; i < targetLength; i++) {
@@ -128,16 +166,22 @@ export class ProcurementDashboardComponent implements OnInit {
     this.grnForm = this.fb.group({
       supplierInfo: this.fb.group({
         supplier: ['', Validators.required],
-        invoiceNumber: ['', Validators.required],
+        sourceDocumentNumber: ['', Validators.required],
+        invoiceNumber: [''],
         receivedDate: [new Date().toISOString().substring(0, 10), Validators.required],
         condition: ['Good', Validators.required],
+        nonPoReason: ['EMERGENCY_REPAIR'],
+        explanation: [''],
+        affectedWorkType: ['NONE'],
+        affectedWorkReference: [''],
+        supportingDocumentUrl: ['', Validators.pattern(/^https?:\/\/\S+$/i)],
       }),
       itemDetails: this.fb.group({
         name: ['', Validators.required],
         sku: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9-]+$')]],
         brand: ['', Validators.required],
         type: ['Single', Validators.required],
-        itemClass: ['Unclassified', Validators.required],
+        itemClass: ['Unclassified', [Validators.required, (control: AbstractControl) => control.value === 'Unclassified' ? { classification: true } : null]],
         subcategory: ['Unclassified', Validators.required],
         manufacturerPartNumber: [''],
         compatibleModels: [''],
@@ -150,7 +194,7 @@ export class ProcurementDashboardComponent implements OnInit {
         specsUrl: [''],
       }),
       inventorySettings: this.fb.group({
-        available: [0, [Validators.required, Validators.min(0)]],
+        available: [1, [Validators.required, Validators.min(1)]],
         location: ['Warehouse', Validators.required],
         binLocation: [''],
         unit: ['units', Validators.required],
@@ -173,6 +217,99 @@ export class ProcurementDashboardComponent implements OnInit {
     });
   }
 
+  get isFinalReceipt(): boolean {
+    return !!this.selectedPurchaseLine || !!this.selectedAuthorization;
+  }
+
+  get availablePoLines(): PurchaseLine[] {
+    return this.selectedPurchaseOrder?.items.filter(line => outstanding(line) > 0) || [];
+  }
+
+  outstanding(line: PurchaseLine): number {
+    return outstanding(line);
+  }
+
+  private loadWorkflowRecords(): void {
+    this.inventoryService.getOrderRequests().subscribe({
+      next: orders => this.purchaseOrders = orders.filter(order => ['ordered', 'partially-received'].includes(order.status)),
+      error: () => this.purchaseOrders = [],
+    });
+    this.inventoryService.getReceiptAuthorizations().subscribe({
+      next: items => {
+        this.authorizations = items;
+        const id = new URLSearchParams(window.location.search).get('authorizationId');
+        const selected = items.find(item => item._id === id && ['approved', 'partially-received'].includes(item.status));
+        if (selected) { this.receiptMode = 'NON_PO'; this.selectAuthorization(selected); }
+      },
+      error: () => this.authorizations = [],
+    });
+  }
+
+  setReceiptMode(mode: 'PO' | 'NON_PO'): void {
+    this.receiptMode = mode;
+    this.selectedPurchaseOrder = null;
+    this.selectedPurchaseLine = null;
+    this.selectedAuthorization = null;
+    this.resetForm();
+  }
+
+  selectPurchaseOrder(orderId: string): void {
+    this.selectedPurchaseOrder = this.purchaseOrders.find(order => order._id === orderId) || null;
+    this.selectedPurchaseLine = null;
+  }
+
+  selectPurchaseLine(lineId: string): void {
+    const line = this.availablePoLines.find(item => item.lineId === lineId);
+    if (!line || !this.selectedPurchaseOrder) return;
+    this.selectedPurchaseLine = line;
+    const item = this.inventoryItems.find(candidate => (candidate._id || candidate.id) === line.inventoryId);
+    if (item) this.selectExistingItem(item);
+    const supplier = this.suppliers.find(candidate => candidate._id === this.selectedPurchaseOrder?.supplierId)
+      || this.suppliers.find(candidate => candidate.name === this.selectedPurchaseOrder?.supplierName);
+    if (supplier) this.selectSupplier(supplier);
+    this.grnForm.get('inventorySettings.available')?.setValue(outstanding(line));
+    this.grnForm.get('inventorySettings.unitCost')?.setValue(line.unitCost);
+  }
+
+  selectAuthorization(authorization: ReceiptAuthorization): void {
+    if (!['approved', 'partially-received'].includes(authorization.status)) return;
+    this.selectedAuthorization = authorization;
+    const item = authorization.inventoryId;
+    if (item?._id || item?.id) this.selectExistingItem(item);
+    else if (authorization.newItemSnapshot) {
+      this.grnForm.get('itemDetails')?.patchValue({
+        ...authorization.newItemSnapshot,
+        compatibleModels: (authorization.newItemSnapshot.compatibleModels || []).join(', '),
+        refrigerants: (authorization.newItemSnapshot.refrigerants || []).join(', '),
+      });
+      this.grnForm.get('inventorySettings')?.patchValue(authorization.newItemSnapshot);
+    }
+    const supplierId = typeof authorization.supplierId === 'string' ? authorization.supplierId : authorization.supplierId?._id;
+    const supplier = this.suppliers.find(candidate => candidate._id === supplierId)
+      || this.suppliers.find(candidate => candidate.name === authorization.supplierName);
+    if (supplier) this.selectSupplier(supplier);
+    this.grnForm.get('supplierInfo')?.patchValue({
+      sourceDocumentNumber: authorization.sourceDocumentNumber,
+      nonPoReason: authorization.nonPoReason,
+      explanation: authorization.explanation,
+      affectedWorkType: authorization.affectedWorkType,
+      affectedWorkReference: authorization.affectedWorkReference || '',
+      supportingDocumentUrl: authorization.supportingDocumentUrl || '',
+    });
+    this.grnForm.get('inventorySettings.available')?.setValue(authorization.authorizedQuantity - authorization.receivedQuantity);
+    this.grnForm.get('inventorySettings.unitCost')?.setValue(authorization.unitCost);
+    this.updateSerialNumbersArray(this.grnForm.get('inventorySettings.available')?.value || 0);
+  }
+
+  selectAuthorizationById(id: string): void {
+    const authorization = this.authorizations.find(item => item._id === id);
+    if (authorization) this.selectAuthorization(authorization);
+    else {
+      this.selectedAuthorization = null;
+      this.resetForm();
+    }
+  }
+
   get availableSubcategories(): string[] {
     const itemClass = this.grnForm?.get('itemDetails.itemClass')?.value as InventoryItemClass;
     return this.subcategories[itemClass] || ['Unclassified'];
@@ -184,6 +321,7 @@ export class ProcurementDashboardComponent implements OnInit {
       next: (data) => {
         this.suppliers = data;
         this.filteredSuppliers = data;
+        this.applyPreferredSupplier();
       },
       error: (err) => console.error('Error loading suppliers:', err),
     });
@@ -194,6 +332,8 @@ export class ProcurementDashboardComponent implements OnInit {
       next: (items) => {
         this.inventoryItems = items;
         this.filteredInventoryItems = items.slice(0, 8);
+        const preselected = items.find((item) => (item._id || item.id) === this.preselectedInventoryId);
+        if (preselected) this.selectExistingItem(preselected);
       },
       error: (err) => console.error('Error loading inventory:', err),
     });
@@ -208,15 +348,21 @@ export class ProcurementDashboardComponent implements OnInit {
 
   get filteredProcurements() {
     const query = (this.searchQuery || '').toLowerCase().trim();
-    if (!query) return this.procurements;
-    return this.procurements.filter(
-      (p) =>
+    return this.procurements.filter((p) => {
+      const matchesFilter = this.grnFilter === 'all'
+        || this.grnFilter === p.receiptMode
+        || this.grnFilter === 'EMERGENCY' && p.nonPoReason === 'EMERGENCY_REPAIR'
+        || this.grnFilter === 'REPLACEMENT' && ['WARRANTY_REPLACEMENT', 'SUPPLIER_REPLACEMENT'].includes(p.nonPoReason || '')
+        || this.grnFilter === 'FINANCE' && p.receiptAuthorizationId?.financeReviewStatus === 'pending';
+      const matchesQuery = !query ||
         p.invoiceNumber?.toLowerCase().includes(query) ||
+        p.sourceDocumentNumber?.toLowerCase().includes(query) ||
         p.supplierName?.toLowerCase().includes(query) ||
         p.itemName?.toLowerCase().includes(query) ||
         p.sku?.toLowerCase().includes(query) ||
-        p.receivedBy?.toLowerCase().includes(query),
-    );
+        p.receivedBy?.toLowerCase().includes(query);
+      return matchesFilter && matchesQuery;
+    });
   }
 
   filterSuppliers(query: string) {
@@ -316,6 +462,7 @@ export class ProcurementDashboardComponent implements OnInit {
       maxStockLevel: item.maxStockLevel,
       unitCost: item.unitCost,
     });
+    this.applyPreferredSupplier();
   }
 
   clearExistingItem(): void {
@@ -374,9 +521,17 @@ export class ProcurementDashboardComponent implements OnInit {
 
   canGoNext(): boolean {
     if (this.currentStep === 1) {
-      return this.grnForm.get('supplierInfo')!.valid && !!this.selectedSupplierId && !this.isAddingNewSupplier;
+      const supplierValid = this.grnForm.get('supplierInfo')!.valid && !!this.selectedSupplierId && !this.isAddingNewSupplier;
+      if (this.receiptMode === 'PO') return supplierValid && !!this.selectedPurchaseLine;
+      if (this.selectedAuthorization) return supplierValid;
+      return supplierValid
+        && !!String(this.grnForm.get('supplierInfo.explanation')?.value || '').trim()
+        && !!this.grnForm.get('supplierInfo.nonPoReason')?.value;
     }
-    if (this.currentStep === 2) return this.grnForm.get('itemDetails')!.valid;
+    if (this.currentStep === 2) {
+      const details = this.grnForm.get('itemDetails')!;
+      return details.valid && isValidSubcategory(details.get('itemClass')?.value, details.get('subcategory')?.value);
+    }
     return this.grnForm.valid;
   }
 
@@ -414,18 +569,22 @@ export class ProcurementDashboardComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    const formData = {
+    const itemPayload = this.selectedExistingItem ? undefined : {
+      ...this.grnForm.get('itemDetails')?.value,
+      ...this.grnForm.get('inventorySettings')?.value,
+      compatibleModels: this.toList(this.grnForm.get('itemDetails.compatibleModels')?.value),
+      refrigerants: this.toList(this.grnForm.get('itemDetails.refrigerants')?.value),
+    };
+    const sourceDocumentNumber = this.grnForm.get('supplierInfo.sourceDocumentNumber')?.value;
+    const commonData = {
       inventoryId: this.selectedExistingItem?._id,
-      item: this.selectedExistingItem ? undefined : {
-        ...this.grnForm.get('itemDetails')?.value,
-        ...this.grnForm.get('inventorySettings')?.value,
-        compatibleModels: this.toList(this.grnForm.get('itemDetails.compatibleModels')?.value),
-        refrigerants: this.toList(this.grnForm.get('itemDetails.refrigerants')?.value),
-      },
+      item: itemPayload,
       quantity: this.grnForm.get('inventorySettings.available')?.value,
       serialNumbers: this.grnForm.get('inventorySettings.serialNumbers')?.value,
       supplierId: this.selectedSupplierId,
       invoiceNumber: this.grnForm.get('supplierInfo.invoiceNumber')?.value,
+      sourceDocumentNumber,
+      supportingDocumentUrl: this.grnForm.get('supplierInfo.supportingDocumentUrl')?.value,
       receivedDate: this.grnForm.get('supplierInfo.receivedDate')?.value,
       condition: this.grnForm.get('supplierInfo.condition')?.value,
       location: this.grnForm.get('inventorySettings.location')?.value,
@@ -433,11 +592,47 @@ export class ProcurementDashboardComponent implements OnInit {
       unitCost: this.grnForm.get('inventorySettings.unitCost')?.value,
     };
 
-    this.inventoryService.receiveInventory(formData).subscribe({
+    if (this.receiptMode === 'NON_PO' && !this.selectedAuthorization) {
+      this.inventoryService.createReceiptAuthorization({
+        inventoryId: commonData.inventoryId,
+        item: commonData.item,
+        supplierId: commonData.supplierId,
+        authorizedQuantity: commonData.quantity,
+        unitCost: commonData.unitCost,
+        nonPoReason: this.grnForm.get('supplierInfo.nonPoReason')?.value,
+        explanation: this.grnForm.get('supplierInfo.explanation')?.value,
+        affectedWorkType: this.grnForm.get('supplierInfo.affectedWorkType')?.value,
+        affectedWorkReference: this.grnForm.get('supplierInfo.affectedWorkReference')?.value,
+        sourceDocumentNumber,
+        supportingDocumentUrl: commonData.supportingDocumentUrl,
+      }).subscribe({
+        next: authorization => {
+          this.isSubmitting = false;
+          this.successMessage = `${authorization.authorizationNumber} submitted to Manager. Stock has not changed.`;
+          this.loadWorkflowRecords();
+          this.resetForm();
+        },
+        error: err => {
+          this.isSubmitting = false;
+          this.errorMessage = err.error?.message || 'Failed to request Non-PO authorization.';
+        },
+      });
+      return;
+    }
+
+    this.inventoryService.receiveInventory({
+      ...commonData,
+      receiptEventId: this.pendingReceiptEventId || (this.pendingReceiptEventId = crypto.randomUUID()),
+      receiptMode: this.receiptMode,
+      orderRequestId: this.selectedPurchaseOrder?._id,
+      orderLineId: this.selectedPurchaseLine?.lineId,
+      receiptAuthorizationId: this.selectedAuthorization?._id,
+    }).subscribe({
       next: ({ item }) => {
         this.isSubmitting = false;
-        this.successMessage = `Product "${item.name}" added successfully!`;
+        this.successMessage = `Receipt posted for "${item.name}". Stock and GRN were updated together.`;
         this.loadProcurements(); // Refresh list from server
+        this.loadWorkflowRecords();
         this.resetForm();
       },
       error: (err) => {
@@ -454,10 +649,12 @@ export class ProcurementDashboardComponent implements OnInit {
       supplierInfo: {
         receivedDate: new Date().toISOString().substring(0, 10),
         condition: 'Good',
+        nonPoReason: 'EMERGENCY_REPAIR',
+        affectedWorkType: 'NONE',
       },
       itemDetails: { type: 'Single', itemClass: 'Unclassified', subcategory: 'Unclassified', systemType: 'Not Applicable', phase: 'Not Applicable', isSerialized: false },
       inventorySettings: {
-        available: 0,
+        available: 1,
         location: 'Warehouse',
         binLocation: '',
         unit: 'units',
@@ -473,11 +670,22 @@ export class ProcurementDashboardComponent implements OnInit {
     }
     this.selectedSupplierId = '';
     this.selectedExistingItem = null;
+    this.selectedPurchaseOrder = null;
+    this.selectedPurchaseLine = null;
+    this.selectedAuthorization = null;
     this.existingItemQuery = '';
     this.showTechnicalFields = false;
+    this.pendingReceiptEventId = '';
   }
 
   private toList(value: string): string[] {
     return [...new Set((value || '').split(',').map((entry) => entry.trim()).filter(Boolean))];
+  }
+
+  private applyPreferredSupplier(): void {
+    if (!this.selectedExistingItem) return;
+    const supplierId = supplierIdOf(this.selectedExistingItem);
+    const supplier = this.suppliers.find((option) => option._id === supplierId);
+    if (supplier) this.selectSupplier(supplier);
   }
 }

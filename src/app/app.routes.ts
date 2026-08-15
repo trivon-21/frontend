@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
   {
@@ -50,10 +51,12 @@ export const routes: Routes = [
       },
       {
         path: 'list-items',
-        loadComponent: () =>
-          import('./features/inventory-manager/pages/list-items/list-items.component').then(
-            (m) => m.ListItemsComponent,
-          ),
+        redirectTo: 'data-quality',
+        pathMatch: 'full',
+      },
+      {
+        path: 'data-quality',
+        loadComponent: () => import('./features/inventory-manager/pages/list-items/list-items.component').then((m) => m.ListItemsComponent),
       },
       {
         path: 'product-wizard',
@@ -61,6 +64,7 @@ export const routes: Routes = [
           import('./features/inventory-manager/pages/product-wizard/product-wizard.component').then(
             (m) => m.ProductWizardComponent,
           ),
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'product-wizard/:id',
@@ -68,6 +72,7 @@ export const routes: Routes = [
           import('./features/inventory-manager/pages/product-wizard/product-wizard.component').then(
             (m) => m.ProductWizardComponent,
           ),
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'asset-management',
@@ -158,10 +163,8 @@ export const routes: Routes = [
       },
       {
         path: 'vehicle-assignment',
-        loadComponent: () =>
-          import('./features/manager/pages/vehicle-assignment/vehicle-assignment.component').then(
-            (m) => m.VehicleAssignmentComponent,
-          ),
+        redirectTo: 'tickets',
+        pathMatch: 'full',
       },
       {
         path: 'orders',
@@ -179,10 +182,8 @@ export const routes: Routes = [
       },
       {
         path: 'customers',
-        loadComponent: () =>
-          import('./features/manager/pages/customers/customers.component').then(
-            (m) => m.CustomersComponent,
-          ),
+        redirectTo: 'tickets',
+        pathMatch: 'full',
       },
       {
         path: 'analytics',
@@ -193,17 +194,13 @@ export const routes: Routes = [
       },
       {
         path: 'notifications',
-        loadComponent: () =>
-          import('./features/manager/pages/notifications/notifications.component').then(
-            (m) => m.NotificationsComponent,
-          ),
+        redirectTo: '',
+        pathMatch: 'full',
       },
       {
         path: 'settings',
-        loadComponent: () =>
-          import('./features/manager/pages/settings/settings.component').then(
-            (m) => m.SettingsComponent,
-          ),
+        redirectTo: '',
+        pathMatch: 'full',
       },
     ],
   },

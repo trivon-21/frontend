@@ -9,6 +9,7 @@ import { OrderItemSearchComponent } from './components/order-item-search/order-i
 import { OrderCartListComponent } from './components/order-cart-list/order-cart-list.component';
 import { OrderSuggestedGridComponent } from './components/order-suggested-grid/order-suggested-grid.component';
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-new-order-form',
@@ -103,7 +104,7 @@ export class NewOrderFormComponent implements OnInit {
         const order = requests.find((r: any) => r.requestId === id);
         if (order) {
           this.selectedSupplier = order.supplierName;
-          this.orderNotes = order.notes;
+          this.orderNotes = order.notes || '';
           this.orderItems = order.items.map((i: any) => ({
             ...i,
             inventoryId: typeof i.inventoryId === 'object' ? i.inventoryId._id : i.inventoryId || '',
@@ -168,9 +169,11 @@ export class NewOrderFormComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    const payload = this.buildPayload('pending-approval');
+    const payload = this.buildPayload();
 
-    this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).subscribe({
+    this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).pipe(
+      switchMap((saved) => this.orderCreationService.submitForManager(saved.requestId)),
+    ).subscribe({
       next: (data) => {
         this.isSubmitting = false;
         const msgId = this.isEditMode ? this.orderId : data.requestId;
@@ -192,7 +195,7 @@ export class NewOrderFormComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    const payload = this.buildPayload('draft');
+    const payload = this.buildPayload();
 
     this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).subscribe({
       next: (data) => {
@@ -211,7 +214,8 @@ export class NewOrderFormComponent implements OnInit {
     });
   }
 
-  private buildPayload(status: string): any {
+  private buildPayload(): any {
+    const supplier = this.suppliers.find(item => item.name === this.selectedSupplier);
     return {
       items: this.orderItems.map(i => ({
         inventoryId: i.inventoryId,
@@ -226,8 +230,8 @@ export class NewOrderFormComponent implements OnInit {
         supplierId: i.supplierId || undefined,
       })),
       supplierName: this.selectedSupplier,
+      supplierId: supplier?._id,
       notes: this.orderNotes,
-      status: status,
       source: 'manual'
     };
   }

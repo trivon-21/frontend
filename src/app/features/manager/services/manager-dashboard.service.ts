@@ -1,56 +1,47 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-
-export interface SubStat {
-  label: string;
-  value: number | string;
-}
+import { catchError, map } from 'rxjs/operators';
 
 export interface CardStat {
-  total: number | string;
-  subStats: SubStat[];
+  total: number;
+  subStats: Array<{ label: string; value: number }>;
 }
 
 export interface ManagerSummaryStats {
-  pendingTickets: CardStat;
-  vehicleAvailability: CardStat;
-  todaysSchedule: CardStat;
-  escalations: CardStat;
+  openTickets: CardStat;
+  unassignedTickets: CardStat;
+  slaRisk: CardStat;
+  pendingApprovals: CardStat;
 }
 
 export interface InventoryKpiItem {
   label: string;
   value: number;
   icon: string;
-  trend?: string;
 }
 
-export interface InventoryKpis {
-  reservedItems: InventoryKpiItem;
-  lowStockAlerts: InventoryKpiItem;
-  pendingDeliveries: InventoryKpiItem;
+export interface DashboardLink {
+  route: string;
+  queryParams?: Record<string, string>;
 }
 
-export interface ActivityItem {
+export interface ActivityItem extends DashboardLink {
   id: string;
-  type: 'ticket' | 'vehicle' | 'order' | 'customer' | 'alert' | 'escalation';
+  type: 'ticket' | 'order' | 'escalation';
   title: string;
   description: string;
-  timeAgo?: string;
   timestamp: Date;
-  status?: string;
-  actionLabel?: string;
+  timeAgo?: string;
 }
 
-export interface PendingAction {
+export interface PendingAction extends DashboardLink {
   id: string;
   type: string;
   title: string;
   description: string;
-  dueDate?: string;
   priority: 'high' | 'medium' | 'low';
+  createdAt?: Date | string;
 }
 
 export interface ManagerDashboardData {
@@ -58,14 +49,35 @@ export interface ManagerDashboardData {
   currentDate: Date;
   status: string;
   stats: ManagerSummaryStats;
-  inventoryKpis: InventoryKpis;
+  inventoryKpis: {
+    reservedItems: InventoryKpiItem;
+    lowStockAlerts: InventoryKpiItem;
+    pendingMaterialRequests: InventoryKpiItem;
+  };
   recentActivity: ActivityItem[];
   pendingActions: PendingAction[];
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+const EMPTY_DASHBOARD: ManagerDashboardData = {
+  managerName: 'Manager',
+  currentDate: new Date(),
+  status: 'Offline',
+  stats: {
+    openTickets: { total: 0, subStats: [] },
+    unassignedTickets: { total: 0, subStats: [] },
+    slaRisk: { total: 0, subStats: [] },
+    pendingApprovals: { total: 0, subStats: [] },
+  },
+  inventoryKpis: {
+    reservedItems: { label: 'Reserved Items', value: 0, icon: 'clipboard-check' },
+    lowStockAlerts: { label: 'Low Stock Alerts', value: 0, icon: 'triangle-alert' },
+    pendingMaterialRequests: { label: 'Pending Material Requests', value: 0, icon: 'package-clock' },
+  },
+  recentActivity: [],
+  pendingActions: [],
+};
+
+@Injectable({ providedIn: 'root' })
 export class ManagerDashboardService {
   private apiUrl = 'http://localhost:5000/api/manager';
 
@@ -73,115 +85,27 @@ export class ManagerDashboardService {
 
   getDashboard(): Observable<ManagerDashboardData> {
     return this.http.get<ManagerDashboardData>(`${this.apiUrl}/dashboard`).pipe(
-      map(data => {
-        data.recentActivity = data.recentActivity.map(activity => ({
-          ...activity,
-          timestamp: new Date(activity.timestamp),
-          timeAgo: this.getTimeAgo(new Date(activity.timestamp))
-        }));
-        data.currentDate = new Date(data.currentDate);
-        return data;
+      map((data) => ({
+        ...data,
+        currentDate: new Date(data.currentDate),
+        recentActivity: data.recentActivity.map((activity) => {
+          const timestamp = new Date(activity.timestamp);
+          return { ...activity, timestamp, timeAgo: this.getTimeAgo(timestamp) };
+        }),
+      })),
+      catchError((error) => {
+        console.error('Manager dashboard unavailable.', error);
+        return of({ ...EMPTY_DASHBOARD, currentDate: new Date() });
       }),
-      catchError(err => {
-        console.error('Backend connection failed. Switching to Offline mode.', err);
-        return of({
-          managerName: 'Manager',
-          currentDate: new Date(),
-          status: 'Offline',
-          stats: {
-            pendingTickets: {
-              total: 12,
-              subStats: [
-                { label: 'Unassigned', value: 5 },
-                { label: 'In Progress', value: 7 }
-              ]
-            },
-            vehicleAvailability: {
-              total: '8/12',
-              subStats: [
-                { label: 'Active', value: 8 },
-                { label: 'Maintenance', value: 2 }
-              ]
-            },
-            todaysSchedule: {
-              total: 15,
-              subStats: [
-                { label: 'Completed', value: 4 },
-                { label: 'Remaining', value: 11 }
-              ]
-            },
-            escalations: {
-              total: 3,
-              subStats: [
-                { label: 'Critical', value: 2 },
-                { label: 'High', value: 1 }
-              ]
-            }
-          },
-          inventoryKpis: {
-            reservedItems: { label: 'Reserved Items', value: 45, icon: 'clipboard-check', trend: 'For upcoming jobs' },
-            lowStockAlerts: { label: 'Low Stock Alerts', value: 4, icon: 'triangle-alert', trend: 'Affects 2 jobs' },
-            pendingDeliveries: { label: 'Pending Deliveries', value: 8, icon: 'truck', trend: 'To job sites' }
-          },
-          recentActivity: [
-            {
-              id: '1',
-              type: 'escalation',
-              title: 'Critical Escalation on Ticket #T-1002',
-              description: 'Customer reported leak after AC installation',
-              timestamp: new Date(Date.now() - 30 * 60 * 1000)
-            },
-            {
-              id: '2',
-              type: 'vehicle',
-              title: 'Vehicle Assigned',
-              description: 'Van 3 assigned to Tech team for ticket #T-1005',
-              timestamp: new Date(Date.now() - 120 * 60 * 1000)
-            },
-            {
-              id: '3',
-              type: 'ticket',
-              title: 'New Service Ticket Created',
-              description: 'Annual inspection requested by John Doe',
-              timestamp: new Date(Date.now() - 300 * 60 * 1000)
-            }
-          ],
-          pendingActions: [
-            {
-              id: 'act1',
-              type: 'vehicle',
-              title: 'Assign Vehicle to Ticket #T-1008',
-              description: 'Installation scheduled for 2:00 PM today has no vehicle assigned.',
-              priority: 'high'
-            },
-            {
-              id: 'act2',
-              type: 'escalation',
-              title: 'Resolve Escalation: Ticket #T-1002',
-              description: 'Leak report needs immediate dispatcher reallocation.',
-              priority: 'high'
-            },
-            {
-              id: 'act3',
-              type: 'order',
-              title: 'Approve Purchase Request #PR-409',
-              description: 'Awaiting manager approval for 5 outdoor units.',
-              priority: 'medium'
-            }
-          ]
-        } as ManagerDashboardData);
-      })
     );
   }
 
   private getTimeAgo(date: Date): string {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return 'Just now';
-    const minutes = Math.floor(seconds / 60);
+    const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { Observable } from 'rxjs';
 import { InventoryItem } from './inventory-domain';
+import { PurchaseRequest } from './purchase-workflow';
 export type { InventoryItem } from './inventory-domain';
 
 export interface OrderItem {
@@ -44,8 +45,8 @@ export class OrderCreationService {
     return this.apiService.get<InventoryItem[]>('/inventory/suggested-orders');
   }
 
-  getOrderRequests(): Observable<any[]> {
-    return this.apiService.get<any[]>('/inventory/order-requests');
+  getOrderRequests(): Observable<PurchaseRequest[]> {
+    return this.apiService.get<PurchaseRequest[]>('/inventory/order-requests');
   }
 
   submitOrderRequest(payload: any, isEditMode: boolean, orderId?: string): Observable<any> {
@@ -53,5 +54,13 @@ export class OrderCreationService {
       return this.apiService.patch(`/inventory/order-requests/${orderId}`, payload);
     }
     return this.apiService.post('/inventory/order-requests', payload);
+  }
+
+  submitForManager(orderId: string): Observable<PurchaseRequest> {
+    return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${orderId}/submit`, {});
+  }
+
+  issuePurchaseOrder(orderId: string): Observable<PurchaseRequest> {
+    return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${orderId}/issue-po`, {});
   }
 }

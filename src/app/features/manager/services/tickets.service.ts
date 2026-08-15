@@ -7,18 +7,39 @@ export type TicketStatus = 'open' | 'in-progress' | 'resolved' | 'escalated';
 export type TicketPriority = 'high' | 'medium' | 'low';
 export type TicketCategory = 'installation' | 'repair' | 'maintenance' | 'inspection';
 
+export interface SafeUserReference {
+  _id: string;
+  fullName: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+  role?: 'MAIN_TECH' | 'SERVICE_TEAM' | 'INSPECTION';
+}
+
+export interface Technician extends SafeUserReference {
+  role: 'MAIN_TECH' | 'SERVICE_TEAM' | 'INSPECTION';
+}
+
 export interface Ticket {
   _id: string;
   ticketId: string;
   subject: string;
   description?: string;
   customer: string;
+  customerId?: SafeUserReference | string;
   category: TicketCategory;
   priority: TicketPriority;
   status: TicketStatus;
   assignedTo?: string;
+  assignedTechnicianId?: Technician | string;
   slaDueAt?: Date | string;
+  resolvedAt?: Date | string;
   createdAt?: Date | string;
+  inventoryConstraints?: Array<{
+    authorizationId: string; authorizationNumber: string; reason: string; status: string;
+    financeReviewStatus: string; authorizedQuantity: number; receivedQuantity: number;
+    item?: { name?: string; sku?: string; available?: number; reorderLevel?: number };
+  }>;
 }
 
 export interface TicketSummary {
@@ -40,6 +61,10 @@ export interface TicketFilters {
   priority?: string;
 }
 
+export type TicketUpdate = Partial<Pick<Ticket, 'status' | 'priority'>> & {
+  assignedTechnicianId?: string | null;
+};
+
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
   private apiUrl = 'http://localhost:5000/api/manager';
@@ -48,58 +73,37 @@ export class TicketsService {
 
   getTickets(filters: TicketFilters = {}): Observable<TicketsResponse> {
     const params: Record<string, string> = {};
-    if (filters.status) params['status'] = filters.status;
-    if (filters.priority) params['priority'] = filters.priority;
-
+    if (filters.status && filters.status !== 'all') params['status'] = filters.status;
+    if (filters.priority && filters.priority !== 'all') params['priority'] = filters.priority;
     return this.http.get<TicketsResponse>(`${this.apiUrl}/tickets`, { params }).pipe(
-      map((res) => ({
-        ...res,
-        tickets: res.tickets.map((t) => ({
-          ...t,
-          slaDueAt: t.slaDueAt ? new Date(t.slaDueAt) : undefined,
-          createdAt: t.createdAt ? new Date(t.createdAt) : undefined,
+      map((response) => ({
+        ...response,
+        tickets: response.tickets.map((ticket) => ({
+          ...ticket,
+          slaDueAt: ticket.slaDueAt ? new Date(ticket.slaDueAt) : undefined,
+          resolvedAt: ticket.resolvedAt ? new Date(ticket.resolvedAt) : undefined,
+          createdAt: ticket.createdAt ? new Date(ticket.createdAt) : undefined,
         })),
       })),
-      catchError((err) => {
-        console.error('Tickets backend unavailable. Using offline data.', err);
-        return of(this.offline(filters));
+      catchError((error) => {
+        console.error('Tickets backend unavailable.', error);
+        return of({
+          status: 'Offline',
+          summary: { total: 0, open: 0, inProgress: 0, escalated: 0, resolved: 0 },
+          tickets: [],
+        });
       }),
     );
   }
 
-  updateTicket(id: string, patch: Partial<Ticket>): Observable<Ticket | null> {
-    return this.http
-      .patch<Ticket>(`${this.apiUrl}/tickets/${id}`, patch)
-      .pipe(catchError(() => of(null)));
+  getTechnicians(): Observable<Technician[]> {
+    return this.http.get<{ technicians: Technician[] }>(`${this.apiUrl}/technicians`).pipe(
+      map((response) => response.technicians),
+      catchError(() => of([])),
+    );
   }
 
-  // ── Offline fallback (mirrors the backend seeded set) ──
-  private offline(filters: TicketFilters): TicketsResponse {
-    const now = Date.now();
-    const hour = 3600 * 1000;
-    let tickets: Ticket[] = [
-      { _id: 'off_t1', ticketId: 'T-2041', subject: 'Compressor failure after install', customer: 'Jane Smith', category: 'repair', priority: 'high', status: 'escalated', assignedTo: 'A. Fernando', slaDueAt: new Date(now + 3 * hour), createdAt: new Date(now - 0.75 * hour) },
-      { _id: 'off_t2', ticketId: 'T-2042', subject: 'Annual maintenance visit', customer: 'Ravi Kumar', category: 'maintenance', priority: 'low', status: 'in-progress', assignedTo: 'M. Perera', slaDueAt: new Date(now + 20 * hour), createdAt: new Date(now - 5 * hour) },
-      { _id: 'off_t3', ticketId: 'T-2043', subject: 'New AC installation request', customer: 'Acme Holdings', category: 'installation', priority: 'medium', status: 'open', assignedTo: '', slaDueAt: new Date(now + 48 * hour), createdAt: new Date(now - 8 * hour) },
-      { _id: 'off_t4', ticketId: 'T-2044', subject: 'Thermostat not responding', customer: 'Nimal Perera', category: 'repair', priority: 'medium', status: 'open', assignedTo: '', slaDueAt: new Date(now + 12 * hour), createdAt: new Date(now - 2 * hour) },
-      { _id: 'off_t5', ticketId: 'T-2039', subject: 'Post-service inspection', customer: 'Green Valley Hotel', category: 'inspection', priority: 'low', status: 'resolved', assignedTo: 'S. Jayasuriya', slaDueAt: new Date(now - 6 * hour), createdAt: new Date(now - 30 * hour) },
-    ];
-
-    const summary: TicketSummary = {
-      total: tickets.length,
-      open: tickets.filter((t) => t.status === 'open').length,
-      inProgress: tickets.filter((t) => t.status === 'in-progress').length,
-      escalated: tickets.filter((t) => t.status === 'escalated').length,
-      resolved: tickets.filter((t) => t.status === 'resolved').length,
-    };
-
-    if (filters.status && filters.status !== 'all') {
-      tickets = tickets.filter((t) => t.status === filters.status);
-    }
-    if (filters.priority && filters.priority !== 'all') {
-      tickets = tickets.filter((t) => t.priority === filters.priority);
-    }
-
-    return { status: 'Offline', summary, tickets };
+  updateTicket(id: string, patch: TicketUpdate): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${this.apiUrl}/tickets/${id}`, patch);
   }
 }

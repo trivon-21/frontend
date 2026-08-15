@@ -1,110 +1,53 @@
 <div class="mgr-page">
-  <!-- Header -->
   <div class="page-header">
-    <div>
-      <h1 class="page-title">Support Tickets</h1>
-      <p class="page-subtitle">Assign, escalate and resolve field-service tickets.</p>
-    </div>
-    <span class="status-chip" [class.offline]="status === 'Offline'">
-      <span class="dot" [class.syncing]="loading"></span>
-      {{ loading ? 'Syncing…' : status }}
-    </span>
+    <div><h1 class="page-title">Operations</h1><p class="page-subtitle">Review customer context, SLA risk, assignments and inventory blockers.</p></div>
+    <span class="status-chip" [class.offline]="status === 'Offline'"><span class="dot" [class.syncing]="loading"></span>{{ loading ? 'Syncing…' : status }}</span>
   </div>
 
-  <!-- Summary tiles -->
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
   <div class="summary-row">
-    <button class="summary-tile" [class.active]="activeStatus === 'all'" (click)="setStatus('all')">
-      <span class="tile-value">{{ summary.total }}</span>
-      <span class="tile-label">Total</span>
-    </button>
-    <button class="summary-tile" [class.active]="activeStatus === 'open'" (click)="setStatus('open')">
-      <span class="tile-value">{{ summary.open }}</span>
-      <span class="tile-label">Open</span>
-    </button>
-    <button class="summary-tile" [class.active]="activeStatus === 'in-progress'" (click)="setStatus('in-progress')">
-      <span class="tile-value">{{ summary.inProgress }}</span>
-      <span class="tile-label">In Progress</span>
-    </button>
-    <button class="summary-tile alert" [class.active]="activeStatus === 'escalated'" (click)="setStatus('escalated')">
-      <span class="tile-value">{{ summary.escalated }}</span>
-      <span class="tile-label">Escalated</span>
-    </button>
-    <button class="summary-tile" [class.active]="activeStatus === 'resolved'" (click)="setStatus('resolved')">
-      <span class="tile-value">{{ summary.resolved }}</span>
-      <span class="tile-label">Resolved</span>
-    </button>
+    <button class="summary-tile" [class.active]="activeStatus === 'all'" (click)="setStatus('all')"><span class="tile-value">{{ summary.total }}</span><span class="tile-label">Total</span></button>
+    <button class="summary-tile" [class.active]="activeStatus === 'open'" (click)="setStatus('open')"><span class="tile-value">{{ summary.open }}</span><span class="tile-label">Open</span></button>
+    <button class="summary-tile" [class.active]="activeStatus === 'in-progress'" (click)="setStatus('in-progress')"><span class="tile-value">{{ summary.inProgress }}</span><span class="tile-label">In Progress</span></button>
+    <button class="summary-tile alert" [class.active]="activeStatus === 'escalated'" (click)="setStatus('escalated')"><span class="tile-value">{{ summary.escalated }}</span><span class="tile-label">Escalated</span></button>
+    <button class="summary-tile" [class.active]="activeStatus === 'resolved'" (click)="setStatus('resolved')"><span class="tile-value">{{ summary.resolved }}</span><span class="tile-label">Resolved</span></button>
   </div>
 
-  <!-- Priority filter -->
-  <div class="filter-bar">
-    <span class="filter-label">Priority</span>
-    <div class="chip-group">
-      <button
-        *ngFor="let p of priorityFilters"
-        class="chip"
-        [class.active]="activePriority === p.key"
-        (click)="setPriority(p.key)"
-      >
-        {{ p.label }}
-      </button>
-    </div>
-  </div>
+  <div class="filter-bar"><span class="filter-label">Priority</span><div class="chip-group"><button *ngFor="let priority of priorityFilters" class="chip" [class.active]="activePriority === priority" (click)="setPriority(priority)">{{ filterLabel(priority) }}</button></div></div>
 
-  <!-- Table -->
   <div class="alx-table-container">
     <table class="alx-table">
-      <thead>
-        <tr>
-          <th>Ticket</th>
-          <th>Subject</th>
-          <th>Customer</th>
-          <th>Category</th>
-          <th>Priority</th>
-          <th>Status</th>
-          <th>SLA</th>
-          <th>Assignee</th>
-          <th class="actions-cell">Actions</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Ticket</th><th>Subject</th><th>Customer</th><th>Service</th><th>Priority</th><th>Status</th><th>SLA</th><th>Assignee</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
-        <tr *ngFor="let t of tickets" [class.row-updating]="updatingId === t._id">
-          <td class="sku-cell">{{ t.ticketId }}</td>
-          <td class="name-cell">{{ t.subject }}</td>
-          <td>{{ t.customer }}</td>
-          <td class="cap">{{ t.category }}</td>
-          <td>
-            <span class="pill priority" [ngClass]="t.priority">{{ t.priority | uppercase }}</span>
-          </td>
-          <td>
-            <span class="pill status" [ngClass]="t.status">{{ statusLabel(t.status) }}</span>
-          </td>
-          <td>
-            <span class="sla" [class.overdue]="slaOverdue(t)">{{ slaText(t) }}</span>
-          </td>
-          <td>
-            <span *ngIf="t.assignedTo; else unassigned">{{ t.assignedTo }}</span>
-            <ng-template #unassigned><span class="muted">Unassigned</span></ng-template>
-          </td>
-          <td class="actions-cell">
-            <div class="row-actions" *ngIf="t.status !== 'resolved'">
-              <button class="mini-btn" (click)="assign(t)" title="Assign technician">Assign</button>
-              <button
-                class="mini-btn warn"
-                *ngIf="t.status !== 'escalated'"
-                (click)="escalate(t)"
-                title="Escalate"
-              >
-                Escalate
-              </button>
-              <button class="mini-btn ok" (click)="resolve(t)" title="Mark resolved">Resolve</button>
-            </div>
-            <span class="muted" *ngIf="t.status === 'resolved'">—</span>
-          </td>
+        <tr *ngFor="let ticket of tickets" [class.row-updating]="updatingId === ticket._id">
+          <td class="sku-cell">{{ ticket.ticketId }}</td><td class="name-cell">{{ ticket.subject }}</td><td>{{ ticket.customer }}</td><td class="cap">{{ ticket.category }}</td>
+          <td><span class="pill priority" [ngClass]="ticket.priority">{{ ticket.priority | uppercase }}</span></td>
+          <td><span class="pill status" [ngClass]="ticket.status">{{ statusLabel(ticket.status) }}</span></td>
+          <td><span class="sla" [class.overdue]="slaOverdue(ticket)">{{ slaText(ticket) }}</span></td>
+          <td><span *ngIf="ticket.assignedTo; else unassigned">{{ ticket.assignedTo }}</span><ng-template #unassigned><span class="muted">Unassigned</span></ng-template></td>
+          <td class="actions-cell"><div class="row-actions"><button class="mini-btn" (click)="openDetails(ticket)">View</button><button class="mini-btn warn" *ngIf="ticket.status !== 'resolved' && ticket.status !== 'escalated'" (click)="escalate(ticket)">Escalate</button><button class="mini-btn ok" *ngIf="ticket.status !== 'resolved'" (click)="resolve(ticket)">Resolve</button><button class="mini-btn" *ngIf="ticket.status === 'resolved'" (click)="reopen(ticket)">Reopen</button></div></td>
         </tr>
-        <tr *ngIf="!loading && tickets.length === 0">
-          <td colspan="9" class="empty-cell">No tickets match the current filters.</td>
-        </tr>
+        <tr *ngIf="!loading && tickets.length === 0"><td colspan="9" class="empty-cell">No tickets match the current filters.</td></tr>
       </tbody>
     </table>
   </div>
+
+  <section class="ticket-detail" *ngIf="selectedTicket as ticket">
+    <div class="detail-header"><div><span class="sku-cell">{{ ticket.ticketId }}</span><h2>{{ ticket.subject }}</h2></div><button class="mini-btn" (click)="closeDetails()">Close</button></div>
+    <p class="detail-description">{{ ticket.description || 'No additional description.' }}</p>
+    <div class="detail-grid">
+      <div><span class="detail-label">Customer</span><strong>{{ customer(ticket)?.fullName || ticket.customer }}</strong><span>{{ customer(ticket)?.phoneNumber || 'No phone recorded' }}</span><span>{{ customer(ticket)?.email || 'No email recorded' }}</span><span>{{ customer(ticket)?.address || 'No address recorded' }}</span></div>
+      <div><span class="detail-label">Service and SLA</span><strong class="cap">{{ ticket.category }}</strong><span>{{ slaText(ticket) }}</span><span>Priority: {{ ticket.priority }}</span><span *ngIf="ticket.resolvedAt">Resolved {{ ticket.resolvedAt | date:'medium' }}</span></div>
+      <div><label class="detail-label" for="technician">Assigned technician</label><select id="technician" [(ngModel)]="selectedTechnicianId" [disabled]="ticket.status === 'resolved'"><option value="">Select a technician</option><option *ngFor="let technician of technicians" [value]="technician._id">{{ technician.fullName }} · {{ technician.role }}</option></select><button class="mini-btn ok" (click)="assignSelected()" [disabled]="!selectedTechnicianId || ticket.status === 'resolved' || updatingId === ticket._id">Assign technician</button></div>
+    </div>
+    <div class="detail-grid" *ngIf="ticket.inventoryConstraints?.length">
+      <div *ngFor="let constraint of ticket.inventoryConstraints">
+        <span class="detail-label">Inventory exception</span>
+        <strong>{{ constraint.authorizationNumber }} · {{ constraint.item?.name || 'New item' }}</strong>
+        <span>{{ constraint.reason }} · {{ constraint.status }}</span>
+        <span>Received {{ constraint.receivedQuantity }} / {{ constraint.authorizedQuantity }}</span>
+      </div>
+    </div>
+  </section>
 </div>

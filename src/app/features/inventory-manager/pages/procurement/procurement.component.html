@@ -38,10 +38,46 @@
         {{ errorMessage }}
       </div>
 
+      <div class="form-grid workflow-selector">
+        <div class="form-group">
+          <label>RECEIPT MODE</label>
+          <select class="form-select" [ngModel]="receiptMode" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setReceiptMode($event)">
+            <option value="PO">Against Approved PO</option>
+            <option value="NON_PO">Emergency / Non-PO</option>
+          </select>
+        </div>
+        <ng-container *ngIf="receiptMode === 'PO'">
+          <div class="form-group">
+            <label>ISSUED PURCHASE ORDER *</label>
+            <select class="form-select" [ngModel]="selectedPurchaseOrder?._id || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectPurchaseOrder($event)">
+              <option value="">Select an issued PO</option>
+              <option *ngFor="let order of purchaseOrders" [value]="order._id">{{ order.poNumber }} — {{ order.supplierName }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>OUTSTANDING ORDER LINE *</label>
+            <select class="form-select" [ngModel]="selectedPurchaseLine?.lineId || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectPurchaseLine($event)" [disabled]="!selectedPurchaseOrder">
+              <option value="">Select an outstanding line</option>
+              <option *ngFor="let line of availablePoLines" [value]="line.lineId">{{ line.sku }} — {{ line.name }} ({{ outstanding(line) }} remaining)</option>
+            </select>
+          </div>
+        </ng-container>
+        <div class="form-group" *ngIf="receiptMode === 'NON_PO'">
+          <label>APPROVED AUTHORIZATION</label>
+          <select class="form-select" [ngModel]="selectedAuthorization?._id || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectAuthorizationById($event)">
+            <option value="">Create a new authorization request</option>
+            <option *ngFor="let authorization of authorizations" [value]="authorization._id" [disabled]="authorization.status !== 'approved' && authorization.status !== 'partially-received'">
+              {{ authorization.authorizationNumber }} — {{ authorization.status }} ({{ authorization.authorizedQuantity - authorization.receivedQuantity }} remaining)
+            </option>
+          </select>
+          <small *ngIf="!selectedAuthorization">Creating this request will not change stock. Manager approval is required first.</small>
+        </div>
+      </div>
+
       <!-- Step 1: Supplier Info -->
       <div *ngIf="currentStep === 1" class="step-content animate-fade" formGroupName="supplierInfo">
         <h3>Supplier Information</h3>
-        <p class="step-desc">Select the supplier and enter invoice details</p>
+        <p class="step-desc">{{ isFinalReceipt ? 'Confirm the locked supplier and receipt document.' : 'Record the supplier, exception reason and evidence.' }}</p>
 
         <div class="form-grid">
           <!-- Supplier Autocomplete Field -->
@@ -53,6 +89,7 @@
                 placeholder="Type supplier name..."
                 class="form-input"
                 formControlName="supplier"
+                [readonly]="isFinalReceipt"
                 (focus)="onSupplierInputFocus()"
                 (blur)="onSupplierInputBlur()"
                 autocomplete="off"
@@ -110,23 +147,34 @@
           </div>
 
           <div class="form-group">
-            <label>Invoice Number *</label>
+            <label>Source Document Number *</label>
             <input
               type="text"
-              placeholder="e.g., INV-2025-001"
+              placeholder="Invoice, delivery note or replacement reference"
               class="form-input"
-              formControlName="invoiceNumber"
+              formControlName="sourceDocumentNumber"
+              [readonly]="!!selectedAuthorization"
             />
             <span
               class="error-text"
               *ngIf="
-                grnForm.get('supplierInfo.invoiceNumber')?.touched &&
-                grnForm.get('supplierInfo.invoiceNumber')?.invalid
+                grnForm.get('supplierInfo.sourceDocumentNumber')?.touched &&
+                grnForm.get('supplierInfo.sourceDocumentNumber')?.invalid
               "
             >
-              Invoice number is required
+              Source document number is required
             </span>
           </div>
+
+          <div class="form-group"><label>Invoice Number (if applicable)</label><input type="text" class="form-input" formControlName="invoiceNumber" /></div>
+
+          <ng-container *ngIf="receiptMode === 'NON_PO'">
+            <div class="form-group"><label>NON-PO REASON *</label><select class="form-select" formControlName="nonPoReason" [attr.disabled]="selectedAuthorization ? true : null"><option *ngFor="let reason of nonPoReasons" [value]="reason.value">{{ reason.label }}</option></select></div>
+            <div class="form-group"><label>AFFECTED WORK TYPE</label><select class="form-select" formControlName="affectedWorkType"><option value="NONE">Not linked</option><option value="REPAIR">Repair</option><option value="INSTALLATION">Installation</option><option value="MAINTENANCE">Maintenance</option><option value="INSPECTION">Inspection</option><option value="TICKET">Ticket</option><option value="OTHER">Other</option></select></div>
+            <div class="form-group"><label>AFFECTED JOB / TICKET REFERENCE</label><input class="form-input" formControlName="affectedWorkReference" placeholder="e.g., TKT-1042" /></div>
+            <div class="form-group"><label>SUPPORTING DOCUMENT URL</label><input class="form-input" formControlName="supportingDocumentUrl" placeholder="https://..." /></div>
+            <div class="form-group full-width"><label>OPERATIONAL EXPLANATION *</label><textarea class="form-input" formControlName="explanation" rows="3" [readonly]="!!selectedAuthorization"></textarea></div>
+          </ng-container>
 
 
           <div class="form-group">
@@ -146,7 +194,7 @@
 
         <div class="info-box">
           <p>
-            <lucide-angular name="info" [size]="14"></lucide-angular> Note: Make sure the invoice number matches the delivery
+            <lucide-angular name="info" [size]="14"></lucide-angular> Note: Make sure the source document matches the delivery
             documentation exactly.
           </p>
         </div>
@@ -189,7 +237,7 @@
               placeholder="Enter Product Name"
               class="form-input"
               formControlName="name"
-              [readonly]="selectedExistingItem"
+              [readonly]="selectedExistingItem || isFinalReceipt"
             />
             <span
               class="error-text"
@@ -207,7 +255,7 @@
               placeholder="e.g., AC-LG-12000-INV"
               class="form-input"
               formControlName="sku"
-              [readonly]="selectedExistingItem"
+              [readonly]="selectedExistingItem || isFinalReceipt"
             />
             <span
               class="error-text"
@@ -225,7 +273,7 @@
               placeholder="e.g., LG, Samsung, Daikin"
               class="form-input"
               formControlName="brand"
-              [readonly]="selectedExistingItem"
+              [readonly]="selectedExistingItem || isFinalReceipt"
             />
             <span
               class="error-text"
@@ -250,6 +298,7 @@
             <select class="form-select" formControlName="itemClass">
               <option *ngFor="let itemClass of itemClasses" [value]="itemClass">{{ itemClass }}</option>
             </select>
+            <span class="error-text" *ngIf="grnForm.get('itemDetails.itemClass')?.touched && grnForm.get('itemDetails.itemClass')?.hasError('classification')">Select a classified product type</span>
           </div>
           <div class="form-group">
             <label>SUBCATEGORY *</label>
@@ -313,7 +362,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label>INITIAL QUANTITY *</label>
-            <input type="number" class="form-input" formControlName="available" />
+            <input type="number" min="1" step="1" class="form-input" formControlName="available" />
             <span
               class="error-text"
               *ngIf="
@@ -321,7 +370,7 @@
                 grnForm.get('inventorySettings.available')?.invalid
               "
             >
-              Quantity must be 0 or more
+              Quantity must be at least 1
             </span>
           </div>
           <div class="form-group">
@@ -347,10 +396,7 @@
           <div class="form-group">
             <label>UNIT OF MEASURE *</label>
             <select class="form-select" formControlName="unit">
-              <option value="units">Units</option>
-              <option value="sets">Sets</option>
-              <option value="kg">Kilograms</option>
-              <option value="meters">Meters</option>
+              <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
             </select>
           </div>
           <div class="form-group">
@@ -366,7 +412,7 @@
           <div
             class="form-group full-width serials-container animate-fade"
             *ngIf="
-              grnForm.get('itemDetails.isSerialized')?.value &&
+              isFinalReceipt && grnForm.get('itemDetails.isSerialized')?.value &&
               grnForm.get('inventorySettings.available')?.value > 0
             "
           >
@@ -407,7 +453,7 @@
           (click)="nextStep()"
         >
           <span *ngIf="!isSubmitting">{{
-            currentStep === 3 ? 'Complete Entry' : 'Next Step'
+            currentStep === 3 ? (isFinalReceipt ? 'Post Receipt & GRN' : 'Request Manager Approval') : 'Next Step'
           }}</span>
           <span *ngIf="isSubmitting" class="loader-small"></span>
         </button>
@@ -428,14 +474,22 @@
         />
       </div>
       <p class="subtitle">Latest goods received notes processed</p>
+      <div class="chip-group">
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">PO</button>
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Non-PO</button>
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'EMERGENCY'" (click)="grnFilter = 'EMERGENCY'">Emergency</button>
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'REPLACEMENT'" (click)="grnFilter = 'REPLACEMENT'">Replacements</button>
+        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
+      </div>
     </div>
 
     <div class="shipments-list glass-panel">
       <div class="shipment-item" *ngFor="let p of filteredProcurements">
         <div class="item-main">
           <div class="item-id-row">
-            <span class="shipment-id">INV-{{ p.invoiceNumber }}</span>
-            <span class="status-badge">Completed</span>
+            <span class="shipment-id">{{ p.sourceDocumentNumber || p.invoiceNumber }}</span>
+            <span class="status-badge">{{ p.receiptMode }}</span>
           </div>
           <h4 class="supplier-name">{{ p.supplierName }}</h4>
           <div class="item-meta">

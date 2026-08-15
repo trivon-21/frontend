@@ -9,9 +9,13 @@
         <lucide-angular name="clipboard-check" [size]="16" class="inline-icon"></lucide-angular>
         Procurement
       </button>
-      <button class="btn-primary" [routerLink]="['/inventory-manager/list-items']">
+      <button class="btn-primary" [routerLink]="['/inventory-manager/data-quality']">
         <lucide-angular name="list" [size]="16" class="inline-icon"></lucide-angular>
-        List Items
+        Data Quality
+      </button>
+      <button class="btn-primary" [routerLink]="['/inventory-manager/product-wizard']">
+        <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
+        New Product
       </button>
     </div>
   </div>
@@ -312,11 +316,15 @@
           <div class="detail-item"><span class="label">Capacity</span><span class="value">{{ selectedItem.capacityBtu ? (selectedItem.capacityBtu + ' BTU/h') : '—' }}</span></div>
           <div class="detail-item"><span class="label">Power</span><span class="value">{{ selectedItem.voltage || '—' }} · {{ selectedItem.phase || 'Not Applicable' }}</span></div>
           <div class="detail-item"><span class="label">Location</span><span class="value">{{ getDisplayLocation(selectedItem) }}</span></div>
+          <div class="detail-item"><span class="label">Preferred Supplier</span><span class="value">{{ getSupplierName(selectedItem) || 'Not assigned' }}</span></div>
           <div class="detail-item"><span class="label">Stock Status</span><span class="value">{{ getStockStatusLabel(selectedItem) }}</span></div>
           <div class="detail-item"><span class="label">Available</span><span class="value">{{ selectedItem.available }} {{ selectedItem.unit }}</span></div>
           <div class="detail-item"><span class="label">Reserved</span><span class="value">{{ selectedItem.reserved }} {{ selectedItem.unit }}</span></div>
           <div class="detail-item"><span class="label">Unit Cost</span><span class="value">LKR {{ selectedItem.unitCost | number:'1.2-2' }}</span></div>
+          <div class="detail-item"><span class="label">Reorder / Maximum</span><span class="value">{{ selectedItem.reorderLevel }} / {{ selectedItem.maxStockLevel }} {{ selectedItem.unit }}</span></div>
           <div class="detail-item"><span class="label">Tracking</span><span class="value">{{ selectedItem.isSerialized ? 'Serialized' : 'Non-serialized' }}</span></div>
+          <div class="detail-item" *ngIf="selectedItem.isSerialized"><span class="label">Asset Tags</span><span class="value">{{ selectedItem.serialNumbers?.length || 0 }}</span></div>
+          <div class="detail-item" *ngIf="selectedItem.specsUrl"><span class="label">Specifications</span><a class="value" [href]="selectedItem.specsUrl" target="_blank" rel="noopener">Open manufacturer specifications</a></div>
         </div>
       </div>
 

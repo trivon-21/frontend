@@ -142,7 +142,9 @@
   color: var(--text-secondary);
 }
 
-.pill.status.pending-approval {
+.pill.status.pending-approval,
+.pill.status.pending-manager,
+.pill.status.pending-finance {
   background: #fff5e6;
   color: #b26a00;
 }

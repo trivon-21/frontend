@@ -272,6 +272,10 @@ export class InventoryListComponent implements OnInit {
     return item.binLocation ? `${item.location} · ${item.binLocation}` : item.location;
   }
 
+  getSupplierName(item: InventoryItem): string {
+    return this.supplierOf(item);
+  }
+
   openDetailModal(item: InventoryItem): void {
     this.selectedItem = item;
     this.selectedRowId = this.getItemId(item);

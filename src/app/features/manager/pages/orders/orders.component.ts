@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import {
   OrdersService,
   PurchaseRequest,
   OrderSummary,
   OrderStatus,
+  ReceiptAuthorization,
 } from '../../services/orders.service';
+import { purchaseStatusLabel } from '../../../inventory-manager/services/purchase-workflow';
 
 interface FilterChip {
   key: string;
@@ -28,19 +30,36 @@ export class OrdersComponent implements OnInit {
   loading = false;
   updatingId: string | null = null;
   expandedId: string | null = null;
+  authorizationExpandedId: string | null = null;
+  authorizations: ReceiptAuthorization[] = [];
+  activeType: 'purchase' | 'non-po' = 'purchase';
 
   filters: FilterChip[] = [
     { key: 'all', label: 'All' },
-    { key: 'pending-approval', label: 'Pending' },
+    { key: 'pending-manager', label: 'Awaiting Manager' },
+    { key: 'pending-finance', label: 'Awaiting Finance' },
     { key: 'approved', label: 'Approved' },
     { key: 'rejected', label: 'Rejected' },
   ];
   activeFilter = 'all';
 
-  constructor(private ordersService: OrdersService) {}
+  constructor(private ordersService: OrdersService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const status = params.get('status');
+      if (params.get('type') === 'non-po') this.activeType = 'non-po';
+      if (status && this.filters.some((filter) => filter.key === status)) this.activeFilter = status;
+      this.load();
+      this.loadAuthorizations();
+    });
+  }
+
+  loadAuthorizations(): void {
+    this.ordersService.getReceiptAuthorizations().subscribe({
+      next: (items) => this.authorizations = items,
+      error: () => this.authorizations = [],
+    });
   }
 
   load(): void {
@@ -68,52 +87,50 @@ export class OrdersComponent implements OnInit {
   }
 
   approve(order: PurchaseRequest): void {
-    this.decide(order, 'approved');
+    const comment = window.prompt(`Operational approval comment for ${order.requestId}:`, 'Operational need verified.');
+    if (!comment?.trim()) return;
+    this.decide(order, 'approved', comment.trim());
   }
 
   reject(order: PurchaseRequest): void {
     const reason = window.prompt(`Reason for rejecting ${order.requestId}:`, '');
-    if (reason === null) return;
+    if (!reason?.trim()) return;
     this.decide(order, 'rejected', reason.trim());
   }
 
   private decide(order: PurchaseRequest, decision: OrderStatus & ('approved' | 'rejected'), reason = ''): void {
-    const previous = { ...order };
-    order.status = decision;
-    if (decision === 'rejected') order.rejectionReason = reason;
-    if (decision === 'approved') order.approvedBy = 'Manager';
-    this.recompute();
     this.updatingId = order._id;
 
-    this.ordersService.decide(order._id, decision, reason).subscribe({
+    this.ordersService.decide(order, decision, reason).subscribe({
       next: (updated) => {
         this.updatingId = null;
-        if (!updated && this.status !== 'Offline') {
-          Object.assign(order, previous);
-          this.recompute();
-        }
+        if (updated) this.load();
       },
       error: () => {
         this.updatingId = null;
-        Object.assign(order, previous);
-        this.recompute();
       },
     });
   }
 
-  private recompute(): void {
-    const pending = this.orders.filter((o) => o.status === 'pending-approval');
-    this.summary = {
-      pending: pending.length,
-      approved: this.orders.filter((o) => o.status === 'approved').length,
-      rejected: this.orders.filter((o) => o.status === 'rejected').length,
-      pendingValue: pending.reduce((s, o) => s + o.totalEstimate, 0),
-    };
+  statusLabel(status: OrderStatus): string {
+    return purchaseStatusLabel(status);
   }
 
-  statusLabel(status: OrderStatus): string {
-    if (status === 'pending-approval') return 'Pending';
-    return status.charAt(0).toUpperCase() + status.slice(1);
+  decideAuthorization(authorization: ReceiptAuthorization, decision: 'approved' | 'rejected'): void {
+    const comment = window.prompt(
+      `${decision === 'approved' ? 'Approval' : 'Rejection'} comment for ${authorization.authorizationNumber}:`,
+      decision === 'approved' ? 'Operational exception verified.' : '',
+    );
+    if (!comment?.trim()) return;
+    this.updatingId = authorization._id;
+    this.ordersService.decideReceiptAuthorization(authorization, decision, comment.trim()).subscribe({
+      next: () => { this.updatingId = null; this.loadAuthorizations(); },
+      error: () => this.updatingId = null,
+    });
+  }
+
+  authorizationItem(authorization: ReceiptAuthorization): string {
+    return authorization.inventoryId?.name || authorization.newItemSnapshot?.name || 'New catalog item';
   }
 
   formatCurrency(value: number): string {

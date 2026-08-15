@@ -20,6 +20,7 @@ export type InventorySystemType =
 
 export type InventoryItemForm = 'Single' | 'Kit' | 'Bundle';
 export type StockStatus = 'in-stock' | 'low-stock' | 'out-of-stock';
+export type InventoryPhase = 'Single Phase' | 'Three Phase' | 'Not Applicable';
 
 export const INVENTORY_ITEM_CLASSES: InventoryItemClass[] = [
   'AC Equipment',
@@ -44,6 +45,10 @@ export const INVENTORY_SUBCATEGORIES: Record<InventoryItemClass, string[]> = {
 export const INVENTORY_SYSTEM_TYPES: InventorySystemType[] = [
   'Split', 'Cassette', 'Ducted', 'Multi-Split', 'VRF/VRV', 'Packaged/Rooftop', 'AHU/FCU', 'Universal', 'Not Applicable',
 ];
+
+export const INVENTORY_ITEM_FORMS: InventoryItemForm[] = ['Single', 'Kit', 'Bundle'];
+export const INVENTORY_UNITS = ['units', 'kits', 'sets', 'meters', 'rolls', 'kg', 'cylinders', 'liters'];
+export const INVENTORY_PHASES: InventoryPhase[] = ['Single Phase', 'Three Phase', 'Not Applicable'];
 
 export interface SupplierReference {
   _id: string;
@@ -72,7 +77,7 @@ export interface InventoryItem {
   refrigerants?: string[];
   capacityBtu?: number;
   voltage?: string;
-  phase?: 'Single Phase' | 'Three Phase' | 'Not Applicable';
+  phase?: InventoryPhase;
   location: string;
   binLocation?: string;
   supplierId?: string | SupplierReference;
@@ -87,6 +92,44 @@ export interface InventoryItem {
   time?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface InventoryMasterDataInput {
+  name: string;
+  itemClass: InventoryItemClass;
+  subcategory: string;
+  brand: string;
+  manufacturerPartNumber?: string;
+  type: InventoryItemForm;
+  unit: string;
+  reorderLevel: number;
+  maxStockLevel: number;
+  unitCost: number;
+  location: string;
+  binLocation?: string;
+  supplierId?: string | null;
+  isSerialized: boolean;
+  compatibleModels: string[];
+  systemType: InventorySystemType;
+  refrigerants: string[];
+  capacityBtu?: number;
+  voltage?: string;
+  phase: InventoryPhase;
+  specsUrl?: string;
+}
+
+export interface CreateInventoryCatalogItemInput extends InventoryMasterDataInput {
+  sku: string;
+}
+
+export type UpdateInventoryMasterDataInput = InventoryMasterDataInput;
+
+export function isValidSubcategory(itemClass: InventoryItemClass, subcategory: string): boolean {
+  return (INVENTORY_SUBCATEGORIES[itemClass] || []).includes(subcategory);
+}
+
+export function normalizeInventoryList(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
 
 export function deriveStockStatus(item: Pick<InventoryItem, 'available' | 'reorderLevel'>): StockStatus {

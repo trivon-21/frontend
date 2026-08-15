@@ -1,63 +1,47 @@
-<div class="list-items-container">
-  <!-- Header -->
-  <div class="header">
-    <h1>List Items</h1>
-    <button class="btn-primary" [routerLink]="['/inventory-manager/procurement']">
-      <lucide-angular name="shopping-cart" [size]="16" class="inline-icon"></lucide-angular>
-      Procurement
+<div class="quality-container">
+  <header class="page-header">
+    <div>
+      <h1>Product Data Quality</h1>
+      <p>Resolve incomplete classification and inventory master-data issues.</p>
+    </div>
+    <button class="btn-primary" routerLink="/inventory-manager/product-wizard">
+      <lucide-angular name="plus" [size]="16"></lucide-angular> New Product
     </button>
+  </header>
+
+  <div class="summary-grid">
+    <div><strong>{{ records.length }}</strong><span>Products need review</span></div>
+    <div><strong>{{ records.length ? filteredRecords.length : 0 }}</strong><span>Currently shown</span></div>
   </div>
 
-  <!-- Search Section -->
-  <div class="filters-row">
-    <div class="search-box">
-      <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <input type="text" [(ngModel)]="searchQuery" (input)="applySearch()" placeholder="Search Inventory...">
-    </div>
-    <button class="btn-clear" (click)="clearFilters()" *ngIf="searchQuery">Clear</button>
+  <div class="toolbar">
+    <label class="search-box">
+      <lucide-angular name="search" [size]="17"></lucide-angular>
+      <input [(ngModel)]="searchQuery" (input)="applySearch()" placeholder="Search product, SKU, class, or issue">
+    </label>
+    <button class="btn-link" type="button" *ngIf="searchQuery" (click)="clearSearch()">Clear</button>
   </div>
 
-  <!-- Dual Lists Layout -->
-  <div class="lists-grid">
-    <!-- Pending Items -->
-    <div class="list-column glass-panel">
-      <div class="column-header">
-        <h2>Items to be listed</h2>
-      </div>
-      <div class="items-list">
-        <div class="item-card" *ngFor="let item of pendingItems">
-          <div class="item-icon pending">
-            <lucide-angular name="box" [size]="18"></lucide-angular>
-          </div>
-          <div class="item-info">
-            <span class="item-name">{{ item.name }}</span>
-            <span class="item-sku">{{ item.sku }}</span>
-          </div>
-          <button class="btn-add-details" [routerLink]="['/inventory-manager/product-wizard', item._id || item.id]">Add Details</button>
-        </div>
-      </div>
-    </div>
+  <div class="state-card" *ngIf="loading">Checking inventory data…</div>
+  <div class="state-card error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="state-card success" *ngIf="!loading && !errorMessage && records.length === 0">All inventory products pass the current data-quality checks.</div>
 
-    <!-- Listed Items -->
-    <div class="list-column glass-panel">
-      <div class="column-header">
-        <h2>Listed Items</h2>
+  <div class="quality-list" *ngIf="!loading && !errorMessage">
+    <article class="quality-card" *ngFor="let record of filteredRecords">
+      <div class="product-main">
+        <span class="sku">{{ record.item.sku || 'No SKU' }}</span>
+        <h2>{{ record.item.name || 'Unnamed product' }}</h2>
+        <p>{{ record.item.itemClass || 'Unclassified' }} / {{ record.item.subcategory || 'Unclassified' }}</p>
       </div>
-      <div class="items-list">
-        <div class="item-card" *ngFor="let item of listedItems">
-          <div class="item-icon success">
-            <lucide-angular name="check" [size]="18"></lucide-angular>
-          </div>
-          <div class="item-info">
-            <span class="item-name">{{ item.name }}</span>
-            <span class="item-sku">{{ item.sku }}</span>
-          </div>
-          <div class="item-meta">
-            <lucide-angular name="clock" [size]="14"></lucide-angular>
-            <span>{{ item.time }}</span>
-          </div>
-        </div>
+      <div class="issues">
+        <span class="issue master" *ngFor="let issue of record.masterIssues">{{ issue }}</span>
+        <span class="issue stock" *ngFor="let issue of record.stockIssues">{{ issue }}</span>
       </div>
-    </div>
+      <div class="actions">
+        <a class="btn-secondary" *ngIf="record.masterIssues.length" [routerLink]="['/inventory-manager/product-wizard', itemId(record.item)]">Fix Product Data</a>
+        <a class="btn-secondary" *ngIf="record.stockIssues.length" [routerLink]="['/inventory-manager/procurement']" [queryParams]="{ inventoryId: itemId(record.item) }">Review in Procurement</a>
+      </div>
+    </article>
+    <div class="state-card" *ngIf="records.length && filteredRecords.length === 0">No quality issues match this search.</div>
   </div>
 </div>

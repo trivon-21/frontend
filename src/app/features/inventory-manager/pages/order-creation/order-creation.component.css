@@ -886,7 +886,10 @@
 }
 
 .summary-box .price { color: var(--primary-main); }
-.status-val.pending-approval { color: var(--warning); }
+
+.status-val.pending-approval,
+.status-val.pending-manager,
+.status-val.pending-finance { color: var(--warning); }
 .status-val.approved { color: var(--primary-main); }
 .status-val.rejected { color: var(--error); }
 

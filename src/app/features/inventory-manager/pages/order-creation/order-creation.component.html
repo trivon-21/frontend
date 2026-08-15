@@ -40,14 +40,19 @@
         <div class="suggested-item" *ngFor="let item of suggestedItems">
           <div class="item-main">
             <span class="item-name">{{ item.name }}</span>
-            <span class="item-sku">{{ item.sku }}</span>
+            <span class="item-sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</span>
+            <span class="item-sku">{{ supplierName(item) }}</span>
           </div>
           <div class="item-stock">
             <div class="stock-label-group">
               <span class="label">Stock Level</span>
               <span class="value" [class.critical]="item.available <= item.reorderLevel/2">
-                {{ item.available }} / {{ item.reorderLevel }}
+                {{ item.available }} / {{ item.reorderLevel }} {{ item.unit }}
               </span>
+            </div>
+            <div class="stock-label-group">
+              <span class="label">Suggested</span>
+              <span class="value">{{ item.suggestedQuantity || 1 }} {{ item.unit }}</span>
             </div>
           </div>
         </div>
@@ -85,11 +90,17 @@
   <div class="tracking-section">
     <!-- Tabs -->
     <div class="tabs-nav">
-      <button class="tab-item" [class.active]="activeTab === 'pending-approval'" (click)="setActiveTab('pending-approval')">
-        Pending Approval
+      <button class="tab-item" [class.active]="activeTab === 'pending'" (click)="setActiveTab('pending')">
+        Awaiting Approval
       </button>
       <button class="tab-item" [class.active]="activeTab === 'approved'" (click)="setActiveTab('approved')">
         Approved
+      </button>
+      <button class="tab-item" [class.active]="activeTab === 'receiving'" (click)="setActiveTab('receiving')">
+        Ordered / Receiving
+      </button>
+      <button class="tab-item" [class.active]="activeTab === 'received'" (click)="setActiveTab('received')">
+        Completed
       </button>
       <button class="tab-item" [class.active]="activeTab === 'rejected'" (click)="setActiveTab('rejected')">
         Rejected
@@ -229,12 +240,13 @@
           <div class="alert-content">
             <strong>Order Approved</strong>
             <p>Approved by <strong>{{ selectedOrder.approvedBy }}</strong> on {{ formatDate(selectedOrder.approvedAt) }}</p>
-            <p class="sub">Procurement records have been created automatically.</p>
+            <p class="sub">Approval does not add stock. Issue the PO, then receive its outstanding lines in Procurement.</p>
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
+        <button class="btn-primary-close" *ngIf="selectedOrder.status === 'approved'" (click)="issuePurchaseOrder(selectedOrder)">Issue Purchase Order</button>
         <button class="btn-primary-close" (click)="closeDetail()">Close</button>
       </div>
     </div>

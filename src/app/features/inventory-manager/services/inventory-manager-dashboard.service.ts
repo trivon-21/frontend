@@ -2,13 +2,20 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { InventoryItem } from './inventory-domain';
+import {
+  CreateInventoryCatalogItemInput,
+  InventoryItem,
+  UpdateInventoryMasterDataInput,
+} from './inventory-domain';
+import { PurchaseRequest, ReceiptAuthorization } from './purchase-workflow';
 export type {
+  CreateInventoryCatalogItemInput,
   InventoryItem,
   InventoryItemClass,
   InventoryItemForm,
   InventorySystemType,
   StockStatus,
+  UpdateInventoryMasterDataInput,
 } from './inventory-domain';
 
 export interface SubStat {
@@ -50,6 +57,7 @@ export interface InventoryDashboardData {
   stats: SummaryStats;
   recentActivity: ActivityItem[];
   reorderList: ReorderItem[];
+  procurementWorkflow: { awaitingManager: number; awaitingReceipt: number; awaitingFinance: number };
 }
 
 @Injectable({
@@ -87,6 +95,7 @@ export class InventoryManagerDashboardService {
           },
           recentActivity: [],
           reorderList: [],
+          procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
         });
       })
     );
@@ -111,15 +120,15 @@ export class InventoryManagerDashboardService {
     return this.http.get<InventoryItem>(`${this.apiUrl}/item/${id}`);
   }
 
-  updateItem(id: string, data: any): Observable<InventoryItem> {
-    return this.http.put<InventoryItem>(`${this.apiUrl}/item/${id}`, data);
+  updateItem(id: string, data: UpdateInventoryMasterDataInput): Observable<InventoryItem> {
+    return this.http.patch<InventoryItem>(`${this.apiUrl}/item/${id}`, data);
   }
 
-  addItem(data: any): Observable<InventoryItem> {
+  addItem(data: CreateInventoryCatalogItemInput): Observable<InventoryItem> {
     return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
   }
 
-  receiveInventory(data: any): Observable<{ item: InventoryItem; procurement: any }> {
+  receiveInventory(data: Record<string, unknown>): Observable<{ item: InventoryItem; procurement: any }> {
     return this.http.post<{ item: InventoryItem; procurement: any }>(`${this.apiUrl}/receipts`, data);
   }
 
@@ -133,6 +142,20 @@ export class InventoryManagerDashboardService {
 
   getProcurements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/procurements`);
+  }
+
+  getOrderRequests(): Observable<PurchaseRequest[]> {
+    return this.http.get<PurchaseRequest[]>(`${this.apiUrl}/order-requests`);
+  }
+
+  getReceiptAuthorizations(status?: string): Observable<ReceiptAuthorization[]> {
+    const params: Record<string, string> = {};
+    if (status) params['status'] = status;
+    return this.http.get<ReceiptAuthorization[]>(`${this.apiUrl}/receipt-authorizations`, { params });
+  }
+
+  createReceiptAuthorization(data: Record<string, unknown>): Observable<ReceiptAuthorization> {
+    return this.http.post<ReceiptAuthorization>(`${this.apiUrl}/receipt-authorizations`, data);
   }
 
   getActivityLog(): Observable<ActivityItem[]> {

@@ -256,6 +256,66 @@
   padding: var(--spacing-xxl, 28px) !important;
 }
 
+.error-message {
+  padding: var(--spacing-md);
+  border: 1px solid var(--error);
+  border-radius: 8px;
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.ticket-detail {
+  padding: var(--spacing-lg, 16px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-lg, 14px);
+  background: var(--background-card);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.detail-header h2 {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--text-primary);
+}
+
+.detail-description {
+  color: var(--text-secondary);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.detail-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--text-secondary);
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.detail-grid select {
+  min-height: 38px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--background-card);
+  color: var(--text-primary);
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -282,5 +342,9 @@
 @media (max-width: 900px) {
   .summary-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
   }
 }
