@@ -1,51 +1,227 @@
 <div class="analytics-page">
-  <div class="page-header">
-    <div class="header-titles"><h1 class="page-title">Operational Analytics</h1><p class="page-subtitle">Live service workload, purchase approvals, and inventory signals.</p></div>
-    <div class="header-controls">
-      <span class="status-chip" [class.offline]="data?.status === 'Offline'"><span class="dot" [class.syncing]="loading"></span>{{ loading ? 'Syncing…' : (data?.status || 'Waiting') }}</span>
-      <div class="period-toggle" role="tablist" aria-label="Reporting period"><button *ngFor="let period of periods" class="period-btn" [class.active]="period.key === activePeriod" (click)="selectPeriod(period.key)">{{ period.label }}</button></div>
-      <button class="export-btn" (click)="exportCsv()" [disabled]="!data"><lucide-angular name="download" [size]="16"></lucide-angular>Export</button>
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Operational Analytics</h1>
+      <p class="page-subtitle">Period performance and the company’s current operational position.</p>
     </div>
+    <div class="header-controls">
+      <span class="status-chip" [class.offline]="!!errorMessage">
+        <span class="dot" [class.syncing]="loading"></span>
+        {{ loading ? 'Syncing…' : errorMessage ? 'Unavailable' : data?.status || 'Waiting' }}
+      </span>
+      <div class="period-toggle" role="tablist" aria-label="Reporting period">
+        <button
+          *ngFor="let period of periods"
+          type="button"
+          role="tab"
+          class="period-btn"
+          [class.active]="period.key === activePeriod"
+          [attr.aria-selected]="period.key === activePeriod"
+          (click)="selectPeriod(period.key)"
+        >{{ period.label }}</button>
+      </div>
+      <button type="button" class="export-btn" (click)="exportCsv()" [disabled]="!data || loading">
+        <lucide-angular name="download" [size]="16"></lucide-angular>
+        Export CSV
+      </button>
+    </div>
+  </header>
+
+  <div class="error-state" *ngIf="errorMessage && !loading" role="alert">
+    <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>
+    <div><strong>Analytics could not be loaded</strong><p>{{ errorMessage }}</p></div>
+    <button type="button" class="retry-btn" (click)="load()">Retry</button>
+  </div>
+
+  <div class="skeleton-grid" *ngIf="loading && !data" aria-label="Loading analytics">
+    <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4]"></div>
   </div>
 
   <ng-container *ngIf="data as report">
-    <p class="footnote" *ngIf="report.status === 'Offline'"><lucide-angular name="triangle-alert" [size]="14"></lucide-angular>Live analytics are unavailable; no demonstration values are shown.</p>
-    <div class="kpi-row">
-      <div class="kpi-card"><div class="kpi-top"><span class="kpi-label">Tickets Created</span><div class="kpi-icon"><lucide-angular name="ticket-plus" [size]="18"></lucide-angular></div></div><div class="kpi-value">{{ report.kpis.ticketsCreated }}</div></div>
-      <div class="kpi-card"><div class="kpi-top"><span class="kpi-label">Tickets Resolved</span><div class="kpi-icon"><lucide-angular name="circle-check-big" [size]="18"></lucide-angular></div></div><div class="kpi-value">{{ report.kpis.ticketsResolved }}</div></div>
-      <div class="kpi-card"><div class="kpi-top"><span class="kpi-label">Avg. Resolution</span><div class="kpi-icon"><lucide-angular name="timer" [size]="18"></lucide-angular></div></div><div class="kpi-value">{{ report.kpis.avgResolutionHours }}h</div></div>
-      <div class="kpi-card"><div class="kpi-top"><span class="kpi-label">Pending Approval Value</span><div class="kpi-icon"><lucide-angular name="shopping-bag" [size]="18"></lucide-angular></div></div><div class="kpi-value">{{ report.kpis.pendingApprovalValue | number:'1.0-0' }}</div></div>
+    <div class="report-scope">
+      <span class="scope-badge period">Selected period</span>
+      <span>{{ report.reportingPeriod.currentStart | date:'mediumDate' }} – {{ report.reportingPeriod.currentEnd | date:'mediumDate' }}</span>
+      <span class="generated">Updated {{ report.generatedAt | date:'short' }}</span>
     </div>
 
-    <div class="chart-grid two">
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Ticket Trend</h2><p class="chart-sub">Created / resolved in each period</p></div></div><div class="bar-list"><div class="bar-row" *ngFor="let label of report.ticketTrend.labels; let index = index"><span class="bar-label">{{ label }}</span><div class="bar-track"><div class="bar-fill" [style.width.%]="(report.ticketTrend.created[index] / maxTrend(report)) * 100" [style.background]="color(0)"></div></div><span class="bar-value">{{ report.ticketTrend.created[index] }} / {{ report.ticketTrend.resolved[index] }}</span></div><div class="footnote" *ngIf="report.ticketTrend.labels.length === 0">No trend data available.</div></div></div>
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Current Ticket Status</h2><p class="chart-sub">All service tickets</p></div></div><div class="bar-list"><div class="bar-row" *ngFor="let item of report.ticketStatus; let index = index"><span class="bar-label">{{ item.label }}</span><div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / max(report.ticketStatus)) * 100" [style.background]="color(index)"></div></div><span class="bar-value">{{ item.value }}</span></div></div></div>
-    </div>
+    <section aria-labelledby="performance-heading">
+      <div class="section-heading">
+        <div><h2 id="performance-heading">Period Performance</h2><p>Compared with the immediately preceding equivalent period.</p></div>
+        <span class="scope-badge period">{{ activePeriod }}</span>
+      </div>
+      <div class="kpi-row">
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Tickets Created</span><span class="kpi-icon"><lucide-angular name="ticket-plus" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">{{ report.performance.ticketsCreated.current }}</strong>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.performance.ticketsCreated)">{{ deltaText(report.performance.ticketsCreated) }}</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Tickets Resolved</span><span class="kpi-icon"><lucide-angular name="circle-check-big" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">{{ report.performance.ticketsResolved.current }}</strong>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.performance.ticketsResolved)">{{ deltaText(report.performance.ticketsResolved) }}</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Average Resolution</span><span class="kpi-icon"><lucide-angular name="timer" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">{{ report.performance.averageResolutionHours.current | number:'1.0-1' }}h</strong>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.performance.averageResolutionHours)">{{ deltaText(report.performance.averageResolutionHours) }}</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Purchase Request Value</span><span class="kpi-icon"><lucide-angular name="shopping-bag" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">LKR {{ report.performance.purchaseRequestValue.current | number:'1.0-0' }}</strong>
+          <span class="kpi-detail">{{ report.performance.purchaseRequestCount.current }} submitted</span>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.performance.purchaseRequestValue)">{{ deltaText(report.performance.purchaseRequestValue) }}</span>
+        </article>
+      </div>
+    </section>
 
-    <div class="chart-grid two">
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Procurement Control</h2><p class="chart-sub">Issued PO progress and operational exceptions</p></div></div><div class="bar-list">
-        <div class="bar-row"><span class="bar-label">PO units received</span><span class="bar-value">{{ report.procurementSignals.receivedQuantity }} / {{ report.procurementSignals.orderedQuantity }}</span></div>
-        <div class="bar-row"><span class="bar-label">Non-PO receipts</span><span class="bar-value">{{ report.procurementSignals.nonPoCount }} · {{ report.procurementSignals.nonPoValue | number:'1.0-0' }}</span></div>
-        <div class="bar-row"><span class="bar-label">Emergency receipts</span><span class="bar-value">{{ report.procurementSignals.emergencyCount }} · {{ report.procurementSignals.emergencyValue | number:'1.0-0' }}</span></div>
-        <div class="bar-row"><span class="bar-label">Non-PO share</span><span class="bar-value">{{ report.procurementSignals.nonPoPercentage }}%</span></div>
-        <div class="bar-row"><span class="bar-label">Average approval</span><span class="bar-value">{{ report.procurementSignals.averageApprovalHours }}h</span></div>
-      </div></div>
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Exception Backlog</h2><p class="chart-sub">Items requiring operational follow-up</p></div></div><div class="bar-list">
-        <div class="bar-row"><span class="bar-label">Approved, awaiting receipt</span><span class="bar-value">{{ report.procurementSignals.awaitingReceipt }}</span></div>
-        <div class="bar-row"><span class="bar-label">Awaiting Finance</span><span class="bar-value">{{ report.procurementSignals.awaitingFinance }}</span></div>
-        <div class="bar-row"><span class="bar-label">Authorized vs received value</span><span class="bar-value">{{ report.procurementSignals.receivedAuthorizedValue | number:'1.0-0' }} / {{ report.procurementSignals.authorizedValue | number:'1.0-0' }}</span></div>
-        <div class="bar-row" *ngFor="let item of report.procurementSignals.repeatedSkus"><span class="bar-label">Repeat {{ item.sku }}</span><span class="bar-value">{{ item.count }}</span></div>
-      </div></div>
-    </div>
+    <section class="position-panel" aria-labelledby="position-heading">
+      <div class="section-heading compact">
+        <div><h2 id="position-heading">Current Position</h2><p>Live operational conditions; these values are not historical comparisons.</p></div>
+        <span class="scope-badge current">Current</span>
+      </div>
+      <div class="position-grid">
+        <a routerLink="/manager/tickets" class="position-item"><span>Open backlog</span><strong>{{ report.currentPosition.openTickets.value }}</strong></a>
+        <a routerLink="/manager/tickets" class="position-item"><span>Unassigned</span><strong>{{ report.currentPosition.unassignedTickets.value }}</strong></a>
+        <a routerLink="/manager/tickets" [queryParams]="{ status: 'escalated' }" class="position-item risk"><span>SLA / escalation risk</span><strong>{{ report.currentPosition.slaRiskTickets.value }}</strong></a>
+        <a routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }" class="position-item"><span>Pending approval value</span><strong>LKR {{ report.currentPosition.pendingApprovalValue.value | number:'1.0-0' }}</strong></a>
+        <a routerLink="/inventory-manager/inventory" class="position-item risk"><span>Stock-risk items</span><strong>{{ report.currentPosition.stockRiskItems.value }}</strong></a>
+      </div>
+    </section>
 
-    <div class="chart-grid two">
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Service Types</h2><p class="chart-sub">Tickets created in the selected period</p></div></div><div class="bar-list"><div class="bar-row" *ngFor="let item of report.serviceTypes; let index = index"><span class="bar-label">{{ item.label }}</span><div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / max(report.serviceTypes)) * 100" [style.background]="color(index)"></div></div><span class="bar-value">{{ item.value }}</span></div></div></div>
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Technician Workload</h2><p class="chart-sub">Assigned tickets created in the period</p></div></div><div class="tech-list"><div class="tech-row" *ngFor="let item of report.technicianWorkload; let index = index"><span class="tech-rank">{{ index + 1 }}</span><div class="tech-body"><div class="tech-top"><span class="tech-name">{{ item.name }}</span></div><div class="tech-track"><div class="tech-fill" [style.width.%]="(item.assigned / maxWorkload(report)) * 100" [style.background]="color(1)"></div></div></div><span class="tech-jobs">{{ item.assigned }}</span></div><div class="footnote" *ngIf="report.technicianWorkload.length === 0">No assigned work in this period.</div></div></div>
-    </div>
+    <section aria-labelledby="service-heading">
+      <div class="section-heading"><div><h2 id="service-heading">Service Operations</h2><p>Demand and completions in the selected period, with the current ticket mix alongside.</p></div></div>
+      <div class="chart-grid">
+        <article class="chart-card trend-card">
+          <div class="chart-header">
+            <div><h3>Ticket Flow</h3><p>Created and resolved per reporting bucket.</p></div>
+            <div class="legend" aria-label="Chart legend"><span><i class="swatch created"></i>Created</span><span><i class="swatch resolved"></i>Resolved</span></div>
+          </div>
+          <div class="empty-state" *ngIf="!hasTrendActivity(report)">
+            <lucide-angular name="chart-no-axes-column" [size]="24"></lucide-angular>
+            <strong>No ticket activity in this period</strong><span>Current operational snapshots remain visible above.</span>
+          </div>
+          <div class="trend-wrap" *ngIf="hasTrendActivity(report)">
+            <svg class="trend-svg" [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight" role="img" aria-labelledby="trend-title trend-desc">
+              <title id="trend-title">Tickets created and resolved over {{ activePeriod }}</title>
+              <desc id="trend-desc">A line chart. Focus each data point for exact created and resolved counts.</desc>
+              <g class="grid">
+                <ng-container *ngFor="let fraction of gridFractions">
+                  <line [attr.x1]="chartLeft" [attr.x2]="chartWidth - chartRight" [attr.y1]="gridY(fraction)" [attr.y2]="gridY(fraction)"></line>
+                  <text class="axis-label" [attr.x]="chartLeft - 8" [attr.y]="gridY(fraction) + 4" text-anchor="end">{{ gridValue(report, fraction) }}</text>
+                </ng-container>
+              </g>
+              <path class="trend-area" [attr.d]="areaPath(report)"></path>
+              <path class="trend-line created" [attr.d]="linePath(trendPoints(report, 'created'))"></path>
+              <path class="trend-line resolved" [attr.d]="linePath(trendPoints(report, 'resolved'))"></path>
+              <g *ngFor="let point of trendPoints(report, 'created'); let index = index">
+                <text *ngIf="showAxisLabel(index, report.serviceOperations.ticketTrend.labels.length)" class="axis-label" [attr.x]="point.x" [attr.y]="chartHeight - 12" text-anchor="middle">{{ point.label }}</text>
+                <circle class="trend-point created" [attr.cx]="point.x" [attr.cy]="point.y" r="4" tabindex="0" [attr.aria-label]="point.label + ': ' + point.value + ' tickets created'" (mouseenter)="activeTrendIndex = index" (mouseleave)="activeTrendIndex = null" (focus)="activeTrendIndex = index" (blur)="activeTrendIndex = null"></circle>
+              </g>
+              <circle *ngFor="let point of trendPoints(report, 'resolved'); let index = index" class="trend-point resolved" [attr.cx]="point.x" [attr.cy]="point.y" r="4" tabindex="0" [attr.aria-label]="point.label + ': ' + point.value + ' tickets resolved'" (mouseenter)="activeTrendIndex = index" (mouseleave)="activeTrendIndex = null" (focus)="activeTrendIndex = index" (blur)="activeTrendIndex = null"></circle>
+            </svg>
+            <div class="trend-tooltip" *ngIf="activeTrendIndex !== null" [style.left.%]="(trendPoints(report, 'created')[activeTrendIndex].x / chartWidth) * 100">
+              <strong>{{ report.serviceOperations.ticketTrend.labels[activeTrendIndex] }}</strong>
+              <span>Created: {{ report.serviceOperations.ticketTrend.created[activeTrendIndex] }}</span>
+              <span>Resolved: {{ report.serviceOperations.ticketTrend.resolved[activeTrendIndex] }}</span>
+            </div>
+          </div>
+        </article>
 
-    <div class="chart-grid two">
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Purchase Requests</h2><p class="chart-sub">Decisions in the selected period</p></div></div><div class="bar-list"><div class="bar-row" *ngFor="let item of report.approvalSummary"><span class="bar-label">{{ item.status }}</span><div class="bar-track"><div class="bar-fill" [style.width.%]="item.count ? 100 : 0" [style.background]="color(0)"></div></div><span class="bar-value">{{ item.count }} · {{ item.value | number:'1.0-0' }}</span></div></div></div>
-      <div class="chart-card"><div class="chart-header"><div><h2 class="chart-title">Inventory Signals</h2><p class="chart-sub">Current operational constraints</p></div></div><div class="bar-list"><div class="bar-row"><span class="bar-label">Low stock</span><span class="bar-value">{{ report.inventorySignals.lowStockAlerts }}</span></div><div class="bar-row"><span class="bar-label">Reserved units</span><span class="bar-value">{{ report.inventorySignals.reservedItems }}</span></div><div class="bar-row"><span class="bar-label">Material requests</span><span class="bar-value">{{ report.inventorySignals.pendingRequests }}</span></div></div></div>
-    </div>
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Current Ticket Status</h3><p>Live distribution across all service tickets.</p></div><span class="scope-badge current">Current</span></div>
+          <div class="empty-state" *ngIf="total(report.serviceOperations.currentTicketStatus) === 0"><strong>No tickets recorded</strong></div>
+          <div class="donut-wrap" *ngIf="total(report.serviceOperations.currentTicketStatus) > 0">
+            <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="Current ticket status distribution">
+              <circle class="donut-track" cx="60" cy="60" r="48" fill="none" stroke-width="14"></circle>
+              <circle *ngFor="let item of donutSegments(report.serviceOperations.currentTicketStatus)" class="donut-segment" [ngClass]="item.className" cx="60" cy="60" r="48" fill="none" stroke-width="14" [attr.stroke-dasharray]="item.dash" [attr.stroke-dashoffset]="item.offset"></circle>
+              <text class="donut-total" x="60" y="58" text-anchor="middle">{{ total(report.serviceOperations.currentTicketStatus) }}</text>
+              <text class="donut-total-label" x="60" y="74" text-anchor="middle">Tickets</text>
+            </svg>
+            <ul class="donut-legend">
+              <li *ngFor="let item of donutSegments(report.serviceOperations.currentTicketStatus)"><i class="swatch" [ngClass]="item.className"></i><span>{{ label(item.label) }}</span><strong>{{ item.value }}</strong><small>{{ item.percent }}%</small></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="chart-grid two">
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Service Demand</h3><p>Tickets created in the selected period by service type.</p></div><span class="scope-badge period">{{ activePeriod }}</span></div>
+          <div class="empty-state compact" *ngIf="total(report.serviceOperations.serviceTypes) === 0">No service demand recorded in this period.</div>
+          <div class="bar-list" *ngIf="total(report.serviceOperations.serviceTypes) > 0">
+            <div class="bar-row" *ngFor="let item of positive(report.serviceOperations.serviceTypes); let index = index">
+              <span>{{ label(item.label) }}</span><div class="bar-track"><div class="bar-fill" [class]="'bar-fill tone-' + (index % 5)" [style.width.%]="barWidth(item.value, max(report.serviceOperations.serviceTypes))"></div></div><strong>{{ item.value }} <small>{{ percentage(item.value, total(report.serviceOperations.serviceTypes)) }}%</small></strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Current Workload</h3><p>Live assignments; completed counts use current assignee attribution.</p></div><span class="scope-badge current">Current</span></div>
+          <div class="table-wrap" *ngIf="report.workforce.currentWorkload.length; else noWorkload">
+            <table><thead><tr><th>Technician / team</th><th>Active</th><th>Awaiting action</th><th>SLA risk</th><th>Escalated</th><th>Completed*</th></tr></thead><tbody><tr *ngFor="let item of report.workforce.currentWorkload"><td>{{ item.name }}</td><td>{{ item.active }}</td><td>{{ item.awaitingAction }}</td><td><span class="value-badge" [class.risk]="item.slaRisk > 0">{{ item.slaRisk }}</span></td><td>{{ item.escalated }}</td><td>{{ item.completedInPeriod }}</td></tr></tbody></table>
+          </div>
+          <ng-template #noWorkload><div class="empty-state compact">No tickets are currently assigned.</div></ng-template>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="purchasing-heading">
+      <div class="section-heading"><div><h2 id="purchasing-heading">Purchasing and Approvals</h2><p>Current pipeline position is separated from decisions made during the period.</p></div></div>
+      <div class="chart-grid two">
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Current Purchase Pipeline</h3><p>Request count and value at each current stage.</p></div><span class="scope-badge current">Current</span></div>
+          <div class="table-wrap" *ngIf="countTotal(report.purchasing.currentPipeline) > 0"><table><thead><tr><th>Stage</th><th>Requests</th><th>Value</th></tr></thead><tbody><ng-container *ngFor="let item of report.purchasing.currentPipeline"><tr *ngIf="item.count > 0"><td>{{ label(item.status) }}</td><td>{{ item.count }}</td><td>{{ item.value | number:'1.0-0' }}</td></tr></ng-container></tbody></table></div>
+          <div class="empty-state compact" *ngIf="countTotal(report.purchasing.currentPipeline) === 0">No active or completed purchase requests.</div>
+          <div class="pipeline-summary"><span>Oldest pending request</span><strong>{{ pendingPurchaseCount(report) ? (report.purchasing.oldestPendingAgeHours | number:'1.0-1') + 'h' : 'None' }}</strong></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Period Decisions</h3><p>Actual approval events from decision history.</p></div><span class="scope-badge period">{{ activePeriod }}</span></div>
+          <div class="table-wrap" *ngIf="countTotal(report.purchasing.periodDecisions) > 0"><table><thead><tr><th>Stage</th><th>Decision</th><th>Count</th><th>Value</th></tr></thead><tbody><ng-container *ngFor="let item of report.purchasing.periodDecisions"><tr *ngIf="item.count > 0"><td>{{ label(item.stage) }}</td><td>{{ label(item.decision) }}</td><td>{{ item.count }}</td><td>{{ item.value | number:'1.0-0' }}</td></tr></ng-container></tbody></table></div>
+          <div class="empty-state compact" *ngIf="countTotal(report.purchasing.periodDecisions) === 0">No Manager or Finance decisions in this period.</div>
+          <div class="approval-times"><span>Manager average <strong>{{ decisionCount(report, 'manager') ? (report.purchasing.averageManagerApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span><span>Finance average <strong>{{ decisionCount(report, 'finance') ? (report.purchasing.averageFinanceApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span></div>
+        </article>
+      </div>
+      <article class="chart-card po-card">
+        <div class="chart-header"><div><h3>PO Fulfilment</h3><p>Ordered quantities and values against physically received stock.</p></div><span class="scope-badge current">Current lifecycle</span></div>
+        <div class="progress-label"><span>Units received</span><strong>{{ report.purchasing.poProgress.receivedQuantity }} / {{ report.purchasing.poProgress.orderedQuantity }}</strong></div>
+        <div class="progress-track"><div class="progress-fill" [style.width.%]="poProgress(report)"></div></div>
+        <div class="po-values"><span>Ordered value <strong>{{ report.purchasing.poProgress.orderedValue | number:'1.0-0' }}</strong></span><span>Received value <strong>{{ report.purchasing.poProgress.receivedValue | number:'1.0-0' }}</strong></span></div>
+      </article>
+    </section>
+
+    <section aria-labelledby="risk-heading">
+      <div class="section-heading"><div><h2 id="risk-heading">Inventory and Exception Control</h2><p>Live stock constraints and Non-PO activity in the selected period.</p></div></div>
+      <div class="signal-grid">
+        <article><span>Low stock</span><strong>{{ report.inventoryRisk.lowStockItems.value }}</strong></article>
+        <article class="danger"><span>Out of stock</span><strong>{{ report.inventoryRisk.outOfStockItems.value }}</strong></article>
+        <article><span>Reserved units</span><strong>{{ report.inventoryRisk.reservedUnits.value }}</strong></article>
+        <article><span>Material requests</span><strong>{{ report.inventoryRisk.pendingMaterialRequests.value }}</strong></article>
+        <article><span>Awaiting receipt</span><strong>{{ report.inventoryRisk.approvedAwaitingReceipt.value }}</strong></article>
+      </div>
+      <div class="chart-grid two">
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Top Stock Risks</h3><p>Out-of-stock items are ranked before low-stock items.</p></div><span class="scope-badge current">Current</span></div>
+          <div class="table-wrap" *ngIf="report.inventoryRisk.topRisks.length; else noStockRisk"><table><thead><tr><th>Item</th><th>Status</th><th>Available</th><th>Reserved</th><th>Reorder</th></tr></thead><tbody><tr *ngFor="let item of report.inventoryRisk.topRisks"><td><strong>{{ item.name }}</strong><small>{{ item.sku }}</small></td><td><span class="status-badge" [class.danger]="item.status === 'out-of-stock'">{{ label(item.status) }}</span></td><td>{{ item.available }}</td><td>{{ item.reserved }}</td><td>{{ item.reorderLevel }}</td></tr></tbody></table></div>
+          <ng-template #noStockRisk><div class="empty-state compact">No current low-stock or out-of-stock items.</div></ng-template>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Non-PO Exceptions</h3><p>Receipts posted during the selected period.</p></div><span class="scope-badge period">{{ activePeriod }}</span></div>
+          <div class="exception-kpis"><div><span>Non-PO</span><strong>{{ report.exceptions.nonPoCount }}</strong><small>{{ report.exceptions.nonPoValue | number:'1.0-0' }}</small></div><div><span>Emergency</span><strong>{{ report.exceptions.emergencyCount }}</strong><small>{{ report.exceptions.emergencyValue | number:'1.0-0' }}</small></div><div><span>Procurement share</span><strong>{{ report.exceptions.nonPoPercentage }}%</strong><small>Non-PO value</small></div><div><span>Approval time</span><strong>{{ report.exceptions.averageAuthorizationHours | number:'1.0-1' }}h</strong><small>Average</small></div></div>
+          <div class="exception-actions"><a routerLink="/manager/orders" [queryParams]="{ type: 'non-po', status: 'approved' }"><span>Approved, awaiting receipt</span><strong>{{ report.exceptions.awaitingReceipt.value }}</strong></a><a routerLink="/manager/orders" [queryParams]="{ type: 'non-po' }"><span>Awaiting Finance</span><strong>{{ report.exceptions.awaitingFinance.value }}</strong></a><span class="exception-action" *ngIf="report.exceptions.slaProtectedJobs > 0"><span>SLA-supported jobs</span><strong>{{ report.exceptions.slaProtectedJobs }}</strong></span></div>
+          <div class="progress-label"><span>Authorized vs received value</span><strong>{{ report.exceptions.receivedAuthorizedValue | number:'1.0-0' }} / {{ report.exceptions.authorizedValue | number:'1.0-0' }}</strong></div>
+          <div class="progress-track"><div class="progress-fill warning" [style.width.%]="percentage(report.exceptions.receivedAuthorizedValue, report.exceptions.authorizedValue)"></div></div>
+        </article>
+      </div>
+
+      <div class="chart-grid two" *ngIf="report.exceptions.byReason.length || report.exceptions.repeatedSkus.length">
+        <article class="chart-card" *ngIf="report.exceptions.byReason.length"><div class="chart-header"><div><h3>Exception Breakdown</h3><p>Non-PO receipt count and value for the selected period.</p></div></div><h4 class="subsection-title">By reason</h4><div class="table-wrap"><table><thead><tr><th>Reason</th><th>Count</th><th>Value</th></tr></thead><tbody><tr *ngFor="let item of report.exceptions.byReason"><td>{{ label(item.label) }}</td><td>{{ item.count }}</td><td>{{ item.value | number:'1.0-0' }}</td></tr></tbody></table></div><h4 class="subsection-title" *ngIf="report.exceptions.bySupplier.length">By supplier</h4><div class="table-wrap" *ngIf="report.exceptions.bySupplier.length"><table><thead><tr><th>Supplier</th><th>Count</th><th>Value</th></tr></thead><tbody><tr *ngFor="let item of report.exceptions.bySupplier"><td>{{ item.label }}</td><td>{{ item.count }}</td><td>{{ item.value | number:'1.0-0' }}</td></tr></tbody></table></div></article>
+        <article class="chart-card" *ngIf="report.exceptions.repeatedSkus.length"><div class="chart-header"><div><h3>Repeated Non-PO SKUs</h3><p>Items that may require normal replenishment planning.</p></div></div><div class="repeat-list"><span *ngFor="let item of report.exceptions.repeatedSkus"><strong>{{ item.sku }}</strong>{{ item.count }} receipts</span></div></article>
+      </div>
+    </section>
+
+    <section class="coverage-panel" aria-labelledby="coverage-heading">
+      <div class="section-heading compact"><div><h2 id="coverage-heading">Data Coverage</h2><p>Known limits are shown explicitly instead of being reported as zero performance.</p></div></div>
+      <ul><li *ngFor="let item of report.dataCoverage"><span class="coverage-badge" [class.partial]="item.status === 'partial'">{{ label(item.status) }}</span><span>{{ item.message }}</span></li></ul>
+    </section>
   </ng-container>
 </div>
