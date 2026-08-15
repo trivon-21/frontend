@@ -122,3 +122,30 @@
   cursor: pointer;
   border: 2px solid #e5e7eb;
 }
+/* ═══════════════════════════════════════
+   TABLET  (≤ 900px) — inspector uses tablet
+═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .header {
+    padding: 1rem;
+  }
+  .header-center {
+    margin: 0 1rem;
+  }
+  .search-bar input {
+    font-size: 13px;
+    padding: 10px 14px 10px 42px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem 1rem;
+    height: auto;
+    min-height: 60px;
+  }
+  .header-center {
+    display: none; /* hide search on tablet — too cramped */
+  }
+  .header-left .logo { font-size: 1.4rem; }
+}
