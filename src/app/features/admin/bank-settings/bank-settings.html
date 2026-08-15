@@ -1,0 +1,77 @@
+<div class="admin-container">
+  <div class="admin-header">
+    <div class="header-content">
+      <h1>Admin Bank Detail Management</h1>
+      <p>Configure the company bank account for customer manual transfers (LKR only)</p>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-title-row">
+      <div class="title-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <h2>Payment Settings</h2>
+    </div>
+
+    <form class="settings-form" (ngSubmit)="saveChanges()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="bankName">Bank Name</label>
+          <input type="text" id="bankName" name="bankName" [(ngModel)]="bankDetails.bankName" placeholder="e.g. Sampath Bank" required>
+        </div>
+
+        <div class="form-group">
+          <label for="accountNumber">Account Number</label>
+          <input type="text" id="accountNumber" name="accountNumber" [(ngModel)]="bankDetails.accountNumber" placeholder="Numeric digits only" required>
+        </div>
+
+        <div class="form-group">
+          <label for="accountName">Account Holder Name</label>
+          <input type="text" id="accountName" name="accountName" [(ngModel)]="bankDetails.accountName" placeholder="e.g. AirLux PVT LTD" required>
+        </div>
+
+        <div class="form-group">
+          <label for="branch">Branch Name</label>
+          <input type="text" id="branch" name="branch" [(ngModel)]="bankDetails.branch" placeholder="e.g. Colombo 03" required>
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Currency</label>
+          <input type="text" id="currency" name="currency" [value]="bankDetails.currency" disabled class="disabled-input">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="save-btn" [disabled]="loading">
+          <span *ngIf="!loading">Save Changes</span>
+          <span *ngIf="loading" class="loader"></span>
+        </button>
+      </div>
+    </form>
+
+    <!-- TOAST MESSAGES -->
+    <div class="toast success" *ngIf="successMessage">
+      <div class="toast-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>{{ successMessage }}</span>
+      </div>
+    </div>
+
+    <div class="toast error" *ngIf="errorMessage">
+      <div class="toast-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+  </div>
+</div>
