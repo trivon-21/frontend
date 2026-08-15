@@ -1,0 +1,167 @@
+<!-- inspection-payment.component.html -->
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">AirLux</div>
+  <div class="nav-links">
+    <a href="#">Profile</a>
+    <a href="#">View products</a>
+    <a href="#">Our Services</a>
+    <button class="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="hero-text">
+    <h1>Premium Cooling<br>Solutions</h1>
+    <p>Discover our curated collection of high-performance air conditioning systems</p>
+  </div>
+  <div class="hero-right">
+    <div class="welcome-badge">
+      <span>🔔 Welcome {{ customerName }}!</span>
+    </div>
+    <div class="hero-avatar">
+      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
+    </div>
+  </div>
+</div>
+
+<!-- ORDER SUMMARY -->
+<div class="page-body">
+
+  <div class="order-summary-card">
+    <h2 class="section-title">
+      <span class="title-icon">📋</span> Order Summary
+    </h2>
+    <div class="summary-row">
+      <span class="label">Order ID:</span>
+      <span class="value">#{{ orderId }}</span>
+    </div>
+    <hr />
+    <div class="summary-row">
+      <span class="label">Items:</span>
+      <span class="value items-list">
+        <span *ngFor="let item of items">{{ item }}</span>
+      </span>
+    </div>
+    <hr />
+    <div class="summary-row total-row">
+      <span class="label total-label">Total Amount:</span>
+      <span class="value total-amount">LKR {{ totalAmount | number }}</span>
+    </div>
+  </div>
+
+  <!-- BEFORE SUBMIT: Bank Details + Upload -->
+  <div class="bottom-card" *ngIf="!slipSubmitted">
+
+    <!-- LEFT: BANK DETAILS -->
+    <div class="bank-details">
+      <h3>Bank Details</h3>
+      <p class="dear">Dear Customer,</p>
+      <ul class="bank-notes">
+        <li>You are only required to make the inspection payment here to continue further</li>
+        <li>Pay the inspection amount to the given account details and upload the slip</li>
+      </ul>
+      <div class="bank-table">
+        <div class="bank-row">
+          <span class="bank-label">Bank Name</span>
+          <span class="bank-value">{{ bankDetails.bankName }}</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-label">Branch Name</span>
+          <span class="bank-value">{{ bankDetails.branchName }}</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-label">Account Name</span>
+          <span class="bank-value">{{ bankDetails.accountName }}</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-label">Account No</span>
+          <span class="bank-value">{{ bankDetails.accountNo }}</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-label">Inspection Amount</span>
+          <span class="bank-value bold">LKR {{ bankDetails.inspectionAmount | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: INSPECTION PAYMENT UPLOAD -->
+    <div class="inspection-payment">
+      <h3><span class="asterisk">*</span>Inspection Payment</h3>
+      <p class="note">Note: It is mandatory to make inspection payment to continue installation</p>
+
+      <div class="inspection-row">
+        <span class="insp-label">Inspection Amount</span>
+        <span class="insp-value">LKR {{ bankDetails.inspectionAmount | number }}</span>
+      </div>
+
+      <div class="status-badge">Status: {{ paymentStatus }}</div>
+
+      <p class="upload-label">Upload Slip:</p>
+
+      <div class="drop-zone" [class.has-file]="uploadedFile" [class.drag-over]="isDragOver" (click)="triggerFileInput()"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+        <input #fileInput type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event)"
+          style="display:none" />
+
+        <div *ngIf="!uploadedFile" class="drop-content">
+          <span class="camera-icon">📷</span>
+          <p>Click<br>or<br>Drag and Drop<br>here to upload</p>
+          <span class="file-types">(PDF or PNG)</span>
+        </div>
+
+        <div *ngIf="uploadedFile" class="file-selected">
+          <span class="file-icon">✅</span>
+          <p class="file-name">{{ uploadedFile.name }}</p>
+          <button class="remove-file" (click)="removeFile($event)">✕ Remove</button>
+        </div>
+      </div>
+
+      <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button class="confirm-btn" (click)="confirmAndContinue()" [disabled]="!uploadedFile || isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Confirm and Continue →' }}
+      </button>
+    </div>
+
+  </div>
+
+  <!-- AFTER SUBMIT: Success State -->
+  <div class="success-card" *ngIf="slipSubmitted">
+    <h2 class="success-title">Inspection Payment<br>Successful</h2>
+    <div class="success-tick">✓</div>
+    <div class="success-status-badge">Status: Under Review</div>
+    <p class="success-message">We will let you know shortly !<br>Stay connected</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>AirLux</h3>
+      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
+    </div>
+    <div class="footer-contact">
+      <h4>Contact Us</h4>
+      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
+      <p>📞 +94 11 234 5678</p>
+      <p>✉️ support@airlux.lk</p>
+    </div>
+    <div class="footer-social">
+      <h4>Follow Us</h4>
+      <div class="social-icons">
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
+  </div>
+</footer>

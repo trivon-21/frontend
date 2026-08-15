@@ -1,0 +1,366 @@
+<div class="page-container">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h2 class="page-title">Payment Audit Log</h2>
+    <p class="page-subtitle">Read-only record of all payment events</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-icon total">📋</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalLogs }}</span>
+        <span class="stat-label">Total Events</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon approved">✓</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ approved }}</span>
+        <span class="stat-label">Approved</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon rejected">✕</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ rejected }}</span>
+        <span class="stat-label">Rejected</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon total">📊</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalLogs }}</span>
+        <span class="stat-label">Total Events</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" placeholder="Search customer, order, ticket, invoice..." [(ngModel)]="searchQuery"
+        (input)="applyFilters()" />
+    </div>
+
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label>Type</label>
+        <select [(ngModel)]="paymentType" (change)="applyFilters()">
+          <option value="ALL">All Types</option>
+          <option value="BUY_ONLY">Buy Only</option>
+          <option value="INSPECTION">Inspection</option>
+          <option value="INVOICE">Invoice</option>
+          <option value="REPAIR">Repair</option>
+          <option value="MAINTENANCE">Maintenance</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Event</label>
+        <select [(ngModel)]="eventType" (change)="applyFilters()">
+          <option value="ALL">All Events</option>
+          <option value="PAYMENT_SUBMITTED">Slip Submitted</option>
+          <option value="PAYMENT_APPROVED">Payment Approved</option>
+          <option value="PAYMENT_REJECTED">Payment Rejected</option>
+          <option value="PAYMENT_RESUBMITTED">Slip Re-uploaded</option>
+          <option value="INVOICE_GENERATED">Invoice Generated</option>
+          <option value="INVOICE_SENT">Invoice Sent</option>
+          <option value="INVOICE_ACCEPTED">Invoice Accepted</option>
+          <option value="INVOICE_REJECTED">Invoice Rejected</option>
+          <option value="INVOICE_PAID">Invoice Paid</option>
+          <option value="INVOICE_AUTO_CANCELLED">Auto Cancelled</option>
+          <option value="SERVICE_PAYMENT_APPROVED">Service Approved</option>
+          <option value="SERVICE_PAYMENT_REJECTED">Service Rejected</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" [(ngModel)]="startDate" (change)="applyFilters()" />
+      </div>
+
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" [(ngModel)]="endDate" (change)="applyFilters()" />
+      </div>
+
+      <button class="clear-btn" (click)="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-container">
+    <div class="loading-row" *ngIf="isLoading">
+      <p>Loading audit logs...</p>
+    </div>
+
+    <table class="data-table" *ngIf="!isLoading">
+      <thead>
+        <tr>
+          <th>DATE & TIME</th>
+          <th>CUSTOMER</th>
+          <th>EVENT</th>
+          <th>TYPE</th>
+          <th>AMOUNT</th>
+          <th>REFERENCE</th>
+          <th>PERFORMED BY</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td class="date-cell">
+            <span class="date-main">{{ log.createdAt | date:'dd MMM yyyy' }}</span>
+            <span class="date-time">{{ log.createdAt | date:'hh:mm a' }}</span>
+          </td>
+          <td>
+            <span class="customer-name">{{ log.customerName }}</span>
+            <span class="customer-email" *ngIf="log.customerEmail">{{ log.customerEmail }}</span>
+          </td>
+          <td>
+            <span class="event-badge" [ngClass]="getEventClass(log.eventType)">
+              {{ getEventLabel(log.eventType) }}
+            </span>
+          </td>
+          <td>
+            <span class="type-badge" [ngClass]="getTypeClass(log.paymentType)">
+              {{ getTypeLabel(log.paymentType) }}
+            </span>
+          </td>
+          <td class="amount-cell">
+            <span *ngIf="log.amount > 0">LKR {{ log.amount | number:'1.0-0' }}</span>
+            <span *ngIf="log.amount === 0" class="no-amount">—</span>
+          </td>
+          <td class="ref-cell">{{ getReference(log) }}</td>
+          <td class="performed-cell">{{ log.performedByDisplay || log.performedBy }}</td>
+          <td>
+            <div class="action-cell">
+              <button class="view-btn" (click)="openModal(log)">View</button>
+              <span class="attachment-icon" *ngIf="log.slipUrl" title="Has payment slip">🧾</span>
+              <span class="attachment-icon" *ngIf="log.invoiceId" title="Has invoice">📄</span>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="logs.length === 0 && !isLoading">
+          <td colspan="8" class="empty-row">
+            <div class="empty-state">
+              <span>📋</span>
+              <p>No audit logs found</p>
+              <small>Logs will appear here as payments are processed</small>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination" *ngIf="totalItems > 0">
+    <span class="showing">Showing {{ startItem }}–{{ endItem }} of {{ totalItems }} events</span>
+    <div class="pages">
+      <button [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage === page">{{ page
+        }}</button>
+      <button [disabled]="currentPage * itemsPerPage >= totalItems" (click)="nextPage()">Next</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- LOG DETAIL MODAL -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <div>
+        <h3>Audit Log Detail</h3>
+        <span class="modal-subtitle">Read-only record</span>
+      </div>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedLog">
+
+      <div class="detail-section">
+        <h4>Event Information</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Event</label>
+            <span class="event-badge" [ngClass]="getEventClass(selectedLog.eventType)">
+              {{ getEventLabel(selectedLog.eventType) }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Payment Type</label>
+            <span class="type-badge" [ngClass]="getTypeClass(selectedLog.paymentType)">
+              {{ getTypeLabel(selectedLog.paymentType) }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Date & Time</label>
+            <span>{{ selectedLog.createdAt | date:'dd MMM yyyy, hh:mm:ss a' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Performed By</label>
+            <span>{{ selectedLog.performedBy }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Customer Details</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Customer Name</label>
+            <span>{{ selectedLog.customerName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Email</label>
+            <span>{{ selectedLog.customerEmail || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Reference Details</h4>
+        <div class="detail-grid">
+          <div class="detail-item" *ngIf="selectedLog.orderId">
+            <label>Order ID</label>
+            <span>{{ selectedLog.orderId }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedLog.ticketId">
+            <label>Ticket ID</label>
+            <span>{{ selectedLog.ticketId }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedLog.invoiceId">
+            <label>Invoice ID</label>
+            <span>{{ selectedLog.invoiceId }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedLog.amount > 0">
+            <label>Amount</label>
+            <span>LKR {{ selectedLog.amount | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section" *ngIf="selectedLog.rejectionReason">
+        <h4>Rejection Reason</h4>
+        <div class="rejection-box">
+          {{ selectedLog.rejectionReason }}
+        </div>
+      </div>
+
+      <div class="detail-section" *ngIf="selectedLog.notes">
+        <h4>Notes</h4>
+        <p class="notes-text">{{ selectedLog.notes }}</p>
+      </div>
+
+    </div>
+
+    <!-- Attachments -->
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeModal()">Close</button>
+
+      <!-- Show slip button if slipUrl exists -->
+      <button class="btn-view-slip" *ngIf="selectedLog?.slipUrl" (click)="viewSlip()">
+        🧾 View Payment Slip
+      </button>
+
+      <!-- Show invoice button if invoiceId exists -->
+      <button class="btn-view-invoice" *ngIf="selectedLog?.invoiceId" (click)="viewInvoice()">
+        📄 View Invoice
+      </button>
+
+      <!-- Show both if both exist (e.g. invoice payment verification) -->
+    </div>
+
+  </div>
+</div>
+<!-- SLIP POPUP -->
+<div class="modal-overlay" *ngIf="showSlipPopup" (click)="closeSlipPopup()">
+  <div class="modal" (click)="$event.stopPropagation()" style="max-width:620px;">
+    <div class="modal-header">
+      <h3>Payment Slip</h3>
+      <button class="modal-close" (click)="closeSlipPopup()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding:20px;">
+      <img *ngIf="isImage(slipUrlToShow)" [src]="slipUrlToShow"
+        style="max-width:100%; max-height:500px; border-radius:8px;" alt="Payment Slip" />
+      <iframe *ngIf="isPDF(slipUrlToShow)" [src]="slipUrlToShow" width="100%" height="450px"
+        style="border:none; border-radius:8px;"></iframe>
+      <div *ngIf="!isImage(slipUrlToShow) && !isPDF(slipUrlToShow)"
+        style="padding:16px; background:#f9fafb; border-radius:8px; word-break:break-all; text-align:left;">
+        <p style="color:#6b7280; font-size:13px; margin-bottom:8px;">Slip reference:</p>
+        <code style="font-size:12px;">{{ slipUrlToShow }}</code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeSlipPopup()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE POPUP -->
+<div class="modal-overlay" *ngIf="showInvoicePopup" (click)="closeInvoicePopup()">
+  <div class="modal" (click)="$event.stopPropagation()" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>Invoice — {{ invoiceToShow?.invoiceNumber }}</h3>
+      <button class="modal-close" (click)="closeInvoicePopup()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="invoiceToShow">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div>
+          <p class="info-label">Invoice No</p>
+          <p class="info-value">{{ invoiceToShow.invoiceNumber }}</p>
+        </div>
+        <div>
+          <p class="info-label">Status</p>
+          <p class="info-value">{{ invoiceToShow.status }}</p>
+        </div>
+        <div>
+          <p class="info-label">Customer</p>
+          <p class="info-value">{{ invoiceToShow.customerName }}</p>
+        </div>
+        <div>
+          <p class="info-label">Grand Total</p>
+          <p class="info-value" style="font-weight:700; color:#2d5a3d;">LKR {{ invoiceToShow.grandTotal | number:'1.0-0'
+            }}</p>
+        </div>
+      </div>
+      <hr style="border-color:#e5e7eb; margin:12px 0;" />
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead style="background:#eef2ff;">
+          <tr>
+            <th style="padding:8px 12px; text-align:left;">Item</th>
+            <th style="padding:8px 12px;">Qty</th>
+            <th style="padding:8px 12px;">Rate (LKR)</th>
+            <th style="padding:8px 12px;">Amount (LKR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of invoiceToShow.items" style="border-top:1px solid #f1f5f9;">
+            <td style="padding:8px 12px;">{{ item.itemName }}</td>
+            <td style="padding:8px 12px; text-align:center;">{{ item.qty }}</td>
+            <td style="padding:8px 12px; text-align:right;">{{ item.rate | number:'1.0-0' }}</td>
+            <td style="padding:8px 12px; text-align:right;">{{ item.amount | number:'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        style="display:flex; justify-content:flex-end; margin-top:12px; font-size:15px; font-weight:700; color:#2d1b69;">
+        Grand Total: LKR {{ invoiceToShow.grandTotal | number:'1.0-0' }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeInvoicePopup()">Close</button>
+    </div>
+  </div>
+</div>

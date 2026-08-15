@@ -1,17 +1,15 @@
 # Node modules
 node_modules/
+jspm_packages/
 
-# Angular build output
+# Angular / build output
 dist/
 out-tsc/
 .angular/
-
-# Build artifacts
 build/
-
-# Temporary files
 tmp/
 temp/
+bazel-out/
 
 # Logs
 logs/
@@ -19,33 +17,49 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+testem.log
 
-# Dependency directories
-jspm_packages/
-
-# Environment files (if you create any)
+# Environment files
 .env
 .env.local
 .env.development
 .env.production
 
-# VS Code
-.vscode/
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+.settings/
+*.launch
+*.sublime-workspace
+*.history
 .history/
 
-# WebStorm / IntelliJ
-.idea/
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
 
-# Visual Studio
+# WebStorm / IntelliJ
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 
+# Miscellaneous
 .DS_Store
 Thumbs.db
-
 coverage/
+.sass-cache/
+connect.lock
+libpeerconnection.log
+typings/
+__screenshots__/
 
+# Temporary / backup files
 *.swp
 *.bak

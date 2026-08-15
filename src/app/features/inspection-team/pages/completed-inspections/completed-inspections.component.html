@@ -1,0 +1,376 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2 class="page-title">Completed Inspections</h2>
+    <div class="page-search">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" placeholder="Search here" [(ngModel)]="searchQuery" (input)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <div class="search-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" placeholder="Search ID or Customer" [(ngModel)]="searchQuery" (input)="applyFilters()" />
+    </div>
+    <div class="filters-section">
+      <span class="filter-label">Filters:</span>
+      <select [(ngModel)]="selectedFilter" (change)="applyFilters()">
+        <option value="All">All</option>
+        <option value="Submitted">Submitted</option>
+        <option value="Pending">Pending</option>
+      </select>
+      <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>TICKET ID</th>
+          <th>CUSTOMER</th>
+          <th>DATE</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inspection of paginatedInspections">
+          <td>{{ inspection.orderId }}</td>
+          <td>{{ inspection.ticketId }}</td>
+          <td>{{ inspection.customerName }}</td>
+          <td>{{ formatDate(inspection.inspectionDate) }}</td>
+          <td>
+            <button *ngIf="!inspection.submitted" class="action-btn view-report" (click)="viewReport(inspection)">
+              View Report
+            </button>
+            <span *ngIf="inspection.submitted" class="action-btn submitted">Submitted</span>
+          </td>
+        </tr>
+        <tr *ngIf="filteredInspections.length === 0">
+          <td colspan="5" style="text-align:center;color:#9ca3af;padding:24px;">No completed inspections</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
+    <div class="pages">
+      <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
+      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
+        }}</button>
+      <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="modal-overlay" *ngIf="showReportModal" (click)="closeModal()">
+    <div class="modal report-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Inspection Report</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body report-body" *ngIf="reportData">
+
+        <!-- View Mode -->
+        <div *ngIf="!isEditing">
+          <div class="report-section">
+            <h4>Customer & Site Details</h4>
+            <p><strong>Customer:</strong> {{ reportData.customerName }}</p>
+            <p><strong>Contact:</strong> {{ reportData.contactNumber }}</p>
+            <p><strong>Address:</strong> {{ reportData.siteAddress }}</p>
+            <p><strong>Site Type:</strong> {{ reportData.siteType }}</p>
+            <p><strong>Inspection Date:</strong> {{ reportData.inspectionDate }}</p>
+            <p><strong>Site Status:</strong> {{ reportData.siteStatus }}</p>
+            <p><strong>Floor Level:</strong> {{ reportData.floorLevel }}</p>
+            <p><strong>Elevator:</strong> {{ reportData.elevatorAvailability ? 'Available' : 'Not Available' }}</p>
+            <p><strong>Parking:</strong> {{ reportData.parkingAvailability }}</p>
+          </div>
+
+          <div class="report-section" *ngFor="let room of reportData.rooms; let i = index">
+            <h4>Room {{ i+1 }}: {{ room.name || 'Unnamed' }}</h4>
+            <p><strong>Dimensions:</strong> {{ room.length }}m x {{ room.width }}m x {{ room.height }}m</p>
+            <p><strong>Area:</strong> {{ room.area }} sq m</p>
+            <p><strong>Sun Exposure:</strong> {{ room.sunExposure }}</p>
+            <p><strong>Ventilation:</strong> {{ room.ventilation }}</p>
+            <p><strong>Windows:</strong> {{ room.windows }}</p>
+            <p><strong>Wall Locations:</strong> {{ room.possibleWallLocations }}</p>
+            <p><strong>Wall Condition:</strong> {{ room.wallCondition }}</p>
+            <p><strong>Distance (Indoor-Outdoor):</strong> {{ room.indoorOutdoorDistance }}m</p>
+            <p><strong>Routing Path:</strong> {{ room.possibleRoutingPath }}</p>
+            <p><strong>Obstacles:</strong> {{ room.obstacles?.join(', ') }}</p>
+            <p><strong>Power Points:</strong> {{ room.powerPointsNearby ? 'Yes' : 'No' }}</p>
+            <p><strong>Constraints:</strong> {{ room.constraintsRisks }}</p>
+            <p><strong>Notes:</strong> {{ room.inspectorNotes }}</p>
+          </div>
+
+          <div class="report-section" *ngIf="reportData.photos?.length > 0">
+            <h4>Photos ({{ reportData.photos.length }})</h4>
+            <div class="photos-grid-small">
+              <div *ngFor="let photo of reportData.photos" class="photo-thumb">
+                <img [src]="photo.dataUrl" [alt]="photo.name" />
+                <p>{{ photo.name }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <h4>Acknowledgement</h4>
+            <p><strong>Inspector:</strong> {{ reportData.inspectorName }}</p>
+            <p><strong>Date:</strong> {{ reportData.acknowledgeDate }}</p>
+            <p><strong>Time:</strong> {{ reportData.acknowledgeTime }}</p>
+          </div>
+        </div>
+
+        <!-- Edit Mode — full editable report -->
+        <div *ngIf="isEditing">
+          <p style="color:#f59e0b;font-size:13px;margin-bottom:16px;">
+            ⚠️ Edit mode — modify fields below then click Save Changes.
+          </p>
+
+          <!-- Customer & Site Details -->
+          <div class="report-section">
+            <h4>Customer & Site Details</h4>
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" [(ngModel)]="editedReport.customerName" />
+            </div>
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="text" [(ngModel)]="editedReport.contactNumber" />
+            </div>
+            <div class="form-group">
+              <label>Site Address</label>
+              <textarea rows="3" [(ngModel)]="editedReport.siteAddress"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Site Type</label>
+              <input type="text" [(ngModel)]="editedReport.siteType" />
+            </div>
+            <div class="form-group">
+              <label>Inspection Date</label>
+              <input type="date" [(ngModel)]="editedReport.inspectionDate" />
+            </div>
+            <div class="form-group">
+              <label>Site Status</label>
+              <input type="text" [(ngModel)]="editedReport.siteStatus" />
+            </div>
+            <div class="form-group">
+              <label>Floor Level</label>
+              <input type="text" [(ngModel)]="editedReport.floorLevel" />
+            </div>
+            <div class="form-group">
+              <label>Elevator Availability</label>
+              <input type="checkbox" [(ngModel)]="editedReport.elevatorAvailability" />
+            </div>
+            <div class="form-group">
+              <label>Parking Availability</label>
+              <input type="text" [(ngModel)]="editedReport.parkingAvailability" />
+            </div>
+          </div>
+
+          <!-- Rooms -->
+          <div *ngFor="let room of editedReport.rooms; let i = index" class="report-section">
+            <h4>Room {{ i+1 }}: {{ room.name || 'Unnamed' }}</h4>
+
+            <div class="form-group">
+              <label>Room Name</label>
+              <input type="text" [(ngModel)]="room.name" />
+            </div>
+
+            <!-- Dimensions -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <div class="form-group">
+                <label>Length (m)</label>
+                <input type="number" [(ngModel)]="room.length" />
+              </div>
+              <div class="form-group">
+                <label>Width (m)</label>
+                <input type="number" [(ngModel)]="room.width" />
+              </div>
+              <div class="form-group">
+                <label>Height (m)</label>
+                <input type="number" [(ngModel)]="room.height" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Area (sq m)</label>
+              <input type="number" [(ngModel)]="room.area" />
+            </div>
+
+            <!-- Environmental Factors -->
+            <div class="form-group">
+              <label>Sun Exposure</label>
+              <input type="text" [(ngModel)]="room.sunExposure" />
+            </div>
+            <div class="form-group">
+              <label>Ventilation</label>
+              <input type="text" [(ngModel)]="room.ventilation" />
+            </div>
+            <div class="form-group">
+              <label>Windows</label>
+              <input type="number" [(ngModel)]="room.windows" />
+            </div>
+
+            <!-- Wall & Space -->
+            <div class="form-group">
+              <label>Possible Wall Locations</label>
+              <input type="text" [(ngModel)]="room.possibleWallLocations" />
+            </div>
+            <div class="form-group">
+              <label>Wall Condition</label>
+              <input type="text" [(ngModel)]="room.wallCondition" />
+            </div>
+            <div class="form-group">
+              <label>Space Availability</label>
+              <input type="text" [(ngModel)]="room.spaceAvailability" />
+            </div>
+            <div class="form-group">
+              <label>Outdoor Available Locations</label>
+              <input type="text" [(ngModel)]="room.outdoorAvailableLocations" />
+            </div>
+            <div class="form-group">
+              <label>Surface Condition</label>
+              <input type="text" [(ngModel)]="room.surfaceCondition" />
+            </div>
+            <div class="form-group">
+              <label>Ventilation Condition</label>
+              <input type="text" [(ngModel)]="room.ventilationCondition" />
+            </div>
+            <div class="form-group">
+              <label>Exposure to Weather</label>
+              <input type="text" [(ngModel)]="room.exposureToWeather" />
+            </div>
+
+            <!-- Routing & Drainage -->
+            <div class="form-group">
+              <label>Indoor-Outdoor Distance</label>
+              <input type="text" [(ngModel)]="room.indoorOutdoorDistance" />
+            </div>
+            <div class="form-group">
+              <label>Distance Measured</label>
+              <input type="text" [(ngModel)]="room.distanceMeasured" />
+            </div>
+            <div class="form-group">
+              <label>Possible Routing Path</label>
+              <input type="text" [(ngModel)]="room.possibleRoutingPath" />
+            </div>
+            <div class="form-group">
+              <label>Routing Path Description</label>
+              <textarea rows="2" [(ngModel)]="room.routingPathDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Estimated Bends</label>
+              <input type="text" [(ngModel)]="room.estimatedBends" />
+            </div>
+            <div class="form-group">
+              <label>Drain Outlet Available</label>
+              <input type="checkbox" [(ngModel)]="room.drainOutletAvailable" />
+            </div>
+            <div class="form-group">
+              <label>Drain Type</label>
+              <input type="text" [(ngModel)]="room.drainType" />
+            </div>
+            <div class="form-group">
+              <label>Drain Path Description</label>
+              <textarea rows="2" [(ngModel)]="room.drainPathDescription"></textarea>
+            </div>
+
+            <!-- Obstacles -->
+            <div class="form-group">
+              <label>Obstacles</label>
+              <textarea rows="2" [(ngModel)]="room.obstacleDetails" placeholder="List obstacles..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Wall Drilling Required</label>
+              <input type="checkbox" [(ngModel)]="room.wallDrillingRequired" />
+            </div>
+            <div class="form-group">
+              <label>Drill Points</label>
+              <input type="text" [(ngModel)]="room.drillPoints" />
+            </div>
+            <div class="form-group">
+              <label>Vertical Height Difference</label>
+              <input type="text" [(ngModel)]="room.verticalHeightDiff" />
+            </div>
+
+            <!-- Electrical -->
+            <div class="form-group">
+              <label>Power Points Nearby</label>
+              <input type="checkbox" [(ngModel)]="room.powerPointsNearby" />
+            </div>
+            <div class="form-group">
+              <label>Wiring Condition Visible</label>
+              <input type="checkbox" [(ngModel)]="room.wiringConditionVisible" />
+            </div>
+            <div class="form-group">
+              <label>Earthing Availability</label>
+              <input type="checkbox" [(ngModel)]="room.earthingAvailability" />
+            </div>
+            <div class="form-group">
+              <label>Distance to Board</label>
+              <input type="text" [(ngModel)]="room.distanceToBoard" />
+            </div>
+            <div class="form-group">
+              <label>Electrical Limitations</label>
+              <textarea rows="2" [(ngModel)]="room.electricalLimitations"></textarea>
+            </div>
+
+            <!-- General -->
+            <div class="form-group">
+              <label>Constraints & Risks</label>
+              <textarea rows="3" [(ngModel)]="room.constraintsRisks"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Inspector Notes</label>
+              <textarea rows="3" [(ngModel)]="room.inspectorNotes"></textarea>
+            </div>
+          </div>
+
+          <!-- Acknowledgement -->
+          <div class="report-section">
+            <h4>Acknowledgement</h4>
+            <div class="form-group">
+              <label>Inspector Name</label>
+              <input type="text" [(ngModel)]="editedReport.inspectorName" />
+            </div>
+            <div class="form-group">
+              <label>Acknowledge Date</label>
+              <input type="date" [(ngModel)]="editedReport.acknowledgeDate" />
+            </div>
+            <div class="form-group">
+              <label>Acknowledge Time</label>
+              <input type="time" [(ngModel)]="editedReport.acknowledgeTime" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()">Close</button>
+        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-edit" (click)="startEditing()">✏
+          Edit</button>
+        <button *ngIf="isEditing" class="btn-save" (click)="saveEdit()" [disabled]="isLoading">
+          {{ isLoading ? 'Saving...' : '💾 Save Changes' }}
+        </button>
+        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-submit"
+          (click)="submitToTechnician(selectedInspection)" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : '📧 Submit to Main Technician' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
