@@ -315,6 +315,11 @@ section {
   color: var(--primary-main);
 }
 
+.position-item.informational:hover {
+  border-color: var(--border-light);
+  color: var(--text-secondary);
+}
+
 .position-item strong,
 .signal-grid strong {
   color: var(--text-primary);
