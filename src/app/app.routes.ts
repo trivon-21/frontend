@@ -8,9 +8,136 @@ import { BuyInstall } from './features/product/buy-install/buy-install';
 import { BankSettings } from './features/admin/bank-settings/bank-settings';
 import { ConsultationBridge } from './features/consultation-bridge/consultation-bridge';
 
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { maintenanceGuard } from './core/guards/maintenance.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'catalog', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/landing/landing.component').then((m) => m.LandingComponent),
+  },
+  {
+    path: 'signup',
+    loadComponent: () =>
+      import('./pages/signup/signup.component').then((m) => m.SignupComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./pages/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent
+      ),
+  },
+  {
+    path: 'reset-password/:token',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent
+      ),
+  },
+  {
+    path: 'reactivation-request',
+    loadComponent: () =>
+      import('./pages/reactivation-request/reactivation-request.component').then(
+        (m) => m.ReactivationRequestComponent
+      ),
+  },
+  {
+    path: 'maintenance',
+    loadComponent: () =>
+      import('./pages/maintenance/maintenance.component').then((m) => m.MaintenanceComponent),
+  },
+  {
+    path: 'dashboard',
+    canActivate: [authGuard, maintenanceGuard],
+    loadComponent: () =>
+      import('./features/customer/components/layout/customer-layout/customer-layout.component').then(
+        (m) => m.CustomerLayoutComponent
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/customer/pages/dashboard/customer-dashboard-home.component').then(
+            (m) => m.CustomerDashboardHomeComponent
+          ),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/customer/pages/orders/customer-orders.component').then(
+            (m) => m.CustomerOrdersComponent
+          ),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/customer/pages/settings/notification-settings.component').then(
+            (m) => m.NotificationSettingsComponent
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/customer/pages/notifications/notifications.component').then(
+            (m) => m.NotificationsPageComponent
+          ),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/customer/pages/profile/customer-profile.component').then(
+            (m) => m.CustomerProfileComponent
+          ),
+      },
+    ],
+  },
+  {
+    path: 'super-admin',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SUPER_ADMIN'] },
+    loadComponent: () =>
+      import('./features/super-admin/components/layout/super-admin-layout/super-admin-layout.component').then(
+        (m) => m.SuperAdminLayoutComponent
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/super-admin/pages/dashboard/super-admin-dashboard.component').then(
+            (m) => m.SuperAdminDashboardComponent
+          ),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/super-admin/pages/users/users.component').then(
+            (m) => m.UsersComponent
+          ),
+      },
+      {
+        path: 'system-config',
+        loadComponent: () =>
+          import('./features/super-admin/pages/system-config/system-config.component').then(
+            (m) => m.SystemConfigComponent
+          ),
+      },
+      {
+        path: 'system-logs',
+        loadComponent: () =>
+          import('./features/super-admin/pages/system-logs-monitoring/system-logs-monitoring.component').then(
+            (m) => m.SystemLogsMonitoringComponent
+          ),
+      },
+    ],
+  },
   { path: 'catalog', component: Catalog },
   { path: 'product-detail', component: ProductDetail },
   { path: 'buy-install', component: BuyInstall },
@@ -18,5 +145,5 @@ export const routes: Routes = [
   { path: 'cart', component: Cart },
   { path: 'checkout', component: Checkout },
   { path: 'order-success', component: OrderSuccess },
-  { path: 'admin/bank-settings', component: BankSettings }
+  { path: 'admin/bank-settings', component: BankSettings },
 ];
