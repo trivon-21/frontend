@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface SignupPayload {
   fullName: string;
@@ -50,7 +51,7 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getCurrentUser());
   currentUser$ = this.currentUserSubject.asObservable();
@@ -139,7 +140,7 @@ export class AuthService {
 
   changePasswordFirstLogin(newPassword: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `http://localhost:5000/api/customer/profile/change-password-first-login`,
+      `${environment.apiUrl}/customer/profile/change-password-first-login`,
       { newPassword },
       { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
     );

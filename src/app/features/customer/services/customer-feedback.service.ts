@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
+import { environment } from '../../../../environments/environment';
 
 export interface Feedback {
   _id: string;
@@ -31,7 +32,7 @@ export interface CreateFeedbackPayload {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerFeedbackService {
-  private apiUrl = 'http://localhost:5000/api/customer/feedback';
+  private apiUrl = `${environment.apiUrl}/customer/feedback`;
 
   constructor(
     private http: HttpClient,

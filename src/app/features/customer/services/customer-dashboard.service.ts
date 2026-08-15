@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface DashboardOrder {
   id: string;
@@ -32,7 +33,7 @@ export interface DashboardData {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerDashboardService {
-  private apiUrl = 'http://localhost:5000/api/customer/dashboard';
+  private apiUrl = `${environment.apiUrl}/customer/dashboard`;
 
   constructor(private http: HttpClient) {}
 

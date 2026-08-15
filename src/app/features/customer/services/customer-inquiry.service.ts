@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
+import { environment } from '../../../../environments/environment';
 
 export interface ThreadMessage {
   sender: 'Customer' | 'Support';
@@ -35,7 +36,7 @@ export interface CreateInquiryPayload {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerInquiryService {
-  private apiUrl = 'http://localhost:5000/api/customer/inquiries';
+  private apiUrl = `${environment.apiUrl}/customer/inquiries`;
 
   constructor(
     private http: HttpClient,

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
+import { environment } from '../../../../environments/environment';
 
 export interface TrackedOrder {
   id: string;
@@ -34,7 +35,7 @@ export interface TrackedOrder {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerOrderService {
-  private apiUrl = 'http://localhost:5000/api/customer/orders';
+  private apiUrl = `${environment.apiUrl}/customer/orders`;
 
   constructor(
     private http: HttpClient,

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export interface ProfileUpdatePayload {
   fullName?: string;
@@ -13,7 +14,7 @@ export interface ProfileUpdatePayload {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerProfileService {
-  private apiUrl = 'http://localhost:5000/api/customer/profile';
+  private apiUrl = `${environment.apiUrl}/customer/profile`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

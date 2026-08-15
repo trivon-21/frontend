@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * Service: Base HTTP wrapper for all API calls
@@ -10,7 +11,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ApiService {
-  private apiBaseUrl = 'http://localhost:5000/api';
+  private apiBaseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
