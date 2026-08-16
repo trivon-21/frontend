@@ -36,9 +36,9 @@ export class SidebarComponent {
   constructor(private sanitizer: DomSanitizer) { }
 
   standaloneLinks: StandaloneLink[] = [
-    { title: 'Payment Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { title: 'Payment Audit Log', icon: 'audit', route: '/payment-audit-log' },
-    { title: 'Financial Reports', icon: 'report', route: '/financial-report' },
+    { title: 'Payment Dashboard', icon: 'dashboard', route: '/finance/dashboard' },
+    { title: 'Payment Audit Log', icon: 'audit', route: '/finance/payment-audit-log' },
+    { title: 'Financial Reports', icon: 'report', route: '/finance/financial-report' },
   ];
 
   sections: NavSection[] = [
@@ -47,9 +47,9 @@ export class SidebarComponent {
       icon: 'buyonly',
       isOpen: false,
       items: [
-        { label: 'Payment Verification', icon: 'verification', route: '/payment-verification' },
-        { label: 'Verified Payments', icon: 'verified', route: '/verified-payments' },
-        { label: 'Rejected Payments', icon: 'rejected', route: '/rejected-payments' },
+        { label: 'Payment Verification', icon: 'verification', route: '/finance/payment-verification' },
+        { label: 'Verified Payments', icon: 'verified', route: '/finance/verified-payments' },
+        { label: 'Rejected Payments', icon: 'rejected', route: '/finance/rejected-payments' },
       ]
     },
     {
@@ -67,9 +67,9 @@ export class SidebarComponent {
       icon: 'invoicepayment',
       isOpen: false,
       items: [
-        { label: 'Payment Verification', icon: 'verification', route: '/invoice/payment-verification' },
-        { label: 'Verified Payments', icon: 'verified', route: '/invoice/verified-payments' },
-        { label: 'Rejected Payments', icon: 'rejected', route: '/invoice/rejected-payments' },
+        { label: 'Payment Verification', icon: 'verification', route: '/finance/invoice/payment-verification' },
+        { label: 'Verified Payments', icon: 'verified', route: '/finance/invoice/verified-payments' },
+        { label: 'Rejected Payments', icon: 'rejected', route: '/finance/invoice/rejected-payments' },
       ]
     },
     {
@@ -77,13 +77,13 @@ export class SidebarComponent {
       icon: 'invoice',
       isOpen: false,
       items: [
-        { label: 'Dashboard', icon: 'dashboard', route: '/invoice/dashboard' },
-        { label: 'Generate Invoice', icon: 'verification', route: '/invoice/generate' },
-        { label: 'Pending Invoices', icon: 'verification', route: '/invoice/pending' },
-        { label: 'Accepted Invoices', icon: 'verified', route: '/invoice/accepted' },
-        { label: 'Rejected Invoices', icon: 'rejected', route: '/invoice/rejected' },
-        { label: 'Paid Invoices', icon: 'verified', route: '/invoice/paid' },
-        { label: 'Auto Cancelled', icon: 'rejected', route: '/invoice/auto-cancelled' },
+        { label: 'Dashboard', icon: 'dashboard', route: '/finance/invoice/dashboard' },
+        { label: 'Generate Invoice', icon: 'verification', route: '/finance/invoice/generate' },
+        { label: 'Pending Invoices', icon: 'verification', route: '/finance/invoice/pending' },
+        { label: 'Accepted Invoices', icon: 'verified', route: '/finance/invoice/accepted' },
+        { label: 'Rejected Invoices', icon: 'rejected', route: '/finance/invoice/rejected' },
+        { label: 'Paid Invoices', icon: 'verified', route: '/finance/invoice/paid' },
+        { label: 'Auto Cancelled', icon: 'rejected', route: '/finance/invoice/auto-cancelled' },
       ]
     },
     {
@@ -96,9 +96,9 @@ export class SidebarComponent {
           icon: 'repair',
           isOpen: false,
           children: [
-            { label: 'Payment Verification', icon: 'verification', route: '/services/repair-verification' },
-            { label: 'Verified Payments', icon: 'verified', route: '/services/repair-verified' },
-            { label: 'Rejected Payments', icon: 'rejected', route: '/services/repair-rejected' },
+            { label: 'Payment Verification', icon: 'verification', route: '/finance/services/repair-verification' },
+            { label: 'Verified Payments', icon: 'verified', route: '/finance/services/repair-verified' },
+            { label: 'Rejected Payments', icon: 'rejected', route: '/finance/services/repair-rejected' },
           ]
         },
         {
@@ -106,9 +106,9 @@ export class SidebarComponent {
           icon: 'maintenance',
           isOpen: false,
           children: [
-            { label: 'Payment Verification', icon: 'verification', route: '/services/maintenance-verification' },
-            { label: 'Verified Payments', icon: 'verified', route: '/services/maintenance-verified' },
-            { label: 'Rejected Payments', icon: 'rejected', route: '/services/maintenance-rejected' },
+            { label: 'Payment Verification', icon: 'verification', route: '/finance/services/maintenance-verification' },
+            { label: 'Verified Payments', icon: 'verified', route: '/finance/services/maintenance-verified' },
+            { label: 'Rejected Payments', icon: 'rejected', route: '/finance/services/maintenance-rejected' },
           ]
         },
       ]
@@ -118,9 +118,9 @@ export class SidebarComponent {
   icon: 'purchase',
   isOpen: false,
   items: [
-    { label: 'Pending Requests',  icon: 'verification', route: '/purchase-requests/pending' },
-    { label: 'Approved Requests', icon: 'verified',     route: '/purchase-requests/approved' },
-    { label: 'Rejected Requests', icon: 'rejected',     route: '/purchase-requests/rejected' },
+    { label: 'Pending Requests',  icon: 'verification', route: '/finance/purchase-requests/pending' },
+    { label: 'Approved Requests', icon: 'verified',     route: '/finance/purchase-requests/approved' },
+    { label: 'Rejected Requests', icon: 'rejected',     route: '/finance/purchase-requests/rejected' },
   ]
 },
   ];
