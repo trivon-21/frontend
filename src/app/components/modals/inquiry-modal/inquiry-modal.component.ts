@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class InquiryModalComponent implements OnInit {
   @Input() initialTab: 'new' | 'list' = 'new';
+  @Input() selectedType?: string;
   @Output() closed = new EventEmitter<void>();
 
   activeTab: 'new' | 'list' = 'new';
@@ -49,6 +50,9 @@ export class InquiryModalComponent implements OnInit {
       this.name = `${user.fullName}${user.lastName ? ' ' + user.lastName : ''}`.trim();
       this.email = user.email || '';
       this.phone = user.phoneNumber || '';
+    }
+    if (this.selectedType && this.inquiryTypes.includes(this.selectedType)) {
+      this.inquiryType = this.selectedType;
     }
     if (this.initialTab === 'list') {
       this.activeTab = 'list';

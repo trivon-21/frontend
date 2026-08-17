@@ -39,8 +39,24 @@
   border: 1px solid rgba(255,255,255,0.10);
   color: rgba(255,255,255,0.92);
   font-weight: 800;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.2s ease, 
+              color 0.2s ease, 
+              border-color 0.2s ease;
 }
-.soc:hover { background: rgba(255,255,255,0.14); }
+.soc:hover {
+  transform: translateY(-3px);
+  background: #E6FBE7;
+  border-color: #CDE1CF;
+  color: #1B2A22;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soc {
+    transition: none !important;
+    transform: none !important;
+  }
+}
 
 .footer-bottom {
   max-width: 1200px;

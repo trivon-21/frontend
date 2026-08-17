@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
@@ -15,6 +15,20 @@ export class NavbarComponent implements OnInit {
   currentUser: AuthUser | null = null;
   showDropdown = false;
   isMobileMenuOpen = false;
+  isSticky = false;
+  private isTicking = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (typeof window === 'undefined') return;
+    if (!this.isTicking) {
+      window.requestAnimationFrame(() => {
+        this.isSticky = window.scrollY > 50;
+        this.isTicking = false;
+      });
+      this.isTicking = true;
+    }
+  }
 
   constructor(private authService: AuthService, public router: Router) {}
 
