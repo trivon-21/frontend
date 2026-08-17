@@ -45,4 +45,11 @@ export class NavbarComponent implements OnInit {
     this.showDropdown = false;
     this.router.navigate(['/']);
   }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
+  }
 }

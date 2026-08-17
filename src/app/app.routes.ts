@@ -136,6 +136,13 @@ export const routes: Routes = [
             (m) => m.SystemLogsMonitoringComponent
           ),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/customer/pages/profile/customer-profile.component').then(
+            (m) => m.CustomerProfileComponent
+          ),
+      },
     ],
   },
   { path: 'catalog', component: Catalog },

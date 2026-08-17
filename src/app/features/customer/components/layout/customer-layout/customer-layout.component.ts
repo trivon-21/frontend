@@ -31,6 +31,12 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    if (user?.role === 'SUPER_ADMIN') {
+      this.router.navigate(['/super-admin']);
+      return;
+    }
+
     this.notificationService.getNotifications().subscribe((notifs) => {
       this.notifications = notifs;
     });
