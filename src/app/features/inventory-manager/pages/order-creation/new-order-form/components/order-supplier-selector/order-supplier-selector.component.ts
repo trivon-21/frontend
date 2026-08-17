@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -9,8 +9,7 @@ import { Supplier } from '../../../../../services/order-creation.service';
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './order-supplier-selector.component.html',
-  styleUrl: './order-supplier-selector.component.css',
-  encapsulation: ViewEncapsulation.None
+  styleUrl: './order-supplier-selector.component.css'
 })
 export class OrderSupplierSelectorComponent implements OnChanges {
   @Input() suppliers: Supplier[] = [];

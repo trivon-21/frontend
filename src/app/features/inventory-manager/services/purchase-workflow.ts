@@ -10,7 +10,7 @@ export type NonPoReason =
 
 export interface PurchaseLine {
   lineId: string;
-  inventoryId?: string;
+  inventoryId?: string | InventoryItem;
   name: string;
   sku: string;
   itemClass?: string;

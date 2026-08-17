@@ -1,578 +1,365 @@
 <div class="procurement-container">
-  <!-- Header -->
-  <div class="header">
-    <h1>Procurement</h1>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon-wrap">
+        <lucide-angular name="clipboard-check" [size]="28"></lucide-angular>
+      </div>
+      <div>
+        <h1>Procurement</h1>
+        <p class="subtitle">Receive approved purchases and update stock with a traceable Goods Received Note (GRN).</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/inventory-manager/inventory">
+        <lucide-angular name="package" [size]="16"></lucide-angular>
+        <span>Inventory Items</span>
+      </a>
+      <a class="btn-secondary" routerLink="/inventory-manager/order-creation">
+        <lucide-angular name="shopping-cart" [size]="16"></lucide-angular>
+        <span>Purchase Orders</span>
+      </a>
+    </div>
   </div>
 
-  <!-- GRN Entry Stepper -->
-  <div class="grn-card glass-panel" [formGroup]="grnForm">
-    <div class="grn-header">
-      <h2>Goods Received Note (GRN) Entry</h2>
+  <!-- Notification Toasts -->
+  <div class="alert alert-success animate-fade" *ngIf="successMessage">
+    <lucide-angular name="check" [size]="18"></lucide-angular>
+    <span>{{ successMessage }}</span>
+  </div>
+  <div class="alert alert-error animate-fade" *ngIf="errorMessage">
+    <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+    <span>{{ errorMessage }}</span>
+  </div>
 
-      <div class="stepper">
-        <div class="step" [class.active]="currentStep >= 1" (click)="setStep(1)">
-          <span class="step-num">1</span>
-          <span class="step-label">Supplier Info</span>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step" [class.active]="currentStep >= 2" (click)="setStep(2)">
-          <span class="step-num">2</span>
-          <span class="step-label">Item Entry</span>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step" [class.active]="currentStep >= 3" (click)="setStep(3)">
-          <span class="step-num">3</span>
-          <span class="step-label">Inventory Settings</span>
-        </div>
+  <!-- Goods Received Note (GRN) Card -->
+  <div class="grn-card">
+    <div class="stepper-header">
+      <div class="stepper-title">
+        <div class="badge-tag">GOODS RECEIVED NOTE</div>
+        <h2>Post Inward Stock Receipt</h2>
+      </div>
+      <div class="stepper-nav">
+        <button type="button" class="step-tab" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" (click)="setStep(1)">
+          <div class="step-circle">
+            <lucide-angular name="check" [size]="14" *ngIf="currentStep > 1"></lucide-angular>
+            <span *ngIf="currentStep <= 1">1</span>
+          </div>
+          <div class="step-meta"><span class="step-title">Receipt Source</span><span class="step-sub">PO / Authorization</span></div>
+        </button>
+        <div class="step-divider" [class.active]="currentStep > 1"></div>
+        <button type="button" class="step-tab" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" (click)="setStep(2)">
+          <div class="step-circle">
+            <lucide-angular name="check" [size]="14" *ngIf="currentStep > 2"></lucide-angular>
+            <span *ngIf="currentStep <= 2">2</span>
+          </div>
+          <div class="step-meta"><span class="step-title">Documents</span><span class="step-sub">Invoice & Details</span></div>
+        </button>
+        <div class="step-divider" [class.active]="currentStep > 2"></div>
+        <button type="button" class="step-tab" [class.active]="currentStep === 3" (click)="setStep(3)">
+          <div class="step-circle"><span>3</span></div>
+          <div class="step-meta"><span class="step-title">Placement</span><span class="step-sub">Quantity & Storage</span></div>
+        </button>
       </div>
     </div>
 
-    <div class="grn-body">
-      <!-- Success/Error Messages -->
-      <div class="alert success animate-fade" *ngIf="successMessage">
-        <lucide-angular name="check" [size]="16" class="inline-icon"></lucide-angular>
-        {{ successMessage }}
-      </div>
-      <div class="alert error animate-fade" *ngIf="errorMessage">
-        <lucide-angular name="circle-alert" class="inline-icon"></lucide-angular>
-        {{ errorMessage }}
-      </div>
-
-      <div class="form-grid workflow-selector">
-        <div class="form-group">
-          <label>RECEIPT MODE</label>
-          <select class="form-select" [ngModel]="receiptMode" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setReceiptMode($event)">
-            <option value="PO">Against Approved PO</option>
-            <option value="NON_PO">Emergency / Non-PO</option>
-          </select>
+    <!-- Form Content -->
+    <form [formGroup]="receiptForm" (ngSubmit)="onSubmit()" class="grn-body">
+      <!-- Step 1: Receipt Source -->
+      <div class="step-content animate-fade" *ngIf="currentStep === 1">
+        <div class="step-intro">
+          <h3>Select Purchase or Authorization Source</h3>
+          <p class="step-desc">Choose the approved workflow record that authorizes this incoming shipment.</p>
         </div>
-        <ng-container *ngIf="receiptMode === 'PO'">
-          <div class="form-group">
-            <label>ISSUED PURCHASE ORDER *</label>
-            <select class="form-select" [ngModel]="selectedPurchaseOrder?._id || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectPurchaseOrder($event)">
-              <option value="">Select an issued PO</option>
-              <option *ngFor="let order of purchaseOrders" [value]="order._id">{{ order.poNumber }} — {{ order.supplierName }}</option>
-            </select>
+
+        <div class="mode-selector-wrapper">
+          <label class="field-label">RECEIPT WORKFLOW TYPE *</label>
+          <div class="segmented-control">
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'PO'" (click)="setReceiptMode('PO')">
+              <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
+              <span>Normal — Issued Purchase Order (PO)</span>
+            </button>
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
+              <lucide-angular name="shield-check" [size]="16"></lucide-angular>
+              <span>Emergency — Approved Authorization (Non-PO)</span>
+            </button>
           </div>
-          <div class="form-group">
-            <label>OUTSTANDING ORDER LINE *</label>
-            <select class="form-select" [ngModel]="selectedPurchaseLine?.lineId || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectPurchaseLine($event)" [disabled]="!selectedPurchaseOrder">
-              <option value="">Select an outstanding line</option>
-              <option *ngFor="let line of availablePoLines" [value]="line.lineId">{{ line.sku }} — {{ line.name }} ({{ outstanding(line) }} remaining)</option>
-            </select>
+        </div>
+
+        <ng-container *ngIf="receiptMode === 'PO'; else emergencySource">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="field-label">ISSUED PURCHASE ORDER *</label>
+              <select class="form-select" [value]="selectedPurchaseOrder?._id || ''" (change)="selectPurchaseOrder($any($event.target).value)">
+                <option value="">Select an issued purchase order</option>
+                <option *ngFor="let order of purchaseOrders" [value]="order._id">
+                  {{ order.poNumber || order.requestId }} — {{ order.supplierName }} ({{ order.items.length }} items)
+                </option>
+              </select>
+              <small class="field-help">Only orders in 'ordered' or 'partially-received' status are eligible.</small>
+            </div>
+            <div class="form-group" *ngIf="selectedPurchaseOrder">
+              <label class="field-label">OUTSTANDING ORDER LINE *</label>
+              <select class="form-select" [value]="selectedPurchaseLine?.lineId || ''" (change)="selectPurchaseLine($any($event.target).value)">
+                <option value="">Select the item line being received</option>
+                <option *ngFor="let line of availablePoLines" [value]="line.lineId">
+                  {{ line.sku }} — {{ line.name }} ({{ outstanding(line) }} {{ line.unit || 'units' }} outstanding)
+                </option>
+              </select>
+              <small class="field-help" *ngIf="availablePoLines.length === 0">No remaining quantity left to receive on this PO.</small>
+            </div>
           </div>
         </ng-container>
-        <div class="form-group" *ngIf="receiptMode === 'NON_PO'">
-          <label>APPROVED AUTHORIZATION</label>
-          <select class="form-select" [ngModel]="selectedAuthorization?._id || ''" [ngModelOptions]="{ standalone: true }" (ngModelChange)="selectAuthorizationById($event)">
-            <option value="">Create a new authorization request</option>
-            <option *ngFor="let authorization of authorizations" [value]="authorization._id" [disabled]="authorization.status !== 'approved' && authorization.status !== 'partially-received'">
-              {{ authorization.authorizationNumber }} — {{ authorization.status }} ({{ authorization.authorizedQuantity - authorization.receivedQuantity }} remaining)
-            </option>
-          </select>
-          <small *ngIf="!selectedAuthorization">Creating this request will not change stock. Manager approval is required first.</small>
+
+        <ng-template #emergencySource>
+          <div class="form-group">
+            <label class="field-label">APPROVED EMERGENCY AUTHORIZATION *</label>
+            <select class="form-select" [value]="selectedAuthorization?._id || ''" (change)="selectAuthorizationById($any($event.target).value)">
+              <option value="">Select an approved emergency authorization</option>
+              <option *ngFor="let auth of authorizations" [value]="auth._id">
+                {{ auth.authorizationNumber }} — {{ auth.supplierName }} ({{ reasonLabel(auth.nonPoReason) }})
+              </option>
+            </select>
+            <small class="field-help">Emergency stock can only be posted after Manager approval.</small>
+          </div>
+        </ng-template>
+
+        <div class="item-summary-card animate-fade" *ngIf="selectedItem">
+          <div class="summary-header">
+            <div class="summary-badge">ITEM VERIFICATION</div>
+            <div class="summary-supplier">
+              <lucide-angular name="truck" [size]="14"></lucide-angular>
+              <span>{{ selectedPurchaseOrder?.supplierName || selectedAuthorization?.supplierName || '—' }}</span>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-col"><span class="label">Item Name</span><strong class="val">{{ selectedItem.name }}</strong></div>
+            <div class="summary-col"><span class="label">SKU / Code</span><strong class="val sku-badge">{{ selectedItem.sku }}</strong></div>
+            <div class="summary-col"><span class="label">Unit Cost</span><strong class="val price">LKR {{ selectedUnitCost | number:'1.2-2' }}</strong></div>
+            <div class="summary-col"><span class="label">Available to Receive</span><strong class="val highlight-badge">{{ remainingQuantity }} {{ selectedItem.unit }}</strong></div>
+          </div>
         </div>
       </div>
 
-      <!-- Step 1: Supplier Info -->
-      <div *ngIf="currentStep === 1" class="step-content animate-fade" formGroupName="supplierInfo">
-        <h3>Supplier Information</h3>
-        <p class="step-desc">{{ isFinalReceipt ? 'Confirm the locked supplier and receipt document.' : 'Record the supplier, exception reason and evidence.' }}</p>
-
+      <!-- Step 2: Document Details -->
+      <div class="step-content animate-fade" formGroupName="source" *ngIf="currentStep === 2">
+        <div class="step-intro">
+          <h3>Supplier Documents & Receipt Details</h3>
+          <p class="step-desc">Enter the supplier delivery note or invoice details to attach to this GRN.</p>
+        </div>
         <div class="form-grid">
-          <!-- Supplier Autocomplete Field -->
-          <div class="form-group supplier-group">
-            <label>Select/Add Supplier *</label>
-            <div class="autocomplete-container">
-              <input
-                type="text"
-                placeholder="Type supplier name..."
-                class="form-input"
-                formControlName="supplier"
-                [readonly]="isFinalReceipt"
-                (focus)="onSupplierInputFocus()"
-                (blur)="onSupplierInputBlur()"
-                autocomplete="off"
-              />
-
-              <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
-                <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
-                  <lucide-angular name="plus" class="inline-icon"></lucide-angular> Add New Supplier
-                </div>
-                <div
-                  class="dropdown-item"
-                  *ngFor="let supplier of filteredSuppliers"
-                  (mousedown)="selectSupplier(supplier)"
-                >
-                  {{ supplier.name }}
-                </div>
-                <div
-                  class="dropdown-no-results"
-                  *ngIf="
-                    filteredSuppliers.length === 0 && grnForm.get('supplierInfo.supplier')?.value
-                  "
-                >
-                  No existing suppliers found. Click above to add.
-                </div>
-              </div>
+          <div class="form-group">
+            <label class="field-label">SOURCE DOCUMENT NUMBER *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="file-text" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="sourceDocumentNumber" placeholder="e.g. DN-2026-8890 or INV-1045" />
             </div>
-
-            <!-- New Supplier Confirmation -->
-            <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
-              <button
-                class="btn-confirm-mini"
-                (click)="confirmNewSupplier()"
-                [disabled]="isSubmitting"
-              >
-                Confirm Supplier
-              </button>
-              <button
-                class="btn-cancel-mini"
-                (click)="cancelNewSupplier()"
-                [disabled]="isSubmitting"
-              >
-                Cancel
-              </button>
+            <small class="field-help">Delivery Note, Supplier Waybill, or Invoice reference.</small>
+          </div>
+          <div class="form-group">
+            <label class="field-label">SUPPLIER INVOICE NUMBER</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="dollar-sign" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="invoiceNumber" placeholder="e.g. INV-2026-1045 (optional)" />
             </div>
-
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('supplierInfo.supplier')?.touched &&
-                grnForm.get('supplierInfo.supplier')?.invalid
-              "
-            >
-              Supplier is required
-            </span>
           </div>
-
           <div class="form-group">
-            <label>Source Document Number *</label>
-            <input
-              type="text"
-              placeholder="Invoice, delivery note or replacement reference"
-              class="form-input"
-              formControlName="sourceDocumentNumber"
-              [readonly]="!!selectedAuthorization"
-            />
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('supplierInfo.sourceDocumentNumber')?.touched &&
-                grnForm.get('supplierInfo.sourceDocumentNumber')?.invalid
-              "
-            >
-              Source document number is required
-            </span>
+            <label class="field-label">RECEIVED DATE *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="calendar" [size]="16" class="input-icon"></lucide-angular>
+              <input type="date" class="form-input" formControlName="receivedDate" />
+            </div>
           </div>
-
-          <div class="form-group"><label>Invoice Number (if applicable)</label><input type="text" class="form-input" formControlName="invoiceNumber" /></div>
-
-          <ng-container *ngIf="receiptMode === 'NON_PO'">
-            <div class="form-group"><label>NON-PO REASON *</label><select class="form-select" formControlName="nonPoReason" [attr.disabled]="selectedAuthorization ? true : null"><option *ngFor="let reason of nonPoReasons" [value]="reason.value">{{ reason.label }}</option></select></div>
-            <div class="form-group"><label>AFFECTED WORK TYPE</label><select class="form-select" formControlName="affectedWorkType"><option value="NONE">Not linked</option><option value="REPAIR">Repair</option><option value="INSTALLATION">Installation</option><option value="MAINTENANCE">Maintenance</option><option value="INSPECTION">Inspection</option><option value="TICKET">Ticket</option><option value="OTHER">Other</option></select></div>
-            <div class="form-group"><label>AFFECTED JOB / TICKET REFERENCE</label><input class="form-input" formControlName="affectedWorkReference" placeholder="e.g., TKT-1042" /></div>
-            <div class="form-group"><label>SUPPORTING DOCUMENT URL</label><input class="form-input" formControlName="supportingDocumentUrl" placeholder="https://..." /></div>
-            <div class="form-group full-width"><label>OPERATIONAL EXPLANATION *</label><textarea class="form-input" formControlName="explanation" rows="3" [readonly]="!!selectedAuthorization"></textarea></div>
-          </ng-container>
-
-
           <div class="form-group">
-            <label>Received Date *</label>
-            <input type="date" class="form-input" formControlName="receivedDate" />
-          </div>
-
-          <div class="form-group">
-            <label>Condition upon Receipt *</label>
+            <label class="field-label">CONDITION UPON RECEIPT *</label>
             <select class="form-select" formControlName="condition">
-              <option value="Good">Good</option>
-              <option value="Damaged">Damaged</option>
-              <option value="Incomplete">Incomplete</option>
+              <option value="Good">Good — Complete & Pristine</option>
+              <option value="Damaged">Damaged — Physical Damage</option>
+              <option value="Incomplete">Incomplete — Missing Pieces</option>
             </select>
           </div>
-        </div>
-
-        <div class="info-box">
-          <p>
-            <lucide-angular name="info" [size]="14"></lucide-angular> Note: Make sure the source document matches the delivery
-            documentation exactly.
-          </p>
-        </div>
-      </div>
-
-      <!-- Step 2: Item Entry -->
-      <div *ngIf="currentStep === 2" class="step-content animate-fade" formGroupName="itemDetails">
-        <h3>Product Details</h3>
-        <p class="step-desc">Select an existing SKU to replenish it, or enter a new classified product</p>
-
-        <div class="form-group supplier-group">
-          <label>FIND EXISTING SKU</label>
-          <div class="input-with-icon">
-            <input
-              type="text"
-              class="form-input"
-              [ngModel]="existingItemQuery"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="filterExistingItems($event)"
-              (focus)="filterExistingItems(existingItemQuery)"
-              (blur)="showExistingItemDropdown = false"
-              placeholder="Search by SKU or product name"
-            />
-            <button type="button" class="btn-icon" *ngIf="selectedExistingItem" (mousedown)="clearExistingItem()">×</button>
-          </div>
-          <div class="supplier-dropdown" *ngIf="showExistingItemDropdown && !selectedExistingItem">
-            <div class="supplier-option" *ngFor="let item of filteredInventoryItems" (mousedown)="selectExistingItem(item)">
-              <strong>{{ item.sku }}</strong> — {{ item.name }}
-              <small>{{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</small>
-            </div>
-          </div>
-          <small *ngIf="selectedExistingItem">Receiving into existing stock. Product identity remains unchanged.</small>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>PRODUCT NAME *</label>
-            <input
-              type="text"
-              placeholder="Enter Product Name"
-              class="form-input"
-              formControlName="name"
-              [readonly]="selectedExistingItem || isFinalReceipt"
-            />
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('itemDetails.name')?.touched && grnForm.get('itemDetails.name')?.invalid
-              "
-            >
-              Product name is required
-            </span>
-          </div>
-          <div class="form-group">
-            <label>SKU (Unique Code) *</label>
-            <input
-              type="text"
-              placeholder="e.g., AC-LG-12000-INV"
-              class="form-input"
-              formControlName="sku"
-              [readonly]="selectedExistingItem || isFinalReceipt"
-            />
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('itemDetails.sku')?.touched && grnForm.get('itemDetails.sku')?.invalid
-              "
-            >
-              Valid alphanumeric SKU is required
-            </span>
-          </div>
-          <div class="form-group">
-            <label>BRAND *</label>
-            <input
-              type="text"
-              placeholder="e.g., LG, Samsung, Daikin"
-              class="form-input"
-              formControlName="brand"
-              [readonly]="selectedExistingItem || isFinalReceipt"
-            />
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('itemDetails.brand')?.touched &&
-                grnForm.get('itemDetails.brand')?.invalid
-              "
-            >
-              Brand is required
-            </span>
-          </div>
-          <div class="form-group">
-            <label>PRODUCT TYPE *</label>
-            <select class="form-select" formControlName="type">
-              <option value="Single">Single Item</option>
-              <option value="Kit">Kit</option>
-              <option value="Bundle">Bundle Pack</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>PRODUCT CLASS *</label>
-            <select class="form-select" formControlName="itemClass">
-              <option *ngFor="let itemClass of itemClasses" [value]="itemClass">{{ itemClass }}</option>
-            </select>
-            <span class="error-text" *ngIf="grnForm.get('itemDetails.itemClass')?.touched && grnForm.get('itemDetails.itemClass')?.hasError('classification')">Select a classified product type</span>
-          </div>
-          <div class="form-group">
-            <label>SUBCATEGORY *</label>
-            <select class="form-select" formControlName="subcategory">
-              <option *ngFor="let subcategory of availableSubcategories" [value]="subcategory">{{ subcategory }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>OEM PART / MODEL NUMBER</label>
-            <input type="text" class="form-input" formControlName="manufacturerPartNumber" />
-          </div>
-          <div class="form-group">
-            <label>Technical Specs Link (URL)</label>
-            <input
-              type="text"
-              placeholder="e.g., https://specs.com/unit-a"
-              class="form-input"
-              formControlName="specsUrl"
-            />
-          </div>
-          <div class="form-group toggle-group">
-            <label class="toggle-label">
-              <input type="checkbox" formControlName="isSerialized" />
-              <span class="toggle-text">Is Serialized? (Track individual units)</span>
-            </label>
-          </div>
-        </div>
-
-        <button type="button" class="btn-link" (click)="showTechnicalFields = !showTechnicalFields">
-          {{ showTechnicalFields ? 'Hide' : 'Add' }} technical compatibility
-        </button>
-        <div class="form-grid" *ngIf="showTechnicalFields">
-          <div class="form-group">
-            <label>COMPATIBLE SYSTEM</label>
-            <select class="form-select" formControlName="systemType">
-              <option *ngFor="let systemType of systemTypes" [value]="systemType">{{ systemType }}</option>
-            </select>
-          </div>
-          <div class="form-group"><label>COMPATIBLE MODELS</label><input class="form-input" formControlName="compatibleModels" placeholder="Comma-separated" /></div>
-          <div class="form-group"><label>REFRIGERANTS</label><input class="form-input" formControlName="refrigerants" placeholder="R32, R410A" /></div>
-          <div class="form-group"><label>CAPACITY (BTU/h)</label><input type="number" min="0" class="form-input" formControlName="capacityBtu" /></div>
-          <div class="form-group"><label>VOLTAGE</label><input class="form-input" formControlName="voltage" placeholder="230 V" /></div>
-          <div class="form-group">
-            <label>PHASE</label>
-            <select class="form-select" formControlName="phase">
-              <option>Single Phase</option><option>Three Phase</option><option>Not Applicable</option>
-            </select>
+          <div class="form-group full-span">
+            <label class="field-label">SUPPORTING DOCUMENT URL</label>
+            <input class="form-input" formControlName="supportingDocumentUrl" placeholder="https://... Cloud scan or document attachment link (optional)" />
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Inventory Settings -->
-      <div
-        *ngIf="currentStep === 3"
-        class="step-content animate-fade"
-        formGroupName="inventorySettings"
-      >
-        <h3>Inventory & Stock Settings</h3>
-        <p class="step-desc">Configure storage and initial quantities</p>
-
+      <!-- Step 3: Stock Placement -->
+      <div class="step-content animate-fade" formGroupName="stock" *ngIf="currentStep === 3">
+        <div class="step-intro">
+          <h3>Stock Placement & Location</h3>
+          <p class="step-desc">Confirm incoming count and designate where items will be stored.</p>
+        </div>
         <div class="form-grid">
           <div class="form-group">
-            <label>INITIAL QUANTITY *</label>
-            <input type="number" min="1" step="1" class="form-input" formControlName="available" />
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('inventorySettings.available')?.touched &&
-                grnForm.get('inventorySettings.available')?.invalid
-              "
-            >
-              Quantity must be at least 1
-            </span>
+            <label class="field-label">RECEIVED QUANTITY *</label>
+            <input type="number" min="1" [max]="remainingQuantity" step="1" class="form-input highlight-input" formControlName="quantity" placeholder="Enter quantity" />
+            <small class="field-help">Maximum outstanding: {{ remainingQuantity }} {{ selectedItem?.unit || 'units' }}.</small>
           </div>
           <div class="form-group">
-            <label>UNIT COST (Buying Price) *</label>
-            <div class="cost-input">
-              <span class="currency">LKR</span>
-              <input type="number" class="form-input" formControlName="unitCost" />
+            <label class="field-label">UNIT OF MEASURE</label>
+            <input class="form-input readonly-input" [value]="selectedItem?.unit || '—'" readonly />
+          </div>
+          <div class="form-group">
+            <label class="field-label">WAREHOUSE / LOCATION *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="box" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="location" placeholder="e.g. Main Warehouse" />
             </div>
           </div>
           <div class="form-group">
-            <label>LOCATION *</label>
-            <input
-              type="text"
-              placeholder="e.g., Warehouse A, Section 4"
-              class="form-input"
-              formControlName="location"
-            />
+            <label class="field-label">SHELF / BIN CODE *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="layout-grid" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="binLocation" placeholder="e.g. A-01-04" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>SHELF / BIN</label>
-            <input type="text" class="form-input" formControlName="binLocation" placeholder="e.g., SP-A01" />
-          </div>
-          <div class="form-group">
-            <label>UNIT OF MEASURE *</label>
-            <select class="form-select" formControlName="unit">
-              <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>REORDER LEVEL (Min) *</label>
-            <input type="number" class="form-input" formControlName="reorderLevel" />
-          </div>
-          <div class="form-group">
-            <label>MAXIMUM STOCK LEVEL *</label>
-            <input type="number" class="form-input" formControlName="maxStockLevel" />
-          </div>
-
-          <!-- Serial Numbers Section (Dynamic) -->
-          <div
-            class="form-group full-width serials-container animate-fade"
-            *ngIf="
-              isFinalReceipt && grnForm.get('itemDetails.isSerialized')?.value &&
-              grnForm.get('inventorySettings.available')?.value > 0
-            "
-          >
-            <label>SERIAL NUMBERS (Scan or Type individually) *</label>
-            <div class="serials-grid" formArrayName="serialNumbers">
-              <div
-                class="serial-input-wrapper"
-                *ngFor="let ctrl of serialNumbersControls; let i = index"
-              >
-                <span class="serial-index">#{{ i + 1 }}</span>
-                <input
-                  type="text"
-                  [formControlName]="i"
-                  placeholder="Scan Serial..."
-                  class="form-input mini"
-                />
+          <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && selectedQuantity > 0">
+            <div class="serials-header">
+              <label class="field-label">SERIAL NUMBERS ({{ selectedQuantity }} REQUIRED) *</label>
+              <span class="serials-tip">Enter one unique serial number per unit</span>
+            </div>
+            <div formArrayName="serialNumbers" class="serials-grid">
+              <div class="serial-item" *ngFor="let control of serialNumbersControls; let i = index">
+                <span class="serial-idx">#{{ i + 1 }}</span>
+                <input class="form-input serial-input" [formControlName]="i" placeholder="Serial No. {{ i + 1 }}" />
               </div>
             </div>
-            <span
-              class="error-text"
-              *ngIf="
-                grnForm.get('inventorySettings.serialNumbers')?.invalid &&
-                grnForm.get('inventorySettings.serialNumbers')?.touched
-              "
-            >
-              All serial numbers are required for serialized items
-            </span>
+          </div>
+        </div>
+
+        <div class="receipt-calculation-card animate-fade" *ngIf="selectedItem">
+          <div class="calc-header">
+            <h4>GRN Valuation Summary</h4>
+            <span class="calc-badge">{{ receiptMode === 'PO' ? 'PURCHASE ORDER' : 'EMERGENCY AUTH' }}</span>
+          </div>
+          <div class="calc-grid">
+            <div class="calc-row">
+              <span class="label">Workflow Reference:</span>
+              <span class="value">{{ receiptMode === 'PO' ? (selectedPurchaseOrder?.poNumber || selectedPurchaseOrder?.requestId) : selectedAuthorization?.authorizationNumber }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Source Document:</span>
+              <span class="value">{{ receiptForm.get('source.sourceDocumentNumber')?.value || '—' }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Item & SKU:</span>
+              <span class="value">{{ selectedItem.name }} ({{ selectedItem.sku }})</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Quantity Received:</span>
+              <span class="value highlight">{{ selectedQuantity }} {{ selectedItem.unit }}</span>
+            </div>
+            <div class="calc-row total-row">
+              <span class="label">Estimated Total Value:</span>
+              <span class="value total-price">LKR {{ estimatedTotal | number:'1.2-2' }}</span>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- Stepper Controls Footer -->
       <div class="grn-footer">
-        <button class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">Back</button>
+        <button type="button" class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">
+          <lucide-angular name="arrow-left" [size]="16"></lucide-angular>
+          <span>Previous Step</span>
+        </button>
         <div class="spacer"></div>
-        <button
-          class="btn-next"
-          [disabled]="isSubmitting || (currentStep === 1 && isAddingNewSupplier)"
-          (click)="nextStep()"
-        >
-          <span *ngIf="!isSubmitting">{{
-            currentStep === 3 ? (isFinalReceipt ? 'Post Receipt & GRN' : 'Request Manager Approval') : 'Next Step'
-          }}</span>
-          <span *ngIf="isSubmitting" class="loader-small"></span>
+        <button type="button" class="btn-primary" [disabled]="isSubmitting" (click)="nextStep()">
+          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Post GRN & Update Stock' : 'Continue' }}</span>
+          <span *ngIf="isSubmitting">Posting GRN...</span>
+          <lucide-angular name="chevron-right" [size]="16" *ngIf="!isSubmitting && currentStep < 3"></lucide-angular>
+          <lucide-angular name="check" [size]="16" *ngIf="!isSubmitting && currentStep === 3"></lucide-angular>
         </button>
       </div>
-    </div>
+    </form>
   </div>
 
-  <!-- Recent GRN Entries -->
+  <!-- Recent GRN Entries Section -->
   <div class="shipments-section">
-    <div class="section-header">
-      <h2>Recent GRN Entries</h2>
-      <div class="search-box">
-        <lucide-angular name="search" class="inline-icon"></lucide-angular>
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          placeholder="Search by Invoice, Supplier, Item or SKU..."
-        />
+    <div class="section-top-bar">
+      <div class="section-title">
+        <h2>Recent GRN Entries</h2>
+        <p class="subtitle">History of Goods Received Notes posted to inventory.</p>
       </div>
-      <p class="subtitle">Latest goods received notes processed</p>
-      <div class="chip-group">
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">PO</button>
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Non-PO</button>
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'EMERGENCY'" (click)="grnFilter = 'EMERGENCY'">Emergency</button>
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'REPLACEMENT'" (click)="grnFilter = 'REPLACEMENT'">Replacements</button>
-        <button type="button" class="btn-cancel-mini" [class.active]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
+      <div class="section-controls">
+        <div class="search-box">
+          <lucide-angular name="search" [size]="16" class="search-icon"></lucide-angular>
+          <input type="text" [(ngModel)]="searchQuery" placeholder="Search document, PO, supplier, SKU..." />
+        </div>
+        <div class="filter-pills">
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">Normal PO</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Emergency</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
+        </div>
       </div>
     </div>
 
-    <div class="shipments-list glass-panel">
-      <div class="shipment-item" *ngFor="let p of filteredProcurements">
-        <div class="item-main">
-          <div class="item-id-row">
-            <span class="shipment-id">{{ p.sourceDocumentNumber || p.invoiceNumber }}</span>
-            <span class="status-badge">{{ p.receiptMode }}</span>
+    <!-- GRN Items List -->
+    <div class="shipments-list">
+      <div class="shipment-item animate-fade" *ngFor="let p of filteredProcurements">
+        <div class="shipment-info">
+          <div class="shipment-top-meta">
+            <span class="grn-code">{{ p.sourceDocumentNumber || p.invoiceNumber || 'GRN-ENTRY' }}</span>
+            <span class="mode-tag" [class.emergency]="p.receiptMode === 'NON_PO'">
+              {{ p.receiptMode === 'PO' ? 'NORMAL PO' : 'EMERGENCY' }}
+            </span>
+            <span class="received-date" *ngIf="p.receivedDate">
+              <lucide-angular name="calendar" [size]="12"></lucide-angular>
+              {{ p.receivedDate }}
+            </span>
           </div>
-          <h4 class="supplier-name">{{ p.supplierName }}</h4>
-          <div class="item-meta">
-            <span>{{ p.itemName }} ({{ p.sku }})</span>
-            <span class="divider"></span>
-            <span>{{ p.quantity }} {{ p.unit }}</span>
-            <span class="divider"></span>
-            <span><lucide-angular name="clock" [size]="14"></lucide-angular> {{ p.timestamp | date: 'short' }}</span>
-            <span class="divider"></span>
-            <span>By: {{ p.receivedBy }}</span>
+          <h4 class="supplier-title">{{ p.supplierName }}</h4>
+          <div class="shipment-details-row">
+            <span class="detail-badge item-name">
+              <lucide-angular name="package" [size]="14"></lucide-angular>
+              {{ p.itemName }} ({{ p.sku }})
+            </span>
+            <span class="detail-badge qty-badge">{{ p.quantity }} {{ p.unit }}</span>
+            <span class="detail-badge ref-badge">Ref: {{ p.poNumber || p.receiptAuthorizationId?.authorizationNumber || '—' }}</span>
+            <span class="detail-badge condition-badge" [class.damaged]="p.condition === 'Damaged'">Condition: {{ p.condition }}</span>
           </div>
         </div>
-        <div class="card-actions">
-          <button class="btn-view-details" (click)="viewProcurementDetails(p)">View Details</button>
-          <button class="btn-view-inventory" [routerLink]="['/inventory-manager/inventory']" [queryParams]="{ search: p.sku }">
-            View in Inventory
-          </button>
-        </div>
+        <button class="btn-details" type="button" (click)="viewProcurementDetails(p)">
+          <lucide-angular name="eye" [size]="16"></lucide-angular>
+          <span>View Details</span>
+        </button>
       </div>
 
-      <div class="no-results animate-fade" *ngIf="filteredProcurements.length === 0">
-        <p>No matching GRN entries found.</p>
+      <div class="empty-results" *ngIf="filteredProcurements.length === 0">
+        <lucide-angular name="clipboard-list" [size]="40" class="empty-icon"></lucide-angular>
+        <p>No GRN entries match your search or filter criteria.</p>
       </div>
     </div>
   </div>
 
   <!-- GRN Details Modal -->
-  <div class="modal-overlay" *ngIf="showDetailsModal && selectedProcurement" (click)="closeDetailsModal()">
-    <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+  <div class="modal-overlay animate-fade" *ngIf="showDetailsModal && selectedProcurement" (click)="closeDetailsModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <div class="header-title-group">
-          <h2>GRN Details</h2>
-          <span class="invoice-badge">INV-{{ selectedProcurement.invoiceNumber }}</span>
+        <div class="modal-title-group">
+          <div class="modal-tag">GRN DETAILS</div>
+          <h3>{{ selectedProcurement.sourceDocumentNumber || selectedProcurement.invoiceNumber || 'Receipt Details' }}</h3>
         </div>
-        <button class="btn-close" (click)="closeDetailsModal()">
-          <lucide-angular name="x" [size]="20"></lucide-angular>
+        <button type="button" class="btn-close-modal" (click)="closeDetailsModal()">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
         </button>
       </div>
-
-      <div class="modal-body detail-view">
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="label">Supplier</span>
-            <span class="value">{{ selectedProcurement.supplierName }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Received Date</span>
-            <span class="value">{{ selectedProcurement.receivedDate | date: 'longDate' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Product</span>
-            <span class="value">{{ selectedProcurement.itemName }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">SKU</span>
-            <span class="value">{{ selectedProcurement.sku }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Quantity</span>
-            <span class="value">{{ selectedProcurement.quantity }} {{ selectedProcurement.unit }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Condition</span>
-            <span class="value status-val" [class]="selectedProcurement.condition.toLowerCase()">
-              {{ selectedProcurement.condition }}
-            </span>
-          </div>
-        </div>
-
-        <div class="detail-meta-footer">
-          <div class="meta-info">
-            <span class="label">Processed By</span>
-            <span class="value">{{ selectedProcurement.receivedBy }}</span>
-          </div>
-          <div class="meta-info">
-            <span class="label">System Timestamp</span>
-            <span class="value">{{ selectedProcurement.timestamp | date: 'medium' }}</span>
-          </div>
+      <div class="modal-body">
+        <div class="modal-detail-grid">
+          <div class="detail-card"><span class="label">Source Document</span><span class="val">{{ selectedProcurement.sourceDocumentNumber || '—' }}</span></div>
+          <div class="detail-card"><span class="label">Workflow Reference</span><span class="val">{{ selectedProcurement.poNumber || selectedProcurement.receiptAuthorizationId?.authorizationNumber || '—' }}</span></div>
+          <div class="detail-card"><span class="label">Supplier Name</span><span class="val">{{ selectedProcurement.supplierName }}</span></div>
+          <div class="detail-card"><span class="label">Item & SKU</span><span class="val">{{ selectedProcurement.itemName }} ({{ selectedProcurement.sku }})</span></div>
+          <div class="detail-card"><span class="label">Quantity Received</span><span class="val highlight">{{ selectedProcurement.quantity }} {{ selectedProcurement.unit }}</span></div>
+          <div class="detail-card"><span class="label">Receipt Condition</span><span class="val status" [class.damaged]="selectedProcurement.condition === 'Damaged'">{{ selectedProcurement.condition }}</span></div>
+          <div class="detail-card full-span" *ngIf="selectedProcurement.receivedBy"><span class="label">Received By</span><span class="val">{{ selectedProcurement.receivedBy }}</span></div>
         </div>
       </div>
-
       <div class="modal-footer">
-        <button class="btn-primary" (click)="closeDetailsModal()">Close Details</button>
+        <button type="button" class="btn-secondary" (click)="closeDetailsModal()">Close</button>
       </div>
     </div>
   </div>

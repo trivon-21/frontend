@@ -41,6 +41,10 @@ export class OrderCreationService {
     return this.apiService.get<Supplier[]>('/inventory/suppliers');
   }
 
+  addSupplier(name: string): Observable<Supplier> {
+    return this.apiService.post<Supplier>('/inventory/suppliers', { name });
+  }
+
   getSuggestedItems(): Observable<InventoryItem[]> {
     return this.apiService.get<InventoryItem[]>('/inventory/suggested-orders');
   }

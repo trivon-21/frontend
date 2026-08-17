@@ -44,7 +44,7 @@
       <span class="generated">Updated {{ report.generatedAt | date:'short' }}</span>
     </div>
 
-    <section aria-labelledby="performance-heading">
+    <section *ngIf="section === 'performance'" aria-labelledby="performance-heading">
       <div class="section-heading">
         <div><h2 id="performance-heading">Period Performance</h2><p>Compared with the immediately preceding equivalent period.</p></div>
         <span class="scope-badge period">{{ activePeriod }}</span>
@@ -74,7 +74,7 @@
       </div>
     </section>
 
-    <section class="position-panel" aria-labelledby="position-heading">
+    <section *ngIf="section === 'performance'" class="position-panel" aria-labelledby="position-heading">
       <div class="section-heading compact">
         <div><h2 id="position-heading">Current Position</h2><p>Live operational conditions; these values are not historical comparisons.</p></div>
         <span class="scope-badge current">Current</span>
@@ -88,7 +88,7 @@
       </div>
     </section>
 
-    <section aria-labelledby="service-heading">
+    <section *ngIf="section === 'service'" aria-labelledby="service-heading">
       <div class="section-heading"><div><h2 id="service-heading">Service Operations</h2><p>Demand and completions in the selected period, with the current ticket mix alongside.</p></div></div>
       <div class="chart-grid">
         <article class="chart-card trend-card">
@@ -165,7 +165,7 @@
       </div>
     </section>
 
-    <section aria-labelledby="purchasing-heading">
+    <section *ngIf="section === 'purchasing'" aria-labelledby="purchasing-heading">
       <div class="section-heading"><div><h2 id="purchasing-heading">Purchasing and Approvals</h2><p>Current pipeline position is separated from decisions made during the period.</p></div></div>
       <div class="chart-grid two">
         <article class="chart-card">
@@ -189,7 +189,7 @@
       </article>
     </section>
 
-    <section id="inventory-risk" aria-labelledby="risk-heading">
+    <section *ngIf="section === 'inventory'" id="inventory-risk" aria-labelledby="risk-heading">
       <div class="section-heading"><div><h2 id="risk-heading">Inventory and Exception Control</h2><p>Live stock constraints and Non-PO activity in the selected period.</p></div></div>
       <div class="signal-grid">
         <article><span>Low stock</span><strong>{{ report.inventoryRisk.lowStockItems.value }}</strong></article>
@@ -219,7 +219,7 @@
       </div>
     </section>
 
-    <section class="coverage-panel" aria-labelledby="coverage-heading">
+    <section *ngIf="section !== 'performance'" class="coverage-panel" aria-labelledby="coverage-heading">
       <div class="section-heading compact"><div><h2 id="coverage-heading">Data Coverage</h2><p>Known limits are shown explicitly instead of being reported as zero performance.</p></div></div>
       <ul><li *ngFor="let item of report.dataCoverage"><span class="coverage-badge" [class.partial]="item.status === 'partial'">{{ label(item.status) }}</span><span>{{ item.message }}</span></li></ul>
     </section>

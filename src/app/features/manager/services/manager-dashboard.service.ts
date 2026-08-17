@@ -71,7 +71,7 @@ const EMPTY_DASHBOARD: ManagerDashboardData = {
   inventoryKpis: {
     reservedItems: { label: 'Reserved Items', value: 0, icon: 'clipboard-check' },
     lowStockAlerts: { label: 'Low Stock Alerts', value: 0, icon: 'triangle-alert' },
-    pendingMaterialRequests: { label: 'Pending Material Requests', value: 0, icon: 'package-clock' },
+    pendingMaterialRequests: { label: 'Pending Material Requests', value: 0, icon: 'package' },
   },
   recentActivity: [],
   pendingActions: [],
@@ -88,7 +88,7 @@ export class ManagerDashboardService {
       map((data) => ({
         ...data,
         currentDate: new Date(data.currentDate),
-        recentActivity: data.recentActivity.map((activity) => {
+        recentActivity: (data.recentActivity || []).map((activity) => {
           const timestamp = new Date(activity.timestamp);
           return { ...activity, timestamp, timeAgo: this.getTimeAgo(timestamp) };
         }),

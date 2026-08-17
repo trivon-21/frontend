@@ -36,7 +36,7 @@ export class ListItemsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Unable to load product quality checks.';
+        this.errorMessage = 'Unable to load catalog health checks.';
         this.loading = false;
       },
     });

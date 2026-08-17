@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import {
   AnalyticsData,
@@ -33,6 +33,7 @@ interface DonutSegment extends NamedValue {
   styleUrls: ['./analytics.component.css'],
 })
 export class AnalyticsComponent implements OnInit {
+  section: 'performance' | 'service' | 'purchasing' | 'inventory' = 'performance';
   readonly periods: Array<{ key: AnalyticsPeriod; label: string }> = [
     { key: '7d', label: '7 Days' },
     { key: '30d', label: '30 Days' },
@@ -52,9 +53,12 @@ export class AnalyticsComponent implements OnInit {
   errorMessage = '';
   activeTrendIndex: number | null = null;
 
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(private readonly analyticsService: AnalyticsService, private readonly route: ActivatedRoute) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.route.data.subscribe((data) => this.section = data['analyticsSection'] || 'performance');
+    this.load();
+  }
 
   selectPeriod(period: AnalyticsPeriod): void {
     if (period === this.activePeriod && this.data) return;

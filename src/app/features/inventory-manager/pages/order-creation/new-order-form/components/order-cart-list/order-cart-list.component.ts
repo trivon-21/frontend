@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -9,8 +9,7 @@ import { OrderItem } from '../../../../../services/order-creation.service';
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './order-cart-list.component.html',
-  styleUrl: './order-cart-list.component.css',
-  encapsulation: ViewEncapsulation.None
+  styleUrl: './order-cart-list.component.css'
 })
 export class OrderCartListComponent {
   @Input() orderItems: OrderItem[] = [];

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,8 +10,7 @@ import { InventoryItem, OrderItem } from '../../../../../services/order-creation
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule, RouterModule],
   templateUrl: './order-item-search.component.html',
-  styleUrl: './order-item-search.component.css',
-  encapsulation: ViewEncapsulation.None
+  styleUrl: './order-item-search.component.css'
 })
 export class OrderItemSearchComponent implements OnChanges {
   @Input() inventoryItems: InventoryItem[] = [];

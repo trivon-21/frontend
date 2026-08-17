@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -21,11 +22,17 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
 })
 export class ManagerLayoutComponent {
   showUserMenu = false;
+  analyticsExpanded = false;
 
   constructor(
     public authService: AuthService,
     private router: Router,
-  ) {}
+  ) {
+    this.analyticsExpanded = this.router.url.startsWith('/manager/analytics');
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
+      this.analyticsExpanded = (event as NavigationEnd).urlAfterRedirects.startsWith('/manager/analytics');
+    });
+  }
 
   get userInitials(): string {
     const user = this.authService.getUser();
@@ -52,6 +59,10 @@ export class ManagerLayoutComponent {
 
   closeUserMenu(): void {
     this.showUserMenu = false;
+  }
+
+  toggleAnalytics(): void {
+    this.analyticsExpanded = !this.analyticsExpanded;
   }
 
   logout(): void {

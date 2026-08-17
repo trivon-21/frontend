@@ -13,7 +13,7 @@ function item(overrides: Partial<InventoryItem> = {}): InventoryItem {
   };
 }
 
-describe('ListItemsComponent data quality', () => {
+describe('ListItemsComponent catalog health', () => {
   it('keeps complete records out of the quality queue', () => {
     const service = { getInventory: () => of([item()]) } as InventoryManagerDashboardService;
     const component = new ListItemsComponent(service);

@@ -93,6 +93,14 @@
   stroke-width: 1.8px;
 }
 
+.analytics-nav-row { display: flex; align-items: center; }
+.analytics-link { flex: 1; }
+.analytics-toggle { border: 0; background: transparent; color: var(--text-secondary); padding: 10px; cursor: pointer; }
+.analytics-toggle:hover { color: var(--text-primary); }
+.analytics-submenu { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px 52px; }
+.analytics-submenu a { color: var(--text-secondary); text-decoration: none; font-size: 14px; padding: 7px 8px; border-radius: var(--border-radius-lg); }
+.analytics-submenu a:hover, .analytics-submenu a.active { color: var(--primary-active); background: var(--background-selected); }
+
 /* ── Main ── */
 .dashboard-main {
   flex: 1;

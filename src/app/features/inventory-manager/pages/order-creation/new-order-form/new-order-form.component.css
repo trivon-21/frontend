@@ -80,7 +80,7 @@
 }
 
 .layout-left {
-  flex: 2;
+  flex: 3;
   padding: var(--spacing-huge);
   display: flex;
   flex-direction: column;
@@ -88,11 +88,100 @@
 }
 
 .layout-right {
-  flex: 3;
+  flex: 1;
   display: flex;
   flex-direction: column;
   position: relative;
-  min-width: 0;
+  min-width: 300px;
+}
+
+/* Action buttons */
+.btn-primary,
+.btn-secondary {
+  min-height: 44px;
+  padding: 0 var(--spacing-xl);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  border: 1px solid var(--primary-main);
+  background: var(--primary-main);
+  color: var(--background-card);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border-light);
+  background: var(--background-card);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--background-page);
+  border-color: var(--primary-main);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-small,
+.btn-confirm-mini,
+.btn-cancel-mini {
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-small {
+  min-height: 34px;
+  gap: 6px;
+  padding: 0 var(--spacing-md);
+  border-radius: 8px;
+  background: var(--primary-main);
+  color: var(--background-card);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-small:hover {
+  background: var(--primary-hover);
+}
+
+.btn-confirm-mini,
+.btn-cancel-mini {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+}
+
+.btn-confirm-mini {
+  background: var(--primary-main);
+  color: var(--background-card);
+}
+
+.btn-cancel-mini {
+  background: var(--background-hover);
+  color: var(--text-secondary);
+}
+
+.btn-confirm-mini:hover,
+.btn-cancel-mini:hover {
+  filter: brightness(0.95);
 }
 
 /* Form Steps */
@@ -319,6 +408,45 @@
 
 .btn-discard:hover {
   color: var(--error);
+}
+
+@media (max-width: 1100px) {
+  .split-layout {
+    gap: var(--spacing-xl);
+  }
+
+  .layout-left {
+    padding: var(--spacing-xxl);
+  }
+}
+
+@media (max-width: 820px) {
+  .new-order-container {
+    padding: var(--spacing-lg);
+  }
+
+  .split-layout {
+    flex-direction: column;
+  }
+
+  .layout-right {
+    min-width: 0;
+  }
+
+  .form-header,
+  .form-footer-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .action-group {
+    width: 100%;
+  }
+
+  .action-group button {
+    flex: 1;
+  }
 }
 
 

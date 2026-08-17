@@ -1,8 +1,8 @@
 <div class="quality-container">
   <header class="page-header">
     <div>
-      <h1>Product Data Quality</h1>
-      <p>Resolve incomplete classification and inventory master-data issues.</p>
+        <h1>Catalog Health</h1>
+        <p>Resolve incomplete product information and inventory master-data issues.</p>
     </div>
     <button class="btn-primary" routerLink="/inventory-manager/product-wizard">
       <lucide-angular name="plus" [size]="16"></lucide-angular> New Product
@@ -10,7 +10,7 @@
   </header>
 
   <div class="summary-grid">
-    <div><strong>{{ records.length }}</strong><span>Products need review</span></div>
+      <div><strong>{{ records.length }}</strong><span>Products needing attention</span></div>
     <div><strong>{{ records.length ? filteredRecords.length : 0 }}</strong><span>Currently shown</span></div>
   </div>
 
@@ -24,7 +24,7 @@
 
   <div class="state-card" *ngIf="loading">Checking inventory data…</div>
   <div class="state-card error" *ngIf="errorMessage">{{ errorMessage }}</div>
-  <div class="state-card success" *ngIf="!loading && !errorMessage && records.length === 0">All inventory products pass the current data-quality checks.</div>
+    <div class="state-card success" *ngIf="!loading && !errorMessage && records.length === 0">All inventory products pass the current catalog health checks.</div>
 
   <div class="quality-list" *ngIf="!loading && !errorMessage">
     <article class="quality-card" *ngFor="let record of filteredRecords">

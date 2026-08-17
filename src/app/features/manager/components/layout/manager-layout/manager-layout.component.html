@@ -22,10 +22,23 @@
         <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
         <span>Operations</span>
       </a>
-      <a routerLink="/manager/analytics" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="bar-chart-3" [size]="20" strokeWidth="1.8"></lucide-angular>
-        <span>Analytics</span>
-      </a>
+      <div class="analytics-nav-group">
+        <div class="analytics-nav-row">
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" class="nav-item analytics-link">
+            <lucide-angular name="bar-chart-3" [size]="20" strokeWidth="1.8"></lucide-angular>
+            <span>Analytics</span>
+          </a>
+          <button type="button" class="analytics-toggle" (click)="toggleAnalytics()" [attr.aria-expanded]="analyticsExpanded" aria-label="Toggle analytics menu">
+            <lucide-angular name="chevron-down" [size]="16" strokeWidth="1.8"></lucide-angular>
+          </button>
+        </div>
+        <div class="analytics-submenu" *ngIf="analyticsExpanded">
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active">Period Performance</a>
+          <a routerLink="/manager/analytics/service-operations" routerLinkActive="active">Service Operations</a>
+          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active">Purchasing and Approvals</a>
+          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active">Inventory and Exception Control</a>
+        </div>
+      </div>
     </nav>
   </aside>
 

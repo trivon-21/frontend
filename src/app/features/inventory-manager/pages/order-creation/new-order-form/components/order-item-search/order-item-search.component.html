@@ -45,13 +45,13 @@
         <div class="config-row">
           <div class="config-field">
             <span class="field-label">QTY</span>
-            <input type="number" [(ngModel)]="currentQuantity" class="qty-field no-spinner">
+            <input type="number" min="1" step="1" [(ngModel)]="currentQuantity" class="qty-field no-spinner">
           </div>
           <div class="config-field">
             <span class="field-label">UNIT COST</span>
             <div class="price-input-wrapper">
               <span class="currency-prefix">LKR</span>
-              <input type="number" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
+            <input type="number" min="0" step="0.01" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
             </div>
           </div>
         </div>

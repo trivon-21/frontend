@@ -224,8 +224,8 @@
 }
 
 .stock-pill.low-stock {
-  color: var(--warning);
-  background: var(--warning-light);
+  color: var(--error);
+  background: var(--error-light);
 }
 
 .stock-pill.out-of-stock {

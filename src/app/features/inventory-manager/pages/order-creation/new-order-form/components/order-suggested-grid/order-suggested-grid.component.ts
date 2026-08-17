@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -9,8 +9,7 @@ import { InventoryItem, OrderItem } from '../../../../../services/order-creation
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './order-suggested-grid.component.html',
-  styleUrl: './order-suggested-grid.component.css',
-  encapsulation: ViewEncapsulation.None
+  styleUrl: './order-suggested-grid.component.css'
 })
 export class OrderSuggestedGridComponent implements OnChanges {
   @Input() suggestedItems: InventoryItem[] = [];

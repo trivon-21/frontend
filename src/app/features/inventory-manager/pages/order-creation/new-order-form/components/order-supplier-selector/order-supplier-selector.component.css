@@ -1,4 +1,91 @@
-/* Autocomplete Dropdown */
+.form-step {
+  margin-bottom: 32px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.step-badge {
+  width: 28px;
+  height: 28px;
+  background: var(--primary-main);
+  color: var(--background-card);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.step-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.supplier-group {
+  position: relative;
+  z-index: 10;
+}
+
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  color: var(--text-muted);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-lg);
+  padding-left: 48px;
+  padding-right: 48px;
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  font-size: 15px;
+  background: var(--background-paper);
+  color: var(--text-primary);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 4px var(--primary-lighter);
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
 .dropdown-list {
   position: absolute;
   top: calc(100% + 8px);
@@ -6,7 +93,7 @@
   right: 0;
   max-height: 320px;
   overflow-y: auto;
-  z-index: 2000; /* Ensure it stays above everything */
+  z-index: 2000;
   padding: var(--spacing-sm);
   background: var(--background-card);
   border: 1px solid var(--border-light);
@@ -36,157 +123,13 @@
   margin-bottom: 4px;
 }
 
-.dropdown-item.add-new:hover {
-  background: var(--primary-lighter);
-  opacity: 0.8;
-}
-
-/* Animations */
 .animate-fade {
   animation: fade-in 0.3s ease-out;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Inline Editing in Table */
-.price-cell {
-  min-width: 140px;
-}
-
-/* Hide number spinners for monetary/numeric inputs */
-input[type="number"].no-spinner::-webkit-outer-spin-button,
-input[type="number"].no-spinner::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
-input[type="number"].no-spinner {
-  appearance: textfield;
-}
-
-.selected-row {
-  background-color: var(--primary-lighter) !important;
-}
-
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.clickable-row:hover:not(.selected-row) {
-  background-color: var(--background-page);
-}
-
-.price-edit-wrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  justify-content: flex-end;
-}
-
-.currency-prefix {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.inline-price-input {
-  width: 90px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--primary-main);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-  outline: none;
-  background: var(--primary-lighter);
-}
-
-.edit-icon {
-  margin-left: 8px;
-  color: var(--border-medium);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.price-cell:hover .edit-icon {
-  opacity: 1;
-}
-
-.pointer { cursor: pointer; }
-
-.config-action-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: center;
-  animation: slide-in-right 0.2s ease-out;
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.qty-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--background-page);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 8px;
-}
-
-.qty-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.inline-qty-input-mini {
-  width: 44px;
-  border: none;
-  background: transparent;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--text-primary);
-  text-align: center;
-}
-
-.config-btns {
-  display: flex;
-  gap: 6px;
-}
-
-
-
-.empty-table-row {
-  text-align: center;
-  padding: var(--spacing-xxxl) !important;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.supplier-group {
-  position: relative;
-  z-index: 10;
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .new-supplier-actions {
@@ -200,12 +143,32 @@ input[type="number"].no-spinner {
   border: 1px solid var(--primary-light);
 }
 
-.btn-confirm-mini.wide {
-  width: auto;
-  padding: 0 var(--spacing-lg);
+.supplier-help {
+  flex: 1;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.btn-cancel-mini.wide {
-  width: auto;
+.btn-primary,
+.btn-secondary {
+  min-height: 38px;
   padding: 0 var(--spacing-lg);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  border: 1px solid var(--primary-main);
+  background: var(--primary-main);
+  color: var(--background-card);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border-light);
+  background: var(--background-card);
+  color: var(--text-primary);
 }

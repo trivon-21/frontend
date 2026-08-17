@@ -38,6 +38,7 @@ export class NewOrderFormComponent implements OnInit {
   orderNotes = '';
   
   isSubmitting = false;
+  isCreatingSupplier = false;
   successMessage = '';
   errorMessage = '';
 
@@ -119,6 +120,23 @@ export class NewOrderFormComponent implements OnInit {
   // Event Handlers from Dumb Components
   onSupplierSelected(supplierName: string): void {
     const supplier = this.suppliers.find((candidate) => candidate.name === supplierName);
+    if (!supplier && supplierName.trim()) {
+      this.isCreatingSupplier = true;
+      this.errorMessage = '';
+      this.orderCreationService.addSupplier(supplierName.trim()).subscribe({
+        next: (created) => {
+          this.suppliers = [...this.suppliers, created];
+          this.selectedSupplier = created.name;
+          this.isCreatingSupplier = false;
+        },
+        error: (err) => {
+          this.isCreatingSupplier = false;
+          this.selectedSupplier = '';
+          this.errorMessage = err.error?.message || 'Unable to add supplier.';
+        },
+      });
+      return;
+    }
     const conflictingItem = this.orderItems.find((item) => item.supplierId && item.supplierId !== supplier?._id);
     if (conflictingItem) {
       this.errorMessage = `${conflictingItem.name} is assigned to a different preferred supplier.`;
@@ -160,11 +178,16 @@ export class NewOrderFormComponent implements OnInit {
   }
 
   get canSubmit(): boolean {
-    return this.orderItems.length > 0 && this.selectedSupplier.length > 0;
+    return this.orderItems.length > 0
+      && !!this.suppliers.find((supplier) => supplier.name === this.selectedSupplier)
+      && !this.isCreatingSupplier;
   }
 
   submitOrder(): void {
-    if (!this.canSubmit) return;
+    if (!this.canSubmit || this.isSubmitting) {
+      this.errorMessage = 'Select a supplier and add at least one inventory item before submitting.';
+      return;
+    }
     this.isSubmitting = true;
     this.successMessage = '';
     this.errorMessage = '';

@@ -60,7 +60,9 @@ import {
   Smile,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  TimerOff,
+  UserRoundX
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -129,7 +131,9 @@ export const appConfig: ApplicationConfig = {
       Smile,
       Mail,
       Phone,
-      MapPin
+      MapPin,
+      TimerOff,
+      UserRoundX
     }))
   ],
 };

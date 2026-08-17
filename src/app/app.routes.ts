@@ -51,11 +51,16 @@ export const routes: Routes = [
       },
       {
         path: 'list-items',
-        redirectTo: 'data-quality',
+        redirectTo: 'catalog-health',
         pathMatch: 'full',
       },
       {
         path: 'data-quality',
+        redirectTo: 'catalog-health',
+        pathMatch: 'full',
+      },
+      {
+        path: 'catalog-health',
         loadComponent: () => import('./features/inventory-manager/pages/list-items/list-items.component').then((m) => m.ListItemsComponent),
       },
       {
@@ -187,10 +192,33 @@ export const routes: Routes = [
       },
       {
         path: 'analytics',
-        loadComponent: () =>
-          import('./features/manager/pages/analytics/analytics.component').then(
-            (m) => m.AnalyticsComponent,
-          ),
+        children: [
+          {
+            path: '',
+            redirectTo: 'period-performance',
+            pathMatch: 'full',
+          },
+          {
+            path: 'period-performance',
+            data: { analyticsSection: 'performance' },
+            loadComponent: () => import('./features/manager/pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          },
+          {
+            path: 'service-operations',
+            data: { analyticsSection: 'service' },
+            loadComponent: () => import('./features/manager/pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          },
+          {
+            path: 'purchasing-approvals',
+            data: { analyticsSection: 'purchasing' },
+            loadComponent: () => import('./features/manager/pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          },
+          {
+            path: 'inventory-exception-control',
+            data: { analyticsSection: 'inventory' },
+            loadComponent: () => import('./features/manager/pages/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          },
+        ],
       },
       {
         path: 'notifications',
