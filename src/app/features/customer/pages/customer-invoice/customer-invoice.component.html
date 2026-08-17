@@ -1,0 +1,226 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">AirLux</div>
+  <div class="nav-links">
+    <a href="#">Profile</a>
+    <a href="#">View products</a>
+    <a href="#">Our Services</a>
+    <button class="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-banner">
+  <div class="hero-text">
+    <h1>Premium Cooling<br>Solutions</h1>
+    <p>Discover our curated collection of high-performance air conditioning systems</p>
+  </div>
+  <div class="hero-right">
+    <div class="welcome-badge">🔔 Welcome {{ customerName }}!</div>
+    <div class="hero-avatar">
+      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <div class="loading-card" *ngIf="isLoading">
+    <p>Loading invoice...</p>
+  </div>
+  <div class="error-card" *ngIf="loadError && !isLoading">
+    <p>{{ loadError }}</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !loadError && invoice">
+
+    <h2 class="welcome-text">Welcome Back {{ customerName }} !</h2>
+
+    <!-- INVOICE DOCUMENT -->
+    <div class="invoice-doc">
+      <div class="doc-header-bar">
+        <span class="invoice-num">INVOICE #{{ invoice.invoiceNumber }}</span>
+        <span class="invoice-date">Date: {{ invoice.invoiceDate | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="doc-from-to">
+        <div class="from-section">
+          <h2 class="brand-name">AirLux</h2>
+          <p class="brand-tagline">Premium Cooling Solutions</p>
+          <p class="brand-address">123 Galle Road,<br>Colombo 03.</p>
+        </div>
+        <div class="to-section">
+          <p class="to-label">INVOICE TO:</p>
+          <p class="to-name">{{ invoice.customerName }}</p>
+          <p class="to-address" style="white-space:pre-line">{{ invoice.customerAddress }}</p>
+        </div>
+      </div>
+
+      <div class="doc-table-section">
+        <p class="table-heading">SALES & SERVICES</p>
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th class="col-item">Item name</th>
+              <th class="col-desc">Description</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-rate">Rate(LKR)</th>
+              <th class="col-amount">Amount(LKR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of invoice.items; let i = index" [class.alt-row]="i%2===1">
+              <td>{{ item.no }}</td>
+              <td>{{ item.itemName }}</td>
+              <td>{{ item.description }}</td>
+              <td class="text-right">{{ item.qty }}</td>
+              <td class="text-right">{{ item.rate | number }}</td>
+              <td class="text-right amount-cell">{{ item.amount | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="totals-section">
+          <div class="total-row-item">
+            <span class="total-label">Sub Total</span>
+            <span class="total-val"><strong>LKR {{ invoice.subTotal | number }}</strong></span>
+          </div>
+          <div class="total-row-item">
+            <span class="total-label">Service Charge</span>
+            <span class="total-val">LKR {{ invoice.serviceCharge | number }}</span>
+          </div>
+          <div class="total-row-item grand">
+            <span class="grand-label">Grand Total</span>
+            <span class="grand-val">LKR {{ invoice.grandTotal | number }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <p class="terms-title">Terms & Conditions</p>
+        <p class="terms-text">Payment Deadline: Once an invoice is accepted, the customer must complete the payment and
+          upload the payment slip within fourteen (14) calendar days.</p>
+        <p class="terms-text">Rejection Policy: If the invoice is rejected, it can be resumed within one (1) month of
+          the rejection date. After this period, the request will be permanently closed.</p>
+        <p class="terms-text">Failure to upload the payment slip within the 2-week period, the invoice will be
+          automatically cancelled.</p>
+      </div>
+    </div>
+
+    <!-- ACTION CARD -->
+    <div class="action-card" *ngIf="!isAccepted && !isRejected && !isAutoCancelled && invoice.status === 'SENT'">
+      <p class="action-question">Would You Like to,</p>
+      <div class="action-buttons">
+        <button class="btn-accept" (click)="acceptInvoice()" [disabled]="isSubmitting">
+          ✓ Accept Invoice
+        </button>
+        <button class="btn-reject" (click)="openRejectModal()" [disabled]="isSubmitting">
+          ✕ Reject Invoice
+        </button>
+      </div>
+      <p class="action-note">
+        Note: You can always resume the rejected invoices within one(1) month of the rejection
+        date using the same link
+      </p>
+    </div>
+
+    <!-- ACCEPTED STATE -->
+    <div class="success-card" *ngIf="isAccepted">
+      <div class="success-icon">✓</div>
+      <h3>Invoice Accepted!</h3>
+      <p>Thank you for accepting the invoice. Our team will be in touch shortly.</p>
+      <p *ngIf="invoice.paymentDeadline" style="color:#dc2626;font-weight:600;">
+        Payment due by: {{ invoice.paymentDeadline | date:'dd MMM yyyy' }}
+      </p>
+      <div class="success-badge">Status: Invoice Accepted</div>
+      <p style="font-size:13px;color:#6b7280;margin-top:8px;">
+        Please complete your payment and upload the slip within 14 days to avoid auto-cancellation.
+      </p>
+    </div>
+
+    <!-- REJECTED STATE -->
+    <div class="rejected-card" *ngIf="isRejected">
+      <div class="rejected-icon">✕</div>
+      <h3>Invoice Rejected</h3>
+      <p>Your rejection has been recorded.</p>
+      <p><strong>Reason:</strong> {{ invoice.rejectionReason }}</p>
+
+      <div *ngIf="canCancelRejection" class="countdown-box">
+        <p class="countdown-label">Time remaining to cancel rejection:</p>
+        <p class="countdown-days">{{ daysLeft }} day(s) left</p>
+        <button class="btn-cancel-rejection" (click)="cancelRejection()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Processing...' : 'Cancel Rejection & Accept Invoice' }}
+        </button>
+      </div>
+
+      <div *ngIf="!canCancelRejection" class="expired-box">
+        <p style="color:#dc2626;font-weight:600;">Rejection period has expired. This order is permanently closed.</p>
+      </div>
+
+      <div class="rejected-badge">Status: Invoice Rejected</div>
+    </div>
+
+    <!-- AUTO CANCELLED STATE -->
+    <div class="rejected-card" *ngIf="isAutoCancelled">
+      <div class="rejected-icon">✕</div>
+      <h3>Invoice Auto-Cancelled</h3>
+      <p>This invoice has been automatically cancelled.</p>
+      <div class="rejected-badge" style="background:#fef3c7;color:#92400e;">Status: Auto Cancelled</div>
+    </div>
+
+  </ng-container>
+</div>
+
+<!-- REJECT MODAL -->
+<div class="modal-overlay" *ngIf="showRejectModal" (click)="closeRejectModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Reject Invoice</h3>
+      <button class="modal-close" (click)="closeRejectModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Please provide a reason for rejecting this invoice.</p>
+      <p><strong>Invoice:</strong> #{{ invoice?.invoiceNumber }}</p>
+      <p><strong>Grand Total:</strong> LKR {{ invoice?.grandTotal | number }}</p>
+      <div class="form-group">
+        <label>Rejection Reason <span class="required">*</span></label>
+        <textarea rows="4" [(ngModel)]="rejectionReason"
+          placeholder="Please explain why you are rejecting this invoice..." [disabled]="isSubmitting"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeRejectModal()" [disabled]="isSubmitting">Cancel</button>
+      <button class="btn-confirm-reject" (click)="confirmReject()" [disabled]="isSubmitting || !rejectionReason.trim()">
+        {{ isSubmitting ? 'Processing...' : 'Confirm Reject' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>AirLux</h3>
+      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
+    </div>
+    <div class="footer-contact">
+      <h4>Contact Us</h4>
+      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
+      <p>📞 +94 11 234 5678</p>
+      <p>✉️ support@airlux.lk</p>
+    </div>
+    <div class="footer-social">
+      <h4>Follow Us</h4>
+      <div class="social-icons">
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">▶</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
+  </div>
+</footer>

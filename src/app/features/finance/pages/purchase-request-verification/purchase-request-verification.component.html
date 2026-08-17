@@ -1,0 +1,168 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2 class="page-title">Purchase Request Verification</h2>
+    <div class="page-search">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" placeholder="Search by manager name or reason..." [(ngModel)]="searchQuery" />
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="empty-state">
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredRequests.length === 0" class="empty-state">
+    <p>No pending purchase requests</p>
+  </div>
+
+  <div class="payments-grid">
+
+    <div class="payment-card" *ngFor="let request of filteredRequests">
+
+      <div class="card-body">
+
+        <div class="id-row">
+          <span class="id-label">Request ID:</span>
+          <span class="id-value">{{ getRequestRef(request) }}</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label">REQUESTED BY:</label>
+          <p class="field-value">{{ request.requestedBy }}</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">TOTAL AMOUNT:</label>
+          <p class="field-value amount">
+            LKR {{ request.totalAmount | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">ITEMS:</label>
+          <p class="field-value date-small">
+            {{ request.items?.length || 0 }} item(s)
+          </p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">SUBMITTED:</label>
+          <p class="field-value date-small">
+            {{ request.createdAt | date:'dd MMM yyyy, hh:mm a' }}
+          </p>
+        </div>
+
+        <button class="slip-preview-btn" (click)="openDetailsModal(request)">
+          View Items & Reason
+        </button>
+
+        <div class="action-buttons">
+
+          <button class="btn btn-approve" (click)="approveRequest(request)" [disabled]="isLoading">
+            Approve
+          </button>
+
+          <button class="btn btn-reject" (click)="openRejectModal(request)" [disabled]="isLoading">
+            Reject
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3>Purchase Request Details</h3>
+      </div>
+
+      <div class="modal-body">
+        <div class="field"><span class="field-label">Request ID</span><span class="field-value">{{ getRequestRef(selectedRequest) }}</span></div>
+        <div class="field" style="margin-top: 10px;"><span class="field-label">Requested By</span><span class="field-value">{{ selectedRequest?.requestedBy }}</span></div>
+        <div class="field" style="margin-top: 10px;"><span class="field-label">Email</span><span class="field-value">{{ selectedRequest?.requestedByEmail }}</span></div>
+        <div class="field" style="margin-top: 10px;"><span class="field-label">Reason</span><span class="field-value">{{ selectedRequest?.reason || '—' }}</span></div>
+
+        <hr style="margin: 14px 0; border-color: #f3f4f6;" />
+
+        <table class="invoice-items-table" *ngIf="selectedRequest?.items?.length > 0">
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedRequest?.items">
+              <td>{{ item.itemName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>LKR {{ item.unitPrice | number:'1.2-2' }}</td>
+              <td>LKR {{ item.total | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-row" style="margin-top:14px;">
+          <span>Total Amount</span>
+          <span class="total-amount">LKR {{ selectedRequest?.totalAmount | number:'1.2-2' }}</span>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeDetailsModal()">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REJECT MODAL -->
+  <div class="modal-overlay" *ngIf="showRejectModal" (click)="closeRejectModal()">
+
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3>Reject Purchase Request</h3>
+      </div>
+
+      <div class="modal-body">
+
+        <p><strong>Requested By:</strong> {{ selectedRequest?.requestedBy }}</p>
+        <p><strong>Amount:</strong> LKR {{ (selectedRequest?.totalAmount || 0) | number:'1.2-2' }}</p>
+
+        <div class="form-group">
+          <label for="reason">Rejection Reason <span class="required">*</span></label>
+          <textarea id="reason" rows="4" [(ngModel)]="rejectionReason"
+            placeholder="Explain why this purchase request is being rejected..."
+            [disabled]="isLoading"
+            (input)="reasonError = false"></textarea>
+          <p *ngIf="reasonError" style="color:#dc2626; font-size:12px; margin-top:6px; font-weight:500;">
+            ⚠️ Please enter a rejection reason before submitting.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button class="btn btn-secondary" (click)="closeRejectModal()" [disabled]="isLoading">
+          Cancel
+        </button>
+
+        <button class="btn btn-reject" (click)="rejectRequest()" [disabled]="isLoading">
+          {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

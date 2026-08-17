@@ -1,0 +1,314 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="state-overlay">
+  <div class="spinner"></div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="!loading && error" class="error-banner">
+  {{ error }}
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h2 class="page-title">Dashboard</h2>
+  <div class="page-header-right">
+    <button class="track-order-btn" (click)="showTrackOrder = true">Track Order</button>
+    <div class="page-search-wrap">
+      <svg class="page-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="page-search" type="text" placeholder="Search here" />
+    </div>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stat-cards">
+  <!-- Total Purchases -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('tp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'tp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'tp')">View Details</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('export', 'tp')">Export</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Total Purchases</p>
+    <p class="stat-value">{{ pad(data?.stats?.totalPurchases ?? 0) }}</p>
+  </div>
+
+  <!-- Return Orders -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('ro', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'ro'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'ro')">View Details</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'ro')">Contact Support</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Return Orders</p>
+    <p class="stat-value">{{ pad(data?.stats?.returnOrders ?? 0) }}</p>
+  </div>
+
+  <!-- Pending Payment -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('pp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'pp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('pay-now', 'pp')">View Details</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Pending Payment</p>
+    <p class="stat-value">{{ pad(data?.stats?.pendingPayment ?? 0) }}</p>
+  </div>
+
+  <!-- Rejected Payment -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('rp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'rp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('retry-payment', 'rp')">Retry Payment</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'rp')">Contact Support</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Rejected Payment</p>
+    <p class="stat-value">{{ pad(data?.stats?.rejectedPayment ?? 0) }}</p>
+  </div>
+
+  <!-- Completed -->
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+      </div>
+      <div class="stat-dropdown-container">
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('comp', $event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div *ngIf="openDropdown === 'comp'" class="stat-dropdown">
+          <button class="dropdown-item" (click)="onMenuItemClick('view-orders', 'comp')">View Orders</button>
+          <button class="dropdown-item" (click)="onMenuItemClick('leave-review', 'comp')">Leave Review</button>
+        </div>
+      </div>
+    </div>
+    <p class="stat-label">Completed</p>
+    <p class="stat-value">{{ pad(data?.stats?.completed ?? 0) }}</p>
+  </div>
+</div>
+
+<!-- Body: Order History + Right Panel -->
+<div class="dashboard-body">
+
+  <!-- Order History -->
+  <div class="order-history-card">
+    <div class="oh-header">
+      <h3 class="oh-title">Order History</h3>
+      <div class="oh-search-wrap">
+        <input class="oh-search" type="text" placeholder="Search for anything...." />
+        <svg class="oh-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div class="oh-date-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>10 May - 20 May</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+
+    <table class="oh-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>
+            <div class="order-name-cell">
+              <div class="order-avatar"></div>
+              <span>{{ order.itemName }}</span>
+            </div>
+          </td>
+          <td>{{ formatDate(order.date) }}</td>
+          <td>{{ formatAmount(order.amount) }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && orders.length === 0">
+          <td colspan="4" class="oh-empty">No orders found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <button class="panel-action-btn" (click)="showRequestService = true">+ Request Service</button>
+
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title">Service Requests</span>
+        <button class="more-btn" aria-label="More options" (click)="showServiceRequestsList = true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        </button>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Ongoing</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.ongoing ?? 0) }}</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Addressed</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.addressed ?? 0) }}</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Closed</span>
+        <span class="panel-stat-value">{{ pad(data?.serviceRequests?.closed ?? 0) }}</span>
+      </div>
+    </div>
+
+    <button class="panel-action-btn" (click)="showInquiry = true">+ Inquiry</button>
+
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title">Inquiries</span>
+        <button class="more-btn" aria-label="More options" (click)="showInquiryList = true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        </button>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Ongoing</span>
+        <span class="panel-stat-value">{{ pad(data?.inquiries?.ongoing ?? 0) }}</span>
+      </div>
+      <div class="panel-stat-row">
+        <span class="panel-stat-label">Addressed</span>
+        <span class="panel-stat-value">{{ pad(data?.inquiries?.addressed ?? 0) }}</span>
+      </div>
+    </div>
+
+    <button class="panel-action-btn" (click)="showFeedback = true">+ Feedback</button>
+  </div>
+</div>
+
+<!-- ── Modals ── -->
+
+<!-- Filtered Orders Modal -->
+<div *ngIf="showFilteredOrders" class="modal-overlay" (click)="closeFilteredOrders()">
+  <div class="modal-content filtered-orders-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        {{ filterMode === 'completed' ? 'Completed Orders' :
+           filterMode === 'pending' ? 'Pending Orders' :
+           filterMode === 'returned' ? 'Returned Orders' :
+           filterMode === 'rejected' ? 'Rejected Orders' : 'All Orders' }}
+      </h2>
+      <button class="modal-close" (click)="closeFilteredOrders()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="getFilteredOrders().length === 0" class="empty-state">
+        <p>No orders found</p>
+      </div>
+      <div *ngIf="getFilteredOrders().length > 0" class="orders-list">
+        <div *ngFor="let order of getFilteredOrders()" class="order-item">
+          <div class="order-info">
+            <div class="order-name">{{ order.itemName }}</div>
+            <div class="order-date">{{ formatDate(order.date) }}</div>
+          </div>
+          <div class="order-amount">{{ formatAmount(order.amount) }}</div>
+          <div class="order-status">
+            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-track-order-modal
+  *ngIf="showTrackOrder"
+  (closed)="showTrackOrder = false"
+></app-track-order-modal>
+
+<app-request-service-modal
+  *ngIf="showRequestService"
+  (closed)="showRequestService = false"
+></app-request-service-modal>
+
+<app-inquiry-modal
+  *ngIf="showInquiry"
+  (closed)="showInquiry = false"
+></app-inquiry-modal>
+
+<app-feedback-modal
+  *ngIf="showFeedback"
+  (closed)="showFeedback = false"
+></app-feedback-modal>
+
+<app-service-requests-list-modal
+  *ngIf="showServiceRequestsList"
+  (closed)="showServiceRequestsList = false"
+></app-service-requests-list-modal>
+
+<app-inquiry-modal
+  *ngIf="showInquiryList"
+  [initialTab]="'list'"
+  (closed)="showInquiryList = false"
+></app-inquiry-modal>

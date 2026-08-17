@@ -1,0 +1,148 @@
+<div class="page">
+  <!-- Header -->
+  <app-navbar></app-navbar>
+
+  <!-- Background image -->
+  <div class="hero-bg" aria-hidden="true"></div>
+
+  <!-- Center Card -->
+  <main class="content">
+    <section class="card">
+      <div class="card-left">
+        <img class="illus" src="assets/signup-illustration.png" alt="Login illustration" />
+      </div>
+
+      <div class="card-right">
+        <h1>Login to account</h1>
+        <p class="sub">
+          Don't have an account?
+          <a class="link" routerLink="/signup">Signup</a>
+        </p>
+
+        <div class="social-auth">
+          <button
+            type="button"
+            class="btn google"
+            (click)="signInWithGoogle()"
+            [disabled]="isLoading || googleLoading"
+          >
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.23 3.62l6.9-6.9C35.93 2.66 30.52 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.07 6.27C12.54 13.4 17.7 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.1 24.5c0-1.57-.14-3.09-.4-4.55H24v8.62h12.4c-.54 2.9-2.18 5.36-4.66 7.02l7.15 5.55C43.8 36.27 46.1 30.95 46.1 24.5z"/>
+              <path fill="#FBBC05" d="M10.63 28.86A14.5 14.5 0 0 1 9.5 24c0-1.7.29-3.36.82-4.86L2.25 12.87A24 24 0 0 0 0 24c0 3.86.92 7.52 2.56 10.78l8.07-5.92z"/>
+              <path fill="#34A853" d="M24 48c6.52 0 12-2.15 16-5.84l-7.15-5.55C30.85 38.2 27.7 39.5 24 39.5c-6.3 0-11.46-3.9-13.37-9.36l-8.07 5.92C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            {{ googleLoading ? 'Connecting…' : 'Continue with Google' }}
+          </button>
+        </div>
+
+        <div class="divider">
+          <span>or use your email</span>
+        </div>
+
+        <!-- Maintenance Notice -->
+        @if (maintenanceService.isMaintenanceActive$ | async) {
+        <div class="maintenance-notice">
+          <div class="notice-icon">🔧</div>
+          <div class="notice-content">
+            <h2 class="notice-title">System Maintenance</h2>
+            <p class="notice-message">{{ maintenanceService.message$ | async }}</p>
+            <p class="notice-hint">Access is limited to administrators during this time.</p>
+          </div>
+        </div>
+        }
+
+        <!-- Deactivation Notice -->
+        @if (showDeactivationNotice) {
+        <div class="deactivation-notice">
+          <div class="notice-icon">Warning</div>
+          <h2 class="notice-title">Account Deactivated</h2>
+          <p class="notice-message">
+            Your account has been deactivated. You can request reactivation by providing a reason to our support team.
+          </p>
+          <button class="btn primary" (click)="requestReactivation()">
+            Request Reactivation
+          </button>
+          <button class="btn secondary" (click)="showDeactivationNotice = false">
+            Back to Login
+          </button>
+        </div>
+        } @else {
+        <!-- Login Form -->
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+          <div class="row">
+            <div class="field">
+              <label>Email or Phone Number</label>
+              <input type="text" formControlName="identifier" placeholder="you@example.com or 0779541563"
+                (blur)="onIdentifierChange(form.get('identifier')?.value || '')" />
+              @if (
+              form.get('identifier')?.invalid &&
+              form.get('identifier')?.touched &&
+              detectedAuthType === 'invalid'
+              ) {
+              <span class="field-error">Please enter a valid email or Sri Lankan phone number (0XXXXXXXXX)</span>
+              }
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>Password</label>
+              <div class="input-wrap">
+                <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                  placeholder="Your password" />
+                <button type="button" class="eye-btn" (click)="toggleShowPassword()"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                  @if (!showPassword) {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-row">
+            <label class="check">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span>Remember me</span>
+            </label>
+            <a class="link small" routerLink="/forgot-password">Forgot Password?</a>
+          </div>
+
+          <div class="actions">
+            <button class="btn big" type="submit" [disabled]="isLoading">
+              {{ isLoading ? 'Logging in…' : 'Log in' }}
+            </button>
+          </div>
+
+          @if (errorMessage) {
+          <p class="error-msg">{{ errorMessage }}</p>
+          }
+        </form>
+        }
+      </div>
+    </section>
+  </main>
+
+  <!-- Change Password Modal (First Login) -->
+  @if (showChangePasswordModal) {
+    <app-change-password-modal
+      (passwordChanged)="onPasswordChanged()"
+      (closed)="onPasswordModalClosed()"
+    ></app-change-password-modal>
+  }
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>
