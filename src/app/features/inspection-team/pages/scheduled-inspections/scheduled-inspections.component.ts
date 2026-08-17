@@ -82,4 +82,11 @@ export class ScheduledInspectionsComponent implements OnInit {
     if (!date) return '-';
     return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.');
   }
+
+  shortId(id: any): string {
+    if (!id) return '—';
+    const value = id.toString();
+    const suffix = value.includes('-') ? (value.split('-').pop() || value) : value;
+    return suffix.slice(-6).toUpperCase();
+  }
 }

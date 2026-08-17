@@ -100,9 +100,9 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of paginatedInspections">
-          <td>{{ item.orderId }}</td>
-          <td>{{ item.ticketId }}</td>
-          <td>{{ item.customerName }}</td>
+          <td>{{ shortId(item.orderId) }}</td>
+          <td>{{ shortId(item.ticketId) }}</td>
+          <td>{{ item.customer }}</td>
           <td>{{ item.date | date:'EEE, dd MMM yyyy' }}</td>
           <td>
             <span class="status-badge" [ngClass]="getStatusClass(item.status)">

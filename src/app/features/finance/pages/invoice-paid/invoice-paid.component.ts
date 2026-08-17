@@ -81,4 +81,8 @@ export class InvoicePaidComponent implements OnInit {
   repairGoToPage(p: number) { this.repairCurrentPage = p; }
   viewRepairInvoice(i: any) { this.selectedRepairInvoice = i; this.showRepairModal = true; }
   closeRepairModal()        { this.selectedRepairInvoice = null; this.showRepairModal = false; }
+
+  shortId(id: any): string {
+    return id ? id.toString().slice(-6).toUpperCase() : '—';
+  }
 }

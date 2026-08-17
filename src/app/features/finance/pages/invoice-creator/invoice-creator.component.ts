@@ -90,7 +90,7 @@ export class InvoiceCreatorComponent implements OnInit {
       next: () => {
         this.isConfirming = false;
         this.notificationService.show('✅ Invoice confirmed! It has been moved to Pending Invoices.', 'success');
-        this.router.navigate(['/invoice/pending']);
+        this.router.navigate(['/finance/invoice/pending']);
       },
       error: (err: any) => {
         this.isConfirming = false;

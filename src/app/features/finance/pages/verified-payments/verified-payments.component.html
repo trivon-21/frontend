@@ -48,7 +48,7 @@
           <td>{{ payment.itemName || 'N/A' }}</td>
           <td>{{ payment.customerName }}</td>
           <td>{{ payment.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
-          <td class="amount">${{ payment.amount }}</td>
+          <td class="amount">LKR {{ payment.amount }}</td>
           <td>
             <button class="view-btn" (click)="openDetails(payment)">
               View
@@ -89,7 +89,7 @@
         <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Amount:</strong> ${{ selectedPayment?.amount }}</p>
+        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount }}</p>
         <p><strong>Status:</strong> {{ selectedPayment?.status }}</p>
 
         <a *ngIf="selectedPayment?.slipUrl" [href]="selectedPayment?.slipUrl" target="_blank" class="slip-link">

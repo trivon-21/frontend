@@ -62,7 +62,7 @@ export class InvoiceGenerateComponent implements OnInit {
     this.invoiceService.generateInvoice(invoice.reportId).subscribe({
       next: (data: any) => {
         this.isLoading = false;
-        this.router.navigate(['/invoice/create'], { queryParams: { invoiceId: data.invoice._id } });
+        this.router.navigate(['/finance/invoice/create'], { queryParams: { invoiceId: data.invoice._id } });
       },
       error: (err: any) => {
         console.error(err); this.isLoading = false;
@@ -105,7 +105,7 @@ export class InvoiceGenerateComponent implements OnInit {
     this.invoiceService.generateRepairInvoice(invoice.repairId).subscribe({
       next: (data: any) => {
         this.isRepairLoading = false;
-        this.router.navigate(['/invoice/create'], { queryParams: { invoiceId: data.invoice._id } });
+        this.router.navigate(['/finance/invoice/create'], { queryParams: { invoiceId: data.invoice._id } });
       },
       error: (err: any) => {
         console.error(err); this.isRepairLoading = false;

@@ -57,9 +57,9 @@ export class SidebarComponent {
       icon: 'inspection',
       isOpen: false,
       items: [
-        { label: 'Payment Verification', icon: 'verification', route: '/inspection-payment-verification' },
-        { label: 'Verified Payments', icon: 'verified', route: '/inspection-verified-payments' },
-        { label: 'Rejected Payments', icon: 'rejected', route: '/inspection-rejected-payments' },
+        { label: 'Payment Verification', icon: 'verification', route: '/finance/inspection-payment-verification' },
+        { label: 'Verified Payments', icon: 'verified', route: '/finance/inspection-verified-payments' },
+        { label: 'Rejected Payments', icon: 'rejected', route: '/finance/inspection-rejected-payments' },
       ]
     },
     {

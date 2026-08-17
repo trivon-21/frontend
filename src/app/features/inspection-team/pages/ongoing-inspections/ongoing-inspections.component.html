@@ -43,8 +43,8 @@
       </thead>
       <tbody>
         <tr *ngFor="let inspection of paginatedInspections">
-          <td>{{ inspection.orderId }}</td>
-          <td>{{ inspection.ticketId }}</td>
+          <td>{{ shortId(inspection.orderId) }}</td>
+          <td>{{ shortId(inspection.ticketId) }}</td>
           <td>{{ inspection.customerName }}</td>
           <td>{{ formatDate(inspection.inspectionDate) }}</td>
           <td>

@@ -46,7 +46,7 @@
           <td>{{ p.invoiceId }}</td>
           <td>{{ p.customerName }}</td>
           <td>{{ p.date | date:'EEE, dd MMM yyyy' }}</td>
-          <td class="amount">${{ p.amount }}</td>
+          <td class="amount">LKR {{ p.amount }}</td>
           <td><button class="view-btn" (click)="openDetails(p)">View</button></td>
         </tr>
       </tbody>
@@ -74,7 +74,7 @@
         <p><strong>Invoice ID:</strong> {{ selectedPayment?.invoiceId }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Amount:</strong> ${{ selectedPayment?.amount }}</p>
+        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount }}</p>
         <p style="color:#b91c1c; font-weight:600;">
           <strong>Rejection Reason:</strong>
           {{ selectedPayment?.rejectionReason || 'No reason provided' }}

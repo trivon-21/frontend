@@ -22,8 +22,8 @@
     <div class="inspection-card" *ngFor="let inspection of filteredInspections">
       <div class="card-header-bar">
         <div class="id-block">
-          <span class="order-id">ORDER ID: {{ inspection.orderId }}</span>
-          <span class="ticket-id">Ticket ID: {{ inspection.ticketId }}</span>
+          <span class="order-id">ORDER ID: {{ shortId(inspection.orderId) }}</span>
+          <span class="ticket-id">Ticket ID: {{ shortId(inspection.ticketId) }}</span>
         </div>
       </div>
       <div class="card-body">
@@ -52,8 +52,8 @@
         <button class="btn-close" (click)="closeDetailsModal()">X</button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedInspection?.orderId }}</p>
-        <p><strong>Ticket ID:</strong> {{ selectedInspection?.ticketId }}</p>
+        <p><strong>Order ID:</strong> {{ shortId(selectedInspection?.orderId) }}</p>
+        <p><strong>Ticket ID:</strong> {{ shortId(selectedInspection?.ticketId) }}</p>
         <p><strong>Customer:</strong> {{ selectedInspection?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedInspection?.customerEmail }}</p>
         <p><strong>Phone:</strong> {{ selectedInspection?.customerPhone }}</p>

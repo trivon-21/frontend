@@ -74,4 +74,11 @@ export class InspectionVerifiedPaymentsComponent implements OnInit {
 
   openDetails(payment: any) { this.selectedPayment = payment; this.showDetailsModal = true; }
   closeModal() { this.selectedPayment = null; this.showDetailsModal = false; }
+
+  shortId(id: any): string {
+    if (!id) return '—';
+    const value = id.toString();
+    const suffix = value.includes('-') ? (value.split('-').pop() || value) : value;
+    return suffix.slice(-6).toUpperCase();
+  }
 }

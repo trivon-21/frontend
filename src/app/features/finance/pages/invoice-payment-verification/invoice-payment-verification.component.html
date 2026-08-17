@@ -35,7 +35,7 @@
 
         <div class="field">
           <label class="field-label">AMOUNT:</label>
-          <p class="field-value amount">${{ payment.amount | number:'1.2-2' }}</p>
+          <p class="field-value amount">LKR {{ payment.amount | number:'1.2-2' }}</p>
         </div>
 
         <button class="view-invoice-btn" (click)="viewDetails(payment)">
@@ -69,7 +69,7 @@
       <div class="modal-body">
         <p><strong>Order:</strong> #{{ selectedPayment?.orderId }}</p>
         <p><strong>Invoice:</strong> {{ selectedPayment?.invoiceId }}</p>
-        <p><strong>Amount:</strong> ${{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
+        <p><strong>Amount:</strong> LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
         <div class="form-group">
           <label for="reason">Rejection Reason <span class="required">*</span></label>
           <textarea id="reason" rows="4" [(ngModel)]="rejectionReason"

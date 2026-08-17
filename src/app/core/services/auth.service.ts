@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 export interface SignupPayload {
   fullName: string;
   email?: string;
-  identifier?: string; // Can be email or phone
+  identifier?: string;
   phoneNumber?: string;
   firebaseIdToken?: string;
   firebasePhoneNumber?: string;
@@ -15,7 +15,7 @@ export interface SignupPayload {
 
 export interface LoginPayload {
   email?: string;
-  identifier?: string; // Can be email or phone
+  identifier?: string;
   phoneNumber?: string;
   password: string;
   rememberMe?: boolean;
@@ -35,7 +35,7 @@ export interface AuthUser {
   additionalEmails?: { _id: string; email: string; addedAt: string; verified: boolean }[];
   emailVerified?: boolean;
   phoneVerified?: boolean;
-  authMethods?: string[]; // ['email'], ['phone'], ['google'], or combinations
+  authMethods?: string[];
   authType?: 'email' | 'phone';
   createdAt?: string;
   needsPasswordChange?: boolean;
@@ -58,16 +58,27 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // Helper: Identify if input is email or phone
+  private authOptions(): { headers: HttpHeaders } {
+    const token = this.getToken();
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token || ''}`,
+      }),
+    };
+  }
+
   identifyAuthType(identifier: string): 'email' | 'phone' | 'invalid' {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^0\d{9}$/; // Sri Lankan format: 0XXXXXXXXX (10 digits)
+    const phoneRegex = /^0\d{9}$/;
 
     if (emailRegex.test(identifier)) {
       return 'email';
-    } else if (phoneRegex.test(identifier)) {
+    }
+
+    if (phoneRegex.test(identifier)) {
       return 'phone';
     }
+
     return 'invalid';
   }
 
@@ -80,7 +91,6 @@ export class AuthService {
   login(payload: LoginPayload): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, payload).pipe(
       tap((res) => {
-        // Only save session if not requiring phone verification
         if (!res.requiringPhoneVerification) {
           this.saveSession(res.token, res.user, payload.rememberMe !== false);
         }
@@ -102,7 +112,7 @@ export class AuthService {
 
   resetPassword(token: string, password: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password/${token}`, {
-      password
+      password,
     });
   }
 
@@ -110,7 +120,7 @@ export class AuthService {
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/verify-email`,
       { otp },
-      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+      this.authOptions()
     );
   }
 
@@ -118,7 +128,7 @@ export class AuthService {
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/verify-phone`,
       { otp, sessionId },
-      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+      this.authOptions()
     );
   }
 
@@ -126,7 +136,7 @@ export class AuthService {
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/resend-otp`,
       {},
-      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+      this.authOptions()
     );
   }
 
@@ -134,7 +144,7 @@ export class AuthService {
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/resend-otp-phone`,
       { sessionId },
-      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+      this.authOptions()
     );
   }
 
@@ -142,7 +152,7 @@ export class AuthService {
     return this.http.post<{ message: string }>(
       `${environment.apiUrl}/customer/profile/change-password-first-login`,
       { newPassword },
-      { headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }) }
+      this.authOptions()
     );
   }
 
@@ -160,6 +170,7 @@ export class AuthService {
   getCurrentUser(): AuthUser | null {
     const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!raw) return null;
+
     try {
       return JSON.parse(raw) as AuthUser;
     } catch {

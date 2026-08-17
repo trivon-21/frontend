@@ -12,7 +12,7 @@
   </div>
 
   <div *ngIf="!isLoading && filteredPayments.length === 0" class="empty-state">
-    <p>🎉 No pending inspection payments to verify</p>
+    <p>No pending inspection payments to verify</p>
   </div>
 
   <div *ngIf="isLoading" class="empty-state">
@@ -24,11 +24,11 @@
       <div class="card-body">
         <div class="id-row">
           <span class="id-label">Order ID:</span>
-          <span class="id-value">{{ payment.orderId }}</span>
+          <span class="id-value">{{ shortId(payment.orderId) }}</span>
         </div>
         <div class="id-row">
           <span class="id-label">Ticket ID:</span>
-          <span class="id-value">{{ payment.ticketId }}</span>
+          <span class="id-value">{{ shortId(payment.ticketId) }}</span>
         </div>
         <div class="field">
           <label class="field-label">CUSTOMER NAME:</label>
@@ -36,7 +36,7 @@
         </div>
         <div class="field">
           <label class="field-label">AMOUNT:</label>
-          <p class="field-value amount">${{ payment.amount | number:'1.2-2' }}</p>
+          <p class="field-value amount">LKR {{ payment.amount | number:'1.2-2' }}</p>
         </div>
         <div class="field">
           <label class="field-label">SLIP UPLOADED:</label>
@@ -71,11 +71,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
-        <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
+        <p><strong>Order ID:</strong> {{ shortId(selectedPayment?.orderId) }}</p>
+        <p><strong>Ticket ID:</strong> {{ shortId(selectedPayment?.ticketId) }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Amount:</strong> ${{ selectedPayment?.amount | number:'1.2-2' }}</p>
+        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
         <p><strong>Slip Uploaded:</strong> {{ selectedPayment?.date | date:'dd MMM yyyy, hh:mm a' }}</p>
         <p><strong>Status:</strong> {{ selectedPayment?.status }}</p>
         <div class="slip-preview-section" *ngIf="selectedPayment?.slipUrl">
@@ -104,9 +104,9 @@
         </button>
       </div>
       <div class="modal-body">
-        <p><strong>Order:</strong> #{{ selectedPayment?.orderId }}</p>
-        <p><strong>Ticket:</strong> {{ selectedPayment?.ticketId }}</p>
-        <p><strong>Amount:</strong> ${{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
+        <p><strong>Order:</strong> {{ shortId(selectedPayment?.orderId) }}</p>
+        <p><strong>Ticket:</strong> {{ shortId(selectedPayment?.ticketId) }}</p>
+        <p><strong>Amount:</strong> LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
         <div class="form-group">
           <label for="reason">Rejection Reason <span class="required">*</span></label>
           <textarea id="reason" rows="4" [(ngModel)]="rejectionReason"

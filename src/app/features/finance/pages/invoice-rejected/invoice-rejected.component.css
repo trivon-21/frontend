@@ -438,7 +438,7 @@
 }
 .inv-tab.active { background: #1e3a2a; color: white; font-weight: 600; }
 .inv-tab:hover:not(.active) { background: #f3f4f6; color: #1a1a1a; }
-.cancelled-badge { color: #b45309; font-weight: 700; }
+.rejected-badge { color: #dc2626; font-weight: 700; }
 @media (max-width: 768px) {
   .page-container {
     margin-left: 0;

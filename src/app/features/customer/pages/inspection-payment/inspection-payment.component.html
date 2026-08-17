@@ -41,9 +41,9 @@
     <hr />
     <div class="summary-row">
       <span class="label">Items:</span>
-      <span class="value items-list">
-        <span *ngFor="let item of items">{{ item }}</span>
-      </span>
+<span class="value items-list">
+<span *ngFor="let item of items">{{ item?.name || item }} <span *ngIf="item?.quantity"> × {{ item.quantity }}</span></span>
+</span>
     </div>
     <hr />
     <div class="summary-row total-row">

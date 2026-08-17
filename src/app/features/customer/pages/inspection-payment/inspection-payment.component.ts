@@ -16,7 +16,7 @@ export class InspectionPaymentComponent implements OnInit {
   // Order data — loaded from backend
   customerName = '';
   orderId = '';
-  items: string[] = [];
+  items: any[] = [];
   totalAmount = 0;
   ticketId = '';
 

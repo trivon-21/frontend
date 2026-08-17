@@ -47,7 +47,7 @@
           </div>
           <div class="field">
             <label class="field-label">AC MODEL:</label>
-            <p class="field-value">{{ invoice.itemName }}</p>
+            <p class="field-value">{{ invoice.acModel || invoice.itemName }}</p>
           </div>
           <div class="field">
             <label class="field-label">SUBMITTED:</label>
@@ -75,7 +75,7 @@
           <p><strong>Order ID:</strong> {{ selectedInvoice?.orderRef || selectedInvoice?.orderId }}</p>
           <p><strong>Customer:</strong> {{ selectedInvoice?.customerName }}</p>
           <p><strong>Email:</strong> {{ selectedInvoice?.customerEmail }}</p>
-          <p><strong>AC Model:</strong> {{ selectedInvoice?.itemName }}</p>
+          <p><strong>AC Model:</strong> {{ selectedInvoice?.acModel || selectedInvoice?.itemName }}</p>
           <p><strong>Location:</strong> {{ selectedInvoice?.location || '—' }}</p>
           <p><strong>Inspector:</strong> {{ selectedInvoice?.inspectorName || '—' }}</p>
           <p><strong>Materials:</strong> {{ selectedInvoice?.materialsCount }}</p>

@@ -25,7 +25,7 @@
         <thead><tr><th>ORDER ID</th><th>INVOICE NO</th><th>CUSTOMER</th><th>PAID DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
         <tbody>
           <tr *ngFor="let invoice of paginatedInvoices">
-            <td>{{ invoice.orderId }}</td><td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ shortId(invoice.orderId) }}</td><td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
             <td>{{ invoice.paidAt | date:'dd MMM yyyy' }}</td>
             <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
             <td><button class="view-btn" (click)="viewInvoice(invoice)">View</button></td>

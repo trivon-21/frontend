@@ -104,4 +104,11 @@ export class InspectionDashboardComponent implements OnInit {
     if (!date) return '-';
     return new Date(date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
   }
+
+  shortId(id: any): string {
+    if (!id) return '—';
+    const value = id.toString();
+    const suffix = value.includes('-') ? (value.split('-').pop() || value) : value;
+    return suffix.slice(-6).toUpperCase();
+  }
 }

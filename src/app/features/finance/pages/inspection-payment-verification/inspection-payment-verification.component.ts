@@ -128,4 +128,11 @@ export class InspectionPaymentVerificationComponent implements OnInit {
       }
     });
   }
+
+  shortId(id: any): string {
+    if (!id) return '—';
+    const value = id.toString();
+    const suffix = value.includes('-') ? (value.split('-').pop() || value) : value;
+    return suffix.slice(-6).toUpperCase();
+  }
 }
