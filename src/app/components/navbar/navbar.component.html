@@ -3,11 +3,15 @@
     <a routerLink="/" class="brand">AirLux</a>
 
     <div class="search">
-      <span class="search-icon" aria-hidden="true">Search</span>
+      <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
       <input type="text" placeholder="Search" />
     </div>
 
     <nav class="navlinks">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a href="#">View products</a>
       <a routerLink="/" fragment="services">Our Services</a>
       <a href="#">About Us</a>
@@ -15,8 +19,8 @@
 
     <!-- Guest buttons -->
     <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
+      <a *ngIf="router.url !== '/login' && !router.url.startsWith('/login?')" routerLink="/login" class="btn ghost">Log in</a>
+      <a *ngIf="router.url !== '/signup' && !router.url.startsWith('/signup?')" routerLink="/signup" class="btn solid">Sign up</a>
     </div>
 
     <!-- Logged-in user area -->
@@ -55,6 +59,36 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-btn" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen" aria-label="Toggle navigation menu">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Drawer Overlay -->
+  <div class="mobile-menu" *ngIf="isMobileMenuOpen">
+    <nav class="mobile-navlinks">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Home</a>
+      <a href="#" (click)="closeMobileMenu()">View products</a>
+      <a routerLink="/" fragment="services" (click)="closeMobileMenu()">Our Services</a>
+      <a href="#" (click)="closeMobileMenu()">About Us</a>
+    </nav>
+    
+    <div class="mobile-actions">
+      <!-- Guest mobile actions -->
+      <ng-container *ngIf="!currentUser">
+        <a *ngIf="router.url !== '/login' && !router.url.startsWith('/login?')" routerLink="/login" class="btn ghost" (click)="closeMobileMenu()">Log in</a>
+        <a *ngIf="router.url !== '/signup' && !router.url.startsWith('/signup?')" routerLink="/signup" class="btn solid" (click)="closeMobileMenu()">Sign up</a>
+      </ng-container>
+      
+      <!-- Logged-in mobile actions -->
+      <ng-container *ngIf="currentUser">
+        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn" (click)="closeMobileMenu()">Dashboard</a>
+      </ng-container>
     </div>
   </div>
 </header>
