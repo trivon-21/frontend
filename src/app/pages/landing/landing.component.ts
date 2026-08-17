@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './landing.component.css',
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
+  isLoading = true;
   showInquiry = false;
   selectedServiceDetails: any | null = null;
   preselectedInquiryType = 'Other';
@@ -38,6 +39,15 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showInquiry = true;
       }
     }
+
+    // Simulate loading for premium SPA feel
+    setTimeout(() => {
+      this.isLoading = false;
+      // Allow Angular DOM compilation cycle to finish
+      setTimeout(() => {
+        this.initObservers();
+      }, 50);
+    }, 850);
   }
 
   showServiceDetails(serviceName: string): void {
@@ -129,6 +139,14 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    if (!this.isLoading) {
+      this.initObservers();
+    }
+  }
+
+  initObservers(): void {
+    if (this.observer) return; // Prevent duplicate observer bindings
+
     // Scroll reveal observer
     if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
       this.observer = new IntersectionObserver((entries) => {

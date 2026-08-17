@@ -1,5 +1,43 @@
 <app-navbar></app-navbar>
 
+<!-- Skeleton Loader Screen -->
+<div class="skeleton-container" *ngIf="isLoading" aria-hidden="true">
+  <!-- Hero Loading -->
+  <div class="skeleton-hero">
+    <div class="skeleton-line skeleton-title"></div>
+    <div class="skeleton-line skeleton-subtitle"></div>
+    <div class="skeleton-row skeleton-btns">
+      <div class="skeleton-block skeleton-btn"></div>
+      <div class="skeleton-block skeleton-btn"></div>
+    </div>
+  </div>
+
+  <!-- Stats Loading -->
+  <div class="skeleton-stats">
+    <div class="skeleton-stat-item" *ngFor="let item of [1, 2, 3]">
+      <div class="skeleton-line skeleton-stat-num"></div>
+      <div class="skeleton-line skeleton-stat-lbl"></div>
+    </div>
+  </div>
+
+  <!-- Services Loading -->
+  <div class="skeleton-section">
+    <div class="skeleton-line skeleton-sec-title"></div>
+    <div class="skeleton-grid four-col">
+      <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4]">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line skeleton-card-title"></div>
+        <div class="skeleton-line skeleton-card-para-1"></div>
+        <div class="skeleton-line skeleton-card-para-2"></div>
+        <div class="skeleton-line skeleton-card-link"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Page Content -->
+<div class="landing-content" *ngIf="!isLoading">
+
 <!-- Hero Section -->
 <section class="hero" aria-label="Hero">
   <div class="hero-overlay"></div>
@@ -429,3 +467,4 @@
 <app-footer></app-footer>
 
 <app-inquiry-modal *ngIf="showInquiry" [selectedType]="preselectedInquiryType" (closed)="showInquiry = false"></app-inquiry-modal>
+</div>
