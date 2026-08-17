@@ -29,6 +29,7 @@ export interface SystemInfo {
   systemName: string;
   supportEmail: string;
   supportPhoneNumber: string;
+  address: string;
 }
 
 export interface User {

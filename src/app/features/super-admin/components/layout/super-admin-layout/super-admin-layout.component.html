@@ -1,7 +1,7 @@
 <div class="dashboard-wrapper">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <a routerLink="/" class="sidebar-brand">AirLux</a>
+    <a routerLink="/" class="sidebar-brand">{{ systemInfo?.systemName || 'AirLux' }}</a>
     <nav class="sidebar-nav">
       <a
         routerLink="/super-admin"

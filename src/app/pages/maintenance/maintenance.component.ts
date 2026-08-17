@@ -5,6 +5,7 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Subscription, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { SystemInfoService, SystemInfo } from '../../core/services/system-info.service';
 
 @Component({
   selector: 'app-maintenance',
@@ -19,13 +20,15 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
   countdownDisplay = '';
   scheduledEndTime: Date | null = null;
   isInstantMaintenance = false;
+  systemInfo: SystemInfo | null = null;
   private countdownInterval: any;
   private redirectCheckSubscription: Subscription | null = null;
 
   constructor(
     private maintenanceService: MaintenanceService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private systemInfoService: SystemInfoService
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +36,10 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     const maintenance = this.maintenanceService.getMaintenanceSync();
     this.maintenanceMessage = maintenance.message;
     this.maintenanceReason = maintenance.reason;
+
+    this.systemInfoService.systemInfo$.subscribe((info) => {
+      this.systemInfo = info;
+    });
 
     // Check if it's instant or scheduled
     if (maintenance.scheduledEndTime) {

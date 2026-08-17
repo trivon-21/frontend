@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
+import { SystemInfoService, SystemInfo } from '../../core/services/system-info.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,7 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
 })
 export class NavbarComponent implements OnInit {
   currentUser: AuthUser | null = null;
+  systemInfo: SystemInfo | null = null;
   showDropdown = false;
   isMobileMenuOpen = false;
   isSticky = false;
@@ -30,11 +32,18 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  constructor(private authService: AuthService, public router: Router) {}
+  constructor(
+    private authService: AuthService,
+    public router: Router,
+    private systemInfoService: SystemInfoService
+  ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
+    });
+    this.systemInfoService.systemInfo$.subscribe((info) => {
+      this.systemInfo = info;
     });
   }
 

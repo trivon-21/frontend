@@ -5,6 +5,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { MaintenanceService } from '../../../../../core/services/maintenance.service';
 import { NotificationService, Notification } from '../../../../../core/services/notification.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
+import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -20,6 +21,7 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   currentTime = new Date();
   maintenanceCountdown = '';
+  systemInfo: SystemInfo | null = null;
   private clockInterval: any;
   private countdownInterval: any;
 
@@ -27,7 +29,8 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private notificationService: NotificationService,
     private maintenanceService: MaintenanceService,
-    private router: Router
+    private router: Router,
+    private systemInfoService: SystemInfoService
   ) { }
 
   ngOnInit(): void {
@@ -36,6 +39,10 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
       this.router.navigate(['/super-admin']);
       return;
     }
+
+    this.systemInfoService.systemInfo$.subscribe((info) => {
+      this.systemInfo = info;
+    });
 
     this.notificationService.getNotifications().subscribe((notifs) => {
       this.notifications = notifs;

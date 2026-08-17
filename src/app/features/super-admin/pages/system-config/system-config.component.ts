@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SystemConfigService } from '../../services/system-config.service';
 import { MaintenanceService } from '../../../../core/services/maintenance.service';
+import { SystemInfoService } from '../../../../core/services/system-info.service';
 import {
   SystemConfig,
   BusinessRules,
@@ -277,7 +278,11 @@ export class SystemConfigComponent implements OnInit {
     { id: 'system-info' as Tab, label: 'System Info' },
   ];
 
-  constructor(private systemConfigService: SystemConfigService, private maintenanceService: MaintenanceService) {}
+  constructor(
+    private systemConfigService: SystemConfigService,
+    private maintenanceService: MaintenanceService,
+    private systemInfoService: SystemInfoService
+  ) {}
 
   ngOnInit(): void {
     this.loadConfig();
@@ -369,6 +374,8 @@ export class SystemConfigComponent implements OnInit {
       next: (response: any) => {
         this.config = response.data;
         this.isSaving['system-info'] = false;
+        // Force refresh core client layouts (header, footer, sidebars)
+        this.systemInfoService.loadSystemInfo();
       },
       error: (error: any) => {
         console.error('Error saving system info:', error);

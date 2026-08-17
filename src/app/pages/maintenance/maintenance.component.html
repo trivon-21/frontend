@@ -44,11 +44,11 @@
       <div class="support-info">
         <div class="support-item">
           <span class="label">Email:</span>
-          <a href="mailto:support@airlux.lk">support@airlux.lk</a>
+          <a [href]="'mailto:' + (systemInfo?.supportEmail || 'support@airlux.lk')">{{ systemInfo?.supportEmail || 'support@airlux.lk' }}</a>
         </div>
         <div class="support-item">
           <span class="label">Phone:</span>
-          <a href="tel:+94112345678">+94 11 234 5678</a>
+          <a [href]="'tel:' + (systemInfo?.supportPhoneNumber || '+94112345678')">{{ systemInfo?.supportPhoneNumber || '+94 11 234 5678' }}</a>
         </div>
       </div>
     </div>
