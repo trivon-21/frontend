@@ -525,12 +525,43 @@
   background: var(--color-white);
 }
 
-.rating-row {
+/* Overall Rating Summary Block */
+.rating-summary {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  text-align: center;
   gap: 12px;
-  margin-bottom: 48px;
+  margin: 0 auto 56px;
+  padding: 28px;
+  background: linear-gradient(135deg, rgba(230, 251, 231, 0.3) 0%, rgba(252, 253, 253, 0.8) 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-mint-border);
+  max-width: 440px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+.rating-big {
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--color-forest-dark);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.rating-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-subtitle {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin: 0;
 }
 
 .stars-container,
@@ -560,35 +591,39 @@
   .stars-container > :nth-child(5) { transition-delay: 250ms; }
 }
 
-.rating-num {
-  font-weight: 800;
-  font-size: 24px;
-  color: var(--color-forest-dark);
-  line-height: 1;
-}
-
-.rating-label {
-  font-size: 15px;
-  color: var(--color-text-muted);
-}
-
 .review-card {
-  padding: 32px;
-  min-height: 320px;
+  position: relative;
+  padding: 36px;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* Background Quote Graphic */
+.review-card::before {
+  content: "“";
+  position: absolute;
+  top: -12px;
+  right: 24px;
+  font-size: 140px;
+  font-family: Georgia, serif;
+  line-height: 1;
+  color: rgba(60, 95, 53, 0.04);
+  pointer-events: none;
+  user-select: none;
 }
 
 .stars-container-sm {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .review-text {
-  font-style: italic;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--color-text-dark);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  font-weight: 500;
 }
 
 .reviewer {
@@ -617,9 +652,18 @@
   color: var(--color-forest-dark);
 }
 
-.reviewer-tag {
-  color: var(--color-text-muted);
+.reviewer-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.check-icon-sm {
+  color: var(--color-forest-mid);
+  flex-shrink: 0;
 }
 
 /* Testimonials Carousel Touch Swipe (Mobile) */
