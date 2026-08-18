@@ -13,7 +13,7 @@ interface MaterialItem {
 
 interface MaterialRequest {
   id: string;
-  type: 'Installation' | 'Service';
+  type: 'Installation' | 'Service' | 'Maintenance';
   customer: string;
   customerEmail: string;
   customerContactNo: string;
@@ -21,6 +21,7 @@ interface MaterialRequest {
   location: string;
   status: 'Finance Approved' | 'New' | 'Pending Approval' | 'Pending' | 'Sent to IM';
   items: MaterialItem[];
+  serviceType?: string;
 }
 
 type RawMaterialRequest = {
@@ -32,6 +33,7 @@ type RawMaterialRequest = {
   customerContactNo?: string;
   location?: string;
   serviceDate?: string;
+  serviceType?: string;
   serviceDescription?: string;
   createdAt?: string;
   status?: MaterialRequest['status'];
@@ -152,7 +154,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   private mapApiMaterialRequest(item: RawMaterialRequest): MaterialRequest {
     return {
       id: this.normalizeTicketId(item.ticketId || item._id),
-      type: item.requestType || 'Service',
+      // Show 'Maintenance' explicitly when the API indicates a maintenance service
+      type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
       customer: item.customerName || 'Unknown Customer',
       customerEmail: item.customerEmail || '-',
       customerContactNo: item.customerContactNo || '-',
@@ -207,7 +210,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             .map((item: any) => ({
               id: this.normalizeTicketId(item.ticketId),
               requestType: item.requestType || 'Service',
-              serviceType: item.serviceType || '',
+              serviceType: item.serviceType || item.requestType || '',
               productType: (item.productType || '').trim(),
               serviceDescription: (item.serviceDescription || '').trim(),
               customerName: (item.customerName || '').trim(),

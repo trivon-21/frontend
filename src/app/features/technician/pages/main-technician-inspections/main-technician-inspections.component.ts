@@ -13,7 +13,7 @@ interface InspectionTicket {
   productType: string;
   location: string;
   date: string;
-  status: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold';
+  status: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold' | 'Finance Approved';
   assignedTeam: string;
 }
 
@@ -26,7 +26,7 @@ type RawInspection = {
   location?: string;
   date?: string;
   serviceDate?: string;
-  status?: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold';
+  status?: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold' | 'Finance Approved';
   assignedTeam?: string | { teamName?: string };
 };
 
@@ -103,7 +103,17 @@ export class MainTechnicianInspectionsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.tickets = response.data.map((item) => this.mapApiInspection(item));
+            let tickets = response.data.map((item) => this.mapApiInspection(item));
+
+            // By default hide inspections that are in 'Finance Approved' workflow
+            if (!this.statusFilter || this.statusFilter === 'All') {
+              tickets = tickets.filter((t) => {
+                const s = String(t.status || '').toLowerCase().trim();
+                return !(s.includes('finance') && s.includes('approved'));
+              });
+            }
+
+            this.tickets = tickets;
             this.applyFilters();
           } else {
             this.error = 'Failed to load inspections';
