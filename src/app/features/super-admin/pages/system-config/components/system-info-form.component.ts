@@ -63,6 +63,22 @@ import { SystemConfig, SystemInfo } from '../../../models/system-config.model';
             <p class="help-text">Customer support contact phone</p>
           </div>
 
+          <!-- Address -->
+          <div class="form-group">
+            <label for="address">
+              Office Address
+              <span class="required">*</span>
+            </label>
+            <textarea
+              id="address"
+              formControlName="address"
+              placeholder="e.g., 123 Galle Road, Colombo 03, Sri Lanka"
+              class="form-input"
+              rows="3"
+            ></textarea>
+            <p class="help-text">Physical business/support center address</p>
+          </div>
+
           <!-- Preview -->
           <div class="preview-section">
             <h3>Preview</h3>
@@ -84,6 +100,10 @@ import { SystemConfig, SystemInfo } from '../../../models/system-config.model';
                 <a href="tel:{{ form.get('supportPhoneNumber')?.value }}">
                   {{ form.get('supportPhoneNumber')?.value || '+94 11 000 0000' }}
                 </a>
+              </p>
+              <p class="preview-line">
+                <strong>Address:</strong>
+                <span>{{ form.get('address')?.value || '123 Galle Road, Colombo 03, Sri Lanka' }}</span>
               </p>
             </div>
           </div>
@@ -306,6 +326,7 @@ export class SystemInfoFormComponent {
       systemName: ['', [Validators.required, Validators.maxLength(100)]],
       supportEmail: ['', [Validators.required, Validators.email]],
       supportPhoneNumber: ['', [Validators.required]],
+      address: ['', [Validators.required, Validators.maxLength(300)]],
     });
   }
 

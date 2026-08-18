@@ -1,26 +1,58 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
+import { SystemInfoService, SystemInfo } from '../../core/services/system-info.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, ClickOutsideDirective],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ClickOutsideDirective],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent implements OnInit {
   currentUser: AuthUser | null = null;
+  systemInfo: SystemInfo | null = null;
   showDropdown = false;
+  isMobileMenuOpen = false;
+  isSticky = false;
+  private isTicking = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (typeof window === 'undefined') return;
+    if (!this.isTicking) {
+      window.requestAnimationFrame(() => {
+        this.isSticky = window.scrollY > 50;
+        this.isTicking = false;
+      });
+      this.isTicking = true;
+    }
+  }
+
+  constructor(
+    private authService: AuthService,
+    public router: Router,
+    private systemInfoService: SystemInfoService
+  ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+    this.systemInfoService.systemInfo$.subscribe((info) => {
+      this.systemInfo = info;
+    });
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
   }
 
   getInitials(name: string): string {
@@ -44,5 +76,12 @@ export class NavbarComponent implements OnInit {
     this.authService.logout();
     this.showDropdown = false;
     this.router.navigate(['/']);
+  }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
   }
 }

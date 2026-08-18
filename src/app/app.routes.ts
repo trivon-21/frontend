@@ -219,6 +219,13 @@ export const routes: Routes = [
             './features/super-admin/pages/system-logs-monitoring/system-logs-monitoring.component'
           ).then((m) => m.SystemLogsMonitoringComponent),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/customer/pages/profile/customer-profile.component').then(
+            (m) => m.CustomerProfileComponent
+          ),
+      },
     ],
   },
 

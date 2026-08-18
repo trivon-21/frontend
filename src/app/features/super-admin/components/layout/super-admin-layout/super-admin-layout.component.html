@@ -1,7 +1,7 @@
 <div class="dashboard-wrapper">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <a routerLink="/" class="sidebar-brand">AirLux</a>
+    <a routerLink="/" class="sidebar-brand">{{ systemInfo?.systemName || 'AirLux' }}</a>
     <nav class="sidebar-nav">
       <a
         routerLink="/super-admin"
@@ -31,6 +31,13 @@
           <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
         </svg>
         <span>System Logs</span>
+      </a>
+      <a routerLink="/super-admin/profile" routerLinkActive="active" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span>My Profile</span>
       </a>
     </nav>
   </aside>
@@ -96,6 +103,13 @@
                 <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
               </svg>
               System Logs
+            </a>
+            <a routerLink="/super-admin/profile" class="menu-item" (click)="closeUserMenu()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              My Profile
             </a>
             <div class="menu-divider"></div>
             <button class="menu-item logout" (click)="logout()">

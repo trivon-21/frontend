@@ -4,6 +4,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { AuthService } from '../../../../../core/services/auth.service';
 import { MaintenanceService } from '../../../../../core/services/maintenance.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
+import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
 
 @Component({
   selector: 'app-super-admin-layout',
@@ -18,12 +19,14 @@ export class SuperAdminLayoutComponent implements OnInit, OnDestroy {
   userEmail = '';
   userInitials = '';
   currentTime = new Date();
+  systemInfo: SystemInfo | null = null;
   private clockInterval: any;
 
   constructor(
     private authService: AuthService,
     public maintenanceService: MaintenanceService,
-    private router: Router
+    private router: Router,
+    private systemInfoService: SystemInfoService
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +36,10 @@ export class SuperAdminLayoutComponent implements OnInit, OnDestroy {
       this.userEmail = user.email || '';
       this.userInitials = this.getInitials(user.fullName || '');
     }
+
+    this.systemInfoService.systemInfo$.subscribe((info) => {
+      this.systemInfo = info;
+    });
 
     // Update clock every second
     this.clockInterval = setInterval(() => {

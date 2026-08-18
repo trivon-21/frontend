@@ -1,13 +1,17 @@
-<header class="topbar">
+<header class="topbar" [class.sticky]="isSticky">
   <div class="topbar-inner">
-    <a routerLink="/" class="brand">AirLux</a>
+    <a routerLink="/" class="brand">{{ systemInfo?.systemName || 'AirLux' }}</a>
 
     <div class="search">
-      <span class="search-icon" aria-hidden="true">Search</span>
+      <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
       <input type="text" placeholder="Search" />
     </div>
 
     <nav class="navlinks">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a href="#">View products</a>
       <a routerLink="/" fragment="services">Our Services</a>
       <a href="#">About Us</a>
@@ -15,13 +19,13 @@
 
     <!-- Guest buttons -->
     <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
+      <a *ngIf="router.url !== '/login' && !router.url.startsWith('/login?')" routerLink="/login" class="btn ghost">Log in</a>
+      <a *ngIf="router.url !== '/signup' && !router.url.startsWith('/signup?')" routerLink="/signup" class="btn solid">Sign up</a>
     </div>
 
     <!-- Logged-in user area -->
     <div class="user-area" *ngIf="currentUser">
-      <a routerLink="/dashboard" class="btn dashboard-btn">Dashboard</a>
+      <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
       <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
         <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
           <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
@@ -40,11 +44,11 @@
             </div>
           </div>
           <div class="dropdown-divider"></div>
-          <a routerLink="/dashboard" class="dropdown-item" (click)="closeDropdown()">
+          <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
             <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
             My Dashboard
           </a>
-          <a routerLink="/dashboard/profile" class="dropdown-item" (click)="closeDropdown()">
+          <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
             <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             My Profile
           </a>
@@ -55,6 +59,36 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-btn" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen" aria-label="Toggle navigation menu">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Drawer Overlay -->
+  <div class="mobile-menu" *ngIf="isMobileMenuOpen">
+    <nav class="mobile-navlinks">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Home</a>
+      <a href="#" (click)="closeMobileMenu()">View products</a>
+      <a routerLink="/" fragment="services" (click)="closeMobileMenu()">Our Services</a>
+      <a href="#" (click)="closeMobileMenu()">About Us</a>
+    </nav>
+    
+    <div class="mobile-actions">
+      <!-- Guest mobile actions -->
+      <ng-container *ngIf="!currentUser">
+        <a *ngIf="router.url !== '/login' && !router.url.startsWith('/login?')" routerLink="/login" class="btn ghost" (click)="closeMobileMenu()">Log in</a>
+        <a *ngIf="router.url !== '/signup' && !router.url.startsWith('/signup?')" routerLink="/signup" class="btn solid" (click)="closeMobileMenu()">Sign up</a>
+      </ng-container>
+      
+      <!-- Logged-in mobile actions -->
+      <ng-container *ngIf="currentUser">
+        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn" (click)="closeMobileMenu()">Dashboard</a>
+      </ng-container>
     </div>
   </div>
 </header>
