@@ -1,0 +1,59 @@
+<aside class="sidebar">
+  <nav class="nav-menu">
+
+    <!-- STANDALONE LINKS (no dropdown) -->
+    <ng-container *ngFor="let link of standaloneLinks">
+      <a [routerLink]="link.route" routerLinkActive="active" class="standalone-nav-item">
+        <span class="section-icon" [innerHTML]="getIcon(link.icon)"></span>
+        <span>{{ link.title }}</span>
+      </a>
+    </ng-container>
+
+    <!-- COLLAPSIBLE SECTIONS -->
+    <div class="nav-section" *ngFor="let section of sections">
+
+      <div class="section-header" (click)="toggleSection(section)">
+        <div class="section-left">
+          <span class="section-icon" [innerHTML]="getIcon(section.icon)"></span>
+          <span class="section-title">{{ section.title }}</span>
+        </div>
+        <span class="chevron" [innerHTML]="getIcon('chevron')" [class.open]="section.isOpen"></span>
+      </div>
+
+      <div class="section-items" [class.expanded]="section.isOpen">
+        <ng-container *ngFor="let item of section.items">
+
+          <!-- Item WITH children (Repair/Maintenance) -->
+          <ng-container *ngIf="item.children && item.children.length > 0">
+            <div class="sub-section-header" (click)="toggleItem(item)">
+              <div class="section-left">
+                <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+                <span class="nav-label sub-label">{{ item.label }}</span>
+              </div>
+              <span class="chevron small-chevron" [class.open]="item.isOpen" [innerHTML]="getIcon('chevron')"></span>
+            </div>
+            <div class="sub-items" [class.expanded]="item.isOpen">
+              <a *ngFor="let child of item.children"
+                [routerLink]="child.route" routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: true}" class="nav-item child-item">
+                <span class="nav-icon" [innerHTML]="getIcon(child.icon)"></span>
+                <span class="nav-label">{{ child.label }}</span>
+              </a>
+            </div>
+          </ng-container>
+
+          <!-- Regular item WITHOUT children -->
+          <a *ngIf="!item.children || item.children.length === 0"
+            [routerLink]="item.route" routerLinkActive="active"
+            [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+            <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+
+        </ng-container>
+      </div>
+
+    </div>
+
+  </nav>
+</aside>

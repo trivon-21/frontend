@@ -1,0 +1,320 @@
+<div class="fr-container">
+
+  <!-- PAGE HEADER -->
+  <div class="fr-header">
+    <div>
+      <h2 class="fr-title">Financial Reports</h2>
+      <p class="fr-subtitle">Overview of all financial activity</p>
+    </div>
+    <div class="fr-header-actions">
+      <div class="date-range">
+        <div class="date-field">
+          <label>From</label>
+          <input type="date" [(ngModel)]="startDate" (change)="applyDateFilter()" />
+        </div>
+        <div class="date-field">
+          <label>To</label>
+          <input type="date" [(ngModel)]="endDate" (change)="applyDateFilter()" />
+        </div>
+      </div>
+      <!-- export btn -->
+      <div style="display:flex; gap:8px;">
+        <button class="export-btn" (click)="exportCSV()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          CSV
+        </button>
+        <button class="export-btn pdf-btn" (click)="exportPDF()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="fr-tabs">
+    <button class="fr-tab" [class.active]="activeTab === 'summary'" (click)="setTab('summary')">Revenue Summary</button>
+    <button class="fr-tab" [class.active]="activeTab === 'collections'" (click)="setTab('collections')">Payment
+      Collections</button>
+    <button class="fr-tab" [class.active]="activeTab === 'transactions'" (click)="setTab('transactions')">Invoices /
+      Transactions</button>
+    <button class="fr-tab" [class.active]="activeTab === 'outstanding'" (click)="setTab('outstanding')">Outstanding
+      Payments</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1: REVENUE SUMMARY -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'summary'">
+    <div *ngIf="isLoadingSummary" class="fr-loading">Loading...</div>
+
+    <div *ngIf="!isLoadingSummary">
+      <!-- STAT CARDS -->
+      <div class="fr-cards">
+        <div class="fr-card green">
+          <div class="fr-card-icon">💰</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Total Collected</span>
+            <span class="fr-card-value">LKR {{ summary.totalCollected | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card blue">
+          <div class="fr-card-icon">🛒</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Buy Only Revenue</span>
+            <span class="fr-card-value">LKR {{ summary.buyOnlyRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card purple">
+          <div class="fr-card-icon">🔍</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Inspection Fees</span>
+            <span class="fr-card-value">LKR {{ summary.inspectionRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card orange">
+          <div class="fr-card-icon">🔧</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Service Revenue</span>
+            <span class="fr-card-value">LKR {{ summary.serviceRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card teal">
+          <div class="fr-card-icon">📄</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Invoice Payments</span>
+            <span class="fr-card-value">LKR {{ summary.salesRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card red">
+          <div class="fr-card-icon">📦</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Purchase Expenses</span>
+            <span class="fr-card-value">LKR {{ summary.purchaseExpenses | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card teal">
+          <div class="fr-card-icon">📊</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Net Revenue</span>
+            <span class="fr-card-value">LKR {{ summary.netRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card grey">
+          <div class="fr-card-icon">⏳</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Pending Collection</span>
+            <span class="fr-card-value">LKR {{ summary.pendingRevenue | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONTHLY BAR CHART -->
+      <div class="fr-section">
+        <h3 class="fr-section-title">Total Revenue (Last 6 Months)</h3>
+        <div class="fr-chart" *ngIf="monthlyData.length > 0">
+          <div class="fr-bars">
+            <div class="fr-bar-group" *ngFor="let m of monthlyData">
+              <div class="fr-bar-wrap">
+                <div class="fr-bar-fill" [style.height.%]="barHeight(m.total)" [title]="'LKR ' + (m.total | number)">
+                </div>
+              </div>
+              <span class="fr-bar-label">{{ m.month }}</span>
+              <span class="fr-bar-val">LKR {{ m.total | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="monthlyData.length === 0" class="fr-empty">No data for selected period</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2: PAYMENT COLLECTIONS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'collections'">
+    <div *ngIf="isLoadingCollections" class="fr-loading">Loading...</div>
+
+    <div *ngIf="!isLoadingCollections">
+      <div class="fr-section">
+        <div class="fr-table-header">
+          <h3 class="fr-section-title">Payment Collections</h3>
+          <span class="fr-count">{{ collections.length }} records</span>
+        </div>
+
+        <div class="fr-empty" *ngIf="collections.length === 0">No payment collections found for selected period</div>
+
+        <div class="fr-table-wrap" *ngIf="collections.length > 0">
+          <table class="fr-table">
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th>PAYMENT TYPE</th>
+                <th>REFERENCE</th>
+                <th>CUSTOMER</th>
+                <th>AMOUNT</th>
+                <th>METHOD</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of collections">
+                <td>{{ c.date | date:'dd MMM yyyy' }}</td>
+                <td><span class="type-pill">{{ c.type }}</span></td>
+                <td class="mono">{{ c.reference }}</td>
+                <td>{{ c.customer }}</td>
+                <td class="amount-cell" [style.color]="c.amount < 0 ? '#dc2626' : ''">
+                  LKR {{ c.amount | number:'1.0-0' }}
+                </td>
+                <td>{{ c.method }}</td>
+                <td><span class="badge badge-paid">{{ c.status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Simple total below table -->
+        <div class="fr-total-bar" *ngIf="collections.length > 0">
+          <span>Net Total:</span>
+          <strong>LKR {{ getCollectionsTotal() | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 3: INVOICES / TRANSACTIONS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'transactions'">
+    <div class="fr-filter-row">
+      <div class="fr-filter-group">
+        <label>Status</label>
+        <select [(ngModel)]="txStatus" (change)="txPage = 1; loadTransactions()">
+          <option value="ALL">All Status</option>
+          <option value="DRAFT">Pending</option>
+          <option value="SENT">Sent</option>
+          <option value="ACCEPTED">Accepted</option>
+          <option value="PAID">Paid</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="AUTO_CANCELLED">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="isLoadingTx" class="fr-loading">Loading...</div>
+
+    <div class="fr-table-wrap" *ngIf="!isLoadingTx">
+      <div class="fr-empty" *ngIf="transactions.length === 0">No invoices found for selected period</div>
+
+      <table class="fr-table" *ngIf="transactions.length > 0">
+        <thead>
+          <tr>
+            <th>INVOICE NO</th>
+            <th>CUSTOMER</th>
+            <th>TYPE</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+            <th>CREATED DATE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of transactions">
+            <td class="mono">{{ t.invoiceNumber }}</td>
+            <td>
+              <div>{{ t.customerName }}</div>
+              <div class="sub-text">{{ t.customerEmail }}</div>
+            </td>
+            <td>{{ t.type }}</td>
+            <td class="amount-cell">LKR {{ t.grandTotal | number:'1.0-0' }}</td>
+            <td><span class="badge" [ngClass]="statusClass(t.status)">{{ statusLabel(t.status) }}</span></td>
+            <td>{{ t.createdAt | date:'dd MMM yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="fr-pagination" *ngIf="txTotal > 15">
+        <span>Showing {{ (txPage - 1) * 15 + 1 }}–{{ txPage * 15 > txTotal ? txTotal : txPage * 15 }} of {{ txTotal
+          }}</span>
+        <div class="fr-pages">
+          <button (click)="txPrevPage()" [disabled]="txPage === 1">Previous</button>
+          <button (click)="txNextPage()" [disabled]="txPage * 15 >= txTotal">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 4: OUTSTANDING PAYMENTS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'outstanding'">
+    <div *ngIf="isLoadingOutstanding" class="fr-loading">Loading...</div>
+
+    <div *ngIf="!isLoadingOutstanding">
+      <!-- Summary cards -->
+      <div class="fr-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
+        <div class="fr-card red">
+          <div class="fr-card-icon">🚨</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Overdue Invoices</span>
+            <span class="fr-card-value">{{ overdueCount }}</span>
+          </div>
+        </div>
+        <div class="fr-card orange">
+          <div class="fr-card-icon">⚠️</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Overdue Amount</span>
+            <span class="fr-card-value">LKR {{ overdueAmount | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="fr-card grey">
+          <div class="fr-card-icon">📋</div>
+          <div class="fr-card-info">
+            <span class="fr-card-label">Total Outstanding</span>
+            <span class="fr-card-value">LKR {{ totalOutstanding | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fr-empty" *ngIf="outstanding.length === 0">🎉 No outstanding payments</div>
+
+      <div class="fr-table-wrap" *ngIf="outstanding.length > 0">
+        <table class="fr-table">
+          <thead>
+            <tr>
+              <th>CUSTOMER</th>
+              <th>INVOICE NO</th>
+              <th>AMOUNT DUE</th>
+              <th>ACCEPTED DATE</th>
+              <th>DUE DATE</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of outstanding" [class.overdue-row]="o.overdue">
+              <td>
+                <div>{{ o.customerName }}</div>
+                <div class="sub-text">{{ o.customerEmail }}</div>
+              </td>
+              <td class="mono">{{ o.invoiceNumber }}</td>
+              <td class="amount-cell">LKR {{ o.grandTotal | number:'1.0-0' }}</td>
+              <td>{{ o.acceptedAt | date:'dd MMM yyyy' }}</td>
+              <td>{{ o.paymentDeadline | date:'dd MMM yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="o.overdue ? 'badge-overdue' : 'badge-due'">
+                  {{ o.overdue ? o.daysOverdue + 'd overdue' : o.daysLeft + 'd left' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>

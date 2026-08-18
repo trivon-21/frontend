@@ -1,0 +1,123 @@
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.page-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1b2f27;
+  margin: 0;
+}
+
+/* ── Stats Section ── */
+.dashboard-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b2f27;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  padding-left: 4px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+}
+
+.metric-icon.blue { background: #e8f0ff; color: #3b5bdb; }
+.metric-icon.orange { background: #fff3dc; color: #b45309; }
+.metric-icon.red { background: #fde8e8; color: #d64040; }
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: #8a9e96;
+  font-family: 'Inter', sans-serif;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1b2f27;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+/* ── State Boxes ── */
+.state-box {
+  padding: 40px;
+  text-align: center;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: #8a9e96;
+  font-family: 'Inter', sans-serif;
+}
+
+.state-error {
+  background: #fde8e8;
+  color: var(--error);
+  border-color: rgba(214, 64, 64, 0.2);
+}
+
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -22,6 +22,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -33,13 +38,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "16kB",
-                  "maximumError": "32kB"
+                  "maximumWarning": "20kB",
+                  "maximumError": "30kB"
                 }
               ],
               "outputHashing": "all"
@@ -62,7 +67,8 @@
               "buildTarget": "frontend:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
+              "buildTarget": "frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -82,6 +88,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [

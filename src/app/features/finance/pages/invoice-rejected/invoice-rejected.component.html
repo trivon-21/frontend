@@ -1,0 +1,148 @@
+<div class="page-container">
+  <div class="page-header"><h2 class="page-title">Rejected Invoices</h2></div>
+
+  <div class="inv-tabs">
+    <button class="inv-tab" [class.active]="activeTab==='installation'" (click)="activeTab='installation'">🏗️ Installation</button>
+    <button class="inv-tab" [class.active]="activeTab==='repair'" (click)="activeTab='repair'">🔧 Repair</button>
+  </div>
+
+  <ng-container *ngIf="activeTab==='installation'">
+    <div class="controls-row">
+      <div class="search-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" placeholder="Search Invoice No or Customer" [(ngModel)]="searchQuery" (input)="applyFilters()"/>
+      </div>
+      <div class="filters-section">
+        <span class="filter-label">Rejected Date:</span>
+        <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()"/>
+      </div>
+    </div>
+    <div *ngIf="isLoading" class="empty-state"><p>⏳ Loading...</p></div>
+    <div *ngIf="!isLoading && filteredInvoices.length===0" class="empty-state"><p>No rejected installation invoices</p></div>
+    <div class="table-container" *ngIf="!isLoading && filteredInvoices.length>0">
+      <table class="data-table">
+        <thead><tr><th>ORDER ID</th><th>INVOICE NO</th><th>CUSTOMER</th><th>REJECTED DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let invoice of paginatedInvoices">
+            <td>{{ invoice.orderId }}</td><td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ invoice.rejectedAt | date:'dd MMM yyyy' }}</td>
+            <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
+            <td><button class="view-btn" (click)="viewInvoice(invoice)">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" *ngIf="totalItems>0">
+      <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }}</span>
+      <div class="pages">
+        <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
+        <button *ngFor="let p of totalPages" (click)="goToPage(p)" [class.active]="currentPage===p">{{ p }}</button>
+        <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+      </div>
+    </div>
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div><h3>Invoice</h3><p class="modal-subtitle">{{ selectedInvoice?.invoiceNumber }}</p></div>
+          <button class="modal-close" (click)="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="invoice-info-grid">
+            <div><p class="info-label">Invoice No</p><p class="info-value">{{ selectedInvoice?.invoiceNumber }}</p></div>
+            <div><p class="info-label">Customer</p><p class="info-value">{{ selectedInvoice?.customerName }}</p></div>
+            <div><p class="info-label">Email</p><p class="info-value">{{ selectedInvoice?.customerEmail }}</p></div>
+            <div><p class="info-label">Rejected Date</p><p class="info-value">{{ selectedInvoice?.rejectedAt | date:'dd MMM yyyy' }}</p></div>
+            <div><p class="info-label">Status</p><p class="info-value rejected-badge">✕ Rejected</p></div>
+          </div>
+          <div class="rejection-reason-box" *ngIf="selectedInvoice?.rejectionReason">
+            <p class="reason-label">Rejection Reason</p>
+            <p class="reason-text">{{ selectedInvoice?.rejectionReason }}</p>
+          </div>
+          <hr class="modal-divider"/>
+          <table class="invoice-items-table">
+            <thead><tr><th>Item</th><th>Qty</th><th>Rate (LKR)</th><th>Amount (LKR)</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let item of selectedInvoice?.items">
+                <td>{{ item.itemName }}</td><td>{{ item.qty }}</td>
+                <td>{{ item.rate | number:'1.0-0' }}</td><td>{{ item.amount | number:'1.0-0' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="total-row"><span>Grand Total</span><span class="total-amount">LKR {{ selectedInvoice?.grandTotal | number:'1.0-0' }}</span></div>
+        </div>
+        <div class="modal-footer"><button class="btn-close" (click)="closeModal()">Close</button></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="activeTab==='repair'">
+    <div class="controls-row">
+      <div class="search-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" placeholder="Search Invoice No or Customer" [(ngModel)]="repairSearchQuery" (input)="applyRepairFilters()"/>
+      </div>
+      <div class="filters-section">
+        <span class="filter-label">Rejected Date:</span>
+        <input type="date" class="date-btn" [(ngModel)]="repairSelectedDate" (change)="applyRepairFilters()"/>
+      </div>
+    </div>
+    <div *ngIf="isRepairLoading" class="empty-state"><p>⏳ Loading...</p></div>
+    <div *ngIf="!isRepairLoading && filteredRepairInvoices.length===0" class="empty-state"><p>No rejected repair invoices</p></div>
+    <div class="table-container" *ngIf="!isRepairLoading && filteredRepairInvoices.length>0">
+      <table class="data-table">
+        <thead><tr><th>INVOICE NO</th><th>CUSTOMER</th><th>REJECTED DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let invoice of paginatedRepairInvoices">
+            <td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ invoice.rejectedAt | date:'dd MMM yyyy' }}</td>
+            <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
+            <td><button class="view-btn" (click)="viewRepairInvoice(invoice)">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" *ngIf="repairTotalItems>0">
+      <span>Showing {{ repairStartItem }} - {{ repairEndItem }} of {{ repairTotalItems }}</span>
+      <div class="pages">
+        <button (click)="repairPrevPage()" [disabled]="repairCurrentPage===1">Previous</button>
+        <button *ngFor="let p of repairTotalPages" (click)="repairGoToPage(p)" [class.active]="repairCurrentPage===p">{{ p }}</button>
+        <button (click)="repairNextPage()" [disabled]="repairCurrentPage*itemsPerPage>=repairTotalItems">Next</button>
+      </div>
+    </div>
+    <div class="modal-overlay" *ngIf="showRepairModal" (click)="closeRepairModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div><h3>Repair Invoice</h3><p class="modal-subtitle">{{ selectedRepairInvoice?.invoiceNumber }}</p></div>
+          <button class="modal-close" (click)="closeRepairModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="invoice-info-grid">
+            <div><p class="info-label">Invoice No</p><p class="info-value">{{ selectedRepairInvoice?.invoiceNumber }}</p></div>
+            <div><p class="info-label">Customer</p><p class="info-value">{{ selectedRepairInvoice?.customerName }}</p></div>
+            <div><p class="info-label">Email</p><p class="info-value">{{ selectedRepairInvoice?.customerEmail }}</p></div>
+            <div><p class="info-label">Rejected Date</p><p class="info-value">{{ selectedRepairInvoice?.rejectedAt | date:'dd MMM yyyy' }}</p></div>
+            <div><p class="info-label">Status</p><p class="info-value rejected-badge">✕ Rejected</p></div>
+          </div>
+          <div class="rejection-reason-box" *ngIf="selectedRepairInvoice?.rejectionReason">
+            <p class="reason-label">Rejection Reason</p>
+            <p class="reason-text">{{ selectedRepairInvoice?.rejectionReason }}</p>
+          </div>
+          <hr class="modal-divider"/>
+          <table class="invoice-items-table">
+            <thead><tr><th>Item</th><th>Qty</th><th>Rate (LKR)</th><th>Amount (LKR)</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let item of selectedRepairInvoice?.items">
+                <td>{{ item.itemName }}</td><td>{{ item.qty }}</td>
+                <td>{{ item.rate | number:'1.0-0' }}</td><td>{{ item.amount | number:'1.0-0' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="total-row"><span>Grand Total</span><span class="total-amount">LKR {{ selectedRepairInvoice?.grandTotal | number:'1.0-0' }}</span></div>
+        </div>
+        <div class="modal-footer"><button class="btn-close" (click)="closeRepairModal()">Close</button></div>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,125 @@
+<!-- HEADER -->
+<div class="invoice-header">
+  <div class="header-search">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text" placeholder="Search product" />
+  </div>
+  <div class="header-right">
+    <button class="icon-btn">⚙</button>
+    <button class="icon-btn">🔔</button>
+    <img src="https://ui-avatars.com/api/?name=Finance+Officer&background=4a7c4e&color=fff"
+      class="avatar" alt="avatar" />
+  </div>
+</div>
+
+<!-- LOADING STATE -->
+<div *ngIf="isLoading" style="text-align:center; padding:60px; font-size:16px; color:#6b7280;">
+  ⏳ Loading invoice...
+</div>
+
+<div class="invoice-body" *ngIf="!isLoading">
+
+  <h1 class="page-title">{{ invoiceTypeLabel }}</h1>
+
+  <!-- INVOICE DOCUMENT -->
+  <div class="invoice-doc">
+
+    <!-- Header Bar -->
+    <div class="doc-header-bar">
+      <span class="invoice-num">INVOICE #{{ invoiceNumber }}</span>
+      <span class="invoice-date">Date: {{ invoiceDate || '—' }}</span>
+    </div>
+
+    <!-- From + To -->
+    <div class="doc-from-to">
+      <div class="from-section">
+        <h2 class="brand-name">AirLux</h2>
+        <p class="brand-tagline">Premium Cooling Solutions</p>
+        <p class="brand-address">123 Galle Road,<br>Colombo 03.</p>
+      </div>
+      <div class="to-section">
+        <p class="to-label">INVOICE TO:</p>
+        <p class="to-name">{{ customerName }}</p>
+        <p class="to-address" style="white-space:pre-line">{{ customerAddress }}</p>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="doc-table-section">
+      <p class="table-heading">
+        {{ invoiceType === 'REPAIR' ? 'REPAIR SERVICES & MATERIALS' : 'SALES & SERVICES' }}
+      </p>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th class="col-no">No</th>
+            <th class="col-item">Item Name</th>
+            <th class="col-desc">Description</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-rate">Rate (LKR)</th>
+            <th class="col-amount">Amount (LKR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items; let i = index" [class.alt-row]="i % 2 === 1">
+            <td>{{ item.no }}</td>
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.description }}</td>
+            <td class="text-right">{{ item.qty }}</td>
+            <td class="text-right">{{ item.rate | number }}</td>
+            <td class="text-right amount-cell">{{ item.amount | number }}</td>
+          </tr>
+          <tr *ngIf="items.length === 0">
+            <td colspan="6" style="text-align:center; color:#9ca3af; padding:24px;">
+              No items found
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="total-row-item">
+          <span class="total-label">Sub Total</span>
+          <span class="total-val">LKR {{ subTotal | number }}</span>
+        </div>
+        <div class="total-row-item grand">
+          <span class="grand-label">Grand Total</span>
+          <span class="grand-val">LKR {{ grandTotal | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms & Conditions -->
+    <div class="terms-section">
+      <p class="terms-title">Terms & Conditions</p>
+      <p class="terms-text">
+        Payment Deadline: Once an invoice is accepted, the customer must complete the
+        payment and upload the payment slip within fourteen (14) calendar days.
+      </p>
+      <p class="terms-text">
+        Rejection Policy: If the invoice is rejected, it can be resumed within one (1)
+        month of the rejection date. After this period, the request will be permanently closed.
+      </p>
+      <p class="terms-text">
+        Failure to upload the payment slip within the 2-week period, the invoice will be
+        automatically cancelled, and the customer will be notified accordingly.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Confirm Button -->
+  <div class="confirm-wrap">
+    <button class="confirm-btn"
+      (click)="confirmAndGenerate()"
+      [disabled]="isConfirming">
+      {{ isConfirming ? 'Processing...' : 'Confirm and Generate' }}
+    </button>
+  </div>
+
+</div>

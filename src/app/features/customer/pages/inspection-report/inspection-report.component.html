@@ -1,0 +1,435 @@
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-search">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text" placeholder="Search Report field names" />
+  </div>
+  <div class="header-right">
+    <button class="icon-btn">⚙</button>
+    <button class="icon-btn">🔔</button>
+    <img src="https://ui-avatars.com/api/?name=Inspector&background=4a7c4e&color=fff" class="avatar" alt="avatar" />
+  </div>
+</div>
+
+<div class="report-body">
+  <h1 class="report-title">Inspection Report</h1>
+
+  <!-- ========== PAGE 1: Sections 1 & 2 ========== -->
+  <div *ngIf="currentPage === 1" class="page-content">
+    <div class="two-col">
+
+      <div class="col">
+        <!-- Section 1 -->
+        <div class="form-card">
+          <h3 class="section-title">1. &nbsp; Customer & Site Details</h3>
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" [(ngModel)]="customerName" />
+          </div>
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" [(ngModel)]="contactNumber" />
+          </div>
+          <div class="form-group">
+            <label>Site Address</label>
+            <textarea rows="3" [(ngModel)]="siteAddress"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Site Type</label>
+            <select [(ngModel)]="siteType">
+              <option value="">Select</option>
+              <option>Residential</option>
+              <option>Commercial</option>
+              <option>Industrial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Inspection Date</label>
+            <input type="text" [value]="inspectionDate" readonly class="readonly-input" />
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="form-card">
+          <h3 class="section-title">2. &nbsp; General Site Information</h3>
+          <div class="form-group">
+            <label>Site Status</label>
+            <div class="radio-group">
+              <label class="radio-option" [class.selected]="siteStatus==='New'">
+                <input type="radio" [(ngModel)]="siteStatus" value="New" /> New
+              </label>
+              <label class="radio-option" [class.selected]="siteStatus==='Existing'">
+                <input type="radio" [(ngModel)]="siteStatus" value="Existing" /> Existing
+              </label>
+              <label class="radio-option" [class.selected]="siteStatus==='Under Construction'">
+                <input type="radio" [(ngModel)]="siteStatus" value="Under Construction" /> Under Construction
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Floor Level</label>
+            <select [(ngModel)]="floorLevel">
+              <option value="">Select</option>
+              <option>Ground Floor</option>
+              <option>1st Floor</option>
+              <option>2nd Floor</option>
+              <option>3rd Floor</option>
+              <option>4th Floor+</option>
+            </select>
+          </div>
+          <div class="form-group toggle-row">
+            <label>Elevator Availability</label>
+            <div class="toggle" [class.on]="elevatorAvailability" (click)="elevatorAvailability=!elevatorAvailability">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Parking Availability</label>
+            <select [(ngModel)]="parkingAvailability">
+              <option value="">Select</option>
+              <option>Available</option>
+              <option>Limited</option>
+              <option>Not Available</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Manager -->
+      <div class="col">
+        <div class="room-intro-card">
+          <p class="room-intro-text">
+            You have <strong>{{ rooms.length }}</strong> room(s).<br>
+            Sections 3–8 will repeat for each room on the next page.
+          </p>
+          <button class="add-room-btn" (click)="addRoom()">
+            <span class="plus-icon">⊕</span> Add Room
+          </button>
+          <div class="room-chips">
+            <div class="room-chip" *ngFor="let room of rooms; let i = index">
+              <span>Room {{ i+1 }}{{ room.name ? ': '+room.name : '' }}</span>
+              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== PAGE 2: Sections 3–8 per room ========== -->
+  <div *ngIf="currentPage === 2" class="page-content">
+    <div *ngFor="let room of rooms; let i = index" class="room-block">
+
+      <div class="room-header">
+        <h2 class="room-heading">
+          Room {{ i+1 }}{{ room.name ? ': '+room.name : '' }}
+        </h2>
+      </div>
+
+      <div class="two-col">
+
+        <!-- LEFT: 3, 4, 5 -->
+        <div class="col">
+
+          <!-- Section 3 -->
+          <div class="form-card">
+            <h3 class="section-title">3. &nbsp; Room / Area Details</h3>
+            <div class="form-group">
+              <label>Room Name</label>
+              <input type="text" [(ngModel)]="room.name" />
+            </div>
+            <div class="form-group">
+              <label>Dimensions (L x W x H)</label>
+              <div class="dimensions-row">
+                <input type="number" placeholder="Length (ft)" [(ngModel)]="room.length"
+                  (ngModelChange)="calcArea(room)" class="dim-input" />
+                <span class="dim-x">X</span>
+                <input type="number" placeholder="Width (ft)" [(ngModel)]="room.width" (ngModelChange)="calcArea(room)"
+                  class="dim-input" />
+                <span class="dim-x">X</span>
+                <input type="number" placeholder="Height (ft)" [(ngModel)]="room.height" class="dim-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Area <span class="unit">(sq ft)</span></label>
+              <input type="number" [value]="room.area ?? ''" readonly class="readonly-input"
+                placeholder="Auto calculated" />
+            </div>
+            <div class="form-group">
+              <label>Sun Exposure</label>
+              <div class="slider-labels">
+                <span>Low</span><span>Medium</span><span>High</span>
+              </div>
+              <input type="range" min="0" max="100" step="50" [(ngModel)]="room.sunExposure" class="slider" />
+            </div>
+            <div class="form-group">
+              <label>Ventilation</label>
+              <div class="slider-labels">
+                <span>Low</span><span>Moderate</span><span>High</span>
+              </div>
+              <input type="range" min="0" max="100" step="50" [(ngModel)]="room.ventilation" class="slider" />
+            </div>
+            <div class="form-group">
+              <label>No. of Windows</label>
+              <input type="number" [(ngModel)]="room.windows" />
+            </div>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="form-card">
+            <h3 class="section-title">4. &nbsp; Possible Installation Locations</h3>
+            <h4 class="sub-heading">Indoor Unit</h4>
+            <div class="form-group">
+              <label>Possible Wall Locations</label>
+              <textarea rows="3" [(ngModel)]="room.possibleWallLocations"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Wall Condition (Built Material)</label>
+              <input type="text" [(ngModel)]="room.wallCondition" />
+            </div>
+            <div class="form-group">
+              <label>Space Availability</label>
+              <input type="text" [(ngModel)]="room.spaceAvailability" />
+            </div>
+            <h4 class="sub-heading">Outdoor Unit</h4>
+            <div class="form-group">
+              <label>Available Locations</label>
+              <input type="text" [(ngModel)]="room.outdoorAvailableLocations" />
+            </div>
+            <div class="form-group">
+              <label>Surface Condition</label>
+              <input type="text" [(ngModel)]="room.surfaceCondition" />
+            </div>
+            <div class="form-group">
+              <label>Ventilation Condition</label>
+              <input type="text" [(ngModel)]="room.ventilationCondition" />
+            </div>
+            <div class="form-group">
+              <label>Exposure to Weather</label>
+              <input type="text" [(ngModel)]="room.exposureToWeather" />
+            </div>
+          </div>
+
+          <!-- Section 5 -->
+          <div class="form-card">
+            <h3 class="section-title">5. &nbsp; Distance and Routing Observations</h3>
+            <div class="form-group">
+              <label>Indoor — Outdoor distance (approx.)</label>
+              <div class="inline-row">
+                <input type="number" [(ngModel)]="room.indoorOutdoorDistance" class="small-input" />
+                <span class="unit-tag">m</span>
+                <select [(ngModel)]="room.distanceMeasured" class="small-select">
+                  <option>Measured</option>
+                  <option>Estimated</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Possible Routing Path</label>
+              <select [(ngModel)]="room.possibleRoutingPath">
+                <option>Through wall</option>
+                <option>Through ceiling</option>
+                <option>Through floor</option>
+                <option>External</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Routing Path Description</label>
+              <textarea rows="3" [(ngModel)]="room.routingPathDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Estimated Number of Bends</label>
+              <input type="number" [(ngModel)]="room.estimatedBends" />
+            </div>
+            <div class="form-group toggle-row">
+              <label>Drain Outlet Availability Nearby</label>
+              <div class="toggle" [class.on]="room.drainOutletAvailable"
+                (click)="room.drainOutletAvailable=!room.drainOutletAvailable">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Drain Type</label>
+              <select [(ngModel)]="room.drainType">
+                <option>Gravity drain available</option>
+                <option>Pump required</option>
+                <option>No drain nearby</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Drain Path Description</label>
+              <textarea rows="3" [(ngModel)]="room.drainPathDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Obstacles in Routing Path</label>
+              <div class="checkbox-grid">
+                <label *ngFor="let obs of obstacleOptions" class="checkbox-option"
+                  [class.checked]="isObstacleSelected(room, obs)" (click)="toggleObstacle(room, obs)">
+                  <span class="checkbox-box" [class.checked]="isObstacleSelected(room, obs)"></span>
+                  {{ obs }}
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Obstacle Details</label>
+              <textarea rows="3" [(ngModel)]="room.obstacleDetails"></textarea>
+            </div>
+            <div class="form-group toggle-row">
+              <label>Wall Drilling Required</label>
+              <div class="toggle" [class.on]="room.wallDrillingRequired"
+                (click)="room.wallDrillingRequired=!room.wallDrillingRequired">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Number of Drill points (Approx.)</label>
+              <input type="number" [(ngModel)]="room.drillPoints" />
+            </div>
+            <div class="form-group">
+              <label>Vertical Height Difference (Approx.)
+                <span class="unit">In meters</span>
+              </label>
+              <input type="number" [(ngModel)]="room.verticalHeightDiff" />
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: 6, 7, 8 -->
+        <div class="col">
+
+          <!-- Section 6 -->
+          <div class="form-card">
+            <h3 class="section-title">6. &nbsp; Electrical Condition</h3>
+            <div class="form-group toggle-row">
+              <label>Power Points Nearby</label>
+              <div class="toggle" [class.on]="room.powerPointsNearby"
+                (click)="room.powerPointsNearby=!room.powerPointsNearby">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="form-group toggle-row">
+              <label>Wiring Condition Visible</label>
+              <div class="toggle" [class.on]="room.wiringConditionVisible"
+                (click)="room.wiringConditionVisible=!room.wiringConditionVisible">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="form-group toggle-row">
+              <label>Earthing Availability</label>
+              <div class="toggle" [class.on]="room.earthingAvailability"
+                (click)="room.earthingAvailability=!room.earthingAvailability">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Distance to Distribution Board</label>
+              <input type="text" [(ngModel)]="room.distanceToBoard" placeholder="In ft" />
+            </div>
+            <div class="form-group">
+              <label>Electrical Limitations</label>
+              <textarea rows="3" [(ngModel)]="room.electricalLimitations" placeholder="Mention if present"></textarea>
+            </div>
+          </div>
+
+          <!-- Section 7 -->
+          <div class="form-card">
+            <h3 class="section-title">7. &nbsp; Constraints & Risks</h3>
+            <textarea rows="6" [(ngModel)]="room.constraintsRisks" placeholder="Mention if present"
+              class="full-textarea"></textarea>
+          </div>
+
+          <!-- Section 8 -->
+          <div class="form-card">
+            <h3 class="section-title">8. &nbsp; Inspector Notes</h3>
+            <textarea rows="6" [(ngModel)]="room.inspectorNotes" class="full-textarea"></textarea>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE 3: Sections 9 & 10 ========== -->
+  <div *ngIf="currentPage === 3" class="page-content">
+    <div class="two-col">
+
+      <div class="col">
+        <!-- Section 9 -->
+        <div class="form-card">
+          <h3 class="section-title">9. &nbsp; Photo Documentation</h3>
+          <div class="add-photo-wrap">
+            <label class="add-photo-btn" (click)="triggerPhotoUpload(photoInput)">
+              📷 Add Photo
+            </label>
+            <input #photoInput type="file" accept="image/*" (change)="onPhotoFileSelected($event)"
+              style="display:none" />
+          </div>
+
+          <div class="photo-name-prompt" *ngIf="showPhotoNameInput">
+            <img [src]="pendingPhotoFile" class="pending-preview" />
+            <div class="form-group" style="margin-top:12px">
+              <label>Enter a name for this photo</label>
+              <input type="text" [(ngModel)]="pendingPhotoName" placeholder="e.g. Room Overview, IDU Wall..." />
+            </div>
+            <div class="prompt-actions">
+              <button class="btn-cancel-photo" (click)="cancelPhoto()">Cancel</button>
+              <button class="btn-confirm-photo" (click)="confirmPhoto()">Add Photo</button>
+            </div>
+          </div>
+
+          <div class="photos-grid" *ngIf="photoEntries.length > 0">
+            <div class="photo-entry" *ngFor="let entry of photoEntries; let i = index">
+              <div class="photo-entry-img">
+                <img [src]="entry.dataUrl" class="photo-preview" />
+                <button class="remove-photo-btn" (click)="removePhoto(i)">✕</button>
+              </div>
+              <span class="photo-entry-name">{{ entry.name }}</span>
+            </div>
+          </div>
+
+          <p class="no-photos" *ngIf="photoEntries.length === 0 && !showPhotoNameInput">
+            No photos added yet.
+          </p>
+        </div>
+      </div>
+
+      <div class="col">
+        <!-- Section 10 -->
+        <div class="form-card">
+          <h3 class="section-title">10. Acknowledgement</h3>
+          <div class="form-group">
+            <label>Inspector Name</label>
+            <input type="text" [(ngModel)]="inspectorName" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" [(ngModel)]="acknowledgeDate" />
+          </div>
+          <div class="form-group">
+            <label>Time <span class="unit">(auto)</span></label>
+            <input type="text" [value]="currentTime" readonly class="readonly-input" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="record-wrap">
+      <button class="record-btn" (click)="submitReport()">Record</button>
+    </div>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="form-pagination">
+    <button class="page-nav" (click)="goToPage(currentPage-1)" [disabled]="currentPage===1">Previous</button>
+    <button *ngFor="let p of [1,2,3]" class="page-num" [class.active]="currentPage===p" (click)="goToPage(p)">{{ p
+      }}</button>
+    <button class="page-nav" (click)="goToPage(currentPage+1)" [disabled]="currentPage===totalPages">Next</button>
+  </div>
+
+</div>

@@ -1,0 +1,454 @@
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:host {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: #f5f6f8;
+  color: #222;
+  min-height: 100vh;
+  display: block;
+}
+
+/* ===== NAVBAR (MATCHING PRODUCT-DETAIL) ===== */
+.pd-navbar {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 14px 48px 14px 36px;
+  border-bottom: 1px solid #e8e8e8;
+  gap: 0;
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  margin-left: -50vw;
+  right: 50%;
+  margin-right: -50vw;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.pd-navbar-left {
+  flex-shrink: 0;
+  margin-right: 28px;
+}
+
+.pd-logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #133B1F;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.pd-navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-left: auto;
+}
+
+.pd-nav-link {
+  color: #5B6670;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.pd-nav-link:hover {
+  color: #133B1F;
+}
+
+.pd-nav-logout {
+  margin-left: 12px;
+  background: #133B1F;
+  color: #fff;
+  border-radius: 7px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid #133B1F;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.pd-nav-logout:hover {
+  background: #1f4e39;
+}
+
+/* ===== HERO BANNER (MATCHING PRODUCT-DETAIL) ===== */
+.pd-hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(100deg, #163c2e 0%, #1e5c42 55%, #2d7a5a 100%);
+  color: #fff;
+  padding: 36px 48px 32px 48px;
+  gap: 24px;
+  overflow: hidden;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  right: 50%;
+  margin-right: -50vw;
+  box-sizing: border-box;
+}
+
+.pd-hero-content {
+  max-width: 480px;
+  margin-left: 0;
+}
+
+.pd-hero-content h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.pd-hero-content p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  line-height: 1.55;
+  max-width: 380px;
+}
+
+.pd-hero-user-row {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  right: 48px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.pd-hero-welcome {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-right: 16px;
+  text-shadow: 0 2px 8px rgba(19, 59, 31, 0.12);
+}
+
+.pd-hero-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(19, 59, 31, 0.07);
+}
+
+.pd-hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.pd-hero-greeting {
+  display: none;
+}
+
+/* ===== CONSULTATION CONTENT (OPTIMIZED TO FIT) ===== */
+.consult-container {
+    max-width: 1200px;
+    margin: 24px auto 0 auto;
+    padding: 0 18px;
+}
+
+.consult-card {
+    background: #ffffff;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 18px;
+    padding: 32px 38px;
+    box-shadow: 0 2px 16px rgba(19, 59, 31, 0.07);
+    border: 1px solid #e3e7ec;
+}
+
+.consult-split-row {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.consult-intro-col {
+    flex: 1.2;
+    text-align: left;
+}
+
+.consult-details-col {
+    flex: 1;
+}
+
+.consult-icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: #eaf6ef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.consult-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #133B1F;
+    margin-bottom: 6px;
+}
+
+.consult-subtitle {
+    font-size: 14.5px;
+    color: #55665a;
+    line-height: 1.55;
+    margin-bottom: 12px;
+}
+
+.contextual-notice {
+    font-size: 13.5px;
+    color: #667;
+    font-style: italic;
+    background: #f8faf9;
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 3px solid #10A760;
+}
+
+/* TECH INFO */
+.tech-info-box {
+    background: #f0f7f3;
+    border: 1px solid #dcece3;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.tech-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 14px;
+}
+
+.tech-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #55665a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tech-number {
+    font-size: 22px;
+    font-weight: 800;
+    color: #10A760;
+    text-decoration: none;
+}
+
+.times-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #133B1F;
+    margin-bottom: 8px;
+}
+
+.times-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.times-table td {
+    padding: 6px 0;
+    color: #133B1F;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(16, 167, 96, 0.1);
+}
+
+.times-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ACTIONS */
+.consult-actions {
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 18px;
+}
+
+.btn-recovery {
+    flex: 1;
+    background: #133B1F;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.btn-recovery:hover { background: #1f4e39; }
+
+.btn-back {
+    flex: 0.4;
+    background: transparent;
+    color: #133B1F;
+    border: 1.5px solid #133B1F;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-back:hover {
+    background: #133B1F;
+    color: #fff;
+}
+
+/* ===== FOOTER (MATCHING PRODUCT-DETAIL) ===== */
+.footer {
+  background: #162518;
+  color: #ffffff;
+  margin-top: 32px;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  right: 50%;
+  margin-right: -50vw;
+  box-sizing: border-box;
+}
+
+.footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 56px 48px 0 48px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 56px;
+  padding-bottom: 56px;
+}
+
+.footer-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.footer-brand {
+  flex: 0 0 280px;
+  max-width: 300px;
+}
+
+.footer-logo {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.footer-brand p {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.60);
+  max-width: 260px;
+}
+
+.footer-contact h3,
+.footer-social h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.footer-contact p {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 14px;
+  line-height: 1.55;
+}
+
+.footer-icon {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.40);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 18px 0;
+  margin: 0 -48px;
+  padding-left: 48px;
+  padding-right: 48px;
+}
+
+@media (max-width: 700px) {
+  .pd-hero-banner { padding: 32px 24px; }
+  .pd-hero-user-row { display: none; }
+  .consult-card { padding: 24px; }
+  .consult-split-row { flex-direction: column; gap: 20px; }
+  .consult-actions { flex-direction: column; }
+  .btn-back { flex: 1; }
+  .footer-content { flex-direction: column; gap: 28px; }
+  .footer-inner { padding: 36px 20px 0 20px; }
+  .footer-bottom { margin: 0 -20px; }
+}
