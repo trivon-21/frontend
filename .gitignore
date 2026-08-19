@@ -76,3 +76,4 @@ src/app/core/styling/FAILURE_POINTS*
 src/app/core/styling/RECOVERY*
 src/app/core/styling/*.md
 !src/app/core/styling/README.md
+AGENTS.md
