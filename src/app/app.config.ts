@@ -1,6 +1,5 @@
 import {
   ApplicationConfig,
-  provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection
 } from '@angular/core';
 import {
@@ -12,6 +11,11 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+
+// NOTE: provideBrowserGlobalErrorListeners doesn't exist in angular/core standard APIs unless it was locally patched,
+// but since both sides imported it, I must include it.
+
+import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
