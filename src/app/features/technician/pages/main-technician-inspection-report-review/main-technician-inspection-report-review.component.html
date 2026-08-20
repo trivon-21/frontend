@@ -1,0 +1,223 @@
+﻿<div class="review-container">
+  <div class="back-navigation">
+    <a routerLink="/main-technician-inspection-reports" class="back-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to Inspection Reports
+    </a>
+  </div>
+  
+  <header class="page-header">
+    <h1>Inspection Report Review #{{ id }}</h1>
+  </header>
+
+  @if (isLoading) {
+    <div class="summary-card" style="margin-bottom: 16px;">
+      <div class="card-content">
+        <p class="label">Loading</p>
+        <p class="value">Fetching unified report data...</p>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="summary-card" style="margin-bottom: 16px; border-left: 4px solid #ef4444;">
+      <div class="card-content">
+        <p class="label">Error</p>
+        <p class="value">{{ error }}</p>
+      </div>
+    </div>
+  }
+
+  <section class="summary-cards">
+    <div class="summary-card">
+      <div class="card-icon customer-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Customer</p>
+        <p class="value">{{ report?.customerId?.name || '-' }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon location-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Location</p>
+        <p class="value">{{ report?.customerId?.address || '-' }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon date-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="card-content">
+        <p class="label">Inspection Date</p>
+        <p class="value">{{ report?.inspectionMeta?.date | date:'longDate' }}</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs-nav">
+    <ul class="tabs-list">
+      <li class="tab-item" [class.active]="activeTab === 'Overview'" (click)="activeTab = 'Overview'">Overview</li>
+      <li class="tab-item" [class.active]="activeTab === 'Findings'" (click)="activeTab = 'Findings'">Inspection Findings</li>
+      <li class="tab-item" [class.active]="activeTab === 'Photos'" (click)="activeTab = 'Photos'">Photo Evidence</li>
+    </ul>
+  </nav>
+
+  <main class="review-content">
+    @if (activeTab === 'Overview') {
+      <div class="content-grid">
+        <section class="info-column card">
+          <div class="card-header"><h2>Customer Information</h2></div>
+          <div class="card-body">
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Full Name</p>
+                <p class="info-value">{{ report?.customerId?.name || '-' }}</p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Phone Number</p>
+                <p class="info-value">{{ report?.customerId?.contactNo || '-' }}</p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-details">
+                <p class="info-label">Email Address</p>
+                <p class="info-value">{{ report?.customerId?.email || '-' }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="details-column card">
+          <div class="card-header"><h2>Site Details</h2></div>
+          <div class="card-body details-grid">
+            <div class="detail-item">
+              <p class="detail-label">Building Type</p>
+              <p class="detail-value">{{ report?.siteDetails?.buildingType || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Floors</p>
+              <p class="detail-value">{{ report?.siteDetails?.floors ?? '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Rooms</p>
+              <p class="detail-value">{{ report?.siteDetails?.rooms ?? '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Ceiling Height</p>
+              <p class="detail-value">{{ report?.siteDetails?.ceilingHeight || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Wall Type</p>
+              <p class="detail-value">{{ report?.siteDetails?.wallType || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Power Supply</p>
+              <p class="detail-value">{{ report?.siteDetails?.powerSupply || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Outdoor Access</p>
+              <p class="detail-value">{{ report?.siteDetails?.outdoorAccess || '-' }}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (activeTab === 'Findings') {
+      <section class="findings-summary card full-width-card">
+        <div class="card-header"><h2>Inspection Findings Summary</h2></div>
+        <div class="card-body">
+          <div class="findings-list">
+            <div class="finding-item" *ngFor="let finding of report?.findings">
+              <div class="finding-header">
+                <div class="finding-title">
+                  <h3>{{ finding.category }}</h3>
+                </div>
+                <span class="status-badge" [ngClass]="finding.status === 'Needs Attention' ? 'attention' : 'good'">
+                  {{ finding.status }}
+                </span>
+              </div>
+              <p class="finding-desc">{{ finding.description }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (activeTab === 'Photos') {
+      <section class="photos-gallery card full-width-card">
+        <div class="card-header"><h2>Site Inspection Photos</h2></div>
+        <div class="card-body">
+          <div class="photos-grid">
+            <div class="photo-item" *ngFor="let photo of report?.photos">
+              <div class="photo-wrapper">
+                <img [src]="photo.url" [alt]="photo.caption">
+              </div>
+              <p class="photo-caption">{{ photo.caption }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <section class="review-section card full-width-card">
+      <div class="card-header"><h2>Review</h2></div>
+      <div class="card-body">
+        <div class="form-group half-width-field">
+          <label for="recommended-product">Recommended Product</label>
+          <input
+            id="recommended-product"
+            type="text"
+            [(ngModel)]="recommendedProduct"
+            placeholder="Enter recommended product"
+          />
+        </div>
+        <div class="form-group">
+          <label for="review-notes">Review Notes</label>
+          <textarea id="review-notes" [(ngModel)]="reviewNotes" placeholder="Add approval comments..."></textarea>
+        </div>
+      </div>
+      <div class="card-footer actions-footer">
+        <button class="footer-btn reject" (click)="openRejectModal()">Reject</button>
+        <button class="footer-btn approve" (click)="completeReview()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Processing...' : 'Complete Review' }}
+        </button>
+      </div>
+    </section>
+  </main>
+
+  @if (showRejectModal) {
+    <div class="modal-overlay" (click)="closeRejectModal()">
+      <div class="modal-container reject-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h2>Reject Report #{{ id }}</h2>
+          <p class="modal-subtitle">The report will be marked as rejected and returned to the inspection queue.</p>
+        </header>
+        <div class="modal-body">
+          <div class="reason-section">
+            <label for="rejection-reason">Rejection Reason</label>
+            <textarea
+              id="rejection-reason"
+              class="modal-textarea"
+              [(ngModel)]="rejectionReason"
+              placeholder="Explain why this report is being rejected..."
+            ></textarea>
+            <p class="info-notice">This note will be saved with the report history.</p>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button class="modal-btn cancel" (click)="closeRejectModal()">Cancel</button>
+          <button class="modal-btn confirm" (click)="submitRejection()" [disabled]="isSubmitting || !rejectionReason.trim()">Reject Report</button>
+        </footer>
+      </div>
+    </div>
+  }
+
+</div>
+  

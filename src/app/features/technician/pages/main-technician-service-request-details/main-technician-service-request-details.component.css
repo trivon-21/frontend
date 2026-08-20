@@ -1,0 +1,320 @@
+﻿
+    .details-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 8px;
+    }
+
+    .back-link {
+      background-color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+      color: #1e293b;
+    }
+
+    .header-section {
+      background-color: white;
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.03);
+    }
+
+    .header-left {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .header-left h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1b;
+      margin: 0;
+    }
+
+    .status-badge {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-badge.in-progress {
+      background-color: #f0fdf4;
+      color: #16a34a;
+    }
+
+    .status-badge.scheduled {
+      background-color: #f5f3ff;
+      color: #7c3aed;
+    }
+
+    .status-badge.completed {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+
+    .status-badge.on-hold {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+
+    .status-badge.unknown {
+      background-color: #f8fafc;
+      color: #64748b;
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .summary-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background-color: #fff;
+      border: 1px solid #f1f5f9;
+      border-radius: 16px;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .customer-icon { background-color: #f8fafc; color: #16a34a; }
+    .location-icon { background-color: #f0fdf4; color: #16a34a; }
+    .date-icon { background-color: #f0fdf4; color: #16a34a; }
+    .product-icon { background-color: #f0fdf4; color: #16a34a; }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-label {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 4px;
+      margin-top: 0;
+    }
+
+    .card-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .info-section {
+      background-color: white;
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #f1f5f9;
+    }
+
+    .info-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 24px 0;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .view-history-btn {
+      width: 100%;
+      margin-top: 24px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-family: 'Inter', sans-serif;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .view-history-btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .view-history-btn.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .info-icon {
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .info-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .service-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .detail-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .detail-description {
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.6;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .materials-table-wrapper {
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+    }
+
+    .materials-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #f8fafc;
+    }
+
+    .materials-table th {
+      text-align: left;
+      padding: 16px 24px;
+      background-color: #eff6ff;
+      color: #1e40af;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .materials-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      background-color: white;
+      font-size: 14px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .bottom-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .team-lead {
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .team-member {
+      color: #475569;
+      margin: 0;
+    }
+
+    .state-card {
+      background-color: white;
+      border: 1px solid #f1f5f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .retry-btn {
+      background-color: #41603d;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+  

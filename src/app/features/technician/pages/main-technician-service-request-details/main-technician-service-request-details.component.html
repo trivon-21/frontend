@@ -1,0 +1,166 @@
+﻿
+    <div class="details-container">
+      <div class="back-link">
+        <a routerLink="/main-technician-service-requests" class="back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          Back to Service Requests
+        </a>
+      </div>
+
+      <div class="header-section">
+      <header class="header-left">
+        <h1>Service #{{ id }}</h1>
+        <span class="status-badge" [ngClass]="statusClass">{{ serviceView?.status || 'N/A' }}</span>
+      </header>
+
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="card-icon customer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Customer</p>
+            <p class="card-value">{{ serviceView?.customerName || '-' }}</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-icon location-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Location</p>
+            <p class="card-value">{{ serviceView?.location || '-' }}</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-icon date-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Service Date</p>
+            <p class="card-value">{{ formatDate(serviceView?.serviceDate) }}</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-icon product-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Product Type</p>
+            <p class="card-value">{{ serviceView?.productType || '-' }}</p>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="state-card">
+          <p>Loading service request details...</p>
+        </div>
+      } @else if (error) {
+        <div class="state-card">
+          <p>{{ error }}</p>
+          <button class="retry-btn" (click)="loadServiceDetails()">Retry</button>
+        </div>
+      }
+
+      <div class="details-grid">
+        <div class="info-section">
+          <h2>Customer Information</h2>
+          <div class="info-list">
+            <div class="info-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <div class="info-text">
+                <span class="info-label">Full Name</span>
+                <span class="info-value">{{ serviceView?.customerName || '-' }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <div class="info-text">
+                <span class="info-label">Phone Number</span>
+                <span class="info-value">{{ serviceView?.customerDetails?.phone || '-' }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <div class="info-text">
+                <span class="info-label">Email Address</span>
+                <span class="info-value">{{ serviceView?.customerDetails?.email || '-' }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div class="info-text">
+                <span class="info-label">Address</span>
+                <span class="info-value">{{ serviceView?.customerDetails?.address || '-' }}</span>
+              </div>
+            </div>
+          </div>
+          <a
+            class="view-history-btn"
+            [routerLink]="['/main-technician-service-history', 'service', id]"
+            [class.disabled]="!id"
+            [attr.aria-disabled]="!id"
+            [attr.tabindex]="!id ? -1 : null"
+          >
+            View Service History
+          </a>
+        </div>
+
+        <div class="info-section">
+          <h2>Service Request Details</h2>
+          <div class="service-details">
+            <div class="detail-group">
+              <span class="detail-label">Product Type</span>
+              <span class="detail-value">{{ serviceView?.requestDetails?.specificProduct || '-' }}</span>
+            </div>
+            <div class="detail-group">
+              <span class="detail-label">Description</span>
+              <p class="detail-description">{{ serviceView?.requestDetails?.description || '-' }}</p>
+            </div>
+            
+            <div class="materials-section">
+              <span class="detail-label">Materials Required</span>
+              <div class="materials-table-wrapper">
+                <table class="materials-table">
+                  <thead>
+                    <tr>
+                      <th>ITEM</th>
+                      <th>QUANTITY</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (material of serviceView?.requestDetails?.materials || []; track material.item) {
+                      <tr>
+                        <td>{{ material.item || '-' }}</td>
+                        <td>{{ material.quantity || '-' }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="2">No materials listed</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-sections">
+        <div class="info-section team-section">
+          <h2>{{ serviceView?.assignment?.teamName || 'Service Team' }}</h2>
+          <p class="team-lead"><strong>Team Lead - {{ serviceView?.assignment?.teamLead || '-' }}</strong></p>
+          <div class="team-member-list">
+            @for (member of serviceView?.assignment?.members || []; track member) {
+              <p class="team-member">{{ member }}</p>
+            } @empty {
+              <p class="team-member">-</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  
