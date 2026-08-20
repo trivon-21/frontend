@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface NotificationItem {
   message: string;
@@ -24,6 +26,8 @@ export class HeaderComponent implements OnInit {
   searchQuery = '';
   showSettings = false;
   showNotifications = false;
+  showProfileModal = false;
+  currentUser: any = null;
 
   notifications: NotificationItem[] = [];
   totalPending = 0;
@@ -32,10 +36,15 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private notificationService: NotificationService
+    private router: Router,
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) { }
 
-  ngOnInit(): void { this.loadNotifications(); }
+  ngOnInit(): void {
+    this.loadNotifications();
+    this.currentUser = this.authService.getCurrentUser();
+  }
 
   loadNotifications(): void {
     forkJoin({
@@ -108,6 +117,15 @@ export class HeaderComponent implements OnInit {
   onSearch() { console.log('Searching:', this.searchQuery); }
   toggleSettings() { this.showSettings = !this.showSettings; this.showNotifications = false; }
   toggleNotifications() { this.showNotifications = !this.showNotifications; this.showSettings = false; }
-  logout() { this.notificationService.show('Logged out (Demo)', 'info'); }
-  manageProfile() { this.notificationService.show('Manage Profile clicked (Demo)', 'info'); }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
+  manageProfile() {
+    this.showProfileModal = true;
+    this.showSettings = false;
+  }
+  closeProfileModal() {
+    this.showProfileModal = false;
+  }
 }

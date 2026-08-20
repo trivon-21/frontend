@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface NavItem {
   label: string;
@@ -33,7 +34,11 @@ interface StandaloneLink {
 })
 
 export class SidebarComponent {
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   standaloneLinks: StandaloneLink[] = [
     { title: 'Payment Dashboard', icon: 'dashboard', route: '/finance/dashboard' },
@@ -187,5 +192,10 @@ export class SidebarComponent {
       </svg>`,
     };
     return this.sanitizer.bypassSecurityTrustHtml(icons[iconName] || '');
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

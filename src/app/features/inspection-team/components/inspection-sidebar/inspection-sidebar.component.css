@@ -71,3 +71,8 @@
     transform: translateX(0);
   }
 }
+
+.logout-btn:hover {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}

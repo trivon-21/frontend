@@ -12,9 +12,9 @@
 
     <nav class="navlinks">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-      <a href="#">View products</a>
+      <a routerLink="/catalog">View products</a>
       <a routerLink="/" fragment="services">Our Services</a>
-      <a href="#">About Us</a>
+      <!-- <a href="#">About Us</a> -->
     </nav>
 
     <!-- Guest buttons -->
@@ -73,9 +73,9 @@
   <div class="mobile-menu" *ngIf="isMobileMenuOpen">
     <nav class="mobile-navlinks">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Home</a>
-      <a href="#" (click)="closeMobileMenu()">View products</a>
+      <a routerLink="/catalog" (click)="closeMobileMenu()">View products</a>
       <a routerLink="/" fragment="services" (click)="closeMobileMenu()">Our Services</a>
-      <a href="#" (click)="closeMobileMenu()">About Us</a>
+      <!-- <a href="#" (click)="closeMobileMenu()">About Us</a> -->
     </nav>
     
     <div class="mobile-actions">

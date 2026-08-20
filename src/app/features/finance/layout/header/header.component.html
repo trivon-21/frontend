@@ -68,3 +68,35 @@
 
   </div>
 </header>
+
+<!-- PROFILE DETAILS MODAL -->
+<div class="profile-modal-overlay" *ngIf="showProfileModal" (click)="closeProfileModal()">
+  <div class="profile-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header-section">
+      <h3>Account Details</h3>
+      <button class="close-btn" (click)="closeProfileModal()">&times;</button>
+    </div>
+    <div class="modal-body-section" *ngIf="currentUser">
+      <div class="detail-row">
+        <span class="detail-label">Full Name</span>
+        <span class="detail-val">{{ currentUser.fullName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-val">{{ currentUser.email }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">System Role</span>
+        <span class="detail-val role-badge">{{ currentUser.role }}</span>
+      </div>
+      <div class="detail-row" *ngIf="currentUser.phoneNumber">
+        <span class="detail-label">Phone</span>
+        <span class="detail-val">{{ currentUser.phoneNumber }}</span>
+      </div>
+      <div class="detail-row" *ngIf="currentUser.address">
+        <span class="detail-label">Address</span>
+        <span class="detail-val">{{ currentUser.address }}</span>
+      </div>
+    </div>
+  </div>
+</div>

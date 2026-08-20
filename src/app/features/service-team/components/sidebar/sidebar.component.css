@@ -61,4 +61,8 @@
     .icon svg {
       stroke-width: 1.5px;
     }
+    .logout-item:hover {
+      background-color: #fee2e2 !important;
+      color: #dc2626 !important;
+    }
   
