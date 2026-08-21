@@ -63,6 +63,71 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
 
   private getFallbackTicket(id: string): any | null {
     const fallbackTickets: Record<string, any> = {
+      '238489782': {
+        id: '238489782',
+        sourceId: '238489782',
+        type: 'Service Request',
+        status: 'Assigned',
+        customer: {
+          name: 'John Anderson',
+          address: 'Logistic Area 1, Colombo',
+          phone: '+94 77 123 4567',
+          email: 'john.anderson@logistic.lk'
+        },
+        location: 'Logistic Area 1, Colombo',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Split AC - 3 Units',
+        detailedProductType: 'Split Air Conditioner (Inverter)',
+        description: 'Air Conditioner unit making strange noise and failing to cool the server room.',
+        notesFromTechnician: 'Inspect fan blade alignment and compressor power draw.',
+        materials: [
+          { item: 'Copper piping (3/8" + 5/8")', quantity: '15 meters' },
+          { item: 'Compressor capacitor (45uF)', quantity: '1 unit' }
+        ]
+      },
+      '238489783': {
+        id: '238489783',
+        sourceId: '238489783',
+        type: 'Installation',
+        status: 'In Progress',
+        customer: {
+          name: 'Nimal Perera',
+          address: 'Galle Road, Colombo 03',
+          phone: '+94 77 234 5678',
+          email: 'nimal.p@gmail.com'
+        },
+        location: 'Galle Road, Colombo 03',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Cassette AC - 2 Units',
+        detailedProductType: 'Cassette Air Conditioner',
+        description: 'Standard installation of two Cassette units in the main lobby.',
+        notesFromTechnician: 'Requires scaffold tower for high ceiling mounting.',
+        materials: [
+          { item: 'Wall mounting brackets (heavy duty)', quantity: '2 units' },
+          { item: 'Drainage PVC pipes & fittings', quantity: '10 meters' }
+        ]
+      },
+      '238489784': {
+        id: '238489784',
+        sourceId: '238489784',
+        type: 'Service Request',
+        status: 'On Hold',
+        customer: {
+          name: 'Kavindi Silva',
+          address: 'Malabe Tech Park, Malabe',
+          phone: '+94 77 345 6789',
+          email: 'kavindi@techpark.lk'
+        },
+        location: 'Malabe Tech Park, Malabe',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Ducted AC - 1 Unit',
+        detailedProductType: 'Ducted Air Conditioner',
+        description: 'Water leak from the ceiling unit in Section 4.',
+        notesFromTechnician: 'Wait for ceiling tiles to be removed by facility manager.',
+        materials: [
+          { item: 'PVC insulation tape', quantity: '2 rolls' }
+        ]
+      }
     };
 
     return fallbackTickets[id] || null;

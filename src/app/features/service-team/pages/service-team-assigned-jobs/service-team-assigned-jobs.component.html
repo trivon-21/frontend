@@ -1,61 +1,90 @@
-<div class="assigned-jobs-container">
-  <div class="header-actions">
-    <div class="search-box">
-      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<div class="page-wrapper assigned-jobs-container">
+  <!-- Page Header -->
+  <header class="page-header" style="margin-bottom: 24px;">
+    <h1 class="page-title">Assigned Jobs</h1>
+  </header>
+
+  <!-- Filters & Search Bar Row -->
+  <div class="filter-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+    <div class="search-input-wrapper" style="position: relative; flex-grow: 1; max-width: 400px; display: flex; align-items: center;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9e96" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 16px; pointer-events: none;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       <input
         type="text"
         placeholder="Search by ticket, customer..."
+        class="filter-search-input"
         [(ngModel)]="searchQuery"
         (input)="filterTasks()"
+        style="width: 100%; padding: 12px 16px 12px 44px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; background: #fff;"
       >
     </div>
 
-    <div class="filters">
-      <div class="filter-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-        <span>Filters:</span>
+    <div class="filter-actions" style="display: flex; align-items: center; gap: 12px;">
+      <div class="filter-controls" style="display: flex; align-items: center; gap: 8px;">
+        <span class="filter-label" style="font-size: 12px; color: #8a9e96; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9v6l4 2v-8l8-9z"/></svg>
+          Filters:
+        </span>
+        <select
+          class="filter-select"
+          [(ngModel)]="statusFilter"
+          (change)="filterTasks()"
+          style="padding: 10px 16px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; color: #2D3139; outline: none; background: #fff; cursor: pointer; min-width: 150px;"
+        >
+          <option value="All">All</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="On Hold">On Hold</option>
+        </select>
       </div>
-      <select [(ngModel)]="statusFilter" (change)="filterTasks()">
-        <option value="All">All</option>
-        <option value="Assigned">Assigned</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Completed">Completed</option>
-        <option value="On Hold">On Hold</option>
-      </select>
-      <button class="clear-filters" (click)="clearFilters()">Clear Filters</button>
+      <button class="btn-secondary clear-filters" (click)="clearFilters()" style="padding: 10px 20px;">
+        Clear Filters
+      </button>
     </div>
   </div>
 
-  <div class="jobs-list">
-    <div class="job-card" *ngFor="let task of filteredTasks">
-      <div class="job-info">
-        <div class="job-id-title">
-          <h3>#{{ task.id }} - {{ task.type }}</h3>
-          <p class="customer-name">{{ task.customer?.name || task.customer }}</p>
+  <!-- Jobs List Rows -->
+  <div class="jobs-list" style="display: flex; flex-direction: column; gap: 16px;">
+    <div class="job-card card-panel" *ngFor="let task of filteredTasks" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; flex-wrap: wrap; gap: 16px;">
+      <div class="job-info" style="flex-grow: 1; min-width: 250px;">
+        <div class="job-id-title" style="margin-bottom: 12px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #1b2f27; margin: 0 0 4px 0;">
+            #{{ task.id }} - {{ task.type }}
+          </h3>
+          <p class="customer-name" style="font-size: 14px; color: #8a9e96; margin: 0; font-weight: 500;">
+            {{ task.customer?.name || task.customer }}
+          </p>
         </div>
 
-        <div class="job-details-grid">
-          <div class="detail-item">
-            <label>Location</label>
-            <span>{{ task.location }}</span>
+        <div class="job-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px;">
+          <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
+            <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Location</label>
+            <span style="font-size: 13.5px; font-weight: 600; color: #2D3139; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" [title]="task.location">
+              {{ task.location }}
+            </span>
           </div>
-          <div class="detail-item">
-            <label>Type</label>
-            <span>{{ task.serviceType }}</span>
+          <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
+            <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Type</label>
+            <span style="font-size: 13.5px; font-weight: 600; color: #2D3139;">
+              {{ task.serviceType }}
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="job-status-action">
-        <span class="status-badge" [ngClass]="statusClass(task.status)">
+      <div class="job-status-action" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+        <span class="status-badge" [ngClass]="statusClass(task.status)" style="display: inline-block;">
           {{ displayStatus(task.status) }}
         </span>
-        <button class="view-btn" [routerLink]="['/service-team/service-details', task.id]">View</button>
+        <button class="btn-primary view-btn" [routerLink]="['/service-team/service-details', task.id]" style="padding: 10px 24px;">
+          View
+        </button>
       </div>
     </div>
 
-    <div class="no-results" *ngIf="filteredTasks.length === 0">
-      <p>No jobs found matching your criteria.</p>
+    <!-- Empty State -->
+    <div class="no-results card-panel" *ngIf="filteredTasks.length === 0" style="padding: 48px; text-align: center;">
+      <p style="font-size: 15px; color: #8a9e96; margin: 0; font-weight: 500;">No jobs found matching your criteria.</p>
     </div>
   </div>
 </div>
