@@ -117,7 +117,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of historyItems">
+          <tr *ngFor="let item of paginatedHistory">
             <td class="ticket-id">{{ item.ticketId }}</td>
             <td>{{ item.serviceType }}</td>
             <td>{{ item.productType }}</td>
@@ -142,16 +142,11 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination-footer pagination-section">
-      <span class="pagination-info">Showing {{ historyItems.length }} items</span>
+    <div class="pagination-footer pagination-section" *ngIf="totalPages > 1">
+      <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
       <div class="pagination-controls">
-        <button class="page-btn pagination-link prev">Previous</button>
-        <button class="page-btn pagination-link active">1</button>
-        <button class="page-btn pagination-link">2</button>
-        <button class="page-btn pagination-link">3</button>
-        <span class="dots">...</span>
-        <button class="page-btn pagination-link">31</button>
-        <button class="page-btn pagination-link next">Next</button>
+        <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+        <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </div>
   </div>

@@ -61,12 +61,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let ticket of filteredTickets">
+              <tr *ngFor="let ticket of paginatedTickets">
                 <td class="ticket-id">{{ ticket.id }}</td>
                 <td>{{ ticket.customerName }}</td>
                 <td>{{ ticket.location }}</td>
                 <td class="date-cell">
-                  {{ ticket.date.replace(' 2026', '') }}<br>
+                   {{ ticket.date.replace(' 2026', '') }}<br>
                   <span class="year">2026</span>
                 </td>
                 <td>
@@ -83,16 +83,11 @@
           </table>
         }
 
-        <div class="pagination-section">
-          <span class="pagination-info">Showing 1-8 of 247 items</span>
+        <div class="pagination-section" *ngIf="totalPages > 1">
+          <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
           <div class="pagination-controls">
-            <button class="pagination-link prev">Previous</button>
-            <button class="pagination-link active">1</button>
-            <button class="pagination-link">2</button>
-            <button class="pagination-link">3</button>
-            <span class="dots">...</span>
-            <button class="pagination-link">31</button>
-            <button class="pagination-link next">Next</button>
+            <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+            <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
           </div>
         </div>
       </div>
