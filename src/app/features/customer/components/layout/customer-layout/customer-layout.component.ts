@@ -35,8 +35,27 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
-    if (user?.role === 'SUPER_ADMIN') {
-      this.router.navigate(['/super-admin']);
+    if (user && user.role !== 'CUSTOMER') {
+      switch (user.role) {
+        case 'SUPER_ADMIN':
+          this.router.navigate(['/super-admin']);
+          break;
+        case 'MAIN_TECH':
+          this.router.navigate(['/main-technician-dashboard']);
+          break;
+        case 'SERVICE_TEAM':
+          this.router.navigate(['/service-team/dashboard']);
+          break;
+        case 'FINANCE':
+          this.router.navigate(['/finance/dashboard']);
+          break;
+        case 'INSPECTION':
+          this.router.navigate(['/inspection-officer/dashboard']);
+          break;
+        default:
+          this.router.navigate(['/']);
+          break;
+      }
       return;
     }
 

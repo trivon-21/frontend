@@ -154,6 +154,31 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
 
       return matchesType && matchesSearch;
     });
+    this.currentPage = 1;
+  }
+
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.historyItems.length / this.pageSize);
+  }
+
+  get paginatedHistory(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.historyItems.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
   }
 
   private formatDate(value?: string | null): string {

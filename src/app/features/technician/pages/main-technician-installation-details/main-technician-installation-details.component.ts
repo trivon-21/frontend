@@ -89,5 +89,15 @@ export class MainTechnicianInstallationDetailsComponent implements OnInit {
         }
       });
   }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'in-progress';
+    const s = status.toLowerCase();
+    if (s.includes('completed')) return 'completed';
+    if (s.includes('progress')) return 'in-progress';
+    if (s.includes('schedule')) return 'scheduled';
+    if (s.includes('hold')) return 'on-hold';
+    return 'assigned';
+  }
 }
 

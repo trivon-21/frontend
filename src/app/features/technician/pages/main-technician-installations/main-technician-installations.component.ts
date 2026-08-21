@@ -148,6 +148,30 @@ export class MainTechnicianInstallationsComponent implements OnInit {
     this.applyFilters();
   }
 
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTickets.length / this.pageSize);
+  }
+
+  get paginatedTickets(): InstallationTicket[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTickets.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   applyFilters(): void {
     const normalized = this.searchQuery.toLowerCase();
     this.filteredTickets = this.tickets.filter((ticket) => {
@@ -163,6 +187,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
 
       return matchesSearch && matchesStatus;
     });
+    this.currentPage = 1;
   }
 
   clearFilters(): void {

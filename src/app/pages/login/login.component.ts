@@ -60,11 +60,26 @@ export class LoginComponent {
     }
 
     const user = this.authService.getCurrentUser();
-    if (user?.role === 'SUPER_ADMIN') {
-      return '/super-admin';
+    if (!user) {
+      return '/';
     }
 
-    return '/dashboard';
+    switch (user.role) {
+      case 'SUPER_ADMIN':
+        return '/super-admin';
+      case 'CUSTOMER':
+        return '/dashboard';
+      case 'MAIN_TECH':
+        return '/main-technician-dashboard';
+      case 'SERVICE_TEAM':
+        return '/service-team/dashboard';
+      case 'FINANCE':
+        return '/finance/dashboard';
+      case 'INSPECTION':
+        return '/inspection-officer/dashboard';
+      default:
+        return '/';
+    }
   }
 
   onIdentifierChange(identifier: string) {

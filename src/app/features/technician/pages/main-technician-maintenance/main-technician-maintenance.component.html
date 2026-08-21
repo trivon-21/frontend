@@ -51,7 +51,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let ticket of filteredTickets">
+        <tr *ngFor="let ticket of paginatedTickets">
           <td class="ticket-id">{{ ticket.ticketId }}</td>
           <td>{{ ticket.customerName }}</td>
           <td>{{ ticket.productType }}</td>
@@ -76,21 +76,16 @@
           </td>
         </tr>
         <tr *ngIf="filteredTickets.length === 0">
-          <td colspan="8" class="empty-state">No maintenance tickets found.</td>
+          <td colspan="9" class="empty-state">No maintenance tickets found.</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="pagination-section" *ngIf="filteredTickets.length > 0">
-      <span class="pagination-info">Showing 1-{{ filteredTickets.length }} of {{ filteredTickets.length }} items</span>
+    <div class="pagination-section" *ngIf="totalPages > 1">
+      <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
       <div class="pagination-controls">
-        <button class="pagination-link prev">Previous</button>
-        <button class="pagination-link active">1</button>
-        <button class="pagination-link">2</button>
-        <button class="pagination-link">3</button>
-        <span class="dots">...</span>
-        <button class="pagination-link">31</button>
-        <button class="pagination-link next">Next</button>
+        <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+        <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </div>
   </div>
