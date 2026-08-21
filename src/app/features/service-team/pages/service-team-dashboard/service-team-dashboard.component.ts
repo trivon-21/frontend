@@ -190,6 +190,13 @@ export class ServiceTeamDashboardComponent implements OnInit {
     }
   }
 
+  /** Updates search query and triggers application filter. */
+  onSearch(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchQuery = inputElement.value;
+    this.applySearch();
+  }
+
   activity: DashboardActivityItem[] = [];
   alerts: DashboardAlertItem[] = [];
 
