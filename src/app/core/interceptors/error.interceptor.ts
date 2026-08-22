@@ -21,6 +21,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       console.error('HTTP Error:', error);
 
+      // Local development uses a synthetic role so the Manager and Inventory
+      // screens can be reviewed without creating a real authenticated session.
+      // Their API calls can still receive 401/403 responses from a backend that
+      // has its development bypass disabled. Keep the current route in that
+      // case so feature-level offline/error handling can render normally.
+      if (authService.localAuthBypassEnabled && (error.status === 401 || error.status === 403)) {
+        return throwError(() => error);
+      }
+
       if (error.status === 401) {
         // Unauthorized - token expired or invalid
         authService.logout();
