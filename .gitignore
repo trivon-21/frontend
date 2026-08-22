@@ -19,7 +19,6 @@ npm-debug.log*
 *.tsbuildinfo
 Agents.md
 
-
 # Local editor settings
 .idea/
 .vscode/*
