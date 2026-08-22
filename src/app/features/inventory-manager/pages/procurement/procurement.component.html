@@ -1,0 +1,366 @@
+<div class="procurement-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon-wrap">
+        <lucide-angular name="clipboard-check" [size]="28"></lucide-angular>
+      </div>
+      <div>
+        <h1>Procurement</h1>
+        <p class="subtitle">Receive approved purchases and update stock with a traceable Goods Received Note (GRN).</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/inventory-manager/inventory">
+        <lucide-angular name="package" [size]="16"></lucide-angular>
+        <span>Inventory Items</span>
+      </a>
+      <a class="btn-secondary" routerLink="/inventory-manager/order-creation">
+        <lucide-angular name="shopping-cart" [size]="16"></lucide-angular>
+        <span>Purchase Orders</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Notification Toasts -->
+  <div class="alert alert-success animate-fade" *ngIf="successMessage">
+    <lucide-angular name="check" [size]="18"></lucide-angular>
+    <span>{{ successMessage }}</span>
+  </div>
+  <div class="alert alert-error animate-fade" *ngIf="errorMessage">
+    <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Goods Received Note (GRN) Card -->
+  <div class="grn-card">
+    <div class="stepper-header">
+      <div class="stepper-title">
+        <div class="badge-tag">GOODS RECEIVED NOTE</div>
+        <h2>Post Inward Stock Receipt</h2>
+      </div>
+      <div class="stepper-nav">
+        <button type="button" class="step-tab" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" (click)="setStep(1)">
+          <div class="step-circle">
+            <lucide-angular name="check" [size]="14" *ngIf="currentStep > 1"></lucide-angular>
+            <span *ngIf="currentStep <= 1">1</span>
+          </div>
+          <div class="step-meta"><span class="step-title">Receipt Source</span><span class="step-sub">PO / Authorization</span></div>
+        </button>
+        <div class="step-divider" [class.active]="currentStep > 1"></div>
+        <button type="button" class="step-tab" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" (click)="setStep(2)">
+          <div class="step-circle">
+            <lucide-angular name="check" [size]="14" *ngIf="currentStep > 2"></lucide-angular>
+            <span *ngIf="currentStep <= 2">2</span>
+          </div>
+          <div class="step-meta"><span class="step-title">Documents</span><span class="step-sub">Invoice & Details</span></div>
+        </button>
+        <div class="step-divider" [class.active]="currentStep > 2"></div>
+        <button type="button" class="step-tab" [class.active]="currentStep === 3" (click)="setStep(3)">
+          <div class="step-circle"><span>3</span></div>
+          <div class="step-meta"><span class="step-title">Placement</span><span class="step-sub">Quantity & Storage</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="receiptForm" (ngSubmit)="onSubmit()" class="grn-body">
+      <!-- Step 1: Receipt Source -->
+      <div class="step-content animate-fade" *ngIf="currentStep === 1">
+        <div class="step-intro">
+          <h3>Select Purchase or Authorization Source</h3>
+          <p class="step-desc">Choose the approved workflow record that authorizes this incoming shipment.</p>
+        </div>
+
+        <div class="mode-selector-wrapper">
+          <label class="field-label">RECEIPT WORKFLOW TYPE *</label>
+          <div class="segmented-control">
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'PO'" (click)="setReceiptMode('PO')">
+              <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
+              <span>Normal — Issued Purchase Order (PO)</span>
+            </button>
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
+              <lucide-angular name="shield-check" [size]="16"></lucide-angular>
+              <span>Emergency — Approved Authorization (Non-PO)</span>
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="receiptMode === 'PO'; else emergencySource">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="field-label">ISSUED PURCHASE ORDER *</label>
+              <select class="form-select" [value]="selectedPurchaseOrder?._id || ''" (change)="selectPurchaseOrder($any($event.target).value)">
+                <option value="">Select an issued purchase order</option>
+                <option *ngFor="let order of purchaseOrders" [value]="order._id">
+                  {{ order.poNumber || order.requestId }} — {{ order.supplierName }} ({{ order.items.length }} items)
+                </option>
+              </select>
+              <small class="field-help">Only orders in 'ordered' or 'partially-received' status are eligible.</small>
+            </div>
+            <div class="form-group" *ngIf="selectedPurchaseOrder">
+              <label class="field-label">OUTSTANDING ORDER LINE *</label>
+              <select class="form-select" [value]="selectedPurchaseLine?.lineId || ''" (change)="selectPurchaseLine($any($event.target).value)">
+                <option value="">Select the item line being received</option>
+                <option *ngFor="let line of availablePoLines" [value]="line.lineId">
+                  {{ line.sku }} — {{ line.name }} ({{ outstanding(line) }} {{ line.unit || 'units' }} outstanding)
+                </option>
+              </select>
+              <small class="field-help" *ngIf="availablePoLines.length === 0">No remaining quantity left to receive on this PO.</small>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #emergencySource>
+          <div class="form-group">
+            <label class="field-label">APPROVED EMERGENCY AUTHORIZATION *</label>
+            <select class="form-select" [value]="selectedAuthorization?._id || ''" (change)="selectAuthorizationById($any($event.target).value)">
+              <option value="">Select an approved emergency authorization</option>
+              <option *ngFor="let auth of authorizations" [value]="auth._id">
+                {{ auth.authorizationNumber }} — {{ auth.supplierName }} ({{ reasonLabel(auth.nonPoReason) }})
+              </option>
+            </select>
+            <small class="field-help">Emergency stock can only be posted after Manager approval.</small>
+          </div>
+        </ng-template>
+
+        <div class="item-summary-card animate-fade" *ngIf="selectedItem">
+          <div class="summary-header">
+            <div class="summary-badge">ITEM VERIFICATION</div>
+            <div class="summary-supplier">
+              <lucide-angular name="truck" [size]="14"></lucide-angular>
+              <span>{{ selectedPurchaseOrder?.supplierName || selectedAuthorization?.supplierName || '—' }}</span>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-col"><span class="label">Item Name</span><strong class="val">{{ selectedItem.name }}</strong></div>
+            <div class="summary-col"><span class="label">SKU / Code</span><strong class="val sku-badge">{{ selectedItem.sku }}</strong></div>
+            <div class="summary-col"><span class="label">Unit Cost</span><strong class="val price">LKR {{ selectedUnitCost | number:'1.2-2' }}</strong></div>
+            <div class="summary-col"><span class="label">Available to Receive</span><strong class="val highlight-badge">{{ remainingQuantity }} {{ selectedItem.unit }}</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Document Details -->
+      <div class="step-content animate-fade" formGroupName="source" *ngIf="currentStep === 2">
+        <div class="step-intro">
+          <h3>Supplier Documents & Receipt Details</h3>
+          <p class="step-desc">Enter the supplier delivery note or invoice details to attach to this GRN.</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">SOURCE DOCUMENT NUMBER *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="file-text" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="sourceDocumentNumber" placeholder="e.g. DN-2026-8890 or INV-1045" />
+            </div>
+            <small class="field-help">Delivery Note, Supplier Waybill, or Invoice reference.</small>
+          </div>
+          <div class="form-group">
+            <label class="field-label">SUPPLIER INVOICE NUMBER</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="dollar-sign" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="invoiceNumber" placeholder="e.g. INV-2026-1045 (optional)" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">RECEIVED DATE *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="calendar" [size]="16" class="input-icon"></lucide-angular>
+              <input type="date" class="form-input" formControlName="receivedDate" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">CONDITION UPON RECEIPT *</label>
+            <select class="form-select" formControlName="condition">
+              <option value="Good">Good — Complete & Pristine</option>
+              <option value="Damaged">Damaged — Physical Damage</option>
+              <option value="Incomplete">Incomplete — Missing Pieces</option>
+            </select>
+          </div>
+          <div class="form-group full-span">
+            <label class="field-label">SUPPORTING DOCUMENT URL</label>
+            <input class="form-input" formControlName="supportingDocumentUrl" placeholder="https://... Cloud scan or document attachment link (optional)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Stock Placement -->
+      <div class="step-content animate-fade" formGroupName="stock" *ngIf="currentStep === 3">
+        <div class="step-intro">
+          <h3>Stock Placement & Location</h3>
+          <p class="step-desc">Confirm incoming count and designate where items will be stored.</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">RECEIVED QUANTITY *</label>
+            <input type="number" min="1" [max]="remainingQuantity" step="1" class="form-input highlight-input" formControlName="quantity" placeholder="Enter quantity" />
+            <small class="field-help">Maximum outstanding: {{ remainingQuantity }} {{ selectedItem?.unit || 'units' }}.</small>
+          </div>
+          <div class="form-group">
+            <label class="field-label">UNIT OF MEASURE</label>
+            <input class="form-input readonly-input" [value]="selectedItem?.unit || '—'" readonly />
+          </div>
+          <div class="form-group">
+            <label class="field-label">WAREHOUSE / LOCATION *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="box" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="location" placeholder="e.g. Main Warehouse" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">SHELF / BIN CODE *</label>
+            <div class="input-icon-wrap">
+              <lucide-angular name="layout-grid" [size]="16" class="input-icon"></lucide-angular>
+              <input class="form-input" formControlName="binLocation" placeholder="e.g. A-01-04" />
+            </div>
+          </div>
+          <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && selectedQuantity > 0">
+            <div class="serials-header">
+              <label class="field-label">SERIAL NUMBERS ({{ selectedQuantity }} REQUIRED) *</label>
+              <span class="serials-tip">Enter one unique serial number per unit</span>
+            </div>
+            <div formArrayName="serialNumbers" class="serials-grid">
+              <div class="serial-item" *ngFor="let control of serialNumbersControls; let i = index">
+                <span class="serial-idx">#{{ i + 1 }}</span>
+                <input class="form-input serial-input" [formControlName]="i" placeholder="Serial No. {{ i + 1 }}" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="receipt-calculation-card animate-fade" *ngIf="selectedItem">
+          <div class="calc-header">
+            <h4>GRN Valuation Summary</h4>
+            <span class="calc-badge">{{ receiptMode === 'PO' ? 'PURCHASE ORDER' : 'EMERGENCY AUTH' }}</span>
+          </div>
+          <div class="calc-grid">
+            <div class="calc-row">
+              <span class="label">Workflow Reference:</span>
+              <span class="value">{{ receiptMode === 'PO' ? (selectedPurchaseOrder?.poNumber || selectedPurchaseOrder?.requestId) : selectedAuthorization?.authorizationNumber }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Source Document:</span>
+              <span class="value">{{ receiptForm.get('source.sourceDocumentNumber')?.value || '—' }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Item & SKU:</span>
+              <span class="value">{{ selectedItem.name }} ({{ selectedItem.sku }})</span>
+            </div>
+            <div class="calc-row">
+              <span class="label">Quantity Received:</span>
+              <span class="value highlight">{{ selectedQuantity }} {{ selectedItem.unit }}</span>
+            </div>
+            <div class="calc-row total-row">
+              <span class="label">Estimated Total Value:</span>
+              <span class="value total-price">LKR {{ estimatedTotal | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stepper Controls Footer -->
+      <div class="grn-footer">
+        <button type="button" class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">
+          <lucide-angular name="arrow-left" [size]="16"></lucide-angular>
+          <span>Previous Step</span>
+        </button>
+        <div class="spacer"></div>
+        <button type="button" class="btn-primary" [disabled]="isSubmitting" (click)="nextStep()">
+          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Post GRN & Update Stock' : 'Continue' }}</span>
+          <span *ngIf="isSubmitting">Posting GRN...</span>
+          <lucide-angular name="chevron-right" [size]="16" *ngIf="!isSubmitting && currentStep < 3"></lucide-angular>
+          <lucide-angular name="check" [size]="16" *ngIf="!isSubmitting && currentStep === 3"></lucide-angular>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Recent GRN Entries Section -->
+  <div class="shipments-section">
+    <div class="section-top-bar">
+      <div class="section-title">
+        <h2>Recent GRN Entries</h2>
+        <p class="subtitle">History of Goods Received Notes posted to inventory.</p>
+      </div>
+      <div class="section-controls">
+        <div class="search-box">
+          <lucide-angular name="search" [size]="16" class="search-icon"></lucide-angular>
+          <input type="text" [(ngModel)]="searchQuery" placeholder="Search document, PO, supplier, SKU..." />
+        </div>
+        <div class="filter-pills">
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">Normal PO</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Emergency</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRN Items List -->
+    <div class="shipments-list">
+      <div class="shipment-item animate-fade" *ngFor="let p of filteredProcurements">
+        <div class="shipment-info">
+          <div class="shipment-top-meta">
+            <span class="grn-code">{{ p.sourceDocumentNumber || p.invoiceNumber || 'GRN-ENTRY' }}</span>
+            <span class="mode-tag" [class.emergency]="p.receiptMode === 'NON_PO'">
+              {{ p.receiptMode === 'PO' ? 'NORMAL PO' : 'EMERGENCY' }}
+            </span>
+            <span class="received-date" *ngIf="p.receivedDate">
+              <lucide-angular name="calendar" [size]="12"></lucide-angular>
+              {{ p.receivedDate }}
+            </span>
+          </div>
+          <h4 class="supplier-title">{{ p.supplierName }}</h4>
+          <div class="shipment-details-row">
+            <span class="detail-badge item-name">
+              <lucide-angular name="package" [size]="14"></lucide-angular>
+              {{ p.itemName }} ({{ p.sku }})
+            </span>
+            <span class="detail-badge qty-badge">{{ p.quantity }} {{ p.unit }}</span>
+            <span class="detail-badge ref-badge">Ref: {{ p.poNumber || p.receiptAuthorizationId?.authorizationNumber || '—' }}</span>
+            <span class="detail-badge condition-badge" [class.damaged]="p.condition === 'Damaged'">Condition: {{ p.condition }}</span>
+          </div>
+        </div>
+        <button class="btn-details" type="button" (click)="viewProcurementDetails(p)">
+          <lucide-angular name="eye" [size]="16"></lucide-angular>
+          <span>View Details</span>
+        </button>
+      </div>
+
+      <div class="empty-results" *ngIf="filteredProcurements.length === 0">
+        <lucide-angular name="clipboard-list" [size]="40" class="empty-icon"></lucide-angular>
+        <p>No GRN entries match your search or filter criteria.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRN Details Modal -->
+  <div class="modal-overlay animate-fade" *ngIf="showDetailsModal && selectedProcurement" (click)="closeDetailsModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-tag">GRN DETAILS</div>
+          <h3>{{ selectedProcurement.sourceDocumentNumber || selectedProcurement.invoiceNumber || 'Receipt Details' }}</h3>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeDetailsModal()">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-detail-grid">
+          <div class="detail-card"><span class="label">Source Document</span><span class="val">{{ selectedProcurement.sourceDocumentNumber || '—' }}</span></div>
+          <div class="detail-card"><span class="label">Workflow Reference</span><span class="val">{{ selectedProcurement.poNumber || selectedProcurement.receiptAuthorizationId?.authorizationNumber || '—' }}</span></div>
+          <div class="detail-card"><span class="label">Supplier Name</span><span class="val">{{ selectedProcurement.supplierName }}</span></div>
+          <div class="detail-card"><span class="label">Item & SKU</span><span class="val">{{ selectedProcurement.itemName }} ({{ selectedProcurement.sku }})</span></div>
+          <div class="detail-card"><span class="label">Quantity Received</span><span class="val highlight">{{ selectedProcurement.quantity }} {{ selectedProcurement.unit }}</span></div>
+          <div class="detail-card"><span class="label">Receipt Condition</span><span class="val status" [class.damaged]="selectedProcurement.condition === 'Damaged'">{{ selectedProcurement.condition }}</span></div>
+          <div class="detail-card full-span" *ngIf="selectedProcurement.receivedBy"><span class="label">Received By</span><span class="val">{{ selectedProcurement.receivedBy }}</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

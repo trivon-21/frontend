@@ -1,0 +1,87 @@
+<div class="dashboard-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a routerLink="/manager" class="sidebar-brand">
+      AirLux
+    </a>
+    <nav class="sidebar-nav">
+      <a
+        routerLink="/manager"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+      >
+        <lucide-angular name="layout-dashboard" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Overview</span>
+      </a>
+      <a routerLink="/manager/orders" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="shopping-bag" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Approvals</span>
+      </a>
+      <a routerLink="/manager/work-items" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <span>Operations</span>
+      </a>
+      <div class="analytics-nav-group">
+        <div class="analytics-nav-row">
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" class="nav-item analytics-link">
+            <lucide-angular name="bar-chart-3" [size]="20" strokeWidth="1.8"></lucide-angular>
+            <span>Analytics</span>
+          </a>
+          <button type="button" class="analytics-toggle" (click)="toggleAnalytics()" [attr.aria-expanded]="analyticsExpanded" aria-label="Toggle analytics menu">
+            <lucide-angular name="chevron-down" [size]="16" strokeWidth="1.8"></lucide-angular>
+          </button>
+        </div>
+        <div class="analytics-submenu" *ngIf="analyticsExpanded">
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active">Period Performance</a>
+          <a routerLink="/manager/analytics/service-operations" routerLinkActive="active">Service Operations</a>
+          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active">Purchasing and Approvals</a>
+          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active">Inventory and Exception Control</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main area -->
+  <div class="dashboard-main">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <!-- Search removed -->
+      <div class="header-actions">
+        <!-- User Menu -->
+        <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">
+          <button
+            class="user-avatar"
+            (click)="toggleUserMenu(); $event.stopPropagation()"
+            aria-label="User menu"
+            title="User menu"
+          >
+            {{ userInitials }}
+          </button>
+
+          <!-- User Dropdown -->
+          <div class="user-dropdown" *ngIf="showUserMenu">
+            <div class="user-header">
+              <div class="user-avatar-lg">{{ userInitials }}</div>
+              <div>
+                <div class="user-name">{{ userName }}</div>
+                <div class="user-email">{{ userEmail }}</div>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+
+            <button class="menu-item logout" (click)="logout()">
+              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="dashboard-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

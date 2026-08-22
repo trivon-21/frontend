@@ -1,0 +1,182 @@
+/* Required Items Table Section */
+.required-items-table-section {
+  margin-top: 48px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.status-dot-wrapper {
+  width: 24px;
+  height: 24px;
+  background: var(--error-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-dot.warning {
+  color: var(--error);
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.section-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Table — base styles from global alx-* system in styles.css */
+
+/* Component-specific overrides only */
+
+.alx-table {
+  table-layout: fixed;
+}
+
+.alx-table .text-right { text-align: right; }
+.alx-table .text-center { text-align: center; }
+
+.item-name-bold {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.sku-code {
+  font-family: monospace;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.stock-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.stock-info .val.danger {
+  color: var(--error);
+  font-weight: 800;
+}
+
+.price-bold {
+  font-weight: 700;
+  color: var(--primary-main);
+  font-size: 14px;
+}
+
+.price-edit-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.currency-prefix {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.inline-price-input {
+  width: 90px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--primary-main);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+  background: var(--primary-lighter);
+}
+
+.config-action-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: slide-in-right 0.2s ease-out;
+}
+
+.qty-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--background-page);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 8px;
+}
+
+.qty-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.inline-qty-input-mini {
+  width: 44px;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.config-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-small,
+.btn-confirm-mini,
+.btn-cancel-mini {
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-small {
+  min-height: 34px;
+  gap: 6px;
+  padding: 0 var(--spacing-md);
+  border-radius: 8px;
+  background: var(--primary-main);
+  color: var(--background-card);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-confirm-mini,
+.btn-cancel-mini {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+}
+
+.btn-confirm-mini { background: var(--primary-main); color: var(--background-card); }
+.btn-cancel-mini { background: var(--background-hover); color: var(--text-secondary); }
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+input[type="number"].no-spinner::-webkit-outer-spin-button,
+input[type="number"].no-spinner::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"].no-spinner { appearance: textfield; }

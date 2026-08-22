@@ -1,0 +1,182 @@
+<div class="dispatch-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Stock Reservations</h1>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="setActiveTab('pending')">
+      Pending Requests <span class="badge" *ngIf="pendingRequests.length > 0">{{ pendingRequests.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'reserved'" (click)="setActiveTab('reserved')">
+      Reserved/Kitted <span class="badge" *ngIf="reservedRequests.length > 0">{{ reservedRequests.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
+      Completed <span class="badge" *ngIf="completedRequests.length > 0">{{ completedRequests.length }}</span>
+    </button>
+  </div>
+
+  <!-- Table Controls -->
+  <div class="table-controls glass-panel">
+    <div class="search-box">
+      <lucide-angular name="search" class="inline-icon"></lucide-angular>
+      <input type="text" [(ngModel)]="searchQuery" (input)="$event" [placeholder]="
+        activeTab === 'completed' ? 'Search by Request ID, Requester, or Date' :
+        'Search by Request ID or Requester Name'
+      ">
+    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <span>Sort By:</span>
+        <select class="filter-select" (change)="toggleSort($any($event.target).value)">
+          <option value="name">Name ({{ sortField === 'name' ? sortDirection : 'asc' }})</option>
+          <option value="time">Time ({{ sortField === 'time' ? sortDirection : 'asc' }})</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-container alx-table-container glass-panel">
+    <table class="alx-table">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>REQUESTER NAME</th>
+          <th>LOCATION</th>
+          <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
+          <th class="text-right">ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let req of currentRequests"
+            [class.selected-row]="selectedRequestId === req.id">
+          <td>{{ req.id }}</td>
+          <td>{{ req.requester }}</td>
+          <td>{{ req.location }}</td>
+          <td *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
+          <td class="actions-cell">
+            <button class="btn-view" (click)="openModal(req.id)">
+              <lucide-angular name="eye" [size]="14"></lucide-angular>
+              View Request
+            </button>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="currentRequests.length === 0">
+          <td [attr.colspan]="activeTab === 'completed' ? 5 : 4" class="text-center" style="padding: 40px; color: var(--text-muted);">
+            No requests found in this tab.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- View Request Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content pack-modal">
+      <div class="modal-header">
+        <div>
+          <h2>Request ID : {{ selectedRequest?.id }}</h2>
+          <span class="order-type">REQUESTER : {{ selectedRequest?.requester }}</span>
+        </div>
+        <button class="btn-close" (click)="closeModal()">
+          <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="items-verification-full">
+          <div class="section-header">
+            <h3>MATERIALS LIST</h3>
+            <span class="items-count">{{ selectedRequest?.items?.length || 0 }} Items</span>
+          </div>
+
+          <table class="verification-table">
+            <thead>
+              <tr>
+                <th>ITEM NAME</th>
+                <th>SKU</th>
+                <th>QTY</th>
+                <th class="text-center" *ngIf="activeTab === 'pending'">RESERVE CONFIRMATION</th>
+                <th class="text-center" *ngIf="activeTab !== 'pending'">RESERVATION STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedRequest?.items">
+                <td class="item-name">{{ item.name }}</td>
+                <td class="item-sku">{{ item.sku }}</td>
+                <td class="item-qty">
+                  <span class="qty-symbol">×</span>{{ item.qty }}
+                </td>
+                <td class="text-center">
+                  <ng-container *ngIf="activeTab === 'pending'">
+                    <button
+                      class="btn-confirm"
+                      [class.confirmed]="item.confirmed"
+                      (click)="confirmItem(item)">
+                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
+                      {{ item.confirmed ? 'Reserved' : 'Click to Reserve' }}
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="activeTab !== 'pending'">
+                    <div class="btn-confirm" [class.confirmed]="item.confirmed" style="pointer-events: none; display: inline-flex; width: auto; padding: 4px 12px; font-size: 12px; opacity: 0.9;">
+                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
+                      {{ item.confirmed ? 'Reserved' : 'Pending' }}
+                    </div>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="assignment-section" *ngIf="activeTab === 'reserved'" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <div class="section-header">
+            <h3>SERVICE TEAM ASSIGNMENT</h3>
+          </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-muted); font-size: 13px;">Assign Team</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <ng-container *ngIf="!selectedRequest?.serviceTeam || isEditingTeam">
+                <input type="text" class="form-control" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: rgba(0,0,0,0.2); color: white;" placeholder="Enter Service Team Name" [(ngModel)]="editServiceTeam">
+                <button class="btn-save" (click)="saveServiceTeam()" [disabled]="!editServiceTeam.trim()" [style.opacity]="!editServiceTeam.trim() ? 0.5 : 1" [style.cursor]="!editServiceTeam.trim() ? 'not-allowed' : 'pointer'">Save Team</button>
+                <button class="btn-primary btn-outline" *ngIf="isEditingTeam" (click)="cancelEditTeam()">Cancel</button>
+              </ng-container>
+              <ng-container *ngIf="selectedRequest?.serviceTeam && !isEditingTeam">
+                <div style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: rgba(0,0,0,0.1); color: white; border-left: 3px solid var(--primary-color);">
+                  {{ selectedRequest?.serviceTeam }}
+                </div>
+                <button class="btn-primary btn-outline" (click)="enableEditTeam()">Edit</button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="validation-banner" *ngIf="validationMessage"
+        style="background: var(--error-light); color: var(--error); padding: 10px 16px;
+        border-radius: 8px; font-size: 13px; font-weight: 500; margin: 0 24px;">
+        {{ validationMessage }}
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-right" *ngIf="activeTab === 'pending'">
+          <button class="btn-save" (click)="saveStatus()">Save Current Status</button>
+          <button class="btn-primary" (click)="markKitted()">Mark as Reserved / Kitted</button>
+        </div>
+        <div class="footer-right" *ngIf="activeTab === 'reserved'">
+          <button class="btn-primary btn-outline" *ngIf="canUndo(selectedRequest)" (click)="undoAction()">Undo Transition</button>
+          <button class="btn-save" (click)="markHandedOver()" style="margin-left: 12px;" [disabled]="!selectedRequest?.serviceTeam" [style.opacity]="!selectedRequest?.serviceTeam ? 0.5 : 1" [style.cursor]="!selectedRequest?.serviceTeam ? 'not-allowed' : 'pointer'">Mark Completed</button>
+          <button class="btn-primary" (click)="closeModal()" style="margin-left: 12px;">Close</button>
+        </div>
+        <div class="footer-right" *ngIf="activeTab === 'completed'">
+          <button class="btn-primary btn-outline" *ngIf="canUndo(selectedRequest)" (click)="undoAction()">Undo Transition</button>
+          <button class="btn-primary" (click)="closeModal()" style="margin-left: 12px;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
