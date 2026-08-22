@@ -1,79 +1,32 @@
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
-build/
-temp/
-
 # Dependencies
 node_modules/
-jspm_packages/
 
-# IDEs and editors
+# Angular build and test output
+/dist/
+/out-tsc/
+/coverage/
+/.angular/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+*.tmp
+*.tsbuildinfo
+Agents.md
+
+
+# Local editor settings
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-.history/
-.vscode/
-!.vscode/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
 
-# Visual Studio
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-testem.log
-
-# Testing
-/coverage
-/.nyc_output
-/test-results
-/playwright-report
-/reports
-
-# System Files
+# Operating system files
 .DS_Store
 Thumbs.db
-
-# Angular CLI
-.angular/
-
-# Environment files
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-.env.*.local
-.env.*
-!.env.example
-
-# Misc
-*.swp
-*.bak
-*.tmp
-*.tsbuildinfo
-.cache/
-
-# Personal Documentation / Dev Notes
-src/app/core/styling/FAILURE_POINTS*
-src/app/core/styling/RECOVERY*
-src/app/core/styling/*.md
-!src/app/core/styling/README.md
-AGENTS.md
