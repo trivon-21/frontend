@@ -84,6 +84,11 @@ export interface InventoryItem {
   supplierName?: string;
   unit: string;
   unitCost: number;
+  pricing?: {
+    costPerUnit?: number;
+    profitMargin?: number;
+    sellingPricePerUnit?: number;
+  };
   isSerialized: boolean;
   serialNumbers?: string[];
   availableSerialNumbers?: string[];

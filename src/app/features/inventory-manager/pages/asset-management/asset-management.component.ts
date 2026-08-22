@@ -22,6 +22,7 @@ interface ReturnLog {
   technicianName: string;
   checkedOutAt: string;
   returnedAt: string;
+  condition?: 'good' | 'damaged' | 'incomplete';
 }
 
 import { LucideAngularModule } from 'lucide-angular';

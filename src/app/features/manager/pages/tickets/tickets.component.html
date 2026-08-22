@@ -43,7 +43,7 @@
             <span *ngIf="item.assignedTeam || item.assignedTechnician; else unassigned">{{ item.assignedTeam?.teamName || 'No team' }}<span *ngIf="item.assignedTechnician"> · {{ item.assignedTechnician.fullName }}</span></span>
             <ng-template #unassigned><span class="muted">Awaiting Main Technician</span></ng-template>
           </td>
-          <td class="actions-cell"><button class="mini-btn" (click)="openDetails(item)">View and control</button></td>
+          <td class="actions-cell"><button class="mini-btn" (click)="openDetails(item)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
         </tr>
         <tr *ngIf="!loading && items.length === 0"><td colspan="9" class="empty-cell">No operational work matches the current filters.</td></tr>
       </tbody>
@@ -67,6 +67,8 @@
       <div><label class="detail-label" for="sla">SLA deadline</label><input id="sla" type="datetime-local" [(ngModel)]="selectedSla"></div>
       <div><span class="detail-label">Manager controls</span><button class="mini-btn ok" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
     </div>
+
+    <p class="muted" *ngIf="item.allowedActions.length === 0">This record is read-only here. Use its owning inspection or installation workflow to make changes.</p>
 
     <div class="lifecycle-controls" *ngIf="can('escalate') || can('clear-escalation') || can('close') || can('reopen')">
       <label class="detail-label" for="action-reason">Reason for escalation or closure action</label>
