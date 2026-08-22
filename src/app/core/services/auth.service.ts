@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import {
+  getLocalDevHomeRoute,
+  getLocalDevRole,
+  getLocalDevUser,
+  isLocalAuthBypassEnabled,
+  LocalDevRole,
+  setLocalDevRole,
+} from '../auth/local-auth-dev';
 
 export interface LoginPayload {
   email?: string;
@@ -39,6 +47,7 @@ export interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = 'http://localhost:5000/api/auth';
+  readonly localAuthBypassEnabled = isLocalAuthBypassEnabled();
 
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getUser());
   currentUser$ = this.currentUserSubject.asObservable();
@@ -123,6 +132,10 @@ export class AuthService {
   }
 
   getUser(): AuthUser | null {
+    if (this.localAuthBypassEnabled) {
+      return getLocalDevUser();
+    }
+
     const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!raw) return null;
     try {
@@ -133,7 +146,22 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return this.localAuthBypassEnabled || !!this.getToken();
+  }
+
+  getLocalDevRole(): LocalDevRole {
+    return getLocalDevRole();
+  }
+
+  setLocalDevRole(role: LocalDevRole): void {
+    if (!this.localAuthBypassEnabled) return;
+
+    setLocalDevRole(role);
+    this.currentUserSubject.next(getLocalDevUser(role));
+  }
+
+  getLocalDevHomeRoute(): string {
+    return getLocalDevHomeRoute(this.getLocalDevRole());
   }
 
   logout(): void {
@@ -141,6 +169,6 @@ export class AuthService {
     localStorage.removeItem('user');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
-    this.currentUserSubject.next(null);
+    this.currentUserSubject.next(this.localAuthBypassEnabled ? this.getUser() : null);
   }
 }

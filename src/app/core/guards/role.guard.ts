@@ -8,7 +8,7 @@ import { AuthService } from '../services/auth.service';
  *   canActivate: [authGuard, roleGuard],
  *   data: { roles: ['MANAGER'] }
  */
-export const roleGuard: CanActivateFn = (route, state) => {
+export const roleGuard: CanActivateFn = (route) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -20,6 +20,12 @@ export const roleGuard: CanActivateFn = (route, state) => {
   }
 
   const user = authService.getUser();
+
+  if (authService.localAuthBypassEnabled) {
+    return user && requiredRoles.includes(user.role)
+      ? true
+      : router.createUrlTree([authService.getLocalDevHomeRoute()]);
+  }
 
   if (user && requiredRoles.includes(user.role)) {
     return true;
