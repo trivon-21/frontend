@@ -1,11 +1,14 @@
 import { AnalyticsComponent } from './analytics.component';
 import { AnalyticsData, AnalyticsService, ComparisonMetric } from '../../services/analytics.service';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('AnalyticsComponent', () => {
   let component: AnalyticsComponent;
 
   beforeEach(() => {
-    component = new AnalyticsComponent({} as AnalyticsService);
+    const route = { data: of({ analyticsSection: 'performance' }) } as unknown as ActivatedRoute;
+    component = new AnalyticsComponent({} as AnalyticsService, route);
   });
 
   it('describes zero-baseline and unchanged comparisons without infinity', () => {

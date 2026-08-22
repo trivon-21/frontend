@@ -1,109 +1,142 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { ApiService } from '../../../core/services/api.service';
 
-export type TicketStatus = 'open' | 'in-progress' | 'resolved' | 'escalated';
-export type TicketPriority = 'high' | 'medium' | 'low';
-export type TicketCategory = 'installation' | 'repair' | 'maintenance' | 'inspection';
+export type WorkItemSource = 'service' | 'inspection' | 'installation' | 'maintenance';
+export type WorkItemPriority = 'high' | 'medium' | 'low';
+export type WorkItemStatus =
+  | 'open' | 'ready' | 'assigned' | 'scheduled' | 'in-progress' | 'blocked'
+  | 'awaiting-payment' | 'payment-review' | 'awaiting-verification'
+  | 'escalated' | 'closed' | 'cancelled' | 'unknown';
+export type WorkItemAction = 'update-control' | 'escalate' | 'clear-escalation' | 'close' | 'reopen';
 
-export interface SafeUserReference {
-  _id: string;
+export interface SafeCustomer {
+  id: string;
   fullName: string;
   email?: string;
   phoneNumber?: string;
   address?: string;
-  role?: 'MAIN_TECH' | 'SERVICE_TEAM' | 'INSPECTION';
 }
 
-export interface Technician extends SafeUserReference {
-  role: 'MAIN_TECH' | 'SERVICE_TEAM' | 'INSPECTION';
+export interface SafeTeam { id: string; teamName: string; specialization?: string; }
+export interface SafeTechnician { id: string; fullName: string; role: string; }
+export interface OperationalBlocker { type: string; message: string; status?: string; }
+export interface WorkItemChild {
+  type: string;
+  id: string;
+  status: string;
+  jobType?: string;
+  repairStatus?: string;
+  submittedAt?: Date | null;
+  nextServiceDate?: Date | null;
+  itemCount?: number;
+  authorizationNumber?: string;
 }
 
-export interface Ticket {
-  _id: string;
-  ticketId: string;
-  subject: string;
-  description?: string;
-  customer: string;
-  customerId?: SafeUserReference | string;
-  category: TicketCategory;
-  priority: TicketPriority;
-  status: TicketStatus;
-  assignedTo?: string;
-  assignedTechnicianId?: Technician | string;
-  slaDueAt?: Date | string;
-  resolvedAt?: Date | string;
-  createdAt?: Date | string;
-  inventoryConstraints?: Array<{
-    authorizationId: string; authorizationNumber: string; reason: string; status: string;
-    financeReviewStatus: string; authorizedQuantity: number; receivedQuantity: number;
-    item?: { name?: string; sku?: string; available?: number; reorderLevel?: number };
-  }>;
+export interface OperationalWorkItem {
+  id: string;
+  sourceType: WorkItemSource;
+  sourceId: string;
+  reference: string;
+  customer: SafeCustomer | null;
+  category: string;
+  operationalStatus: WorkItemStatus;
+  domainStatus: string;
+  priority: WorkItemPriority;
+  slaDueAt: Date | null;
+  assignedTeam: SafeTeam | null;
+  assignedTechnician: SafeTechnician | null;
+  escalated: boolean;
+  managerClosed: boolean;
+  blockers: OperationalBlocker[];
+  children: WorkItemChild[];
+  allowedActions: WorkItemAction[];
+  version: number;
+  technicalComplete: boolean;
+  reportComplete: boolean;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
 
-export interface TicketSummary {
+export interface WorkItemSummary {
   total: number;
   open: number;
   inProgress: number;
   escalated: number;
-  resolved: number;
+  awaitingVerification: number;
+  closed: number;
 }
 
-export interface TicketsResponse {
+export interface WorkItemsResponse {
   status: string;
-  summary: TicketSummary;
-  tickets: Ticket[];
+  summary: WorkItemSummary;
+  page: number;
+  limit: number;
+  total: number;
+  items: OperationalWorkItem[];
 }
 
-export interface TicketFilters {
+export interface WorkItemFilters {
+  type?: string;
   status?: string;
   priority?: string;
+  assignment?: string;
+  sla?: string;
+  page?: number;
 }
 
-export type TicketUpdate = Partial<Pick<Ticket, 'status' | 'priority'>> & {
-  assignedTechnicianId?: string | null;
+const EMPTY_RESPONSE: WorkItemsResponse = {
+  status: 'Offline',
+  summary: { total: 0, open: 0, inProgress: 0, escalated: 0, awaitingVerification: 0, closed: 0 },
+  page: 1,
+  limit: 25,
+  total: 0,
+  items: [],
 };
+
+function hydrate(item: OperationalWorkItem): OperationalWorkItem {
+  return {
+    ...item,
+    slaDueAt: item.slaDueAt ? new Date(item.slaDueAt) : null,
+    createdAt: item.createdAt ? new Date(item.createdAt) : null,
+    updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
+    children: (item.children || []).map((child) => ({
+      ...child,
+      submittedAt: child.submittedAt ? new Date(child.submittedAt) : null,
+      nextServiceDate: child.nextServiceDate ? new Date(child.nextServiceDate) : null,
+    })),
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
-  private apiUrl = 'http://localhost:5000/api/manager';
+  constructor(private readonly api: ApiService) {}
 
-  constructor(private http: HttpClient) {}
-
-  getTickets(filters: TicketFilters = {}): Observable<TicketsResponse> {
-    const params: Record<string, string> = {};
-    if (filters.status && filters.status !== 'all') params['status'] = filters.status;
-    if (filters.priority && filters.priority !== 'all') params['priority'] = filters.priority;
-    return this.http.get<TicketsResponse>(`${this.apiUrl}/tickets`, { params }).pipe(
-      map((response) => ({
-        ...response,
-        tickets: response.tickets.map((ticket) => ({
-          ...ticket,
-          slaDueAt: ticket.slaDueAt ? new Date(ticket.slaDueAt) : undefined,
-          resolvedAt: ticket.resolvedAt ? new Date(ticket.resolvedAt) : undefined,
-          createdAt: ticket.createdAt ? new Date(ticket.createdAt) : undefined,
-        })),
-      })),
-      catchError((error) => {
-        console.error('Tickets backend unavailable.', error);
-        return of({
-          status: 'Offline',
-          summary: { total: 0, open: 0, inProgress: 0, escalated: 0, resolved: 0 },
-          tickets: [],
-        });
-      }),
+  getWorkItems(filters: WorkItemFilters = {}): Observable<WorkItemsResponse> {
+    let params = new HttpParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== '' && value !== 'all') params = params.set(key, String(value));
+    }
+    return this.api.get<WorkItemsResponse>('/manager/work-items', params).pipe(
+      map((response) => ({ ...response, items: response.items.map(hydrate) })),
+      catchError(() => of(EMPTY_RESPONSE)),
     );
   }
 
-  getTechnicians(): Observable<Technician[]> {
-    return this.http.get<{ technicians: Technician[] }>(`${this.apiUrl}/technicians`).pipe(
-      map((response) => response.technicians),
-      catchError(() => of([])),
-    );
+  updateControl(item: OperationalWorkItem, priority: WorkItemPriority, slaDueAt: string | null): Observable<OperationalWorkItem> {
+    return this.api.patch<OperationalWorkItem>(`/manager/work-items/${item.sourceType}/${item.sourceId}/control`, {
+      priority,
+      slaDueAt,
+      expectedVersion: item.version,
+    }).pipe(map(hydrate));
   }
 
-  updateTicket(id: string, patch: TicketUpdate): Observable<Ticket> {
-    return this.http.patch<Ticket>(`${this.apiUrl}/tickets/${id}`, patch);
+  runAction(item: OperationalWorkItem, action: Exclude<WorkItemAction, 'update-control'>, reason: string): Observable<OperationalWorkItem> {
+    return this.api.post<OperationalWorkItem>(`/manager/work-items/${item.sourceType}/${item.sourceId}/${action}`, {
+      reason,
+      expectedVersion: item.version,
+    }).pipe(map(hydrate));
   }
 }

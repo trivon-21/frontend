@@ -41,6 +41,24 @@ export interface PurchaseRequest {
   rejectedAt?: string;
   notes?: string;
   createdAt?: Date | string;
+  operationalApproval?: PurchaseDecision;
+  financialApproval?: PurchaseDecision;
+  decisionHistory?: PurchaseDecisionHistory[];
+}
+
+export interface PurchaseDecision {
+  status: 'pending' | 'approved' | 'rejected';
+  actorName?: string;
+  comment?: string;
+  decidedAt?: string;
+}
+
+export interface PurchaseDecisionHistory {
+  stage: 'manager' | 'finance' | 'fulfillment' | 'migration';
+  decision: string;
+  actorName?: string;
+  comment?: string;
+  at: string;
 }
 
 export interface ReceiptAuthorization {

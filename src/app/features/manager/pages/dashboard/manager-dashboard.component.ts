@@ -2,16 +2,19 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
+import { FormsModule } from '@angular/forms';
+import { FinanceSummary, ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
 
 @Component({
   selector: 'app-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
 export class ManagerDashboardComponent implements OnInit, OnDestroy {
+  financeSummary: FinanceSummary | null = null;
+  financePeriod: '7d' | '30d' | '12m' = '30d';
   data: ManagerDashboardData = {
     managerName: 'Manager',
     currentDate: new Date(),
@@ -52,6 +55,11 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
       this.data = data;
       this.loading = false;
     });
+    this.loadFinanceSummary();
+  }
+
+  loadFinanceSummary(): void {
+    this.dashboardService.getFinanceSummary(this.financePeriod).subscribe((summary) => this.financeSummary = summary);
   }
 
   formatDate(date: Date): string {

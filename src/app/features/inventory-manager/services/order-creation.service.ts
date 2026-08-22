@@ -50,21 +50,25 @@ export class OrderCreationService {
   }
 
   getOrderRequests(): Observable<PurchaseRequest[]> {
-    return this.apiService.get<PurchaseRequest[]>('/inventory/order-requests');
+    return this.apiService.get<PurchaseRequest[]>('/inventory/purchase-requests');
   }
 
-  submitOrderRequest(payload: any, isEditMode: boolean, orderId?: string): Observable<any> {
+  submitOrderRequest(payload: Record<string, unknown>, isEditMode: boolean, orderId?: string): Observable<PurchaseRequest> {
     if (isEditMode && orderId) {
-      return this.apiService.patch(`/inventory/order-requests/${orderId}`, payload);
+      return this.apiService.patch<PurchaseRequest>(`/inventory/purchase-requests/${orderId}`, payload);
     }
-    return this.apiService.post('/inventory/order-requests', payload);
+    return this.apiService.post<PurchaseRequest>('/inventory/purchase-requests', payload);
   }
 
-  submitForManager(orderId: string): Observable<PurchaseRequest> {
-    return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${orderId}/submit`, {});
+  submitForManager(order: PurchaseRequest): Observable<PurchaseRequest> {
+    return this.apiService.post<PurchaseRequest>(`/inventory/purchase-requests/${order.requestId}/submit`, {
+      expectedVersion: order.statusVersion,
+    });
   }
 
-  issuePurchaseOrder(orderId: string): Observable<PurchaseRequest> {
-    return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${orderId}/issue-po`, {});
+  issuePurchaseOrder(order: PurchaseRequest): Observable<PurchaseRequest> {
+    return this.apiService.post<PurchaseRequest>(`/inventory/purchase-requests/${order.requestId}/issue-po`, {
+      expectedVersion: order.statusVersion,
+    });
   }
 }

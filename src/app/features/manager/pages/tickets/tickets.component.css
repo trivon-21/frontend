@@ -31,25 +31,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 99px;
   font-size: 12px;
   font-weight: 600;
-  background: var(--primary-lighter, #eef4ff);
-  color: var(--primary-main, #2a78d6);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   white-space: nowrap;
 }
 
 .status-chip.offline {
-  background: #fff4ed;
-  color: #c2410c;
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .status-chip .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: currentColor;
+  background: currentcolor;
 }
 
 .status-chip .dot.syncing {
@@ -59,7 +59,7 @@
 /* Summary tiles */
 .summary-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: var(--spacing-md, 12px);
 }
 
@@ -82,8 +82,8 @@
 }
 
 .summary-tile.active {
-  border-color: var(--primary-main, #2a78d6);
-  box-shadow: 0 0 0 1px var(--primary-main, #2a78d6);
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 1px var(--primary-main);
 }
 
 .summary-tile .tile-value {
@@ -94,7 +94,7 @@
 }
 
 .summary-tile.alert .tile-value {
-  color: #c2371f;
+  color: var(--error);
 }
 
 .summary-tile .tile-label {
@@ -126,7 +126,7 @@
   border: 1px solid var(--border-light);
   background: var(--background-card);
   color: var(--text-secondary);
-  padding: 6px 14px;
+  padding: var(--spacing-xs) var(--spacing-lg);
   border-radius: 99px;
   font-size: 13px;
   font-weight: 600;
@@ -135,9 +135,9 @@
 }
 
 .chip.active {
-  background: var(--primary-lighter, #eef4ff);
-  color: var(--primary-main, #2a78d6);
-  border-color: var(--primary-main, #2a78d6);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  border-color: var(--primary-main);
 }
 
 .chip:hover:not(.active) {
@@ -160,7 +160,7 @@
 /* Pills */
 .pill {
   display: inline-block;
-  padding: 3px 10px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
@@ -168,38 +168,38 @@
 }
 
 .pill.priority.high {
-  background: #fdecea;
-  color: #c2371f;
+  background: var(--error-light);
+  color: var(--error);
 }
 
 .pill.priority.medium {
-  background: #fff5e6;
-  color: #b26a00;
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .pill.priority.low {
-  background: #eaf3ec;
-  color: #1f7a45;
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .pill.status.open {
-  background: #eef4ff;
-  color: #2a78d6;
+  background: var(--info-light);
+  color: var(--info);
 }
 
 .pill.status.in-progress {
-  background: #fff5e6;
-  color: #b26a00;
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .pill.status.escalated {
-  background: #fdecea;
-  color: #c2371f;
+  background: var(--error-light);
+  color: var(--error);
 }
 
 .pill.status.resolved {
-  background: #eaf3ec;
-  color: #1f7a45;
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .sla {
@@ -209,7 +209,7 @@
 }
 
 .sla.overdue {
-  color: #c2371f;
+  color: var(--error);
 }
 
 /* Row actions */
@@ -223,7 +223,7 @@
   border: 1px solid var(--border-light);
   background: var(--background-card);
   color: var(--text-secondary);
-  padding: 5px 11px;
+  padding: var(--spacing-xs) var(--spacing-md);
   border-radius: 7px;
   font-size: 12px;
   font-weight: 600;
@@ -237,13 +237,13 @@
 }
 
 .mini-btn.warn:hover {
-  border-color: #e0a800;
-  color: #b26a00;
+  border-color: var(--warning);
+  color: var(--warning);
 }
 
 .mini-btn.ok:hover {
-  border-color: #1f7a45;
-  color: #1f7a45;
+  border-color: var(--success);
+  color: var(--success);
 }
 
 .row-updating {
@@ -308,12 +308,26 @@
   text-transform: uppercase;
 }
 
-.detail-grid select {
+.detail-grid select,
+.detail-grid input,
+.lifecycle-controls textarea {
   min-height: 38px;
   border: 1px solid var(--border-light);
   border-radius: 8px;
   background: var(--background-card);
   color: var(--text-primary);
+  padding: var(--spacing-sm, 8px);
+}
+
+.lifecycle-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+  margin-top: var(--spacing-lg, 16px);
+}
+
+.lifecycle-controls textarea {
+  resize: vertical;
 }
 
 @keyframes fade-in-up {
@@ -339,7 +353,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .summary-row {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -80,9 +80,9 @@
         <span class="scope-badge current">Current</span>
       </div>
       <div class="position-grid">
-        <a routerLink="/manager/tickets" class="position-item"><span>Open backlog</span><strong>{{ report.currentPosition.openTickets.value }}</strong></a>
-        <a routerLink="/manager/tickets" class="position-item"><span>Unassigned</span><strong>{{ report.currentPosition.unassignedTickets.value }}</strong></a>
-        <a routerLink="/manager/tickets" [queryParams]="{ status: 'escalated' }" class="position-item risk"><span>SLA / escalation risk</span><strong>{{ report.currentPosition.slaRiskTickets.value }}</strong></a>
+        <a routerLink="/manager/work-items" class="position-item"><span>Open backlog</span><strong>{{ report.currentPosition.openTickets.value }}</strong></a>
+        <a routerLink="/manager/work-items" [queryParams]="{ assignment: 'unassigned' }" class="position-item"><span>Unassigned</span><strong>{{ report.currentPosition.unassignedTickets.value }}</strong></a>
+        <a routerLink="/manager/work-items" [queryParams]="{ status: 'escalated' }" class="position-item risk"><span>SLA / escalation risk</span><strong>{{ report.currentPosition.slaRiskTickets.value }}</strong></a>
         <a routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }" class="position-item"><span>Pending approval value</span><strong>LKR {{ report.currentPosition.pendingApprovalValue.value | number:'1.0-0' }}</strong></a>
         <div class="position-item risk informational" title="Inventory Managers resolve stock levels; this is a Manager monitoring signal."><span>Stock-risk items</span><strong>{{ report.currentPosition.stockRiskItems.value }}</strong></div>
       </div>

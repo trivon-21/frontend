@@ -59,7 +59,7 @@ export class OrderCreationComponent implements OnInit {
   }
 
   fetchOrders(): void {
-    this.apiService.get<PurchaseRequest[]>('/inventory/order-requests').subscribe({
+    this.apiService.get<PurchaseRequest[]>('/inventory/purchase-requests').subscribe({
       next: (data) => {
         this.draftOrders = data.filter(o => o.status === 'draft');
         this.pendingOrders = data.filter(o => ['pending-manager', 'pending-finance'].includes(o.status));
@@ -136,7 +136,7 @@ export class OrderCreationComponent implements OnInit {
   }
 
   issuePurchaseOrder(order: PurchaseRequest): void {
-    this.orderService.issuePurchaseOrder(order.requestId).subscribe({
+    this.orderService.issuePurchaseOrder(order).subscribe({
       next: () => {
         this.fetchOrders();
         this.loadSuggestedOrders();

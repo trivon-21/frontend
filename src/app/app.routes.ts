@@ -29,7 +29,8 @@ export const routes: Routes = [
   },
   {
     path: 'inventory-manager',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['INVENTORY'] },
     loadComponent: () =>
       import('./features/inventory-manager/components/layout/inventory-manager-layout/inventory-manager-layout.component').then(
         (m) => m.InventoryManagerLayoutComponent,
@@ -168,7 +169,7 @@ export const routes: Routes = [
       },
       {
         path: 'vehicle-assignment',
-        redirectTo: 'tickets',
+        redirectTo: 'work-items',
         pathMatch: 'full',
       },
       {
@@ -179,15 +180,20 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'tickets',
+        path: 'work-items',
         loadComponent: () =>
           import('./features/manager/pages/tickets/tickets.component').then(
             (m) => m.TicketsComponent,
           ),
       },
       {
+        path: 'tickets',
+        redirectTo: 'work-items',
+        pathMatch: 'full',
+      },
+      {
         path: 'customers',
-        redirectTo: 'tickets',
+        redirectTo: 'work-items',
         pathMatch: 'full',
       },
       {

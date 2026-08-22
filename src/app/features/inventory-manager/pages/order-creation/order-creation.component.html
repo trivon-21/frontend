@@ -225,6 +225,15 @@
           </table>
         </div>
 
+        <div class="detail-notes-section" *ngIf="selectedOrder.decisionHistory?.length">
+          <label>DECISION HISTORY</label>
+          <div *ngFor="let decision of selectedOrder.decisionHistory">
+            <strong>{{ decision.stage | titlecase }} · {{ decision.decision | titlecase }}</strong>
+            <p>{{ decision.comment || 'No comment recorded' }}<span *ngIf="decision.actorName"> · {{ decision.actorName }}</span></p>
+            <small>{{ formatDate(decision.at) }}</small>
+          </div>
+        </div>
+
         <!-- Rejection / Approval Info -->
         <div class="status-footer-alert rejected" *ngIf="selectedOrder.status === 'rejected'">
           <div class="alert-icon">!</div>

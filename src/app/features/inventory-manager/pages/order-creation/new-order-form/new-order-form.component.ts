@@ -44,6 +44,7 @@ export class NewOrderFormComponent implements OnInit {
 
   isEditMode = false;
   orderId: string | null = null;
+  statusVersion = 0;
 
   constructor(
     private orderCreationService: OrderCreationService, 
@@ -102,8 +103,9 @@ export class NewOrderFormComponent implements OnInit {
   loadOrder(id: string): void {
     this.orderCreationService.getOrderRequests().subscribe({
       next: (requests) => {
-        const order = requests.find((r: any) => r.requestId === id);
+        const order = requests.find((request) => request.requestId === id);
         if (order) {
+          this.statusVersion = order.statusVersion;
           this.selectedSupplier = order.supplierName;
           this.orderNotes = order.notes || '';
           this.orderItems = order.items.map((i: any) => ({
@@ -195,7 +197,7 @@ export class NewOrderFormComponent implements OnInit {
     const payload = this.buildPayload();
 
     this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).pipe(
-      switchMap((saved) => this.orderCreationService.submitForManager(saved.requestId)),
+      switchMap((saved) => this.orderCreationService.submitForManager(saved)),
     ).subscribe({
       next: (data) => {
         this.isSubmitting = false;
@@ -237,7 +239,7 @@ export class NewOrderFormComponent implements OnInit {
     });
   }
 
-  private buildPayload(): any {
+  private buildPayload(): Record<string, unknown> {
     const supplier = this.suppliers.find(item => item.name === this.selectedSupplier);
     return {
       items: this.orderItems.map(i => ({
@@ -255,7 +257,8 @@ export class NewOrderFormComponent implements OnInit {
       supplierName: this.selectedSupplier,
       supplierId: supplier?._id,
       notes: this.orderNotes,
-      source: 'manual'
+      source: 'manual',
+      ...(this.isEditMode ? { expectedVersion: this.statusVersion } : {}),
     };
   }
 

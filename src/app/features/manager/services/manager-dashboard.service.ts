@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { HttpParams } from '@angular/common/http';
+import { ApiService } from '../../../core/services/api.service';
 
 export interface CardStat {
   total: number;
@@ -58,6 +59,20 @@ export interface ManagerDashboardData {
   pendingActions: PendingAction[];
 }
 
+export interface FinanceSummary {
+  label: string;
+  period: '7d' | '30d' | '12m';
+  generatedAt: Date;
+  paymentReview: { count: number; value: number; byType: { orders: number; inspections: number; services: number } };
+  invoicesIssued: { count: number; value: number; byStatus: Record<string, { count: number; value: number }> };
+  purchasing: {
+    awaitingFinance: { count: number; value: number };
+    financeApprovals: number;
+    financeRejections: number;
+    procurementSpend: number;
+  };
+}
+
 const EMPTY_DASHBOARD: ManagerDashboardData = {
   managerName: 'Manager',
   currentDate: new Date(),
@@ -79,12 +94,10 @@ const EMPTY_DASHBOARD: ManagerDashboardData = {
 
 @Injectable({ providedIn: 'root' })
 export class ManagerDashboardService {
-  private apiUrl = 'http://localhost:5000/api/manager';
-
-  constructor(private http: HttpClient) {}
+  constructor(private readonly api: ApiService) {}
 
   getDashboard(): Observable<ManagerDashboardData> {
-    return this.http.get<ManagerDashboardData>(`${this.apiUrl}/dashboard`).pipe(
+    return this.api.get<ManagerDashboardData>('/manager/dashboard').pipe(
       map((data) => ({
         ...data,
         currentDate: new Date(data.currentDate),
@@ -97,6 +110,14 @@ export class ManagerDashboardService {
         console.error('Manager dashboard unavailable.', error);
         return of({ ...EMPTY_DASHBOARD, currentDate: new Date() });
       }),
+    );
+  }
+
+  getFinanceSummary(period: '7d' | '30d' | '12m'): Observable<FinanceSummary | null> {
+    const params = new HttpParams().set('period', period);
+    return this.api.get<FinanceSummary>('/manager/finance-summary', params).pipe(
+      map((summary) => ({ ...summary, generatedAt: new Date(summary.generatedAt) })),
+      catchError(() => of(null)),
     );
   }
 
