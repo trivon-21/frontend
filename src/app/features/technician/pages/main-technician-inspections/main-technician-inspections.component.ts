@@ -21,7 +21,8 @@ type RawInspection = {
   _id?: string;
   ticketId?: string | number;
   customerName?: string;
-  customerId?: string | { name?: string; address?: string };
+  fullName?: string;
+  customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
   location?: string;
   date?: string;
@@ -79,12 +80,12 @@ export class MainTechnicianInspectionsComponent implements OnInit {
   private mapApiInspection(item: RawInspection): InspectionTicket {
     const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
-    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
-    const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
+    const populatedCustomerName = typeof item.customerId === 'object' ? (item.customerId as any)?.fullName || (item.customerId as any)?.name : undefined;
+    const populatedCustomerAddress = typeof item.customerId === 'object' ? (item.customerId as any)?.address : undefined;
 
     return {
       id: normalizedId,
-      customerName: item.customerName || populatedCustomerName || 'Unknown Customer',
+      customerName: item.fullName || item.customerName || populatedCustomerName || 'Unknown Customer',
       productType: item.productType || 'N/A',
       location: populatedCustomerAddress || item.location || '-',
       date: this.formatDisplayDate(item.date || item.serviceDate || ''),
