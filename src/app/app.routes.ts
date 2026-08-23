@@ -88,6 +88,26 @@ export const routes: Routes = [
 { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
 
+  // ── Manager portal
+  {
+    path: 'manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MANAGER', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
+  },
+
+  // ── Inventory Manager portal
+  {
+    path: 'inventory-manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INVENTORY', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/inventory-manager/inventory-manager.routes').then(
+        (m) => m.INVENTORY_MANAGER_ROUTES,
+      ),
+  },
+
   // ── Technician / Manager portal
   {
     path: '',

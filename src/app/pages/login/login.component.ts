@@ -8,6 +8,7 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { ChangePasswordModalComponent } from '../../components/modals/change-password-modal/change-password-modal.component';
+import { roleHomeUrl } from '../../core/routing/role-home';
 
 @Component({
   selector: 'app-login',
@@ -59,12 +60,7 @@ export class LoginComponent {
       return this.returnUrl;
     }
 
-    const user = this.authService.getCurrentUser();
-    if (user?.role === 'SUPER_ADMIN') {
-      return '/super-admin';
-    }
-
-    return '/dashboard';
+    return roleHomeUrl(this.authService.getCurrentUser()?.role);
   }
 
   onIdentifierChange(identifier: string) {
