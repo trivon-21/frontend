@@ -1,0 +1,216 @@
+<div class="inventory-dashboard">
+  <!-- Offline Warning Banner -->
+  <div class="offline-banner" *ngIf="data.status === 'Offline'">
+    <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
+    <div class="banner-text">
+      <strong>Database Offline</strong>
+      <span
+        >The system is currently running in local mode. Live data and updates are unavailable.</span
+      >
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <div class="welcome-banner">
+    <div class="banner-content">
+      <div class="title-row">
+        <h1 class="welcome-title">Welcome back!</h1>
+        <span class="status-badge" [class.offline]="data.status === 'Offline'">
+          <span class="dot" [class.syncing]="loading"></span>
+          {{ loading ? 'Syncing...' : data.status }}
+        </span>
+      </div>
+    </div>
+    <div class="time-date-section">
+      <div class="live-time">{{ formatTime(data.currentDate) }}</div>
+      <div class="live-date">{{ formatDate(data.currentDate) }}</div>
+      <button class="btn-new-order" routerLink="/inventory-manager/order-creation">
+        <lucide-angular name="plus" [size]="16"></lucide-angular>
+        Create New Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards Section -->
+  <div class="summary-grid">
+    <!-- Material Reservations -->
+    <div class="summary-card clickable" routerLink="/inventory-manager/material-requests">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Stock Reservations</span>
+          <span class="card-value">{{ data.stats.materialReservations.total }}</span>
+        </div>
+        <div class="card-icon">
+          <lucide-angular name="clipboard-check" [size]="24"></lucide-angular>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.materialReservations.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispatch Queue -->
+    <div class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Dispatch Queue</span>
+          <span class="card-value">{{ data.stats.dispatchQueue.total }}</span>
+        </div>
+        <div class="card-icon">
+          <lucide-angular name="truck" [size]="24"></lucide-angular>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.dispatchQueue.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Health -->
+    <div class="summary-card clickable" routerLink="/inventory-manager/asset-management">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Tool Status</span>
+          <span class="card-value">{{ data.stats.assetHealth.total }}</span>
+        </div>
+        <div class="card-icon">
+          <lucide-angular name="wrench" [size]="24"></lucide-angular>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.assetHealth.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Alerts -->
+    <div class="summary-card clickable" routerLink="/inventory-manager/inventory">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Stock Alerts</span>
+          <span class="card-value">{{ data.stats.stockAlerts.total }}</span>
+        </div>
+        <div class="card-icon">
+          <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div *ngFor="let sub of data.stats.stockAlerts.subStats" class="sub-stat">
+          <span class="sub-label">{{ sub.label }}</span>
+          <span class="sub-value">{{ sub.value }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="content-card workflow-card" routerLink="/inventory-manager/procurement" aria-label="Open Purchasing Workflow">
+    <div class="card-header">
+      <div class="title-with-icon">
+        <lucide-angular name="clipboard-list" [size]="18"></lucide-angular>
+        <div>
+          <h2 class="card-title">Purchasing Workflow</h2>
+          <p class="workflow-description">Track approvals, receiving, and finance review.</p>
+        </div>
+      </div>
+      <span class="workflow-link">Open procurement <lucide-angular name="chevron-right" [size]="16"></lucide-angular></span>
+    </div>
+    <div class="workflow-stages">
+      <div class="workflow-stage">
+        <span class="workflow-stage-label">Awaiting Manager</span>
+        <strong>{{ data.procurementWorkflow.awaitingManager }}</strong>
+        <span class="workflow-stage-hint">Requests to approve</span>
+      </div>
+      <div class="workflow-stage">
+        <span class="workflow-stage-label">Approved to Receive</span>
+        <strong>{{ data.procurementWorkflow.awaitingReceipt }}</strong>
+        <span class="workflow-stage-hint">Orders ready for GRN</span>
+      </div>
+      <div class="workflow-stage">
+        <span class="workflow-stage-label">Awaiting Finance</span>
+        <strong>{{ data.procurementWorkflow.awaitingFinance }}</strong>
+        <span class="workflow-stage-hint">Receipts to review</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Main Grid Content -->
+  <div class="dashboard-main-grid">
+    <!-- Left Column: Activity Feed -->
+    <div class="content-card activity-card">
+      <div class="card-header">
+        <h2 class="card-title">Recent Activity</h2>
+        <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
+      </div>
+      <div class="timeline-container">
+        <div *ngFor="let activity of data.recentActivity" class="timeline-item">
+          <div class="timeline-line"></div>
+          <div class="timeline-marker" [ngClass]="activity.type">
+            <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <p class="activity-title">{{ activity.title }}</p>
+              <span class="activity-time">{{ activity.timeAgo }}</span>
+            </div>
+            <div class="activity-actions" *ngIf="activity.actionLabel">
+              <button class="activity-btn" (click)="handleActivityAction(activity)">
+                {{ activity.actionLabel }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Reorder & Logistics -->
+    <div class="side-column">
+      <!-- Reorder List -->
+      <div class="content-card reorder-card">
+        <div class="card-header">
+          <div class="title-with-icon">
+            <lucide-angular name="triangle-alert" class="error-icon" [size]="18"></lucide-angular>
+            <h2 class="card-title">Reorder List</h2>
+          </div>
+          <span class="count-badge">{{ data.reorderList.length }} Items</span>
+        </div>
+        <div class="table-container alx-table-container">
+          <table class="reorder-table alx-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="text-right">Available</th>
+                <th class="text-right">Reserved</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of data.reorderList"
+                  class="clickable-row"
+                  routerLink="/inventory-manager/order-creation/new">
+                <td class="item-name-cell">
+                  <div class="item-cell-wrapper">
+                    <div class="status-dot" [ngClass]="item.status"></div>
+                    <span class="item-name">{{ item.name }}</span>
+                  </div>
+                </td>
+                <td class="item-avail text-right" [class.critical]="item.available === 0">
+                  {{ item.available }}
+                </td>
+                <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
+                  {{ item.reserved }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

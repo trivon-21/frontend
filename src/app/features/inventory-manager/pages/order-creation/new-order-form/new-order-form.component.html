@@ -1,0 +1,90 @@
+<div class="new-order-container animate-fade">
+  <!-- Header Section -->
+  <div class="form-header">
+    <div class="header-main">
+      <button class="btn-back" (click)="goBack()">
+        <lucide-angular name="arrow-left" [size]="20" strokeWidth="2.5"></lucide-angular>
+      </button>
+      <div class="title-group">
+        <h1 *ngIf="!isEditMode">New Purchase Order Request</h1>
+        <h1 *ngIf="isEditMode">Edit Purchase Order Request</h1>
+        <p class="subtitle">Fill in the details below to {{ isEditMode ? 'update your draft' : 'request a new purchase order' }} for approval.</p>
+      </div>
+    </div>
+    <div class="header-actions" *ngIf="isEditMode">
+      <span class="draft-badge">DRAFT: {{ orderId }}</span>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="alerts-wrap" *ngIf="successMessage || errorMessage">
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+
+  <div class="split-layout">
+    <!-- Left Column: Form Inputs -->
+    <div class="layout-left white-panel">
+      <!-- Step 1: Supplier Selector Dumb Component -->
+      <app-order-supplier-selector
+        [suppliers]="suppliers"
+        [initialSupplier]="selectedSupplier"
+        (supplierSelected)="onSupplierSelected($event)">
+      </app-order-supplier-selector>
+
+      <div class="step-divider"></div>
+
+      <!-- Step 2: Item Search Dumb Component -->
+      <app-order-item-search
+        [inventoryItems]="inventoryItems"
+        (itemAdded)="onItemAdded($event)">
+      </app-order-item-search>
+
+      <div class="step-divider"></div>
+
+      <!-- Step 3: Additional Details -->
+      <div class="form-step">
+        <div class="step-header">
+          <span class="step-badge">3</span>
+          <h3>Additional Details</h3>
+        </div>
+        <div class="step-content">
+          <div class="form-group">
+            <label>Order Notes / Justification</label>
+            <textarea
+              [(ngModel)]="orderNotes"
+              class="form-textarea"
+              placeholder="Add any additional context for the approver..."
+              rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer-actions">
+        <button class="btn-discard" (click)="goBack()">Discard Changes</button>
+        <div class="action-group">
+          <button class="btn-secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+            {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
+          </button>
+          <button class="btn-primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+            <span *ngIf="!isSubmitting">Submit Order</span>
+            <span *ngIf="isSubmitting">...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Added Items List Dumb Component -->
+    <app-order-cart-list
+      [orderItems]="orderItems"
+      (itemUpdated)="onItemUpdated($event)"
+      (itemRemoved)="onItemRemoved($event)">
+    </app-order-cart-list>
+  </div>
+
+  <!-- Required Items Grid Dumb Component -->
+  <app-order-suggested-grid
+    [suggestedItems]="suggestedItems"
+    (suggestedItemAdded)="onItemAdded($event)">
+  </app-order-suggested-grid>
+</div>

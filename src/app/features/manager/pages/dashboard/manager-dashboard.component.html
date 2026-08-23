@@ -1,0 +1,120 @@
+<div class="inventory-dashboard">
+  <div class="offline-banner" *ngIf="data.status === 'Offline'">
+    <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
+    <div class="banner-text">
+      <strong>Live data unavailable</strong>
+      <span>Operational values are shown as zero until the database reconnects.</span>
+    </div>
+  </div>
+
+  <div class="welcome-banner">
+    <div class="banner-content">
+      <div class="title-row">
+        <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
+        <span class="status-badge" [class.offline]="data.status === 'Offline'">
+          <span class="dot" [class.syncing]="loading"></span>
+          {{ loading ? 'Syncing...' : data.status }}
+        </span>
+      </div>
+    </div>
+    <div class="time-date-section">
+      <div class="live-time">{{ formatTime(data.currentDate) }}</div>
+      <div class="live-date">{{ formatDate(data.currentDate) }}</div>
+      <button class="btn-new-order" routerLink="/manager/work-items">
+        <lucide-angular name="clipboard-list" [size]="16"></lucide-angular>
+        Open Work Queue
+      </button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card clickable" routerLink="/manager/work-items">
+      <div class="card-main">
+        <div class="card-info"><span class="card-label">Open Tickets</span><span class="card-value">{{ data.stats.openTickets.total }}</span></div>
+        <div class="card-icon"><lucide-angular name="clipboard-list" [size]="24"></lucide-angular></div>
+      </div>
+      <div class="card-footer"><div *ngFor="let sub of data.stats.openTickets.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
+    </div>
+
+    <div class="summary-card clickable" routerLink="/manager/work-items" [queryParams]="{ assignment: 'unassigned' }">
+      <div class="card-main">
+        <div class="card-info"><span class="card-label">Unassigned Tickets</span><span class="card-value">{{ data.stats.unassignedTickets.total }}</span></div>
+        <div class="card-icon"><lucide-angular name="user-round-x" [size]="24"></lucide-angular></div>
+      </div>
+      <div class="card-footer"><div *ngFor="let sub of data.stats.unassignedTickets.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
+    </div>
+
+    <div class="summary-card clickable" routerLink="/manager/work-items" [queryParams]="{ sla: 'overdue' }">
+      <div class="card-main">
+        <div class="card-info"><span class="card-label">SLA Risk</span><span class="card-value">{{ data.stats.slaRisk.total }}</span></div>
+        <div class="card-icon"><lucide-angular name="timer-off" [size]="24"></lucide-angular></div>
+      </div>
+      <div class="card-footer"><div *ngFor="let sub of data.stats.slaRisk.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
+    </div>
+
+    <div class="summary-card clickable" routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }">
+      <div class="card-main">
+        <div class="card-info"><span class="card-label">Pending Approvals</span><span class="card-value">{{ data.stats.pendingApprovals.total }}</span></div>
+        <div class="card-icon"><lucide-angular name="shopping-bag" [size]="24"></lucide-angular></div>
+      </div>
+      <div class="card-footer"><div *ngFor="let sub of data.stats.pendingApprovals.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
+    </div>
+  </div>
+
+  <section class="content-card finance-snapshot" *ngIf="financeSummary as finance">
+    <div class="card-header">
+      <div><h2 class="card-title">{{ finance.label }}</h2><p>Read-only workflow totals—not cash balance or profit.</p></div>
+      <select [(ngModel)]="financePeriod" (ngModelChange)="loadFinanceSummary()" aria-label="Finance snapshot period"><option value="7d">7 days</option><option value="30d">30 days</option><option value="12m">12 months</option></select>
+    </div>
+    <div class="inventory-kpi-row">
+      <div class="kpi-mini-card"><div class="kpi-details"><span class="kpi-value">{{ finance.paymentReview.count }}</span><span class="kpi-label">Payment reviews · {{ finance.paymentReview.value | currency:'LKR':'symbol':'1.0-0' }}</span></div></div>
+      <div class="kpi-mini-card"><div class="kpi-details"><span class="kpi-value">{{ finance.invoicesIssued.count }}</span><span class="kpi-label">Invoices · {{ finance.invoicesIssued.value | currency:'LKR':'symbol':'1.0-0' }}</span></div></div>
+      <div class="kpi-mini-card"><div class="kpi-details"><span class="kpi-value">{{ finance.purchasing.awaitingFinance.count }}</span><span class="kpi-label">Awaiting Finance · {{ finance.purchasing.awaitingFinance.value | currency:'LKR':'symbol':'1.0-0' }}</span></div></div>
+      <div class="kpi-mini-card"><div class="kpi-details"><span class="kpi-value">{{ finance.purchasing.procurementSpend | currency:'LKR':'symbol':'1.0-0' }}</span><span class="kpi-label">Procurement received in period</span></div></div>
+    </div>
+  </section>
+
+  <div class="inventory-kpi-row">
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-wrapper reserved"><lucide-angular name="clipboard-check" [size]="20"></lucide-angular></div>
+      <div class="kpi-details"><span class="kpi-value">{{ data.inventoryKpis.reservedItems.value }}</span><span class="kpi-label">Reserved Items</span></div>
+    </div>
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-wrapper alert" [class.critical]="data.inventoryKpis.lowStockAlerts.value > 0"><lucide-angular name="triangle-alert" [size]="20"></lucide-angular></div>
+      <div class="kpi-details"><span class="kpi-value" [class.critical-text]="data.inventoryKpis.lowStockAlerts.value > 0">{{ data.inventoryKpis.lowStockAlerts.value }}</span><span class="kpi-label">Low Stock Alerts</span></div>
+    </div>
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-wrapper pending"><lucide-angular name="package" [size]="20"></lucide-angular></div>
+      <div class="kpi-details"><span class="kpi-value">{{ data.inventoryKpis.pendingMaterialRequests.value }}</span><span class="kpi-label">Pending Material Requests</span></div>
+    </div>
+  </div>
+
+  <div class="dashboard-main-grid">
+    <div class="content-card activity-card">
+      <div class="card-header"><h2 class="card-title">Recent Activity</h2></div>
+      <div class="timeline-container">
+        <a *ngFor="let activity of data.recentActivity" class="timeline-item" [routerLink]="activity.route" [queryParams]="activity.queryParams">
+          <div class="timeline-line"></div>
+          <div class="timeline-marker" [ngClass]="activity.type"><lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular></div>
+          <div class="timeline-content"><div class="timeline-header"><p class="activity-title">{{ activity.title }}</p><span class="activity-time">{{ activity.timeAgo }}</span></div><p class="activity-desc">{{ activity.description }}</p></div>
+        </a>
+        <div *ngIf="data.recentActivity.length === 0" class="empty-state">No recent operational activity.</div>
+      </div>
+    </div>
+
+    <div class="side-column">
+      <div class="content-card actions-card">
+        <div class="card-header"><div class="title-with-icon"><lucide-angular name="clipboard-list" class="primary-icon" [size]="18"></lucide-angular><h2 class="card-title">Pending Actions</h2></div><span class="count-badge">{{ data.pendingActions.length }} Items</span></div>
+        <div class="actions-list">
+          <div *ngFor="let action of data.pendingActions" class="action-item">
+            <div class="action-header"><span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span><span class="action-type-tag">{{ action.type | uppercase }}</span></div>
+            <h3 class="action-title">{{ action.title }}</h3>
+            <p class="action-desc">{{ action.description }}</p>
+            <div class="action-footer"><a class="action-btn-primary" [routerLink]="action.route" [queryParams]="action.queryParams">Open</a></div>
+          </div>
+          <div *ngIf="data.pendingActions.length === 0" class="empty-state">No unresolved actions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

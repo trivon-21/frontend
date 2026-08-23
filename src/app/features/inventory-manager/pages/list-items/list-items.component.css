@@ -1,0 +1,41 @@
+/* stylelint-disable declaration-property-value-allowed-list, declaration-block-single-line-max-declarations, declaration-block-no-redundant-longhand-properties -- This legacy component keeps compact local layout rules while using the shared AirLux theme tokens. */
+:host { display: block; }
+.quality-container { padding: var(--spacing-xxl); color: var(--text-primary); }
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.page-header h1 { margin: 0 0 5px; }
+.page-header p, .product-main p { margin: 0; color: var(--text-secondary); }
+.btn-primary, .btn-secondary { display: inline-flex; align-items: center; gap: 7px; border-radius: 8px; padding: 10px 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.btn-primary { border: 1px solid var(--primary-main); background: var(--primary-main); color: var(--text-inverse); }
+.btn-primary:hover { border-color: var(--primary-hover); background: var(--primary-hover); }
+.btn-secondary { border: 1px solid var(--border-medium); background: var(--background-card); color: var(--text-primary); }
+.summary-grid { display: grid; grid-template-columns: repeat(2, minmax(180px, 260px)); gap: 12px; margin-bottom: 16px; }
+.summary-grid div { display: flex; flex-direction: column; padding: var(--spacing-lg); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm); background: var(--background-card); }
+.summary-grid strong { font-size: 24px; }
+.summary-grid span { color: var(--text-secondary); font-size: 13px; }
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.search-box { min-width: min(520px, 100%); display: flex; align-items: center; gap: var(--spacing-sm); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm); background: var(--background-input); padding: 0 var(--spacing-md); }
+.search-box input { width: 100%; border: 0; outline: 0; padding: 11px 0; color: var(--text-primary); background: transparent; }
+.btn-link { border: 0; background: transparent; color: var(--primary-main); cursor: pointer; }
+.quality-list { display: grid; gap: 12px; }
+.quality-card { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(300px, 1.4fr) auto; align-items: center; gap: var(--spacing-xl); padding: var(--spacing-xl); border: 1px solid var(--border-light); border-radius: var(--border-radius-md); background: var(--background-card); box-shadow: var(--shadow-standard); }
+.product-main h2 { margin: 4px 0; font-size: 17px; }
+.sku { color: var(--primary-main); font-size: 12px; font-weight: 750; }
+.issues { display: flex; flex-wrap: wrap; gap: 7px; }
+.issue { padding: 6px 9px; border-radius: 999px; font-size: 12px; font-weight: 650; }
+.issue.master { background: var(--error-light); color: var(--error); }
+.issue.stock { background: var(--error-light); color: var(--error); }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.state-card { padding: var(--spacing-xl); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm); background: var(--background-card); color: var(--text-secondary); text-align: center; }
+.state-card.error { color: var(--error); background: var(--error-light); }
+.state-card.success { color: var(--success); background: var(--success-light); }
+
+@media (width <= 850px) {
+  .quality-card { grid-template-columns: 1fr; }
+  .actions { flex-flow: row wrap; }
+}
+
+@media (width <= 600px) {
+  .quality-container { padding: 16px; }
+  .page-header { align-items: flex-start; flex-direction: column; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+}
