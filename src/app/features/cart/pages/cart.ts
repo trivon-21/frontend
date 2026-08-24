@@ -3,17 +3,21 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartResponse, DisplayCartItem } from './cart.service';
 import { HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService, AuthUser } from '../../../core/services/auth.service';
+import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, HttpClientModule],
+  imports: [CommonModule, DecimalPipe, HttpClientModule, RouterModule, ClickOutsideDirective],
   templateUrl: './cart.html',
   styleUrl: './cart.css',
 })
 export class Cart implements OnInit {
   username: string = 'Customer';
+  currentUser: AuthUser | null = null;
+  showDropdown = false;
   cartItems: DisplayCartItem[] = [];
   subtotal: number = 0;
   additionalCharges: number = 0;
@@ -33,12 +37,62 @@ export class Cart implements OnInit {
   validationError: string | null = null;
 
   private cartService = inject(CartService);
+  private authService = inject(AuthService);
   public router = inject(Router);
 
   ngOnInit() {
-    this.username = localStorage.getItem('username') || 'Customer';
-    this.userId = localStorage.getItem('userId') || 'demo-user';
-    this.fetchCart();
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      return;
+    }
+
+    this.currentUser = this.authService.getCurrentUser();
+    this.userId = this.currentUser ? (this.currentUser.id || (this.currentUser as any)._id) : '';
+    this.username = this.currentUser ? this.currentUser.fullName.split(' ')[0] : 'Customer';
+
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+      this.username = user ? user.fullName.split(' ')[0] : 'Customer';
+      this.userId = user ? (user.id || (user as any)._id) : '';
+      if (this.userId) {
+        this.fetchCart();
+      }
+    });
+
+    if (this.userId) {
+      this.fetchCart();
+    }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  closeDropdown(): void {
+    this.showDropdown = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.showDropdown = false;
+    this.router.navigate(['/']);
+  }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
   }
 
 
@@ -175,13 +229,16 @@ export class Cart implements OnInit {
   }
 
   onProceedCheckout() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      return;
+    }
+
     if (this.selectedIndices.length === 0) {
       this.validationError = "You need to first select one type of items to checkout";
       return;
     }
     
-    // For now, we'll navigate to checkout. 
-    // In a real app, we'd pass the selected item IDs in navigation state or similar.
     const selectedIds = this.selectedIndices.map(i => this.cartItems[i].productId.toString());
     this.router.navigate(['/checkout'], { state: { selectedItems: selectedIds } });
   }

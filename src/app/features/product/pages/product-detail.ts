@@ -4,21 +4,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { AuthService, AuthUser } from '../../../core/services/auth.service';
+import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
 export class ProductDetail implements OnInit {
-  username: string;
+  username: string = 'Customer';
+  currentUser: AuthUser | null = null;
+  showDropdown = false;
   activeTab: 'description' | 'spec' | 'warranty' | 'reviews' = 'description';
   private cartService = inject(CartService);
-  private router = inject(Router);
+  public router = inject(Router);
+  private authService = inject(AuthService);
 
   // Purchase flow options
   purchaseOption: 'buy-only' | 'buy-install' | null = null;
@@ -38,11 +43,45 @@ export class ProductDetail implements OnInit {
   alreadyInCartToast = false;
   private alreadyInCartTimer: any = null;
 
+  // Login required modal
+  showLoginPromptModal = false;
+  loginModalMessage = 'You need to be logged into your account before adding items to your cart.';
+  modalReturnUrl = '';
+
+  onCartNavClick(event?: Event) {
+    if (event) event.preventDefault();
+    if (!this.authService.isLoggedIn()) {
+      this.loginModalMessage = 'You need to be logged into your account to view your shopping cart.';
+      this.modalReturnUrl = '/cart';
+      this.showLoginPromptModal = true;
+    } else {
+      this.router.navigate(['/cart']);
+    }
+  }
+
+  closeLoginPromptModal() {
+    this.showLoginPromptModal = false;
+  }
+
+  goToLoginFromModal() {
+    this.showLoginPromptModal = false;
+    const returnUrl = this.modalReturnUrl || this.router.url;
+    this.router.navigate(['/login'], { queryParams: { returnUrl } });
+  }
+
   /**
  * Adds the current product and selected quantity to the user's cart via the backend API.
- * Shows a success or error alert based on the API response.
+ * Requires the user to be logged in before adding to cart.
  */
   addToCart() {
+    // Check if user is logged in
+    if (!this.authService.isLoggedIn()) {
+      this.loginModalMessage = 'You need to be logged into your account before adding items to your cart.';
+      this.modalReturnUrl = this.router.url;
+      this.showLoginPromptModal = true;
+      return;
+    }
+
     // Determine purchase type from the selected option
     const purchaseType: 'buy_only' | 'buy_and_install' =
       this.purchaseOption === 'buy-install' ? 'buy_and_install' : 'buy_only';
@@ -53,7 +92,8 @@ export class ProductDetail implements OnInit {
       return;
     }
 
-    const userId = localStorage.getItem('userId') || 'demo-user';
+    const user = this.authService.getCurrentUser();
+    const userId = user ? (user.id || (user as any)._id) : 'demo-user';
     const productId = this.product._id;
     const quantity = this.quantity;
     this.cartService.addOrUpdateItem(userId, productId, quantity, purchaseType).subscribe({
@@ -118,10 +158,17 @@ export class ProductDetail implements OnInit {
   private readonly API_BASE = `${environment.apiUrl}/products`;
 
   constructor() {
-    this.username = localStorage.getItem('username') || 'Customer';
+    const user = this.authService.getCurrentUser();
+    this.currentUser = user;
+    this.username = user ? user.fullName.split(' ')[0] : 'Customer';
   }
 
   ngOnInit() {
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+      this.username = user ? user.fullName.split(' ')[0] : 'Customer';
+    });
+
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
@@ -139,6 +186,37 @@ export class ProductDetail implements OnInit {
     }
   }
 
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  closeDropdown(): void {
+    this.showDropdown = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.showDropdown = false;
+    this.router.navigate(['/']);
+  }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
+  }
+
   fetchProduct(id: string) {
     this.loading = true;
     this.error = '';
@@ -147,12 +225,13 @@ export class ProductDetail implements OnInit {
         if (res.success && res.data) {
           this.product = res.data;
           if (this.product.variants && this.product.variants.length > 0) {
-            this.selectedVariant = this.product.variants[0];
+            const match = this.product.variants.find((v: any) => v.capacity === this.product.capacity);
+            this.selectedVariant = match || this.product.variants[0];
           } else {
             this.selectedVariant = {
               capacity: this.product.capacity,
               price: this.product.price,
-              label: `${this.product.capacity} Ton`
+              label: `${this.product.capacity} BTU`
             };
           }
           // Check if already in cart
@@ -171,7 +250,12 @@ export class ProductDetail implements OnInit {
   }
 
   checkIfInCart(productId: string) {
-    const userId = localStorage.getItem('userId') || 'demo-user';
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      this.alreadyInCart = false;
+      return;
+    }
+    const userId = user.id || (user as any)._id || 'demo-user';
     this.cartService.getCart(userId).subscribe({
       next: (res) => {
         const items = res?.cart?.items ?? [];
@@ -214,7 +298,7 @@ export class ProductDetail implements OnInit {
       return [{
         capacity: this.product.capacity,
         price: this.product.price,
-        label: `${this.product.capacity} Ton`
+        label: `${this.product.capacity} BTU`
       }];
     }
     return [];
@@ -234,7 +318,7 @@ export class ProductDetail implements OnInit {
 
   variantLabel(variant: any): string {
     if (variant.label) return `${variant.label} – LKR ${variant.price.toLocaleString()}`;
-    return `${variant.capacity} Ton – LKR ${variant.price.toLocaleString()}`;
+    return `${variant.capacity} BTU – LKR ${variant.price.toLocaleString()}`;
   }
 
   // --- Quantity ---
@@ -255,6 +339,11 @@ export class ProductDetail implements OnInit {
   }
 
   onGetExpertAdvice() {
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginPromptModal = true;
+      return;
+    }
+
     this.router.navigate(['/consultation-bridge'], {
       state: { 
         productId: this.product._id,

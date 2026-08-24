@@ -363,6 +363,7 @@
 /* ---------- OUR SERVICES SECTION ---------- */
 .services-section {
   background: linear-gradient(135deg, var(--color-surface-soft-1) 0%, var(--color-surface-soft-2) 100%);
+  scroll-margin-top: 140px;
 }
 
 .service-card {
