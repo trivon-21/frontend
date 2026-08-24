@@ -22,8 +22,8 @@
     <div class="inspection-card" *ngFor="let inspection of filteredInspections">
       <div class="card-header-bar">
         <div class="id-block">
-          <span class="order-id">ORDER ID: {{ shortId(inspection.orderId) }}</span>
-          <span class="ticket-id">Ticket ID: {{ shortId(inspection.ticketId) }}</span>
+          <span class="order-id">ORDER ID: {{ inspection.orderId }}</span>
+          <span class="ticket-id">Ticket ID: {{ inspection.ticketId }}</span>
         </div>
       </div>
       <div class="card-body">
