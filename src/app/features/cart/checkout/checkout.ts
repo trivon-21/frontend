@@ -1,15 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CartService, CartResponse, DisplayCartItem } from '../pages/cart.service';
 import { OrderService } from './order.service';
 import { PaymentService, BankDetails } from '../../../core/services/payment.service';
+import { AuthService, AuthUser } from '../../../core/services/auth.service';
+import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
@@ -17,6 +19,8 @@ export class Checkout implements OnInit {
   // User ID
   userId: string = '';
   username: string = '';
+  currentUser: AuthUser | null = null;
+  showDropdown: boolean = false;
 
   // Selection from state
   selectedItemIds: string[] = [];
@@ -56,7 +60,8 @@ export class Checkout implements OnInit {
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private paymentService = inject(PaymentService);
-  private router = inject(Router);
+  private authService = inject(AuthService);
+  public router = inject(Router);
 
   constructor() {
     // Explicitly using new FormGroup and FormControl for maximum reliability
@@ -72,8 +77,36 @@ export class Checkout implements OnInit {
   }
 
   ngOnInit() {
-    this.userId = localStorage.getItem('userId') || 'demo-user';
-    this.username = localStorage.getItem('username') || 'Customer';
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      return;
+    }
+
+    this.currentUser = this.authService.getCurrentUser();
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.currentUser = user;
+        this.userId = user.id || (user as any)._id || '';
+        this.username = user.fullName.split(' ')[0] || 'Customer';
+      }
+    });
+
+    this.userId = this.currentUser ? (this.currentUser.id || (this.currentUser as any)._id || '') : '';
+    this.username = this.currentUser ? this.currentUser.fullName.split(' ')[0] : 'Customer';
+
+    // Auto-fill user information into shipping form if fields are empty
+    if (this.currentUser) {
+      const nameParts = (this.currentUser.fullName || '').trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || (this.currentUser.lastName || '');
+      this.shippingForm.patchValue({
+        firstName: this.shippingForm.get('firstName')?.value || firstName,
+        lastName: this.shippingForm.get('lastName')?.value || lastName,
+        email: this.shippingForm.get('email')?.value || (this.currentUser.email || ''),
+        phone: this.shippingForm.get('phone')?.value || (this.currentUser.phoneNumber || ''),
+        address: this.shippingForm.get('address')?.value || (this.currentUser.address || '')
+      });
+    }
 
     const state = history.state;
     if (state) {
@@ -88,6 +121,37 @@ export class Checkout implements OnInit {
 
     this.fetchCart();
     this.fetchBankDetails();
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  closeDropdown(): void {
+    this.showDropdown = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.showDropdown = false;
+    this.router.navigate(['/']);
+  }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
   }
 
   // Explicitly check for errors to ensure template updates

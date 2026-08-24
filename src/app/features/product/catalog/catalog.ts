@@ -2,19 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { NgFor, NgIf, DecimalPipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { AuthService, AuthUser } from '../../../core/services/auth.service';
+import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-catalog',
   templateUrl: './catalog.html',
   styleUrl: './catalog.css',
-  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule],
+  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective],
 })
 export class Catalog implements OnInit {
   products: any[] = [];
 
+  // Authentication state
+  currentUser: AuthUser | null = null;
+  showDropdown = false;
+  showLoginPromptModal = false;
+
   // Filter state
+  searchQuery: string = '';
+  private searchTimeout: any = null;
   selectedCategory: string = '';
   selectedBrands: string[] = [];
   selectedCapacities: number[] = [];
@@ -30,10 +39,76 @@ export class Catalog implements OnInit {
   brands: string[] = ['Samsung', 'LG', 'Daikin', 'Panasonic'];
   capacities: number[] = [12000, 18000, 24000];
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    public router: Router
+  ) { }
 
   ngOnInit() {
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+    });
     this.fetchProducts();
+  }
+
+  onSearchChange(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchProducts();
+    }, 250);
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+
+  toggleDropdown(): void {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  closeDropdown(): void {
+    this.showDropdown = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.showDropdown = false;
+    this.router.navigate(['/']);
+  }
+
+  getDashboardUrl(): string {
+    if (this.currentUser?.role === 'SUPER_ADMIN') {
+      return '/super-admin';
+    }
+    return '/dashboard';
+  }
+
+  onCartClick(event?: Event): void {
+    if (event) event.preventDefault();
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginPromptModal = true;
+    } else {
+      this.router.navigate(['/cart']);
+    }
+  }
+
+  closeLoginPromptModal(): void {
+    this.showLoginPromptModal = false;
+  }
+
+  goToLoginFromModal(): void {
+    this.showLoginPromptModal = false;
+    this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
   }
 
   fetchProducts() {
@@ -41,6 +116,9 @@ export class Catalog implements OnInit {
     .set('page', this.currentPage.toString())
     .set('limit', '9');
 
+  if (this.searchQuery && this.searchQuery.trim()) {
+    params = params.set('search', this.searchQuery.trim());
+  }
   if (this.selectedCategory) {
     params = params.set('category', this.selectedCategory);
   }
@@ -129,6 +207,7 @@ export class Catalog implements OnInit {
   // Reset all filters
   resetFilter(event: Event) {
     event.preventDefault();
+    this.searchQuery = '';
     this.selectedCategory = '';
     this.selectedBrands = [];
     this.selectedCapacities = [];
