@@ -105,7 +105,9 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 0; }
 .file-name { font-size: 13px; color: #374151; word-break: break-all; max-width: 200px; text-align: center; }
 .remove-file { background: #fee2e2; color: #dc2626; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
 .error-msg { color: #dc2626; font-size: 12px; margin-bottom: 8px; }
-
+.remove-file:hover{
+  background-color: rgb(245, 187, 187);
+}
 /* CONFIRM BUTTON */
 .confirm-btn {
   width: 100%; padding: 14px; background: #2d5a3d; color: white;

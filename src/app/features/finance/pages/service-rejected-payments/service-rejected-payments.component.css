@@ -211,6 +211,10 @@
   color: #6b7280;
 }
 
+.modal-close:hover{
+  color: #cc2721;
+}
+
 .modal-body {
   padding: 18px 20px;
 }
