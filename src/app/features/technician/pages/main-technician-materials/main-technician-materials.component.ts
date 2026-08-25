@@ -72,6 +72,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
+  showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
     productType: '',
@@ -320,13 +321,20 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    if (!this.selectedRequest || !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
-      this.selectedRequest = this.filteredRequests[0] ?? null;
+    if (this.selectedRequest && !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
+      this.selectedRequest = null;
+      this.showViewModal = false;
     }
   }
 
   selectRequest(request: MaterialRequest) {
     this.selectedRequest = request;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedRequest = null;
   }
 
   openCreateModal(): void {

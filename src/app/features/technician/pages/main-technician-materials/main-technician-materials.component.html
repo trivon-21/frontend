@@ -1,8 +1,7 @@
-
-    <div class="materials-container">
+    <div class="materials-container page-wrapper">
       <header class="page-header">
         <h1 class="page-title">Materials Management</h1>
-        <button class="new-request-btn" (click)="openCreateModal()">
+        <button class="header-action-btn" (click)="openCreateModal()">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New Material Request
         </button>
@@ -37,123 +36,150 @@
         </div>
       </div>
 
-      <div class="summary-cards">
-        <div class="card">
-          <div class="card-icon drafts-icon">
+      <div class="metrics-grid">
+        <div class="metric-card" (click)="statusFilter = 'draft'; applyFilters()" [class.active-card]="statusFilter === 'draft'">
+          <div class="metric-icon blue">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 12h8"/><path d="M8 16h8"/></svg>
           </div>
-          <div class="card-content">
-            <span class="card-label">New</span>
-            <span class="card-value">{{ getCountByStatus(['New']) }}</span>
+          <div class="metric-content">
+            <span class="metric-label">New</span>
+            <span class="metric-value">{{ getCountByStatus(['New']) }}</span>
           </div>
         </div>
-        <div class="card">
-          <div class="card-icon pending-icon">
+        <div class="metric-card" (click)="statusFilter = 'pending'; applyFilters()" [class.active-card]="statusFilter === 'pending'">
+          <div class="metric-icon orange">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <div class="card-content">
-            <span class="card-label">Pending</span>
-            <span class="card-value">{{ getCountByStatus(['Pending Approval', 'Pending']) }}</span>
+          <div class="metric-content">
+            <span class="metric-label">Pending</span>
+            <span class="metric-value">{{ getCountByStatus(['Pending Approval', 'Pending']) }}</span>
           </div>
         </div>
-        <div class="card">
-          <div class="card-icon approved-icon">
+        <div class="metric-card" (click)="statusFilter = 'approved'; applyFilters()" [class.active-card]="statusFilter === 'approved'">
+          <div class="metric-icon green">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
           </div>
-          <div class="card-content">
-            <span class="card-label">Finance Approved</span>
-            <span class="card-value">{{ getCountByStatus(['Finance Approved']) }}</span>
+          <div class="metric-content">
+            <span class="metric-label">Finance Approved</span>
+            <span class="metric-value">{{ getCountByStatus(['Finance Approved']) }}</span>
           </div>
         </div>
-        <div class="card">
-          <div class="card-icon send-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <div class="metric-card" (click)="statusFilter = 'sent'; applyFilters()" [class.active-card]="statusFilter === 'sent'">
+          <div class="metric-icon teal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           </div>
-          <div class="card-content">
-            <span class="card-label">Sent to IM</span>
-            <span class="card-value">{{ getCountByStatus(['Sent to IM']) }}</span>
+          <div class="metric-content">
+            <span class="metric-label">Sent to IM</span>
+            <span class="metric-value">{{ getCountByStatus(['Sent to IM']) }}</span>
           </div>
         </div>
       </div>
 
-      <div class="main-grid">
-        <div class="request-list">
-          <div class="empty-state" *ngIf="!isLoading && !error && filteredRequests.length === 0">
-            No material requests found
-          </div>
-          <div class="empty-state" *ngIf="isLoading">Loading material requests...</div>
-          <div class="empty-state" *ngIf="error">{{ error }}</div>
-          <div 
-            *ngFor="let request of filteredRequests" 
-            class="request-card" 
-            [class.selected]="selectedRequest?.id === request.id"
-            (click)="selectRequest(request)"
-          >
-            <div class="request-id-row">
-              <div class="id-type" style="max-width: 65%;">
-                <span class="req-id" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ request.id }}</span>
-                <span class="req-type">{{ request.type }}</span>
-              </div>
-              <span class="status-chip" [ngClass]="getStatusClass(request.status)">
-                {{ request.status }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>REQUEST ID</th>
+              <th>TYPE</th>
+              <th>CUSTOMER</th>
+              <th>LOCATION</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="isLoading">
+              <td colspan="7" style="text-align: center; color: #8a9e96;">Loading material requests...</td>
+            </tr>
+            <tr *ngIf="!isLoading && !error && filteredRequests.length === 0">
+              <td colspan="7" style="text-align: center; color: #8a9e96;">No material requests found</td>
+            </tr>
+            <tr *ngIf="error">
+              <td colspan="7" style="text-align: center; color: #d64040;">{{ error }}</td>
+            </tr>
+            <tr *ngFor="let request of filteredRequests">
+              <td style="font-weight: 600;">{{ request.id }}</td>
+              <td>{{ request.type }}</td>
+              <td>{{ request.customer }}</td>
+              <td>{{ request.location }}</td>
+              <td>{{ request.date }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="getStatusClass(request.status)">
+                  {{ request.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-primary" (click)="selectRequest(request)" style="padding: 6px 12px; font-size: 12px;">
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="request-detail" *ngIf="selectedRequest">
-          <header class="detail-header">
-            <h2>Service Request {{ selectedRequest.id }}</h2>
-            <div class="detail-meta">
-              <div class="meta-item">
-                <span class="meta-label">Customer</span>
-                <span class="meta-value">{{ selectedRequest.customer }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Contact No</span>
-                <span class="meta-value">{{ selectedRequest.customerContactNo }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Email</span>
-                <span class="meta-value">{{ selectedRequest.customerEmail }}</span>
-              </div>
+      <!-- View Request Modal -->
+      <div class="modal-backdrop" *ngIf="showViewModal && selectedRequest">
+        <div class="modal-content">
+          <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+            <div>
+              <h2 style="font-size: 20px; margin: 0 0 4px 0;">Service Request {{ selectedRequest.id }}</h2>
+              <p style="margin: 0; color: #64748b;">Material Request Details</p>
             </div>
-            <div class="meta-item location-item">
-              <span class="meta-label">Location</span>
-              <span class="meta-value">{{ selectedRequest.location }}</span>
-            </div>
-          </header>
+            <button (click)="closeViewModal()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;">&times;</button>
+          </div>
 
-          <div class="materials-section">
-            <h3>Materials Required</h3>
-            <div class="materials-table-wrapper">
-              <table class="materials-table">
-                <thead>
+          <div class="detail-meta" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 10px;">
+            <div class="meta-item">
+              <span class="meta-label" style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">Customer</span>
+              <span class="meta-value" style="font-weight: 600;">{{ selectedRequest.customer }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label" style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">Contact No</span>
+              <span class="meta-value" style="font-weight: 600;">{{ selectedRequest.customerContactNo }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label" style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">Email</span>
+              <span class="meta-value" style="font-weight: 600;">{{ selectedRequest.customerEmail }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label" style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">Location</span>
+              <span class="meta-value" style="font-weight: 600;">{{ selectedRequest.location }}</span>
+            </div>
+          </div>
+
+          <div class="materials-section" style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; margin: 0 0 16px 0;">Materials Required</h3>
+            <div class="materials-table-wrapper" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8fafc;">
                   <tr>
-                    <th>ITEM</th>
-                    <th>QUANTITY</th>
+                    <th style="padding: 12px 16px; text-align: left; font-size: 12px; color: #64748b; border-bottom: 1px solid #e2e8f0;">ITEM</th>
+                    <th style="padding: 12px 16px; text-align: left; font-size: 12px; color: #64748b; border-bottom: 1px solid #e2e8f0;">QUANTITY</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let item of selectedRequest.items">
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.quantity }}</td>
+                  <tr *ngFor="let item of selectedRequest.items" style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px 16px;">{{ item.name }}</td>
+                    <td style="padding: 12px 16px;">{{ item.quantity }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="finance-alert">
-            <div class="alert-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </div>
-            <p>Only the material requests approved by the Finance Office can be send to Inventory Manager</p>
+          <div class="finance-alert" style="background: #fff7ed; padding: 16px; border-radius: 8px; display: flex; gap: 12px; margin-bottom: 24px;">
+            <svg style="color: #ea580c; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style="margin: 0; color: #9a3412; font-size: 14px;">Only the material requests approved by the Finance Office can be sent to Inventory Manager.</p>
           </div>
 
-          <button class="send-im-btn" [disabled]="selectedRequest.status !== 'Finance Approved'" (click)="sendToInventoryManager()">
-            Send to Inventory Manager
-          </button>
+          <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="cancel-modal-btn" (click)="closeViewModal()">Close</button>
+            <button class="send-finance-btn" [disabled]="selectedRequest.status !== 'Finance Approved'" (click)="sendToInventoryManager(); closeViewModal()" [ngStyle]="{'opacity': selectedRequest.status !== 'Finance Approved' ? '0.5' : '1'}">
+              Send to Inventory Manager
+            </button>
+          </div>
         </div>
       </div>
 

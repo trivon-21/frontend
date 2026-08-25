@@ -463,12 +463,6 @@
       color: #1e293b;
     }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
 
     .request-list {
       background-color: white;

@@ -246,3 +246,35 @@ textarea:focus {
   border-color: var(--primary-main) !important;
   box-shadow: 0 0 0 3px rgba(0, 132, 61, 0.1) !important;
 }
+
+.page-wrapper .btn-yellow {
+  background-color: #eab308 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.page-wrapper .btn-yellow:hover:not(:disabled) {
+  background-color: #ca8a04 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25) !important;
+}
+.page-wrapper .btn-yellow:disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+
+.page-wrapper .btn-orange {
+  background-color: #f97316 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.page-wrapper .btn-orange:hover:not(:disabled) {
+  background-color: #ea580c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25) !important;
+}
+.page-wrapper .btn-orange:disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
