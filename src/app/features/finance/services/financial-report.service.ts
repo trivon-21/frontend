@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class FinancialReportService {
-  private api = 'http://127.0.0.1:3000/api/financial-report';
+  private api = 'http://127.0.0.1:5000/api/financial-report';
 
   constructor(private http: HttpClient) { }
 

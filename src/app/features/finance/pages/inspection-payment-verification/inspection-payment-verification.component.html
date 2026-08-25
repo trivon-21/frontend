@@ -24,7 +24,7 @@
       <div class="card-body">
         <div class="id-row">
           <span class="id-label">Order ID:</span>
-          <span class="id-value">{{ shortId(payment.orderId) }}</span>
+          <span class="id-value">{{ payment.orderRef || shortId(payment.orderId) }}</span>
         </div>
         <div class="id-row">
           <span class="id-label">Ticket ID:</span>

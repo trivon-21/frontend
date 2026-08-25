@@ -9,21 +9,21 @@
   <!-- STAT CARDS -->
   <div class="stat-cards">
     <div class="stat-card">
-      <div class="stat-icon total">📋</div>
+      <div class="stat-icon total"></div>
       <div class="stat-info">
         <span class="stat-value">{{ totalLogs }}</span>
         <span class="stat-label">Total Events</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon approved">✓</div>
+      <div class="stat-icon approved"></div>
       <div class="stat-info">
         <span class="stat-value">{{ approved }}</span>
         <span class="stat-label">Approved</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon rejected">✕</div>
+      <div class="stat-icon rejected"></div>
       <div class="stat-info">
         <span class="stat-value">{{ rejected }}</span>
         <span class="stat-label">Rejected</span>
@@ -31,7 +31,7 @@
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon total">📊</div>
+      <div class="stat-icon total"></div>
       <div class="stat-info">
         <span class="stat-value">{{ totalLogs }}</span>
         <span class="stat-label">Total Events</span>
@@ -144,15 +144,15 @@
           <td>
             <div class="action-cell">
               <button class="view-btn" (click)="openModal(log)">View</button>
-              <span class="attachment-icon" *ngIf="log.slipUrl" title="Has payment slip">🧾</span>
-              <span class="attachment-icon" *ngIf="log.invoiceId" title="Has invoice">📄</span>
+              <span class="attachment-icon" *ngIf="log.slipUrl" title="Has payment slip"></span>
+              <span class="attachment-icon" *ngIf="log.invoiceId" title="Has invoice"></span>
             </div>
           </td>
         </tr>
         <tr *ngIf="logs.length === 0 && !isLoading">
           <td colspan="8" class="empty-row">
             <div class="empty-state">
-              <span>📋</span>
+              <span></span>
               <p>No audit logs found</p>
               <small>Logs will appear here as payments are processed</small>
             </div>
@@ -184,7 +184,10 @@
         <h3>Audit Log Detail</h3>
         <span class="modal-subtitle">Read-only record</span>
       </div>
-      <button class="modal-close" (click)="closeModal()">✕</button>
+      <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="24" y1="12" x2="12" y2="24"></line>
+    <line x1="12" y1="12" x2="24" y2="24"></line>
+  </svg></button>
     </div>
 
     <div class="modal-body" *ngIf="selectedLog">
@@ -271,12 +274,12 @@
 
       <!-- Show slip button if slipUrl exists -->
       <button class="btn-view-slip" *ngIf="selectedLog?.slipUrl" (click)="viewSlip()">
-        🧾 View Payment Slip
+        View Payment Slip
       </button>
 
       <!-- Show invoice button if invoiceId exists -->
       <button class="btn-view-invoice" *ngIf="selectedLog?.invoiceId" (click)="viewInvoice()">
-        📄 View Invoice
+        View Invoice
       </button>
 
       <!-- Show both if both exist (e.g. invoice payment verification) -->
@@ -289,7 +292,10 @@
   <div class="modal" (click)="$event.stopPropagation()" style="max-width:620px;">
     <div class="modal-header">
       <h3>Payment Slip</h3>
-      <button class="modal-close" (click)="closeSlipPopup()">✕</button>
+      <button class="modal-close" (click)="closeSlipPopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="24" y1="12" x2="12" y2="24"></line>
+    <line x1="12" y1="12" x2="24" y2="24"></line>
+  </svg></button>
     </div>
     <div class="modal-body" style="text-align:center; padding:20px;">
       <img *ngIf="isImage(slipUrlToShow)" [src]="slipUrlToShow"
@@ -313,7 +319,10 @@
   <div class="modal" (click)="$event.stopPropagation()" style="max-width:700px;">
     <div class="modal-header">
       <h3>Invoice — {{ invoiceToShow?.invoiceNumber }}</h3>
-      <button class="modal-close" (click)="closeInvoicePopup()">✕</button>
+      <button class="modal-close" (click)="closeInvoicePopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="24" y1="12" x2="12" y2="24"></line>
+    <line x1="12" y1="12" x2="24" y2="24"></line>
+  </svg></button>
     </div>
     <div class="modal-body" *ngIf="invoiceToShow">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">

@@ -232,6 +232,10 @@
   cursor: pointer;
 }
 
+.modal-close:hover{
+  color: #cc2721;
+}
+
 .modal-body p {
   margin-bottom: 10px;
   font-size: 14px;

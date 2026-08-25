@@ -266,6 +266,10 @@
   color: #6b7280;
 }
 
+.modal-close:hover{
+  color: #cc2721;
+}
+
 .modal-body p {
   margin-bottom: 10px;
   font-size: 14px;

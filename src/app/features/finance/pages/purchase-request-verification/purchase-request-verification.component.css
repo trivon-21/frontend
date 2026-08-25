@@ -157,7 +157,7 @@
   background: #bc3e30;
 }
 
-/* MODAL*/
+/* MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -165,6 +165,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2000;
 }
 
 .modal {
@@ -172,6 +173,9 @@
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .modal-header,
@@ -180,8 +184,36 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: #1a1a1a;
+}
+
 .modal-footer {
   border-top: 1px solid #e5e7eb;
+  border-bottom: none;
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -189,6 +221,96 @@
 
 .modal-body {
   padding: 1.5rem;
+}
+
+.modal-body p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 14px 0;
+}
+
+/* Items table inside modal */
+.invoice-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.invoice-items-table thead tr {
+  background: #f0fdf4;
+}
+
+.invoice-items-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a7c4e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.invoice-items-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #374151;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Total row below the table */
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.total-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4a7c4e;
+}
+
+/* Secondary/close button used in modal footer */
+.btn-secondary {
+  padding: 10px 20px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close {
+  padding: 10px 20px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 .form-group {
@@ -245,5 +367,10 @@ textarea:focus {
 
   .page-search {
     width: 100%;
+  }
+
+  .modal {
+    width: 95%;
+    max-height: 90vh;
   }
 }

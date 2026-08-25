@@ -32,7 +32,7 @@ export class HeaderComponent implements OnInit {
   notifications: NotificationItem[] = [];
   totalPending = 0;
 
-  private api = 'http://127.0.0.1:3000/api';
+  private api = 'http://127.0.0.1:5000/api';
 
   constructor(
     private http: HttpClient,
