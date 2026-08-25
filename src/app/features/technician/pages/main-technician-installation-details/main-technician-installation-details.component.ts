@@ -8,10 +8,14 @@ import { environment } from '../../../../../environments/environment';
 interface InstallationDetail {
   _id?: string;
   ticketId?: string | number;
+  fullName?: string;
   customerId?: {
     name?: string;
+    fullName?: string;
     email?: string;
     contactNo?: string;
+    contactNumber?: string;
+    phoneNumber?: string;
     address?: string;
   };
   productType?: string;

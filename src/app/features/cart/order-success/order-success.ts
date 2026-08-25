@@ -7,7 +7,11 @@ import { ClickOutsideDirective } from '../../../directives/click-outside.directi
 @Component({
   selector: 'app-order-success',
   standalone: true,
+<<<<<<< HEAD
+  imports: [CommonModule],
+=======
   imports: [CommonModule, RouterModule, ClickOutsideDirective],
+>>>>>>> origin/dev-new
   templateUrl: './order-success.html',
   styleUrl: './order-success.css'
 })

@@ -1,4 +1,4 @@
-﻿<div class="review-container">
+<div class="review-container">
   <div class="back-navigation">
     <a routerLink="/main-technician-inspection-reports" class="back-btn">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
@@ -35,7 +35,7 @@
       </div>
       <div class="card-content">
         <p class="label">Customer</p>
-        <p class="value">{{ report?.customerId?.name || '-' }}</p>
+        <p class="value">{{ report?.customerName || '-' }}</p>
       </div>
     </div>
     <div class="summary-card">
@@ -44,7 +44,7 @@
       </div>
       <div class="card-content">
         <p class="label">Location</p>
-        <p class="value">{{ report?.customerId?.address || '-' }}</p>
+        <p class="value">{{ report?.siteAddress || '-' }}</p>
       </div>
     </div>
     <div class="summary-card">
@@ -53,7 +53,7 @@
       </div>
       <div class="card-content">
         <p class="label">Inspection Date</p>
-        <p class="value">{{ report?.inspectionMeta?.date | date:'longDate' }}</p>
+        <p class="value">{{ report?.inspectionDate | date:'longDate' }}</p>
       </div>
     </div>
   </section>
@@ -75,21 +75,16 @@
             <div class="info-row">
               <div class="info-details">
                 <p class="info-label">Full Name</p>
-                <p class="info-value">{{ report?.customerId?.name || '-' }}</p>
+                <p class="info-value">{{ report?.customerName || '-' }}</p>
               </div>
             </div>
             <div class="info-row">
               <div class="info-details">
                 <p class="info-label">Phone Number</p>
-                <p class="info-value">{{ report?.customerId?.contactNo || '-' }}</p>
+                <p class="info-value">{{ report?.contactNumber || '-' }}</p>
               </div>
             </div>
-            <div class="info-row">
-              <div class="info-details">
-                <p class="info-label">Email Address</p>
-                <p class="info-value">{{ report?.customerId?.email || '-' }}</p>
-              </div>
-            </div>
+
           </div>
         </section>
 
@@ -97,32 +92,28 @@
           <div class="card-header"><h2>Site Details</h2></div>
           <div class="card-body details-grid">
             <div class="detail-item">
-              <p class="detail-label">Building Type</p>
-              <p class="detail-value">{{ report?.siteDetails?.buildingType || '-' }}</p>
+              <p class="detail-label">Site Status</p>
+              <p class="detail-value">{{ report?.siteStatus || '-' }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Site Type</p>
+              <p class="detail-value">{{ report?.siteType || '-' }}</p>
             </div>
             <div class="detail-item">
               <p class="detail-label">Floors</p>
-              <p class="detail-value">{{ report?.siteDetails?.floors ?? '-' }}</p>
+              <p class="detail-value">{{ report?.floorLevel || '-' }}</p>
             </div>
             <div class="detail-item">
               <p class="detail-label">Rooms</p>
-              <p class="detail-value">{{ report?.siteDetails?.rooms ?? '-' }}</p>
+              <p class="detail-value">{{ report?.rooms?.length || 0 }}</p>
             </div>
             <div class="detail-item">
-              <p class="detail-label">Ceiling Height</p>
-              <p class="detail-value">{{ report?.siteDetails?.ceilingHeight || '-' }}</p>
+              <p class="detail-label">Elevator Availability</p>
+              <p class="detail-value">{{ report?.elevatorAvailability ? 'Yes' : 'No' }}</p>
             </div>
             <div class="detail-item">
-              <p class="detail-label">Wall Type</p>
-              <p class="detail-value">{{ report?.siteDetails?.wallType || '-' }}</p>
-            </div>
-            <div class="detail-item">
-              <p class="detail-label">Power Supply</p>
-              <p class="detail-value">{{ report?.siteDetails?.powerSupply || '-' }}</p>
-            </div>
-            <div class="detail-item">
-              <p class="detail-label">Outdoor Access</p>
-              <p class="detail-value">{{ report?.siteDetails?.outdoorAccess || '-' }}</p>
+              <p class="detail-label">Parking Availability</p>
+              <p class="detail-value">{{ report?.parkingAvailability || '-' }}</p>
             </div>
           </div>
         </section>
@@ -131,19 +122,34 @@
 
     @if (activeTab === 'Findings') {
       <section class="findings-summary card full-width-card">
-        <div class="card-header"><h2>Inspection Findings Summary</h2></div>
+        <div class="card-header"><h2>Room Details & Observations</h2></div>
         <div class="card-body">
           <div class="findings-list">
-            <div class="finding-item" *ngFor="let finding of report?.findings">
+            <!-- Iterate over the 'rooms' array from the database -->
+            <div class="finding-item" *ngFor="let room of report?.rooms; let i = index" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
               <div class="finding-header">
                 <div class="finding-title">
-                  <h3>{{ finding.category }}</h3>
+                  <h3>Room {{ i + 1 }}: {{ room.name || 'Unnamed' }}</h3>
                 </div>
-                <span class="status-badge" [ngClass]="finding.status === 'Needs Attention' ? 'attention' : 'good'">
-                  {{ finding.status }}
-                </span>
               </div>
-              <p class="finding-desc">{{ finding.description }}</p>
+              
+              <div class="room-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                <p><strong>Dimensions:</strong> {{ room.length }}x{{ room.width }}x{{ room.height }} ft ({{ room.area }} sq ft)</p>
+                <p><strong>Wall Condition:</strong> {{ room.wallCondition }}</p>
+                <p><strong>Routing Path:</strong> {{ room.possibleRoutingPath }}</p>
+                <p><strong>Distance (In-Out):</strong> {{ room.indoorOutdoorDistance }}m ({{ room.distanceMeasured }})</p>
+                <p><strong>Drain Type:</strong> {{ room.drainType }}</p>
+                <p><strong>Power Nearby:</strong> {{ room.powerPointsNearby ? 'Yes' : 'No' }}</p>
+              </div>
+              <div style="margin-top: 16px;" *ngIf="room.constraintsRisks">
+                <h4 style="margin-bottom: 4px; color: #ef4444;">Constraints & Risks</h4>
+                <p style="color: #4b5563;">{{ room.constraintsRisks }}</p>
+              </div>
+              
+              <div style="margin-top: 12px;" *ngIf="room.inspectorNotes">
+                <h4 style="margin-bottom: 4px;">Inspector Notes</h4>
+                <p style="color: #4b5563;">{{ room.inspectorNotes }}</p>
+              </div>
             </div>
           </div>
         </div>

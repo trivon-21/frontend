@@ -70,10 +70,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showUserMenu = false;
   }
 
-  goToSettings(): void {
-    this.router.navigate(['/main-technician-team-management']);
-    this.showUserMenu = false;
-  }
 
   logout(): void {
     this.authService.logout();

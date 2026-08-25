@@ -22,7 +22,8 @@ type RawInstallation = {
   _id?: string;
   ticketId?: string | number;
   customerName?: string;
-  customerId?: string | { name?: string; address?: string };
+  fullName?: string;
+  customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
   location?: string;
   date?: string;
@@ -94,7 +95,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
   private mapApiInstallation(item: RawInstallation): InstallationTicket {
     const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
-    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
+    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
 
     const isScheduledOrLater = ['Scheduled', 'In Progress', 'Completed', 'On Hold'].includes(item.status || '');
@@ -102,7 +103,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
 
     return {
       id: normalizedId,
-      customerName: item.customerName || populatedCustomerName || 'Unknown Customer',
+      customerName: item.fullName || item.customerName || populatedCustomerName || 'Unknown Customer',
       productType: item.productType || 'N/A',
       location: populatedCustomerAddress || (item.location && !/logistic area/i.test(item.location) ? item.location : '-'),
       date: this.formatDisplayDate(scheduledDate),

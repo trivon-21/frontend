@@ -67,7 +67,10 @@ export class MainTechnicianMaintenanceComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.tickets = response.data;
+            this.tickets = response.data.map((item: any) => ({
+              ...item,
+              customerName: item.fullName || item.customerName || (item.customerId ? item.customerId.fullName || item.customerId.name : 'Unknown Customer'),
+            }));
             this.applyFilters();
           } else {
             this.error = 'Failed to load maintenance records';

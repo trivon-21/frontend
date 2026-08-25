@@ -72,6 +72,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
+  showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
     productType: '',
@@ -151,12 +152,12 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     return normalized.startsWith('#') ? normalized : `#${normalized}`;
   }
 
-  private mapApiMaterialRequest(item: RawMaterialRequest): MaterialRequest {
+  private mapApiMaterialRequest(item: RawMaterialRequest & { fullName?: string; customerId?: any }): MaterialRequest {
     return {
       id: this.normalizeTicketId(item.ticketId || item._id),
       // Show 'Maintenance' explicitly when the API indicates a maintenance service
       type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
-      customer: item.customerName || 'Unknown Customer',
+      customer: item.fullName || item.customerName || (item.customerId?.fullName || item.customerId?.name) || 'Unknown Customer',
       customerEmail: item.customerEmail || '-',
       customerContactNo: item.customerContactNo || '-',
       date: this.formatDisplayDate(item.serviceDate || item.createdAt),
@@ -320,13 +321,20 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    if (!this.selectedRequest || !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
-      this.selectedRequest = this.filteredRequests[0] ?? null;
+    if (this.selectedRequest && !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
+      this.selectedRequest = null;
+      this.showViewModal = false;
     }
   }
 
   selectRequest(request: MaterialRequest) {
     this.selectedRequest = request;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedRequest = null;
   }
 
   openCreateModal(): void {
