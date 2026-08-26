@@ -84,6 +84,14 @@ import { CompletedInspectionsComponent } from './features/inspection-team/pages/
 import { InspectionDashboardComponent } from './features/inspection-team/pages/inspection-dashboard/inspection-dashboard.component';
 import { CustomerInvoiceComponent } from './features/customer/pages/customer-invoice/customer-invoice.component';
 
+// CSA (Customer Support Agent)
+import { CsaLayoutComponent } from './features/csa/components/layout/csa-layout.component';
+import { CsaDashboardComponent } from './features/csa/pages/csa-dashboard/csa-dashboard.component';
+import { CsaMaintenanceSchedulesComponent } from './features/csa/pages/csa-maintenance-schedules/csa-maintenance-schedules.component';
+import { CsaCustomersComponent } from './features/csa/pages/csa-customers/csa-customers.component';
+import { CsaServiceTicketsComponent } from './features/csa/pages/csa-service-tickets/csa-service-tickets.component';
+import { CsaInquiriesComponent } from './features/csa/pages/csa-inquiries/csa-inquiries.component';
+
 export const routes: Routes = [
 { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -566,6 +574,22 @@ export const routes: Routes = [
   {
     path: 'customer/invoice',
     component: CustomerInvoiceComponent,
+  },
+
+  // =========================================================
+  // CSA (CUSTOMER SUPPORT AGENT)
+  // =========================================================
+  {
+    path: 'csa',
+    component: CsaLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: CsaDashboardComponent },
+      { path: 'customers', component: CsaCustomersComponent },
+      { path: 'service-tickets', component: CsaServiceTicketsComponent },
+      { path: 'inquiries', component: CsaInquiriesComponent },
+      { path: 'maintenance-schedules', component: CsaMaintenanceSchedulesComponent },
+    ]
   },
 
   // =========================================================

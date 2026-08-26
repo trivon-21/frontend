@@ -1,0 +1,241 @@
+<div class="inquiries-page-container">
+
+  <!-- TOAST ALERT -->
+  <div class="toast-alert" *ngIf="successToast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+    <span>{{ successToast }}</span>
+    <button class="toast-close" (click)="successToast = ''">✕</button>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Customer Inquiries & Communication</h1>
+      <p class="page-subtitle">View and respond to customer support inquiries in real-time</p>
+    </div>
+    <button class="btn-refresh" (click)="loadInquiries(true)" [disabled]="isLoading">
+      <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+      </svg>
+      Refresh Inbox
+    </button>
+  </div>
+
+  <!-- KPI SUMMARY CARDS -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countTotal }}</span>
+        <span class="summary-label">Total Inquiries</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countOngoing }}</span>
+        <span class="summary-label">Ongoing / Active</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon cyan">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countAddressed }}</span>
+        <span class="summary-label">Addressed</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countClosed }}</span>
+        <span class="summary-label">Closed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR ALERT -->
+  <div class="alert-banner error" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SPLIT INBOX & CHAT THREAD WORKBENCH        -->
+  <!-- ========================================== -->
+  <div class="inbox-workbench-card">
+
+    <!-- LEFT PANEL: INQUIRY LIST -->
+    <div class="inbox-sidebar">
+      <div class="inbox-search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search inquiries..." 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="applySearch()"
+        />
+      </div>
+
+      <!-- FILTER TABS -->
+      <div class="inbox-filter-tabs">
+        <button [class.active]="selectedStatus === 'ALL'" (click)="setStatusFilter('ALL')">All</button>
+        <button [class.active]="selectedStatus === 'Ongoing'" (click)="setStatusFilter('Ongoing')">Ongoing</button>
+        <button [class.active]="selectedStatus === 'Addressed'" (click)="setStatusFilter('Addressed')">Addressed</button>
+        <button [class.active]="selectedStatus === 'Closed'" (click)="setStatusFilter('Closed')">Closed</button>
+      </div>
+
+      <!-- INQUIRY ITEMS LIST -->
+      <div class="inquiry-items-list">
+        <div 
+          *ngFor="let item of inquiries" 
+          class="inquiry-item" 
+          [class.selected]="selectedInquiry?._id === item._id"
+          (click)="selectInquiry(item)"
+        >
+          <div class="inquiry-item-header">
+            <span class="item-customer-name">
+              {{ item.customer ? (item.customer.fullName + ' ' + (item.customer.lastName || '')) : (item.name || 'Anonymous') }}
+            </span>
+            <span class="item-time">{{ formatDate(item.updatedAt || item.createdAt) }}</span>
+          </div>
+
+          <div class="item-subject">{{ item.subject || item.inquiryType }}</div>
+          <div class="item-snippet">{{ item.message }}</div>
+
+          <div class="item-footer">
+            <span class="inq-type-badge">{{ item.inquiryType }}</span>
+            <span class="inq-status-pill" [class.ongoing]="item.status === 'Ongoing'" [class.addressed]="item.status === 'Addressed'" [class.closed]="item.status === 'Closed'">
+              {{ item.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="inbox-empty-hint" *ngIf="inquiries.length === 0 && !isLoading">
+          No inquiries found.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: CHAT CONVERSATION & REPLY -->
+    <div class="chat-main" *ngIf="selectedInquiry">
+      
+      <!-- CHAT HEADER -->
+      <div class="chat-header">
+        <div class="chat-customer-profile">
+          <div class="chat-avatar">{{ getInitials(selectedInquiry.customer ? selectedInquiry.customer.fullName : selectedInquiry.name) }}</div>
+          <div>
+            <h3 class="chat-customer-name">
+              {{ selectedInquiry.customer ? (selectedInquiry.customer.fullName + ' ' + (selectedInquiry.customer.lastName || '')) : (selectedInquiry.name || 'Guest User') }}
+            </h3>
+            <div class="chat-customer-meta">
+              <span>Phone: {{ selectedInquiry.customer?.phoneNumber || selectedInquiry.phone || 'No phone' }}</span>
+              <span>Email: {{ selectedInquiry.customer?.email || selectedInquiry.email || 'No email' }}</span>
+              <span class="inq-ref-code">Ref: {{ selectedInquiry.inquiryRef }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK STATUS CHANGE DROPDOWN -->
+        <div class="chat-status-action">
+          <label>Status:</label>
+          <select [ngModel]="selectedInquiry.status" (ngModelChange)="changeStatus($event)">
+            <option value="Ongoing">Ongoing</option>
+            <option value="Addressed">Addressed</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MESSAGE STREAM -->
+      <div class="chat-messages" #chatMessages>
+        
+        <!-- INITIAL INQUIRY TOPIC CARD -->
+        <div class="topic-info-box">
+          <div class="topic-title">Inquiry Topic: {{ selectedInquiry.subject || selectedInquiry.inquiryType }}</div>
+          <p class="topic-desc">{{ selectedInquiry.message }}</p>
+          <span class="topic-time">Started on {{ formatDate(selectedInquiry.createdAt) }}</span>
+        </div>
+
+        <!-- THREAD BUBBLES -->
+        <div 
+          *ngFor="let msg of selectedInquiry.thread" 
+          class="chat-bubble-row" 
+          [class.support-row]="msg.sender === 'Support'" 
+          [class.customer-row]="msg.sender === 'Customer'"
+        >
+          <div class="bubble-sender-avatar" *ngIf="msg.sender === 'Customer'">
+            {{ getInitials(selectedInquiry.customer ? selectedInquiry.customer.fullName : selectedInquiry.name) }}
+          </div>
+
+          <div class="chat-bubble" [class.support-bubble]="msg.sender === 'Support'" [class.customer-bubble]="msg.sender === 'Customer'">
+            <div class="bubble-sender-title">{{ msg.sender === 'Support' ? 'AirLux Support (You)' : (selectedInquiry.customer?.fullName || 'Customer') }}</div>
+            <div class="bubble-text">{{ msg.message }}</div>
+            <div class="bubble-time">{{ formatDate(msg.createdAt) }}</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REPLY FOOTER BOX -->
+      <div class="chat-reply-box">
+        <div class="reply-error-banner" *ngIf="replyError">
+          {{ replyError }}
+        </div>
+
+        <div class="reply-input-group">
+          <textarea 
+            rows="2" 
+            placeholder="Type your reply to the customer (they will receive an in-app notification)..." 
+            [(ngModel)]="replyText"
+            (keydown.control.enter)="sendReply()"
+            (keydown.meta.enter)="sendReply()"
+          ></textarea>
+
+          <button class="btn-primary btn-send" (click)="sendReply()" [disabled]="isSendingReply || !replyText.trim()">
+            <svg *ngIf="!isSendingReply" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            <span *ngIf="!isSendingReply">Send & Notify</span>
+            <span *ngIf="isSendingReply">Sending...</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EMPTY SELECTION STATE -->
+    <div class="chat-empty-selection" *ngIf="!selectedInquiry">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <h3>No Inquiry Selected</h3>
+      <p>Select a customer inquiry from the left panel to view the thread and send a response.</p>
+    </div>
+
+  </div>
+
+</div>
