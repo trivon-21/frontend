@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
+import { HeaderComponent } from '../../../inspection-team/layout/header/header.component';
 
 interface Room {
   name: string;
@@ -51,7 +52,7 @@ interface PhotoEntry {
 @Component({
   selector: 'app-inspection-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,HeaderComponent],
   templateUrl: './inspection-report.component.html',
   styleUrls: ['./inspection-report.component.css']
 })

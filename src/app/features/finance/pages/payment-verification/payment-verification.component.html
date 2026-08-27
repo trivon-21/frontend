@@ -3,158 +3,294 @@
   <div class="page-header">
     <h2 class="page-title">Buy Only Payment Verification</h2>
 
-    <div class="page-search">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
 
-      <input type="text" placeholder="Search by Order ID or Customer..." [(ngModel)]="searchQuery" />
-    </div>
+<div class="page-search">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+
+  <input
+    type="text"
+    placeholder="Search by Order ID or Customer..."
+    [(ngModel)]="searchQuery"
+  />
+</div>
+
   </div>
+
+  <!-- LOADING -->
 
   <div *ngIf="isLoading" class="empty-state">
     <p>Loading...</p>
   </div>
 
+  <!-- EMPTY STATE -->
+
   <div *ngIf="!isLoading && filteredPayments.length === 0" class="empty-state">
     <p>No pending buy only payments</p>
   </div>
 
-  <div class="payments-grid">
+  <!-- PAYMENT TABLE -->
 
-    <div class="payment-card" *ngFor="let payment of filteredPayments">
+  <div
+    class="table-container"
+    *ngIf="!isLoading && filteredPayments.length > 0"
+  >
 
-      <div class="card-body">
+<table class="data-table">
 
-        <div class="id-row">
-          <span class="id-label">Order ID:</span>
-          <span class="id-value">{{ payment.orderId }}</span>
-        </div>
+  <thead>
+    <tr>
+      <th>ORDER ID</th>
+      <th>CUSTOMER</th>
+      <th>AMOUNT</th>
+      <th>DATE</th>
+      <th>PAYMENT SLIP</th>
+      <th>ACTIONS</th>
+    </tr>
+  </thead>
 
-        <div class="field">
-          <label class="field-label">CUSTOMER NAME:</label>
-          <p class="field-value">{{ payment.customerName }}</p>
-        </div>
+  <tbody>
 
-        <div class="field">
-          <label class="field-label">AMOUNT:</label>
-          <p class="field-value amount">
-            LKR {{ payment.amount | number:'1.2-2' }}
-          </p>
-        </div>
+    <tr *ngFor="let payment of filteredPayments">
 
-        <div class="field">
-          <label class="field-label">SLIP UPLOADED:</label>
-          <p class="field-value date-small">
-            {{ payment.date | date:'dd MMM yyyy, hh:mm a' }}
-          </p>
-        </div>
+      <!-- ORDER ID -->
+      <td>
+        <span class="order-id">
+          {{ payment.orderId }}
+        </span>
+      </td>
 
-        <button class="slip-preview-btn" (click)="openSlipModal(payment)">
+      <!-- CUSTOMER -->
+      <td>
+        <span class="customer-name">
+          {{ payment.customerName }}
+        </span>
+      </td>
+
+      <!-- AMOUNT -->
+      <td>
+        <span class="amount">
+          LKR {{ payment.amount | number:'1.2-2' }}
+        </span>
+      </td>
+
+      <!-- DATE -->
+      <td>
+        <span class="date-value">
+          {{ payment.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
+        </span>
+      </td>
+
+      <!-- SLIP PREVIEW -->
+      <td>
+        <button
+          class="slip-preview-btn"
+          (click)="openSlipModal(payment)"
+        >
           Slip Preview
         </button>
+      </td>
 
+      <!-- ACTIONS -->
+      <td>
         <div class="action-buttons">
 
-          <button class="btn btn-approve" (click)="approvePayment(payment)" [disabled]="isLoading">
+          <button
+            class="btn btn-approve"
+            (click)="approvePayment(payment)"
+            [disabled]="isLoading"
+          >
             Approve
           </button>
 
-          <button class="btn btn-reject" (click)="openRejectModal(payment)" [disabled]="isLoading">
+          <button
+            class="btn btn-reject"
+            (click)="openRejectModal(payment)"
+            [disabled]="isLoading"
+          >
             Reject
           </button>
 
         </div>
+      </td>
 
-      </div>
-    </div>
+    </tr>
+
+  </tbody>
+
+</table>
+
+
   </div>
 
   <!-- SLIP MODAL -->
-  <div class="modal-overlay" *ngIf="showSlipModal" (click)="closeSlipModal()">
 
-    <div class="modal" (click)="$event.stopPropagation()">
-
-      <div class="modal-header">
-        <h3>Payment Details</h3>
-      </div>
-
-      <div class="modal-body">
-
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
-        <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
-        <p><strong>Status:</strong> {{ selectedPayment?.status }}</p>
-
-        <div class="slip-preview-section" *ngIf="selectedPayment?.slipUrl">
-
-          <p><strong>Payment Slip:</strong></p>
-
-          <img *ngIf="isImage(selectedPayment?.slipUrl)" [src]="selectedPayment?.slipUrl" class="slip-image" />
-
-          <a *ngIf="!isImage(selectedPayment?.slipUrl)" [href]="selectedPayment?.slipUrl" target="_blank"
-            class="slip-link">
-            View Slip Document
-          </a>
-
-        </div>
-
-        <p *ngIf="!selectedPayment?.slipUrl" class="empty-state">
-          No slip uploaded
-        </p>
-
-      </div>
-
-      <div class="modal-footer">
-
-        <button class="btn btn-secondary" (click)="closeSlipModal()">
-          Close
-        </button>
+  <div
+    class="modal-overlay"
+    *ngIf="showSlipModal"
+    (click)="closeSlipModal()"
+  >
 
 
+<div
+  class="modal"
+  (click)="$event.stopPropagation()"
+>
 
-      </div>
+  <div class="modal-header">
+    <h3>Payment Details</h3>
+  </div>
+
+  <div class="modal-body">
+
+    <p>
+      <strong>Order ID:</strong>
+      {{ selectedPayment?.orderId }}
+    </p>
+
+    <p>
+      <strong>Customer:</strong>
+      {{ selectedPayment?.customerName }}
+    </p>
+
+    <p>
+      <strong>Email:</strong>
+      {{ selectedPayment?.customerEmail }}
+    </p>
+
+    <p>
+      <strong>Amount:</strong>
+      LKR {{ selectedPayment?.amount | number:'1.2-2' }}
+    </p>
+
+    <p>
+      <strong>Status:</strong>
+      {{ selectedPayment?.status }}
+    </p>
+
+    <div
+      class="slip-preview-section"
+      *ngIf="selectedPayment?.slipUrl"
+    >
+
+      <p>
+        <strong>Payment Slip:</strong>
+      </p>
+
+      <img
+        *ngIf="isImage(selectedPayment?.slipUrl)"
+        [src]="selectedPayment?.slipUrl"
+        class="slip-image"
+      />
+
+      <a
+        *ngIf="!isImage(selectedPayment?.slipUrl)"
+        [href]="selectedPayment?.slipUrl"
+        target="_blank"
+        class="slip-link"
+      >
+        View Slip Document
+      </a>
 
     </div>
+
+    <p
+      *ngIf="!selectedPayment?.slipUrl"
+      class="empty-state"
+    >
+      No slip uploaded
+    </p>
+
+  </div>
+
+  <div class="modal-footer">
+
+    <button
+      class="btn btn-secondary"
+      (click)="closeSlipModal()"
+    >
+      Close
+    </button>
+
+  </div>
+
+</div>
+
   </div>
 
   <!-- REJECT MODAL -->
-  <div class="modal-overlay" *ngIf="showRejectModal" (click)="closeRejectModal()">
 
-    <div class="modal" (click)="$event.stopPropagation()">
+  <div
+    class="modal-overlay"
+    *ngIf="showRejectModal"
+    (click)="closeRejectModal()"
+  >
 
-      <div class="modal-header">
-        <h3>Reject Payment</h3>
-      </div>
+<div
+  class="modal"
+  (click)="$event.stopPropagation()"
+>
 
-      <div class="modal-body">
+  <div class="modal-header">
+    <h3>Reject Payment</h3>
+  </div>
 
-        <p><strong>Order:</strong> #{{ selectedPayment?.orderId }}</p>
-        <p><strong>Amount:</strong> LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}</p>
+  <div class="modal-body">
 
-        <div class="form-group">
-          <label for="reason">Rejection Reason <span class="required">*</span></label>
-          <textarea id="reason" rows="4" [(ngModel)]="rejectionReason"
-            placeholder="Explain why this payment is being rejected..." [disabled]="isLoading"></textarea>
-        </div>
+    <p>
+      <strong>Order:</strong>
+      #{{ selectedPayment?.orderId }}
+    </p>
 
-      </div>
+    <p>
+      <strong>Amount:</strong>
+      LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}
+    </p>
 
-      <div class="modal-footer">
+    <div class="form-group">
 
-        <button class="btn btn-secondary" (click)="closeRejectModal()" [disabled]="isLoading">
-          Cancel
-        </button>
+      <label for="reason">
+        Rejection Reason
+        <span class="required">*</span>
+      </label>
 
-        <button class="btn btn-reject" (click)="rejectPayment()" [disabled]="isLoading || !rejectionReason.trim()">
-          {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
-        </button>
-
-      </div>
+      <textarea
+        id="reason"
+        rows="4"
+        [(ngModel)]="rejectionReason"
+        placeholder="Explain why this payment is being rejected..."
+        [disabled]="isLoading"
+      ></textarea>
 
     </div>
+
+  </div>
+
+  <div class="modal-footer">
+
+    <button
+      class="btn btn-secondary"
+      (click)="closeRejectModal()"
+      [disabled]="isLoading"
+    >
+      Cancel
+    </button>
+
+    <button
+      class="btn btn-reject"
+      (click)="rejectPayment()"
+      [disabled]="isLoading || !rejectionReason.trim()"
+    >
+      {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
+    </button>
+
+  </div>
+
+</div>
+
+
   </div>
 
 </div>
