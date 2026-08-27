@@ -5,11 +5,13 @@ import { ActivatedRoute } from '@angular/router';
 import { InvoiceService } from '../../../finance/services/invoice.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
+import { NavbarComponent } from '../../../../components/navbar/navbar.component';
+import { FooterComponent } from '../../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-customer-invoice',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NavbarComponent, FooterComponent],
   templateUrl: './customer-invoice.component.html',
   styleUrls: ['./customer-invoice.component.css']
 })

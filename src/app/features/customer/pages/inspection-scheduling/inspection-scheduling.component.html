@@ -1,27 +1,5 @@
 <!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">AirLux</div>
-  <div class="nav-links">
-    <a href="#">Profile</a>
-    <a href="#">View products</a>
-    <a href="#">Our Services</a>
-    <button class="logout-btn">Logout</button>
-  </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero-banner">
-  <div class="hero-text">
-    <h1>Premium Cooling<br>Solutions</h1>
-    <p>Discover our curated collection of high-performance air conditioning systems</p>
-  </div>
-  <div class="hero-right">
-    <div class="welcome-badge">Welcome {{ customerName }}!</div>
-    <div class="hero-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
-    </div>
-  </div>
-</div>
+<app-navbar></app-navbar>
 
 <!-- POPUP MESSAGE -->
 <div class="popup-toast" *ngIf="showPopup">
@@ -132,29 +110,4 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <h3>AirLux</h3>
-      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
-    </div>
-    <div class="footer-contact">
-      <h4>Contact Us</h4>
-      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
-      <p>📞 +94 11 234 5678</p>
-      <p>✉️ support@airlux.lk</p>
-    </div>
-    <div class="footer-social">
-      <h4>Follow Us</h4>
-      <div class="social-icons">
-        <a href="#" class="social-btn">f</a>
-        <a href="#" class="social-btn">𝕏</a>
-        <a href="#" class="social-btn">in</a>
-        <a href="#" class="social-btn">▶</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
-  </div>
-</footer>
+<app-footer></app-footer>

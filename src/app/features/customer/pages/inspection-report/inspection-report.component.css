@@ -4,12 +4,25 @@
   background: #f5f7fa;
   min-height: 100vh;
 }
+:host ::ng-deep app-header .dashboard-header {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
 
 /* BODY */
 .report-body {
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 102px 24px 80px;
+  padding: 94px 24px 80px;
+  box-sizing: border-box;
+}
+.report-title {
+  font-size: 25px;
+  font-weight: 700;
+  color: #1e2a4a;
+  margin-bottom: 15px;
 }
 
 /* TWO COLUMN LAYOUT */
