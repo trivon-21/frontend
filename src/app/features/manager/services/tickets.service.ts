@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 
 export type WorkItemSource = 'service' | 'inspection' | 'installation' | 'maintenance';
@@ -85,16 +85,8 @@ export interface WorkItemFilters {
   assignment?: string;
   sla?: string;
   page?: number;
+  limit?: number;
 }
-
-const EMPTY_RESPONSE: WorkItemsResponse = {
-  status: 'Offline',
-  summary: { total: 0, open: 0, inProgress: 0, escalated: 0, awaitingVerification: 0, closed: 0 },
-  page: 1,
-  limit: 25,
-  total: 0,
-  items: [],
-};
 
 function hydrate(item: OperationalWorkItem): OperationalWorkItem {
   return {
@@ -121,7 +113,6 @@ export class TicketsService {
     }
     return this.api.get<WorkItemsResponse>('/manager/work-items', params).pipe(
       map((response) => ({ ...response, items: response.items.map(hydrate) })),
-      catchError(() => of(EMPTY_RESPONSE)),
     );
   }
 

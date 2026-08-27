@@ -8,7 +8,7 @@
     <span class="mode-badge">Catalog master data</span>
   </header>
 
-  <div class="success-panel" *ngIf="savedItem">
+  <div class="success-panel" *ngIf="savedItem" role="status">
     <div>
       <h2>{{ createdNewProduct ? 'Catalog product created' : 'Product saved' }}</h2>
       <p>{{ savedItem.name }} is ready in inventory. Physical quantities and asset tags are managed through receiving.</p>
@@ -21,7 +21,7 @@
 
   <ng-container *ngIf="!savedItem">
     <nav class="stepper" aria-label="Product form steps">
-      <button type="button" *ngFor="let step of [1, 2, 3]" [class.active]="currentStep === step" [class.complete]="currentStep > step" (click)="goToStep(step)">
+      <button type="button" *ngFor="let step of [1, 2, 3]" [class.active]="currentStep === step" [class.complete]="currentStep > step" [attr.aria-current]="currentStep === step ? 'step' : null" (click)="goToStep(step)">
         <span>{{ step }}</span>
         <strong>{{ step === 1 ? 'Identity' : step === 2 ? 'Inventory settings' : 'Compatibility' }}</strong>
       </button>
@@ -181,7 +181,7 @@
         </div>
       </section>
 
-      <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="error-banner" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button" (click)="loadSuppliers()">Retry suppliers</button></div>
       <footer class="wizard-footer">
         <button type="button" class="btn-secondary" (click)="previousStep()" [disabled]="currentStep === 1 || isSubmitting">Back</button>
         <span>Step {{ currentStep }} of {{ totalSteps }}</span>
@@ -191,5 +191,5 @@
     </form>
   </ng-container>
 
-  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div><p>Loading product…</p></div>
+  <div class="loading-overlay" *ngIf="loading" role="status" aria-live="polite"><div class="spinner"></div><p>Loading product…</p></div>
 </div>

@@ -1,12 +1,12 @@
 .form-step {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .step-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .step-badge {
@@ -14,7 +14,7 @@
   height: 28px;
   background: var(--primary-main);
   color: var(--background-card);
-  border-radius: 50%;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,18 +55,16 @@
 
 .search-icon {
   position: absolute;
-  left: 18px;
+  left: 14px;
   color: var(--text-muted);
 }
 
 .form-input {
   width: 100%;
-  padding: var(--spacing-lg);
-  padding-left: 48px;
-  padding-right: 48px;
+  padding: 10px 42px;
   border: 1px solid var(--border-light);
-  border-radius: 14px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 13.5px;
   background: var(--background-paper);
   color: var(--text-primary);
 }
@@ -74,12 +72,12 @@
 .form-input:focus {
   outline: none;
   border-color: var(--primary-main);
-  box-shadow: 0 0 0 4px var(--primary-lighter);
+  box-shadow: 0 0 0 3px rgb(0 132 61 / 10%);
 }
 
 .dropdown-icon {
   position: absolute;
-  right: 18px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -97,8 +95,8 @@
   padding: var(--spacing-sm);
   background: var(--background-card);
   border: 1px solid var(--border-light);
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgb(0 0 0 / 15%);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 12%);
 }
 
 .dropdown-item {
@@ -123,6 +121,8 @@
   margin-bottom: 4px;
 }
 
+.inline-icon { margin-right: 8px; }
+
 .animate-fade {
   animation: fade-in 0.3s ease-out;
 }
@@ -139,7 +139,7 @@
   margin-top: 12px;
   padding: var(--spacing-md);
   background: var(--primary-lighter);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--primary-light);
 }
 
@@ -159,6 +159,13 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible { outline: 3px solid rgb(0 132 61 / 22%); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
 .btn-primary {

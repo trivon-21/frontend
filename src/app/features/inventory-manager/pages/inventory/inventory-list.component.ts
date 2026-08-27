@@ -6,7 +6,7 @@ import {
   InventoryItem,
   InventoryManagerDashboardService,
 } from '../../services/inventory-manager-dashboard.service';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   deriveStockStatus,
   StockStatus,
@@ -27,7 +27,7 @@ export type InventorySortField =
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PortalIconsModule],
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.css'],
 })
@@ -78,6 +78,12 @@ export class InventoryListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadInventory();
+  }
+
+  loadInventory(): void {
+    this.loading = true;
+    this.error = null;
     this.inventoryService.getInventory().subscribe({
       next: (items) => {
         this.allInventoryItems = items;

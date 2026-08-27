@@ -9,6 +9,7 @@
         <div class="input-wrapper search-wrapper">
           <lucide-angular name="search" class="search-icon" [size]="18" strokeWidth="2.5"></lucide-angular>
           <input
+            id="order-item-search"
             type="text"
             [(ngModel)]="itemSearchQuery"
             (input)="filterItems()"
@@ -17,16 +18,19 @@
             placeholder="Search inventory items to add..."
             class="form-input search-input"
             [class.has-selection]="selectedItem"
-            autocomplete="off">
+            autocomplete="off"
+            aria-label="Search inventory items"
+            aria-autocomplete="list"
+            [attr.aria-expanded]="showItemDropdown">
 
-          <button class="btn-clear-selection" *ngIf="selectedItem" (click)="clearSelection()" title="Clear selection">
+          <button type="button" class="btn-clear-selection" *ngIf="selectedItem" (click)="clearSelection()" aria-label="Clear selected item" title="Clear selection">
             <lucide-angular name="x" [size]="18" strokeWidth="2.5"></lucide-angular>
           </button>
         </div>
 
         <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
           <a class="dropdown-item add-new" routerLink="/inventory-manager/product-wizard">
-            <lucide-angular name="plus" [size]="14" strokeWidth="3" style="margin-right: 8px;"></lucide-angular>
+            <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
             Create catalog product first
           </a>
           <div class="dropdown-item" *ngFor="let item of filteredInventory" (mousedown)="selectInventoryItem(item)">
@@ -60,7 +64,7 @@
             <span class="field-label">SUBTOTAL</span>
             <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
           </div>
-          <button class="btn-primary" (click)="addLineItem()">ADD TO LIST</button>
+          <button type="button" class="btn-primary" (click)="addLineItem()">ADD TO LIST</button>
         </div>
       </div>
     </div>

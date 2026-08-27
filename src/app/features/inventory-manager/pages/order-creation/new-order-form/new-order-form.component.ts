@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-import { LocalIconComponent } from '../../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { OrderCreationService, OrderItem, InventoryItem, Supplier } from '../../../services/order-creation.service';
 import { OrderSupplierSelectorComponent } from './components/order-supplier-selector/order-supplier-selector.component';
 import { OrderItemSearchComponent } from './components/order-item-search/order-item-search.component';
@@ -10,6 +10,7 @@ import { OrderCartListComponent } from './components/order-cart-list/order-cart-
 import { OrderSuggestedGridComponent } from './components/order-suggested-grid/order-suggested-grid.component';
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
 import { switchMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-new-order-form',
@@ -18,7 +19,7 @@ import { switchMap } from 'rxjs/operators';
     CommonModule,
     FormsModule,
     RouterModule,
-    LocalIconComponent,
+    PortalIconsModule,
     OrderSupplierSelectorComponent,
     OrderItemSearchComponent,
     OrderCartListComponent,
@@ -41,6 +42,8 @@ export class NewOrderFormComponent implements OnInit {
   isCreatingSupplier = false;
   successMessage = '';
   errorMessage = '';
+  loading = true;
+  loadError = '';
 
   isEditMode = false;
   orderId: string | null = null;
@@ -86,17 +89,23 @@ export class NewOrderFormComponent implements OnInit {
   }
 
   loadData(): void {
-    this.orderCreationService.getInventory().subscribe({
-      next: data => this.inventoryItems = data,
-      error: err => console.error('Failed to load inventory', err)
-    });
-    this.orderCreationService.getSuppliers().subscribe({
-      next: data => this.suppliers = data,
-      error: err => console.error('Failed to load suppliers', err)
-    });
-    this.orderCreationService.getSuggestedItems().subscribe({
-      next: data => this.suggestedItems = data,
-      error: err => console.error('Failed to load suggested items', err)
+    this.loading = true;
+    this.loadError = '';
+    forkJoin({
+      inventoryItems: this.orderCreationService.getInventory(),
+      suppliers: this.orderCreationService.getSuppliers(),
+      suggestedItems: this.orderCreationService.getSuggestedItems(),
+    }).subscribe({
+      next: ({ inventoryItems, suppliers, suggestedItems }) => {
+        this.inventoryItems = inventoryItems;
+        this.suppliers = suppliers;
+        this.suggestedItems = suggestedItems;
+        this.loading = false;
+      },
+      error: () => {
+        this.loadError = 'Order form data could not be loaded. No partial options have been shown.';
+        this.loading = false;
+      },
     });
   }
 
@@ -115,7 +124,7 @@ export class NewOrderFormComponent implements OnInit {
           }));
         }
       },
-      error: (err) => console.error('Failed to load order:', err)
+      error: () => this.loadError = 'The draft order could not be loaded.'
     });
   }
 

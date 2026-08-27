@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { forkJoin } from 'rxjs';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   InventoryManagerDashboardService,
   InventoryItem,
@@ -14,7 +15,7 @@ import {
 @Component({
   selector: 'app-returns-rma-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './returns-rma.component.html',
   styleUrls: ['./returns-rma.component.css'],
 })
@@ -26,6 +27,8 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   submitting = false;
+  pendingActionIds = new Set<string>();
+  private dialogTrigger: HTMLElement | null = null;
   successMessage: string | null = null;
 
   // Summary stats
@@ -97,13 +100,19 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Load all data in parallel
-    this.dashboardService.getReturnsSummary().subscribe((data) => (this.summary = data));
-    this.dashboardService.getLeftoverReturns().subscribe((data) => (this.leftoverReturns = data));
-    this.dashboardService.getRmaCases().subscribe((data) => (this.rmaCases = data));
-    this.dashboardService.getQuarantineItems().subscribe({
+    forkJoin({
+      summary: this.dashboardService.getReturnsSummary(),
+      leftoverReturns: this.dashboardService.getLeftoverReturns(),
+      rmaCases: this.dashboardService.getRmaCases(),
+      quarantineItems: this.dashboardService.getQuarantineItems(),
+      inventoryItems: this.dashboardService.getInventory(),
+    }).subscribe({
       next: (data) => {
-        this.quarantineItems = data;
+        this.summary = data.summary;
+        this.leftoverReturns = data.leftoverReturns;
+        this.rmaCases = data.rmaCases;
+        this.quarantineItems = data.quarantineItems;
+        this.inventoryItems = data.inventoryItems;
         this.loading = false;
       },
       error: () => {
@@ -111,16 +120,10 @@ export class ReturnsRmaDashboardComponent implements OnInit {
         this.loading = false;
       },
     });
-
-    // Load inventory for autocomplete
-    this.dashboardService.getInventory().subscribe((items) => (this.inventoryItems = items));
   }
 
   refreshData(): void {
-    this.dashboardService.getReturnsSummary().subscribe((data) => (this.summary = data));
-    this.dashboardService.getLeftoverReturns().subscribe((data) => (this.leftoverReturns = data));
-    this.dashboardService.getRmaCases().subscribe((data) => (this.rmaCases = data));
-    this.dashboardService.getQuarantineItems().subscribe((data) => (this.quarantineItems = data));
+    this.loadAllData();
   }
 
   // ── Leftover Return Form ──
@@ -201,6 +204,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   // ── RMA Case ──
 
   openRmaModal(): void {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.rmaForm = {
       serialNumber: '',
       itemName: '',
@@ -230,8 +234,15 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   closeRmaModal(): void {
+    if (this.submitting) return;
     this.showRmaModal = false;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
   }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeRmaModal(); }
 
   get isRmaFormValid(): boolean {
     return (
@@ -262,15 +273,18 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   advanceRmaStatus(rma: RmaCaseItem): void {
     const nextStatus = this.rmaNextStatus[rma.status];
-    if (!nextStatus) return;
+    if (!nextStatus || this.pendingActionIds.has(rma.rmaId)) return;
+    this.pendingActionIds.add(rma.rmaId);
 
     this.dashboardService.updateRmaCase(rma.rmaId, { status: nextStatus }).subscribe({
       next: () => {
+        this.pendingActionIds.delete(rma.rmaId);
         this.refreshData();
         this.successMessage = `RMA ${rma.rmaId} moved to ${this.rmaStatusLabels[nextStatus]}.`;
         setTimeout(() => (this.successMessage = null), 5000);
       },
       error: (err) => {
+        this.pendingActionIds.delete(rma.rmaId);
         this.error = err.error?.message || 'Failed to update RMA status.';
         setTimeout(() => (this.error = null), 5000);
       },
@@ -293,15 +307,18 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   disposeItem(quarantineId: string): void {
+    if (this.pendingActionIds.has(quarantineId)) return;
+    this.pendingActionIds.add(quarantineId);
     this.dashboardService.disposeQuarantineItem(quarantineId).subscribe({
       next: () => {
+        this.pendingActionIds.delete(quarantineId);
         this.confirmDisposeId = null;
         this.successMessage = 'Item disposed successfully.';
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
       error: (err) => {
-        this.confirmDisposeId = null;
+        this.pendingActionIds.delete(quarantineId);
         this.error = err.error?.message || 'Failed to dispose item.';
         setTimeout(() => (this.error = null), 5000);
       },

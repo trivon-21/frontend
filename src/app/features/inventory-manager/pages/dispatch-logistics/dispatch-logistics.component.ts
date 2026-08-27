@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -25,12 +25,12 @@ interface DispatchOrder {
   lastMovedAt?: string;
 }
 
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-dispatch-logistics',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './dispatch-logistics.component.html',
   styleUrls: ['./dispatch-logistics.component.css'],
 })
@@ -41,6 +41,12 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   showAssignModal = false;
   isViewingDetailsFromAssign = false;
   selectedOrderId: string | null = null;
+  dialogOrder: DispatchOrder | null = null;
+  loading = true;
+  loadError = '';
+  saving = false;
+  mutationError = '';
+  private dialogTrigger: HTMLElement | null = null;
 
   // Edit mode state
   isEditMode = false;
@@ -65,7 +71,10 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   fetchOrders() {
-    this.apiService.get<any[]>('/inventory/orders').subscribe((data: any[]) => {
+    this.loading = true;
+    this.loadError = '';
+    this.apiService.get<any[]>('/inventory/orders').subscribe({
+      next: (data: any[]) => {
       // Map backend model to frontend model
       const orders: DispatchOrder[] = data.map((o: any) => ({
         id: o.orderId,
@@ -86,6 +95,12 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       this.ordersCompleted = orders.filter((o: DispatchOrder) => o.status === 'completed');
 
       this.selectFirstOrder();
+        this.loading = false;
+      },
+      error: () => {
+        this.loadError = 'Dispatch orders could not be loaded.';
+        this.loading = false;
+      },
     });
   }
 
@@ -138,17 +153,23 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   openPackModal(id: string) {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.selectedOrderId = id;
     this.isViewingDetailsFromAssign = false;
     this.isEditMode = false;
+    this.stageSelectedOrder(id);
     this.showPackModal = true;
+    this.mutationError = '';
   }
 
   openAssignModal(id: string) {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.selectedOrderId = id;
     this.courierService = '';
     this.trackingId = '';
+    this.stageSelectedOrder(id);
     this.showAssignModal = true;
+    this.mutationError = '';
   }
 
   isOrderFullyReserved(order: DispatchOrder): boolean {
@@ -160,7 +181,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   completeAssignment() {
-    if (!this.selectedOrderId) return;
+    if (!this.selectedOrderId || this.saving) return;
 
     const index = this.ordersToPack.findIndex((o) => o.id === this.selectedOrderId);
     if (index !== -1) {
@@ -172,13 +193,12 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         lastMovedAt: new Date().toISOString(),
       };
 
-      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
-        this.fetchOrders();
+      this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('ready');
+        this.fetchOrders();
+        this.closeModals();
       });
     }
-
-    this.closeModals();
   }
 
   toggleSort(field: 'name' | 'time') {
@@ -203,6 +223,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   get selectedOrder() {
+    if (this.dialogOrder) return this.dialogOrder;
     const allOrders = [
       ...this.ordersToPack,
       ...this.ordersReady,
@@ -228,32 +249,33 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         courier: this.editCourier,
         trackId: this.editTrackId,
       };
-      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
+      this.runOrderUpdate(order, updateData, () => {
         order.courier = this.editCourier;
         order.trackId = this.editTrackId;
         this.isEditMode = false;
+        this.fetchOrders();
       });
     }
   }
 
   markHandedOver() {
-    if (!this.selectedOrderId) return;
+    if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;
     if (order) {
       const updateData = {
         status: 'in-transit',
         lastMovedAt: new Date().toISOString(),
       };
-      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
-        this.fetchOrders();
+      this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('in-transit');
+        this.fetchOrders();
+        this.closeModals();
       });
     }
-    this.closeModals();
   }
 
   markComplete() {
-    if (!this.selectedOrderId) return;
+    if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;
     if (order) {
       const updateData = {
@@ -261,12 +283,12 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         completedAt: new Date().toISOString().split('T')[0],
         lastMovedAt: new Date().toISOString(),
       };
-      this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
-        this.fetchOrders();
+      this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('completed');
+        this.fetchOrders();
+        this.closeModals();
       });
     }
-    this.closeModals();
   }
 
   cancelEdit() {
@@ -281,7 +303,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   undoAction() {
-    if (!this.selectedOrderId) return;
+    if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;
     if (!order) return;
 
@@ -299,12 +321,11 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       targetTab = 'to-pack';
     }
 
-    this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe(() => {
-      this.fetchOrders();
+    this.runOrderUpdate(order, updateData, () => {
       this.setActiveTab(targetTab);
+      this.fetchOrders();
+      this.closeModals();
     });
-
-    this.closeModals();
   }
 
   confirmItem(item: DispatchItem) {
@@ -312,18 +333,49 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   }
 
   saveStatus() {
-    if (!this.selectedOrderId) return;
+    if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;
     if (order) {
-      this.apiService
-        .patch(`/inventory/orders/${order.id}`, { items: order.items })
-        .subscribe();
+      this.runOrderUpdate(order, { items: order.items }, () => {
+        this.fetchOrders();
+        this.closeModals();
+      });
     }
-    this.closeModals();
   }
 
   closeModals() {
+    if (this.saving) return;
     this.showPackModal = false;
     this.showAssignModal = false;
+    this.dialogOrder = null;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  onBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeModals();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeModals(); }
+
+  private stageSelectedOrder(id: string): void {
+    const source = [...this.ordersToPack, ...this.ordersReady, ...this.ordersInTransit, ...this.ordersCompleted]
+      .find((order) => order.id === id);
+    this.dialogOrder = source ? structuredClone(source) : null;
+  }
+
+  private runOrderUpdate(order: DispatchOrder, updateData: object, onSuccess: () => void): void {
+    if (this.saving) return;
+    this.saving = true;
+    this.mutationError = '';
+    this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe({
+      next: () => { this.saving = false; onSuccess(); },
+      error: (error) => {
+        this.saving = false;
+        this.mutationError = error.error?.message || 'The dispatch change could not be saved.';
+      },
+    });
   }
 }

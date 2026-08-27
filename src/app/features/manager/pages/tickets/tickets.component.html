@@ -11,6 +11,11 @@
 
   <div class="error-message" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+  <div class="portal-state portal-state--error" role="alert" *ngIf="loadError">
+    <div><strong>Operations unavailable</strong><p>{{ loadError }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="load()" [disabled]="loading">Retry</button>
+  </div>
+
   <div class="summary-row">
     <button class="summary-tile" [class.active]="activeStatus === 'all'" (click)="setFilter('status', 'all')"><span class="tile-value">{{ summary.total }}</span><span class="tile-label">Total</span></button>
     <button class="summary-tile" [class.active]="activeStatus === 'open'" (click)="setFilter('status', 'open')"><span class="tile-value">{{ summary.open }}</span><span class="tile-label">Open / Ready</span></button>
@@ -27,7 +32,9 @@
     <div class="chip-group"><button *ngFor="let priority of priorityFilters" class="chip" [class.active]="activePriority === priority" (click)="setFilter('priority', priority)">{{ priority | titlecase }}</button></div>
   </div>
 
-  <div class="alx-table-container">
+  <div class="portal-state" *ngIf="loading && items.length === 0" aria-live="polite">Loading operations…</div>
+
+  <div class="alx-table-container" *ngIf="!loadError">
     <table class="alx-table">
       <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Priority</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
@@ -49,6 +56,15 @@
       </tbody>
     </table>
   </div>
+
+  <nav class="alx-pagination" *ngIf="!loadError && total > 0" aria-label="Operations pagination">
+    <span>Showing {{ firstResult }}–{{ lastResult }} of {{ total }}</span>
+    <div class="alx-pagination__controls">
+      <button type="button" (click)="changePage(page - 1)" [disabled]="loading || page <= 1">Previous</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button type="button" (click)="changePage(page + 1)" [disabled]="loading || page >= totalPages">Next</button>
+    </div>
+  </nav>
 
   <section class="ticket-detail" *ngIf="selectedItem as item">
     <div class="detail-header">

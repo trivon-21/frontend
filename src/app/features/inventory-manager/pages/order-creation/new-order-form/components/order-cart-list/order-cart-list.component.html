@@ -4,7 +4,7 @@
   </div>
 
   <div class="added-items-content">
-    <div class="empty-items-state" *ngIf="orderItems.length === 0">
+    <div class="empty-items-state" *ngIf="orderItems.length === 0" role="status">
       <div class="empty-icon">
         <lucide-angular name="package" [size]="40" strokeWidth="1.5" color="var(--border-medium)"></lucide-angular>
       </div>
@@ -32,11 +32,11 @@
             </td>
             <td class="qty-cell">
               <div class="qty-editor" *ngIf="selectedLineItemIndex === i">
-                <button (click)="updateItemQuantity(i, item.quantity - 1, $event)">
+                <button type="button" [attr.aria-label]="'Decrease quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity - 1, $event)">
                   <lucide-angular name="minus" [size]="14"></lucide-angular>
                 </button>
                 <input type="number" [ngModel]="item.quantity" (ngModelChange)="updateItemQuantity(i, $event)" class="inline-qty-input no-spinner">
-                <button (click)="updateItemQuantity(i, item.quantity + 1, $event)">
+                <button type="button" [attr.aria-label]="'Increase quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity + 1, $event)">
                   <lucide-angular name="plus" [size]="14"></lucide-angular>
                 </button>
               </div>
@@ -44,7 +44,7 @@
             </td>
             <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
             <td class="text-center">
-              <button class="btn-delete-row" *ngIf="selectedLineItemIndex === i" (click)="removeLineItem(i, $event)">
+              <button type="button" class="btn-delete-row" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
                 <lucide-angular name="trash-2" [size]="16"></lucide-angular>
               </button>
             </td>

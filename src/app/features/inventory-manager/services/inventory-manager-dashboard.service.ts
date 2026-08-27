@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   CreateInventoryCatalogItemInput,
   InventoryItem,
@@ -61,6 +61,51 @@ export interface InventoryDashboardData {
   procurementWorkflow: { awaitingManager: number; awaitingReceipt: number; awaitingFinance: number };
 }
 
+function emptyDashboard(status = 'Offline'): InventoryDashboardData {
+  return {
+    managerName: 'Manager',
+    currentDate: new Date(),
+    status,
+    stats: {
+      materialReservations: { total: 0, subStats: [] },
+      dispatchQueue: { total: 0, subStats: [] },
+      assetHealth: { total: 0, subStats: [] },
+      stockAlerts: { total: 0, subStats: [] },
+    },
+    recentActivity: [],
+    reorderList: [],
+    procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
+  };
+}
+
+export function normalizeInventoryDashboard(
+  data: Partial<InventoryDashboardData> | null | undefined,
+): InventoryDashboardData {
+  const fallback = emptyDashboard(data?.status || 'Offline');
+  const stats = data?.stats;
+  return {
+    ...fallback,
+    ...data,
+    managerName: data?.managerName || fallback.managerName,
+    currentDate: new Date(data?.currentDate || fallback.currentDate),
+    stats: {
+      materialReservations: { ...fallback.stats.materialReservations, ...stats?.materialReservations },
+      dispatchQueue: { ...fallback.stats.dispatchQueue, ...stats?.dispatchQueue },
+      assetHealth: { ...fallback.stats.assetHealth, ...stats?.assetHealth },
+      stockAlerts: { ...fallback.stats.stockAlerts, ...stats?.stockAlerts },
+    },
+    recentActivity: (data?.recentActivity || []).map((activity) => {
+      const timestamp = new Date(activity.timestamp);
+      return { ...activity, timestamp };
+    }),
+    reorderList: data?.reorderList || [],
+    procurementWorkflow: {
+      ...fallback.procurementWorkflow,
+      ...(data?.procurementWorkflow || {}),
+    },
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -72,33 +117,13 @@ export class InventoryManagerDashboardService {
   getDashboard(): Observable<InventoryDashboardData> {
     return this.http.get<InventoryDashboardData>(`${this.apiUrl}/dashboard`).pipe(
       map(data => {
-        // Convert timestamp strings to Date objects and add timeAgo
-        data.recentActivity = data.recentActivity.map(activity => ({
+        const normalized = normalizeInventoryDashboard(data);
+        normalized.recentActivity = normalized.recentActivity.map(activity => ({
           ...activity,
-          timestamp: new Date(activity.timestamp),
-          timeAgo: this.getTimeAgo(new Date(activity.timestamp))
+          timeAgo: this.getTimeAgo(activity.timestamp),
         }));
-        data.currentDate = new Date(data.currentDate);
-        return data;
+        return normalized;
       }),
-      catchError(err => {
-        console.error('Backend connection failed. Switching to Offline mode.', err);
-        // Fallback object so the dashboard shell still renders
-        return of({
-          managerName: 'Manager',
-          currentDate: new Date(),
-          status: 'Offline',
-          stats: {
-            materialReservations: { total: 0, subStats: [] },
-            dispatchQueue: { total: 0, subStats: [] },
-            assetHealth: { total: 0, subStats: [] },
-            stockAlerts: { total: 0, subStats: [] }
-          },
-          recentActivity: [],
-          reorderList: [],
-          procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
-        });
-      })
     );
   }
 
@@ -166,26 +191,17 @@ export class InventoryManagerDashboardService {
         timestamp: new Date(activity.timestamp),
         timeAgo: this.getTimeAgo(new Date(activity.timestamp))
       }))),
-      catchError(() => of([]))
     );
   }
 
   // ── Returns & RMA Methods ──
 
   getReturnsSummary(): Observable<ReturnsSummary> {
-    return this.http.get<ReturnsSummary>(`${this.apiUrl}/returns-summary`).pipe(
-      catchError(() => of({
-        leftoverReturns: { total: 0, restoredToStock: 0, movedToQuarantine: 0 },
-        rmaCases: { total: 0, active: 0 },
-        quarantine: { active: 0, disposed: 0 },
-      }))
-    );
+    return this.http.get<ReturnsSummary>(`${this.apiUrl}/returns-summary`);
   }
 
   getLeftoverReturns(): Observable<LeftoverReturnItem[]> {
-    return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`).pipe(
-      catchError(() => of([]))
-    );
+    return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`);
   }
 
   createLeftoverReturn(data: any): Observable<LeftoverReturnItem> {
@@ -193,9 +209,7 @@ export class InventoryManagerDashboardService {
   }
 
   getRmaCases(): Observable<RmaCaseItem[]> {
-    return this.http.get<RmaCaseItem[]>(`${this.apiUrl}/rma-cases`).pipe(
-      catchError(() => of([]))
-    );
+    return this.http.get<RmaCaseItem[]>(`${this.apiUrl}/rma-cases`);
   }
 
   createRmaCase(data: any): Observable<RmaCaseItem> {
@@ -207,9 +221,7 @@ export class InventoryManagerDashboardService {
   }
 
   getQuarantineItems(): Observable<QuarantineItemData[]> {
-    return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`).pipe(
-      catchError(() => of([]))
-    );
+    return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`);
   }
 
   createQuarantineItem(data: any): Observable<QuarantineItemData> {

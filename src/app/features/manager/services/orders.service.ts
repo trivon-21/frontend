@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { PurchaseRequest, PurchaseStatus, ReceiptAuthorization } from '../../inventory-manager/services/purchase-workflow';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -28,9 +27,7 @@ export class OrdersService {
   getOrders(status = 'all'): Observable<OrdersResponse> {
     let params = new HttpParams();
     if (status && status !== 'all') params = params.set('status', status);
-    return this.api.get<OrdersResponse>('/manager/orders', params).pipe(catchError(() => of({
-      status: 'Offline', summary: { pending: 0, approved: 0, rejected: 0, pendingValue: 0 }, orders: [],
-    })));
+    return this.api.get<OrdersResponse>('/manager/orders', params);
   }
 
   decide(order: PurchaseRequest, decision: 'approved' | 'rejected', comment: string): Observable<PurchaseRequest> {

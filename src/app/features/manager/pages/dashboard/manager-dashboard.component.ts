@@ -1,20 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
-import { FormsModule } from '@angular/forms';
-import { FinanceSummary, ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
 
 @Component({
   selector: 'app-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LocalIconComponent],
+  imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
 export class ManagerDashboardComponent implements OnInit, OnDestroy {
-  financeSummary: FinanceSummary | null = null;
-  financePeriod: '7d' | '30d' | '12m' = '30d';
   data: ManagerDashboardData = {
     managerName: 'Manager',
     currentDate: new Date(),
@@ -34,6 +31,7 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
     pendingActions: [],
   };
   loading = true;
+  errorMessage = '';
   private timer?: ReturnType<typeof setInterval>;
 
   constructor(private dashboardService: ManagerDashboardService) {}
@@ -51,15 +49,17 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
 
   loadData(): void {
     this.loading = true;
-    this.dashboardService.getDashboard().subscribe((data) => {
-      this.data = data;
-      this.loading = false;
+    this.errorMessage = '';
+    this.dashboardService.getDashboard().subscribe({
+      next: (data) => {
+        this.data = data;
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'The Manager dashboard could not be loaded. Check your connection and try again.';
+        this.loading = false;
+      },
     });
-    this.loadFinanceSummary();
-  }
-
-  loadFinanceSummary(): void {
-    this.dashboardService.getFinanceSummary(this.financePeriod).subscribe((summary) => this.financeSummary = summary);
   }
 
   formatDate(date: Date): string {

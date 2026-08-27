@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { LocalIconComponent } from '../../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 
@@ -14,11 +14,14 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
     RouterLink,
     RouterLinkActive,
     CommonModule,
-    LocalIconComponent,
+    PortalIconsModule,
     ClickOutsideDirective,
   ],
   templateUrl: './manager-layout.component.html',
-  styleUrl: './manager-layout.component.css',
+  styleUrls: [
+    '../../../../../shared/styles/role-portal-shell.css',
+    './manager-layout.component.css',
+  ],
 })
 export class ManagerLayoutComponent {
   showUserMenu = false;

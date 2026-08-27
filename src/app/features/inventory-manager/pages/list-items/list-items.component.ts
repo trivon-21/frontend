@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import { INVENTORY_ITEM_FORMS, InventoryItem, InventoryItemClass, isValidSubcategory } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 
@@ -15,7 +15,7 @@ interface ProductQualityRecord {
 @Component({
   selector: 'app-list-items',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PortalIconsModule],
   templateUrl: './list-items.component.html',
   styleUrls: ['./list-items.component.css'],
 })
@@ -29,6 +29,12 @@ export class ListItemsComponent implements OnInit {
   constructor(private readonly inventoryService: InventoryManagerDashboardService) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.errorMessage = '';
     this.inventoryService.getInventory().subscribe({
       next: (items) => {
         this.records = items.map((item) => this.inspect(item)).filter((record) => record.masterIssues.length || record.stockIssues.length);

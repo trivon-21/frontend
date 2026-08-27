@@ -26,6 +26,10 @@ export class TicketsComponent implements OnInit {
   };
   status = 'Syncing…';
   loading = false;
+  loadError = '';
+  page = 1;
+  limit = 25;
+  total = 0;
   updatingId: string | null = null;
   errorMessage = '';
   actionReason = '';
@@ -52,23 +56,37 @@ export class TicketsComponent implements OnInit {
       this.activePriority = this.accepted(params.get('priority'), this.priorityFilters);
       this.activeAssignment = this.accepted(params.get('assignment'), ['all', 'assigned', 'unassigned']);
       this.activeSla = this.accepted(params.get('sla'), ['all', 'overdue']);
+      this.page = 1;
       this.load();
     });
   }
 
   load(): void {
     this.loading = true;
+    this.loadError = '';
     this.ticketsService.getWorkItems({
       status: this.activeStatus,
       type: this.activeType,
       priority: this.activePriority,
       assignment: this.activeAssignment,
       sla: this.activeSla,
-    }).subscribe((response) => {
-      this.items = response.items;
-      this.summary = response.summary;
-      this.status = response.status;
-      this.loading = false;
+      page: this.page,
+      limit: this.limit,
+    }).subscribe({
+      next: (response) => {
+        this.items = response.items;
+        this.summary = response.summary;
+        this.status = response.status;
+        this.page = response.page;
+        this.limit = response.limit;
+        this.total = response.total;
+        this.loading = false;
+      },
+      error: () => {
+        this.loadError = 'Operations could not be loaded. Check your connection and try again.';
+        this.status = 'Offline';
+        this.loading = false;
+      },
     });
   }
 
@@ -76,6 +94,17 @@ export class TicketsComponent implements OnInit {
     if (kind === 'status') this.activeStatus = value;
     if (kind === 'type') this.activeType = value;
     if (kind === 'priority') this.activePriority = value;
+    this.page = 1;
+    this.load();
+  }
+
+  get totalPages(): number { return Math.max(1, Math.ceil(this.total / this.limit)); }
+  get firstResult(): number { return this.total === 0 ? 0 : (this.page - 1) * this.limit + 1; }
+  get lastResult(): number { return Math.min(this.page * this.limit, this.total); }
+
+  changePage(nextPage: number): void {
+    if (this.loading || nextPage < 1 || nextPage > this.totalPages || nextPage === this.page) return;
+    this.page = nextPage;
     this.load();
   }
 

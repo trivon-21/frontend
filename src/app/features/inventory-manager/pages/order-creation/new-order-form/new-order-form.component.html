@@ -2,7 +2,7 @@
   <!-- Header Section -->
   <div class="form-header">
     <div class="header-main">
-      <button class="btn-back" (click)="goBack()">
+      <button type="button" class="btn-back" aria-label="Back to order requests" (click)="goBack()">
         <lucide-angular name="arrow-left" [size]="20" strokeWidth="2.5"></lucide-angular>
       </button>
       <div class="title-group">
@@ -18,11 +18,17 @@
 
   <!-- Messages -->
   <div class="alerts-wrap" *ngIf="successMessage || errorMessage">
-    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert success" *ngIf="successMessage" role="status" aria-live="polite">{{ successMessage }}</div>
     <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
   </div>
 
-  <div class="split-layout">
+  <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading order form…</div>
+  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+    <div><strong>Order form unavailable</strong><p>{{ loadError }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="loadData()">Retry</button>
+  </div>
+
+  <div class="split-layout" *ngIf="!loading && !loadError">
     <!-- Left Column: Form Inputs -->
     <div class="layout-left white-panel">
       <!-- Step 1: Supplier Selector Dumb Component -->
@@ -50,8 +56,9 @@
         </div>
         <div class="step-content">
           <div class="form-group">
-            <label>Order Notes / Justification</label>
+            <label for="order-notes">Order Notes / Justification</label>
             <textarea
+              id="order-notes"
               [(ngModel)]="orderNotes"
               class="form-textarea"
               placeholder="Add any additional context for the approver..."
@@ -61,12 +68,12 @@
       </div>
 
       <div class="form-footer-actions">
-        <button class="btn-discard" (click)="goBack()">Discard Changes</button>
+        <button type="button" class="btn-discard" (click)="goBack()">Discard Changes</button>
         <div class="action-group">
-          <button class="btn-secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+          <button type="button" class="btn-secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
             {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
           </button>
-          <button class="btn-primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+          <button type="button" class="btn-primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>
           </button>

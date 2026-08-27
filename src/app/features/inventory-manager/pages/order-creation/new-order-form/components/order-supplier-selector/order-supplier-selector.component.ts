@@ -1,13 +1,13 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LocalIconComponent } from '../../../../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { Supplier } from '../../../../../services/order-creation.service';
 
 @Component({
   selector: 'app-order-supplier-selector',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './order-supplier-selector.component.html',
   styleUrl: './order-supplier-selector.component.css'
 })

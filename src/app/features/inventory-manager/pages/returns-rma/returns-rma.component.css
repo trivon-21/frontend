@@ -1,8 +1,10 @@
 .rma-container {
-  padding: var(--spacing-xxl) var(--spacing-xxl) calc(var(--spacing-xxxl) * 2);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 40px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
   position: relative;
 }
 
@@ -50,9 +52,9 @@
 
 /* ── Header ── */
 .header h1 {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1b2f27;
   margin: 0;
 }
 
@@ -67,9 +69,9 @@
   align-items: center;
   gap: 12px;
   background: var(--background-card, var(--background-card));
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: 99px;
-  border: 1px solid var(--border-light);
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-light);
   width: 400px;
 }
 
@@ -77,7 +79,7 @@
   border: none;
   outline: none;
   width: 100%;
-  font-size: 14px;
+  font-size: 13.5px;
   background: transparent;
   color: var(--text-primary);
 }
@@ -86,14 +88,14 @@
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 
 .stat-card {
   background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-lg, 16px);
-  padding: var(--spacing-xl) var(--spacing-xl);
+  border-radius: 14px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -106,9 +108,9 @@
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--border-radius-md, 10px);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,9 +138,9 @@
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1b2f27;
   line-height: 1;
 }
 
@@ -188,7 +190,7 @@
 
 /* ── Card Panel / Glass ── */
 .card-panel {
-  padding: var(--spacing-xl);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -197,8 +199,8 @@
 .glass-panel {
   background: var(--background-card, var(--background-card));
   border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-lg, 16px);
-  box-shadow: var(--shadow-light, 0 1px 4px rgb(0 0 0 / 4%));
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
 }
 
 .panel-header {
@@ -211,7 +213,7 @@
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  color: var(--text-primary);
+  color: #1b2f27;
 }
 
 .title-group {
@@ -247,12 +249,12 @@
 
 .form-input {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--border-radius-md, 10px);
-  border: 1px solid var(--border-light);
-  background: var(--background-page);
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-light);
+  background: var(--background-card);
   outline: none;
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-primary);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
@@ -325,13 +327,13 @@ select.form-input {
 
 /* ── Buttons ── */
 .btn-primary {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 9px 20px;
   border: none;
   border-radius: var(--border-radius-md, 10px);
   background: var(--primary-main);
   color: var(--background-card);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13.5px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -350,13 +352,13 @@ select.form-input {
 }
 
 .btn-secondary {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 9px 16px;
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md, 10px);
   background: var(--background-card, var(--background-card));
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13.5px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -408,7 +410,7 @@ select.form-input {
   margin-left: auto;
   padding: var(--spacing-sm) var(--spacing-lg);
   border: 1px solid var(--primary-main);
-  border-radius: var(--border-radius-md, 10px);
+  border-radius: 10px;
   background: transparent;
   color: var(--primary-main);
   font-weight: 600;
@@ -648,7 +650,7 @@ select.form-input {
 .quarantine-section {
   background: var(--error-light);
   border: 1px solid var(--error-light);
-  border-radius: var(--border-radius-lg, 16px);
+  border-radius: 14px;
   overflow: hidden;
 }
 
@@ -687,6 +689,7 @@ select.form-input {
 .quarantine-table-container {
   background: var(--background-card, var(--background-card));
   padding-bottom: 8px;
+  overflow-x: auto;
 }
 
 .quarantine-table {
@@ -696,8 +699,8 @@ select.form-input {
 
 .quarantine-table th {
   text-align: left;
-  padding: var(--spacing-lg) var(--spacing-xl);
-  font-size: 11px;
+  padding: 16px 20px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--error);
   border-bottom: 1px solid var(--error-light);
@@ -705,7 +708,7 @@ select.form-input {
 }
 
 .quarantine-table td {
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
   color: var(--text-secondary);
@@ -731,7 +734,7 @@ select.form-input {
 
 .modal-content {
   background: var(--background-card, var(--background-card));
-  border-radius: var(--border-radius-lg, 16px);
+  border-radius: 14px;
   width: 100%;
   max-width: 520px;
   box-shadow: var(--shadow-xl, 0 20px 60px rgb(0 0 0 / 20%));
@@ -754,7 +757,7 @@ select.form-input {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xl) var(--spacing-xl);
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -780,7 +783,7 @@ select.form-input {
 }
 
 .modal-body {
-  padding: var(--spacing-xl);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -790,7 +793,7 @@ select.form-input {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: 16px 24px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -822,3 +825,8 @@ select.form-input {
 .autocomplete-results button:hover {
   background: var(--primary-lighter);
 }
+
+.quarantine-icon { color: var(--error); }
+.dialog-description { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.search-box:focus-within { border-color: #00843d; box-shadow: 0 0 0 3px #e8fdf0; }
+.btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-danger:focus-visible, .btn-danger-sm:focus-visible, .btn-cancel-sm:focus-visible, .btn-new-rma:focus-visible, .btn-advance:focus-visible, .modal-close:focus-visible, .autocomplete-results button:focus-visible { outline: 2px solid #00843d; outline-offset: 2px; }

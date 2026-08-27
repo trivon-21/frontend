@@ -1,5 +1,7 @@
 .inventory-container {
-  padding: var(--spacing-xxl);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 40px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -12,9 +14,9 @@
 }
 
 .page-title h1 {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1b2f27;
   margin: 0;
 }
 
@@ -26,20 +28,20 @@
 
 .header-actions {
   display: flex;
-  gap: 16px;
+  gap: 10px;
 }
 
 
 
 /* Filters Card */
 .filters-card {
-  padding: var(--spacing-xl);
+  padding: 20px;
   display: grid;
   gap: var(--spacing-lg);
   background: var(--background-card);
-  border-radius: var(--border-radius-lg, 12px);
+  border-radius: 14px;
   border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-standard);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
 }
 
 .quick-filters {
@@ -68,11 +70,11 @@
 .filter-field select,
 .sort-field select {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: 1px solid var(--border-light);
+  padding: 10px 16px;
+  border: 1.5px solid var(--border-light);
   border-radius: 10px;
   background: var(--background-card);
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-primary);
   transition: all 0.2s ease;
 }
@@ -212,10 +214,11 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 99px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .stock-pill.in-stock {
@@ -271,14 +274,14 @@
   background: var(--background-card);
   width: 90%;
   max-width: 600px;
-  border-radius: 24px;
+  border-radius: 14px;
   box-shadow: var(--shadow-modal);
   overflow: hidden;
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {
-  padding: var(--spacing-xl) var(--spacing-xxl);
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -286,8 +289,8 @@
 }
 
 .modal-header h2 {
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
@@ -309,16 +312,16 @@
 }
 
 .modal-body {
-  padding: var(--spacing-xxl);
+  padding: 24px;
 }
 
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 18px;
   background: var(--background-page);
-  padding: var(--spacing-xl);
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border-light);
 }
 
@@ -337,18 +340,29 @@
 }
 
 .detail-item .value {
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .modal-footer {
-  padding: var(--spacing-xl) var(--spacing-xxl);
+  padding: 16px 24px;
   border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   background: var(--background-page);
+}
+
+.clickable-row:focus-visible,
+.btn-advanced:focus-visible,
+.btn-icon:focus-visible,
+.btn-link:focus-visible,
+.btn-small:focus-visible,
+.btn-close:focus-visible,
+.btn-page:focus-visible {
+  outline: 2px solid #00843d;
+  outline-offset: 2px;
 }
 
 .btn-close {

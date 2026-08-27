@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -6,13 +6,14 @@ import { ApiService } from '../../../../core/services/api.service';
 import { InventoryItem, supplierNameOf } from '../../services/inventory-domain';
 import { PurchaseRequest, PurchaseStatus, purchaseStatusLabel } from '../../services/purchase-workflow';
 import { OrderCreationService } from '../../services/order-creation.service';
+import { forkJoin } from 'rxjs';
 
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-order-creation',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './order-creation.component.html',
   styleUrls: ['./order-creation.component.css']
 })
@@ -33,6 +34,10 @@ export class OrderCreationComponent implements OnInit {
 
   successMessage = '';
   errorMessage = '';
+  loading = true;
+  loadError = '';
+  issuing = false;
+  private dialogTrigger: HTMLElement | null = null;
 
   // Detail modal
   showDetailModal = false;
@@ -46,8 +51,7 @@ export class OrderCreationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchOrders();
-    this.loadSuggestedOrders();
+    this.loadData();
 
     // Check for success message from new order page
     this.route.queryParams.subscribe(params => {
@@ -58,24 +62,22 @@ export class OrderCreationComponent implements OnInit {
     });
   }
 
-  fetchOrders(): void {
-    this.apiService.get<PurchaseRequest[]>('/inventory/order-requests').subscribe({
-      next: (data) => {
-        this.draftOrders = data.filter(o => o.status === 'draft');
-        this.pendingOrders = data.filter(o => ['pending-manager', 'pending-finance'].includes(o.status));
-        this.approvedOrders = data.filter(o => o.status === 'approved');
-        this.receivingOrders = data.filter(o => ['ordered', 'partially-received'].includes(o.status));
-        this.receivedOrders = data.filter(o => o.status === 'received');
-        this.rejectedOrders = data.filter(o => o.status === 'rejected');
+  loadData(): void {
+    this.loading = true;
+    this.loadError = '';
+    forkJoin({
+      orders: this.apiService.get<PurchaseRequest[]>('/inventory/order-requests'),
+      suggestedItems: this.apiService.get<InventoryItem[]>('/inventory/suggested-orders'),
+    }).subscribe({
+      next: ({ orders, suggestedItems }) => {
+        this.applyOrders(orders);
+        this.suggestedItems = suggestedItems;
+        this.loading = false;
       },
-      error: (err) => console.error('Failed to load order requests:', err)
-    });
-  }
-
-  loadSuggestedOrders(): void {
-    this.apiService.get<InventoryItem[]>('/inventory/suggested-orders').subscribe({
-      next: (data) => this.suggestedItems = data,
-      error: (err) => console.error('Failed to load suggested orders:', err)
+      error: () => {
+        this.loadError = 'Orders and reorder suggestions could not be loaded. No partial data has been shown.';
+        this.loading = false;
+      },
     });
   }
 
@@ -122,6 +124,7 @@ export class OrderCreationComponent implements OnInit {
       this.editDraft(order);
       return;
     }
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.selectedOrder = order;
     this.showDetailModal = true;
   }
@@ -131,19 +134,32 @@ export class OrderCreationComponent implements OnInit {
   }
 
   closeDetail(): void {
+    if (this.issuing) return;
     this.showDetailModal = false;
     this.selectedOrder = null;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeDetail(); }
+
   issuePurchaseOrder(order: PurchaseRequest): void {
+    if (this.issuing) return;
+    this.issuing = true;
+    this.errorMessage = '';
     this.orderService.issuePurchaseOrder(order).subscribe({
       next: () => {
-        this.fetchOrders();
-        this.loadSuggestedOrders();
+        this.issuing = false;
+        this.loadData();
         this.selectedOrder = null;
         this.showDetailModal = false;
       },
-      error: (err) => this.errorMessage = err.error?.message || 'Failed to issue purchase order',
+      error: (err) => {
+        this.issuing = false;
+        this.errorMessage = err.error?.message || 'Failed to issue purchase order';
+      },
     });
   }
 
@@ -164,5 +180,14 @@ export class OrderCreationComponent implements OnInit {
 
   formatCurrency(val: number): string {
     return `LKR ${(val || 0).toLocaleString()}`;
+  }
+
+  private applyOrders(data: PurchaseRequest[]): void {
+    this.draftOrders = data.filter(o => o.status === 'draft');
+    this.pendingOrders = data.filter(o => ['pending-manager', 'pending-finance'].includes(o.status));
+    this.approvedOrders = data.filter(o => o.status === 'approved');
+    this.receivingOrders = data.filter(o => ['ordered', 'partially-received'].includes(o.status));
+    this.receivedOrders = data.filter(o => o.status === 'received');
+    this.rejectedOrders = data.filter(o => o.status === 'rejected');
   }
 }

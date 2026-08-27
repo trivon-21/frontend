@@ -1,14 +1,15 @@
 <div class="rma-container">
   <!-- Success Toast -->
-  <div class="toast toast-success" *ngIf="successMessage">
+  <div class="toast toast-success" *ngIf="successMessage" role="status">
     <lucide-angular name="check" [size]="16" class="inline-icon"></lucide-angular>
     {{ successMessage }}
   </div>
 
   <!-- Error Toast -->
-  <div class="toast toast-error" *ngIf="error">
+  <div class="toast toast-error" *ngIf="error" role="alert">
     <lucide-angular name="triangle-alert" [size]="16" class="inline-icon"></lucide-angular>
     {{ error }}
+    <button type="button" class="portal-retry-button" *ngIf="!submitting && leftoverReturns.length === 0 && rmaCases.length === 0" (click)="loadAllData()">Retry</button>
   </div>
 
   <!-- Header -->
@@ -16,7 +17,7 @@
     <h1>Returns</h1>
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <input type="text" [(ngModel)]="searchQuery" placeholder="Search returns, RMA or quarantine items...">
+      <input type="text" [(ngModel)]="searchQuery" aria-label="Search returns, RMA and quarantine items" placeholder="Search returns, RMA or quarantine items...">
     </div>
   </div>
 
@@ -62,7 +63,7 @@
   </div>
 
   <!-- Loading Skeleton -->
-  <div class="skeleton-container" *ngIf="loading">
+  <div class="skeleton-container" *ngIf="loading" role="status" aria-label="Loading returns data">
     <div class="skeleton-block skeleton-lg"></div>
     <div class="skeleton-block skeleton-md"></div>
   </div>
@@ -121,6 +122,7 @@
         </div>
 
         <button
+          type="button"
           class="btn-primary"
           [disabled]="!isLeftoverFormValid || submitting"
           (click)="submitLeftoverReturn()"
@@ -157,7 +159,7 @@
           <h2>Defective / RMA Log</h2>
           <span class="subtitle">{{ summary.rmaCases.active }} active RMA cases</span>
         </div>
-        <button class="btn-new-rma" (click)="openRmaModal()">
+        <button type="button" class="btn-new-rma" (click)="openRmaModal()">
           <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
           New RMA
         </button>
@@ -203,9 +205,11 @@
               </td>
               <td>
                 <button
+                  type="button"
                   class="btn-advance"
                   *ngIf="rmaNextStatus[rma.status]"
                   (click)="advanceRmaStatus(rma)"
+                  [disabled]="pendingActionIds.has(rma.rmaId)"
                   [title]="'Move to ' + getNextStatusLabel(rma.status)"
                 >
                   <lucide-angular name="chevron-right" [size]="14" class="inline-icon"></lucide-angular>
@@ -224,7 +228,7 @@
   <div class="quarantine-section" *ngIf="!loading">
     <div class="quarantine-header">
       <div class="header-left">
-        <lucide-angular name="circle-alert" [size]="24" class="inline-icon" style="color: var(--error);"></lucide-angular>
+        <lucide-angular name="circle-alert" [size]="24" class="inline-icon quarantine-icon"></lucide-angular>
         <div class="title-group">
           <h2>Quarantine Zone</h2>
           <span class="subtitle">Items damaged or incomplete — pending disposal decision</span>
@@ -260,12 +264,12 @@
             <td>{{ item.location || '—' }}</td>
             <td>
               <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId">
-                <button class="btn-danger" (click)="confirmDispose(item.quarantineId)">Dispose</button>
+                <button type="button" class="btn-danger" (click)="confirmDispose(item.quarantineId)">Dispose</button>
               </div>
               <div class="confirm-actions" *ngIf="confirmDisposeId === item.quarantineId">
                 <span class="confirm-text">Confirm?</span>
-                <button class="btn-danger-sm" (click)="disposeItem(item.quarantineId)">Yes</button>
-                <button class="btn-cancel-sm" (click)="cancelDispose()">No</button>
+                <button type="button" class="btn-danger-sm" (click)="disposeItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
+                <button type="button" class="btn-cancel-sm" (click)="cancelDispose()">No</button>
               </div>
             </td>
           </tr>
@@ -276,14 +280,15 @@
 
   <!-- New RMA Modal -->
   <div class="modal-overlay" *ngIf="showRmaModal" (click)="closeRmaModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="rma-dialog-title" aria-describedby="rma-dialog-description" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>New RMA Case</h2>
-        <button class="modal-close" (click)="closeRmaModal()">
+        <h2 id="rma-dialog-title">New RMA Case</h2>
+        <button type="button" class="modal-close" aria-label="Close RMA dialog" (click)="closeRmaModal()" [disabled]="submitting">
           <lucide-angular name="x" [size]="20"></lucide-angular>
         </button>
       </div>
       <div class="modal-body">
+        <p id="rma-dialog-description" class="dialog-description">Register a defective serialized item for supplier review and resolution tracking.</p>
         <div class="form-group">
           <label>Serial Number *</label>
           <input type="text" [(ngModel)]="rmaForm.serialNumber" placeholder="e.g., CAR-IND-2024-2234" class="form-input">
@@ -311,8 +316,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeRmaModal()">Cancel</button>
-        <button class="btn-primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
+        <button type="button" class="btn-secondary" (click)="closeRmaModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
           {{ submitting ? 'Creating...' : 'Create RMA Case' }}
         </button>
       </div>

@@ -7,12 +7,12 @@ import {
   ActivityItem,
 } from '../../services/inventory-manager-dashboard.service';
 import { IconMappingService } from '../../../../shared/services/icon-mapping.service';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-inventory-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LocalIconComponent],
+  imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './inventory-manager-dashboard.component.html',
   styleUrl: './inventory-manager-dashboard.component.css',
 })
@@ -59,6 +59,7 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
 
   loadData(): void {
     this.loading = true;
+    this.error = null;
     this.dashboardService.getDashboard().subscribe({
       next: (data: InventoryDashboardData) => {
         this.data = data;

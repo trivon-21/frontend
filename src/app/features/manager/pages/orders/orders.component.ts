@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
 import {
   OrdersService,
   PurchaseRequest,
@@ -15,14 +18,22 @@ interface FilterChip {
   label: string;
 }
 
+interface DecisionTarget {
+  kind: 'purchase' | 'authorization';
+  record: PurchaseRequest | ReceiptAuthorization;
+  decision: 'approved' | 'rejected';
+  reference: string;
+}
+
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent implements OnInit {
+  @ViewChild('decisionCommentInput') decisionCommentInput?: ElementRef<HTMLTextAreaElement>;
   orders: PurchaseRequest[] = [];
   summary: OrderSummary = { pending: 0, approved: 0, rejected: 0, pendingValue: 0 };
   status = 'Syncing…';
@@ -32,6 +43,14 @@ export class OrdersComponent implements OnInit {
   authorizationExpandedId: string | null = null;
   authorizations: ReceiptAuthorization[] = [];
   activeType: 'purchase' | 'non-po' = 'purchase';
+  loadError = '';
+  authorizationLoadError = '';
+  authorizationLoading = false;
+  decisionTarget: DecisionTarget | null = null;
+  decisionComment = '';
+  decisionError = '';
+  decisionPending = false;
+  private decisionTrigger: HTMLElement | null = null;
 
   filters: FilterChip[] = [
     { key: 'all', label: 'All' },
@@ -42,27 +61,49 @@ export class OrdersComponent implements OnInit {
   ];
   activeFilter = 'all';
 
-  constructor(private ordersService: OrdersService, private route: ActivatedRoute) {}
+  constructor(private ordersService: OrdersService, private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
-      const status = params.get('status');
-      if (params.get('type') === 'non-po') this.activeType = 'non-po';
-      if (status && this.filters.some((filter) => filter.key === status)) this.activeFilter = status;
+      const type = params.get('type') === 'non-po' ? 'non-po' : 'purchase';
+      const requestedStatus = params.get('status');
+      const status = requestedStatus && this.filters.some((filter) => filter.key === requestedStatus)
+        ? requestedStatus
+        : 'all';
+      if (params.get('type') !== type || requestedStatus !== status) {
+        void this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { type, status },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+        return;
+      }
+      this.activeType = type;
+      this.activeFilter = status;
       this.load();
       this.loadAuthorizations();
     });
   }
 
   loadAuthorizations(): void {
+    this.authorizationLoading = true;
+    this.authorizationLoadError = '';
     this.ordersService.getReceiptAuthorizations().subscribe({
-      next: (items) => this.authorizations = items,
-      error: () => this.authorizations = [],
+      next: (items) => {
+        this.authorizations = items;
+        this.authorizationLoading = false;
+      },
+      error: () => {
+        this.authorizationLoadError = 'Non-PO authorizations could not be loaded.';
+        this.authorizationLoading = false;
+      },
     });
   }
 
   load(): void {
     this.loading = true;
+    this.loadError = '';
     this.ordersService.getOrders(this.activeFilter).subscribe({
       next: (res) => {
         this.orders = res.orders;
@@ -71,14 +112,27 @@ export class OrdersComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
+        this.loadError = 'Purchase approvals could not be loaded. Check your connection and try again.';
+        this.status = 'Offline';
         this.loading = false;
       },
     });
   }
 
   setFilter(key: string): void {
-    this.activeFilter = key;
-    this.load();
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { type: this.activeType, status: key },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  setType(type: 'purchase' | 'non-po'): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { type, status: this.activeFilter },
+      queryParamsHandling: 'merge',
+    });
   }
 
   toggleExpand(order: PurchaseRequest): void {
@@ -86,29 +140,11 @@ export class OrdersComponent implements OnInit {
   }
 
   approve(order: PurchaseRequest): void {
-    const comment = window.prompt(`Operational approval comment for ${order.requestId}:`, 'Operational need verified.');
-    if (!comment?.trim()) return;
-    this.decide(order, 'approved', comment.trim());
+    this.openDecision('purchase', order, 'approved', order.requestId, 'Operational need verified.');
   }
 
   reject(order: PurchaseRequest): void {
-    const reason = window.prompt(`Reason for rejecting ${order.requestId}:`, '');
-    if (!reason?.trim()) return;
-    this.decide(order, 'rejected', reason.trim());
-  }
-
-  private decide(order: PurchaseRequest, decision: OrderStatus & ('approved' | 'rejected'), reason = ''): void {
-    this.updatingId = order._id;
-
-    this.ordersService.decide(order, decision, reason).subscribe({
-      next: (updated) => {
-        this.updatingId = null;
-        if (updated) this.load();
-      },
-      error: () => {
-        this.updatingId = null;
-      },
-    });
+    this.openDecision('purchase', order, 'rejected', order.requestId);
   }
 
   statusLabel(status: OrderStatus): string {
@@ -116,17 +152,74 @@ export class OrdersComponent implements OnInit {
   }
 
   decideAuthorization(authorization: ReceiptAuthorization, decision: 'approved' | 'rejected'): void {
-    const comment = window.prompt(
-      `${decision === 'approved' ? 'Approval' : 'Rejection'} comment for ${authorization.authorizationNumber}:`,
+    this.openDecision(
+      'authorization', authorization, decision, authorization.authorizationNumber,
       decision === 'approved' ? 'Operational exception verified.' : '',
     );
-    if (!comment?.trim()) return;
-    this.updatingId = authorization._id;
-    this.ordersService.decideReceiptAuthorization(authorization, decision, comment.trim()).subscribe({
-      next: () => { this.updatingId = null; this.loadAuthorizations(); },
-      error: () => this.updatingId = null,
+  }
+
+  openDecision(
+    kind: DecisionTarget['kind'],
+    record: PurchaseRequest | ReceiptAuthorization,
+    decision: DecisionTarget['decision'],
+    reference: string,
+    initialComment = '',
+  ): void {
+    this.decisionTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    this.decisionTarget = { kind, record, decision, reference };
+    this.decisionComment = initialComment;
+    this.decisionError = '';
+    setTimeout(() => this.decisionCommentInput?.nativeElement.focus());
+  }
+
+  submitDecision(): void {
+    const target = this.decisionTarget;
+    const comment = this.decisionComment.trim();
+    if (!target || this.decisionPending) return;
+    if (!comment) {
+      this.decisionError = 'A comment is required before submitting this decision.';
+      this.decisionCommentInput?.nativeElement.focus();
+      return;
+    }
+    this.decisionPending = true;
+    this.decisionError = '';
+    this.updatingId = target.record._id;
+    const request = target.kind === 'purchase'
+      ? this.ordersService.decide(target.record as PurchaseRequest, target.decision, comment)
+      : this.ordersService.decideReceiptAuthorization(target.record as ReceiptAuthorization, target.decision, comment);
+    (request as Observable<PurchaseRequest | ReceiptAuthorization>).subscribe({
+      next: () => {
+        this.decisionPending = false;
+        this.updatingId = null;
+        const kind = target.kind;
+        this.closeDecision();
+        if (kind === 'purchase') this.load(); else this.loadAuthorizations();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.decisionError = error?.error?.message ||
+          (error?.status === 409 ? 'This record changed while you were reviewing it. Refresh and try again.' :
+            'The decision could not be saved. Your comment has been retained.');
+        this.decisionPending = false;
+        this.updatingId = null;
+      },
     });
   }
+
+  closeDecision(): void {
+    if (this.decisionPending) return;
+    this.decisionTarget = null;
+    this.decisionError = '';
+    const trigger = this.decisionTrigger;
+    this.decisionTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  onDecisionBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeDecision();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeDecision(); }
 
   authorizationItem(authorization: ReceiptAuthorization): string {
     return authorization.inventoryId?.name || authorization.newItemSnapshot?.name || 'New catalog item';

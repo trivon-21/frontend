@@ -34,13 +34,13 @@
   <!-- Filter -->
   <div class="filter-bar">
     <div class="chip-group">
-      <button class="chip" [class.active]="activeType === 'purchase'" (click)="activeType = 'purchase'">Purchase Requests</button>
-      <button class="chip" [class.active]="activeType === 'non-po'" (click)="activeType = 'non-po'">Non-PO Authorizations</button>
+      <button type="button" class="chip" [class.active]="activeType === 'purchase'" (click)="setType('purchase')">Purchase Requests</button>
+      <button type="button" class="chip" [class.active]="activeType === 'non-po'" (click)="setType('non-po')">Non-PO Authorizations</button>
     </div>
     <div class="chip-group" *ngIf="activeType === 'purchase'">
       <button
         *ngFor="let f of filters"
-        class="chip"
+        type="button" class="chip"
         [class.active]="activeFilter === f.key"
         (click)="setFilter(f.key)"
       >
@@ -49,8 +49,19 @@
     </div>
   </div>
 
+  <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'purchase' && loadError">
+    <div><strong>Purchase approvals unavailable</strong><p>{{ loadError }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="load()" [disabled]="loading">Retry</button>
+  </div>
+  <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'non-po' && authorizationLoadError">
+    <div><strong>Non-PO approvals unavailable</strong><p>{{ authorizationLoadError }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="loadAuthorizations()" [disabled]="authorizationLoading">Retry</button>
+  </div>
+  <div class="portal-state" *ngIf="activeType === 'purchase' && loading && orders.length === 0">Loading purchase approvals…</div>
+  <div class="portal-state" *ngIf="activeType === 'non-po' && authorizationLoading && authorizations.length === 0">Loading Non-PO approvals…</div>
+
   <!-- Table -->
-  <div class="alx-table-container" *ngIf="activeType === 'purchase'">
+  <div class="alx-table-container" *ngIf="activeType === 'purchase' && !loadError">
     <table class="alx-table">
       <thead>
         <tr>
@@ -78,8 +89,8 @@
             </td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
               <div class="row-actions" *ngIf="o.status === 'pending-manager'">
-                <button class="mini-btn ok" (click)="approve(o)">Approve</button>
-                <button class="mini-btn warn" (click)="reject(o)">Reject</button>
+                <button type="button" class="mini-btn ok" (click)="approve(o)">Approve</button>
+                <button type="button" class="mini-btn warn" (click)="reject(o)">Reject</button>
               </div>
               <span class="muted" *ngIf="o.status === 'approved'">by {{ o.approvedBy || 'Manager' }}</span>
               <span class="muted" *ngIf="o.status === 'rejected'" [title]="o.rejectionReason || ''">Rejected</span>
@@ -114,7 +125,7 @@
     </table>
   </div>
 
-  <div class="alx-table-container" *ngIf="activeType === 'non-po'">
+  <div class="alx-table-container" *ngIf="activeType === 'non-po' && !authorizationLoadError">
     <table class="alx-table">
       <thead><tr><th>Authorization</th><th>Reason / Item</th><th>Supplier</th><th>Quantity</th><th>Est. Total</th><th>Status</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
@@ -128,8 +139,8 @@
             <td><span class="pill status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
               <div class="row-actions" *ngIf="authorization.status === 'pending'">
-                <button class="mini-btn ok" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
-                <button class="mini-btn warn" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
+                <button type="button" class="mini-btn ok" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
+                <button type="button" class="mini-btn warn" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
               </div>
               <span class="muted" *ngIf="authorization.status !== 'pending'">{{ authorization.financeReviewStatus }}</span>
             </td>
@@ -147,5 +158,26 @@
         <tr *ngIf="authorizations.length === 0"><td colspan="7" class="empty-cell">No Non-PO authorizations in this view.</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="portal-dialog-backdrop" *ngIf="decisionTarget as target" (click)="onDecisionBackdrop($event)">
+    <section class="portal-dialog" role="dialog" aria-modal="true" aria-labelledby="decision-dialog-title" aria-describedby="decision-dialog-description">
+      <div class="portal-dialog__header">
+        <div>
+          <h2 id="decision-dialog-title">{{ target.decision === 'approved' ? 'Approve' : 'Reject' }} {{ target.reference }}</h2>
+          <p id="decision-dialog-description">Add the required operational comment. It will be retained if the request fails.</p>
+        </div>
+        <button type="button" class="portal-dialog__close" aria-label="Close decision dialog" (click)="closeDecision()" [disabled]="decisionPending">×</button>
+      </div>
+      <label for="decision-comment">Comment</label>
+      <textarea #decisionCommentInput id="decision-comment" rows="4" [(ngModel)]="decisionComment" [disabled]="decisionPending" required></textarea>
+      <p class="portal-dialog__error" role="alert" *ngIf="decisionError">{{ decisionError }}</p>
+      <div class="portal-dialog__actions">
+        <button type="button" (click)="closeDecision()" [disabled]="decisionPending">Cancel</button>
+        <button type="button" class="primary" (click)="submitDecision()" [disabled]="decisionPending">
+          {{ decisionPending ? 'Saving…' : (target.decision === 'approved' ? 'Approve' : 'Reject') }}
+        </button>
+      </div>
+    </section>
   </div>
 </div>

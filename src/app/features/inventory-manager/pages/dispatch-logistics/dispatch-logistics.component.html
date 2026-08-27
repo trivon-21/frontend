@@ -1,24 +1,54 @@
 <div class="dispatch-container">
   <!-- Header -->
-  <div class="header">
+  <div class="header page-header">
     <h1>Logistics</h1>
   </div>
 
+  <div class="portal-state" role="status" aria-live="polite" *ngIf="loading">
+    Loading dispatch orders…
+  </div>
+  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+    <div>
+      <strong>Dispatch unavailable</strong>
+      <p>{{ loadError }}</p>
+    </div>
+    <button type="button" class="portal-retry-button" (click)="fetchOrders()">Retry</button>
+  </div>
+
   <!-- Tabs Navigation -->
-  <div class="tabs-nav">
+  <div class="tabs-nav" role="tablist" aria-label="Logistics order status">
     <button
+      type="button"
+      id="logistics-to-pack-tab"
       class="tab-btn"
+      role="tab"
+      aria-controls="logistics-orders-panel"
+      [attr.aria-selected]="activeTab === 'to-pack'"
       [class.active]="activeTab === 'to-pack'"
       (click)="setActiveTab('to-pack')"
     >
       To Pack <span class="badge" *ngIf="ordersToPack.length > 0">{{ ordersToPack.length }}</span>
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'ready'" (click)="setActiveTab('ready')">
+    <button
+      type="button"
+      id="logistics-ready-tab"
+      class="tab-btn"
+      role="tab"
+      aria-controls="logistics-orders-panel"
+      [attr.aria-selected]="activeTab === 'ready'"
+      [class.active]="activeTab === 'ready'"
+      (click)="setActiveTab('ready')"
+    >
       Ready to Pick up
       <span class="badge" *ngIf="ordersReady.length > 0">{{ ordersReady.length }}</span>
     </button>
     <button
+      type="button"
+      id="logistics-in-transit-tab"
       class="tab-btn"
+      role="tab"
+      aria-controls="logistics-orders-panel"
+      [attr.aria-selected]="activeTab === 'in-transit'"
       [class.active]="activeTab === 'in-transit'"
       (click)="setActiveTab('in-transit')"
     >
@@ -26,7 +56,12 @@
       <span class="badge" *ngIf="ordersInTransit.length > 0">{{ ordersInTransit.length }}</span>
     </button>
     <button
+      type="button"
+      id="logistics-completed-tab"
       class="tab-btn"
+      role="tab"
+      aria-controls="logistics-orders-panel"
+      [attr.aria-selected]="activeTab === 'completed'"
       [class.active]="activeTab === 'completed'"
       (click)="setActiveTab('completed')"
     >
@@ -39,7 +74,9 @@
   <div class="table-controls glass-panel">
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
+      <label class="visually-hidden" for="logistics-search">Search logistics orders</label>
       <input
+        id="logistics-search"
         type="text"
         [(ngModel)]="searchQuery"
         (input)="($event)"
@@ -54,8 +91,12 @@
     </div>
     <div class="filters">
       <div class="filter-group">
-        <span>Sort By:</span>
-        <select class="filter-select" (change)="toggleSort($any($event.target).value)">
+        <label for="logistics-sort">Sort By:</label>
+        <select
+          id="logistics-sort"
+          class="filter-select"
+          (change)="toggleSort($any($event.target).value)"
+        >
           <option value="name">Name ({{ sortField === 'name' ? sortDirection : 'asc' }})</option>
           <option value="time">Time ({{ sortField === 'time' ? sortDirection : 'asc' }})</option>
         </select>
@@ -64,7 +105,13 @@
   </div>
 
   <!-- Orders Table -->
-  <div class="table-container alx-table-container glass-panel">
+  <div
+    id="logistics-orders-panel"
+    class="table-container alx-table-container glass-panel"
+    role="tabpanel"
+    [attr.aria-labelledby]="'logistics-' + activeTab + '-tab'"
+    *ngIf="!loading && !loadError"
+  >
     <table class="alx-table">
       <thead>
         <tr>
@@ -92,6 +139,7 @@
             <ng-container *ngIf="selectedOrderId === order.id">
               <ng-container *ngIf="activeTab === 'to-pack'">
                 <button
+                  type="button"
                   class="btn-assign"
                   [disabled]="!isOrderFullyReserved(order)"
                   [title]="
@@ -104,6 +152,7 @@
                   Assign Delivery
                 </button>
                 <button
+                  type="button"
                   class="btn-pack"
                   (click)="openPackModal(order.id); $event.stopPropagation()"
                 >
@@ -112,6 +161,7 @@
               </ng-container>
               <ng-container *ngIf="activeTab !== 'to-pack'">
                 <button
+                  type="button"
                   class="btn-view"
                   (click)="openPackModal(order.id); $event.stopPropagation()"
                 >
@@ -126,12 +176,28 @@
   </div>
 
   <!-- Pack Order Modal -->
-  <div class="modal-overlay" *ngIf="showPackModal">
-    <div class="modal-content pack-modal">
+  <div class="modal-overlay" *ngIf="showPackModal" (click)="onBackdrop($event)">
+    <div
+      class="modal-content pack-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dispatch-pack-title"
+      aria-describedby="dispatch-pack-context"
+    >
       <div class="modal-header">
-        <h2>Order ID : {{ selectedOrderId }}</h2>
-        <span class="order-type">ORDER TYPE : {{ selectedOrder?.type || 'N/A' }}</span>
-        <button class="btn-close" (click)="closeModals()">
+        <div class="header-text">
+          <h2 id="dispatch-pack-title">Order ID : {{ selectedOrderId }}</h2>
+          <span id="dispatch-pack-context" class="order-type"
+            >ORDER TYPE : {{ selectedOrder?.type || 'N/A' }}</span
+          >
+        </div>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close dispatch dialog"
+          (click)="closeModals()"
+          [disabled]="saving"
+        >
           <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
         </button>
       </div>
@@ -152,6 +218,7 @@
               *ngIf="isEditMode"
               type="text"
               class="form-input"
+              aria-label="Courier service"
               [(ngModel)]="editCourier"
               placeholder="Enter Courier Service"
             />
@@ -165,6 +232,7 @@
               *ngIf="isEditMode"
               type="text"
               class="form-input"
+              aria-label="Tracking or reference ID"
               [(ngModel)]="editTrackId"
               placeholder="Enter Tracking ID"
             />
@@ -201,34 +269,31 @@
               <tr *ngFor="let item of selectedOrder?.items">
                 <td class="item-name">{{ item.name }}</td>
                 <td class="item-sku">{{ item.sku }}</td>
-                <td class="item-qty">
-                  <span class="qty-symbol">×</span>{{ item.qty }}
-                </td>
+                <td class="item-qty"><span class="qty-symbol">×</span>{{ item.qty }}</td>
                 <td class="text-center" *ngIf="!isViewingDetailsFromAssign">
                   <ng-container *ngIf="activeTab === 'to-pack'">
                     <button
+                      type="button"
                       class="btn-confirm"
                       [class.confirmed]="item.confirmed"
+                      [attr.aria-pressed]="item.confirmed"
                       (click)="confirmItem(item)"
                     >
-                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
+                      <lucide-angular
+                        name="check"
+                        [size]="14"
+                        *ngIf="item.confirmed"
+                      ></lucide-angular>
                       {{ item.confirmed ? 'Reserved' : 'Click to Reserve' }}
                     </button>
                   </ng-container>
                   <ng-container *ngIf="activeTab !== 'to-pack'">
-                    <div
-                      class="btn-confirm"
-                      [class.confirmed]="item.confirmed"
-                      style="
-                        pointer-events: none;
-                        display: inline-flex;
-                        width: auto;
-                        padding: 4px 12px;
-                        font-size: 12px;
-                        opacity: 0.9;
-                      "
-                    >
-                      <lucide-angular name="check" [size]="14" *ngIf="item.confirmed"></lucide-angular>
+                    <div class="btn-confirm reservation-status" [class.confirmed]="item.confirmed">
+                      <lucide-angular
+                        name="check"
+                        [size]="14"
+                        *ngIf="item.confirmed"
+                      ></lucide-angular>
                       {{ item.confirmed ? 'Reserved' : 'Pending' }}
                     </div>
                   </ng-container>
@@ -239,88 +304,82 @@
         </div>
       </div>
 
+      <div class="validation-banner" role="alert" *ngIf="mutationError">{{ mutationError }}</div>
       <div class="modal-footer">
         <!-- If coming from Assign Modal, show Back regardless of tab -->
         <div class="footer-right" *ngIf="isViewingDetailsFromAssign">
-          <button class="btn-primary" (click)="backToAssign()">← Back</button>
+          <button type="button" class="btn-primary" (click)="backToAssign()">← Back</button>
         </div>
 
         <!-- Normal view modes -->
         <ng-container *ngIf="!isViewingDetailsFromAssign">
           <div class="footer-right" *ngIf="activeTab === 'to-pack'">
-            <button class="btn-save" (click)="saveStatus()">Save Current Status</button>
-            <button class="btn-primary" (click)="closeModals()">Done</button>
+            <button type="button" class="btn-save" (click)="saveStatus()" [disabled]="saving">
+              Save Current Status
+            </button>
+            <button type="button" class="btn-primary" (click)="closeModals()" [disabled]="saving">
+              Done
+            </button>
           </div>
           <div class="footer-right" *ngIf="activeTab === 'ready'">
             <button
+              type="button"
               class="btn-primary btn-outline"
               *ngIf="!isEditMode && canUndo(selectedOrder)"
               (click)="undoAction()"
             >
               Undo Transition
             </button>
-            <button
-              class="btn-save"
-              *ngIf="!isEditMode"
-              (click)="markHandedOver()"
-              style="margin-left: 12px"
-            >
+            <button type="button" class="btn-save" *ngIf="!isEditMode" (click)="markHandedOver()">
               Mark Handed Over
             </button>
             <button
+              type="button"
               class="btn-primary btn-outline"
               *ngIf="!isEditMode"
               (click)="enableEditMode()"
-              style="margin-left: 12px"
             >
               Edit Details
             </button>
-            <button
-              class="btn-primary"
-              *ngIf="!isEditMode"
-              (click)="closeModals()"
-              style="margin-left: 12px"
-            >
+            <button type="button" class="btn-primary" *ngIf="!isEditMode" (click)="closeModals()">
               Close
             </button>
-            <button class="btn-primary btn-outline" *ngIf="isEditMode" (click)="cancelEdit()">
+            <button
+              type="button"
+              class="btn-primary btn-outline"
+              *ngIf="isEditMode"
+              (click)="cancelEdit()"
+            >
               Cancel
             </button>
-            <button
-              class="btn-save"
-              *ngIf="isEditMode"
-              (click)="saveEdit()"
-              style="margin-left: 12px"
-            >
+            <button type="button" class="btn-save" *ngIf="isEditMode" (click)="saveEdit()">
               Save Changes
             </button>
           </div>
           <div class="footer-right" *ngIf="activeTab === 'in-transit'">
             <button
+              type="button"
               class="btn-primary btn-outline"
               *ngIf="canUndo(selectedOrder)"
               (click)="undoAction()"
             >
               Undo Transition
             </button>
-            <button class="btn-save" (click)="markComplete()" style="margin-left: 12px">
+            <button type="button" class="btn-save" (click)="markComplete()" [disabled]="saving">
               Mark as Complete
             </button>
-            <button class="btn-primary" (click)="closeModals()" style="margin-left: 12px">
-              Close
-            </button>
+            <button type="button" class="btn-primary" (click)="closeModals()">Close</button>
           </div>
           <div class="footer-right" *ngIf="activeTab === 'completed'">
             <button
+              type="button"
               class="btn-primary btn-outline"
               *ngIf="canUndo(selectedOrder)"
               (click)="undoAction()"
             >
               Undo Transition
             </button>
-            <button class="btn-primary" (click)="closeModals()" style="margin-left: 12px">
-              Close
-            </button>
+            <button type="button" class="btn-primary" (click)="closeModals()">Close</button>
           </div>
         </ng-container>
       </div>
@@ -328,14 +387,28 @@
   </div>
 
   <!-- Assign Delivery Modal -->
-  <div class="modal-overlay" *ngIf="showAssignModal">
-    <div class="modal-content assign-modal">
+  <div class="modal-overlay" *ngIf="showAssignModal" (click)="onBackdrop($event)">
+    <div
+      class="modal-content assign-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dispatch-assign-title"
+      aria-describedby="dispatch-assign-context"
+    >
       <div class="modal-header">
         <div class="header-text">
-          <h2>Assign Delivery Partner</h2>
-          <span class="order-type">ORDER {{ selectedOrderId }} • LOGISTICS PREPARATION</span>
+          <h2 id="dispatch-assign-title">Assign Delivery Partner</h2>
+          <span id="dispatch-assign-context" class="order-type"
+            >ORDER {{ selectedOrderId }} • LOGISTICS PREPARATION</span
+          >
         </div>
-        <button class="btn-close" (click)="closeModals()">
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close courier dialog"
+          (click)="closeModals()"
+          [disabled]="saving"
+        >
           <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
         </button>
       </div>
@@ -343,8 +416,9 @@
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Courier Service</label>
+            <label for="dispatch-courier-service">Courier Service</label>
             <input
+              id="dispatch-courier-service"
               type="text"
               class="form-input"
               placeholder="e.g. DMX / Prompt Express"
@@ -352,8 +426,9 @@
             />
           </div>
           <div class="form-group">
-            <label>Tracking / Ref ID</label>
+            <label for="dispatch-tracking-id">Tracking / Ref ID</label>
             <input
+              id="dispatch-tracking-id"
               type="text"
               placeholder="e.g., DMX20250217001"
               class="form-input"
@@ -372,6 +447,7 @@
       <div class="modal-footer justify-between">
         <div class="footer-left">
           <button
+            type="button"
             class="btn-secondary-outline"
             [disabled]="!isDeliveryFormValid"
             (click)="closeModals()"
@@ -380,12 +456,18 @@
           </button>
         </div>
         <div class="footer-right">
-          <button class="btn-primary-alt" (click)="viewPackingDetails()">
+          <button
+            type="button"
+            class="btn-primary-alt"
+            (click)="viewPackingDetails()"
+            [disabled]="saving"
+          >
             View Packing Details
           </button>
           <button
+            type="button"
             class="btn-primary"
-            [disabled]="!isDeliveryFormValid"
+            [disabled]="saving || !isDeliveryFormValid"
             (click)="completeAssignment()"
           >
             Done

@@ -23,24 +23,30 @@
   </div>
 
   <!-- Notification Toasts -->
-  <div class="alert alert-success animate-fade" *ngIf="successMessage">
+  <div class="alert alert-success animate-fade" *ngIf="successMessage" role="status">
     <lucide-angular name="check" [size]="18"></lucide-angular>
     <span>{{ successMessage }}</span>
   </div>
-  <div class="alert alert-error animate-fade" *ngIf="errorMessage">
+  <div class="alert alert-error animate-fade" *ngIf="errorMessage" role="alert">
     <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
     <span>{{ errorMessage }}</span>
   </div>
 
+  <div class="portal-state" *ngIf="loading">Loading procurement workflow…</div>
+  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+    <div><strong>Procurement unavailable</strong><p>{{ loadError }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="loadAllData()">Retry</button>
+  </div>
+
   <!-- Goods Received Note (GRN) Card -->
-  <div class="grn-card">
+  <div class="grn-card" *ngIf="!loading && !loadError">
     <div class="stepper-header">
       <div class="stepper-title">
         <div class="badge-tag">GOODS RECEIVED NOTE</div>
         <h2>Post Inward Stock Receipt</h2>
       </div>
-      <div class="stepper-nav">
-        <button type="button" class="step-tab" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" (click)="setStep(1)">
+      <div class="stepper-nav" aria-label="Goods received note steps">
+        <button type="button" class="step-tab" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" [attr.aria-current]="currentStep === 1 ? 'step' : null" (click)="setStep(1)">
           <div class="step-circle">
             <lucide-angular name="check" [size]="14" *ngIf="currentStep > 1"></lucide-angular>
             <span *ngIf="currentStep <= 1">1</span>
@@ -48,7 +54,7 @@
           <div class="step-meta"><span class="step-title">Receipt Source</span><span class="step-sub">PO / Authorization</span></div>
         </button>
         <div class="step-divider" [class.active]="currentStep > 1"></div>
-        <button type="button" class="step-tab" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" (click)="setStep(2)">
+        <button type="button" class="step-tab" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" [attr.aria-current]="currentStep === 2 ? 'step' : null" (click)="setStep(2)">
           <div class="step-circle">
             <lucide-angular name="check" [size]="14" *ngIf="currentStep > 2"></lucide-angular>
             <span *ngIf="currentStep <= 2">2</span>
@@ -56,7 +62,7 @@
           <div class="step-meta"><span class="step-title">Documents</span><span class="step-sub">Invoice & Details</span></div>
         </button>
         <div class="step-divider" [class.active]="currentStep > 2"></div>
-        <button type="button" class="step-tab" [class.active]="currentStep === 3" (click)="setStep(3)">
+        <button type="button" class="step-tab" [class.active]="currentStep === 3" [attr.aria-current]="currentStep === 3 ? 'step' : null" (click)="setStep(3)">
           <div class="step-circle"><span>3</span></div>
           <div class="step-meta"><span class="step-title">Placement</span><span class="step-sub">Quantity & Storage</span></div>
         </button>
@@ -75,11 +81,11 @@
         <div class="mode-selector-wrapper">
           <label class="field-label">RECEIPT WORKFLOW TYPE *</label>
           <div class="segmented-control">
-            <button type="button" class="segment-btn" [class.active]="receiptMode === 'PO'" (click)="setReceiptMode('PO')">
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'PO'" [attr.aria-pressed]="receiptMode === 'PO'" (click)="setReceiptMode('PO')">
               <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
               <span>Normal — Issued Purchase Order (PO)</span>
             </button>
-            <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
+            <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" [attr.aria-pressed]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
               <lucide-angular name="shield-check" [size]="16"></lucide-angular>
               <span>Emergency — Approved Authorization (Non-PO)</span>
             </button>
@@ -277,7 +283,7 @@
   </div>
 
   <!-- Recent GRN Entries Section -->
-  <div class="shipments-section">
+  <div class="shipments-section" *ngIf="!loading && !loadError">
     <div class="section-top-bar">
       <div class="section-title">
         <h2>Recent GRN Entries</h2>
@@ -286,13 +292,13 @@
       <div class="section-controls">
         <div class="search-box">
           <lucide-angular name="search" [size]="16" class="search-icon"></lucide-angular>
-          <input type="text" [(ngModel)]="searchQuery" placeholder="Search document, PO, supplier, SKU..." />
+          <input type="text" [(ngModel)]="searchQuery" aria-label="Search recent GRN entries" placeholder="Search document, PO, supplier, SKU..." />
         </div>
         <div class="filter-pills">
-          <button type="button" class="pill-btn" [class.active]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
-          <button type="button" class="pill-btn" [class.active]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">Normal PO</button>
-          <button type="button" class="pill-btn" [class.active]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Emergency</button>
-          <button type="button" class="pill-btn" [class.active]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'all'" [attr.aria-pressed]="grnFilter === 'all'" (click)="grnFilter = 'all'">All</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'PO'" [attr.aria-pressed]="grnFilter === 'PO'" (click)="grnFilter = 'PO'">Normal PO</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'NON_PO'" [attr.aria-pressed]="grnFilter === 'NON_PO'" (click)="grnFilter = 'NON_PO'">Emergency</button>
+          <button type="button" class="pill-btn" [class.active]="grnFilter === 'FINANCE'" [attr.aria-pressed]="grnFilter === 'FINANCE'" (click)="grnFilter = 'FINANCE'">Awaiting Finance</button>
         </div>
       </div>
     </div>
@@ -337,13 +343,13 @@
 
   <!-- GRN Details Modal -->
   <div class="modal-overlay animate-fade" *ngIf="showDetailsModal && selectedProcurement" (click)="closeDetailsModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="grn-details-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title-group">
           <div class="modal-tag">GRN DETAILS</div>
-          <h3>{{ selectedProcurement.sourceDocumentNumber || selectedProcurement.invoiceNumber || 'Receipt Details' }}</h3>
+          <h3 id="grn-details-title">{{ selectedProcurement.sourceDocumentNumber || selectedProcurement.invoiceNumber || 'Receipt Details' }}</h3>
         </div>
-        <button type="button" class="btn-close-modal" (click)="closeDetailsModal()">
+        <button type="button" class="btn-close-modal" aria-label="Close receipt details" (click)="closeDetailsModal()">
           <lucide-angular name="x" [size]="18"></lucide-angular>
         </button>
       </div>

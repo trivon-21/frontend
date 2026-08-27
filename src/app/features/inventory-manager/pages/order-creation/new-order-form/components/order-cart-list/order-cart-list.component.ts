@@ -1,13 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LocalIconComponent } from '../../../../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { OrderItem } from '../../../../../services/order-creation.service';
 
 @Component({
   selector: 'app-order-cart-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './order-cart-list.component.html',
   styleUrl: './order-cart-list.component.css'
 })

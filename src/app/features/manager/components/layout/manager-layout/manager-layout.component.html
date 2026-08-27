@@ -1,4 +1,4 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper role-portal-shell manager-portal-shell">
   <!-- Sidebar -->
   <aside class="sidebar">
     <a routerLink="/manager" class="sidebar-brand">
@@ -8,35 +8,36 @@
       <a
         routerLink="/manager"
         routerLinkActive="active"
+        ariaCurrentWhenActive="page"
         [routerLinkActiveOptions]="{ exact: true }"
         class="nav-item"
       >
-        <lucide-angular name="layout-dashboard" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <lucide-angular name="layout-dashboard" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Overview</span>
       </a>
-      <a routerLink="/manager/orders" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="shopping-bag" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/manager/orders" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="shopping-bag" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Approvals</span>
       </a>
-      <a routerLink="/manager/work-items" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/manager/work-items" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="clipboard-list" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Operations</span>
       </a>
       <div class="analytics-nav-group">
         <div class="analytics-nav-row">
-          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" class="nav-item analytics-link">
-            <lucide-angular name="bar-chart-3" [size]="20" strokeWidth="1.8"></lucide-angular>
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item analytics-link">
+            <lucide-angular name="bar-chart-3" [size]="18" strokeWidth="1.8"></lucide-angular>
             <span>Analytics</span>
           </a>
-          <button type="button" class="analytics-toggle" (click)="toggleAnalytics()" [attr.aria-expanded]="analyticsExpanded" aria-label="Toggle analytics menu">
+          <button type="button" class="analytics-toggle" (click)="toggleAnalytics()" [attr.aria-expanded]="analyticsExpanded" aria-controls="manager-analytics-submenu" aria-label="Toggle analytics menu">
             <lucide-angular name="chevron-down" [size]="16" strokeWidth="1.8"></lucide-angular>
           </button>
         </div>
-        <div class="analytics-submenu" *ngIf="analyticsExpanded">
-          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active">Period Performance</a>
-          <a routerLink="/manager/analytics/service-operations" routerLinkActive="active">Service Operations</a>
-          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active">Purchasing and Approvals</a>
-          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active">Inventory and Exception Control</a>
+        <div id="manager-analytics-submenu" class="analytics-submenu" *ngIf="analyticsExpanded">
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page">Period Performance</a>
+          <a routerLink="/manager/analytics/service-operations" routerLinkActive="active" ariaCurrentWhenActive="page">Service Operations</a>
+          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active" ariaCurrentWhenActive="page">Purchasing and Approvals</a>
+          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active" ariaCurrentWhenActive="page">Inventory and Exception Control</a>
         </div>
       </div>
     </nav>
@@ -54,13 +55,16 @@
             class="user-avatar"
             (click)="toggleUserMenu(); $event.stopPropagation()"
             aria-label="User menu"
+            aria-controls="manager-user-menu"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="showUserMenu"
             title="User menu"
           >
             {{ userInitials }}
           </button>
 
           <!-- User Dropdown -->
-          <div class="user-dropdown" *ngIf="showUserMenu">
+          <div id="manager-user-menu" class="user-dropdown" role="menu" *ngIf="showUserMenu">
             <div class="user-header">
               <div class="user-avatar-lg">{{ userInitials }}</div>
               <div>
@@ -70,7 +74,7 @@
             </div>
             <div class="menu-divider"></div>
 
-            <button class="menu-item logout" (click)="logout()">
+            <button class="menu-item logout" role="menuitem" (click)="logout()">
               <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
               Sign out
             </button>

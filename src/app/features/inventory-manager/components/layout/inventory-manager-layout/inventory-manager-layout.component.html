@@ -1,4 +1,4 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper role-portal-shell inventory-portal-shell">
   <!-- Sidebar -->
   <aside class="sidebar">
     <a routerLink="/inventory-manager" class="sidebar-brand">
@@ -8,50 +8,54 @@
       <a
         routerLink="/inventory-manager"
         routerLinkActive="active"
+        ariaCurrentWhenActive="page"
         [routerLinkActiveOptions]="{ exact: true }"
         class="nav-item"
       >
-        <lucide-angular name="layout-dashboard" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <lucide-angular name="layout-dashboard" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Dashboard</span>
       </a>
-      <a routerLink="/inventory-manager/inventory" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="package" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/inventory-manager/inventory" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="package" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Inventory</span>
       </a>
       <a
         routerLink="/inventory-manager/asset-management"
         routerLinkActive="active"
+        ariaCurrentWhenActive="page"
         class="nav-item"
       >
-        <lucide-angular name="wrench" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <lucide-angular name="wrench" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Tool Lending</span>
       </a>
       <a
         routerLink="/inventory-manager/material-requests"
         routerLinkActive="active"
+        ariaCurrentWhenActive="page"
         class="nav-item"
       >
-        <lucide-angular name="clipboard-list" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <lucide-angular name="clipboard-list" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Stock Reservations</span>
       </a>
       <a
         routerLink="/inventory-manager/dispatch-logistics"
         routerLinkActive="active"
+        ariaCurrentWhenActive="page"
         class="nav-item"
       >
-        <lucide-angular name="truck" [size]="20" strokeWidth="1.8"></lucide-angular>
+        <lucide-angular name="truck" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Logistics</span>
       </a>
-      <a routerLink="/inventory-manager/order-creation" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="shopping-cart" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/inventory-manager/order-creation" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="shopping-cart" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Order Creation</span>
       </a>
-      <a routerLink="/inventory-manager/procurement" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="clipboard-check" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/inventory-manager/procurement" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="clipboard-check" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Procurement</span>
       </a>
-      <a routerLink="/inventory-manager/returns-rma" routerLinkActive="active" class="nav-item">
-        <lucide-angular name="rotate-ccw" [size]="20" strokeWidth="1.8"></lucide-angular>
+      <a routerLink="/inventory-manager/returns-rma" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+        <lucide-angular name="rotate-ccw" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Returns</span>
       </a>
     </nav>
@@ -69,13 +73,16 @@
             class="user-avatar"
             (click)="toggleUserMenu(); $event.stopPropagation()"
             aria-label="User menu"
+            aria-controls="inventory-manager-user-menu"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="showUserMenu"
             title="User menu"
           >
             {{ userInitials }}
           </button>
 
           <!-- User Dropdown -->
-          <div class="user-dropdown" *ngIf="showUserMenu">
+          <div id="inventory-manager-user-menu" class="user-dropdown" role="menu" *ngIf="showUserMenu">
             <div class="user-header">
               <div class="user-avatar-lg">{{ userInitials }}</div>
               <div>
@@ -85,7 +92,7 @@
             </div>
             <div class="menu-divider"></div>
 
-            <button class="menu-item logout" (click)="logout()">
+            <button class="menu-item logout" role="menuitem" (click)="logout()">
               <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
               Sign out
             </button>

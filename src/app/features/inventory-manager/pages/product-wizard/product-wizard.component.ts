@@ -100,13 +100,17 @@ export class ProductWizardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.inventoryService.getSuppliers().subscribe({
-      next: (suppliers) => (this.suppliers = suppliers),
-      error: () => (this.suppliers = []),
-    });
+    this.loadSuppliers();
 
     this.itemId = this.route.snapshot.paramMap.get('id');
     if (this.itemId) this.loadItem(this.itemId);
+  }
+
+  loadSuppliers(): void {
+    this.inventoryService.getSuppliers().subscribe({
+      next: (suppliers) => (this.suppliers = suppliers),
+      error: () => this.errorMessage = 'Suppliers could not be loaded. Retry before saving a supplier-linked product.',
+    });
   }
 
   get isEditMode(): boolean {

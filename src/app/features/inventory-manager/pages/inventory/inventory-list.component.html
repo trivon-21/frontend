@@ -76,6 +76,8 @@
         type="button"
         [class.active]="showAdvancedFilters || hasAdvancedFilters"
         (click)="showAdvancedFilters = !showAdvancedFilters"
+        aria-controls="inventory-advanced-filters"
+        [attr.aria-expanded]="showAdvancedFilters"
       >
         <lucide-angular name="sliders-horizontal" [size]="16"></lucide-angular>
         Advanced
@@ -100,7 +102,7 @@
       <button class="btn-link" type="button" (click)="clearFilters()">Clear filters</button>
     </div>
 
-    <div class="advanced-filters" *ngIf="showAdvancedFilters">
+    <div id="inventory-advanced-filters" class="advanced-filters" *ngIf="showAdvancedFilters">
       <label class="filter-field">
         <span>Brand</span>
         <select [(ngModel)]="selectedBrand" (change)="applyFilters()">
@@ -204,7 +206,7 @@
   </div>
 
   <div class="state-card" *ngIf="loading">Loading inventory…</div>
-  <div class="state-card error-state" *ngIf="error">{{ error }}</div>
+  <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button" (click)="loadInventory()">Retry</button></div>
 
   <div class="table-container alx-table-container" *ngIf="!loading && !error">
     <table class="alx-table">
@@ -225,7 +227,12 @@
         <tr
           *ngFor="let item of inventoryItems; trackBy: trackByItem"
           (click)="selectRow(item)"
+          (keydown.enter)="$event.target === $event.currentTarget && selectRow(item)"
+          (keydown.space)="$event.target === $event.currentTarget && selectRow(item); $event.preventDefault()"
           class="clickable-row"
+          tabindex="0"
+          role="button"
+          [attr.aria-selected]="isRowSelected(item)"
           [class.selected-row]="isRowSelected(item)"
         >
           <td class="sku-cell">{{ item.sku }}</td>
@@ -273,6 +280,7 @@
             *ngFor="let page of getPageNumbers()"
             class="btn-page"
             [class.active]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
             (click)="goToPage(page)"
           >
             {{ page }}
@@ -292,13 +300,13 @@
   </div>
 
   <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="inventory-detail-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="header-title-group">
-          <h2>Product Details</h2>
+          <h2 id="inventory-detail-title">Product Details</h2>
           <span class="sku-badge">{{ selectedItem.sku }}</span>
         </div>
-        <button class="btn-close" (click)="closeDetailModal()">
+        <button class="btn-close" type="button" aria-label="Close product details" (click)="closeDetailModal()">
           <lucide-angular name="x" [size]="20"></lucide-angular>
         </button>
       </div>

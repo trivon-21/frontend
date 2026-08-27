@@ -8,6 +8,14 @@
         >The system is currently running in local mode. Live data and updates are unavailable.</span
       >
     </div>
+    <button type="button" class="portal-retry-button" (click)="loadData()" [disabled]="loading">
+      {{ loading ? 'Retrying…' : 'Retry' }}
+    </button>
+  </div>
+
+  <div class="portal-state portal-state--error" *ngIf="error" role="alert">
+    <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
+    <button type="button" class="portal-retry-button" (click)="loadData()" [disabled]="loading">Retry</button>
   </div>
 
   <!-- Header Section -->
@@ -34,7 +42,7 @@
   <!-- Summary Cards Section -->
   <div class="summary-grid">
     <!-- Material Reservations -->
-    <div class="summary-card clickable" routerLink="/inventory-manager/material-requests">
+    <a class="summary-card clickable" routerLink="/inventory-manager/material-requests">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Stock Reservations</span>
@@ -50,10 +58,10 @@
           <span class="sub-value">{{ sub.value }}</span>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Dispatch Queue -->
-    <div class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
+    <a class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Dispatch Queue</span>
@@ -69,10 +77,10 @@
           <span class="sub-value">{{ sub.value }}</span>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Asset Health -->
-    <div class="summary-card clickable" routerLink="/inventory-manager/asset-management">
+    <a class="summary-card clickable" routerLink="/inventory-manager/asset-management">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Tool Status</span>
@@ -88,10 +96,10 @@
           <span class="sub-value">{{ sub.value }}</span>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Stock Alerts -->
-    <div class="summary-card clickable" routerLink="/inventory-manager/inventory">
+    <a class="summary-card clickable" routerLink="/inventory-manager/inventory">
       <div class="card-main">
         <div class="card-info">
           <span class="card-label">Stock Alerts</span>
@@ -107,7 +115,7 @@
           <span class="sub-value">{{ sub.value }}</span>
         </div>
       </div>
-    </div>
+    </a>
   </div>
 
   <a class="content-card workflow-card" routerLink="/inventory-manager/procurement" aria-label="Open Purchasing Workflow">
@@ -196,7 +204,7 @@
                 <td class="item-name-cell">
                   <div class="item-cell-wrapper">
                     <div class="status-dot" [ngClass]="item.status"></div>
-                    <span class="item-name">{{ item.name }}</span>
+                    <a class="item-name reorder-link" routerLink="/inventory-manager/order-creation/new">{{ item.name }}</a>
                   </div>
                 </td>
                 <td class="item-avail text-right" [class.critical]="item.available === 0">

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
@@ -23,12 +23,12 @@ interface MaterialRequest {
   lastMovedAt?: string;
 }
 
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-material-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocalIconComponent],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './material-requests.component.html',
   styleUrls: ['./material-requests.component.css'],
 })
@@ -38,6 +38,12 @@ export class MaterialRequestsDashboardComponent implements OnInit {
 
   showModal = false;
   selectedRequestId: string | null = null;
+  dialogRequest: MaterialRequest | null = null;
+  loading = true;
+  loadError = '';
+  saving = false;
+  mutationError = '';
+  private dialogTrigger: HTMLElement | null = null;
 
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -57,7 +63,10 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   fetchRequests() {
-    this.apiService.get<any[]>('/inventory/material-requests').subscribe((data: any[]) => {
+    this.loading = true;
+    this.loadError = '';
+    this.apiService.get<any[]>('/inventory/material-requests').subscribe({
+      next: (data: any[]) => {
       // Map backend model to frontend model
       const requests: MaterialRequest[] = data.map((r: any) => ({
         id: r.requestId,
@@ -74,6 +83,12 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       this.pendingRequests = requests.filter((r: MaterialRequest) => r.status === 'pending');
       this.reservedRequests = requests.filter((r: MaterialRequest) => r.status === 'reserved');
       this.completedRequests = requests.filter((r: MaterialRequest) => r.status === 'completed');
+        this.loading = false;
+      },
+      error: () => {
+        this.loadError = 'Material reservations could not be loaded.';
+        this.loading = false;
+      },
     });
   }
 
@@ -113,6 +128,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   get selectedRequest() {
+    if (this.dialogRequest) return this.dialogRequest;
     const allReqs = [...this.pendingRequests, ...this.reservedRequests, ...this.completedRequests];
     return allReqs.find((r) => r.id === this.selectedRequestId);
   }
@@ -127,19 +143,28 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   openModal(id: string) {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.selectedRequestId = id;
     this.isEditingTeam = false;
     this.editServiceTeam = '';
-    const req = this.selectedRequest;
+    const source = [...this.pendingRequests, ...this.reservedRequests, ...this.completedRequests].find((r) => r.id === id);
+    this.dialogRequest = source ? structuredClone(source) : null;
+    const req = this.dialogRequest;
     if (req && req.serviceTeam) {
       this.editServiceTeam = req.serviceTeam;
     }
     this.showModal = true;
+    this.mutationError = '';
   }
 
   closeModal() {
+    if (this.saving) return;
     this.showModal = false;
     this.selectedRequestId = null;
+    this.dialogRequest = null;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
   }
 
   confirmItem(item: MaterialItem) {
@@ -147,14 +172,16 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   saveStatus() {
-    if (!this.selectedRequestId) return;
+    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req) {
-      this.apiService
-        .patch(`/inventory/material-requests/${req.id}`, { items: req.items })
-        .subscribe();
+      this.saving = true;
+      this.mutationError = '';
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, { items: req.items }).subscribe({
+        next: () => { this.saving = false; this.fetchRequests(); this.closeModal(); },
+        error: (error) => { this.saving = false; this.mutationError = error.error?.message || 'The reservation changes could not be saved.'; },
+      });
     }
-    this.closeModal();
   }
 
   enableEditTeam() {
@@ -170,30 +197,49 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   saveServiceTeam() {
-    if (!this.selectedRequestId) return;
+    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req) {
+      this.saving = true;
+      this.mutationError = '';
       this.apiService
         .patch(`/inventory/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam })
-        .subscribe(() => {
-          this.fetchRequests();
-          this.isEditingTeam = false;
+        .subscribe({
+          next: () => {
+            this.saving = false;
+            req.serviceTeam = this.editServiceTeam;
+            this.fetchRequests();
+            this.isEditingTeam = false;
+          },
+          error: (error) => {
+            this.saving = false;
+            this.mutationError = error.error?.message || 'The service team could not be saved.';
+          },
         });
     }
   }
 
   markKitted() {
-    if (!this.selectedRequestId) return;
+    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req && req.items.every((i) => i.confirmed)) {
       const updateData = {
         status: 'reserved',
         lastMovedAt: new Date().toISOString(),
       };
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
-        this.fetchRequests();
-        this.setActiveTab('reserved');
-        this.closeModal();
+      this.saving = true;
+      this.mutationError = '';
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+        next: () => {
+          this.saving = false;
+          this.setActiveTab('reserved');
+          this.fetchRequests();
+          this.closeModal();
+        },
+        error: (error) => {
+          this.saving = false;
+          this.mutationError = error.error?.message || 'The request could not be marked as reserved.';
+        },
       });
     } else {
       this.validationMessage = 'Please reserve all items before marking as kitted.';
@@ -202,7 +248,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   markHandedOver() {
-    if (!this.selectedRequestId) return;
+    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req) {
       if (!req.serviceTeam) {
@@ -215,10 +261,19 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         completedAt: new Date().toISOString().split('T')[0],
         lastMovedAt: new Date().toISOString(),
       };
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
-        this.fetchRequests();
-        this.setActiveTab('completed');
-        this.closeModal();
+      this.saving = true;
+      this.mutationError = '';
+      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+        next: () => {
+          this.saving = false;
+          this.setActiveTab('completed');
+          this.fetchRequests();
+          this.closeModal();
+        },
+        error: (error) => {
+          this.saving = false;
+          this.mutationError = error.error?.message || 'The request could not be completed.';
+        },
       });
     }
   }
@@ -231,7 +286,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   undoAction() {
-    if (!this.selectedRequestId) return;
+    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (!req) return;
 
@@ -246,11 +301,26 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       targetTab = 'pending';
     }
 
-    this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe(() => {
-      this.fetchRequests();
-      this.setActiveTab(targetTab);
+    this.saving = true;
+    this.mutationError = '';
+    this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+      next: () => {
+        this.saving = false;
+        this.setActiveTab(targetTab);
+        this.fetchRequests();
+        this.closeModal();
+      },
+      error: (error) => {
+        this.saving = false;
+        this.mutationError = error.error?.message || 'The transition could not be undone.';
+      },
     });
-
-    this.closeModal();
   }
+
+  onBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeModal();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeModal(); }
 }

@@ -1,9 +1,8 @@
 <div class="asset-container">
   <!-- Header Section -->
-  <div class="header">
+  <div class="header page-header">
     <h1>Tool Lending</h1>
-    <div class="header-actions">
-    </div>
+    <div class="header-actions"></div>
   </div>
 
   <!-- Check-Out Panel -->
@@ -14,8 +13,8 @@
     </div>
     <div class="checkout-form">
       <div class="input-group">
-        <label>Select Technician</label>
-        <select class="form-select" [(ngModel)]="selectedTechnicianId">
+        <label for="loan-technician">Select Technician</label>
+        <select id="loan-technician" class="form-select" [(ngModel)]="selectedTechnicianId">
           <option value="">Choose Technician...</option>
           <option *ngFor="let tech of technicians" [value]="tech._id">
             {{ tech.name }} ({{ tech.role }})
@@ -23,8 +22,13 @@
         </select>
       </div>
       <div class="input-group">
-        <label>Select Tool</label>
-        <select class="form-select" [(ngModel)]="selectedToolId" (change)="onToolSelected()">
+        <label for="loan-tool">Select Tool</label>
+        <select
+          id="loan-tool"
+          class="form-select"
+          [(ngModel)]="selectedToolId"
+          (change)="onToolSelected()"
+        >
           <option value="">Choose Tool...</option>
           <option *ngFor="let tool of tools" [value]="tool._id">
             {{ tool.name }} - {{ tool.sku }}
@@ -32,40 +36,75 @@
         </select>
       </div>
       <div class="input-group">
-        <label>Select Asset Tag</label>
-        <select class="form-select" [(ngModel)]="selectedAssetTag" [disabled]="!selectedToolId">
+        <label for="loan-asset-tag">Select Asset Tag</label>
+        <select
+          id="loan-asset-tag"
+          class="form-select"
+          [(ngModel)]="selectedAssetTag"
+          [disabled]="!selectedToolId"
+        >
           <option value="">Choose Asset Tag...</option>
-          <option *ngFor="let assetTag of selectedToolAssetTags" [value]="assetTag">{{ assetTag }}</option>
+          <option *ngFor="let assetTag of selectedToolAssetTags" [value]="assetTag">
+            {{ assetTag }}
+          </option>
         </select>
       </div>
       <div class="input-group">
-        <label>Expected Return</label>
-        <input type="date" class="form-input" [(ngModel)]="dueDate" />
+        <label for="loan-due-date">Expected Return</label>
+        <input id="loan-due-date" type="date" class="form-input" [(ngModel)]="dueDate" />
       </div>
-      <button class="btn-primary" (click)="checkOut()">
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="checkOut()"
+        [disabled]="checkingOut || loading || !!loadError"
+      >
         <lucide-angular name="arrow-right-left" [size]="16" class="inline-icon"></lucide-angular>
-        Check Out
+        {{ checkingOut ? 'Checking out…' : 'Check Out' }}
       </button>
     </div>
-    <div class="validation-banner" *ngIf="validationMessage"
-      style="background: var(--error-light); color: var(--error); padding: 10px 16px;
-      border-radius: 8px; font-size: 13px; font-weight: 500; margin-top: 12px;">
+    <div class="validation-banner" role="alert" *ngIf="validationMessage">
       {{ validationMessage }}
     </div>
   </div>
 
+  <div class="portal-state" role="status" aria-live="polite" *ngIf="loading">
+    Loading tool lending data…
+  </div>
+  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+    <div>
+      <strong>Tool lending unavailable</strong>
+      <p>{{ loadError }}</p>
+    </div>
+    <button type="button" class="portal-retry-button" (click)="fetchData()">Retry</button>
+  </div>
+
   <!-- Search and Tabs Bar -->
-  <div class="tabs-nav-container">
-    <div class="tabs-nav">
+  <div class="tabs-nav-container" *ngIf="!loading && !loadError">
+    <div class="tabs-nav" role="tablist" aria-label="Tool lending records">
       <button
+        type="button"
+        id="tool-loans-tab"
         class="tab-btn"
+        role="tab"
+        aria-controls="tool-loans-panel"
+        [attr.aria-selected]="activeTab === 'loans'"
         [class.active]="activeTab === 'loans'"
         (click)="setActiveTab('loans')"
       >
         <lucide-angular name="activity" [size]="16" class="tab-icon"></lucide-angular>
         Active Loans <span class="badge" *ngIf="loans.length > 0">{{ loans.length }}</span>
       </button>
-      <button class="tab-btn" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
+      <button
+        type="button"
+        id="tool-return-logs-tab"
+        class="tab-btn"
+        role="tab"
+        aria-controls="tool-return-logs-panel"
+        [attr.aria-selected]="activeTab === 'logs'"
+        [class.active]="activeTab === 'logs'"
+        (click)="setActiveTab('logs')"
+      >
         <lucide-angular name="history" [size]="16" class="tab-icon"></lucide-angular>
         Return Logs <span class="badge" *ngIf="returnLogs.length > 0">{{ returnLogs.length }}</span>
       </button>
@@ -73,7 +112,9 @@
 
     <div class="search-box">
       <lucide-angular name="search" class="inline-icon"></lucide-angular>
+      <label class="visually-hidden" for="tool-lending-search">Search tool lending records</label>
       <input
+        id="tool-lending-search"
         type="text"
         [(ngModel)]="searchQuery"
         (input)="($event)"
@@ -82,50 +123,66 @@
     </div>
   </div>
 
-  <div class="tab-content glass-panel">
+  <div class="tab-content glass-panel" *ngIf="!loading && !loadError">
     <!-- Active Loans Table -->
-    <div *ngIf="activeTab === 'loans'">
+    <div
+      id="tool-loans-panel"
+      role="tabpanel"
+      aria-labelledby="tool-loans-tab"
+      *ngIf="activeTab === 'loans'"
+    >
       <div class="table-header">
         <h3>Active Loans</h3>
         <span class="loan-count">Tools currently checked out by technicians</span>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>TOOL NAME</th>
-            <th>ASSET TAG</th>
-            <th>HELD BY</th>
-            <th>CHECKED OUT</th>
-            <th>DUE DATE</th>
-            <th>STATUS</th>
-            <th>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let loan of filteredLoans">
-            <td class="tool-name">{{ loan.toolName }}</td>
-            <td class="asset-tag">{{ loan.assetTag }}</td>
-            <td class="held-by">{{ loan.technicianName }}</td>
-            <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
-            <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
-            <td>
-              <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
-                {{ loan.status }}
-              </span>
-            </td>
-            <td>
-              <button class="btn-small" (click)="markReturned(loan._id!)">
-                <lucide-angular name="rotate-ccw" [size]="14" class="inline-icon"></lucide-angular>
-                Mark Returned
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="filteredLoans.length === 0">
-            <td colspan="7" class="empty-state">No loans matching your search.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>TOOL NAME</th>
+              <th>ASSET TAG</th>
+              <th>HELD BY</th>
+              <th>CHECKED OUT</th>
+              <th>DUE DATE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let loan of filteredLoans">
+              <td class="tool-name">{{ loan.toolName }}</td>
+              <td class="asset-tag">{{ loan.assetTag }}</td>
+              <td class="held-by">{{ loan.technicianName }}</td>
+              <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
+              <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
+              <td>
+                <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
+                  {{ loan.status }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-small"
+                  (click)="markReturned(loan._id!)"
+                  [disabled]="returningIds.has(loan._id!)"
+                >
+                  <lucide-angular
+                    name="rotate-ccw"
+                    [size]="14"
+                    class="inline-icon"
+                  ></lucide-angular>
+                  Mark Returned
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredLoans.length === 0">
+              <td colspan="7" class="empty-state">No loans matching your search.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="table-footer" *ngIf="loans.length > 0">
         <div class="warning-badge">
@@ -136,7 +193,12 @@
     </div>
 
     <!-- Return Logs Table -->
-    <div *ngIf="activeTab === 'logs'">
+    <div
+      id="tool-return-logs-panel"
+      role="tabpanel"
+      aria-labelledby="tool-return-logs-tab"
+      *ngIf="activeTab === 'logs'"
+    >
       <div class="table-header">
         <div class="header-with-note">
           <h3>Return Logs</h3>
@@ -145,33 +207,34 @@
         <span class="loan-count">Tools recently returned by technicians</span>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>TOOL NAME</th>
-            <th>TECHNICIAN</th>
-            <th>CHECKED OUT</th>
-            <th>RETURNED AT</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let log of filteredReturnLogs">
-            <td>
-              <div class="tool-info">
-                <span class="name">{{ log.toolName }}</span>
-                <span class="tag">{{ log.assetTag }}</span>
-              </div>
-            </td>
-            <td class="held-by">{{ log.technicianName }}</td>
-            <td class="date-cell">{{ log.checkedOutAt | date: 'short' }}</td>
-            <td class="date-cell">{{ log.returnedAt | date: 'short' }}</td>
-          </tr>
-          <tr *ngIf="filteredReturnLogs.length === 0">
-            <td colspan="4" class="empty-state">No return logs matching your search.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>TOOL NAME</th>
+              <th>TECHNICIAN</th>
+              <th>CHECKED OUT</th>
+              <th>RETURNED AT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of filteredReturnLogs">
+              <td>
+                <div class="tool-info">
+                  <span class="name">{{ log.toolName }}</span>
+                  <span class="tag">{{ log.assetTag }}</span>
+                </div>
+              </td>
+              <td class="held-by">{{ log.technicianName }}</td>
+              <td class="date-cell">{{ log.checkedOutAt | date: 'short' }}</td>
+              <td class="date-cell">{{ log.returnedAt | date: 'short' }}</td>
+            </tr>
+            <tr *ngIf="filteredReturnLogs.length === 0">
+              <td colspan="4" class="empty-state">No return logs matching your search.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
 </div>

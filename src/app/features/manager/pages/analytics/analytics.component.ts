@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   AnalyticsData,
   AnalyticsPeriod,
@@ -28,7 +28,7 @@ interface DonutSegment extends NamedValue {
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule, RouterModule, LocalIconComponent],
+  imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './analytics.component.html',
   styleUrls: ['./analytics.component.css'],
 })

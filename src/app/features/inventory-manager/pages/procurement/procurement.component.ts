@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LocalIconComponent } from '../../../../shared/components/local-icon/local-icon.component';
+import { forkJoin } from 'rxjs';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import { InventoryItem, InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { NonPoReason, PurchaseLine, PurchaseRequest, ReceiptAuthorization, ReceiptMode, outstanding } from '../../services/purchase-workflow';
 
@@ -32,7 +33,7 @@ type AuthItem = InventoryItem | string | undefined | null;
 @Component({
   selector: 'app-procurement-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LocalIconComponent, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule, RouterModule],
   templateUrl: './procurement.component.html',
   styleUrls: ['./procurement.component.css'],
 })
@@ -47,6 +48,8 @@ export class ProcurementDashboardComponent implements OnInit {
   grnFilter: 'all' | 'PO' | 'NON_PO' | 'EMERGENCY' | 'FINANCE' = 'all';
   showDetailsModal = false;
   selectedProcurement: RecentProcurement | null = null;
+  loading = true;
+  loadError = '';
 
   purchaseOrders: PurchaseRequest[] = [];
   authorizations: ReceiptAuthorization[] = [];
@@ -77,9 +80,7 @@ export class ProcurementDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.loadProcurements();
-    this.loadInventory();
-    this.loadWorkflowRecords();
+    this.loadAllData();
   }
 
   get serialNumbersControls(): AbstractControl[] {
@@ -153,46 +154,38 @@ export class ProcurementDashboardComponent implements OnInit {
     return new Date().toISOString().substring(0, 10);
   }
 
-  private loadProcurements(): void {
-    this.inventoryService.getProcurements().subscribe({
-      next: (data) => (this.procurements = data),
-      error: () => (this.procurements = []),
-    });
-  }
-
-  private loadInventory(): void {
-    this.inventoryService.getInventory().subscribe({
-      next: (items) => {
-        this.inventoryItems = items;
+  loadAllData(): void {
+    this.loading = true;
+    this.loadError = '';
+    forkJoin({
+      procurements: this.inventoryService.getProcurements(),
+      inventoryItems: this.inventoryService.getInventory(),
+      orders: this.inventoryService.getOrderRequests(),
+      authorizations: this.inventoryService.getReceiptAuthorizations(),
+    }).subscribe({
+      next: ({ procurements, inventoryItems, orders, authorizations }) => {
+        this.procurements = procurements;
+        this.inventoryItems = inventoryItems;
+        this.purchaseOrders = orders.filter((order) => ['ordered', 'partially-received'].includes(order.status));
+        this.authorizations = authorizations.filter(
+          (item) => ['approved', 'partially-received'].includes(item.status) && !!this.inventoryIdOf(item.inventoryId),
+        );
         if (this.preselectedInventoryId) {
           const item = this.findInventoryItem(this.preselectedInventoryId);
           if (item) this.selectedItem = item;
         }
-      },
-      error: () => (this.inventoryItems = []),
-    });
-  }
-
-  private loadWorkflowRecords(): void {
-    this.inventoryService.getOrderRequests().subscribe({
-      next: (orders) => {
-        this.purchaseOrders = orders.filter((o) => ['ordered', 'partially-received'].includes(o.status));
-      },
-      error: () => (this.purchaseOrders = []),
-    });
-    this.inventoryService.getReceiptAuthorizations().subscribe({
-      next: (items) => {
-        this.authorizations = items.filter(
-          (item) => ['approved', 'partially-received'].includes(item.status) && !!this.inventoryIdOf(item.inventoryId),
-        );
         const authorizationId = new URLSearchParams(window.location.search).get('authorizationId');
         const selected = this.authorizations.find((item) => item._id === authorizationId);
         if (selected) {
           this.receiptMode = 'NON_PO';
           this.selectAuthorization(selected);
         }
+        this.loading = false;
       },
-      error: () => (this.authorizations = []),
+      error: () => {
+        this.loadError = 'Procurement data could not be loaded. No partial workflow data has been shown.';
+        this.loading = false;
+      },
     });
   }
 
@@ -355,9 +348,8 @@ export class ProcurementDashboardComponent implements OnInit {
         next: ({ item }) => {
           this.isSubmitting = false;
           this.successMessage = `GRN posted for ${item.name}. Stock and workflow records were updated together.`;
-          this.loadProcurements();
-          this.loadWorkflowRecords();
           this.resetForm();
+          this.loadAllData();
         },
         error: (err) => {
           this.isSubmitting = false;

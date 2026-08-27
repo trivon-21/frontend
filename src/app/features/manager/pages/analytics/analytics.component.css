@@ -4,6 +4,8 @@
   gap: var(--spacing-xl);
   padding-bottom: var(--spacing-xl);
   animation: fade-in-up 0.35s ease-out;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .page-header,
@@ -26,10 +28,11 @@
 }
 
 .page-title {
-  color: var(--text-primary);
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  margin: 0;
+  color: #1b2f27;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
 }
 
 .page-subtitle,
@@ -43,6 +46,7 @@
 
 .page-subtitle {
   margin-top: var(--spacing-xs);
+  margin-bottom: 0;
   font-size: 14px;
 }
 
@@ -94,8 +98,8 @@
   display: inline-flex;
   padding: var(--spacing-xs);
   border: 1px solid var(--border-light);
-  border-radius: 999px;
-  background: var(--background-hover);
+  border-radius: 10px;
+  background: var(--background-card);
 }
 
 .period-btn,
@@ -107,16 +111,16 @@
 }
 
 .period-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 999px;
+  padding: 8px 12px;
+  border-radius: 8px;
   color: var(--text-secondary);
   background: transparent;
 }
 
 .period-btn.active {
-  color: var(--primary-main);
-  background: var(--background-card);
-  box-shadow: var(--shadow-sm);
+  color: #00843d;
+  background: #e8fdf0;
+  box-shadow: none;
 }
 
 .export-btn,
@@ -125,9 +129,9 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 9px 16px;
   border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-md);
+  border-radius: 10px;
   color: var(--text-primary);
   background: var(--background-card);
 }
@@ -205,7 +209,8 @@ section {
 }
 
 .section-heading h2 {
-  color: var(--text-primary);
+  margin: 0;
+  color: #1b2f27;
   font-size: 18px;
   font-weight: 750;
 }
@@ -225,9 +230,9 @@ section {
 .position-panel,
 .coverage-panel {
   border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-lg);
+  border-radius: 14px;
   background: var(--background-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
 }
 
 .kpi-card {
@@ -235,7 +240,7 @@ section {
   flex-direction: column;
   gap: 9px;
   min-width: 0;
-  padding: var(--spacing-lg);
+  padding: 20px;
 }
 
 .kpi-top {
@@ -255,9 +260,9 @@ section {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--border-radius-md);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   color: var(--primary-main);
   background: var(--primary-lighter);
 }
@@ -265,7 +270,7 @@ section {
 .kpi-value {
   overflow: hidden;
   color: var(--text-primary);
-  font-size: clamp(24px, 2vw, 30px);
+  font-size: 24px;
   line-height: 1.1;
   text-overflow: ellipsis;
 }
@@ -286,7 +291,7 @@ section {
 
 .position-panel,
 .coverage-panel {
-  padding: var(--spacing-lg);
+  padding: 20px 24px;
 }
 
 .position-grid,
@@ -304,7 +309,7 @@ section {
   min-width: 0;
   padding: var(--spacing-md);
   border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-md);
+  border-radius: 10px;
   color: var(--text-secondary);
   background: var(--background-page);
   font-size: 12px;
@@ -343,7 +348,7 @@ section {
 
 .chart-card {
   min-width: 0;
-  padding: var(--spacing-lg);
+  padding: 20px 24px;
 }
 
 .chart-header {
@@ -354,8 +359,10 @@ section {
 }
 
 .chart-header h3 {
-  color: var(--text-primary);
-  font-size: 15px;
+  margin: 0;
+  color: #1b2f27;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .legend {
@@ -604,23 +611,32 @@ table {
   width: 100%;
   border-collapse: collapse;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 13.5px;
   white-space: nowrap;
 }
 
 th,
 td {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-light);
   text-align: left;
 }
 
 th {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.period-btn:focus-visible,
+.export-btn:focus-visible,
+.retry-btn:focus-visible,
+.position-item:focus-visible,
+.exception-actions a:focus-visible {
+  outline: 2px solid #00843d;
+  outline-offset: 2px;
 }
 
 td strong,

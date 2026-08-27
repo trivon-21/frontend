@@ -1,10 +1,9 @@
 .activity-log-container {
-  padding: var(--spacing-xxxl);
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 }
 
 .page-header {
@@ -14,27 +13,27 @@
 .header-content {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .title-group h1 {
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 26px;
+  font-weight: 700;
+  color: #1b2f27;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .title-group p {
-  color: var(--text-muted);
-  font-size: 16px;
+  color: #566463;
+  font-size: 14px;
   margin-top: 4px;
 }
 
 .btn-back {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: var(--background-card);
   border: 1px solid var(--border-light);
   display: flex;
@@ -44,6 +43,7 @@
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-minimal);
+  text-decoration: none;
 }
 
 .btn-back:hover {
@@ -55,16 +55,17 @@
 
 .log-card {
   background: var(--background-card);
-  border-radius: 24px;
+  border-radius: 14px;
   padding: 0;
   border: 1px solid var(--border-light);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 5%), 0 8px 10px -6px rgb(0 0 0 / 5%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
   min-height: 500px;
   overflow: hidden;
 }
 
 .activity-table-wrapper {
   width: 100%;
+  overflow-x: auto;
 }
 
 .activity-table {
@@ -75,8 +76,8 @@
 }
 
 .activity-table th {
-  padding: var(--spacing-xl) var(--spacing-xxl);
-  font-size: 13px;
+  padding: 16px 20px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -90,8 +91,8 @@
 .activity-table th:nth-child(3) { width: 25%; }
 
 .activity-table td {
-  padding: var(--spacing-xl) var(--spacing-xxl);
-  font-size: 15px;
+  padding: 16px 20px;
+  font-size: 13.5px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--background-hover);
   vertical-align: middle;
@@ -114,8 +115,8 @@
 }
 
 .icon-marker {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -124,6 +125,8 @@
   color: var(--primary-main);
   flex-shrink: 0;
 }
+
+.btn-back:focus-visible { outline: 2px solid #00843d; outline-offset: 2px; }
 
 .desc-cell {
   color: var(--text-muted);

@@ -4,7 +4,7 @@
         <h1>Catalog Health</h1>
         <p>Resolve incomplete product information and inventory master-data issues.</p>
     </div>
-    <button class="btn-primary" routerLink="/inventory-manager/product-wizard">
+    <button type="button" class="btn-primary" routerLink="/inventory-manager/product-wizard">
       <lucide-angular name="plus" [size]="16"></lucide-angular> New Product
     </button>
   </header>
@@ -22,8 +22,8 @@
     <button class="btn-link" type="button" *ngIf="searchQuery" (click)="clearSearch()">Clear</button>
   </div>
 
-  <div class="state-card" *ngIf="loading">Checking inventory data…</div>
-  <div class="state-card error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="state-card" *ngIf="loading" aria-live="polite">Checking inventory data…</div>
+  <div class="state-card error" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button" (click)="load()">Retry</button></div>
     <div class="state-card success" *ngIf="!loading && !errorMessage && records.length === 0">All inventory products pass the current catalog health checks.</div>
 
   <div class="quality-list" *ngIf="!loading && !errorMessage">

@@ -1,13 +1,13 @@
 /* Required Items Table Section */
 .required-items-table-section {
-  margin-top: 48px;
+  margin-top: 24px;
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .status-dot-wrapper {
@@ -27,7 +27,7 @@
 }
 
 .section-header h3 {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -40,6 +40,12 @@
 .alx-table {
   table-layout: fixed;
 }
+
+.item-column { width: 30%; }
+.sku-column,
+.price-column { width: 20%; }
+.stock-column,
+.action-column { width: 15%; }
 
 .alx-table .text-right { text-align: right; }
 .alx-table .text-center { text-align: center; }
@@ -180,3 +186,5 @@ input[type="number"].no-spinner::-webkit-inner-spin-button {
 }
 
 input[type="number"].no-spinner { appearance: textfield; }
+button:focus-visible, input:focus-visible { outline: 3px solid rgb(0 132 61 / 22%); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
