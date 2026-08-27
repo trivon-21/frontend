@@ -58,10 +58,25 @@
             <div><p class="info-label">Customer</p><p class="info-value">{{ selectedInvoice?.customerName }}</p></div>
             <div><p class="info-label">Email</p><p class="info-value">{{ selectedInvoice?.customerEmail }}</p></div>
             <div><p class="info-label">Rejected Date</p><p class="info-value">{{ selectedInvoice?.rejectedAt | date:'dd MMM yyyy' }}</p></div>
-            <div><p class="info-label">Status</p><p class="info-value rejected-badge"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="24" y1="12" x2="12" y2="24"></line>
-    <line x1="12" y1="12" x2="24" y2="24"></line>
-  </svg>Rejected</p></div>
+            <div>
+  <p class="info-label">Status</p>
+  <p class="info-value rejected-badge">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="16"
+         height="16"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    Rejected
+  </p>
+</div>
           </div>
           <div class="rejection-reason-box" *ngIf="selectedInvoice?.rejectionReason">
             <p class="reason-label">Rejection Reason</p>

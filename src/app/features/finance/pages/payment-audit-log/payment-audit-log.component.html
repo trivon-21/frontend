@@ -6,38 +6,104 @@
     <p class="page-subtitle">Read-only record of all payment events</p>
   </div>
 
-  <!-- STAT CARDS -->
-  <div class="stat-cards">
-    <div class="stat-card">
-      <div class="stat-icon total"></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ totalLogs }}</span>
-        <span class="stat-label">Total Events</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon approved"></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ approved }}</span>
-        <span class="stat-label">Approved</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon rejected"></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ rejected }}</span>
-        <span class="stat-label">Rejected</span>
-      </div>
+<!-- STAT CARDS -->
+<div class="stat-cards">
+
+  <!-- Total Events -->
+  <div class="stat-card">
+    <div class="stat-icon total">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="22"
+           height="22"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon total"></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ totalLogs }}</span>
-        <span class="stat-label">Total Events</span>
-      </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ totalLogs }}</span>
+      <span class="stat-label">Total Events</span>
     </div>
   </div>
+
+  <!-- Approved -->
+  <div class="stat-card">
+    <div class="stat-icon approved">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="22"
+           height="22"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2.4"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+
+    <div class="stat-info">
+      <span class="stat-value">{{ approved }}</span>
+      <span class="stat-label">Approved</span>
+    </div>
+  </div>
+
+  <!-- Rejected -->
+  <div class="stat-card">
+    <div class="stat-icon rejected">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="22"
+           height="22"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2.2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+
+    <div class="stat-info">
+      <span class="stat-value">{{ rejected }}</span>
+      <span class="stat-label">Rejected</span>
+    </div>
+  </div>
+
+  <!-- Pending -->
+  <div class="stat-card">
+    <div class="stat-icon pending">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="22"
+           height="22"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2.2"
+           stroke-linecap="round"
+           stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <polyline points="12 7 12 12 15 14"/>
+      </svg>
+    </div>
+
+    <div class="stat-info">
+      <span class="stat-value">{{ pending }}</span>
+      <span class="stat-label">Pending</span>
+    </div>
+  </div>
+
+</div>
 
   <!-- FILTERS -->
   <div class="filters-bar">

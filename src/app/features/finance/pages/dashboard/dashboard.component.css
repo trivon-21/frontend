@@ -3,17 +3,18 @@
    Trivon System Theme
    ========================================================= */
 
-
 .dashboard-wrapper {
-  display: flex;
+  display: flex; 
   flex-direction: column;
   gap: 24px;
-  padding: 0;
-  background: transparent;
-  min-height: auto;
-  margin-left: 260px;
+  background: #f3f4f2;
+  padding: 24px 32px;
+  min-height: calc(100vh - 70px);
+  margin-left: 210px;
   margin-top: 70px;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  width: calc(100% - 210px);
 }
 
 /* =========================================================
@@ -73,7 +74,7 @@
 }
 
 .filter-tabs button:hover:not(.active) {
-  background: #f4f7f5;
+   background: #f4f7f5;
   color: #1b2f27;
 }
 
@@ -775,44 +776,75 @@ tbody tr:last-child td {
 
   line-height: 1;
 }
-
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1200px) {
+
   .top-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .main-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .stats-section {
     display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
   }
 }
 
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
 @media (max-width: 900px) {
+
+  .dashboard-wrapper {
+    padding: 22px 20px;
+  }
+
   .section-header {
     flex-direction: column;
-
     align-items: stretch;
+  }
+
+  .search-box {
+    min-width: 0;
+    width: 100%;
   }
 
   .filters {
     justify-content: flex-start;
   }
+
+  .stats-section {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 768px) {
+
   .dashboard-wrapper {
+    margin-left: 0;
+    margin-top: 70px;
+
+    width: 100%;
+
+    padding: 20px 16px;
+
     gap: 20px;
+
+    box-sizing: border-box;
   }
 
   .dashboard-title {
@@ -820,8 +852,7 @@ tbody tr:last-child td {
   }
 
   .top-cards {
-    grid-template-columns: 1fr 1fr;
-
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -835,10 +866,21 @@ tbody tr:last-child td {
 
   .filter-tabs {
     width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-tabs button {
     flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .stats-section {
@@ -848,11 +890,27 @@ tbody tr:last-child td {
   .table-section {
     padding: 16px;
   }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
 }
 
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
 @media (max-width: 520px) {
+
+  .dashboard-wrapper {
+    padding: 18px 12px;
+  }
+
   .top-cards {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .card-value {
@@ -861,27 +919,28 @@ tbody tr:last-child td {
 
   .filters {
     flex-direction: column;
-
     align-items: stretch;
+    width: 100%;
   }
 
   .filters select,
   .date-btn {
     width: 100%;
-
     box-sizing: border-box;
   }
 
   .pagination {
     align-items: flex-start;
-
     flex-direction: column;
   }
 
   .pagination-controls {
     width: 100%;
-
     justify-content: center;
+  }
+
+  .table-section {
+    padding: 12px;
   }
 
   th,

@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ClickOutsideDirective } from '../../../../directives/click-outside.directive';
 
 interface NotificationItem {
   message: string;
@@ -17,15 +18,17 @@ interface NotificationItem {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
   searchQuery = '';
+  currentTime = new Date();
   showSettings = false;
   showNotifications = false;
+  showUserMenu = false;
   showProfileModal = false;
   currentUser: any = null;
 
@@ -33,6 +36,7 @@ export class HeaderComponent implements OnInit {
   totalPending = 0;
 
   private api = 'http://127.0.0.1:5000/api';
+  private clockInterval: any;
 
   constructor(
     private http: HttpClient,
@@ -44,6 +48,15 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.loadNotifications();
     this.currentUser = this.authService.getCurrentUser();
+    this.clockInterval = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
   }
 
   loadNotifications(): void {
@@ -115,17 +128,59 @@ export class HeaderComponent implements OnInit {
   }
 
   onSearch() { console.log('Searching:', this.searchQuery); }
-  toggleSettings() { this.showSettings = !this.showSettings; this.showNotifications = false; }
-  toggleNotifications() { this.showNotifications = !this.showNotifications; this.showSettings = false; }
-  logout() {
+
+  toggleSettings(): void {
+    this.showSettings = !this.showSettings;
+    this.showNotifications = false;
+    this.showUserMenu = false;
+  }
+
+  toggleNotifications(): void {
+    this.showNotifications = !this.showNotifications;
+    this.showSettings = false;
+    this.showUserMenu = false;
+  }
+
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+    this.showSettings = false;
+    this.showNotifications = false;
+  }
+
+  closeUserMenu(): void {
+    this.showUserMenu = false;
+  }
+
+  get userInitials(): string {
+    const user = this.authService.getCurrentUser();
+    if (!user) return 'U';
+    const parts = user.fullName.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
+  }
+
+  get userName(): string {
+    const user = this.authService.getCurrentUser();
+    return user?.fullName || 'User';
+  }
+
+  get userEmail(): string {
+    const user = this.authService.getCurrentUser();
+    return user?.email || '';
+  }
+
+  manageProfile(): void {
+    this.showProfileModal = true;
+    this.showUserMenu = false;
+  }
+
+  closeProfileModal(): void {
+    this.showProfileModal = false;
+  }
+
+  logout(): void {
     this.authService.logout();
     this.router.navigate(['/']);
-  }
-  manageProfile() {
-    this.showProfileModal = true;
-    this.showSettings = false;
-  }
-  closeProfileModal() {
-    this.showProfileModal = false;
   }
 }

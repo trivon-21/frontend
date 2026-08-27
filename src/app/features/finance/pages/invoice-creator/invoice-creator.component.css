@@ -1,18 +1,28 @@
+
+/* =========================================================
+   INVOICE PAGE
+   TRIVON FINANCE THEME
+   ========================================================= */
+
 :host {
   display: block;
   font-family: 'Inter', sans-serif;
-  background: #f0f0f0;
+  background: #f6f8f6;
   min-height: 100vh;
+  color: #40534a;
 }
 
-/* HEADER */
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .invoice-header {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 14px 40px;
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-bottom: 1px solid #e5eae7;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -25,21 +35,36 @@
 
 .header-search svg {
   position: absolute;
-  left: 14px;
+  left: 13px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  color: #9ca3af;
+  width: 17px;
+  height: 17px;
+  color: #8b9690;
 }
 
 .header-search input {
   width: 100%;
-  padding: 10px 16px 10px 42px;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  font-size: 14px;
+  height: 38px;
+  padding: 0 12px 0 40px;
+  border: 1px solid #dfe5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #33413b;
+  font-family: inherit;
+  font-size: 12px;
   outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.header-search input::placeholder {
+  color: #9aa59f;
+}
+
+.header-search input:focus {
+  border-color: #4a7c59;
+  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.08);
 }
 
 .header-right {
@@ -51,11 +76,22 @@
 }
 
 .icon-btn {
-  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: none;
-  font-size: 18px;
+  border-radius: 7px;
+  background: transparent;
+  color: #718079;
   cursor: pointer;
-  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: #edf1ee;
+  color: #356b48;
 }
 
 .avatar {
@@ -64,76 +100,90 @@
   border-radius: 50%;
 }
 
-/* BODY */
+/* =========================================================
+   BODY
+   ========================================================= */
+
 .invoice-body {
   max-width: 920px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 28px 24px 80px;
 }
 
 .page-title {
-  font-size: 2rem;
+  margin: 0 0 20px;
+  font-size: 25px;
   font-weight: 700;
-  color: #1e2a4a;
-  margin-bottom: 24px;
+  color: #1b2f27;
+  letter-spacing: -0.3px;
 }
 
-/* INVOICE DOCUMENT */
+/* =========================================================
+   INVOICE DOCUMENT
+   ========================================================= */
+
 .invoice-doc {
-  background: white;
-  border-radius: 2px;
+  background: #ffffff;
+  border: 1px solid #e5eae7;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 1px 3px rgba(25, 45, 35, 0.035);
 }
 
-/* DARK GREEN HEADER BAR */
+/* =========================================================
+   DOCUMENT HEADER
+   ========================================================= */
+
 .doc-header-bar {
-  background: #006B2D;
-  color: white;
+  background: #00843d;
+  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 32px;
+  padding: 16px 28px;
 }
 
 .invoice-num {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.7px;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .invoice-date {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* FROM + TO */
+/* =========================================================
+   FROM + TO
+   ========================================================= */
+
 .doc-from-to {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 28px 32px 24px;
+  padding: 26px 28px 22px;
 }
 
 .brand-name {
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #1b2f27;
   margin: 0 0 2px;
 }
 
 .brand-tagline {
   font-size: 11px;
-  color: #4b5563;
+  color: #718079;
   margin-bottom: 8px;
   letter-spacing: 0.3px;
 }
 
 .brand-address {
   font-size: 12px;
-  color: #6b7280;
+  color: #718079;
   line-height: 1.7;
 }
 
@@ -142,56 +192,66 @@
 }
 
 .to-label {
-  font-size: 11px;
-  color: #6b7280;
+  font-size: 10px;
+  color: #718079;
   font-weight: 600;
   letter-spacing: 1px;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   text-transform: uppercase;
 }
 
 .to-name {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #2e3d35;
   margin-bottom: 4px;
 }
 
 .to-address {
-  font-size: 13px;
-  color: #4b5563;
+  font-size: 12px;
+  color: #526059;
   line-height: 1.7;
 }
 
-/* TABLE SECTION */
+/* =========================================================
+   TABLE SECTION
+   ========================================================= */
+
 .doc-table-section {
-  padding: 8px 32px 24px;
+  padding: 8px 28px 24px;
+  overflow-x: auto;
 }
 
 .table-heading {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  color: #6b7280;
-  letter-spacing: 1.5px;
+  color: #718079;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
   margin-bottom: 10px;
 }
 
 .invoice-table {
   width: 100%;
+  min-width: 650px;
   border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
 }
 
 .invoice-table thead tr {
-  background: #006B2D;
+  background: #f3f6f4;
 }
 
 .invoice-table th {
-  padding: 11px 14px;
+  padding: 12px 14px;
   text-align: left;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
-  color: white;
+  color: #718079;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e1e7e3;
+  white-space: nowrap;
 }
 
 .invoice-table th.col-qty,
@@ -201,14 +261,27 @@
 }
 
 .invoice-table td {
-  padding: 11px 14px;
-  font-size: 13px;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 13px 14px;
+  font-size: 12px;
+  color: #40534a;
+  border-bottom: 1px solid #edf1ef;
+  vertical-align: middle;
+}
+
+.invoice-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.invoice-table tbody tr:hover td {
+  background: #f9fbfa;
+}
+
+.invoice-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .alt-row td {
-  background: #f7f9f7;
+  background: #fafbfa;
 }
 
 .text-right {
@@ -216,16 +289,20 @@
 }
 
 .amount-cell {
-  font-weight: 600;
+  font-weight: 700;
+  color: #28734b;
   text-align: right;
 }
 
-/* TOTALS */
+/* =========================================================
+   TOTALS
+   ========================================================= */
+
 .totals-section {
   margin-top: 0;
   margin-left: auto;
   width: 340px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5eae7;
   border-top: none;
 }
 
@@ -234,164 +311,307 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  font-size: 13px;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
-  background: white;
+  font-size: 12px;
+  color: #40534a;
+  border-bottom: 1px solid #edf1ef;
+  background: #ffffff;
 }
 
 .total-label {
-  color: #6b7280;
+  color: #718079;
 }
 
 .total-val {
   font-weight: 600;
-  color: #1a1a1a;
+  color: #34483e;
 }
 
 .total-row-item.grand {
-  background: #006B2D;
+  background: #00843d;
   border-bottom: none;
   padding: 12px 16px;
 }
 
 .grand-label {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  color: white;
+  color: #ffffff;
 }
 
 .grand-val {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
-  color: white;
+  color: #ffffff;
 }
 
-/* TERMS */
+/* =========================================================
+   TERMS
+   ========================================================= */
+
 .terms-section {
-  background: #f0fdf4;
-  margin: 20px 32px 32px;
-  padding: 20px 24px;
-  border-radius: 4px;
-  border-left: 3px solid #2d5a3d;
+  background: #f5faf7;
+  margin: 20px 28px 28px;
+  padding: 18px 20px;
+  border-radius: 8px;
+  border: 1px solid #e1ebe5;
+  border-left: 3px solid #4a7c59;
 }
 
 .terms-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #34483e;
   letter-spacing: 0.5px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .terms-text {
-  font-size: 12px;
-  color: #374151;
+  font-size: 11px;
+  color: #526059;
   line-height: 1.7;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 
 .terms-text:last-child {
   margin-bottom: 0;
 }
 
-/* CONFIRM BUTTON */
+/* =========================================================
+   CONFIRM BUTTON
+   ========================================================= */
+
 .confirm-wrap {
   display: flex;
   justify-content: center;
-  margin-top: 28px;
+  margin-top: 24px;
   margin-bottom: 16px;
 }
 
 .confirm-btn {
-  background: #006B2D;
-  color: white;
+  height: 38px;
+  padding: 0 36px;
   border: none;
-  padding: 14px 52px;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 7px;
+  background: #00843d;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
 }
 
 .confirm-btn:hover {
-  background: #1a3a2a;
+  background: #006f34;
 }
 
-/* PAGINATION */
+.confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
 .form-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-top: 16px;
 }
 
 .page-nav {
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: #6b7280;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #dfe7e2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #526059;
+  font-family: inherit;
+  font-size: 11px;
   cursor: pointer;
-  padding: 6px 12px;
-}
-
-.page-nav:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+  transition: all 0.2s ease;
 }
 
 .page-nav:hover:not(:disabled) {
-  color: #1a1a1a;
+  border-color: #6da78a;
+  color: #2f7d5a;
+  background: #f8fbf9;
+}
+
+.page-nav:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .page-num {
-  width: 32px;
+  min-width: 32px;
   height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: none;
-  font-size: 14px;
-  color: #6b7280;
+  padding: 0 8px;
+  border: 1px solid #dfe7e2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #526059;
+  font-family: inherit;
+  font-size: 11px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+}
+
+.page-num:hover {
+  border-color: #6da78a;
+  color: #2f7d5a;
+  background: #f8fbf9;
 }
 
 .page-num.active {
-  color: #2563eb;
-  font-weight: 700;
-  border-bottom: 2px solid #2563eb;
+  background: #e5f5ed;
+  border-color: #8bc2a5;
+  color: #2f7d5a;
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
   .invoice-body {
-    padding: 20px 12px 80px;
+    padding: 24px;
+  }
+
+  .header-right {
+    right: 24px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .invoice-header {
+    padding: 12px 20px;
+  }
+
+  .header-search {
+    width: 280px;
+  }
+
+  .header-right {
+    right: 20px;
+  }
+
+  .invoice-body {
+    padding: 20px 16px 60px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .doc-header-bar {
+    padding: 15px 20px;
   }
 
   .doc-from-to {
     flex-direction: column;
     gap: 20px;
+    padding: 22px 20px;
+  }
+
+  .doc-table-section {
+    padding: 8px 20px 20px;
   }
 
   .totals-section {
     width: 100%;
   }
 
+  .terms-section {
+    margin: 16px 20px 22px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — PHONE
+   ========================================================= */
+
+@media (max-width: 480px) {
   .invoice-header {
-    padding: 14px 20px;
+    padding: 12px 14px;
+  }
+
+  .header-search {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .header-right {
+    display: none;
+  }
+
+  .invoice-body {
+    padding: 16px 12px 50px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .invoice-doc {
+    border-radius: 10px;
   }
 
   .doc-header-bar {
-    padding: 16px 20px;
+    padding: 14px 16px;
+  }
+
+  .invoice-num,
+  .invoice-date {
+    font-size: 11px;
+  }
+
+  .doc-from-to {
+    padding: 20px 16px;
+  }
+
+  .brand-name {
+    font-size: 21px;
   }
 
   .doc-table-section {
-    padding: 8px 16px 24px;
+    padding: 8px 16px 18px;
+  }
+
+  .invoice-table {
+    min-width: 620px;
+  }
+
+  .invoice-table th {
+    padding: 11px 12px;
+  }
+
+  .invoice-table td {
+    padding: 12px;
+  }
+
+  .totals-section {
+    width: calc(100% - 32px);
+    margin-left: 16px;
   }
 
   .terms-section {
-    margin: 16px 16px 24px;
+    margin: 16px 16px 20px;
+    padding: 16px;
+  }
+
+  .confirm-btn {
+    width: 100%;
   }
 }
+
