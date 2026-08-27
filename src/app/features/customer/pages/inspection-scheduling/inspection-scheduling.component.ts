@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
+import { NavbarComponent } from '../../../../components/navbar/navbar.component';
+import { FooterComponent } from '../../../../components/footer/footer.component';
 
 interface CalendarDay {
   date: string;
@@ -18,7 +20,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-inspection-scheduling',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent],
   templateUrl: './inspection-scheduling.component.html',
   styleUrls: ['./inspection-scheduling.component.css']
 })
