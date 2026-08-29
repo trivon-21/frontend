@@ -55,7 +55,7 @@
       </div>
       <button
         type="button"
-        class="btn-primary"
+          class="btn-primary im-btn im-btn--primary"
         (click)="checkOut()"
         [disabled]="checkingOut || loading || !!loadError"
       >
@@ -76,7 +76,7 @@
       <strong>Tool lending unavailable</strong>
       <p>{{ loadError }}</p>
     </div>
-    <button type="button" class="portal-retry-button" (click)="fetchData()">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="fetchData()">Retry</button>
   </div>
 
   <!-- Search and Tabs Bar -->
@@ -164,7 +164,7 @@
               <td>
                 <button
                   type="button"
-                  class="btn-small"
+                  class="btn-small im-btn im-btn--secondary im-btn--compact"
                   (click)="markReturned(loan._id!)"
                   [disabled]="returningIds.has(loan._id!)"
                 >

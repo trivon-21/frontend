@@ -12,7 +12,7 @@
       <strong>Reservations unavailable</strong>
       <p>{{ loadError }}</p>
     </div>
-    <button type="button" class="portal-retry-button" (click)="fetchRequests()">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="fetchRequests()">Retry</button>
   </div>
 
   <!-- Tabs Navigation -->
@@ -115,7 +115,7 @@
           <td>{{ req.location }}</td>
           <td *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
           <td class="actions-cell">
-            <button type="button" class="btn-view" (click)="openModal(req.id)">
+            <button type="button" class="btn-view im-btn im-btn--secondary im-btn--compact" (click)="openModal(req.id)">
               <lucide-angular name="eye" [size]="14"></lucide-angular>
               View Request
             </button>
@@ -150,7 +150,7 @@
         </div>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close im-btn im-btn--close"
           aria-label="Close reservation dialog"
           (click)="closeModal()"
           [disabled]="saving"
@@ -236,18 +236,18 @@
       <div class="validation-banner" role="alert" *ngIf="mutationError">{{ mutationError }}</div>
 
       <div class="modal-footer">
-        <div class="footer-right" *ngIf="activeTab === 'pending'">
-          <button type="button" class="btn-save" *ngFor="let supplier of shortageSuppliers" (click)="createShortageOrder(supplier.id)" [disabled]="saving">
+        <div class="footer-right im-action-group" *ngIf="activeTab === 'pending'">
+          <button type="button" class="btn-save im-btn im-btn--secondary" *ngFor="let supplier of shortageSuppliers" (click)="createShortageOrder(supplier.id)" [disabled]="saving">
             Order {{ supplier.name }} Shortages
           </button>
-          <button type="button" class="btn-primary" (click)="markKitted()" [disabled]="saving || !canReserve(selectedRequest)">
+          <button type="button" class="btn-primary im-btn im-btn--primary" (click)="markKitted()" [disabled]="saving || !canReserve(selectedRequest)">
             Mark as Reserved / Kitted
           </button>
         </div>
-        <div class="footer-right" *ngIf="activeTab === 'reserved'">
+        <div class="footer-right im-action-group" *ngIf="activeTab === 'reserved'">
           <button
             type="button"
-            class="btn-primary btn-outline"
+            class="btn-primary btn-outline im-btn im-btn--secondary"
             *ngIf="canUndo(selectedRequest)"
             (click)="undoAction()"
             [disabled]="saving"
@@ -256,7 +256,7 @@
           </button>
           <button
             type="button"
-            class="btn-save"
+            class="btn-save im-btn im-btn--primary"
             (click)="markHandedOver()"
             [disabled]="saving || !selectedRequest?.assignedTeamId"
             [style.opacity]="!selectedRequest?.assignedTeamId ? 0.5 : 1"
@@ -264,12 +264,12 @@
           >
             Hand Over to Team
           </button>
-          <button type="button" class="btn-primary" (click)="closeModal()" [disabled]="saving">
+          <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
             Close
           </button>
         </div>
-        <div class="footer-right" *ngIf="activeTab === 'completed'">
-          <button type="button" class="btn-primary" (click)="closeModal()" [disabled]="saving">
+        <div class="footer-right im-action-group" *ngIf="activeTab === 'completed'">
+          <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
             Close
           </button>
         </div>

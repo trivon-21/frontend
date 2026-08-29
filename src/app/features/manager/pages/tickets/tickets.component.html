@@ -13,7 +13,7 @@
 
   <div class="portal-state portal-state--error" role="alert" *ngIf="loadError">
     <div><strong>Operations unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="load()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()" [disabled]="loading">Retry</button>
   </div>
 
   <div class="summary-row">
@@ -50,7 +50,7 @@
             <span *ngIf="item.assignedTeam || item.assignedTechnician; else unassigned">{{ item.assignedTeam?.teamName || 'No team' }}<span *ngIf="item.assignedTechnician"> · {{ item.assignedTechnician.fullName }}</span></span>
             <ng-template #unassigned><span class="muted">Awaiting Main Technician</span></ng-template>
           </td>
-          <td class="actions-cell"><button class="mini-btn" (click)="openDetails(item)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
+          <td class="actions-cell"><button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
         </tr>
         <tr *ngIf="!loading && items.length === 0"><td colspan="9" class="empty-cell">No operational work matches the current filters.</td></tr>
       </tbody>
@@ -60,16 +60,16 @@
   <nav class="alx-pagination" *ngIf="!loadError && total > 0" aria-label="Operations pagination">
     <span>Showing {{ firstResult }}–{{ lastResult }} of {{ total }}</span>
     <div class="alx-pagination__controls">
-      <button type="button" (click)="changePage(page - 1)" [disabled]="loading || page <= 1">Previous</button>
+      <button type="button" class="mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="changePage(page - 1)" [disabled]="loading || page <= 1">Previous</button>
       <span>Page {{ page }} of {{ totalPages }}</span>
-      <button type="button" (click)="changePage(page + 1)" [disabled]="loading || page >= totalPages">Next</button>
+      <button type="button" class="mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="changePage(page + 1)" [disabled]="loading || page >= totalPages">Next</button>
     </div>
   </nav>
 
   <section class="ticket-detail" *ngIf="selectedItem as item">
     <div class="detail-header">
       <div><span class="sku-cell">{{ item.reference }}</span><h2>{{ item.sourceType | titlecase }} work item</h2></div>
-      <button class="mini-btn" type="button" (click)="closeDetails()">Close panel</button>
+      <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" type="button" (click)="closeDetails()">Close panel</button>
     </div>
 
     <div class="detail-grid">
@@ -81,7 +81,7 @@
     <div class="detail-grid control-grid" *ngIf="can('update-control')">
       <div><label class="detail-label" for="priority">Priority</label><select id="priority" [(ngModel)]="selectedPriority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
       <div><label class="detail-label" for="sla">SLA deadline</label><input id="sla" type="datetime-local" [(ngModel)]="selectedSla"></div>
-      <div><span class="detail-label">Manager controls</span><button class="mini-btn ok" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
+      <div><span class="detail-label">Manager controls</span><button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
     </div>
 
     <p class="muted" *ngIf="item.allowedActions.length === 0">This record is read-only here. Use its owning inspection or installation workflow to make changes.</p>
@@ -89,11 +89,11 @@
     <div class="lifecycle-controls" *ngIf="can('escalate') || can('clear-escalation') || can('close') || can('reopen')">
       <label class="detail-label" for="action-reason">Reason for escalation or closure action</label>
       <textarea id="action-reason" rows="2" [(ngModel)]="actionReason" placeholder="Required for every lifecycle action"></textarea>
-      <div class="row-actions">
-        <button class="mini-btn warn" *ngIf="can('escalate')" (click)="runAction('escalate')">Escalate</button>
-        <button class="mini-btn" *ngIf="can('clear-escalation')" (click)="runAction('clear-escalation')">Clear escalation</button>
-        <button class="mini-btn ok" *ngIf="can('close')" (click)="runAction('close')">Verify and close</button>
-        <button class="mini-btn" *ngIf="can('reopen')" (click)="runAction('reopen')">Reopen</button>
+      <div class="row-actions mgr-action-group">
+        <button class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" *ngIf="can('escalate')" (click)="runAction('escalate')">Escalate</button>
+        <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('clear-escalation')" (click)="runAction('clear-escalation')">Clear escalation</button>
+        <button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" *ngIf="can('close')" (click)="runAction('close')">Verify and close</button>
+        <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('reopen')" (click)="runAction('reopen')">Reopen</button>
       </div>
     </div>
 

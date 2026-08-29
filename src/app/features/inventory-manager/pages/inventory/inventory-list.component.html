@@ -5,15 +5,15 @@
       <p>Equipment, parts, materials, consumables and tools</p>
     </div>
     <div class="header-actions">
-      <button class="btn-primary" [routerLink]="['/inventory-manager/procurement']">
+      <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/procurement']">
         <lucide-angular name="clipboard-check" [size]="16" class="inline-icon"></lucide-angular>
         Procurement
       </button>
-      <button class="btn-primary" [routerLink]="['/inventory-manager/catalog-health']">
+      <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/catalog-health']">
         <lucide-angular name="list" [size]="16" class="inline-icon"></lucide-angular>
         Catalog Health
       </button>
-      <button class="btn-primary" [routerLink]="['/inventory-manager/product-wizard']">
+      <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/product-wizard']">
         <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
         New Product
       </button>
@@ -72,7 +72,7 @@
 
     <div class="filter-actions">
       <button
-        class="btn-advanced"
+        class="btn-advanced im-btn im-btn--secondary im-btn--compact"
         type="button"
         [class.active]="showAdvancedFilters || hasAdvancedFilters"
         (click)="showAdvancedFilters = !showAdvancedFilters"
@@ -96,10 +96,10 @@
         </select>
       </label>
 
-      <button class="btn-icon" type="button" (click)="toggleSortDirection()" title="Change sort direction">
+      <button class="btn-icon im-btn im-btn--secondary im-btn--icon" type="button" (click)="toggleSortDirection()" title="Change sort direction">
         <lucide-angular [name]="sortDirection === 'asc' ? 'arrow-up-narrow-wide' : 'arrow-down-wide-narrow'" [size]="17"></lucide-angular>
       </button>
-      <button class="btn-link" type="button" (click)="clearFilters()">Clear filters</button>
+      <button class="btn-link im-btn im-btn--ghost im-btn--compact" type="button" (click)="clearFilters()">Clear filters</button>
     </div>
 
     <div id="inventory-advanced-filters" class="advanced-filters" *ngIf="showAdvancedFilters">
@@ -206,7 +206,7 @@
   </div>
 
   <div class="state-card" *ngIf="loading">Loading inventory…</div>
-  <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button" (click)="loadInventory()">Retry</button></div>
+  <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadInventory()">Retry</button></div>
 
   <div class="table-container alx-table-container" *ngIf="!loading && !error">
     <table class="alx-table">
@@ -255,7 +255,7 @@
           <td>{{ getDisplayLocation(item) }}</td>
           <td class="actions-cell">
             <button
-              class="btn-small"
+              class="btn-small im-btn im-btn--secondary im-btn--compact"
               (click)="openDetailModal(item); $event.stopPropagation()"
               *ngIf="isRowSelected(item)"
             >
@@ -274,11 +274,11 @@
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
       </span>
       <div class="pagination-controls">
-        <button class="btn-page" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+        <button class="btn-page im-btn im-btn--secondary im-btn--compact" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
         <ng-container *ngIf="totalPages > 0">
           <button
             *ngFor="let page of getPageNumbers()"
-            class="btn-page"
+            class="btn-page im-btn im-btn--secondary im-btn--compact"
             [class.active]="page === currentPage"
             [attr.aria-current]="page === currentPage ? 'page' : null"
             (click)="goToPage(page)"
@@ -288,13 +288,13 @@
           <span class="dots" *ngIf="totalPages > 5 && currentPage < totalPages - 2">…</span>
           <button
             *ngIf="totalPages > 5 && currentPage < totalPages - 2"
-            class="btn-page"
+            class="btn-page im-btn im-btn--secondary im-btn--compact"
             (click)="goToPage(totalPages)"
           >
             {{ totalPages }}
           </button>
         </ng-container>
-        <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+        <button class="btn-page im-btn im-btn--secondary im-btn--compact" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </div>
   </div>
@@ -306,7 +306,7 @@
           <h2 id="inventory-detail-title">Product Details</h2>
           <span class="sku-badge">{{ selectedItem.sku }}</span>
         </div>
-        <button class="btn-close" type="button" aria-label="Close product details" (click)="closeDetailModal()">
+        <button class="btn-close im-btn im-btn--close" type="button" aria-label="Close product details" (click)="closeDetailModal()">
           <lucide-angular name="x" [size]="20"></lucide-angular>
         </button>
       </div>
@@ -336,10 +336,10 @@
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeDetailModal()">Close</button>
+      <div class="modal-footer im-action-group">
+        <button class="btn-secondary im-btn im-btn--secondary" (click)="closeDetailModal()">Close</button>
         <button
-          class="btn-primary"
+          class="btn-primary im-btn im-btn--primary"
           [routerLink]="['/inventory-manager/product-wizard', getItemId(selectedItem)]"
           (click)="closeDetailModal()"
         >

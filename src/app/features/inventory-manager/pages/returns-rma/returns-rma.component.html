@@ -9,7 +9,7 @@
   <div class="toast toast-error" *ngIf="error" role="alert">
     <lucide-angular name="triangle-alert" [size]="16" class="inline-icon"></lucide-angular>
     {{ error }}
-    <button type="button" class="portal-retry-button" *ngIf="!submitting && leftoverReturns.length === 0 && rmaCases.length === 0" (click)="loadAllData()">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" *ngIf="!submitting && leftoverReturns.length === 0 && rmaCases.length === 0" (click)="loadAllData()">Retry</button>
   </div>
 
   <!-- Header -->
@@ -114,7 +114,7 @@
 
         <button
           type="button"
-          class="btn-primary"
+            class="btn-primary im-btn im-btn--primary"
           [disabled]="!isLeftoverFormValid || submitting"
           (click)="submitLeftoverReturn()"
         >
@@ -150,7 +150,7 @@
           <h2>Defective / RMA Log</h2>
           <span class="subtitle">{{ summary.rmaCases.active }} active RMA cases</span>
         </div>
-        <button type="button" class="btn-new-rma" (click)="openRmaModal()">
+        <button type="button" class="btn-new-rma im-btn im-btn--primary" (click)="openRmaModal()">
           <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
           New RMA
         </button>
@@ -255,12 +255,12 @@
             <td>{{ item.location || '—' }}</td>
             <td>
               <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId">
-                <button type="button" class="btn-danger" (click)="confirmDispose(item.quarantineId)">Dispose</button>
+                <button type="button" class="btn-danger im-btn im-btn--danger im-btn--compact" (click)="confirmDispose(item.quarantineId)">Dispose</button>
               </div>
               <div class="confirm-actions" *ngIf="confirmDisposeId === item.quarantineId">
                 <span class="confirm-text">Confirm?</span>
-                <button type="button" class="btn-danger-sm" (click)="disposeItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
-                <button type="button" class="btn-cancel-sm" (click)="cancelDispose()">No</button>
+                <button type="button" class="btn-danger-sm im-btn im-btn--danger im-btn--compact" (click)="disposeItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
+                <button type="button" class="btn-cancel-sm im-btn im-btn--secondary im-btn--compact" (click)="cancelDispose()">No</button>
               </div>
             </td>
           </tr>
@@ -274,7 +274,7 @@
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="rma-dialog-title" aria-describedby="rma-dialog-description" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 id="rma-dialog-title">New RMA Case</h2>
-        <button type="button" class="modal-close" aria-label="Close RMA dialog" (click)="closeRmaModal()" [disabled]="submitting">
+        <button type="button" class="modal-close im-btn im-btn--close" aria-label="Close RMA dialog" (click)="closeRmaModal()" [disabled]="submitting">
           <lucide-angular name="x" [size]="20"></lucide-angular>
         </button>
       </div>
@@ -307,8 +307,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" (click)="closeRmaModal()">Cancel</button>
-        <button type="button" class="btn-primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeRmaModal()">Cancel</button>
+        <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
           {{ submitting ? 'Creating...' : 'Create RMA Case' }}
         </button>
       </div>

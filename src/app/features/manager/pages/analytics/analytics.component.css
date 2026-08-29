@@ -102,9 +102,7 @@
   background: var(--background-card);
 }
 
-.period-btn,
-.export-btn,
-.retry-btn {
+.period-btn {
   border: 0;
   font-weight: 700;
   cursor: pointer;
@@ -121,30 +119,6 @@
   color: #00843d;
   background: #e8fdf0;
   box-shadow: none;
-}
-
-.export-btn,
-.retry-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 9px 16px;
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
-  color: var(--text-primary);
-  background: var(--background-card);
-}
-
-.export-btn:hover:not(:disabled),
-.retry-btn:hover {
-  border-color: var(--primary-main);
-  color: var(--primary-main);
-}
-
-.export-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
 }
 
 .error-state {

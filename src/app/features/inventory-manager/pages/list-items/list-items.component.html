@@ -4,7 +4,7 @@
         <h1>Catalog Health</h1>
         <p>Resolve incomplete product information and inventory master-data issues.</p>
     </div>
-    <button type="button" class="btn-primary" routerLink="/inventory-manager/product-wizard">
+    <button type="button" class="btn-primary im-btn im-btn--primary" routerLink="/inventory-manager/product-wizard">
       <lucide-angular name="plus" [size]="16"></lucide-angular> New Product
     </button>
   </header>
@@ -19,11 +19,11 @@
       <lucide-angular name="search" [size]="17"></lucide-angular>
       <input [(ngModel)]="searchQuery" (input)="applySearch()" placeholder="Search product, SKU, class, or issue">
     </label>
-    <button class="btn-link" type="button" *ngIf="searchQuery" (click)="clearSearch()">Clear</button>
+    <button class="btn-link im-btn im-btn--ghost im-btn--compact" type="button" *ngIf="searchQuery" (click)="clearSearch()">Clear</button>
   </div>
 
   <div class="state-card" *ngIf="loading" aria-live="polite">Checking inventory data…</div>
-  <div class="state-card error" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button" (click)="load()">Retry</button></div>
+  <div class="state-card error" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="load()">Retry</button></div>
     <div class="state-card success" *ngIf="!loading && !errorMessage && records.length === 0">All inventory products pass the current catalog health checks.</div>
 
   <div class="quality-list" *ngIf="!loading && !errorMessage">
@@ -38,8 +38,8 @@
         <span class="issue stock" *ngFor="let issue of record.stockIssues">{{ issue }}</span>
       </div>
       <div class="actions">
-        <a class="btn-secondary" *ngIf="record.masterIssues.length" [routerLink]="['/inventory-manager/product-wizard', itemId(record.item)]">Fix Product Data</a>
-        <a class="btn-secondary" *ngIf="record.stockIssues.length" [routerLink]="['/inventory-manager/procurement']" [queryParams]="{ inventoryId: itemId(record.item) }">Review in Procurement</a>
+        <a class="btn-secondary im-btn im-btn--secondary im-btn--compact" *ngIf="record.masterIssues.length" [routerLink]="['/inventory-manager/product-wizard', itemId(record.item)]">Fix Product Data</a>
+        <a class="btn-secondary im-btn im-btn--secondary im-btn--compact" *ngIf="record.stockIssues.length" [routerLink]="['/inventory-manager/procurement']" [queryParams]="{ inventoryId: itemId(record.item) }">Review in Procurement</a>
       </div>
     </article>
     <div class="state-card" *ngIf="records.length && filteredRecords.length === 0">No quality issues match this search.</div>

@@ -1,7 +1,7 @@
 <div class="wizard-container">
   <header class="wizard-header">
     <div>
-      <a class="back-link" routerLink="/inventory-manager/inventory">← Back to inventory</a>
+      <a class="back-link im-btn im-btn--secondary im-btn--compact" routerLink="/inventory-manager/inventory">← Back to inventory</a>
       <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
       <p>{{ isEditMode ? (item?.name + ' · ' + item?.sku) : 'Create a zero-stock catalog record. Receive physical stock through Procurement.' }}</p>
     </div>
@@ -14,8 +14,8 @@
       <p>{{ savedItem.name }} is ready in inventory. Physical quantities and asset tags are managed through receiving.</p>
     </div>
     <div class="success-actions">
-      <button type="button" class="btn-secondary" routerLink="/inventory-manager/inventory">View Inventory</button>
-      <button type="button" class="btn-primary" (click)="receiveStock()">Receive Stock</button>
+      <button type="button" class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/inventory">View Inventory</button>
+      <button type="button" class="btn-primary im-btn im-btn--primary" (click)="receiveStock()">Receive Stock</button>
     </div>
   </div>
 
@@ -144,7 +144,7 @@
         <div class="form-grid">
           <div class="field span-2">
             <span>Compatible models</span>
-            <div class="tag-entry"><input [(ngModel)]="compatibleModelInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addCompatibleModel()" placeholder="Enter a model, then press Enter"><button type="button" (click)="addCompatibleModel()">Add</button></div>
+            <div class="tag-entry"><input [(ngModel)]="compatibleModelInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addCompatibleModel()" placeholder="Enter a model, then press Enter"><button type="button" class="im-btn im-btn--primary im-btn--compact" (click)="addCompatibleModel()">Add</button></div>
             <div class="chips"><button type="button" class="chip removable" *ngFor="let model of compatibleModels" (click)="removeTag('compatibleModels', model)">{{ model }} ×</button></div>
           </div>
           <label class="field">
@@ -157,7 +157,7 @@
           </label>
           <div class="field span-2">
             <span>Refrigerant compatibility</span>
-            <div class="tag-entry"><input [(ngModel)]="refrigerantInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addRefrigerant()" placeholder="Enter R32, R410A, etc."><button type="button" (click)="addRefrigerant()">Add</button></div>
+            <div class="tag-entry"><input [(ngModel)]="refrigerantInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addRefrigerant()" placeholder="Enter R32, R410A, etc."><button type="button" class="im-btn im-btn--primary im-btn--compact" (click)="addRefrigerant()">Add</button></div>
             <div class="chips"><button type="button" class="chip removable" *ngFor="let refrigerant of refrigerants" (click)="removeTag('refrigerants', refrigerant)">{{ refrigerant }} ×</button></div>
           </div>
           <label class="field">
@@ -181,12 +181,12 @@
         </div>
       </section>
 
-      <div class="error-banner" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button" (click)="loadSuppliers()">Retry suppliers</button></div>
-      <footer class="wizard-footer">
-        <button type="button" class="btn-secondary" (click)="previousStep()" [disabled]="currentStep === 1 || isSubmitting">Back</button>
+      <div class="error-banner" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadSuppliers()">Retry suppliers</button></div>
+      <footer class="wizard-footer im-action-group">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="previousStep()" [disabled]="currentStep === 1 || isSubmitting">Back</button>
         <span>Step {{ currentStep }} of {{ totalSteps }}</span>
-        <button type="button" class="btn-primary" *ngIf="currentStep < totalSteps" (click)="nextStep()">Continue</button>
-        <button type="submit" class="btn-primary" *ngIf="currentStep === totalSteps" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Product') }}</button>
+        <button type="button" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep < totalSteps" (click)="nextStep()">Continue</button>
+        <button type="submit" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep === totalSteps" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Product') }}</button>
       </footer>
     </form>
   </ng-container>

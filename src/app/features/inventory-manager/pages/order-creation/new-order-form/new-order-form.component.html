@@ -2,7 +2,7 @@
   <!-- Header Section -->
   <div class="form-header">
     <div class="header-main">
-      <button type="button" class="btn-back" aria-label="Back to order requests" (click)="goBack()">
+      <button type="button" class="btn-back im-btn im-btn--secondary im-btn--icon" aria-label="Back to order requests" (click)="goBack()">
         <lucide-angular name="arrow-left" [size]="20" strokeWidth="2.5"></lucide-angular>
       </button>
       <div class="title-group">
@@ -25,7 +25,7 @@
   <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading order form…</div>
   <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
     <div><strong>Order form unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="loadData()">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()">Retry</button>
   </div>
 
   <div class="split-layout" *ngIf="!loading && !loadError">
@@ -68,12 +68,12 @@
       </div>
 
       <div class="form-footer-actions">
-        <button type="button" class="btn-discard" (click)="goBack()">Discard Changes</button>
+        <button type="button" class="btn-discard im-btn im-btn--ghost" (click)="goBack()">Discard Changes</button>
         <div class="action-group">
-          <button type="button" class="btn-secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+          <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
             {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
           </button>
-          <button type="button" class="btn-primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+          <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>
           </button>

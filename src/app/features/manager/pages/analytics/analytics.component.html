@@ -4,7 +4,7 @@
       <h1 class="page-title">Operational Analytics</h1>
       <p class="page-subtitle">Period performance and the company’s current operational position.</p>
     </div>
-    <div class="header-controls">
+    <div class="header-controls mgr-action-group">
       <span class="status-chip" [class.offline]="!!errorMessage">
         <span class="dot" [class.syncing]="loading"></span>
         {{ loading ? 'Syncing…' : errorMessage ? 'Unavailable' : data?.status || 'Waiting' }}
@@ -20,7 +20,7 @@
           (click)="selectPeriod(period.key)"
         >{{ period.label }}</button>
       </div>
-      <button type="button" class="export-btn" (click)="exportCsv()" [disabled]="!data || loading">
+      <button type="button" class="export-btn mgr-btn mgr-btn--secondary" (click)="exportCsv()" [disabled]="!data || loading">
         <lucide-angular name="download" [size]="16"></lucide-angular>
         Export CSV
       </button>
@@ -30,7 +30,7 @@
   <div class="error-state" *ngIf="errorMessage && !loading" role="alert">
     <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>
     <div><strong>Analytics could not be loaded</strong><p>{{ errorMessage }}</p></div>
-    <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    <button type="button" class="retry-btn mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()">Retry</button>
   </div>
 
   <div class="skeleton-grid" *ngIf="loading && !data" aria-label="Loading analytics">

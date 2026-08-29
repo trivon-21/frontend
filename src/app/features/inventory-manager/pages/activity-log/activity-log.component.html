@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
-      <a class="btn-back" routerLink="/inventory-manager" aria-label="Back to inventory dashboard">
+      <a class="btn-back im-btn im-btn--secondary im-btn--compact" routerLink="/inventory-manager" aria-label="Back to inventory dashboard">
         <lucide-angular name="arrow-left" [size]="20"></lucide-angular>
       </a>
       <div class="title-group">
@@ -21,7 +21,7 @@
 
     <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && errorMessage">
       <div><strong>Activity log unavailable</strong><p>{{ errorMessage }}</p></div>
-      <button type="button" class="portal-retry-button" (click)="load()">Retry</button>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="load()">Retry</button>
     </div>
 
     <div class="empty-state" *ngIf="!loading && !errorMessage && activities.length === 0">

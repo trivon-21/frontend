@@ -1,3 +1,6 @@
+@import './inventory-manager-controls.css';
+@import './manager-portal-ui.css';
+
 .role-portal-shell .alx-table-container {
   width: 100%;
   overflow-x: auto;

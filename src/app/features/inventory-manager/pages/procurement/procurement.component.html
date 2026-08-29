@@ -11,11 +11,11 @@
       </div>
     </div>
     <div class="header-actions">
-      <a class="btn-secondary" routerLink="/inventory-manager/inventory">
+      <a class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/inventory">
         <lucide-angular name="package" [size]="16"></lucide-angular>
         <span>Inventory Items</span>
       </a>
-      <a class="btn-secondary" routerLink="/inventory-manager/order-creation">
+      <a class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/order-creation">
         <lucide-angular name="shopping-cart" [size]="16"></lucide-angular>
         <span>Purchase Orders</span>
       </a>
@@ -35,7 +35,7 @@
   <div class="portal-state" *ngIf="loading">Loading procurement workflow…</div>
   <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
     <div><strong>Procurement unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="loadAllData()">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadAllData()">Retry</button>
   </div>
 
   <!-- Goods Received Note (GRN) Card -->
@@ -267,12 +267,12 @@
 
       <!-- Stepper Controls Footer -->
       <div class="grn-footer">
-        <button type="button" class="btn-back" *ngIf="currentStep > 1" (click)="prevStep()">
+        <button type="button" class="btn-back im-btn im-btn--secondary" *ngIf="currentStep > 1" (click)="prevStep()">
           <lucide-angular name="arrow-left" [size]="16"></lucide-angular>
           <span>Previous Step</span>
         </button>
         <div class="spacer"></div>
-        <button type="button" class="btn-primary" [disabled]="isSubmitting" (click)="nextStep()">
+        <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting" (click)="nextStep()">
           <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Post GRN & Update Stock' : 'Continue' }}</span>
           <span *ngIf="isSubmitting">Posting GRN...</span>
           <lucide-angular name="chevron-right" [size]="16" *ngIf="!isSubmitting && currentStep < 3"></lucide-angular>
@@ -328,7 +328,7 @@
             <span class="detail-badge condition-badge" [class.damaged]="p.condition === 'Damaged'">Condition: {{ p.condition }}</span>
           </div>
         </div>
-        <button class="btn-details" type="button" (click)="viewProcurementDetails(p)">
+        <button class="btn-details im-btn im-btn--secondary im-btn--compact" type="button" (click)="viewProcurementDetails(p)">
           <lucide-angular name="eye" [size]="16"></lucide-angular>
           <span>View Details</span>
         </button>
@@ -349,7 +349,7 @@
           <div class="modal-tag">GRN DETAILS</div>
           <h3 id="grn-details-title">{{ selectedProcurement.sourceDocumentNumber || selectedProcurement.invoiceNumber || 'Receipt Details' }}</h3>
         </div>
-        <button type="button" class="btn-close-modal" aria-label="Close receipt details" (click)="closeDetailsModal()">
+        <button type="button" class="btn-close-modal im-btn im-btn--close" aria-label="Close receipt details" (click)="closeDetailsModal()">
           <lucide-angular name="x" [size]="18"></lucide-angular>
         </button>
       </div>
@@ -365,7 +365,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" (click)="closeDetailsModal()">Close</button>
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeDetailsModal()">Close</button>
       </div>
     </div>
   </div>

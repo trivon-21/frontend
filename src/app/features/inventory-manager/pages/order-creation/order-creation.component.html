@@ -5,7 +5,7 @@
       <h1>Order Creation</h1>
       <p class="subtitle">Create and track purchase order requests for approval.</p>
     </div>
-    <button type="button" class="btn-new-request" (click)="createNewOrder()">
+    <button type="button" class="btn-new-request im-btn im-btn--primary" (click)="createNewOrder()">
       <lucide-angular name="plus" [size]="18" strokeWidth="2.5"></lucide-angular>
       New Order Request
     </button>
@@ -16,18 +16,18 @@
     <div class="alert success" *ngIf="successMessage" role="status" aria-live="polite">
       <lucide-angular name="check" [size]="18"></lucide-angular>
       <span>{{ successMessage }}</span>
-      <button type="button" class="alert-close" aria-label="Dismiss success message" (click)="successMessage = ''">×</button>
+      <button type="button" class="alert-close im-btn im-btn--close" aria-label="Dismiss success message" (click)="successMessage = ''">×</button>
     </div>
     <div class="alert error" *ngIf="errorMessage" role="alert">
       <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
       <span>{{ errorMessage }}</span>
-      <button type="button" class="alert-close" aria-label="Dismiss error message" (click)="errorMessage = ''">×</button>
+      <button type="button" class="alert-close im-btn im-btn--close" aria-label="Dismiss error message" (click)="errorMessage = ''">×</button>
     </div>
 
     <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading orders…</div>
     <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
       <div><strong>Orders unavailable</strong><p>{{ loadError }}</p></div>
-      <button type="button" class="portal-retry-button" (click)="loadData()">Retry</button>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()">Retry</button>
     </div>
   </div>
 
@@ -142,7 +142,7 @@
             <td class="total-cell">{{ formatCurrency(order.totalEstimate) }}</td>
             <td>{{ formatDate(order.createdAt) }}</td>
             <td>
-              <button type="button" class="btn-action-view" [attr.aria-label]="'View order ' + order.requestId">View</button>
+              <button type="button" class="btn-action-view im-btn im-btn--secondary im-btn--compact" [attr.aria-label]="'View order ' + order.requestId">View</button>
             </td>
           </tr>
         </tbody>
@@ -164,7 +164,7 @@
           <h2 id="order-detail-title">Order Details</h2>
           <span class="id-badge">{{ selectedOrder.requestId }}</span>
         </div>
-        <button type="button" class="btn-close-modal" aria-label="Close order details" (click)="closeDetail()" [disabled]="issuing">
+        <button type="button" class="btn-close-modal im-btn im-btn--close" aria-label="Close order details" (click)="closeDetail()" [disabled]="issuing">
           <lucide-angular name="x" [size]="24"></lucide-angular>
         </button>
       </div>
@@ -261,8 +261,8 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-primary-close" *ngIf="selectedOrder.status === 'approved'" (click)="issuePurchaseOrder(selectedOrder)" [disabled]="issuing">{{ issuing ? 'Issuing…' : 'Issue Purchase Order' }}</button>
-        <button type="button" class="btn-primary-close" (click)="closeDetail()">Close</button>
+        <button type="button" class="btn-primary-close im-btn im-btn--primary" *ngIf="selectedOrder.status === 'approved'" (click)="issuePurchaseOrder(selectedOrder)" [disabled]="issuing">{{ issuing ? 'Issuing…' : 'Issue Purchase Order' }}</button>
+        <button type="button" class="btn-primary-close im-btn im-btn--secondary" (click)="closeDetail()">Close</button>
       </div>
     </div>
   </div>

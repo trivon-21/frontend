@@ -44,7 +44,7 @@
             </td>
             <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
             <td class="text-center">
-              <button type="button" class="btn-delete-row" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
+              <button type="button" class="btn-delete-row im-btn im-btn--danger im-btn--compact im-btn--icon" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
                 <lucide-angular name="trash-2" [size]="16"></lucide-angular>
               </button>
             </td>

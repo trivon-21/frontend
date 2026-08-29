@@ -54,7 +54,9 @@ describe('ManagerDashboardComponent presentation contract', () => {
       '/manager/orders?status=pending-manager',
     ]);
     expect(root.querySelector('.live-time')).toBeNull();
-    expect(root.querySelector<HTMLButtonElement>('.btn-new-order')?.textContent).toContain('Open Work Queue');
+    const workQueue = root.querySelector<HTMLButtonElement>('.btn-new-order')!;
+    expect(workQueue.textContent).toContain('Open Work Queue');
+    expect(workQueue.classList).toContain('mgr-btn--primary');
     fixture.destroy();
   });
 
@@ -69,6 +71,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     const retry = root.querySelector<HTMLButtonElement>('.portal-retry-button')!;
     expect(root.querySelector('[role="alert"]')).not.toBeNull();
     expect(retry.disabled).toBeFalse();
+    expect(retry.classList).toContain('mgr-btn--compact');
 
     retry.click();
     fixture.detectChanges();

@@ -23,7 +23,7 @@
             aria-autocomplete="list"
             [attr.aria-expanded]="showItemDropdown">
 
-          <button type="button" class="btn-clear-selection" *ngIf="selectedItem" (click)="clearSelection()" aria-label="Clear selected item" title="Clear selection">
+          <button type="button" class="btn-clear-selection im-btn im-btn--close" *ngIf="selectedItem" (click)="clearSelection()" aria-label="Clear selected item" title="Clear selection">
             <lucide-angular name="x" [size]="18" strokeWidth="2.5"></lucide-angular>
           </button>
         </div>
@@ -64,7 +64,7 @@
             <span class="field-label">SUBTOTAL</span>
             <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
           </div>
-          <button type="button" class="btn-primary" (click)="addLineItem()">ADD TO LIST</button>
+          <button type="button" class="btn-primary im-btn im-btn--primary im-btn--compact" (click)="addLineItem()">ADD TO LIST</button>
         </div>
       </div>
     </div>

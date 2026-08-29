@@ -51,11 +51,11 @@
 
   <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'purchase' && loadError">
     <div><strong>Purchase approvals unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="load()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()" [disabled]="loading">Retry</button>
   </div>
   <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'non-po' && authorizationLoadError">
     <div><strong>Non-PO approvals unavailable</strong><p>{{ authorizationLoadError }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="loadAuthorizations()" [disabled]="authorizationLoading">Retry</button>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadAuthorizations()" [disabled]="authorizationLoading">Retry</button>
   </div>
   <div class="portal-state" *ngIf="activeType === 'purchase' && loading && orders.length === 0">Loading purchase approvals…</div>
   <div class="portal-state" *ngIf="activeType === 'non-po' && authorizationLoading && authorizations.length === 0">Loading Non-PO approvals…</div>
@@ -88,9 +88,9 @@
               <span class="pill status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
             </td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions" *ngIf="o.status === 'pending-manager'">
-                <button type="button" class="mini-btn ok" (click)="approve(o)">Approve</button>
-                <button type="button" class="mini-btn warn" (click)="reject(o)">Reject</button>
+              <div class="row-actions mgr-action-group" *ngIf="o.status === 'pending-manager'">
+                <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="approve(o)">Approve</button>
+                <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="reject(o)">Reject</button>
               </div>
               <span class="muted" *ngIf="o.status === 'approved'">by {{ o.approvedBy || 'Manager' }}</span>
               <span class="muted" *ngIf="o.status === 'rejected'" [title]="o.rejectionReason || ''">Rejected</span>
@@ -139,9 +139,9 @@
             <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
             <td><span class="pill status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions" *ngIf="authorization.status === 'pending'">
-                <button type="button" class="mini-btn ok" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
-                <button type="button" class="mini-btn warn" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
+              <div class="row-actions mgr-action-group" *ngIf="authorization.status === 'pending'">
+                <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
+                <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
               </div>
               <span class="muted" *ngIf="authorization.status !== 'pending'">{{ authorization.financeReviewStatus }}</span>
             </td>
@@ -168,14 +168,14 @@
           <h2 id="decision-dialog-title">{{ target.decision === 'approved' ? 'Approve' : 'Reject' }} {{ target.reference }}</h2>
           <p id="decision-dialog-description">Add the required operational comment. It will be retained if the request fails.</p>
         </div>
-        <button type="button" class="portal-dialog__close" aria-label="Close decision dialog" (click)="closeDecision()" [disabled]="decisionPending">×</button>
+        <button type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close decision dialog" (click)="closeDecision()" [disabled]="decisionPending">×</button>
       </div>
       <label for="decision-comment">Comment</label>
       <textarea #decisionCommentInput id="decision-comment" rows="4" [(ngModel)]="decisionComment" [disabled]="decisionPending" required></textarea>
       <p class="portal-dialog__error" role="alert" *ngIf="decisionError">{{ decisionError }}</p>
-      <div class="portal-dialog__actions">
-        <button type="button" (click)="closeDecision()" [disabled]="decisionPending">Cancel</button>
-        <button type="button" class="primary" (click)="submitDecision()" [disabled]="decisionPending">
+      <div class="portal-dialog__actions mgr-action-group">
+        <button type="button" class="mgr-btn mgr-btn--ghost" (click)="closeDecision()" [disabled]="decisionPending">Cancel</button>
+        <button type="button" class="primary mgr-btn" [class.mgr-btn--primary]="target.decision === 'approved'" [class.mgr-btn--danger]="target.decision === 'rejected'" (click)="submitDecision()" [disabled]="decisionPending">
           {{ decisionPending ? 'Saving…' : (target.decision === 'approved' ? 'Approve' : 'Reject') }}
         </button>
       </div>

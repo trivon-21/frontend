@@ -59,16 +59,16 @@
                   <input type="number" [(ngModel)]="item.editQty" class="inline-qty-input-mini no-spinner" (click)="$event.stopPropagation()">
                 </div>
                 <div class="config-btns">
-                  <button type="button" class="btn-confirm-mini" [attr.aria-label]="'Add ' + item.name + ' to order'" (click)="addFromSuggested(item); $event.stopPropagation()">
+                  <button type="button" class="btn-confirm-mini im-btn im-btn--primary im-btn--compact im-btn--icon" [attr.aria-label]="'Add ' + item.name + ' to order'" (click)="addFromSuggested(item); $event.stopPropagation()">
                     <lucide-angular name="check" [size]="14" strokeWidth="3"></lucide-angular>
                   </button>
-                  <button type="button" class="btn-cancel-mini" [attr.aria-label]="'Cancel adding ' + item.name" (click)="cancelConfiguring(item); $event.stopPropagation()">
+                  <button type="button" class="btn-cancel-mini im-btn im-btn--secondary im-btn--compact im-btn--icon" [attr.aria-label]="'Cancel adding ' + item.name" (click)="cancelConfiguring(item); $event.stopPropagation()">
                     <lucide-angular name="x" [size]="14" strokeWidth="3"></lucide-angular>
                   </button>
                 </div>
               </div>
               <ng-template #addBtn>
-                <button type="button" class="btn-small" (click)="startConfiguring(item); $event.stopPropagation()">
+                <button type="button" class="btn-small im-btn im-btn--primary im-btn--compact" (click)="startConfiguring(item); $event.stopPropagation()">
                   <lucide-angular name="plus" [size]="14" strokeWidth="3"></lucide-angular>
                   <span>Add to Order</span>
                 </button>

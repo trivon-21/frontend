@@ -10,7 +10,7 @@
   <div class="portal-state portal-state--error" *ngIf="errorMessage" role="alert">
     <lucide-angular name="triangle-alert" [size]="22"></lucide-angular>
     <div><strong>Dashboard unavailable</strong><p>{{ errorMessage }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="loadData()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
   </div>
 
   <div class="welcome-banner">
@@ -23,8 +23,8 @@
         </span>
       </div>
     </div>
-    <div class="dashboard-actions">
-      <button class="btn-new-order" routerLink="/manager/work-items">
+    <div class="dashboard-actions mgr-action-group">
+      <button class="btn-new-order mgr-btn mgr-btn--primary" routerLink="/manager/work-items">
         <lucide-angular name="clipboard-list" [size]="16"></lucide-angular>
         Open Work Queue
       </button>
@@ -105,7 +105,7 @@
             <div class="action-header"><span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span><span class="action-type-tag">{{ action.type | uppercase }}</span></div>
             <h3 class="action-title">{{ action.title }}</h3>
             <p class="action-desc">{{ action.description }}</p>
-            <div class="action-footer"><a class="action-btn-primary" [routerLink]="action.route" [queryParams]="action.queryParams">Open</a></div>
+            <div class="action-footer"><a class="action-btn-primary mgr-btn mgr-btn--primary mgr-btn--compact" [routerLink]="action.route" [queryParams]="action.queryParams">Open</a></div>
           </div>
           <div *ngIf="data.pendingActions.length === 0" class="empty-state">No unresolved actions.</div>
         </div>

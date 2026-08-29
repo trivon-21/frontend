@@ -8,14 +8,14 @@
         >The system is currently running in local mode. Live data and updates are unavailable.</span
       >
     </div>
-    <button type="button" class="portal-retry-button" (click)="loadData()" [disabled]="loading">
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">
       {{ loading ? 'Retrying…' : 'Retry' }}
     </button>
   </div>
 
   <div class="portal-state portal-state--error" *ngIf="error" role="alert">
     <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
-    <button type="button" class="portal-retry-button" (click)="loadData()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
   </div>
 
   <!-- Header Section -->
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="dashboard-actions">
-      <button class="btn-new-order" routerLink="/inventory-manager/order-creation">
+      <button class="btn-new-order im-btn im-btn--primary" routerLink="/inventory-manager/order-creation">
         <lucide-angular name="plus" [size]="16"></lucide-angular>
         Create New Order
       </button>
@@ -166,7 +166,7 @@
               <span class="activity-time">{{ activity.timeAgo }}</span>
             </div>
             <div class="activity-actions" *ngIf="activity.actionLabel">
-              <button class="activity-btn" (click)="handleActivityAction(activity)">
+              <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
                 {{ activity.actionLabel }}
               </button>
             </div>

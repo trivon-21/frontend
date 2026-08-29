@@ -183,33 +183,6 @@
   justify-content: flex-end;
 }
 
-.mini-btn {
-  border: 1px solid var(--border-light);
-  background: var(--background-card);
-  color: var(--text-secondary);
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.mini-btn:hover {
-  background: var(--background-hover);
-  color: var(--text-primary);
-}
-
-.mini-btn.ok:hover {
-  border-color: #1f7a45;
-  color: #1f7a45;
-}
-
-.mini-btn.warn:hover {
-  border-color: #c2371f;
-  color: #c2371f;
-}
-
 .row-updating {
   opacity: 0.55;
 }
@@ -278,7 +251,6 @@
 }
 
 .chip:focus-visible,
-.mini-btn:focus-visible,
 .detail-box a:focus-visible {
   outline: 2px solid #00843d;
   outline-offset: 2px;
