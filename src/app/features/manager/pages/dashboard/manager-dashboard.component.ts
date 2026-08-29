@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -11,7 +11,7 @@ import { ManagerDashboardData, ManagerDashboardService } from '../../services/ma
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
-export class ManagerDashboardComponent implements OnInit, OnDestroy {
+export class ManagerDashboardComponent implements OnInit {
   data: ManagerDashboardData = {
     managerName: 'Manager',
     currentDate: new Date(),
@@ -33,19 +33,10 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
   };
   loading = true;
   errorMessage = '';
-  private timer?: ReturnType<typeof setInterval>;
-
   constructor(private dashboardService: ManagerDashboardService) {}
 
   ngOnInit(): void {
     this.loadData();
-    this.timer = setInterval(() => {
-      if (this.data) this.data.currentDate = new Date();
-    }, 60000);
-  }
-
-  ngOnDestroy(): void {
-    if (this.timer) clearInterval(this.timer);
   }
 
   loadData(): void {
@@ -61,14 +52,6 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
     });
-  }
-
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
-  formatTime(date: Date): string {
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   }
 
   getActivityIcon(type: string): string {

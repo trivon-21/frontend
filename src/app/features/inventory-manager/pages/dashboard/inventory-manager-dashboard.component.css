@@ -127,26 +127,9 @@
   background: var(--error);
 }
 
-.time-date-section {
+.dashboard-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  gap: 4px;
-}
-
-.live-time {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary-main);
-  line-height: 1;
-  letter-spacing: -0.5px;
-}
-
-.live-date {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
+  align-items: center;
 }
 
 .btn-new-order {
@@ -163,7 +146,6 @@
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
-  margin-top: 8px;
   white-space: nowrap;
 }
 

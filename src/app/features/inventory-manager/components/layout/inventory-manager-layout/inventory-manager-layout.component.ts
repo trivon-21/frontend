@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
+import { HeaderClockComponent } from '../../../../../shared/components/header-clock/header-clock.component';
 
 @Component({
   selector: 'app-inventory-manager-layout',
@@ -15,6 +16,7 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
     CommonModule,
     PortalIconsModule,
     ClickOutsideDirective,
+    HeaderClockComponent,
   ],
   templateUrl: './inventory-manager-layout.component.html',
   styleUrls: [

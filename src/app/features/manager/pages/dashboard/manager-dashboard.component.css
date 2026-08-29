@@ -59,23 +59,15 @@
 .status-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentcolor; }
 .dot.syncing { animation: pulse 1.2s ease-in-out infinite; }
 
-.time-date-section {
-  display: grid;
-  grid-template-columns: auto auto;
+.dashboard-actions {
+  display: flex;
   align-items: center;
-  justify-items: end;
-  column-gap: 10px;
 }
 
-.live-time { grid-row: 1; color: #00843d; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.live-date { grid-row: 1; color: #8a9e96; font-size: 12px; font-weight: 500; }
-
 .btn-new-order {
-  grid-column: 1 / -1;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
   padding: 9px 20px;
   border: 0;
   border-radius: 10px;
@@ -232,6 +224,6 @@
 
 @media (max-width: 760px) {
   .welcome-banner { flex-direction: column; }
-  .time-date-section { justify-items: start; }
+  .dashboard-actions { align-self: flex-start; }
   .inventory-kpi-row { grid-template-columns: 1fr; }
 }

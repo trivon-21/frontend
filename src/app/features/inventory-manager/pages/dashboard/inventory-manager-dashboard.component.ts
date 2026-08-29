@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import {
@@ -16,7 +16,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   templateUrl: './inventory-manager-dashboard.component.html',
   styleUrl: './inventory-manager-dashboard.component.css',
 })
-export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
+export class InventoryManagerDashboardComponent implements OnInit {
   data: InventoryDashboardData = {
     managerName: 'Manager',
     currentDate: new Date(),
@@ -33,8 +33,6 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
   };
   loading = false; // Structure should load immediately
   error: string | null = null;
-  private timer: any;
-
   constructor(
     private dashboardService: InventoryManagerDashboardService,
     private iconMappingService: IconMappingService,
@@ -43,18 +41,6 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
-    // Update time every minute for real-world accuracy
-    this.timer = setInterval(() => {
-      if (this.data) {
-        this.data.currentDate = new Date();
-      }
-    }, 60000);
-  }
-
-  ngOnDestroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
   }
 
   loadData(): void {
@@ -69,23 +55,6 @@ export class InventoryManagerDashboardComponent implements OnInit, OnDestroy {
         this.error = err.error?.message || 'Failed to load dashboard data';
         this.loading = false;
       },
-    });
-  }
-
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  }
-
-  formatTime(date: Date): string {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
     });
   }
 

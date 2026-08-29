@@ -51,6 +51,9 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
       '/inventory-manager/asset-management',
       '/inventory-manager/inventory',
     ]);
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.live-time')).toBeNull();
+    expect(root.querySelector<HTMLButtonElement>('.btn-new-order')?.textContent).toContain('Create New Order');
     fixture.destroy();
   });
 

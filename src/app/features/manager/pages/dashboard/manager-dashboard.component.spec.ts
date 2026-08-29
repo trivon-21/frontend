@@ -53,6 +53,8 @@ describe('ManagerDashboardComponent presentation contract', () => {
       '/manager/work-items?sla=overdue',
       '/manager/orders?status=pending-manager',
     ]);
+    expect(root.querySelector('.live-time')).toBeNull();
+    expect(root.querySelector<HTMLButtonElement>('.btn-new-order')?.textContent).toContain('Open Work Queue');
     fixture.destroy();
   });
 

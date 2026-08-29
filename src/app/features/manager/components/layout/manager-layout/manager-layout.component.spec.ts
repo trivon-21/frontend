@@ -92,4 +92,12 @@ describe('ManagerLayoutComponent presentation contract', () => {
     expect(authService.logout).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
+
+  it('places the live clock immediately before the user menu', () => {
+    const root = fixture.nativeElement as HTMLElement;
+    const actions = root.querySelector('.header-actions')!;
+
+    expect(actions.children[0].tagName.toLowerCase()).toBe('app-header-clock');
+    expect(actions.children[1].classList.contains('user-menu-container')).toBeTrue();
+  });
 });
