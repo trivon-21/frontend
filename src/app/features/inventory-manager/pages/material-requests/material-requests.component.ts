@@ -2,23 +2,39 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
+import { Router } from '@angular/router';
 
 interface MaterialItem {
+  lineId: string;
+  inventoryId: string;
   name: string;
   qty: number;
   confirmed: boolean;
   sku: string;
+  available: number;
+  shortage: number;
+  unit: string;
+  unitCost?: number;
+  itemClass?: string;
+  subcategory?: string;
+  manufacturerPartNumber?: string;
+  supplierId?: string;
+  supplierName?: string;
 }
 
 interface MaterialRequest {
   id: string;
   requestId?: string; // from backend
+  sourceMaterialRequestId: string;
   requester: string;
   date: string;
   location: string;
   status: 'pending' | 'reserved' | 'completed';
   items: MaterialItem[];
-  serviceTeam?: string;
+  assignedTeamId?: string;
+  assignedTeamName?: string;
+  hasShortage?: boolean;
+  statusVersion: number;
   completedAt?: string;
   lastMovedAt?: string;
 }
@@ -48,15 +64,13 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   sortField: 'name' | 'time' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  isEditingTeam = false;
-  editServiceTeam = '';
   validationMessage = '';
 
   pendingRequests: MaterialRequest[] = [];
   reservedRequests: MaterialRequest[] = [];
   completedRequests: MaterialRequest[] = [];
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router?: Router) {}
 
   ngOnInit() {
     this.fetchRequests();
@@ -70,12 +84,16 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       // Map backend model to frontend model
       const requests: MaterialRequest[] = data.map((r: any) => ({
         id: r.requestId,
+        sourceMaterialRequestId: r.sourceMaterialRequestId,
         requester: r.requester,
         date: r.date,
         location: r.location,
         status: r.status,
         items: r.items,
-        serviceTeam: r.serviceTeam,
+        assignedTeamId: r.assignedTeamId,
+        assignedTeamName: r.assignedTeamName,
+        hasShortage: r.hasShortage,
+        statusVersion: r.statusVersion || 0,
         completedAt: r.completedAt,
         lastMovedAt: r.lastMovedAt,
       }));
@@ -145,14 +163,9 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   openModal(id: string) {
     this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.selectedRequestId = id;
-    this.isEditingTeam = false;
-    this.editServiceTeam = '';
     const source = [...this.pendingRequests, ...this.reservedRequests, ...this.completedRequests].find((r) => r.id === id);
     this.dialogRequest = source ? structuredClone(source) : null;
     const req = this.dialogRequest;
-    if (req && req.serviceTeam) {
-      this.editServiceTeam = req.serviceTeam;
-    }
     this.showModal = true;
     this.mutationError = '';
   }
@@ -168,68 +181,35 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   confirmItem(item: MaterialItem) {
-    item.confirmed = !item.confirmed;
-  }
-
-  saveStatus() {
-    if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
-    if (req) {
-      this.saving = true;
-      this.mutationError = '';
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, { items: req.items }).subscribe({
-        next: () => { this.saving = false; this.fetchRequests(); this.closeModal(); },
-        error: (error) => { this.saving = false; this.mutationError = error.error?.message || 'The reservation changes could not be saved.'; },
-      });
-    }
-  }
-
-  enableEditTeam() {
-    const req = this.selectedRequest;
-    if (req) {
-      this.isEditingTeam = true;
-      this.editServiceTeam = req.serviceTeam || '';
-    }
-  }
-
-  cancelEditTeam() {
-    this.isEditingTeam = false;
-  }
-
-  saveServiceTeam() {
-    if (!this.selectedRequestId || this.saving) return;
-    const req = this.selectedRequest;
-    if (req) {
-      this.saving = true;
-      this.mutationError = '';
-      this.apiService
-        .patch(`/inventory/material-requests/${req.id}`, { serviceTeam: this.editServiceTeam })
-        .subscribe({
-          next: () => {
-            this.saving = false;
-            req.serviceTeam = this.editServiceTeam;
-            this.fetchRequests();
-            this.isEditingTeam = false;
-          },
-          error: (error) => {
-            this.saving = false;
-            this.mutationError = error.error?.message || 'The service team could not be saved.';
-          },
-        });
-    }
+    if (!req || this.saving) return;
+    const confirmed = !item.confirmed;
+    this.saving = true;
+    this.mutationError = '';
+    this.apiService.patch(`/inventory/material-requests/${req.id}/items/${item.lineId}`, {
+      confirmed,
+      statusVersion: req.statusVersion,
+    }).subscribe({
+      next: (updated: any) => {
+        this.saving = false;
+        item.confirmed = confirmed;
+        req.statusVersion = updated.statusVersion;
+        this.fetchRequests();
+      },
+      error: error => {
+        this.saving = false;
+        this.mutationError = error.error?.message || 'The material confirmation could not be saved.';
+      },
+    });
   }
 
   markKitted() {
     if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req && req.items.every((i) => i.confirmed)) {
-      const updateData = {
-        status: 'reserved',
-        lastMovedAt: new Date().toISOString(),
-      };
       this.saving = true;
       this.mutationError = '';
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+      this.apiService.post(`/inventory/material-requests/${req.id}/reserve`, { statusVersion: req.statusVersion }).subscribe({
         next: () => {
           this.saving = false;
           this.setActiveTab('reserved');
@@ -251,19 +231,14 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     if (!this.selectedRequestId || this.saving) return;
     const req = this.selectedRequest;
     if (req) {
-      if (!req.serviceTeam) {
-        this.validationMessage = 'Please assign a service team first.';
+      if (!req.assignedTeamId) {
+        this.validationMessage = 'The Main Technician must assign a service team first.';
         setTimeout(() => this.validationMessage = '', 4000);
         return;
       }
-      const updateData = {
-        status: 'completed',
-        completedAt: new Date().toISOString().split('T')[0],
-        lastMovedAt: new Date().toISOString(),
-      };
       this.saving = true;
       this.mutationError = '';
-      this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+      this.apiService.post(`/inventory/material-requests/${req.id}/handover`, { statusVersion: req.statusVersion }).subscribe({
         next: () => {
           this.saving = false;
           this.setActiveTab('completed');
@@ -279,10 +254,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   canUndo(req: MaterialRequest | undefined): boolean {
-    if (!req || !req.lastMovedAt) return false;
-    const movedTime = new Date(req.lastMovedAt).getTime();
-    const currentTime = new Date().getTime();
-    return currentTime - movedTime <= 3600000;
+    return req?.status === 'reserved';
   }
 
   undoAction() {
@@ -290,23 +262,14 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     const req = this.selectedRequest;
     if (!req) return;
 
-    let updateData: any = {};
-    let targetTab: 'pending' | 'reserved' | 'completed' = 'pending';
-
-    if (req.status === 'completed') {
-      updateData = { status: 'reserved', completedAt: null, lastMovedAt: null };
-      targetTab = 'reserved';
-    } else if (req.status === 'reserved') {
-      updateData = { status: 'pending', lastMovedAt: null };
-      targetTab = 'pending';
-    }
+    if (req.status !== 'reserved') return;
 
     this.saving = true;
     this.mutationError = '';
-    this.apiService.patch(`/inventory/material-requests/${req.id}`, updateData).subscribe({
+    this.apiService.post(`/inventory/material-requests/${req.id}/release`, { statusVersion: req.statusVersion }).subscribe({
       next: () => {
         this.saving = false;
-        this.setActiveTab(targetTab);
+        this.setActiveTab('pending');
         this.fetchRequests();
         this.closeModal();
       },
@@ -314,6 +277,41 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         this.saving = false;
         this.mutationError = error.error?.message || 'The transition could not be undone.';
       },
+    });
+  }
+
+  canReserve(req: MaterialRequest | undefined): boolean {
+    return Boolean(req?.items.length && !req.hasShortage && req.items.every(item => item.confirmed));
+  }
+
+  get shortageSuppliers(): Array<{ id: string; name: string }> {
+    const groups = new Map<string, string>();
+    for (const item of this.selectedRequest?.items || []) {
+      if (item.shortage > 0) groups.set(item.supplierId || '', item.supplierName || 'Unassigned supplier');
+    }
+    return [...groups].map(([id, name]) => ({ id, name }));
+  }
+
+  createShortageOrder(supplierId?: string): void {
+    const req = this.selectedRequest;
+    if (!req?.hasShortage) return;
+    const shortageItems = req.items
+      .filter(item => item.shortage > 0 && (supplierId === undefined || (item.supplierId || '') === supplierId))
+      .map(item => ({
+      _id: item.inventoryId,
+      name: item.name,
+      sku: item.sku,
+      suggestedQuantity: item.shortage,
+      unit: item.unit,
+      unitCost: item.unitCost,
+      itemClass: item.itemClass,
+      subcategory: item.subcategory,
+      manufacturerPartNumber: item.manufacturerPartNumber,
+      supplierId: item.supplierId,
+      supplierName: item.supplierName,
+      }));
+    this.router?.navigate(['/inventory-manager/order-creation/new'], {
+      state: { shortageItems, sourceMaterialRequestId: req.sourceMaterialRequestId },
     });
   }
 

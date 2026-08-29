@@ -102,6 +102,7 @@
               <div class="detail-box">
                 <div class="detail-title">
                   Requested by {{ o.requestedBy }} · {{ o.items.length }} item(s)
+                  <span *ngIf="o.source === 'material-request'"> · Material shortage {{ o.sourceMaterialRequestId }}</span>
                   <span *ngIf="o.status === 'rejected' && o.rejectionReason" class="reject-note">
                     Reason: {{ o.rejectionReason }}
                   </span>

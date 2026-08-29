@@ -48,6 +48,7 @@ export class NewOrderFormComponent implements OnInit {
   isEditMode = false;
   orderId: string | null = null;
   statusVersion = 0;
+  sourceMaterialRequestId = '';
 
   constructor(
     private orderCreationService: OrderCreationService,
@@ -60,6 +61,33 @@ export class NewOrderFormComponent implements OnInit {
 
     // Check for suggested item passed via router state
     const navState = history.state;
+    this.sourceMaterialRequestId = navState?.sourceMaterialRequestId || '';
+    if (Array.isArray(navState?.shortageItems)) {
+      const firstSupplier = navState.shortageItems.find((item: any) => item.supplierId)?.supplierId;
+      const compatibleItems = firstSupplier
+        ? navState.shortageItems.filter((item: any) => !item.supplierId || item.supplierId === firstSupplier)
+        : navState.shortageItems;
+      for (const item of compatibleItems) {
+        this.orderItems.push({
+          inventoryId: item._id,
+          name: item.name,
+          sku: item.sku,
+          quantity: item.suggestedQuantity || 1,
+          unitCost: item.unitCost || 0,
+          estimatedTotal: (item.suggestedQuantity || 1) * (item.unitCost || 0),
+          itemClass: item.itemClass || 'Unclassified',
+          subcategory: item.subcategory || 'Unclassified',
+          unit: item.unit || 'units',
+          manufacturerPartNumber: item.manufacturerPartNumber || '',
+          supplierId: item.supplierId,
+          supplierName: item.supplierName,
+        });
+      }
+      if (compatibleItems.length) this.selectPreferredSupplier(compatibleItems[0]);
+      if (compatibleItems.length !== navState.shortageItems.length) {
+        this.errorMessage = 'This order contains one supplier. Create another linked order for shortages from other suppliers.';
+      }
+    }
     if (navState?.suggestedItem) {
       const item = navState.suggestedItem;
       this.orderItems.push({
@@ -266,7 +294,8 @@ export class NewOrderFormComponent implements OnInit {
       supplierName: this.selectedSupplier,
       supplierId: supplier?._id,
       notes: this.orderNotes,
-      source: 'manual',
+      source: this.sourceMaterialRequestId ? 'material-request' : 'manual',
+      ...(this.sourceMaterialRequestId ? { sourceMaterialRequestId: this.sourceMaterialRequestId } : {}),
       ...(this.isEditMode ? { expectedVersion: this.statusVersion } : {}),
     };
   }

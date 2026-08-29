@@ -73,6 +73,10 @@
       <div class="kpi-details"><span class="kpi-value">{{ data.inventoryKpis.reservedItems.value }}</span><span class="kpi-label">Reserved Items</span></div>
     </div>
     <div class="kpi-mini-card">
+      <div class="kpi-icon-wrapper alert" [class.critical]="data.inventoryKpis.blockedMaterialRequests.value > 0"><lucide-angular name="triangle-alert" [size]="20"></lucide-angular></div>
+      <div class="kpi-details"><span class="kpi-value" [class.critical-text]="data.inventoryKpis.blockedMaterialRequests.value > 0">{{ data.inventoryKpis.blockedMaterialRequests.value }}</span><span class="kpi-label">Blocked Material Requests</span></div>
+    </div>
+    <div class="kpi-mini-card">
       <div class="kpi-icon-wrapper alert" [class.critical]="data.inventoryKpis.lowStockAlerts.value > 0"><lucide-angular name="triangle-alert" [size]="20"></lucide-angular></div>
       <div class="kpi-details"><span class="kpi-value" [class.critical-text]="data.inventoryKpis.lowStockAlerts.value > 0">{{ data.inventoryKpis.lowStockAlerts.value }}</span><span class="kpi-label">Low Stock Alerts</span></div>
     </div>

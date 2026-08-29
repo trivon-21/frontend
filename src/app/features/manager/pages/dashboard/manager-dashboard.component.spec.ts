@@ -19,6 +19,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
       reservedItems: { label: 'Reserved Items', value: 4, icon: 'clipboard-check' },
       lowStockAlerts: { label: 'Low Stock Alerts', value: 2, icon: 'triangle-alert' },
       pendingMaterialRequests: { label: 'Pending Material Requests', value: 5, icon: 'package' },
+      blockedMaterialRequests: { label: 'Blocked Material Requests', value: 1, icon: 'triangle-alert' },
     },
     recentActivity: [],
     pendingActions: [],

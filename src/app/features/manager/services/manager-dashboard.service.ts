@@ -53,6 +53,7 @@ export interface ManagerDashboardData {
     reservedItems: InventoryKpiItem;
     lowStockAlerts: InventoryKpiItem;
     pendingMaterialRequests: InventoryKpiItem;
+    blockedMaterialRequests: InventoryKpiItem;
   };
   recentActivity: ActivityItem[];
   pendingActions: PendingAction[];

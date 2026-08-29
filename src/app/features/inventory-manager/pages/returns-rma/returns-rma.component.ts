@@ -10,6 +10,7 @@ import {
   LeftoverReturnItem,
   RmaCaseItem,
   QuarantineItemData,
+  HandedOverMaterialRequest,
 } from '../../services/inventory-manager-dashboard.service';
 
 @Component({
@@ -41,6 +42,9 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   // Leftover return form
   leftoverForm = {
     jobId: '',
+    warehousePickRequestId: '',
+    warehouseLineId: '',
+    statusVersion: 0,
     itemName: '',
     itemId: '',
     itemSku: '',
@@ -48,6 +52,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     condition: 'good' as 'good' | 'damaged' | 'scrap',
     notes: '',
   };
+  handedOverRequests: HandedOverMaterialRequest[] = [];
 
   // Item autocomplete
   inventoryItems: InventoryItem[] = [];
@@ -106,6 +111,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       rmaCases: this.dashboardService.getRmaCases(),
       quarantineItems: this.dashboardService.getQuarantineItems(),
       inventoryItems: this.dashboardService.getInventory(),
+      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(),
     }).subscribe({
       next: (data) => {
         this.summary = data.summary;
@@ -113,6 +119,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
         this.rmaCases = data.rmaCases;
         this.quarantineItems = data.quarantineItems;
         this.inventoryItems = data.inventoryItems;
+        this.handedOverRequests = data.handedOverRequests;
         this.loading = false;
       },
       error: () => {
@@ -127,6 +134,27 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   // ── Leftover Return Form ──
+
+  get selectedHandover(): HandedOverMaterialRequest | undefined {
+    return this.handedOverRequests.find(request => request.requestId === this.leftoverForm.warehousePickRequestId);
+  }
+
+  selectHandover(requestId: string): void {
+    const request = this.handedOverRequests.find(item => item.requestId === requestId);
+    this.leftoverForm.jobId = request?.jobId || '';
+    this.leftoverForm.statusVersion = request?.statusVersion || 0;
+    this.leftoverForm.warehouseLineId = '';
+    this.leftoverForm.itemId = '';
+    this.leftoverForm.itemName = '';
+    this.leftoverForm.itemSku = '';
+  }
+
+  selectHandoverLine(lineId: string): void {
+    const line = this.selectedHandover?.items.find(item => item.lineId === lineId);
+    this.leftoverForm.itemId = line?.inventoryId || '';
+    this.leftoverForm.itemName = line?.name || '';
+    this.leftoverForm.itemSku = line?.sku || '';
+  }
 
   onItemSearch(query: string): void {
     this.leftoverForm.itemName = query;
@@ -161,6 +189,8 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   get isLeftoverFormValid(): boolean {
     return (
       this.leftoverForm.jobId.trim().length > 0 &&
+      this.leftoverForm.warehousePickRequestId.trim().length > 0 &&
+      this.leftoverForm.warehouseLineId.trim().length > 0 &&
       this.leftoverForm.itemName.trim().length > 0 &&
       this.leftoverForm.quantityReturned > 0 &&
       !!this.leftoverForm.condition
@@ -192,6 +222,9 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   resetLeftoverForm(): void {
     this.leftoverForm = {
       jobId: '',
+      warehousePickRequestId: '',
+      warehouseLineId: '',
+      statusVersion: 0,
       itemName: '',
       itemId: '',
       itemSku: '',

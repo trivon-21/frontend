@@ -44,6 +44,8 @@ export interface PurchaseRequest {
   operationalApproval?: PurchaseDecision;
   financialApproval?: PurchaseDecision;
   decisionHistory?: PurchaseDecisionHistory[];
+  source?: 'manual' | 'low-stock' | 'material-request';
+  sourceMaterialRequestId?: string;
 }
 
 export interface PurchaseDecision {

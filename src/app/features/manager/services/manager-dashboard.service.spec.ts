@@ -40,6 +40,7 @@ describe('ManagerDashboardService', () => {
         reservedItems: { label: 'Reserved', value: 2, icon: 'package' },
         lowStockAlerts: { label: 'Low stock', value: 1, icon: 'alert' },
         pendingMaterialRequests: { label: 'Pending', value: 3, icon: 'clipboard' },
+        blockedMaterialRequests: { label: 'Blocked', value: 1, icon: 'alert' },
       },
       recentActivity: [
         {

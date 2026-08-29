@@ -204,6 +204,12 @@ export class InventoryManagerDashboardService {
     return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`);
   }
 
+  getHandedOverMaterialRequests(): Observable<HandedOverMaterialRequest[]> {
+    return this.http.get<HandedOverMaterialRequest[]>(`${this.apiUrl}/material-requests`).pipe(
+      map(requests => requests.filter(request => request.status === 'completed')),
+    );
+  }
+
   createLeftoverReturn(data: any): Observable<LeftoverReturnItem> {
     return this.http.post<LeftoverReturnItem>(`${this.apiUrl}/leftover-returns`, data);
   }
@@ -255,6 +261,24 @@ export interface LeftoverReturnItem {
   restoredToStock: boolean;
   movedToQuarantine: boolean;
   createdAt: string;
+}
+
+export interface HandedOverMaterialLine {
+  lineId: string;
+  inventoryId: string;
+  name: string;
+  sku: string;
+  qty: number;
+}
+
+export interface HandedOverMaterialRequest {
+  _id: string;
+  requestId: string;
+  jobId: string;
+  status: 'completed';
+  assignedTeamName?: string;
+  statusVersion: number;
+  items: HandedOverMaterialLine[];
 }
 
 export interface RmaCaseItem {
