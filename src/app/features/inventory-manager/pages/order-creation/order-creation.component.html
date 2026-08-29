@@ -1,0 +1,269 @@
+<div class="order-creation-container">
+  <!-- Header Section -->
+  <div class="header">
+    <div class="header-content">
+      <h1>Order Creation</h1>
+      <p class="subtitle">Create and track purchase order requests for approval.</p>
+    </div>
+    <button type="button" class="btn-new-request im-btn im-btn--primary" (click)="createNewOrder()">
+      <lucide-angular name="plus" [size]="18" strokeWidth="2.5"></lucide-angular>
+      New Order Request
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alerts-container">
+    <div class="alert success" *ngIf="successMessage" role="status" aria-live="polite">
+      <lucide-angular name="check" [size]="18"></lucide-angular>
+      <span>{{ successMessage }}</span>
+      <button type="button" class="alert-close im-btn im-btn--close" aria-label="Dismiss success message" (click)="successMessage = ''">×</button>
+    </div>
+    <div class="alert error" *ngIf="errorMessage" role="alert">
+      <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
+      <span>{{ errorMessage }}</span>
+      <button type="button" class="alert-close im-btn im-btn--close" aria-label="Dismiss error message" (click)="errorMessage = ''">×</button>
+    </div>
+
+    <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading orders…</div>
+    <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+      <div><strong>Orders unavailable</strong><p>{{ loadError }}</p></div>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()">Retry</button>
+    </div>
+  </div>
+
+  <div class="dashboard-top-grid">
+    <!-- Suggested Orders Card -->
+    <div class="suggested-card" *ngIf="suggestedItems.length > 0">
+      <div class="card-header">
+        <div class="title-row">
+          <lucide-angular name="triangle-alert" class="warning-icon" [size]="20"></lucide-angular>
+          <h2>Suggested Orders</h2>
+        </div>
+        <span class="status-info">{{ suggestedItems.length }} Low Stock Items</span>
+      </div>
+
+      <div class="suggested-list">
+        <div class="suggested-item" *ngFor="let item of suggestedItems">
+          <div class="item-main">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</span>
+            <span class="item-sku">{{ supplierName(item) }}</span>
+          </div>
+          <div class="item-stock">
+            <div class="stock-label-group">
+              <span class="label">Stock Level</span>
+              <span class="value" [class.critical]="item.available <= item.reorderLevel/2">
+                {{ item.available }} / {{ item.reorderLevel }} {{ item.unit }}
+              </span>
+            </div>
+            <div class="stock-label-group">
+              <span class="label">Suggested</span>
+              <span class="value">{{ item.suggestedQuantity || 1 }} {{ item.unit }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Drafts Card -->
+    <div class="drafts-card">
+      <div class="card-header">
+        <div class="title-row">
+          <lucide-angular name="file-text" class="draft-icon" [size]="20" strokeWidth="2.5"></lucide-angular>
+          <h2>Saved Drafts</h2>
+        </div>
+        <span class="status-info">{{ draftOrders.length }} Drafts Found</span>
+      </div>
+      <div class="drafts-list">
+        <button type="button" class="draft-item" *ngFor="let draft of draftOrders" (click)="openDetail(draft)">
+          <div class="draft-main">
+            <span class="draft-id">{{ draft.requestId }}</span>
+            <span class="draft-vendor">{{ draft.supplierName }}</span>
+          </div>
+          <div class="draft-meta">
+            <span class="draft-price">{{ formatCurrency(draft.totalEstimate) }}</span>
+            <span class="draft-date">{{ formatDate(draft.createdAt) }}</span>
+          </div>
+        </button>
+        <div class="empty-mini-state" *ngIf="draftOrders.length === 0">
+          <p>No drafts saved at the moment.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tracking Section -->
+  <div class="tracking-section">
+    <!-- Tabs -->
+    <div class="tabs-nav" role="tablist" aria-label="Order status">
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending'" [class.active]="activeTab === 'pending'" (click)="setActiveTab('pending')">
+        Awaiting Approval
+      </button>
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'approved'" [class.active]="activeTab === 'approved'" (click)="setActiveTab('approved')">
+        Approved
+      </button>
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'receiving'" [class.active]="activeTab === 'receiving'" (click)="setActiveTab('receiving')">
+        Ordered / Receiving
+      </button>
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'received'" [class.active]="activeTab === 'received'" (click)="setActiveTab('received')">
+        Completed
+      </button>
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'rejected'" [class.active]="activeTab === 'rejected'" (click)="setActiveTab('rejected')">
+        Rejected
+      </button>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="table-header">
+      <div class="search-wrapper">
+        <lucide-angular name="search" class="search-icon" [size]="18"></lucide-angular>
+        <input type="text" [(ngModel)]="searchQuery" aria-label="Search orders" placeholder="Search by Order ID, Supplier...">
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card" *ngIf="!loading && !loadError">
+      <table class="orders-table" *ngIf="currentOrders.length > 0">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>SUPPLIER</th>
+            <th>ITEMS</th>
+            <th>ESTIMATED TOTAL</th>
+            <th>DATE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of currentOrders" (click)="openDetail(order)">
+            <td class="id-cell">{{ order.requestId }}</td>
+            <td>{{ order.supplierName }}</td>
+            <td>{{ order.items.length }} Items</td>
+            <td class="total-cell">{{ formatCurrency(order.totalEstimate) }}</td>
+            <td>{{ formatDate(order.createdAt) }}</td>
+            <td>
+              <button type="button" class="btn-action-view im-btn im-btn--secondary im-btn--compact" [attr.aria-label]="'View order ' + order.requestId">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="currentOrders.length === 0" role="status">
+        <div class="empty-icon-wrap">
+          <lucide-angular name="info" [size]="48" strokeWidth="1.5"></lucide-angular>
+        </div>
+        <p>No {{ getStatusLabel(activeTab) | lowercase }} orders found.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" *ngIf="showDetailModal && selectedOrder" (click)="closeDetail()">
+    <div class="modal-content detail-modal" role="dialog" aria-modal="true" aria-labelledby="order-detail-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="title-group">
+          <h2 id="order-detail-title">Order Details</h2>
+          <span class="id-badge">{{ selectedOrder.requestId }}</span>
+        </div>
+        <button type="button" class="btn-close-modal im-btn im-btn--close" aria-label="Close order details" (click)="closeDetail()" [disabled]="issuing">
+          <lucide-angular name="x" [size]="24"></lucide-angular>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Summary Stats Grid -->
+        <div class="detail-summary-grid">
+          <div class="summary-box">
+            <span class="label">Vendor</span>
+            <span class="value">{{ selectedOrder.supplierName }}</span>
+          </div>
+          <div class="summary-box">
+            <span class="label">Total Estimate</span>
+            <span class="value price">{{ formatCurrency(selectedOrder.totalEstimate) }}</span>
+          </div>
+          <div class="summary-box">
+            <span class="label">Status</span>
+            <span class="value status-val" [class]="selectedOrder.status">
+              {{ getStatusLabel(selectedOrder.status) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Secondary Info Row -->
+        <div class="secondary-info-row">
+          <div class="info-item">
+            <span class="label">Requested By:</span>
+            <span class="val">{{ selectedOrder.requestedBy }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Requested On:</span>
+            <span class="val">{{ formatDate(selectedOrder.createdAt) }}</span>
+          </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="detail-notes-section" *ngIf="selectedOrder.notes">
+          <label>NOTES / JUSTIFICATION</label>
+          <p>{{ selectedOrder.notes }}</p>
+        </div>
+
+        <!-- Items Table -->
+        <div class="detail-items-container">
+          <label class="section-label">ORDERED ITEMS</label>
+          <table class="detail-items-table">
+            <thead>
+              <tr>
+                <th>ITEM</th>
+                <th>SKU</th>
+                <th class="text-center">QTY</th>
+                <th class="text-right">UNIT PRICE</th>
+                <th class="text-right">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td class="name">{{ item.name }}</td>
+                <td class="sku">{{ item.sku }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-right">{{ formatCurrency(item.unitCost) }}</td>
+                <td class="text-right price">{{ formatCurrency(item.quantity * item.unitCost) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="detail-notes-section" *ngIf="selectedOrder.decisionHistory?.length">
+          <label>DECISION HISTORY</label>
+          <div *ngFor="let decision of selectedOrder.decisionHistory">
+            <strong>{{ decision.stage | titlecase }} · {{ decision.decision | titlecase }}</strong>
+            <p>{{ decision.comment || 'No comment recorded' }}<span *ngIf="decision.actorName"> · {{ decision.actorName }}</span></p>
+            <small>{{ formatDate(decision.at) }}</small>
+          </div>
+        </div>
+
+        <!-- Rejection / Approval Info -->
+        <div class="status-footer-alert rejected" *ngIf="selectedOrder.status === 'rejected'">
+          <div class="alert-icon">!</div>
+          <div class="alert-content">
+            <strong>Rejection Reason:</strong>
+            <p>{{ selectedOrder.rejectionReason }}</p>
+            <small>Rejected on {{ formatDate(selectedOrder.rejectedAt) }}</small>
+          </div>
+        </div>
+
+        <div class="status-footer-alert approved" *ngIf="selectedOrder.status === 'approved'">
+          <div class="alert-icon">✓</div>
+          <div class="alert-content">
+            <strong>Order Approved</strong>
+            <p>Approved by <strong>{{ selectedOrder.approvedBy }}</strong> on {{ formatDate(selectedOrder.approvedAt) }}</p>
+            <p class="sub">Approval does not add stock. Issue the PO, then receive its outstanding lines in Procurement.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-primary-close im-btn im-btn--primary" *ngIf="selectedOrder.status === 'approved'" (click)="issuePurchaseOrder(selectedOrder)" [disabled]="issuing">{{ issuing ? 'Issuing…' : 'Issue Purchase Order' }}</button>
+        <button type="button" class="btn-primary-close im-btn im-btn--secondary" (click)="closeDetail()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="activity-log-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <a class="btn-back im-btn im-btn--secondary im-btn--compact" routerLink="/inventory-manager" aria-label="Back to inventory dashboard">
+        <lucide-angular name="arrow-left" [size]="20"></lucide-angular>
+      </a>
+      <div class="title-group">
+        <h1>Activity Log</h1>
+        <p>Complete history of inventory and procurement events</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity List -->
+  <div class="log-card glass-panel">
+    <div class="loading-state" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Fetching full activity history...</p>
+    </div>
+
+    <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && errorMessage">
+      <div><strong>Activity log unavailable</strong><p>{{ errorMessage }}</p></div>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="load()">Retry</button>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && !errorMessage && activities.length === 0">
+      <lucide-angular name="clipboard-list" [size]="48"></lucide-angular>
+      <p>No activity logs found.</p>
+    </div>
+
+    <div class="activity-table-wrapper" *ngIf="!loading && !errorMessage && activities.length > 0">
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Description</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of activities" class="animate-fade">
+            <td class="event-cell">
+              <div class="icon-marker" [ngClass]="activity.type">
+                <lucide-angular [name]="getActivityIcon(activity.type)" [size]="18"></lucide-angular>
+              </div>
+              <span class="event-title">{{ activity.title }}</span>
+            </td>
+            <td class="desc-cell">{{ activity.description }}</td>
+            <td class="time-cell">
+              <span class="full-date">{{ activity.timestamp | date: 'medium' }}</span>
+              <span class="time-ago">{{ activity.timeAgo }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

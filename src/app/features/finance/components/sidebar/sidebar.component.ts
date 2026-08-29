@@ -45,6 +45,7 @@ export class SidebarComponent {
     { title: 'Payment Dashboard', icon: 'dashboard', route: '/finance/dashboard' },
     { title: 'Payment Audit Log', icon: 'audit', route: '/finance/payment-audit-log' },
     { title: 'Financial Reports', icon: 'report', route: '/finance/financial-report' },
+    { title: 'Material Requests', icon: 'verification', route: '/finance/material-requests' },
   ];
 
   sections: NavSection[] = [
