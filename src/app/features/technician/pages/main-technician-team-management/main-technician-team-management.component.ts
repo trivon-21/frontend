@@ -85,6 +85,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | Team['status'] = 'All';
   showAssignModal: boolean = false;
+  showViewModal: boolean = false;
   selectedPendingJobId: string | null = null;
   pendingAssignmentCount = 0;
   isLoading = false;
@@ -251,13 +252,20 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    if (!this.selectedTeam || !this.filteredTeams.some((team) => team.id === this.selectedTeam?.id)) {
-      this.selectedTeam = this.filteredTeams[0] ?? null;
+    if (this.selectedTeam && !this.filteredTeams.some((team) => team.id === this.selectedTeam?.id)) {
+      this.selectedTeam = null;
+      this.showViewModal = false;
     }
   }
 
   selectTeam(team: Team) {
     this.selectedTeam = team;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedTeam = null;
   }
 
   openAssignModal(): void {

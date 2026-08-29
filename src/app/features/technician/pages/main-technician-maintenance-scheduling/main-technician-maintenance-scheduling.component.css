@@ -229,14 +229,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ===== SPLIT LAYOUT ===== */
-.content-split-layout {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
 /* ===== LEFT PANEL ===== */
 .left-panel {
   display: flex;

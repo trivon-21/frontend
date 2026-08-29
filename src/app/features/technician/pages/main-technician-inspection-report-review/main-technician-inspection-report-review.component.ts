@@ -53,13 +53,7 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
     if (this.recommendedProduct.trim()) {
       return this.recommendedProduct.trim();
     }
-
-    const recommendedProducts = this.report?.inspectionMeta?.recommendedProducts;
-    if (!Array.isArray(recommendedProducts) || recommendedProducts.length === 0) {
-      return '-';
-    }
-
-    return recommendedProducts.join(', ');
+    return '-';
   }
 
   private loadReviewReport(): void {
@@ -70,7 +64,7 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.report = res.data;
-          this.recommendedProduct = res.data?.inspectionMeta?.recommendedProducts?.[0] || '';
+          this.recommendedProduct = '';
           this.reviewNotes = res.data.reviewNotes || '';
           this.isLoading = false;
         },

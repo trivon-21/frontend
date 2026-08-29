@@ -1,17 +1,60 @@
 <aside class="sidebar">
+
+  <!-- AIRLUX BRAND -->
+  <a
+    routerLink="/inspection-officer/dashboard"
+    class="sidebar-brand"
+  >
+    AirLux
+  </a>
+
   <nav class="nav-menu">
-    <a *ngFor="let item of navItems" [routerLink]="item.route" routerLinkActive="active"
-      [routerLinkActiveOptions]="{exact: true}" class="nav-item">
-      <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
-      <span class="nav-label">{{ item.label }}</span>
+
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item"
+    >
+      <span
+        class="nav-icon"
+        [innerHTML]="getIcon(item.icon)"
+      ></span>
+
+      <span class="nav-label">
+        {{ item.label }}
+      </span>
     </a>
-    <a (click)="logout()" class="nav-item logout-btn" style="cursor: pointer;">
+
+    <!-- LOGOUT -->
+    <a
+      (click)="logout()"
+      class="nav-item logout-btn"
+      style="cursor: pointer;"
+    >
       <span class="nav-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20" style="width: 20px; height: 20px;">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          width="20"
+          height="20"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+          />
         </svg>
       </span>
-      <span class="nav-label">Sign Out</span>
+
+      <span class="nav-label">
+        Sign Out
+      </span>
     </a>
+
   </nav>
 </aside>

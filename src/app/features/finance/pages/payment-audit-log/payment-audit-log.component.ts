@@ -164,6 +164,8 @@ export class PaymentAuditLogComponent implements OnInit {
       SERVICE_PAYMENT_SUBMITTED: 'Service Slip Submitted',
       SERVICE_PAYMENT_APPROVED: 'Service Payment Approved',
       SERVICE_PAYMENT_REJECTED: 'Service Payment Rejected',
+      PURCHASE_REQUEST_APPROVED: 'Purchase Request Approved',
+      PURCHASE_REQUEST_REJECTED: 'Purchase Request Rejected',
     };
     return map[e] || e;
   }
@@ -187,6 +189,7 @@ export class PaymentAuditLogComponent implements OnInit {
       INVOICE: 'Invoice',
       REPAIR: 'Repair',
       MAINTENANCE: 'Maintenance',
+      PURCHASE_REQUEST: 'Purchase Request',
     };
     return map[t] || t;
   }
@@ -198,14 +201,31 @@ export class PaymentAuditLogComponent implements OnInit {
       INVOICE: 'type-invoice',
       REPAIR: 'type-repair',
       MAINTENANCE: 'type-maintenance',
+      PURCHASE_REQUEST: 'type-purchase',
     };
     return map[t] || '';
   }
 
-  getReference(log: any): string {
-    return log.invoiceId || log.ticketId || log.orderId || '—';
-  }
+isReadableReference(value: any): boolean {
+  if (!value) return false;
+  const str = value.toString();
+  // Raw MongoDB ObjectIds are exactly 24 hex characters, nothing else
+  const isRawObjectId = /^[a-f0-9]{24}$/i.test(str);
+  return !isRawObjectId;
+}
 
+getReference(log: any): string {
+  const raw = log.invoiceId || log.orderId || log.ticketId;
+  if (!raw) return '—';
+  if (this.isReadableReference(raw)) return raw;
+  return this.shortId(raw);
+}
+shortId(id: any): string {
+  if (!id) return '—';
+  const value = id.toString();
+  const suffix = value.includes('-') ? (value.split('-').pop() || value) : value;
+  return suffix.slice(-5).toUpperCase();
+}
   hasAttachment(log: any): boolean {
     return !!(log.slipUrl || log.invoiceId);
   }

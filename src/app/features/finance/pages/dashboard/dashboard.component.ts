@@ -48,6 +48,12 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void { this.loadAllPayments(); }
 
+  // Prefer the real readable order reference (e.g. ALX-BI-TEST01) whenever the
+  // backend provides it; fall back to the raw orderId only if it's missing
+  private resolveOrderDisplay(p: any): string {
+    return p.orderRef || p.orderReference || p.orderId || '—';
+  }
+
   loadAllPayments(): void {
     forkJoin({
       buyPending: this.paymentService.getPendingPayments(),
@@ -70,24 +76,24 @@ export class DashboardComponent implements OnInit {
       repairInvoicePending: this.invoiceService.getRepairPendingInvoices(),
     }).subscribe({
       next: (res: any) => {
-        const buyPending = (res.buyPending || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'PENDING', displayDate: p.updatedAt }));
-        const buyVerified = (res.buyVerified || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'APPROVED', displayDate: p.updatedAt }));
-        const buyRejected = (res.buyRejected || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'REJECTED', displayDate: p.updatedAt }));
-        const inspPending = (res.inspPending || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'PENDING', invoiceId: p.ticketId, displayDate: p.date || p.updatedAt }));
-        const inspVerified = (res.inspVerified || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.updatedAt }));
-        const inspRejected = (res.inspRejected || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.updatedAt }));
-        const repairPending = (res.repairPending || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'PENDING', invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
-        const repairVerified = (res.repairVerified || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
-        const repairRejected = (res.repairRejected || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
-        const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, displayDate: p.slipUploadedAt || p.updatedAt }));
-        const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, displayDate: p.approvedAt || p.updatedAt }));
-        const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, displayDate: p.rejectedAt || p.updatedAt }));
+        const buyPending = (res.buyPending || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'PENDING', displayDate: p.updatedAt, orderId: this.resolveOrderDisplay(p) }));
+        const buyVerified = (res.buyVerified || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'APPROVED', displayDate: p.updatedAt, orderId: this.resolveOrderDisplay(p) }));
+        const buyRejected = (res.buyRejected || []).map((p: any) => ({ ...p, paymentType: 'BUY_ONLY', status: 'REJECTED', displayDate: p.updatedAt, orderId: this.resolveOrderDisplay(p) }));
+        const inspPending = (res.inspPending || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.date || p.updatedAt }));
+        const inspVerified = (res.inspVerified || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
+        const inspRejected = (res.inspRejected || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
+        const repairPending = (res.repairPending || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.slipUploadedAt || p.updatedAt }));
+        const repairVerified = (res.repairVerified || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.approvedAt || p.updatedAt }));
+        const repairRejected = (res.repairRejected || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.rejectedAt || p.updatedAt }));
+        const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.slipUploadedAt || p.updatedAt }));
+        const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.approvedAt || p.updatedAt }));
+        const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.rejectedAt || p.updatedAt }));
 
         const invoicePaid = (res.invoicePaid || []).map((p: any) => ({
           ...p,
           paymentType: 'INVOICE',
           status: 'APPROVED',
-          orderId: p.orderId,
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -98,7 +104,7 @@ export class DashboardComponent implements OnInit {
           ...p,
           paymentType: 'INVOICE',
           status: 'PENDING',
-          orderId: p.orderId,
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -109,7 +115,7 @@ export class DashboardComponent implements OnInit {
           ...p,
           paymentType: 'INVOICE',
           status: 'PENDING',
-          orderId: p.orderId,
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -121,7 +127,7 @@ export class DashboardComponent implements OnInit {
           ...p,
           paymentType: 'INVOICE',
           status: 'APPROVED',
-          orderId: p.orderId || '—',
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -132,7 +138,7 @@ export class DashboardComponent implements OnInit {
           ...p,
           paymentType: 'INVOICE',
           status: 'PENDING',
-          orderId: p.orderId || '—',
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -143,7 +149,7 @@ export class DashboardComponent implements OnInit {
           ...p,
           paymentType: 'INVOICE',
           status: 'PENDING',
-          orderId: p.orderId || '—',
+          orderId: this.resolveOrderDisplay(p),
           invoiceId: p.invoiceNumber,
           customerName: p.customerName,
           amount: p.grandTotal || 0,
@@ -263,3 +269,4 @@ export class DashboardComponent implements OnInit {
 
   openDatePicker(el: HTMLInputElement) { el.showPicker(); }
 }
+

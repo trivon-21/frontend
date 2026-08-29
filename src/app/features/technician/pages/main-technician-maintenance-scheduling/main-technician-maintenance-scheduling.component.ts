@@ -42,6 +42,7 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
   schedules: MaintenanceSchedule[] = [];
   filteredSchedules: MaintenanceSchedule[] = [];
   selectedSchedule: MaintenanceSchedule | null = null;
+  showViewModal: boolean = false;
 
   isLoading = false;
   isSaving = false;
@@ -98,14 +99,12 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
             if (this.selectedSchedule) {
               const found = this.schedules.find(s => s._id === this.selectedSchedule!._id);
               if (found) {
-                this.selectSchedule(found);
-              } else if (this.filteredSchedules.length > 0) {
-                this.selectSchedule(this.filteredSchedules[0]);
+                // Update selected schedule without opening modal
+                this.selectedSchedule = JSON.parse(JSON.stringify(found));
               } else {
                 this.selectedSchedule = null;
+                this.showViewModal = false;
               }
-            } else if (this.filteredSchedules.length > 0) {
-              this.selectSchedule(this.filteredSchedules[0]);
             }
           } else {
             this.error = 'Failed to load schedules';
@@ -139,9 +138,10 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    // If the selected item falls outside the filtered list, reset or pick first
+    // If the selected item falls outside the filtered list, reset it and close modal
     if (this.selectedSchedule && !this.filteredSchedules.some(s => s._id === this.selectedSchedule!._id)) {
-      this.selectedSchedule = this.filteredSchedules.length > 0 ? { ...this.filteredSchedules[0] } : null;
+      this.selectedSchedule = null;
+      this.showViewModal = false;
     }
   }
 
@@ -162,6 +162,12 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
     this.selectedSchedule = JSON.parse(JSON.stringify(schedule));
     this.error = null;
     this.successMessage = null;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedSchedule = null;
   }
 
   toInputDateFormat(dateStr: string | null | undefined): string {

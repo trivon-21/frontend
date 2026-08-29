@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class InspectionTicketService {
 
-  private apiUrl = 'http://127.0.0.1:3000/api/inspection-tickets';
+  private apiUrl = 'http://127.0.0.1:5000/api/inspection-tickets';
 
   constructor(private http: HttpClient) { }
 

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class PurchaseRequestService {
-  private api = 'http://127.0.0.1:3000/api/purchase-requests';
+  private api = 'http://127.0.0.1:5000/api/purchase-requests';
 
   constructor(private http: HttpClient) { }
 

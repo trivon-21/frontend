@@ -1,98 +1,379 @@
+
 <div class="page-container">
 
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
+
   <div class="page-header">
-    <h2 class="page-title">Scheduled Inspections</h2>
+
+    <h2 class="page-title">
+      Scheduled Inspections
+    </h2>
+
     <div class="page-search">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
       </svg>
-      <input type="text" placeholder="Search here" [(ngModel)]="searchQuery" />
+
+      <input
+        type="text"
+        placeholder="Search by Order ID, Ticket ID or Customer..."
+        [(ngModel)]="searchQuery"
+      />
+
     </div>
+
   </div>
 
-  <div *ngIf="isLoading" class="empty-state">
+
+  <!-- =========================================================
+       LOADING STATE
+       ========================================================= -->
+
+  <div
+    *ngIf="isLoading"
+    class="empty-state"
+  >
     <p>Loading...</p>
   </div>
-  <div *ngIf="!isLoading && filteredInspections.length === 0" class="empty-state">
+
+
+  <!-- =========================================================
+       EMPTY STATE
+       ========================================================= -->
+
+  <div
+    *ngIf="!isLoading && filteredInspections.length === 0"
+    class="empty-state"
+  >
     <p>No scheduled inspections found</p>
   </div>
 
-  <div class="inspections-grid">
-    <div class="inspection-card" *ngFor="let inspection of filteredInspections">
-      <div class="card-header-bar">
-        <div class="id-block">
-          <span class="order-id">ORDER ID: {{ shortId(inspection.orderId) }}</span>
-          <span class="ticket-id">Ticket ID: {{ shortId(inspection.ticketId) }}</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="field">
-          <label class="field-label">CUSTOMER NAME:</label>
-          <p class="field-value">{{ inspection.customerName }}</p>
-        </div>
-        <div class="field">
-          <label class="field-label">Inspection Date:</label>
-          <p class="field-value">{{ formatDate(inspection.inspectionDate) }}</p>
-        </div>
-        <hr class="divider" />
-        <div class="card-footer">
-          <button class="view-details-btn" (click)="openDetails(inspection)">View Details</button>
-          <button class="start-btn" (click)="openArrivalModal(inspection)">→ START INSPECTION</button>
-        </div>
-      </div>
-    </div>
+
+  <!-- =========================================================
+       INSPECTION TABLE
+       ========================================================= -->
+
+  <div
+    class="table-container"
+    *ngIf="!isLoading && filteredInspections.length > 0"
+  >
+
+    <table class="data-table">
+
+      <thead>
+
+        <tr>
+          <th>ORDER ID</th>
+          <th>TICKET ID</th>
+          <th>CUSTOMER</th>
+          <th>INSPECTION DATE</th>
+          <th>DETAILS</th>
+          <th>ACTION</th>
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        <tr *ngFor="let inspection of filteredInspections">
+
+          <!-- ORDER ID -->
+
+          <td>
+            <span class="order-id">
+              {{ shortId(inspection.orderId) }}
+            </span>
+          </td>
+
+
+          <!-- TICKET ID -->
+
+          <td>
+            <span class="ticket-id">
+              {{ shortId(inspection.ticketId) }}
+            </span>
+          </td>
+
+
+          <!-- CUSTOMER -->
+
+          <td>
+            <span class="customer-name">
+              {{ inspection.customerName }}
+            </span>
+          </td>
+
+
+          <!-- INSPECTION DATE -->
+
+          <td>
+            <span class="inspection-date">
+              {{ formatDate(inspection.inspectionDate) }}
+            </span>
+          </td>
+
+          <!-- DETAILS -->
+
+          <td>
+
+            <button
+              class="view-details-btn"
+              (click)="openDetails(inspection)"
+            >
+              View Details
+            </button>
+
+          </td>
+
+
+          <!-- ACTION -->
+
+          <td>
+
+            <button
+              class="start-btn"
+              (click)="openArrivalModal(inspection)"
+              [disabled]="isLoading"
+            >
+              Start Inspection
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
   </div>
 
-  <!-- Details Modal -->
-  <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+
+  <!-- =========================================================
+       DETAILS MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showDetailsModal"
+    (click)="closeDetailsModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
       <div class="modal-header">
-        <h3>Inspection Details</h3>
-        <button class="btn-close" (click)="closeDetailsModal()">X</button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ shortId(selectedInspection?.orderId) }}</p>
-        <p><strong>Ticket ID:</strong> {{ shortId(selectedInspection?.ticketId) }}</p>
-        <p><strong>Customer:</strong> {{ selectedInspection?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedInspection?.customerEmail }}</p>
-        <p><strong>Phone:</strong> {{ selectedInspection?.customerPhone }}</p>
-        <p><strong>Address:</strong> {{ selectedInspection?.customerAddress }}</p>
-        <p><strong>Inspection Date:</strong> {{ formatDate(selectedInspection?.inspectionDate) }}</p>
-        <p><strong>Item:</strong> {{ selectedInspection?.itemName }}</p>
-      </div>
-      <div class="modal-footer">
-        <button class="start-btn" (click)="closeDetailsModal(); openArrivalModal(selectedInspection)">
-          → START INSPECTION
+
+        <h3>
+          Inspection Details
+        </h3>
+
+        <button
+          class="modal-close"
+          (click)="closeDetailsModal()"
+        >
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+
         </button>
+
       </div>
+
+
+      <div class="modal-body">
+
+        <p>
+          <strong>Order ID:</strong>
+          {{ shortId(selectedInspection?.orderId) }}
+        </p>
+
+        <p>
+          <strong>Ticket ID:</strong>
+          {{ shortId(selectedInspection?.ticketId) }}
+        </p>
+
+        <p>
+          <strong>Customer:</strong>
+          {{ selectedInspection?.customerName }}
+        </p>
+
+        <p>
+          <strong>Email:</strong>
+          {{ selectedInspection?.customerEmail }}
+        </p>
+
+        <p>
+          <strong>Phone:</strong>
+          {{ selectedInspection?.customerPhone }}
+        </p>
+
+        <p>
+          <strong>Address:</strong>
+          {{ selectedInspection?.customerAddress }}
+        </p>
+
+        <p>
+          <strong>Inspection Date:</strong>
+          {{ formatDate(selectedInspection?.inspectionDate) }}
+        </p>
+
+        <p>
+          <strong>Item:</strong>
+          {{ selectedInspection?.itemName || '—' }}
+        </p>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-secondary"
+          (click)="closeDetailsModal()"
+        >
+          Close
+        </button>
+
+        <button
+          class="start-btn"
+          (click)="closeDetailsModal(); openArrivalModal(selectedInspection)"
+        >
+          Start Inspection
+        </button>
+
+      </div>
+
     </div>
+
   </div>
 
-  <!-- Arrival Time Modal -->
-  <div class="modal-overlay" *ngIf="showArrivalModal" (click)="closeArrivalModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+
+  <!-- =========================================================
+       ARRIVAL TIME MODAL
+       ========================================================= -->
+
+  <div
+    class="modal-overlay"
+    *ngIf="showArrivalModal"
+    (click)="closeArrivalModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
       <div class="modal-header">
-        <h3>Set Arrival Time</h3>
-        <button class="btn-close" (click)="closeArrivalModal()">X</button>
+
+        <h3>
+          Set Arrival Time
+        </h3>
+
+        <button
+          class="modal-close"
+          (click)="closeArrivalModal()"
+        >
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+
+        </button>
+
       </div>
+
+
       <div class="modal-body">
-        <p>Starting inspection for <strong>{{ selectedInspection?.customerName }}</strong></p>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">
+
+        <p>
+          Starting inspection for
+          <strong>{{ selectedInspection?.customerName }}</strong>
+        </p>
+
+        <p style="color:#718079;">
           An email will be sent to the customer with your expected arrival time.
         </p>
+
+
         <div class="form-group">
-          <label>Expected Arrival Time <span class="required">*</span></label>
-          <input type="time" [(ngModel)]="arrivalTime"
-            style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;" />
+
+          <label>
+            Expected Arrival Time
+            <span class="required">*</span>
+          </label>
+
+          <input
+            type="time"
+            [(ngModel)]="arrivalTime"
+            [disabled]="isLoading"
+          />
+
         </div>
+
       </div>
+
+
       <div class="modal-footer">
-        <br><button class="start-btn" (click)="confirmStartInspection()" [disabled]="isLoading">
+
+        <button
+          class="btn-secondary"
+          (click)="closeArrivalModal()"
+          [disabled]="isLoading"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="start-btn"
+          (click)="confirmStartInspection()"
+          [disabled]="isLoading"
+        >
           {{ isLoading ? 'Starting...' : 'Confirm & Start' }}
         </button>
+
       </div>
+
     </div>
+
   </div>
 
 </div>
+

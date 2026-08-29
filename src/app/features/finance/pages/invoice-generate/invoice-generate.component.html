@@ -1,179 +1,606 @@
 <div class="page-container">
 
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
+
   <div class="page-header">
-    <h2 class="page-title">Invoice Generator</h2>
+
+    <h2 class="page-title">
+      Invoice Generator
+    </h2>
+
     <div class="page-search">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
       </svg>
-      <input type="text" placeholder="Search here"
-        [ngModel]="activeTab === 'installation' ? searchQuery : repairSearchQuery"
-        (ngModelChange)="onSearchQueryChange($event)" />
+
+      <input
+        type="text"
+        placeholder="Search by Order ID or Customer..."
+        [ngModel]="activeTab === 'installation'
+          ? searchQuery
+          : repairSearchQuery"
+        (ngModelChange)="onSearchQueryChange($event)"
+      />
+
     </div>
+
   </div>
 
-  <!-- TABS -->
+
+  <!-- =========================================================
+       TABS
+       ========================================================= -->
+
   <div class="inv-tabs">
-    <button class="inv-tab" [class.active]="activeTab === 'installation'"
-      (click)="activeTab = 'installation'">
-      🏗️ Installation Invoices
+
+    <button
+      class="inv-tab"
+      [class.active]="activeTab === 'installation'"
+      (click)="activeTab = 'installation'"
+    >
+      Installation Invoices
     </button>
-    <button class="inv-tab" [class.active]="activeTab === 'repair'"
-      (click)="activeTab = 'repair'">
-      🔧 Repair Invoices
+
+    <button
+      class="inv-tab"
+      [class.active]="activeTab === 'repair'"
+      (click)="activeTab = 'repair'"
+    >
+      Repair Invoices
     </button>
+
   </div>
 
-  <!-- ═══ INSTALLATION TAB ═══ -->
+
+  <!-- =========================================================
+       INSTALLATION TAB
+       ========================================================= -->
+
   <ng-container *ngIf="activeTab === 'installation'">
-    <div *ngIf="isLoading" class="empty-state"><p>⏳ Loading...</p></div>
-    <div *ngIf="!isLoading && filteredInvoices.length === 0" class="empty-state">
-      <p>🎉 No installation invoices ready to generate</p>
+
+    <!-- Loading -->
+
+    <div
+      *ngIf="isLoading"
+      class="empty-state"
+    >
+      <p>Loading...</p>
     </div>
 
-    <div class="invoices-grid" *ngIf="!isLoading && filteredInvoices.length > 0">
-      <div class="invoice-card" *ngFor="let invoice of filteredInvoices">
-        <div class="card-header-bar">
-          <div class="id-block">
-            <span class="order-id">ORDER: {{ invoice.orderRef || invoice.orderId }}</span>
-            <span class="invoice-id">{{ invoice.materialsCount }} material(s)</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="field">
-            <label class="field-label">CUSTOMER:</label>
-            <p class="field-value">{{ invoice.customerName }}</p>
-          </div>
-          <div class="field">
-            <label class="field-label">AC MODEL:</label>
-            <p class="field-value">{{ invoice.acModel || invoice.itemName }}</p>
-          </div>
-          <div class="field">
-            <label class="field-label">SUBMITTED:</label>
-            <p class="field-value">{{ invoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-          </div>
-          <hr class="divider"/>
-          <div class="card-footer">
-            <button class="view-details-btn" (click)="openDetails(invoice)">View Details</button>
-            <button class="generate-btn" (click)="generateInvoice(invoice)" [disabled]="isLoading">
-              → GENERATE INVOICE
-            </button>
-          </div>
-        </div>
-      </div>
+
+    <!-- Empty -->
+
+    <div
+      *ngIf="!isLoading && filteredInvoices.length === 0"
+      class="empty-state"
+    >
+      <p>No installation invoices ready to generate</p>
     </div>
 
-    <!-- Installation details modal -->
-    <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- Installation Table -->
+
+    <div
+      class="table-container"
+      *ngIf="!isLoading && filteredInvoices.length > 0"
+    >
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+            <th>ORDER ID</th>
+            <th>CUSTOMER</th>
+            <th>AC MODEL</th>
+            <th>MATERIALS</th>
+            <th>SUBMITTED</th>
+            <th>DETAILS</th>
+            <th>ACTION</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr *ngFor="let invoice of filteredInvoices">
+
+            <!-- ORDER -->
+
+            <td>
+              <span class="order-id">
+                {{ invoice.orderRef || invoice.orderId }}
+              </span>
+            </td>
+
+
+            <!-- CUSTOMER -->
+
+            <td>
+              <span class="customer-name">
+                {{ invoice.customerName }}
+              </span>
+            </td>
+
+
+            <!-- AC MODEL -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.acModel || invoice.itemName }}
+              </span>
+            </td>
+
+
+            <!-- MATERIALS -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.materialsCount }} item(s)
+              </span>
+            </td>
+
+
+            <!-- DATE -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.date | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </td>
+
+
+            <!-- DETAILS -->
+
+            <td>
+
+              <button
+                class="view-details-btn"
+                (click)="openDetails(invoice)"
+              >
+                View Details
+              </button>
+
+            </td>
+
+
+            <!-- GENERATE -->
+
+            <td>
+
+              <button
+                class="generate-btn"
+                (click)="generateInvoice(invoice)"
+                [disabled]="isLoading"
+              >
+                → Generate Invoice
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         INSTALLATION DETAILS MODAL
+         ===================================================== -->
+
+    <div
+      class="modal-overlay"
+      *ngIf="showDetailsModal"
+      (click)="closeModal()"
+    >
+
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+      >
+
         <div class="modal-header">
-          <h3>Order Details</h3>
-          <button class="modal-close" (click)="closeModal()">✕</button>
+
+          <h3>
+            Order Details
+          </h3>
+
+          <button
+            class="modal-close"
+            (click)="closeModal()"
+          >
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+
+          </button>
+
         </div>
+
+
         <div class="modal-body">
-          <p><strong>Order ID:</strong> {{ selectedInvoice?.orderRef || selectedInvoice?.orderId }}</p>
-          <p><strong>Customer:</strong> {{ selectedInvoice?.customerName }}</p>
-          <p><strong>Email:</strong> {{ selectedInvoice?.customerEmail }}</p>
-          <p><strong>AC Model:</strong> {{ selectedInvoice?.acModel || selectedInvoice?.itemName }}</p>
-          <p><strong>Location:</strong> {{ selectedInvoice?.location || '—' }}</p>
-          <p><strong>Inspector:</strong> {{ selectedInvoice?.inspectorName || '—' }}</p>
-          <p><strong>Materials:</strong> {{ selectedInvoice?.materialsCount }}</p>
-          <p><strong>Submitted:</strong> {{ selectedInvoice?.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-          <hr style="margin:12px 0; border-color:#f3f4f6;"/>
-          <p style="font-size:13px; color:#6b7280; font-style:italic;">
-            💡 Amounts calculated automatically on generation.
+
+          <p>
+            <strong>Order ID:</strong>
+            {{ selectedInvoice?.orderRef || selectedInvoice?.orderId }}
           </p>
+
+          <p>
+            <strong>Customer:</strong>
+            {{ selectedInvoice?.customerName }}
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            {{ selectedInvoice?.customerEmail }}
+          </p>
+
+          <p>
+            <strong>AC Model:</strong>
+            {{ selectedInvoice?.acModel || selectedInvoice?.itemName }}
+          </p>
+
+          <p>
+            <strong>Location:</strong>
+            {{ selectedInvoice?.location || '—' }}
+          </p>
+
+          <p>
+            <strong>Inspector:</strong>
+            {{ selectedInvoice?.inspectorName || '—' }}
+          </p>
+
+          <p>
+            <strong>Materials:</strong>
+            {{ selectedInvoice?.materialsCount }}
+          </p>
+
+          <p>
+            <strong>Submitted:</strong>
+            {{ selectedInvoice?.date | date:'dd MMM yyyy, hh:mm a' }}
+          </p>
+
+          <hr class="modal-divider">
+
+          <p>
+            <em>
+              Amounts calculated automatically on generation.
+            </em>
+          </p>
+
         </div>
-        <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; padding:16px 24px 24px; border-top:1px solid #e5e7eb;">
-          <button class="btn-close-styled" (click)="closeModal()">Close</button>
-          <button class="generate-btn" (click)="generateInvoice(selectedInvoice); closeModal()">
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn-secondary"
+            (click)="closeModal()"
+          >
+            Close
+          </button>
+
+          <button
+            class="generate-btn"
+            (click)="generateInvoice(selectedInvoice); closeModal()"
+          >
             → Generate Invoice
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   </ng-container>
 
-  <!-- ═══ REPAIR TAB ═══ -->
+
+  <!-- =========================================================
+       REPAIR TAB
+       ========================================================= -->
+
   <ng-container *ngIf="activeTab === 'repair'">
-    <div *ngIf="isRepairLoading" class="empty-state"><p>⏳ Loading...</p></div>
-    <div *ngIf="!isRepairLoading && filteredRepairInvoices.length === 0" class="empty-state">
-      <p>🎉 No repair invoices ready to generate</p>
+
+    <!-- Loading -->
+
+    <div
+      *ngIf="isRepairLoading"
+      class="empty-state"
+    >
+      <p>Loading...</p>
     </div>
 
-    <div class="invoices-grid" *ngIf="!isRepairLoading && filteredRepairInvoices.length > 0">
-      <div class="invoice-card" *ngFor="let invoice of filteredRepairInvoices">
-        <div class="card-header-bar">
-          <div class="id-block">
-            <span class="order-id">TICKET: {{ invoice.ticketRef }}</span>
-            <span class="invoice-id repair-type-badge">
-              {{ invoice.repairType === 'major' ? '🔴 Major Repair' : '🟡 Minor Repair' }}
-            </span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="field">
-            <label class="field-label">CUSTOMER:</label>
-            <p class="field-value">{{ invoice.customerName }}</p>
-          </div>
-          <div class="field">
-            <label class="field-label">MATERIALS:</label>
-            <p class="field-value">{{ invoice.materialsCount }} item(s)</p>
-          </div>
-          <div class="field">
-            <label class="field-label">LOCATION:</label>
-            <p class="field-value">{{ invoice.location || '—' }}</p>
-          </div>
-          <div class="field">
-            <label class="field-label">UPDATED:</label>
-            <p class="field-value">{{ invoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-          </div>
-          <hr class="divider"/>
-          <div class="card-footer">
-            <button class="view-details-btn" (click)="openRepairDetails(invoice)">View Details</button>
-            <button class="generate-btn"
-              (click)="generateRepairInvoice(invoice)" [disabled]="isRepairLoading">
-              → GENERATE INVOICE
-            </button>
-          </div>
-        </div>
-      </div>
+
+    <!-- Empty -->
+
+    <div
+      *ngIf="!isRepairLoading && filteredRepairInvoices.length === 0"
+      class="empty-state"
+    >
+      <p>No repair invoices ready to generate</p>
     </div>
 
-    <!-- Repair details modal -->
-    <div class="modal-overlay" *ngIf="showRepairDetailsModal" (click)="closeRepairModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- Repair Table -->
+
+    <div
+      class="table-container"
+      *ngIf="!isRepairLoading && filteredRepairInvoices.length > 0"
+    >
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+            <th>TICKET ID</th>
+            <th>REPAIR TYPE</th>
+            <th>CUSTOMER</th>
+            <th>MATERIALS</th>
+            <th>LOCATION</th>
+            <th>UPDATED</th>
+            <th>DETAILS</th>
+            <th>ACTION</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr *ngFor="let invoice of filteredRepairInvoices">
+
+            <!-- TICKET -->
+
+            <td>
+              <span class="ticket-id">
+                {{ invoice.ticketRef }}
+              </span>
+            </td>
+
+
+            <!-- REPAIR TYPE -->
+
+            <td>
+
+              <span class="repair-type-badge">
+                {{
+                  invoice.repairType === 'major'
+                    ? 'Major Repair'
+                    : 'Minor Repair'
+                }}
+              </span>
+
+            </td>
+
+
+            <!-- CUSTOMER -->
+
+            <td>
+              <span class="customer-name">
+                {{ invoice.customerName }}
+              </span>
+            </td>
+
+
+            <!-- MATERIALS -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.materialsCount }} item(s)
+              </span>
+            </td>
+
+
+            <!-- LOCATION -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.location || '—' }}
+              </span>
+            </td>
+
+
+            <!-- UPDATED -->
+
+            <td>
+              <span class="table-value">
+                {{ invoice.date | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </td>
+
+
+            <!-- DETAILS -->
+
+            <td>
+
+              <button
+                class="view-details-btn"
+                (click)="openRepairDetails(invoice)"
+              >
+                View Details
+              </button>
+
+            </td>
+
+
+            <!-- GENERATE -->
+
+            <td>
+
+              <button
+                class="generate-btn"
+                (click)="generateRepairInvoice(invoice)"
+                [disabled]="isRepairLoading"
+              >
+                → Generate Invoice
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         REPAIR DETAILS MODAL
+         ===================================================== -->
+
+    <div
+      class="modal-overlay"
+      *ngIf="showRepairDetailsModal"
+      (click)="closeRepairModal()"
+    >
+
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+      >
+
         <div class="modal-header">
-          <h3>Repair Details</h3>
-          <button class="modal-close" (click)="closeRepairModal()">✕</button>
+
+          <h3>
+            Repair Details
+          </h3>
+
+          <button
+            class="modal-close"
+            (click)="closeRepairModal()"
+          >
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+
+          </button>
+
         </div>
+
+
         <div class="modal-body">
-          <p><strong>Ticket Ref:</strong> {{ selectedRepairInvoice?.ticketRef }}</p>
-          <p><strong>Repair Type:</strong>
-            {{ selectedRepairInvoice?.repairType === 'major' ? '🔴 Major' : '🟡 Minor' }}
+
+          <p>
+            <strong>Ticket Ref:</strong>
+            {{ selectedRepairInvoice?.ticketRef }}
           </p>
-          <p><strong>Customer:</strong> {{ selectedRepairInvoice?.customerName }}</p>
-          <p><strong>Email:</strong> {{ selectedRepairInvoice?.customerEmail }}</p>
-          <p><strong>Location:</strong> {{ selectedRepairInvoice?.location || '—' }}</p>
-          <p><strong>Materials:</strong> {{ selectedRepairInvoice?.materialsCount }}</p>
-          <p><strong>Notes:</strong> {{ selectedRepairInvoice?.notes || '—' }}</p>
-          <p><strong>Updated:</strong> {{ selectedRepairInvoice?.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-          <hr style="margin:12px 0; border-color:#f3f4f6;"/>
-          <p style="font-size:13px; color:#6b7280; font-style:italic;">
-            💡 Fixed {{ selectedRepairInvoice?.repairType }} repair charge +
-            materials will be calculated automatically.
+
+          <p>
+            <strong>Repair Type:</strong>
+            {{
+              selectedRepairInvoice?.repairType === 'major'
+                ? 'Major'
+                : 'Minor'
+            }}
           </p>
+
+          <p>
+            <strong>Customer:</strong>
+            {{ selectedRepairInvoice?.customerName }}
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            {{ selectedRepairInvoice?.customerEmail }}
+          </p>
+
+          <p>
+            <strong>Location:</strong>
+            {{ selectedRepairInvoice?.location || '—' }}
+          </p>
+
+          <p>
+            <strong>Materials:</strong>
+            {{ selectedRepairInvoice?.materialsCount }}
+          </p>
+
+          <p>
+            <strong>Notes:</strong>
+            {{ selectedRepairInvoice?.notes || '—' }}
+          </p>
+
+          <p>
+            <strong>Updated:</strong>
+            {{ selectedRepairInvoice?.date | date:'dd MMM yyyy, hh:mm a' }}
+          </p>
+
+          <hr class="modal-divider">
+
+          <p>
+            <em>
+              Fixed {{ selectedRepairInvoice?.repairType }} repair charge +
+              materials will be calculated automatically.
+            </em>
+          </p>
+
         </div>
-        <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; padding:16px 24px 24px; border-top:1px solid #e5e7eb;">
-          <button class="btn-close-styled" (click)="closeRepairModal()">Close</button>
-          <button class="generate-btn"
-            (click)="generateRepairInvoice(selectedRepairInvoice); closeRepairModal()">
+
+
+        <div class="modal-footer">
+
+          <button
+            class="btn-secondary"
+            (click)="closeRepairModal()"
+          >
+            Close
+          </button>
+
+          <button
+            class="generate-btn"
+            (click)="generateRepairInvoice(selectedRepairInvoice); closeRepairModal()"
+          >
             → Generate Invoice
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   </ng-container>
 
 </div>
