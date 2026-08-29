@@ -24,7 +24,7 @@
 }
 
 .manager-portal-shell .sidebar {
-  width: 210px;
+  width: 248px;
   height: 100vh;
   flex-shrink: 0;
   padding: 28px 0 24px;
@@ -90,14 +90,17 @@
   outline-offset: 2px;
 }
 
-.analytics-nav-row { display: flex; align-items: center; }
-.analytics-link { flex: 1; }
+.analytics-nav-row { position: relative; display: flex; align-items: center; }
+.analytics-link { flex: 1; padding-right: 48px; }
 
 .analytics-toggle {
+  position: absolute;
+  top: 50%;
+  right: 7px;
   display: grid;
   width: 34px;
   height: 34px;
-  margin-left: 2px;
+  margin: 0;
   padding: 0;
   place-items: center;
   border: 0;
@@ -106,6 +109,7 @@
   color: var(--manager-text-secondary);
   cursor: pointer;
   transition: background 0.13s, color 0.13s;
+  transform: translateY(-50%);
 }
 
 .analytics-toggle:hover { background: var(--manager-primary-soft); color: var(--manager-primary); }
@@ -115,9 +119,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin: 4px 0 6px 38px;
-  border-left: 1px solid rgba(0, 132, 61, 0.18);
-  padding-left: 8px;
+  margin: 4px 0 6px 22px;
 }
 
 .analytics-submenu a {
