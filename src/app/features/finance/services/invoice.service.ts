@@ -129,4 +129,28 @@ getRepairAutoCancelledInvoices(): Observable<any[]> {
 getRepairDashboardStats(): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}/repair/dashboard`);
 }
+
+getInvoiceForPaymentUpload(invoiceId: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/upload-payment/${invoiceId}`);
+}
+
+uploadPaymentSlip(invoiceId: string, slipUrl: string): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/upload-payment/${invoiceId}`, { slipUrl });
+}
+
+getPaymentVerificationQueue(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/payment-verification`);
+}
+
+getRepairPaymentVerificationQueue(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/repair/payment-verification`);
+}
+
+approveInvoicePayment(id: string): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/payment-verification/approve/${id}`, {});
+}
+
+rejectInvoicePayment(id: string, reason: string): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/payment-verification/reject/${id}`, { reason });
+}
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InspectionTicketService } from '../../services/inspection-ticket.service';
+import { InvoiceService } from '../../services/invoice.service';
 
 @Component({
   selector: 'app-invoice-rejected-payments',
@@ -11,6 +11,8 @@ import { InspectionTicketService } from '../../services/inspection-ticket.servic
   styleUrls: ['./invoice-rejected-payments.component.css']
 })
 export class InvoiceRejectedPaymentsComponent implements OnInit {
+
+  activeTab: 'installation' | 'repair' = 'installation';
 
   searchQuery = '';
   selectedFilter = 'All';
@@ -25,17 +27,33 @@ export class InvoiceRejectedPaymentsComponent implements OnInit {
   showModal = false;
   isLoading = false;
 
-  constructor(private ticketService: InspectionTicketService) { }
+  // Repair
+  repairSearchQuery = '';
+  repairSelectedDate = '';
+  repairCurrentPage = 1;
+  repairTotalItems = 0;
+  repairPayments: any[] = [];
+  filteredRepairPayments: any[] = [];
+  selectedRepairPayment: any = null;
+  showRepairModal = false;
+  isRepairLoading = false;
+
+  constructor(private invoiceService: InvoiceService) { }
 
   ngOnInit(): void {
     this.loadPayments();
-    setInterval(() => this.loadPayments(), 10000);
+    this.loadRepairPayments();
   }
 
+  // NOTE: a rejected PAYMENT SLIP moves the invoice back to "ACCEPTED" status
+  // with paymentRejectionReason set — it does NOT use the invoice "REJECTED"
+  // status (that's reserved for the customer rejecting the invoice itself).
+  // So we filter accepted invoices that have a paymentRejectionReason set.
   loadPayments(): void {
-    this.ticketService.getRejectedPayments().subscribe({
+    this.isLoading = true;
+    this.invoiceService.getAcceptedInvoices().subscribe({
       next: (data: any[]) => {
-        this.payments = data;
+        this.payments = (data || []).filter(p => !!p.paymentRejectionReason);
         this.applyFilters();
         this.isLoading = false;
       },
@@ -43,12 +61,13 @@ export class InvoiceRejectedPaymentsComponent implements OnInit {
     });
   }
 
-  applyFilters() {
+  applyFilters(): void {
     this.filteredPayments = this.payments.filter(p => {
+      const q = this.searchQuery.toLowerCase();
       const matchesSearch = this.searchQuery
-        ? p.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        ? p.invoiceNumber?.toLowerCase().includes(q) ||
+          p.orderId?.toString().toLowerCase().includes(q) ||
+          p.customerName?.toLowerCase().includes(q)
         : true;
       const matchesDate = this.selectedDate
         ? new Date(p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
@@ -76,4 +95,55 @@ export class InvoiceRejectedPaymentsComponent implements OnInit {
 
   openDetails(payment: any) { this.selectedPayment = payment; this.showModal = true; }
   closeModal() { this.selectedPayment = null; this.showModal = false; }
+
+  // ── Repair ───────────────────────────────────────────────────────────────────
+  loadRepairPayments(): void {
+    this.isRepairLoading = true;
+    this.invoiceService.getRepairAcceptedInvoices().subscribe({
+      next: (data: any[]) => {
+        this.repairPayments = (data || []).filter(p => !!p.paymentRejectionReason);
+        this.applyRepairFilters();
+        this.isRepairLoading = false;
+      },
+      error: (err: any) => { console.error(err); this.isRepairLoading = false; }
+    });
+  }
+
+  applyRepairFilters(): void {
+    this.filteredRepairPayments = this.repairPayments.filter(p => {
+      const q = this.repairSearchQuery.toLowerCase();
+      const matchesSearch = this.repairSearchQuery
+        ? p.invoiceNumber?.toLowerCase().includes(q) ||
+          p.customerName?.toLowerCase().includes(q)
+        : true;
+      const matchesDate = this.repairSelectedDate
+        ? new Date(p.updatedAt).toDateString() === new Date(this.repairSelectedDate).toDateString()
+        : true;
+      return matchesSearch && matchesDate;
+    });
+    this.repairTotalItems = this.filteredRepairPayments.length;
+    this.repairCurrentPage = 1;
+  }
+
+  get paginatedRepairPayments() {
+    const start = (this.repairCurrentPage - 1) * this.itemsPerPage;
+    return this.filteredRepairPayments.slice(start, start + this.itemsPerPage);
+  }
+
+  get repairTotalPages(): number[] {
+    return Array.from({ length: Math.ceil(this.repairTotalItems / this.itemsPerPage) }, (_, i) => i + 1);
+  }
+
+  get repairStartItem() { return this.repairTotalItems === 0 ? 0 : (this.repairCurrentPage - 1) * this.itemsPerPage + 1; }
+  get repairEndItem() { return Math.min(this.repairCurrentPage * this.itemsPerPage, this.repairTotalItems); }
+  repairNextPage() { if (this.repairCurrentPage * this.itemsPerPage < this.repairTotalItems) this.repairCurrentPage++; }
+  repairPrevPage() { if (this.repairCurrentPage > 1) this.repairCurrentPage--; }
+  repairGoToPage(page: number) { this.repairCurrentPage = page; }
+
+  openRepairDetails(payment: any) { this.selectedRepairPayment = payment; this.showRepairModal = true; }
+  closeRepairModal() { this.selectedRepairPayment = null; this.showRepairModal = false; }
+
+  shortId(id: any): string {
+    return id ? id.toString().slice(-6).toUpperCase() : '—';
+  }
 }

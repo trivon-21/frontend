@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InspectionTicketService } from '../../services/inspection-ticket.service';
+import { InvoiceService } from '../../services/invoice.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 
@@ -14,27 +14,63 @@ import { ConfirmService } from '../../../../services/confirm.service';
 })
 export class InvoicePaymentVerificationComponent implements OnInit {
 
+  activeTab: 'installation' | 'repair' = 'installation';
+
+  // Installation
   payments: any[] = [];
   searchQuery = '';
+  isLoading = false;
+
+  // Repair
+  repairPayments: any[] = [];
+  repairSearchQuery = '';
+  isRepairLoading = false;
+
+  // Shared modal state
   showRejectModal = false;
   showDetailsModal = false;
   selectedPayment: any = null;
   rejectionReason = '';
-  isLoading = false;
 
   constructor(
-    private ticketService: InspectionTicketService,
+    private invoiceService: InvoiceService,
     private notificationService: NotificationService,
     private confirmService: ConfirmService
   ) { }
 
-  ngOnInit(): void { this.loadPayments(); }
+  ngOnInit(): void { this.loadPayments(); this.loadRepairPayments(); }
 
   loadPayments(): void {
     this.isLoading = true;
-    this.ticketService.getPendingVerification().subscribe({
-      next: (data: any[]) => { this.payments = data; this.isLoading = false; },
+    this.invoiceService.getPaymentVerificationQueue().subscribe({
+      next: (data: any[]) => {
+        this.payments = data.map(inv => ({
+          ...inv,
+          orderId: inv.orderRef || inv.orderId,
+          invoiceId: inv.invoiceNumber,
+          amount: inv.grandTotal,
+          slipUrl: inv.paymentSlipUrl,
+        }));
+        this.isLoading = false;
+      },
       error: (err: any) => { console.error(err); this.isLoading = false; }
+    });
+  }
+
+  loadRepairPayments(): void {
+    this.isRepairLoading = true;
+    this.invoiceService.getRepairPaymentVerificationQueue().subscribe({
+      next: (data: any[]) => {
+        this.repairPayments = data.map(inv => ({
+          ...inv,
+          orderId: inv.orderRef || inv.orderId || '—',
+          invoiceId: inv.invoiceNumber,
+          amount: inv.grandTotal,
+          slipUrl: inv.paymentSlipUrl,
+        }));
+        this.isRepairLoading = false;
+      },
+      error: (err: any) => { console.error(err); this.isRepairLoading = false; }
     });
   }
 
@@ -43,7 +79,16 @@ export class InvoicePaymentVerificationComponent implements OnInit {
     const q = this.searchQuery.toLowerCase();
     return this.payments.filter(p =>
       p.orderId?.toLowerCase().includes(q) ||
-      p.ticketId?.toLowerCase().includes(q) ||
+      p.invoiceId?.toLowerCase().includes(q) ||
+      p.customerName?.toLowerCase().includes(q)
+    );
+  }
+
+  get filteredRepairPayments(): any[] {
+    if (!this.repairSearchQuery.trim()) return this.repairPayments;
+    const q = this.repairSearchQuery.toLowerCase();
+    return this.repairPayments.filter(p =>
+      p.invoiceId?.toLowerCase().includes(q) ||
       p.customerName?.toLowerCase().includes(q)
     );
   }
@@ -51,17 +96,25 @@ export class InvoicePaymentVerificationComponent implements OnInit {
   viewDetails(payment: any): void { this.selectedPayment = payment; this.showDetailsModal = true; }
   closeDetailsModal(): void { this.showDetailsModal = false; this.selectedPayment = null; }
 
+  isImage(url: string | null | undefined): boolean {
+    if (!url) return false;
+    return url.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  }
+
   async approvePayment(payment: any): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Approve Invoice Payment',
-      message: `Approve invoice payment for Order #${payment.orderId}?`,
+      message: `Approve invoice payment for ${payment.customerName}?`,
       confirmText: 'Approve',
       cancelText: 'Cancel'
     });
     if (!confirmed) return;
     this.isLoading = true;
-    this.ticketService.approvePayment(payment._id).subscribe({
-      next: () => { this.notificationService.show('✅ Payment approved!', 'success'); this.loadPayments(); },
+    this.invoiceService.approveInvoicePayment(payment._id).subscribe({
+      next: () => {
+        this.notificationService.show('✅ Payment approved! Email sent to customer.', 'success');
+        this.loadPayments(); this.loadRepairPayments();
+      },
       error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Failed to approve.', 'error'); }
     });
   }
@@ -81,8 +134,11 @@ export class InvoicePaymentVerificationComponent implements OnInit {
   rejectPayment(): void {
     if (!this.rejectionReason.trim()) { this.notificationService.show('⚠️ Please enter a reason.', 'warning'); return; }
     this.isLoading = true;
-    this.ticketService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
-      next: () => { this.notificationService.show('✅ Payment rejected!', 'success'); this.closeRejectModal(); this.loadPayments(); },
+    this.invoiceService.rejectInvoicePayment(this.selectedPayment._id, this.rejectionReason).subscribe({
+      next: () => {
+        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent.', 'success');
+        this.closeRejectModal(); this.loadPayments(); this.loadRepairPayments();
+      },
       error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Failed to reject.', 'error'); }
     });
   }
