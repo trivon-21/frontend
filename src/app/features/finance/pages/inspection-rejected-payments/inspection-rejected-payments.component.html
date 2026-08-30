@@ -34,8 +34,8 @@
       </thead>
       <tbody>
         <tr *ngFor="let payment of paginatedPayments">
-          <td>{{ payment.orderRef }}</td>
-          <td>{{ payment.ticketId }}</td>
+          <td>{{ payment.orderRef || payment.orderId }}</td>
+          <td>{{ payment.ticketRef || payment.ticketId }}</td>
           <td>{{ payment.customerName }}</td>
           <td>{{ payment.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
           <td class="amount">LKR {{ payment.amount | number:'1.2-2' }}</td>
@@ -71,10 +71,9 @@
   </svg></button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
+        <p><strong>Order ID:</strong> {{ selectedPayment?.orderRef||selectedPayment?.orderId }}</p>
         <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
         <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
         <p><strong>Rejected Date:</strong> {{ selectedPayment?.updatedAt | date:'dd MMM yyyy, hh:mm a' }}</p>
         <p style="color:#b91c1c; font-weight:600; margin-top:8px;">

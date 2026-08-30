@@ -96,7 +96,7 @@
 
           <td>
             <span class="request-id">
-              {{ getRequestRef(request) }}
+              {{ request.requestId || getRequestRef(request) }}
             </span>
           </td>
 
@@ -251,7 +251,7 @@
           </span>
 
           <span class="field-value">
-            {{ getRequestRef(selectedRequest) }}
+            {{ selectedRequest.requestId || getRequestRef(selectedRequest)}}
           </span>
 
         </div>

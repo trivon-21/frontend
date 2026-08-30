@@ -12,6 +12,8 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class InvoiceVerifiedPaymentsComponent implements OnInit {
 
+  activeTab: 'installation' | 'repair' = 'installation';
+
   searchQuery = '';
   selectedFilter = 'All';
   selectedDate = '';
@@ -25,10 +27,22 @@ export class InvoiceVerifiedPaymentsComponent implements OnInit {
   showModal = false;
   isLoading = false;
 
+  // Repair
+  repairSearchQuery = '';
+  repairSelectedDate = '';
+  repairCurrentPage = 1;
+  repairTotalItems = 0;
+  repairPayments: any[] = [];
+  filteredRepairPayments: any[] = [];
+  selectedRepairPayment: any = null;
+  showRepairModal = false;
+  isRepairLoading = false;
+
   constructor(private invoiceService: InvoiceService) { }
 
   ngOnInit(): void {
     this.loadPayments();
+    this.loadRepairPayments();
   }
 
   loadPayments(): void {
@@ -39,10 +53,7 @@ export class InvoiceVerifiedPaymentsComponent implements OnInit {
         this.applyFilters();
         this.isLoading = false;
       },
-      error: (err: any) => {
-        console.error(err);
-        this.isLoading = false;
-      }
+      error: (err: any) => { console.error(err); this.isLoading = false; }
     });
   }
 
@@ -53,12 +64,10 @@ export class InvoiceVerifiedPaymentsComponent implements OnInit {
           payment.orderId?.toString().toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           payment.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
-
       const matchesStatus = this.selectedFilter === 'All' ? true : payment.status === this.selectedFilter;
       const matchesDate = this.selectedDate
         ? new Date(payment.paidAt || payment.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
         : true;
-
       return matchesSearch && matchesStatus && matchesDate;
     });
 
@@ -75,39 +84,61 @@ export class InvoiceVerifiedPaymentsComponent implements OnInit {
     return Array.from({ length: Math.ceil(this.totalItems / this.itemsPerPage) }, (_, i) => i + 1);
   }
 
-  get startItem(): number {
-    return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+  get startItem(): number { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1; }
+  get endItem(): number { return this.totalItems === 0 ? 0 : Math.min(this.currentPage * this.itemsPerPage, this.totalItems); }
+  nextPage(): void { if (this.currentPage * this.itemsPerPage < this.totalItems) this.currentPage++; }
+  prevPage(): void { if (this.currentPage > 1) this.currentPage--; }
+  goToPage(page: number): void { this.currentPage = page; }
+
+  openDetails(payment: any): void { this.selectedPayment = payment; this.showModal = true; }
+  closeModal(): void { this.selectedPayment = null; this.showModal = false; }
+
+  // ── Repair ───────────────────────────────────────────────────────────────────
+  loadRepairPayments(): void {
+    this.isRepairLoading = true;
+    this.invoiceService.getRepairPaidInvoices().subscribe({
+      next: (data: any[]) => {
+        this.repairPayments = data || [];
+        this.applyRepairFilters();
+        this.isRepairLoading = false;
+      },
+      error: (err: any) => { console.error(err); this.isRepairLoading = false; }
+    });
   }
 
-  get endItem(): number {
-    return this.totalItems === 0 ? 0 : Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+  applyRepairFilters(): void {
+    this.filteredRepairPayments = this.repairPayments.filter((payment) => {
+      const matchesSearch = this.repairSearchQuery
+        ? payment.invoiceNumber?.toLowerCase().includes(this.repairSearchQuery.toLowerCase()) ||
+          payment.customerName?.toLowerCase().includes(this.repairSearchQuery.toLowerCase())
+        : true;
+      const matchesDate = this.repairSelectedDate
+        ? new Date(payment.paidAt || payment.updatedAt).toDateString() === new Date(this.repairSelectedDate).toDateString()
+        : true;
+      return matchesSearch && matchesDate;
+    });
+
+    this.repairTotalItems = this.filteredRepairPayments.length;
+    this.repairCurrentPage = 1;
   }
 
-  nextPage(): void {
-    if (this.currentPage * this.itemsPerPage < this.totalItems) {
-      this.currentPage++;
-    }
+  get paginatedRepairPayments(): any[] {
+    const start = (this.repairCurrentPage - 1) * this.itemsPerPage;
+    return this.filteredRepairPayments.slice(start, start + this.itemsPerPage);
   }
 
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
+  get repairTotalPages(): number[] {
+    return Array.from({ length: Math.ceil(this.repairTotalItems / this.itemsPerPage) }, (_, i) => i + 1);
   }
 
-  goToPage(page: number): void {
-    this.currentPage = page;
-  }
+  get repairStartItem(): number { return this.repairTotalItems === 0 ? 0 : (this.repairCurrentPage - 1) * this.itemsPerPage + 1; }
+  get repairEndItem(): number { return Math.min(this.repairCurrentPage * this.itemsPerPage, this.repairTotalItems); }
+  repairNextPage(): void { if (this.repairCurrentPage * this.itemsPerPage < this.repairTotalItems) this.repairCurrentPage++; }
+  repairPrevPage(): void { if (this.repairCurrentPage > 1) this.repairCurrentPage--; }
+  repairGoToPage(page: number): void { this.repairCurrentPage = page; }
 
-  openDetails(payment: any): void {
-    this.selectedPayment = payment;
-    this.showModal = true;
-  }
-
-  closeModal(): void {
-    this.selectedPayment = null;
-    this.showModal = false;
-  }
+  openRepairDetails(payment: any): void { this.selectedRepairPayment = payment; this.showRepairModal = true; }
+  closeRepairModal(): void { this.selectedRepairPayment = null; this.showRepairModal = false; }
 
   shortId(id: any): string {
     return id ? id.toString().slice(-6).toUpperCase() : '—';

@@ -95,7 +95,7 @@
 
           <td>
             <span class="order-id">
-              {{ shortId(inspection.orderId) }}
+              {{ inspection.orderId }}
             </span>
           </td>
 
@@ -104,7 +104,7 @@
 
           <td>
             <span class="ticket-id">
-              {{ shortId(inspection.ticketId) }}
+              {{ inspection.ticketId }}
             </span>
           </td>
 
@@ -212,12 +212,12 @@
 
         <p>
           <strong>Order ID:</strong>
-          {{ shortId(selectedInspection?.orderId) }}
+          {{ selectedInspection?.orderId }}
         </p>
 
         <p>
           <strong>Ticket ID:</strong>
-          {{ shortId(selectedInspection?.ticketId) }}
+          {{ selectedInspection?.ticketId }}
         </p>
 
         <p>

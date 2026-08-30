@@ -91,9 +91,10 @@ import { CsaMaintenanceSchedulesComponent } from './features/csa/pages/csa-maint
 import { CsaCustomersComponent } from './features/csa/pages/csa-customers/csa-customers.component';
 import { CsaServiceTicketsComponent } from './features/csa/pages/csa-service-tickets/csa-service-tickets.component';
 import { CsaInquiriesComponent } from './features/csa/pages/csa-inquiries/csa-inquiries.component';
+import { InvoicePaymentUploadComponent } from './features/customer/pages/invoice-payment-upload/invoice-payment-upload.component';
 
 export const routes: Routes = [
-{ path: '', component: LandingComponent, pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
 
   // ── Technician / Manager portal
@@ -137,16 +138,16 @@ export const routes: Routes = [
   },
 
   // ── Backward compatibility redirects
-  { path: 'service-dashboard',          redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
-  { path: 'service-team-dashboard',     redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
+  { path: 'service-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
+  { path: 'service-team-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
   { path: 'service-team-assigned-jobs', redirectTo: 'service-team/assigned-jobs', pathMatch: 'full' },
-  { path: 'service-team-team-details',  redirectTo: 'service-team/team-details',  pathMatch: 'full' },
+  { path: 'service-team-team-details', redirectTo: 'service-team/team-details', pathMatch: 'full' },
 
-// =========================================================
+  // =========================================================
   // PUBLIC PAGES
   // =========================================================
 
-  
+
 
   {
     path: 'signup',
@@ -156,7 +157,7 @@ export const routes: Routes = [
       ),
   },
 
-  
+
 
   {
     path: 'forgot-password',
@@ -575,6 +576,8 @@ export const routes: Routes = [
     path: 'customer/invoice',
     component: CustomerInvoiceComponent,
   },
+  { path: 'invoice/upload-payment',
+    component: InvoicePaymentUploadComponent },
 
   // =========================================================
   // CSA (CUSTOMER SUPPORT AGENT)

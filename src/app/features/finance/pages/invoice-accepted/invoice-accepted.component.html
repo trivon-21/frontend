@@ -55,7 +55,7 @@
         </div>
         <div class="modal-body">
           <div class="invoice-info-grid">
-            <div><p class="info-label">Order ID</p><p class="info-value">{{ selectedInvoice?.orderId }}</p></div>
+            <div><p class="info-label">Order ID</p><p class="info-value">{{ selectedInvoice?.orderRef || selectedInvoice?.orderId }}</p></div>
             <div><p class="info-label">Invoice No</p><p class="info-value">{{ selectedInvoice?.invoiceNumber }}</p></div>
             <div><p class="info-label">Customer</p><p class="info-value">{{ selectedInvoice?.customerName }}</p></div>
             <div><p class="info-label">Email</p><p class="info-value">{{ selectedInvoice?.customerEmail }}</p></div>

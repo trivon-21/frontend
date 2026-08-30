@@ -1,0 +1,99 @@
+<app-navbar></app-navbar>
+
+<div class="page-body">
+
+  <div class="order-summary-card">
+    <h2 class="section-title">Invoice Summary</h2>
+    <div class="summary-row">
+      <span class="label">Invoice No:</span>
+      <span class="value">{{ invoiceNumber }}</span>
+    </div>
+    <hr />
+    <div class="summary-row">
+      <span class="label">Items:</span>
+      <span class="value items-list">
+        <span *ngFor="let item of items">{{ item.itemName }} × {{ item.qty }}</span>
+      </span>
+    </div>
+    <hr />
+    <div class="summary-row total-row">
+      <span class="label total-label">Grand Total:</span>
+      <span class="value total-amount">LKR {{ grandTotal | number }}</span>
+    </div>
+  </div>
+
+  <div class="bottom-card" *ngIf="!slipSubmitted">
+
+    <div class="bank-details">
+      <h3>Bank Details</h3>
+      <p class="dear">Dear {{ customerName }},</p>
+      <ul class="bank-notes">
+        <li>Pay the full invoice amount to the account below and upload the payment slip</li>
+        <li>Your payment will be verified by our finance team within 1–2 business days</li>
+      </ul>
+      <div class="bank-table">
+        <div class="bank-row"><span class="bank-label">Bank Name</span><span class="bank-value">{{ bankDetails.bankName || 'Commercial Bank' }}</span></div>
+        <div class="bank-row"><span class="bank-label">Branch Name</span><span class="bank-value">{{ bankDetails.branchName || 'Colombo 03' }}</span></div>
+        <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value">{{ bankDetails.accountName || 'AirLux Pvt Ltd' }}</span></div>
+        <div class="bank-row"><span class="bank-label">Account No</span><span class="bank-value">{{ bankDetails.accountNo || '1234567890' }}</span></div>
+        <div class="bank-row"><span class="bank-label">Amount Due</span><span class="bank-value bold">LKR {{ grandTotal | number }}</span></div>
+      </div>
+    </div>
+
+    <div class="inspection-payment">
+      <h3><span class="asterisk">*</span>Invoice Payment</h3>
+      <p class="note">Note: Upload proof of payment to complete this order</p>
+
+      <div class="status-badge" *ngIf="rejectionReason" style="background:#fee2e2;color:#dc2626;">
+        Previous slip rejected: {{ rejectionReason }}
+      </div>
+      <div class="status-badge">Status: {{ status }}</div>
+
+      <p class="upload-label">Upload Slip:</p>
+
+      <div class="drop-zone" [class.has-file]="uploadedFile" [class.drag-over]="isDragOver" (click)="triggerFileInput()"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+        <input #fileInput type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event)" style="display:none" />
+
+        <div *ngIf="!uploadedFile" class="drop-content">
+          <span class="camera-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+              <circle cx="12" cy="13" r="3"></circle>
+            </svg>
+          </span>
+          <p>Click<br>or<br>Drag and Drop<br>here to upload</p>
+          <span class="file-types">(PDF or PNG)</span>
+        </div>
+
+        <div *ngIf="uploadedFile" class="file-selected">
+          <span class="file-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="8 12 11 15 16 9"></polyline>
+            </svg>
+          </span>
+          <p class="file-name">{{ uploadedFile.name }}</p>
+          <button class="remove-file" (click)="removeFile($event)">Remove</button>
+        </div>
+      </div>
+
+      <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button class="confirm-btn" (click)="confirmAndContinue()" [disabled]="!uploadedFile || isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Confirm and Continue →' }}
+      </button>
+    </div>
+
+  </div>
+
+  <div class="success-card" *ngIf="slipSubmitted">
+    <h2 class="success-title">Payment Slip<br>Submitted</h2>
+    <div class="success-tick">✓</div>
+    <div class="success-status-badge">Status: Under Review</div>
+    <p class="success-message">Our finance team will verify your payment shortly!<br>Stay connected</p>
+  </div>
+
+</div>
+
+<app-footer></app-footer>

@@ -78,6 +78,55 @@
   box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.08);
 }
 
+/* =========================================================
+   INVOICE TABS
+   ========================================================= */
+
+.inv-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #ffffff;
+  padding: 6px;
+
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+
+  width: fit-content;
+  margin-bottom: 20px;
+}
+
+.inv-tab {
+  padding: 9px 18px;
+
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+
+  color: #8a9e96;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.inv-tab:hover:not(.active) {
+  background: #f4f7f5;
+  color: #1b2f27;
+}
+
+.inv-tab.active {
+  background: #00843d;
+  color: #ffffff;
+  font-weight: 600;
+}
 
 /* =========================================================
    TABLE
@@ -539,6 +588,17 @@ textarea:disabled {
   .page-search {
     width: 100%;
   }
+    .inv-tabs {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    overflow-x: auto;
+  }
+
+  .inv-tab {
+    flex: 0 0 auto;
+  }
 
   .table-container {
     border-radius: 10px;
@@ -573,6 +633,10 @@ textarea:disabled {
   .page-title {
     font-size: 20px;
   }
+    .inv-tab {
+    padding: 8px 15px;
+  }
+
 
   .data-table {
     min-width: 850px;

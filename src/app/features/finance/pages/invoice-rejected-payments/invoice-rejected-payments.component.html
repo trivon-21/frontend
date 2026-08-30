@@ -6,83 +6,185 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
-      <input type="text" placeholder="Search here" [(ngModel)]="searchQuery" (input)="applyFilters()" />
+      <input type="text" placeholder="Search here"
+        [ngModel]="activeTab === 'installation' ? searchQuery : repairSearchQuery"
+        (ngModelChange)="activeTab === 'installation' ? (searchQuery = $event) : (repairSearchQuery = $event)" />
     </div>
   </div>
 
-  <div class="controls-row">
-    <div class="search-wrapper">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <input type="text" placeholder="Search ID or Customer" [(ngModel)]="searchQuery" (input)="applyFilters()" />
-    </div>
-    <div class="filters-section">
-      <span class="filter-label">Filters:</span>
-      <select [(ngModel)]="selectedFilter" (change)="applyFilters()">
-        <option value="All">All</option>
-        <option value="Rejected">Rejected</option>
-      </select>
-      <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()" />
-    </div>
+  <!-- TABS -->
+  <div class="inv-tabs">
+    <button class="inv-tab" [class.active]="activeTab === 'installation'" (click)="activeTab = 'installation'">
+      Installation
+    </button>
+    <button class="inv-tab" [class.active]="activeTab === 'repair'" (click)="activeTab = 'repair'">
+      Repair
+    </button>
   </div>
 
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ORDER ID</th>
-          <th>INVOICE ID</th>
-          <th>CUSTOMER</th>
-          <th>DATE</th>
-          <th>AMOUNT</th>
-          <th>ACTION</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of paginatedPayments">
-          <td>{{ p.orderId }}</td>
-          <td>{{ p.invoiceId }}</td>
-          <td>{{ p.customerName }}</td>
-          <td>{{ p.date | date:'EEE, dd MMM yyyy' }}</td>
-          <td class="amount">LKR {{ p.amount }}</td>
-          <td><button class="view-btn" (click)="openDetails(p)">View</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="pagination">
-    <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
-    <div class="pages">
-      <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
-      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
-        }}</button>
-      <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+  <!-- ═══ INSTALLATION TAB ═══ -->
+  <ng-container *ngIf="activeTab === 'installation'">
+    <div class="controls-row">
+      <div class="search-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" placeholder="Search ID or Customer" [(ngModel)]="searchQuery" (input)="applyFilters()" />
+      </div>
+      <div class="filters-section">
+        <span class="filter-label">Filters:</span>
+        <select [(ngModel)]="selectedFilter" (change)="applyFilters()">
+          <option value="All">All</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()" />
+      </div>
     </div>
-  </div>
 
+    <div *ngIf="isLoading" class="empty-state"><p>Loading...</p></div>
+    <div *ngIf="!isLoading && paginatedPayments.length === 0" class="empty-state">
+      <p>No rejected installation invoice payments</p>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading && paginatedPayments.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>INVOICE ID</th>
+            <th>CUSTOMER</th>
+            <th>DATE</th>
+            <th>AMOUNT</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paginatedPayments">
+            <td>{{ p.orderRef || shortId(p.orderId) }}</td>
+            <td>{{ p.invoiceNumber }}</td>
+            <td>{{ p.customerName }}</td>
+            <td>{{ p.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
+            <td class="amount">LKR {{ p.grandTotal | number:'1.2-2' }}</td>
+            <td><button class="view-btn" (click)="openDetails(p)">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" *ngIf="totalItems > 0">
+      <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
+      <div class="pages">
+        <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
+        <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page }}</button>
+        <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ═══ REPAIR TAB ═══ -->
+  <ng-container *ngIf="activeTab === 'repair'">
+    <div class="controls-row">
+      <div class="search-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" placeholder="Search Invoice or Customer" [(ngModel)]="repairSearchQuery" (input)="applyRepairFilters()" />
+      </div>
+      <div class="filters-section">
+        <span class="filter-label">Filters:</span>
+        <input type="date" class="date-btn" [(ngModel)]="repairSelectedDate" (change)="applyRepairFilters()" />
+      </div>
+    </div>
+
+    <div *ngIf="isRepairLoading" class="empty-state"><p>Loading...</p></div>
+    <div *ngIf="!isRepairLoading && paginatedRepairPayments.length === 0" class="empty-state">
+      <p>No rejected repair invoice payments</p>
+    </div>
+
+    <div class="table-container" *ngIf="!isRepairLoading && paginatedRepairPayments.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>INVOICE ID</th>
+            <th>CUSTOMER</th>
+            <th>DATE</th>
+            <th>AMOUNT</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paginatedRepairPayments">
+            <td>{{ p.invoiceNumber }}</td>
+            <td>{{ p.customerName }}</td>
+            <td>{{ p.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
+            <td class="amount">LKR {{ p.grandTotal | number:'1.2-2' }}</td>
+            <td><button class="view-btn" (click)="openRepairDetails(p)">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" *ngIf="repairTotalItems > 0">
+      <span>Showing {{ repairStartItem }} - {{ repairEndItem }} of {{ repairTotalItems }} items</span>
+      <div class="pages">
+        <button (click)="repairPrevPage()" [disabled]="repairCurrentPage===1">Previous</button>
+        <button *ngFor="let page of repairTotalPages" (click)="repairGoToPage(page)" [class.active]="repairCurrentPage===page">{{ page }}</button>
+        <button (click)="repairNextPage()" [disabled]="repairCurrentPage*itemsPerPage>=repairTotalItems">Next</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- INSTALLATION DETAILS MODAL -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Rejected Payment Details</h3>
-        <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="24" y1="12" x2="12" y2="24"></line>
-    <line x1="12" y1="12" x2="24" y2="24"></line>
-  </svg></button>
+        <button class="modal-close" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
-        <p><strong>Invoice ID:</strong> {{ selectedPayment?.invoiceId }}</p>
+        <p><strong>Order ID:</strong> {{ selectedPayment?.orderRef || shortId(selectedPayment?.orderId) }}</p>
+        <p><strong>Invoice ID:</strong> {{ selectedPayment?.invoiceNumber }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
         <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount }}</p>
+        <p><strong>Amount:</strong> LKR {{ selectedPayment?.grandTotal | number:'1.2-2' }}</p>
         <p style="color:#b91c1c; font-weight:600;">
           <strong>Rejection Reason:</strong>
-          {{ selectedPayment?.rejectionReason || 'No reason provided' }}
+          {{ selectedPayment?.paymentRejectionReason || 'No reason provided' }}
         </p>
       </div>
     </div>
   </div>
+
+  <!-- REPAIR DETAILS MODAL -->
+  <div class="modal-overlay" *ngIf="showRepairModal" (click)="closeRepairModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Rejected Repair Payment Details</h3>
+        <button class="modal-close" (click)="closeRepairModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Invoice ID:</strong> {{ selectedRepairPayment?.invoiceNumber }}</p>
+        <p><strong>Customer:</strong> {{ selectedRepairPayment?.customerName }}</p>
+        <p><strong>Email:</strong> {{ selectedRepairPayment?.customerEmail }}</p>
+        <p><strong>Amount:</strong> LKR {{ selectedRepairPayment?.grandTotal | number:'1.2-2' }}</p>
+        <p style="color:#b91c1c; font-weight:600;">
+          <strong>Rejection Reason:</strong>
+          {{ selectedRepairPayment?.paymentRejectionReason || 'No reason provided' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
 </div>
