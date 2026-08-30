@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 import { SystemInfoService, SystemInfo } from '../../core/services/system-info.service';
+import { roleHomeUrl } from '../../core/routing/role-home';
 
 @Component({
   selector: 'app-navbar',
@@ -79,9 +80,6 @@ export class NavbarComponent implements OnInit {
   }
 
   getDashboardUrl(): string {
-    if (this.currentUser?.role === 'SUPER_ADMIN') {
-      return '/super-admin';
-    }
-    return '/dashboard';
+    return roleHomeUrl(this.currentUser?.role);
   }
 }

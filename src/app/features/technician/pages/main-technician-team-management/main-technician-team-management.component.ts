@@ -39,6 +39,7 @@ interface PendingJob {
   location: string;
   type: 'Installation' | 'Service' | 'Maintenance';
   productType: string;
+  warehouseStatusVersion?: number;
 }
 
 type RawTeamMember = {
@@ -71,6 +72,7 @@ type RawPendingJob = {
   location?: string;
   requestType?: 'Installation' | 'Service' | 'Maintenance';
   productType?: string;
+  warehouseStatusVersion?: number;
 };
 
 @Component({
@@ -178,7 +180,8 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       customer: job.customerName || 'Unknown Customer',
       location: job.location || '-',
       type: job.requestType || 'Service',
-      productType: job.productType || '-'
+      productType: job.productType || '-',
+      warehouseStatusVersion: job.warehouseStatusVersion,
     };
   }
 
@@ -299,7 +302,8 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       .post<{ success: boolean; message?: string; error?: string }>(`${this.teamsApiUrl}/assign-service`, {
         serviceRequestId,
         teamId,
-        requestType: selectedPendingJob.type
+        requestType: selectedPendingJob.type,
+        warehouseStatusVersion: selectedPendingJob.warehouseStatusVersion,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
@@ -321,7 +325,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error assigning service request to team:', err);
-        this.error = `Failed to assign service request: ${err.message || 'Unknown error'}`;
+        this.error = err.error?.error || err.error?.message || `Failed to assign service request: ${err.message || 'Unknown error'}`;
       }
     });
 }

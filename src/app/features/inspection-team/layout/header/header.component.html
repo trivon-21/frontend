@@ -1,66 +1,98 @@
-<header class="header">
+<header class="dashboard-header">
+  <a routerLink="/" class="back-home-btn" aria-label="Back to Home">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+    <span>Home</span>
+  </a>
 
-  <!-- LEFT -->
-  <div class="header-left">
-    <h1 class="logo">AirLux</h1>
+  <div class="header-search-wrap">
+    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+    <input class="header-search" type="text" placeholder="Search product, supplier, order" [(ngModel)]="searchQuery"
+      (keyup.enter)="onSearch()" />
   </div>
 
-  <!-- CENTER SEARCH -->
-  <div class="header-center">
-    <div class="search-bar">
-      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <input type="text" placeholder="Search product, supplier, order" [(ngModel)]="searchQuery"
-        (keyup.enter)="onSearch()" />
-    </div>
-  </div>
-
-  <!-- RIGHT SIDE -->
-  <div class="header-right">
-
-    <!-- SETTINGS -->
-    <div class="dropdown-wrapper">
-      <button class="icon-btn" (click)="toggleSettings()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </button>
-
-      <div class="dropdown-menu" *ngIf="showSettings">
-        <div (click)="manageProfile()">Manage Profile</div>
-        <div (click)="logout()">Logout</div>
+  <div class="header-actions">
+    <!-- Clock -->
+    <div class="clock-and-maintenance">
+      <div class="header-clock">
+        <span class="clock-time">{{ currentTime | date: 'h:mm:ss a' }}</span>
+        <span class="clock-date">{{ currentTime | date: 'MMM d, yyyy' }}</span>
       </div>
     </div>
 
-    <!-- NOTIFICATIONS -->
+    <!-- Notifications (pending inspections — inspection-officer specific) -->
     <div class="dropdown-wrapper">
-      <button class="icon-btn" (click)="toggleNotifications()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      <button class="icon-btn notif-btn" (click)="toggleNotifications()" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-
-        <!-- Badge -->
-        <span class="notification-badge" *ngIf="pendingCount > 0">
-          {{ pendingCount }}
-        </span>
+        <span class="notif-badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
       </button>
 
-      <div class="dropdown-menu" *ngIf="showNotifications">
-        <div>
-          You have {{ pendingCount }} pending inspection(s) to start.
+      <div class="notif-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+        <div class="notif-header">
+          <span class="notif-title">Notifications</span>
+          <span class="notif-total" *ngIf="pendingCount > 0">{{ pendingCount }} pending</span>
+        </div>
+        <div class="notif-empty" *ngIf="pendingCount === 0">
+          ✅ All caught up! No pending inspections.
+        </div>
+        <div class="notif-item" *ngIf="pendingCount > 0">
+          <div class="notif-dot dot-inspection"></div>
+          <span>You have {{ pendingCount }} pending inspection(s) to start.</span>
         </div>
       </div>
     </div>
 
-    <!-- PROFILE -->
-    <div class="profile">
-      <img src="https://ui-avatars.com/api/?name=Admin+User&background=4a7c4e&color=fff" alt="Profile">
-    </div>
+    <!-- Settings -->
+    <button class="icon-btn" aria-label="Settings" (click)="toggleSettings()" title="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    </button>
 
+    <!-- User Menu -->
+    <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">
+      <button class="user-avatar" (click)="toggleUserMenu()" aria-label="User menu" title="User menu">
+        {{ userInitials }}
+      </button>
+
+      <div class="user-dropdown" *ngIf="showUserMenu">
+        <div class="user-header">
+          <div class="user-avatar-lg">{{ userInitials }}</div>
+          <div>
+            <div class="user-name">{{ userName }}</div>
+            <div class="user-email">{{ userEmail }}</div>
+          </div>
+        </div>
+        <div class="menu-divider"></div>
+        <button class="menu-item" (click)="manageProfile()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21v-2a6 6 0 0112 0v2" />
+          </svg>
+          Manage Profile
+        </button>
+        <div class="menu-divider"></div>
+        <button class="menu-item logout" (click)="logout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign out
+        </button>
+      </div>
+    </div>
   </div>
 </header>

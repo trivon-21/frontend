@@ -1,0 +1,6 @@
+# Dead / orphaned code pending deletion (see QA_REPORT.md §4 — Dead Code Inventory).
+# These components have gutted TypeScript stubs (`// Deleted...`) and are not
+# imported or routed anywhere. Excluded from linting until removed.
+src/app/components/modals/**
+src/app/pages/landing/**
+src/app/pages/signup/**
