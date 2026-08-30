@@ -25,7 +25,9 @@
         <thead><tr><th>ORDER ID</th><th>INVOICE NO</th><th>CUSTOMER</th><th>PAID DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
         <tbody>
           <tr *ngFor="let invoice of paginatedInvoices">
-            <td>{{ shortId(invoice.orderId) }}</td><td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ invoice.orderRef || shortId(invoice.orderId) }}</td>
+            <td>{{ invoice.invoiceNumber }}</td>
+            <td>{{ invoice.customerName }}</td>
             <td>{{ invoice.paidAt | date:'dd MMM yyyy' }}</td>
             <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
             <td><button class="view-btn" (click)="viewInvoice(invoice)">View</button></td>
@@ -104,7 +106,8 @@
         <thead><tr><th>INVOICE NO</th><th>CUSTOMER</th><th>PAID DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
         <tbody>
           <tr *ngFor="let invoice of paginatedRepairInvoices">
-            <td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ invoice.invoiceNumber }}</td>
+            <td>{{ invoice.customerName }}</td>
             <td>{{ invoice.paidAt | date:'dd MMM yyyy' }}</td>
             <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
             <td><button class="view-btn" (click)="viewRepairInvoice(invoice)">View</button></td>
@@ -125,8 +128,8 @@
         <div class="modal-header">
           <div><h3>Repair Invoice</h3><p class="modal-subtitle">{{ selectedRepairInvoice?.invoiceNumber }}</p></div>
           <button class="modal-close" (click)="closeRepairModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="24" y1="12" x2="12" y2="24"></line>
-    <line x1="12" y1="12" x2="24" y2="24"></line>
+   <line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
   </svg></button>
         </div>
         <div class="modal-body">

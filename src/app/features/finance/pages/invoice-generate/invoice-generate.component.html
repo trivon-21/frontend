@@ -383,7 +383,7 @@
 
             <td>
               <span class="ticket-id">
-                {{ invoice.ticketRef }}
+                {{ invoice.ticketRef || invoice.ticketId }}
               </span>
             </td>
 
@@ -525,7 +525,7 @@
 
           <p>
             <strong>Ticket Ref:</strong>
-            {{ selectedRepairInvoice?.ticketRef }}
+            {{ selectedRepairInvoice?.ticketRef || selectedRepairInvoice?.ticketId }}
           </p>
 
           <p>

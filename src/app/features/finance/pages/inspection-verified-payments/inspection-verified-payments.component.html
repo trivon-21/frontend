@@ -35,7 +35,7 @@
       <tbody>
         <tr *ngFor="let payment of paginatedPayments">
           <td>{{ payment.orderRef || shortId(payment.orderId) }}</td>
-          <td>{{ shortId(payment.ticketId) }}</td>
+          <td>{{ payment.ticketRef || shortId(payment.ticketId) }}</td>
           <td>{{ payment.customerName }}</td>
           <td>{{ payment.updatedAt | date:'EEE, dd MMM yyyy' }}</td>
           <td class="amount">LKR {{ payment.amount | number:'1.2-2' }}</td>
@@ -71,10 +71,9 @@
   </svg></button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ shortId(selectedPayment?.orderId) }}</p>
-        <p><strong>Ticket ID:</strong> {{ shortId(selectedPayment?.ticketId) }}</p>
+        <p><strong>Order ID:</strong> {{ selectedPayment?.orderRef || shortId(selectedPayment?.orderId) }}</p>
+        <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketRef || shortId(selectedPayment?.ticketId) }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
         <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
         <p><strong>Status:</strong>
           <span style="color:#065f46; font-weight:600;"> <svg xmlns="http://www.w3.org/2000/svg"

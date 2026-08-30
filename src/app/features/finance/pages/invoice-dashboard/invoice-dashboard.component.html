@@ -171,7 +171,7 @@
           <tr *ngFor="let item of paginatedInvoices">
 
             <td>
-              {{ item.orderId }}
+              {{ item.orderRef || item.orderId }}
             </td>
 
             <td>

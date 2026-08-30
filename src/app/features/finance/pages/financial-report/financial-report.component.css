@@ -649,6 +649,11 @@
   color: #3269a5;
 }
 
+.badge-payment_under_review {
+  background: #e5eef9;
+  color: #3269a5;
+}
+
 
 /* SENT */
 
