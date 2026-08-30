@@ -72,6 +72,7 @@ import { FinancialReportComponent } from './features/finance/pages/financial-rep
 import { PurchaseRequestVerificationComponent } from './features/finance/pages/purchase-request-verification/purchase-request-verification.component';
 import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
 import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
+import { MaterialRequestApprovalComponent } from './features/finance/pages/material-request-approval/material-request-approval.component';
 
 // Inspection
 import { InspectionPaymentComponent } from './features/customer/pages/inspection-payment/inspection-payment.component';
@@ -96,6 +97,26 @@ import { InvoicePaymentUploadComponent } from './features/customer/pages/invoice
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
+
+  // ── Manager portal
+  {
+    path: 'manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MANAGER', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
+  },
+
+  // ── Inventory Manager portal
+  {
+    path: 'inventory-manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INVENTORY', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/inventory-manager/inventory-manager.routes').then(
+        (m) => m.INVENTORY_MANAGER_ROUTES,
+      ),
+  },
 
   // ── Technician / Manager portal
   {
@@ -369,6 +390,10 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: DashboardComponent,
+      },
+      {
+        path: 'material-requests',
+        component: MaterialRequestApprovalComponent,
       },
 
       {

@@ -1,0 +1,445 @@
+.inventory-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1b2f27;
+  margin: 0;
+}
+
+.page-title p {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+
+
+/* Filters Card */
+.filters-card {
+  padding: 20px;
+  display: grid;
+  gap: var(--spacing-lg);
+  background: var(--background-card);
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
+}
+
+.quick-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  align-items: end;
+}
+
+.search-box {
+  position: relative;
+  display: block;
+}
+
+.search-box lucide-angular {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-box input,
+.filter-field input,
+.filter-field select,
+.sort-field select {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--background-card);
+  font-size: 13.5px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.search-box input {
+  padding-left: 44px;
+}
+
+.search-box input:focus,
+.filter-field input:focus,
+.filter-field select:focus,
+.sort-field select:focus {
+  border-color: var(--primary-main);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-lighter);
+}
+
+.filter-field,
+.sort-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.filter-field span,
+.sort-field span {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--spacing-md);
+}
+
+.sort-field {
+  margin-left: auto;
+  min-width: 180px;
+}
+
+.btn-advanced,
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: 42px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.btn-advanced {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: 600;
+}
+
+.btn-advanced.active {
+  border-color: var(--primary-main);
+  color: var(--primary-main);
+  background: var(--primary-lighter);
+}
+
+.btn-icon {
+  width: 42px;
+  padding: 0;
+}
+
+.active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary-main);
+}
+
+.advanced-filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  background: var(--background-page);
+  border: 1px solid var(--border-light);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--info);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  min-height: 42px;
+}
+
+.result-summary {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.state-card,
+.empty-row {
+  padding: var(--spacing-xxl);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--background-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-lg);
+}
+
+.error-state {
+  color: var(--error);
+}
+
+.name-cell strong,
+.alx-table td > strong {
+  display: block;
+}
+
+.name-cell small,
+.alx-table td > small {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.stock-pill.in-stock {
+  color: var(--success);
+  background: var(--success-light);
+}
+
+.stock-pill.low-stock {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+.stock-pill.out-of-stock {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+/* Table Section — component-specific overrides only */
+
+/* Standard table/pagination styles are in global styles.css (alx-*) */
+
+.btn-small {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--primary-main);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-card);
+  color: var(--primary-main);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-small:hover {
+  background: var(--primary-lighter);
+}
+
+
+/* Base Modal Styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--surface-overlay, rgb(0 0 0 / 40%));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fade-in 0.2s ease-out;
+}
+
+.modal-content {
+  background: var(--background-card);
+  width: 90%;
+  max-width: 600px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sku-badge {
+  background: var(--background-page);
+  color: var(--text-secondary);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  background: var(--background-page);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-item .label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-item .value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--background-page);
+}
+
+.clickable-row:focus-visible,
+.btn-advanced:focus-visible,
+.btn-icon:focus-visible,
+.btn-link:focus-visible,
+.btn-small:focus-visible,
+.btn-close:focus-visible,
+.btn-page:focus-visible {
+  outline: 2px solid #00843d;
+  outline-offset: 2px;
+}
+
+.btn-close {
+  background: var(--background-page);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: var(--background-hover);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (width <= 1200px) {
+  .quick-filters,
+  .advanced-filters {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .search-box {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (width <= 720px) {
+  .inventory-container {
+    padding: var(--spacing-lg);
+  }
+
+  .action-header,
+  .filter-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .quick-filters,
+  .advanced-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .search-box {
+    grid-column: auto;
+  }
+
+  .sort-field {
+    margin-left: 0;
+  }
+}
