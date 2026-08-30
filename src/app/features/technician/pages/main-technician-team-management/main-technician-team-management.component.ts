@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 
@@ -37,7 +37,7 @@ interface PendingJob {
   _id: string;
   customer: string;
   location: string;
-  type: 'Installation' | 'Service' | 'Maintenance';
+  type: 'Installation' | 'Service' | 'Maintenance' | 'Inspection';
   productType: string;
   warehouseStatusVersion?: number;
 }
@@ -69,8 +69,9 @@ type RawPendingJob = {
   _id?: string;
   ticketId?: string | number;
   customerName?: string;
+  fullName?: string;
   location?: string;
-  requestType?: 'Installation' | 'Service' | 'Maintenance';
+  requestType?: 'Installation' | 'Service' | 'Maintenance' | 'Inspection';
   productType?: string;
   warehouseStatusVersion?: number;
 };
@@ -78,7 +79,7 @@ type RawPendingJob = {
 @Component({
   selector: 'app-main-technician-team-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './main-technician-team-management.component.html',
   styleUrl: './main-technician-team-management.component.css'})
 export class MainTechnicianTeamManagementComponent implements OnInit {
@@ -177,7 +178,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
     return {
       id: this.normalizeTicketId(job.ticketId || job._id),
       _id: job._id || '',
-      customer: job.customerName || 'Unknown Customer',
+      customer: job.fullName || job.customerName || 'Unknown Customer',
       location: job.location || '-',
       type: job.requestType || 'Service',
       productType: job.productType || '-',
@@ -276,7 +277,6 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
 
   closeViewModal() {
     this.showViewModal = false;
-    this.selectedTeam = null;
   }
 
   openAssignModal(): void {

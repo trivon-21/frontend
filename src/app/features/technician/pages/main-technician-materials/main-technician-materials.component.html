@@ -76,60 +76,80 @@
         </div>
       </div>
 
-      <div class="main-grid">
-        <div class="request-list">
-          <div class="empty-state" *ngIf="!isLoading && !error && filteredRequests.length === 0">
-            No material requests found
-          </div>
-          <div class="empty-state" *ngIf="isLoading">Loading material requests...</div>
-          <div class="empty-state" *ngIf="error">{{ error }}</div>
-          <div 
-            *ngFor="let request of filteredRequests" 
-            class="request-card" 
-            [class.selected]="selectedRequest?.id === request.id"
-            (click)="selectRequest(request)"
-          >
-            <div class="request-id-row">
-              <div class="id-type" style="max-width: 65%;">
-                <span class="req-id" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ request.id }}</span>
-                <span class="req-type">{{ request.type }}</span>
-              </div>
-              <span class="status-chip" [ngClass]="getStatusClass(request.status)">
-                {{ request.status }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <div class="request-list table-container">
+        <table class="requests-table">
+          <thead>
+            <tr>
+              <th>REQUEST ID</th>
+              <th>TYPE</th>
+              <th>CUSTOMER</th>
+              <th>LOCATION</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!isLoading && !error && filteredRequests.length === 0">
+              <td colspan="7" class="empty-state">No material requests found</td>
+            </tr>
+            <tr *ngIf="isLoading">
+              <td colspan="7" class="empty-state">Loading material requests...</td>
+            </tr>
+            <tr *ngIf="error">
+              <td colspan="7" class="empty-state">{{ error }}</td>
+            </tr>
+            <tr *ngFor="let request of filteredRequests">
+              <td class="req-id">{{ request.id }}</td>
+              <td>{{ request.type }}</td>
+              <td>{{ request.customer }}</td>
+              <td>{{ request.location }}</td>
+              <td>{{ request.date }}</td>
+              <td class="status-cell"><strong>{{ request.status | uppercase }}</strong></td>
+              <td>
+                <button class="view-btn" (click)="selectRequest(request)">View</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="request-detail" *ngIf="selectedRequest">
-          <header class="detail-header">
-            <h2>Service Request {{ selectedRequest.id }}</h2>
-            <div class="detail-meta">
-              <div class="meta-item">
-                <span class="meta-label">Customer</span>
-                <span class="meta-value">{{ selectedRequest.customer }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Contact No</span>
-                <span class="meta-value">{{ selectedRequest.customerContactNo }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Email</span>
-                <span class="meta-value">{{ selectedRequest.customerEmail }}</span>
-              </div>
+      <!-- View Request Modal -->
+      <div class="modal-backdrop" *ngIf="showViewModal && selectedRequest">
+        <div class="modal-content">
+          <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h2>Service Request {{ selectedRequest.id }}</h2>
+              <p>Material Request Details</p>
             </div>
-            <div class="meta-item location-item">
-              <span class="meta-label">Location</span>
-              <span class="meta-value">{{ selectedRequest.location }}</span>
+            <button class="close-btn" (click)="closeViewModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">✕</button>
+          </div>
+
+          <div class="detail-meta">
+            <div class="meta-item">
+              <span class="meta-label">Customer</span>
+              <span class="meta-value">{{ selectedRequest.customer }}</span>
             </div>
-            <div class="meta-item location-item">
-              <span class="meta-label">Inventory fulfillment</span>
-              <span class="meta-value">{{ selectedRequest.fulfillmentStatus.replaceAll('_', ' ') }}</span>
+            <div class="meta-item">
+              <span class="meta-label">Contact No</span>
+              <span class="meta-value">{{ selectedRequest.customerContactNo }}</span>
             </div>
-          </header>
+            <div class="meta-item">
+              <span class="meta-label">Email</span>
+              <span class="meta-value">{{ selectedRequest.customerEmail }}</span>
+            </div>
+          </div>
+          <div class="meta-item location-item" style="margin-bottom: 20px;">
+            <span class="meta-label">Location</span>
+            <span class="meta-value">{{ selectedRequest.location }}</span>
+          </div>
+          <div class="meta-item location-item" style="margin-bottom: 20px;">
+            <span class="meta-label">Inventory fulfillment</span>
+            <span class="meta-value">{{ selectedRequest.fulfillmentStatus.replaceAll('_', ' ') }}</span>
+          </div>
 
           <div class="materials-section">
-            <h3>Materials Required</h3>
+            <h3 style="font-size: 16px; font-weight: 700; color: #64748b; margin: 0 0 20px 0;">Materials Required</h3>
             <div class="materials-table-wrapper">
               <table class="materials-table">
                 <thead>
@@ -217,38 +237,34 @@
 
             <div class="form-group" *ngIf="isInstallationTicketSelected">
               <label>Site Details</label>
-              <div class="site-details-card">
-                <div class="details-grid">
-                  <div class="detail-item">
-                    <p class="detail-label">Building Type</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.buildingType || '-' }}</p>
-                  </div>
-                  <div class="detail-item">
-                    <p class="detail-label">Floors</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.floors ?? '-' }}</p>
-                  </div>
-                  <div class="detail-item">
-                    <p class="detail-label">Rooms</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.rooms ?? '-' }}</p>
-                  </div>
-                  <div class="detail-item">
-                    <p class="detail-label">Ceiling Height</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.ceilingHeight || '-' }}</p>
-                  </div>
-                  <div class="detail-item">
-                    <p class="detail-label">Wall Type</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.wallType || '-' }}</p>
-                  </div>
-                  <div class="detail-item">
-                    <p class="detail-label">Power Supply</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.powerSupply || '-' }}</p>
-                  </div>
-                  <div class="detail-item full-width">
-                    <p class="detail-label">Outdoor Access</p>
-                    <p class="detail-value">{{ newRequest.siteDetails?.outdoorAccess || '-' }}</p>
+                <div class="site-details-card">
+                  <div class="details-grid">
+                    <div class="detail-item">
+                      <p class="detail-label">Site Status</p>
+                      <p class="detail-value">{{ newRequest.status || 'New' }}</p>
+                    </div>
+                    <div class="detail-item">
+                      <p class="detail-label">Site Type</p>
+                      <p class="detail-value">{{ newRequest.siteDetails?.buildingType || 'Residential' }}</p>
+                    </div>
+                    <div class="detail-item">
+                      <p class="detail-label">Floors</p>
+                      <p class="detail-value">{{ newRequest.siteDetails?.floors === 0 ? 'Ground Floor' : (newRequest.siteDetails?.floors ?? 'Ground Floor') }}</p>
+                    </div>
+                    <div class="detail-item">
+                      <p class="detail-label">Rooms</p>
+                      <p class="detail-value">{{ newRequest.siteDetails?.rooms ?? '1' }}</p>
+                    </div>
+                    <div class="detail-item">
+                      <p class="detail-label">Elevator Availability</p>
+                      <p class="detail-value">{{ newRequest.siteDetails?.elevatorAvailability || 'Yes' }}</p>
+                    </div>
+                    <div class="detail-item">
+                      <p class="detail-label">Parking Availability</p>
+                      <p class="detail-value">{{ newRequest.siteDetails?.parkingAvailability || 'Available' }}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
             </div>
 
             <div class="warranty-status" *ngIf="newRequest.ticketId && !isInstallationTicketSelected">

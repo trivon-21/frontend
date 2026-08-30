@@ -1,14 +1,14 @@
 import { Component, OnInit, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-main-technician-inspection-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-inspection-details.component.html',
   styleUrl: './main-technician-inspection-details.component.css'})
 export class MainTechnicianInspectionDetailsComponent implements OnInit {
@@ -76,7 +76,7 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
   }
 
   get teamLeadLabel(): string {
-    const lead = this.assignedTeamMembers.find((member) => member.role === 'Team Leader');
+    const lead = this.assignedTeamMembers.find((member) => member.role === 'Team Leader' || member.role === 'Lead');
     if (!lead?.name) {
       return 'Team Lead - -';
     }
@@ -85,7 +85,7 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
 
   get nonLeadTeamMembers(): string[] {
     return this.assignedTeamMembers
-      .filter((member) => member.role !== 'Team Leader' && Boolean(member.name))
+      .filter((member) => member.role !== 'Team Leader' && member.role !== 'Lead' && Boolean(member.name))
       .map((member) => `${member.name}${member.role ? ` (${member.role})` : ''}`);
   }
 

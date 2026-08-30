@@ -128,32 +128,28 @@
 
         <div class="details-grid">
           <div class="detail-block">
-            <span class="detail-label">Building Type</span>
-            <span class="detail-value">{{ installation.siteDetails?.buildingType || '-' }}</span>
+            <span class="detail-label">Site Status</span>
+            <span class="detail-value">{{ installation.status || 'New' }}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Site Type</span>
+            <span class="detail-value">{{ installation.siteDetails?.buildingType || 'Residential' }}</span>
           </div>
           <div class="detail-block">
             <span class="detail-label">Floors</span>
-            <span class="detail-value">{{ installation.siteDetails?.floors ?? '-' }}</span>
+            <span class="detail-value">{{ installation.siteDetails?.floors === 0 ? 'Ground Floor' : (installation.siteDetails?.floors ?? 'Ground Floor') }}</span>
           </div>
           <div class="detail-block">
             <span class="detail-label">Rooms</span>
-            <span class="detail-value">{{ installation.siteDetails?.rooms ?? '-' }}</span>
+            <span class="detail-value">{{ installation.siteDetails?.rooms ?? '1' }}</span>
           </div>
           <div class="detail-block">
-            <span class="detail-label">Ceiling Height</span>
-            <span class="detail-value">{{ installation.siteDetails?.ceilingHeight || '-' }}</span>
+            <span class="detail-label">Elevator Availability</span>
+            <span class="detail-value">{{ installation.siteDetails?.elevatorAvailability || 'Yes' }}</span>
           </div>
           <div class="detail-block">
-            <span class="detail-label">Wall Type</span>
-            <span class="detail-value">{{ installation.siteDetails?.wallType || '-' }}</span>
-          </div>
-          <div class="detail-block">
-            <span class="detail-label">Power Supply</span>
-            <span class="detail-value">{{ installation.siteDetails?.powerSupply || '-' }}</span>
-          </div>
-          <div class="detail-block">
-            <span class="detail-label">Outdoor Access</span>
-            <span class="detail-value">{{ installation.siteDetails?.outdoorAccess || '-' }}</span>
+            <span class="detail-label">Parking Availability</span>
+            <span class="detail-value">{{ installation.siteDetails?.parkingAvailability || 'Available' }}</span>
           </div>
           <div class="detail-block">
             <span class="detail-label">Materials Count</span>

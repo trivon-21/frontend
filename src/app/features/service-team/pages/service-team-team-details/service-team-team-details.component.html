@@ -61,9 +61,10 @@
         </h2>
         
         <div class="slots-grid" *ngIf="details.team.availableSlots.length; else noSlots" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-          <div class="slot-tag" *ngFor="let slot of details.team.availableSlots" style="background: #f4f6f5; border: 1px solid rgba(0,0,0,0.05); border-radius: 10px; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px;">
-            <span class="slot-day" style="font-size: 14px; font-weight: 700; color: #1b2f27;">{{ slot | date:'EEEE' }}</span>
-            <span class="slot-date" style="font-size: 12px; color: #8a9e96; font-weight: 500;">{{ slot | date:'MMMM d, yyyy' }}</span>
+          <div class="slot-tag" *ngFor="let slot of details.team.availableSlots" style="background: #f4f6f5; border: 1px solid rgba(0,0,0,0.05); border-radius: 10px; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px;">
+            <span class="slot-day" style="font-size: 14px; font-weight: 700; color: #1b2f27;">{{ slot.date | date:'EEEE' }}</span>
+            <span class="slot-date" style="font-size: 12px; color: #8a9e96; font-weight: 500;">{{ slot.date | date:'MMMM d, yyyy' }}</span>
+            <span class="slot-time" *ngIf="slot.timeSlot" style="font-size: 12px; color: var(--primary-main); font-weight: 600; margin-top: 2px;">{{ slot.timeSlot }}</span>
           </div>
         </div>
         <ng-template #noSlots>
