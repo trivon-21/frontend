@@ -19,7 +19,7 @@ interface Team {
   status: 'Busy' | 'Available';
   members: TeamMember[];
   availableSlots: number;
-  availableDates: { day: string; date: string }[];
+  availableDates: { day: string; date: string; timeSlot?: string }[];
   activeJobsList: ActiveJob[];
 }
 
@@ -52,7 +52,7 @@ type RawTechTeam = {
   teamType?: string;
   activeJobsCount?: number;
   status?: Team['status'];
-  availableSlots?: string[];
+  availableSlots?: any[];
   members?: RawTeamMember[];
   activeJobs?: Array<{
     id?: string;
@@ -128,7 +128,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
   }
 
   private mapRawTeam(team: RawTechTeam): Team {
-    const availableSlotValues = (team.availableSlots || []).filter((date) => typeof date === 'string' && !!date);
+    const availableSlotValues = (team.availableSlots || []).filter((item) => !!item);
     const members = (team.members || []).map((member) => ({
       name: member.name || 'Unknown Member',
       role: member.role || 'Technician'
@@ -155,7 +155,18 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       status: team.status === 'Busy' ? 'Busy' : 'Available',
       members,
       availableSlots: availableSlotValues.length,
-      availableDates: availableSlotValues.map((date) => this.mapDate(date)),
+      availableDates: availableSlotValues.map((item) => {
+        if (typeof item === 'string') {
+          return this.mapDate(item);
+        } else if (item && item.date) {
+          const mapped: { day: string; date: string; timeSlot?: string } = this.mapDate(item.date);
+          if (item.timeSlot) {
+            mapped.timeSlot = item.timeSlot;
+          }
+          return mapped;
+        }
+        return { day: '-', date: 'Unknown' };
+      }),
       activeJobsList
     };
   }
