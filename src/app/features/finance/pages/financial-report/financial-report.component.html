@@ -57,56 +57,56 @@
       <!-- STAT CARDS -->
       <div class="fr-cards">
         <div class="fr-card green">
-          <div class="fr-card-icon">💰</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Total Collected</span>
             <span class="fr-card-value">LKR {{ summary.totalCollected | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card blue">
-          <div class="fr-card-icon">🛒</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Buy Only Revenue</span>
             <span class="fr-card-value">LKR {{ summary.buyOnlyRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card purple">
-          <div class="fr-card-icon">🔍</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Inspection Fees</span>
             <span class="fr-card-value">LKR {{ summary.inspectionRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card orange">
-          <div class="fr-card-icon">🔧</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Service Revenue</span>
             <span class="fr-card-value">LKR {{ summary.serviceRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card teal">
-          <div class="fr-card-icon">📄</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Invoice Payments</span>
             <span class="fr-card-value">LKR {{ summary.salesRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card red">
-          <div class="fr-card-icon">📦</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Purchase Expenses</span>
             <span class="fr-card-value">LKR {{ summary.purchaseExpenses | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card teal">
-          <div class="fr-card-icon">📊</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Net Revenue</span>
             <span class="fr-card-value">LKR {{ summary.netRevenue | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card grey">
-          <div class="fr-card-icon">⏳</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Pending Collection</span>
             <span class="fr-card-value">LKR {{ summary.pendingRevenue | number:'1.0-0' }}</span>
@@ -199,6 +199,7 @@
           <option value="DRAFT">Pending</option>
           <option value="SENT">Sent</option>
           <option value="ACCEPTED">Accepted</option>
+          <option value="PAYMENT_UNDER_REVIEW">Payment Under Review</option>
           <option value="PAID">Paid</option>
           <option value="REJECTED">Rejected</option>
           <option value="AUTO_CANCELLED">Cancelled</option>
@@ -259,21 +260,21 @@
       <!-- Summary cards -->
       <div class="fr-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
         <div class="fr-card red">
-          <div class="fr-card-icon">🚨</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Overdue Invoices</span>
             <span class="fr-card-value">{{ overdueCount }}</span>
           </div>
         </div>
         <div class="fr-card orange">
-          <div class="fr-card-icon">⚠️</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Overdue Amount</span>
             <span class="fr-card-value">LKR {{ overdueAmount | number:'1.0-0' }}</span>
           </div>
         </div>
         <div class="fr-card grey">
-          <div class="fr-card-icon">📋</div>
+          <div class="fr-card-icon"></div>
           <div class="fr-card-info">
             <span class="fr-card-label">Total Outstanding</span>
             <span class="fr-card-value">LKR {{ totalOutstanding | number:'1.0-0' }}</span>
@@ -281,7 +282,7 @@
         </div>
       </div>
 
-      <div class="fr-empty" *ngIf="outstanding.length === 0">🎉 No outstanding payments</div>
+      <div class="fr-empty" *ngIf="outstanding.length === 0">No outstanding payments</div>
 
       <div class="fr-table-wrap" *ngIf="outstanding.length > 0">
         <table class="fr-table">

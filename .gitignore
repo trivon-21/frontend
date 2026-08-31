@@ -21,9 +21,22 @@ testem.log
 
 # Environment files
 .env
-.env.local
-.env.development
-.env.production
+.env.*
+!.env.example
+
+# Local Playwright E2E suite and runtime output
+e2e/
+playwright*.config.ts
+playwright-report/
+test-results/
+blob-report/
+playwright/.auth/
+
+# Local credentials and certificates
+*.pem
+*.key
+*.p12
+*.pfx
 
 # IDEs and editors
 .idea/
@@ -63,3 +76,6 @@ __screenshots__/
 # Temporary / backup files
 *.swp
 *.bak
+*.tmp
+*.orig
+*.rej

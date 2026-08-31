@@ -32,7 +32,7 @@
         </div>
         <div class="card-content">
           <span class="card-label">Customer</span>
-          <span class="card-value-small" [title]="serviceView.customerName">{{ serviceView.customerName || '-' }}</span>
+          <span class="card-value-small" [title]="serviceView.fullName || serviceView.customerName || serviceView.customerId?.fullName || serviceView.customerId?.name">{{ serviceView.fullName || serviceView.customerName || serviceView.customerId?.fullName || serviceView.customerId?.name || '-' }}</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Full Name</span>
-              <span class="info-value">{{ serviceView.customerName || '-' }}</span>
+              <span class="info-value">{{ serviceView.fullName || serviceView.customerName || serviceView.customerId?.fullName || serviceView.customerId?.name || '-' }}</span>
             </div>
           </div>
 
@@ -93,7 +93,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Phone Number</span>
-              <span class="info-value">{{ serviceView.customerDetails?.phone || '-' }}</span>
+              <span class="info-value">{{ serviceView.customerDetails?.phone || serviceView.customerId?.phoneNumber || serviceView.customerId?.contactNo || serviceView.customerId?.contactNumber || '-' }}</span>
             </div>
           </div>
 

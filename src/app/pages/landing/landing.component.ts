@@ -46,8 +46,27 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       // Allow Angular DOM compilation cycle to finish
       setTimeout(() => {
         this.initObservers();
-      }, 50);
+        this.scrollToFragment();
+      }, 100);
     }, 850);
+
+    this.route.fragment.subscribe((fragment) => {
+      if (!this.isLoading && fragment) {
+        setTimeout(() => this.scrollToFragment(), 50);
+      }
+    });
+  }
+
+  private scrollToFragment(): void {
+    const fragment = this.route.snapshot.fragment;
+    if (fragment) {
+      const element = document.getElementById(fragment);
+      if (element) {
+        const yOffset = -140;
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }
   }
 
   showServiceDetails(serviceName: string): void {

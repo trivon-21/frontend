@@ -193,18 +193,16 @@
     <!-- Status Toggles -->
     <div class="action-buttons-row" style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
       <button
-        class="btn-secondary"
+        class="btn-primary btn-yellow"
         [disabled]="isUpdatingStatus || ticket.status === 'In Progress'"
         (click)="updateTicketStatus('In Progress')"
-        style="border-color: #f59e0b; color: #d97706; padding: 10px 20px;"
       >
         Mark As In Progress
       </button>
       <button
-        class="btn-secondary"
+        class="btn-primary btn-orange"
         [disabled]="isUpdatingStatus || ticket.status === 'On Hold'"
         (click)="updateTicketStatus('On Hold')"
-        style="border-color: #ef4444; color: #dc2626; padding: 10px 20px;"
       >
         Mark As On Hold
       </button>

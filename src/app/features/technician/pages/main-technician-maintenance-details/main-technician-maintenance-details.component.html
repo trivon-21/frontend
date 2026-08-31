@@ -31,7 +31,7 @@
         </div>
         <div class="card-content">
           <span class="card-label">Customer</span>
-          <span class="card-value-small" [title]="ticket.customerName">{{ ticket.customerName }}</span>
+          <span class="card-value-small" [title]="ticket.fullName || ticket.customerName || ticket.customerId?.fullName || ticket.customerId?.name">{{ ticket.fullName || ticket.customerName || ticket.customerId?.fullName || ticket.customerId?.name || '-' }}</span>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
         </div>
         <div class="card-content">
           <span class="card-label">Location</span>
-          <span class="card-value-small" [title]="ticket.location">{{ ticket.location || 'Logistic Area 1' }}</span>
+          <span class="card-value-small" [title]="ticket.location || ticket.customerId?.address">{{ ticket.location || ticket.customerId?.address || 'Logistic Area 1' }}</span>
         </div>
       </div>
 
@@ -82,7 +82,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Full Name</span>
-              <span class="info-value">{{ ticket.customerName }}</span>
+              <span class="info-value">{{ ticket.fullName || ticket.customerName || ticket.customerId?.fullName || ticket.customerId?.name || '-' }}</span>
             </div>
           </div>
 
@@ -92,7 +92,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Phone Number</span>
-              <span class="info-value">{{ ticket.customerPhone || 'N/A' }}</span>
+              <span class="info-value">{{ ticket.customerPhone || ticket.customerId?.phoneNumber || ticket.customerId?.contactNumber || ticket.customerId?.contactNo || ticket.customerId?.phone || 'N/A' }}</span>
             </div>
           </div>
 
@@ -102,7 +102,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Email Address</span>
-              <span class="info-value">{{ ticket.customerEmail || 'N/A' }}</span>
+              <span class="info-value">{{ ticket.customerEmail || ticket.customerId?.email || 'N/A' }}</span>
             </div>
           </div>
 
@@ -112,7 +112,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Address</span>
-              <span class="info-value">{{ ticket.location || 'N/A' }}</span>
+              <span class="info-value">{{ ticket.location || ticket.customerId?.address || 'N/A' }}</span>
             </div>
           </div>
         </div>

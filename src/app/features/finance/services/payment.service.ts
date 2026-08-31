@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
 
-  private apiUrl = 'http://127.0.0.1:3000/api/payments';
+  private apiUrl = 'http://127.0.0.1:5000/api/payments';
 
   constructor(private http: HttpClient) { }
 

@@ -72,6 +72,7 @@ import { FinancialReportComponent } from './features/finance/pages/financial-rep
 import { PurchaseRequestVerificationComponent } from './features/finance/pages/purchase-request-verification/purchase-request-verification.component';
 import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
 import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
+import { MaterialRequestApprovalComponent } from './features/finance/pages/material-request-approval/material-request-approval.component';
 
 // Inspection
 import { InspectionPaymentComponent } from './features/customer/pages/inspection-payment/inspection-payment.component';
@@ -84,9 +85,38 @@ import { CompletedInspectionsComponent } from './features/inspection-team/pages/
 import { InspectionDashboardComponent } from './features/inspection-team/pages/inspection-dashboard/inspection-dashboard.component';
 import { CustomerInvoiceComponent } from './features/customer/pages/customer-invoice/customer-invoice.component';
 
+// CSA (Customer Support Agent)
+import { CsaLayoutComponent } from './features/csa/components/layout/csa-layout.component';
+import { CsaDashboardComponent } from './features/csa/pages/csa-dashboard/csa-dashboard.component';
+import { CsaMaintenanceSchedulesComponent } from './features/csa/pages/csa-maintenance-schedules/csa-maintenance-schedules.component';
+import { CsaCustomersComponent } from './features/csa/pages/csa-customers/csa-customers.component';
+import { CsaServiceTicketsComponent } from './features/csa/pages/csa-service-tickets/csa-service-tickets.component';
+import { CsaInquiriesComponent } from './features/csa/pages/csa-inquiries/csa-inquiries.component';
+import { InvoicePaymentUploadComponent } from './features/customer/pages/invoice-payment-upload/invoice-payment-upload.component';
+
 export const routes: Routes = [
-{ path: '', component: LandingComponent, pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
+
+  // ── Manager portal
+  {
+    path: 'manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MANAGER', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
+  },
+
+  // ── Inventory Manager portal
+  {
+    path: 'inventory-manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INVENTORY', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/inventory-manager/inventory-manager.routes').then(
+        (m) => m.INVENTORY_MANAGER_ROUTES,
+      ),
+  },
 
   // ── Technician / Manager portal
   {
@@ -129,16 +159,16 @@ export const routes: Routes = [
   },
 
   // ── Backward compatibility redirects
-  { path: 'service-dashboard',          redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
-  { path: 'service-team-dashboard',     redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
+  { path: 'service-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
+  { path: 'service-team-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
   { path: 'service-team-assigned-jobs', redirectTo: 'service-team/assigned-jobs', pathMatch: 'full' },
-  { path: 'service-team-team-details',  redirectTo: 'service-team/team-details',  pathMatch: 'full' },
+  { path: 'service-team-team-details', redirectTo: 'service-team/team-details', pathMatch: 'full' },
 
-// =========================================================
+  // =========================================================
   // PUBLIC PAGES
   // =========================================================
 
-  
+
 
   {
     path: 'signup',
@@ -148,7 +178,7 @@ export const routes: Routes = [
       ),
   },
 
-  
+
 
   {
     path: 'forgot-password',
@@ -361,6 +391,10 @@ export const routes: Routes = [
         path: 'dashboard',
         component: DashboardComponent,
       },
+      {
+        path: 'material-requests',
+        component: MaterialRequestApprovalComponent,
+      },
 
       {
         path: 'payment-verification',
@@ -566,6 +600,24 @@ export const routes: Routes = [
   {
     path: 'customer/invoice',
     component: CustomerInvoiceComponent,
+  },
+  { path: 'invoice/upload-payment',
+    component: InvoicePaymentUploadComponent },
+
+  // =========================================================
+  // CSA (CUSTOMER SUPPORT AGENT)
+  // =========================================================
+  {
+    path: 'csa',
+    component: CsaLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: CsaDashboardComponent },
+      { path: 'customers', component: CsaCustomersComponent },
+      { path: 'service-tickets', component: CsaServiceTicketsComponent },
+      { path: 'inquiries', component: CsaInquiriesComponent },
+      { path: 'maintenance-schedules', component: CsaMaintenanceSchedulesComponent },
+    ]
   },
 
   // =========================================================

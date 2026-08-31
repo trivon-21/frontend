@@ -7,7 +7,18 @@ import { environment } from '../../../../../environments/environment';
 interface MaintenanceDetail {
   _id: string;
   ticketId: string;
+  fullName?: string;
   customerName: string;
+  customerId?: {
+    name?: string;
+    fullName?: string;
+    contactNo?: string;
+    contactNumber?: string;
+    phone?: string;
+    phoneNumber?: string;
+    email?: string;
+    address?: string;
+  };
   customerEmail: string;
   customerPhone: string;
   location: string;

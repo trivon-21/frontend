@@ -1,0 +1,85 @@
+<div class="required-items-table-section mt-40">
+  <div class="section-header">
+    <div class="status-dot-wrapper">
+      <div class="status-dot warning">
+        <lucide-angular name="circle-alert" [size]="14" strokeWidth="3"></lucide-angular>
+      </div>
+    </div>
+    <h3>Required Items to Order (Low Stock)</h3>
+  </div>
+
+  <div class="table-container alx-table-container white-panel">
+    <table class="alx-table">
+      <colgroup>
+        <col class="item-column">
+        <col class="sku-column">
+        <col class="stock-column">
+        <col class="price-column">
+        <col class="action-column">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>ITEM DETAILS</th>
+          <th>SKU / CODE</th>
+          <th>AVAILABLE STOCK</th>
+          <th class="text-right">EST. UNIT PRICE</th>
+          <th class="text-center">ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of suggestedItemsState; let i = index"
+            class="clickable-row"
+            [class.selected-row]="selectedSuggestedIndex === i"
+            (click)="selectSuggestedItem(i)">
+          <td>
+            <span class="item-name-bold">{{ item.name }}</span>
+            <small>{{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</small>
+          </td>
+          <td>
+            <span class="sku-code">{{ item.sku }}</span>
+          </td>
+          <td>
+            <div class="stock-info">
+              <span class="label">Avail</span>
+              <span class="val danger">{{ item.available }}</span>
+            </div>
+          </td>
+          <td class="text-right price-cell">
+            <div class="price-edit-wrap" *ngIf="selectedSuggestedIndex === i">
+              <span class="currency-prefix">LKR</span>
+              <input type="number" [(ngModel)]="item.editPrice" class="inline-price-input no-spinner" (click)="$event.stopPropagation()">
+            </div>
+            <span class="price-bold" *ngIf="selectedSuggestedIndex !== i">{{ formatCurrency(item.editPrice) }}</span>
+          </td>
+          <td class="text-center action-cell">
+            <div class="config-action-wrap" *ngIf="selectedSuggestedIndex === i">
+              <div class="config-action-inner" *ngIf="item.isConfiguring; else addBtn">
+                <div class="qty-input-wrap">
+                  <span class="qty-label">Qty:</span>
+                  <input type="number" [(ngModel)]="item.editQty" class="inline-qty-input-mini no-spinner" (click)="$event.stopPropagation()">
+                </div>
+                <div class="config-btns">
+                  <button type="button" class="btn-confirm-mini im-btn im-btn--primary im-btn--compact im-btn--icon" [attr.aria-label]="'Add ' + item.name + ' to order'" (click)="addFromSuggested(item); $event.stopPropagation()">
+                    <lucide-angular name="check" [size]="14" strokeWidth="3"></lucide-angular>
+                  </button>
+                  <button type="button" class="btn-cancel-mini im-btn im-btn--secondary im-btn--compact im-btn--icon" [attr.aria-label]="'Cancel adding ' + item.name" (click)="cancelConfiguring(item); $event.stopPropagation()">
+                    <lucide-angular name="x" [size]="14" strokeWidth="3"></lucide-angular>
+                  </button>
+                </div>
+              </div>
+              <ng-template #addBtn>
+                <button type="button" class="btn-small im-btn im-btn--primary im-btn--compact" (click)="startConfiguring(item); $event.stopPropagation()">
+                  <lucide-angular name="plus" [size]="14" strokeWidth="3"></lucide-angular>
+                  <span>Add to Order</span>
+                </button>
+              </ng-template>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="suggestedItems.length === 0">
+          <td colspan="5" class="empty-table-row" role="status">No urgent items requiring order at the moment.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

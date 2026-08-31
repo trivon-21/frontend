@@ -316,12 +316,6 @@
       font-weight: 500;
     }
 
-    .main-content-grid {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
 
     .team-list-pane {
       background-color: white;

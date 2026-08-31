@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 interface NavItem {
   label: string;
@@ -44,6 +45,7 @@ export class SidebarComponent {
     { title: 'Payment Dashboard', icon: 'dashboard', route: '/finance/dashboard' },
     { title: 'Payment Audit Log', icon: 'audit', route: '/finance/payment-audit-log' },
     { title: 'Financial Reports', icon: 'report', route: '/finance/financial-report' },
+    { title: 'Material Requests', icon: 'verification', route: '/finance/material-requests' },
   ];
 
   sections: NavSection[] = [
@@ -119,21 +121,40 @@ export class SidebarComponent {
       ]
     },
     {
-  title: 'Purchase Requests',
-  icon: 'purchase',
-  isOpen: false,
-  items: [
-    { label: 'Pending Requests',  icon: 'verification', route: '/finance/purchase-requests/pending' },
-    { label: 'Approved Requests', icon: 'verified',     route: '/finance/purchase-requests/approved' },
-    { label: 'Rejected Requests', icon: 'rejected',     route: '/finance/purchase-requests/rejected' },
-  ]
-},
+      title: 'Purchase Requests',
+      icon: 'purchase',
+      isOpen: false,
+      items: [
+        { label: 'Pending Requests',  icon: 'verification', route: '/finance/purchase-requests/pending' },
+        { label: 'Approved Requests', icon: 'verified',     route: '/finance/purchase-requests/approved' },
+        { label: 'Rejected Requests', icon: 'rejected',     route: '/finance/purchase-requests/rejected' },
+      ]
+    },
   ];
 
-  toggleItem(item: NavItem) { item.isOpen = !item.isOpen; }
+  // Toggle a sub-item (Repair/Maintenance) — closes any other open sibling first
+  toggleItem(item: NavItem) {
+    const wasOpen = item.isOpen;
+    // Close every sibling sub-item in the same parent section
+    this.sections.forEach(section => {
+      section.items.forEach(i => {
+        if (i.children && i !== item) i.isOpen = false;
+      });
+    });
+    item.isOpen = !wasOpen;
+  }
 
+  // Toggle a top-level section — closes any other open section first
   toggleSection(section: NavSection) {
-    section.isOpen = !section.isOpen;
+    const wasOpen = section.isOpen;
+    this.sections.forEach(s => {
+      if (s !== section) {
+        s.isOpen = false;
+        // also close any nested sub-items inside sections being collapsed
+        s.items.forEach(i => { if (i.children) i.isOpen = false; });
+      }
+    });
+    section.isOpen = !wasOpen;
   }
 
   getIcon(iconName: string): SafeHtml {

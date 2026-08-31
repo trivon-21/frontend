@@ -1,5 +1,4 @@
-
-    <div class="team-management-container">
+    <div class="team-management-container page-wrapper">
       <header class="page-header">
         <h1 class="page-title">Team Management</h1>
       </header>
@@ -41,113 +40,131 @@
         </div>
       </div>
 
-      <div class="main-content-grid">
-        <div class="team-list-pane">
-          <div class="loading-state" *ngIf="isLoading">
-            <div class="loading-bar"></div>
-            <div class="loading-bar short"></div>
-            <div class="loading-bar"></div>
-          </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>TEAM NAME</th>
+              <th>TYPE</th>
+              <th>MEMBERS</th>
+              <th>ACTIVE JOBS</th>
+              <th>AVAILABLE SLOTS</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="isLoading">
+              <td colspan="7" style="text-align: center; color: #8a9e96;">Loading teams...</td>
+            </tr>
+            <tr *ngIf="!isLoading && filteredTeams.length === 0">
+              <td colspan="7" style="text-align: center; color: #8a9e96;">No teams found</td>
+            </tr>
+            <tr *ngFor="let team of filteredTeams">
+              <td style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                <div class="team-icon" [ngClass]="team.type.toLowerCase()" style="width: 32px; height: 32px; border-radius: 8px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                {{ team.name }}
+              </td>
+              <td>{{ team.type }}</td>
+              <td>{{ team.membersCount }}</td>
+              <td>{{ team.activeJobs }}</td>
+              <td>{{ team.availableSlots }}</td>
+              <td>
+                <span class="status-chip" [ngClass]="team.status.toLowerCase()">
+                  {{ team.status }}
+                </span>
+              </td>
+              <td>
+                <button class="action-btn" (click)="selectTeam(team)" style="padding: 6px 12px; font-size: 12px;">
+                  Assign
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-          <div class="empty-state" *ngIf="!isLoading && filteredTeams.length === 0">
-            <h4>No teams found</h4>
-            <p>Try clearing the filters or check the team records in the database.</p>
-          </div>
-
-          <div 
-            *ngFor="let team of filteredTeams" 
-            class="team-card" 
-            [class.selected]="selectedTeam?.id === team.id"
-            (click)="selectTeam(team)"
-          >
-            <div class="team-card-header">
-              <div class="team-icon" [ngClass]="team.type.toLowerCase()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-              <div class="team-header-info">
-                <h4>{{ team.name }}</h4>
-                <p>{{ team.membersCount }} Members &bull; Active Jobs: {{ team.activeJobs }}</p>
-              </div>
-              <span class="status-chip" [ngClass]="team.status.toLowerCase()">
-                {{ team.status }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="team-detail-pane" *ngIf="selectedTeam">
-          <header class="detail-header">
+      <!-- View Team Modal -->
+      <div class="modal-backdrop" *ngIf="showViewModal && selectedTeam">
+        <div class="modal-content">
+          <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
             <div class="header-info">
-              <h2>{{ selectedTeam.name }}</h2>
-              <p>{{ selectedTeam.type }} Team</p>
+              <h2 style="font-size: 24px; margin: 0 0 4px 0;">{{ selectedTeam.name }}</h2>
+              <p style="margin: 0; color: #64748b;">{{ selectedTeam.type }} Team</p>
             </div>
-          </header>
+            <button (click)="closeViewModal()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;">&times;</button>
+          </div>
 
-          <div class="stats-overview">
-            <div class="stat-item">
-              <span class="stat-label">Team Members</span>
-              <span class="stat-value">{{ selectedTeam.membersCount }} Members</span>
+          <div class="stats-overview" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px;">
+            <div class="stat-item" style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="stat-label" style="font-size: 14px; color: #64748b;">Team Members</span>
+              <span class="stat-value" style="font-size: 18px; font-weight: 700;">{{ selectedTeam.membersCount }} Members</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Active Jobs</span>
-              <span class="stat-value">{{ selectedTeam.activeJobs }}</span>
+            <div class="stat-item" style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="stat-label" style="font-size: 14px; color: #64748b;">Active Jobs</span>
+              <span class="stat-value" style="font-size: 18px; font-weight: 700;">{{ selectedTeam.activeJobs }}</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Available Slots</span>
-              <span class="stat-value">{{ selectedTeam.availableSlots }} Dates</span>
+            <div class="stat-item" style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="stat-label" style="font-size: 14px; color: #64748b;">Available Slots</span>
+              <span class="stat-value" style="font-size: 18px; font-weight: 700;">{{ selectedTeam.availableSlots }} Dates</span>
             </div>
           </div>
 
-          <div class="detail-sections-grid">
+          <div class="detail-sections-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
             <div class="members-section">
-              <h3>Team Members</h3>
-              <div class="member-list">
-                <div *ngFor="let member of selectedTeam.members" class="member-item">
-                  <div class="member-icon">
+              <h3 style="font-size: 16px; margin: 0 0 20px 0;">Team Members</h3>
+              <div class="member-list" style="display: flex; flex-direction: column; gap: 16px;">
+                <div *ngFor="let member of selectedTeam.members" class="member-item" style="display: flex; align-items: center; gap: 12px;">
+                  <div class="member-icon" style="color: #10b981;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
-                  <div class="member-info">
-                    <span class="member-name">{{ member.name }}</span>
-                    <span class="member-role">{{ member.role }}</span>
+                  <div class="member-info" style="display: flex; flex-direction: column;">
+                    <span class="member-name" style="font-size: 15px; font-weight: 600;">{{ member.name }}</span>
+                    <span class="member-role" style="font-size: 13px; color: #64748b;">{{ member.role }}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="active-jobs-section">
-              <h3>Active Jobs</h3>
+              <h3 style="font-size: 16px; margin: 0 0 20px 0;">Active Jobs</h3>
               <ng-container *ngIf="selectedTeam.activeJobsList.length > 0; else noActiveJobs">
-                <div class="job-card" *ngFor="let job of selectedTeam.activeJobsList">
-                  <div class="job-info">
-                    <span class="job-id">{{ job.ticketId }}</span>
-                    <span class="job-customer">{{ job.customerName }}</span>
-                    <span class="job-location">{{ job.location }}</span>
+                <div class="job-card" *ngFor="let job of selectedTeam.activeJobsList" style="background-color: #eff6ff; padding: 16px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                  <div class="job-info" style="display: flex; flex-direction: column; gap: 4px;">
+                    <span class="job-id" style="font-size: 16px; font-weight: 700;">{{ job.ticketId }}</span>
+                    <span class="job-customer" style="font-size: 14px; font-weight: 500;">{{ job.customerName }}</span>
+                    <span class="job-location" style="font-size: 14px; color: #64748b;">{{ job.location }}</span>
                   </div>
-                  <span class="job-chip">{{ job.type }}</span>
+                  <span class="job-chip" style="background-color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; color: #3b82f6;">{{ job.type }}</span>
                 </div>
               </ng-container>
               <ng-template #noActiveJobs>
-                <div class="empty-inline-state">
-                  <p>No active jobs assigned to this team.</p>
+                <div class="empty-inline-state" style="padding: 16px 18px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b;">
+                  <p style="margin: 0;">No active jobs assigned to this team.</p>
                 </div>
               </ng-template>
             </div>
           </div>
 
-          <div class="availability-section">
-            <h3>Available Dates</h3>
-            <div class="date-grid">
-              <div *ngFor="let dateObj of selectedTeam.availableDates" class="date-slot">
-                <span class="date-day">{{ dateObj.day }}</span>
-                <span class="date-value">{{ dateObj.date }}</span>
+          <div class="availability-section" style="margin-bottom: 40px;">
+            <h3 style="font-size: 16px; margin: 0 0 20px 0;">Available Dates</h3>
+            <div class="date-grid" style="display: flex; gap: 16px; flex-wrap: wrap;">
+              <div *ngFor="let dateObj of selectedTeam.availableDates" class="date-slot" style="background-color: #f0fdf4; border: 1px solid #dcfce7; padding: 12px 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; min-width: 100px;">
+                <span class="date-day" style="font-size: 13px; color: #166534; font-weight: 500;">{{ dateObj.day }}</span>
+                <span class="date-value" style="font-size: 14px; font-weight: 700; color: #166534;">{{ dateObj.date }}</span>
               </div>
             </div>
           </div>
 
-          <button class="assign-btn" (click)="openAssignModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Assign New Job
-          </button>
+          <div class="modal-actions" style="display: flex; gap: 16px;">
+            <button class="cancel-btn" (click)="closeViewModal()" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; font-weight: 600; flex: 1;">Close</button>
+            <button class="assign-btn" (click)="closeViewModal(); openAssignModal()" style="flex: 2;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Assign New Job
+            </button>
+          </div>
         </div>
       </div>
 

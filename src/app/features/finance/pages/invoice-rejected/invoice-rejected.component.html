@@ -2,8 +2,8 @@
   <div class="page-header"><h2 class="page-title">Rejected Invoices</h2></div>
 
   <div class="inv-tabs">
-    <button class="inv-tab" [class.active]="activeTab==='installation'" (click)="activeTab='installation'">🏗️ Installation</button>
-    <button class="inv-tab" [class.active]="activeTab==='repair'" (click)="activeTab='repair'">🔧 Repair</button>
+    <button class="inv-tab" [class.active]="activeTab==='installation'" (click)="activeTab='installation'">Installation</button>
+    <button class="inv-tab" [class.active]="activeTab==='repair'" (click)="activeTab='repair'">Repair</button>
   </div>
 
   <ng-container *ngIf="activeTab==='installation'">
@@ -18,14 +18,16 @@
         <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()"/>
       </div>
     </div>
-    <div *ngIf="isLoading" class="empty-state"><p>⏳ Loading...</p></div>
+    <div *ngIf="isLoading" class="empty-state"><p>Loading...</p></div>
     <div *ngIf="!isLoading && filteredInvoices.length===0" class="empty-state"><p>No rejected installation invoices</p></div>
     <div class="table-container" *ngIf="!isLoading && filteredInvoices.length>0">
       <table class="data-table">
         <thead><tr><th>ORDER ID</th><th>INVOICE NO</th><th>CUSTOMER</th><th>REJECTED DATE</th><th>AMOUNT</th><th>ACTION</th></tr></thead>
         <tbody>
           <tr *ngFor="let invoice of paginatedInvoices">
-            <td>{{ invoice.orderId }}</td><td>{{ invoice.invoiceNumber }}</td><td>{{ invoice.customerName }}</td>
+            <td>{{ invoice.orderRef || invoice.orderId }}</td>
+            <td>{{ invoice.invoiceNumber }}</td>
+            <td>{{ invoice.customerName }}</td>
             <td>{{ invoice.rejectedAt | date:'dd MMM yyyy' }}</td>
             <td class="amount">LKR {{ invoice.grandTotal | number:'1.0-0' }}</td>
             <td><button class="view-btn" (click)="viewInvoice(invoice)">View</button></td>
@@ -45,7 +47,10 @@
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div><h3>Invoice</h3><p class="modal-subtitle">{{ selectedInvoice?.invoiceNumber }}</p></div>
-          <button class="modal-close" (click)="closeModal()">✕</button>
+          <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg></button>
         </div>
         <div class="modal-body">
           <div class="invoice-info-grid">
@@ -53,7 +58,25 @@
             <div><p class="info-label">Customer</p><p class="info-value">{{ selectedInvoice?.customerName }}</p></div>
             <div><p class="info-label">Email</p><p class="info-value">{{ selectedInvoice?.customerEmail }}</p></div>
             <div><p class="info-label">Rejected Date</p><p class="info-value">{{ selectedInvoice?.rejectedAt | date:'dd MMM yyyy' }}</p></div>
-            <div><p class="info-label">Status</p><p class="info-value rejected-badge">✕ Rejected</p></div>
+            <div>
+  <p class="info-label">Status</p>
+  <p class="info-value rejected-badge">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="16"
+         height="16"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    Rejected
+  </p>
+</div>
           </div>
           <div class="rejection-reason-box" *ngIf="selectedInvoice?.rejectionReason">
             <p class="reason-label">Rejection Reason</p>
@@ -88,7 +111,7 @@
         <input type="date" class="date-btn" [(ngModel)]="repairSelectedDate" (change)="applyRepairFilters()"/>
       </div>
     </div>
-    <div *ngIf="isRepairLoading" class="empty-state"><p>⏳ Loading...</p></div>
+    <div *ngIf="isRepairLoading" class="empty-state"><p>Loading...</p></div>
     <div *ngIf="!isRepairLoading && filteredRepairInvoices.length===0" class="empty-state"><p>No rejected repair invoices</p></div>
     <div class="table-container" *ngIf="!isRepairLoading && filteredRepairInvoices.length>0">
       <table class="data-table">
@@ -115,7 +138,10 @@
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div><h3>Repair Invoice</h3><p class="modal-subtitle">{{ selectedRepairInvoice?.invoiceNumber }}</p></div>
-          <button class="modal-close" (click)="closeRepairModal()">✕</button>
+          <button class="modal-close" (click)="closeRepairModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+   <line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg></button>
         </div>
         <div class="modal-body">
           <div class="invoice-info-grid">
@@ -123,7 +149,10 @@
             <div><p class="info-label">Customer</p><p class="info-value">{{ selectedRepairInvoice?.customerName }}</p></div>
             <div><p class="info-label">Email</p><p class="info-value">{{ selectedRepairInvoice?.customerEmail }}</p></div>
             <div><p class="info-label">Rejected Date</p><p class="info-value">{{ selectedRepairInvoice?.rejectedAt | date:'dd MMM yyyy' }}</p></div>
-            <div><p class="info-label">Status</p><p class="info-value rejected-badge">✕ Rejected</p></div>
+            <div><p class="info-label">Status</p><p class="info-value rejected-badge"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg> Rejected</p></div>
           </div>
           <div class="rejection-reason-box" *ngIf="selectedRepairInvoice?.rejectionReason">
             <p class="reason-label">Rejection Reason</p>

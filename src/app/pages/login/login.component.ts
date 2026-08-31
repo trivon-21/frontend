@@ -8,6 +8,7 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { ChangePasswordModalComponent } from '../../components/modals/change-password-modal/change-password-modal.component';
+import { roleHomeUrl } from '../../core/routing/role-home';
 
 @Component({
   selector: 'app-login',
@@ -59,27 +60,7 @@ export class LoginComponent {
       return this.returnUrl;
     }
 
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      return '/';
-    }
-
-    switch (user.role) {
-      case 'SUPER_ADMIN':
-        return '/super-admin';
-      case 'CUSTOMER':
-        return '/dashboard';
-      case 'MAIN_TECH':
-        return '/main-technician-dashboard';
-      case 'SERVICE_TEAM':
-        return '/service-team/dashboard';
-      case 'FINANCE':
-        return '/finance/dashboard';
-      case 'INSPECTION':
-        return '/inspection-officer/dashboard';
-      default:
-        return '/';
-    }
+    return roleHomeUrl(this.authService.getCurrentUser()?.role);
   }
 
   onIdentifierChange(identifier: string) {

@@ -122,6 +122,10 @@
               <span class="meta-label">Location</span>
               <span class="meta-value">{{ selectedRequest.location }}</span>
             </div>
+            <div class="meta-item location-item">
+              <span class="meta-label">Inventory fulfillment</span>
+              <span class="meta-value">{{ selectedRequest.fulfillmentStatus.replaceAll('_', ' ') }}</span>
+            </div>
           </header>
 
           <div class="materials-section">
@@ -275,11 +279,16 @@
                 <div *ngFor="let item of newRequest.items; let i = index" class="item-row">
                   <div class="input-group">
                     <span class="input-label">ITEM DESCRIPTION</span>
-                    <input type="text" [(ngModel)]="item.name">
+                    <select [(ngModel)]="item.inventoryId" (ngModelChange)="onMaterialSelection(item)">
+                      <option value="" disabled>Select catalog material</option>
+                      <option *ngFor="let material of materialCatalog" [value]="material._id">
+                        {{ material.name }} ({{ material.sku }}) — {{ material.available }} {{ material.unit }} available
+                      </option>
+                    </select>
                   </div>
                   <div class="input-group quantity-group">
                     <span class="input-label">QUANTITY</span>
-                    <input type="text" [(ngModel)]="item.quantity">
+                    <input type="number" min="1" step="1" [(ngModel)]="item.quantity">
                   </div>
                   <button class="delete-item-btn" (click)="removeItem(i)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
@@ -301,4 +310,3 @@
         </div>
       </div>
     </div>
-  

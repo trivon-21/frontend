@@ -7,12 +7,24 @@ import { environment } from '../../../../../environments/environment';
 import { GlobalSearchService } from '../../services/global-search.service';
 
 interface MaterialItem {
+  inventoryId?: string;
+  sku?: string;
   name: string;
   quantity: string;
 }
 
+interface MaterialCatalogItem {
+  _id: string;
+  name: string;
+  sku: string;
+  unit: string;
+  available: number;
+  unitCost: number;
+}
+
 interface MaterialRequest {
   id: string;
+  materialRequestId: string;
   type: 'Installation' | 'Service' | 'Maintenance';
   customer: string;
   customerEmail: string;
@@ -20,12 +32,15 @@ interface MaterialRequest {
   date: string;
   location: string;
   status: 'Finance Approved' | 'New' | 'Pending Approval' | 'Pending' | 'Sent to IM';
+  fulfillmentStatus: 'NOT_SENT' | 'PENDING' | 'RESERVED' | 'HANDED_OVER' | 'CANCELLED';
+  statusVersion: number;
   items: MaterialItem[];
   serviceType?: string;
 }
 
 type RawMaterialRequest = {
   _id?: string;
+  materialRequestId?: string;
   ticketId?: string | number;
   requestType?: 'Installation' | 'Service';
   customerName?: string;
@@ -37,6 +52,8 @@ type RawMaterialRequest = {
   serviceDescription?: string;
   createdAt?: string;
   status?: MaterialRequest['status'];
+  fulfillmentStatus?: MaterialRequest['fulfillmentStatus'];
+  statusVersion?: number;
   materials?: Array<{
     item?: string;
     quantity?: string;
@@ -72,11 +89,12 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
+  showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
     productType: '',
     description: '',
-    items: [{ name: '', quantity: '' }],
+    items: [{ inventoryId: '', sku: '', name: '', quantity: '' }],
     notes: '',
     isUnderWarranty: false,
     isFreeOfCharge: false,
@@ -103,6 +121,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   requests: MaterialRequest[] = [];
+  materialCatalog: MaterialCatalogItem[] = [];
   filteredRequests: MaterialRequest[] = [];
   selectedRequest: MaterialRequest | null = null;
   newStatusTicketIds: string[] = [];
@@ -128,6 +147,17 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       });
     this.loadMaterialRequests();
     this.loadNewStatusTicketIds();
+    this.loadMaterialCatalog();
+  }
+
+  loadMaterialCatalog(): void {
+    this.http
+      .get<{ success: boolean; data: MaterialCatalogItem[] }>(`${this.apiUrl}/catalog`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: response => { this.materialCatalog = response.data || []; },
+        error: () => { this.error = 'The material catalog could not be loaded.'; },
+      });
   }
 
   private formatDisplayDate(value?: string): string {
@@ -151,17 +181,20 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     return normalized.startsWith('#') ? normalized : `#${normalized}`;
   }
 
-  private mapApiMaterialRequest(item: RawMaterialRequest): MaterialRequest {
+  private mapApiMaterialRequest(item: RawMaterialRequest & { fullName?: string; customerId?: any }): MaterialRequest {
     return {
       id: this.normalizeTicketId(item.ticketId || item._id),
+      materialRequestId: item.materialRequestId || String(item._id || item.ticketId || ''),
       // Show 'Maintenance' explicitly when the API indicates a maintenance service
       type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
-      customer: item.customerName || 'Unknown Customer',
+      customer: item.fullName || item.customerName || (item.customerId?.fullName || item.customerId?.name) || 'Unknown Customer',
       customerEmail: item.customerEmail || '-',
       customerContactNo: item.customerContactNo || '-',
       date: this.formatDisplayDate(item.serviceDate || item.createdAt),
       location: item.location || '-',
       status: item.status || 'New',
+      fulfillmentStatus: item.fulfillmentStatus || 'NOT_SENT',
+      statusVersion: item.statusVersion || 0,
       items: (item.materials || []).map((material) => ({
         name: material.item || '-',
         quantity: material.quantity || '-'
@@ -320,18 +353,26 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    if (!this.selectedRequest || !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
-      this.selectedRequest = this.filteredRequests[0] ?? null;
+    if (this.selectedRequest && !this.filteredRequests.some((request) => request.id === this.selectedRequest?.id)) {
+      this.selectedRequest = null;
+      this.showViewModal = false;
     }
   }
 
   selectRequest(request: MaterialRequest) {
     this.selectedRequest = request;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedRequest = null;
   }
 
   openCreateModal(): void {
     this.showCreateModal = true;
     this.loadNewStatusTicketIds();
+    this.loadMaterialCatalog();
   }
 
   onTicketSelectionChange(ticketId: string): void {
@@ -355,13 +396,15 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     
     // Populate materials if they exist on the selected ticket (e.g. Finance Rejected or Company Initiated Maintenance default materials)
     if (selectedTicket?.materials && selectedTicket.materials.length > 0) {
-      this.newRequest.items = selectedTicket.materials.map((material) => ({
+      this.newRequest.items = selectedTicket.materials.map((material: any) => ({
+        inventoryId: material.inventoryId || '',
+        sku: material.sku || '',
         name: material.item || '',
         quantity: material.quantity || ''
       }));
     } else {
       // Reset to empty for new requests
-      this.newRequest.items = [{ name: '', quantity: '' }];
+      this.newRequest.items = [{ inventoryId: '', sku: '', name: '', quantity: '' }];
     }
   }
 
@@ -370,7 +413,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       ticketId: '',
       productType: '',
       description: '',
-      items: [{ name: '', quantity: '' }],
+      items: [{ inventoryId: '', sku: '', name: '', quantity: '' }],
       notes: '',
       isUnderWarranty: false,
       isFreeOfCharge: false,
@@ -386,7 +429,13 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   addItem() {
-    this.newRequest.items.push({ name: '', quantity: '' });
+    this.newRequest.items.push({ inventoryId: '', sku: '', name: '', quantity: '' });
+  }
+
+  onMaterialSelection(item: MaterialItem): void {
+    const selected = this.materialCatalog.find(material => material._id === item.inventoryId);
+    item.name = selected?.name || '';
+    item.sku = selected?.sku || '';
   }
 
   removeItem(index: number) {
@@ -398,10 +447,10 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     const selectedTicket = this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
     const materials = this.newRequest.items
       .map((item) => ({
-        item: (item.name || '').trim(),
-        quantity: (item.quantity || '').trim()
+        inventoryId: item.inventoryId,
+        quantity: Number(item.quantity)
       }))
-      .filter((item) => item.item && item.quantity);
+      .filter((item) => item.inventoryId && Number.isInteger(item.quantity) && item.quantity > 0);
 
     if (!normalizedTicketId) {
       this.error = 'Please select a service ticket.';
@@ -456,6 +505,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     }
 
     const ticketId = this.selectedRequest.id.replace(/^#/, '');
+    const materialRequestId = this.selectedRequest.materialRequestId || ticketId;
     
     // Prepare the data to send to inventory manager
     const inventoryManagerData = {
@@ -467,11 +517,12 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       materials: this.selectedRequest.items.map((item) => ({
         item: item.name,
         quantity: item.quantity
-      }))
+      })),
+      statusVersion: this.selectedRequest.statusVersion,
     };
 
     this.http
-      .patch<{ success: boolean }>(`${this.apiUrl}/${encodeURIComponent(ticketId)}/send-to-im`, inventoryManagerData)
+      .patch<{ success: boolean }>(`${this.apiUrl}/${encodeURIComponent(materialRequestId)}/send-to-im`, inventoryManagerData)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -481,7 +532,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
           this.requests = this.requests.map((request) =>
             request.id === this.selectedRequest?.id
-              ? { ...request, status: 'Sent to IM' }
+              ? { ...request, status: 'Sent to IM', fulfillmentStatus: 'PENDING' }
               : request
           );
           this.applyFilters();

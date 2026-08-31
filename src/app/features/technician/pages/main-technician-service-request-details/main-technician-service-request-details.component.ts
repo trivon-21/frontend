@@ -8,7 +8,15 @@ import { environment } from '../../../../../environments/environment';
 type ServiceRequestView = {
   ticketId?: number;
   status?: string;
+  fullName?: string;
   customerName?: string;
+  customerId?: {
+    name?: string;
+    fullName?: string;
+    contactNo?: string;
+    contactNumber?: string;
+    phoneNumber?: string;
+  };
   location?: string;
   serviceDate?: string;
   productType?: string;

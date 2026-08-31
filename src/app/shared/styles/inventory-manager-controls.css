@@ -1,0 +1,154 @@
+.inventory-portal-shell {
+  --im-button-height: 40px;
+  --im-button-compact-height: 32px;
+  --im-button-padding: 0 20px;
+  --im-button-compact-padding: 0 12px;
+  --im-button-radius: 10px;
+  --im-button-font-size: 13.5px;
+  --im-button-compact-font-size: 12px;
+  --im-button-font-weight: 600;
+  --im-button-gap: 8px;
+  --im-button-border: rgba(0, 0, 0, 0.1);
+  --im-button-border-hover: rgba(0, 0, 0, 0.2);
+  --im-button-ghost: #f5f5f3;
+  --im-button-ghost-hover: #ebebea;
+  --im-button-danger: #c20e0e;
+  --im-button-danger-hover: #a30c0c;
+  --im-button-focus: rgba(0, 132, 61, 0.24);
+  --im-button-disabled-opacity: 0.55;
+}
+
+.inventory-portal-shell :is(button, a).im-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  height: var(--im-button-height);
+  min-height: var(--im-button-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--im-button-gap);
+  padding: var(--im-button-padding);
+  border: 1.5px solid transparent;
+  border-radius: var(--im-button-radius);
+  box-shadow: none;
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: var(--im-button-font-size);
+  font-weight: var(--im-button-font-weight);
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.inventory-portal-shell .im-btn.im-btn--primary {
+  border-color: var(--primary-main);
+  background: var(--primary-main);
+  color: #fff;
+}
+
+.inventory-portal-shell .im-btn.im-btn--primary:hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.inventory-portal-shell .im-btn.im-btn--secondary {
+  border-color: var(--im-button-border);
+  background: #fff;
+  color: #566463;
+}
+
+.inventory-portal-shell .im-btn.im-btn--secondary:hover:not(:disabled) {
+  border-color: var(--primary-main);
+  color: var(--primary-main);
+}
+
+.inventory-portal-shell .im-btn.im-btn--ghost {
+  border-color: transparent;
+  background: var(--im-button-ghost);
+  color: #566463;
+}
+
+.inventory-portal-shell .im-btn.im-btn--ghost:hover:not(:disabled) {
+  background: var(--im-button-ghost-hover);
+  color: #2d3139;
+}
+
+.inventory-portal-shell .im-btn.im-btn--danger {
+  border-color: var(--im-button-danger);
+  background: var(--im-button-danger);
+  color: #fff;
+}
+
+.inventory-portal-shell .im-btn.im-btn--danger:hover:not(:disabled) {
+  border-color: var(--im-button-danger-hover);
+  background: var(--im-button-danger-hover);
+}
+
+.inventory-portal-shell :is(button, a).im-btn.im-btn--compact {
+  height: var(--im-button-compact-height);
+  min-height: var(--im-button-compact-height);
+  padding: var(--im-button-compact-padding);
+  font-size: var(--im-button-compact-font-size);
+}
+
+.inventory-portal-shell :is(button, a).im-btn.im-btn--icon,
+.inventory-portal-shell :is(button, a).im-btn.im-btn--close {
+  width: var(--im-button-compact-height);
+  min-width: var(--im-button-compact-height);
+  height: var(--im-button-compact-height);
+  min-height: var(--im-button-compact-height);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.inventory-portal-shell :is(button, a).im-btn.im-btn--close {
+  border-color: transparent;
+  background: transparent;
+  color: #8a9e96;
+  font-size: 22px;
+}
+
+.inventory-portal-shell :is(button, a).im-btn.im-btn--close:hover:not(:disabled) {
+  background: var(--im-button-ghost);
+  color: #2d3139;
+}
+
+.inventory-portal-shell :is(button, a).im-btn.im-btn--full {
+  width: 100%;
+}
+
+.inventory-portal-shell :is(button, a).im-btn:focus-visible {
+  outline: 3px solid var(--im-button-focus);
+  outline-offset: 2px;
+}
+
+.inventory-portal-shell :is(button, a).im-btn:disabled,
+.inventory-portal-shell :is(button, a).im-btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: var(--im-button-disabled-opacity);
+}
+
+.inventory-portal-shell :is(button, a).im-btn lucide-angular,
+.inventory-portal-shell :is(button, a).im-btn lucide-icon,
+.inventory-portal-shell :is(button, a).im-btn svg {
+  flex: 0 0 auto;
+}
+
+.inventory-portal-shell .im-action-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .inventory-portal-shell .im-action-group {
+    width: 100%;
+  }
+
+  .inventory-portal-shell .im-action-group > .im-btn:not(.im-btn--icon, .im-btn--close, .im-btn--compact) {
+    width: 100%;
+  }
+}

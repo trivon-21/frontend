@@ -1,0 +1,195 @@
+<div class="wizard-container">
+  <header class="wizard-header">
+    <div>
+      <a class="back-link im-btn im-btn--secondary im-btn--compact" routerLink="/inventory-manager/inventory">← Back to inventory</a>
+      <h1>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h1>
+      <p>{{ isEditMode ? (item?.name + ' · ' + item?.sku) : 'Create a zero-stock catalog record. Receive physical stock through Procurement.' }}</p>
+    </div>
+    <span class="mode-badge">Catalog master data</span>
+  </header>
+
+  <div class="success-panel" *ngIf="savedItem" role="status">
+    <div>
+      <h2>{{ createdNewProduct ? 'Catalog product created' : 'Product saved' }}</h2>
+      <p>{{ savedItem.name }} is ready in inventory. Physical quantities and asset tags are managed through receiving.</p>
+    </div>
+    <div class="success-actions">
+      <button type="button" class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/inventory">View Inventory</button>
+      <button type="button" class="btn-primary im-btn im-btn--primary" (click)="receiveStock()">Receive Stock</button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!savedItem">
+    <nav class="stepper" aria-label="Product form steps">
+      <button type="button" *ngFor="let step of [1, 2, 3]" [class.active]="currentStep === step" [class.complete]="currentStep > step" [attr.aria-current]="currentStep === step ? 'step' : null" (click)="goToStep(step)">
+        <span>{{ step }}</span>
+        <strong>{{ step === 1 ? 'Identity' : step === 2 ? 'Inventory settings' : 'Compatibility' }}</strong>
+      </button>
+    </nav>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <section class="form-card" *ngIf="currentStep === 1">
+        <div class="section-heading">
+          <h2>Identity and classification</h2>
+          <p>Use the shared HVAC taxonomy so purchasing, filtering, and reporting agree.</p>
+        </div>
+        <div class="form-grid">
+          <label class="field span-2">
+            <span>Product name <b>*</b></span>
+            <input formControlName="name" placeholder="e.g., Copeland scroll compressor ZR61KCE">
+            <small class="error" *ngIf="hasError('name')">Product name is required.</small>
+          </label>
+          <label class="field">
+            <span>SKU <b>*</b></span>
+            <input formControlName="sku" placeholder="e.g., COMP-ZR61KCE" [class.locked]="isEditMode">
+            <small class="hint" *ngIf="isEditMode">SKU is locked because other workflows reference it.</small>
+            <small class="error" *ngIf="hasError('sku', 'pattern')">Use letters, numbers, dots, underscores, or hyphens.</small>
+            <small class="error" *ngIf="hasError('sku', 'server')">This SKU already exists.</small>
+          </label>
+          <label class="field">
+            <span>Item form <b>*</b></span>
+            <select formControlName="type"><option *ngFor="let type of itemForms" [value]="type">{{ type }}</option></select>
+          </label>
+          <label class="field">
+            <span>Product class <b>*</b></span>
+            <select formControlName="itemClass" (change)="onItemClassChange()">
+              <option *ngFor="let itemClass of itemClasses" [value]="itemClass">{{ itemClass }}</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Subcategory <b>*</b></span>
+            <select formControlName="subcategory">
+              <option value="" disabled>Select a subcategory</option>
+              <option *ngFor="let subcategory of availableSubcategories" [value]="subcategory">{{ subcategory }}</option>
+            </select>
+            <small class="error" *ngIf="form.hasError('classification') && form.controls['subcategory'].touched">Choose a classified product type and matching subcategory.</small>
+          </label>
+          <label class="field">
+            <span>Brand / manufacturer <b>*</b></span>
+            <input formControlName="brand" placeholder="e.g., Daikin, Copeland">
+            <small class="error" *ngIf="hasError('brand')">Brand or manufacturer is required.</small>
+          </label>
+          <label class="field">
+            <span>OEM part / model number</span>
+            <input formControlName="manufacturerPartNumber" placeholder="Manufacturer reference">
+          </label>
+        </div>
+      </section>
+
+      <section class="form-card" *ngIf="currentStep === 2">
+        <div class="section-heading">
+          <h2>Inventory settings</h2>
+          <p>Set planning and storage defaults. Quantity changes remain controlled by operational workflows.</p>
+        </div>
+        <div class="stock-summary">
+          <div><span>Available</span><strong>{{ item?.available || 0 }} {{ form.controls['unit'].value }}</strong></div>
+          <div><span>Reserved</span><strong>{{ item?.reserved || 0 }} {{ form.controls['unit'].value }}</strong></div>
+          <div><span>Status</span><strong class="capitalize">{{ stockStatusLabel }}</strong></div>
+          <p *ngIf="!isEditMode">New catalog products start at zero stock.</p>
+        </div>
+        <div class="form-grid">
+          <label class="field">
+            <span>Unit of measure <b>*</b></span>
+            <select formControlName="unit"><option *ngFor="let unit of units" [value]="unit">{{ unit }}</option></select>
+          </label>
+          <label class="field">
+            <span>Unit cost (LKR) <b>*</b></span>
+            <input type="number" min="0" formControlName="unitCost">
+          </label>
+          <label class="field">
+            <span>Reorder level <b>*</b></span>
+            <input type="number" min="0" formControlName="reorderLevel">
+          </label>
+          <label class="field">
+            <span>Maximum stock level <b>*</b></span>
+            <input type="number" min="0" formControlName="maxStockLevel">
+            <small class="error" *ngIf="form.hasError('stockLevels') && form.controls['maxStockLevel'].touched">Maximum stock must be at least the reorder level.</small>
+          </label>
+          <label class="field">
+            <span>Warehouse / area <b>*</b></span>
+            <input formControlName="location" placeholder="e.g., Main Warehouse">
+          </label>
+          <label class="field">
+            <span>Shelf / bin</span>
+            <input formControlName="binLocation" placeholder="e.g., A-03-02">
+          </label>
+          <label class="field span-2">
+            <span>Preferred supplier</span>
+            <select formControlName="supplierId">
+              <option value="">Not assigned</option>
+              <option *ngFor="let supplier of suppliers" [value]="supplier._id">{{ supplier.name }}</option>
+            </select>
+            <small class="error" *ngIf="hasError('supplierId', 'server')">The selected supplier no longer exists.</small>
+          </label>
+          <label class="checkbox-card span-2" [class.locked]="serializationLocked">
+            <input type="checkbox" formControlName="isSerialized">
+            <span><strong>Track individual serial numbers / asset tags</strong><small>Tags are added during Procurement receiving, not in this form.</small></span>
+          </label>
+        </div>
+        <div class="serial-panel" *ngIf="item?.isSerialized">
+          <strong>Current asset tags (read-only)</strong>
+          <div class="chips" *ngIf="item?.serialNumbers?.length; else noSerials">
+            <span class="chip" *ngFor="let serial of item?.serialNumbers">{{ serial }}</span>
+          </div>
+          <ng-template #noSerials><p>No asset tags received yet.</p></ng-template>
+          <small *ngIf="serializationLocked">Tracking mode is locked while stock or asset tags exist.</small>
+        </div>
+      </section>
+
+      <section class="form-card" *ngIf="currentStep === 3">
+        <div class="section-heading">
+          <h2>HVAC compatibility</h2>
+          <p>Optional technical metadata improves parts matching, purchasing, and inventory search.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field span-2">
+            <span>Compatible models</span>
+            <div class="tag-entry"><input [(ngModel)]="compatibleModelInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addCompatibleModel()" placeholder="Enter a model, then press Enter"><button type="button" class="im-btn im-btn--primary im-btn--compact" (click)="addCompatibleModel()">Add</button></div>
+            <div class="chips"><button type="button" class="chip removable" *ngFor="let model of compatibleModels" (click)="removeTag('compatibleModels', model)">{{ model }} ×</button></div>
+          </div>
+          <label class="field">
+            <span>Compatible system</span>
+            <select formControlName="systemType"><option *ngFor="let systemType of systemTypes" [value]="systemType">{{ systemType }}</option></select>
+          </label>
+          <label class="field">
+            <span>Cooling capacity (BTU/h)</span>
+            <input type="number" min="0" formControlName="capacityBtu" placeholder="e.g., 18000">
+          </label>
+          <div class="field span-2">
+            <span>Refrigerant compatibility</span>
+            <div class="tag-entry"><input [(ngModel)]="refrigerantInput" [ngModelOptions]="{standalone: true}" (keydown.enter)="$event.preventDefault(); addRefrigerant()" placeholder="Enter R32, R410A, etc."><button type="button" class="im-btn im-btn--primary im-btn--compact" (click)="addRefrigerant()">Add</button></div>
+            <div class="chips"><button type="button" class="chip removable" *ngFor="let refrigerant of refrigerants" (click)="removeTag('refrigerants', refrigerant)">{{ refrigerant }} ×</button></div>
+          </div>
+          <label class="field">
+            <span>Voltage</span>
+            <input formControlName="voltage" placeholder="e.g., 230 V">
+          </label>
+          <label class="field">
+            <span>Phase</span>
+            <select formControlName="phase"><option *ngFor="let phase of phases" [value]="phase">{{ phase }}</option></select>
+          </label>
+          <label class="field span-2">
+            <span>Specifications URL</span>
+            <input type="url" formControlName="specsUrl" placeholder="https://manufacturer.example/specifications">
+            <small class="error" *ngIf="hasError('specsUrl')">Enter a complete http or https URL.</small>
+          </label>
+        </div>
+        <div class="review-panel">
+          <strong>Ready to save</strong>
+          <p>{{ form.controls['name'].value || 'Unnamed product' }} · {{ form.controls['itemClass'].value }} / {{ form.controls['subcategory'].value }}</p>
+          <small>Stock remains {{ item?.available || 0 }} and serial tags are unchanged.</small>
+        </div>
+      </section>
+
+      <div class="error-banner" *ngIf="errorMessage" role="alert">{{ errorMessage }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadSuppliers()">Retry suppliers</button></div>
+      <footer class="wizard-footer im-action-group">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="previousStep()" [disabled]="currentStep === 1 || isSubmitting">Back</button>
+        <span>Step {{ currentStep }} of {{ totalSteps }}</span>
+        <button type="button" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep < totalSteps" (click)="nextStep()">Continue</button>
+        <button type="submit" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep === totalSteps" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Product') }}</button>
+      </footer>
+    </form>
+  </ng-container>
+
+  <div class="loading-overlay" *ngIf="loading" role="status" aria-live="polite"><div class="spinner"></div><p>Loading product…</p></div>
+</div>

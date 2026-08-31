@@ -1,38 +1,14 @@
 <!-- inspection-payment.component.html -->
 
 <!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">AirLux</div>
-  <div class="nav-links">
-    <a href="#">Profile</a>
-    <a href="#">View products</a>
-    <a href="#">Our Services</a>
-    <button class="logout-btn">Logout</button>
-  </div>
-</nav>
-
-<!-- HERO BANNER -->
-<div class="hero-banner">
-  <div class="hero-text">
-    <h1>Premium Cooling<br>Solutions</h1>
-    <p>Discover our curated collection of high-performance air conditioning systems</p>
-  </div>
-  <div class="hero-right">
-    <div class="welcome-badge">
-      <span>🔔 Welcome {{ customerName }}!</span>
-    </div>
-    <div class="hero-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
-    </div>
-  </div>
-</div>
+<app-navbar></app-navbar>
 
 <!-- ORDER SUMMARY -->
 <div class="page-body">
 
   <div class="order-summary-card">
     <h2 class="section-title">
-      <span class="title-icon">📋</span> Order Summary
+      <span class="title-icon"></span> Order Summary
     </h2>
     <div class="summary-row">
       <span class="label">Order ID:</span>
@@ -107,15 +83,35 @@
           style="display:none" />
 
         <div *ngIf="!uploadedFile" class="drop-content">
-          <span class="camera-icon">📷</span>
+          <span class="camera-icon"><svg xmlns="http://www.w3.org/2000/svg"
+     width="25" height="25"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+  <circle cx="12" cy="13" r="3"></circle>
+</svg></span>
           <p>Click<br>or<br>Drag and Drop<br>here to upload</p>
           <span class="file-types">(PDF or PNG)</span>
         </div>
 
         <div *ngIf="uploadedFile" class="file-selected">
-          <span class="file-icon">✅</span>
+          <span class="file-icon"><svg xmlns="http://www.w3.org/2000/svg"
+     width="24" height="24"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10"></circle>
+  <polyline points="8 12 11 15 16 9"></polyline>
+</svg></span>
           <p class="file-name">{{ uploadedFile.name }}</p>
-          <button class="remove-file" (click)="removeFile($event)">✕ Remove</button>
+          <button class="remove-file" (click)="removeFile($event)">Remove</button>
         </div>
       </div>
 
@@ -139,29 +135,4 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <h3>AirLux</h3>
-      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
-    </div>
-    <div class="footer-contact">
-      <h4>Contact Us</h4>
-      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
-      <p>📞 +94 11 234 5678</p>
-      <p>✉️ support@airlux.lk</p>
-    </div>
-    <div class="footer-social">
-      <h4>Follow Us</h4>
-      <div class="social-icons">
-        <a href="#" class="social-btn">f</a>
-        <a href="#" class="social-btn">𝕏</a>
-        <a href="#" class="social-btn">in</a>
-        <a href="#" class="social-btn">▶</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
-  </div>
-</footer>
+<app-footer></app-footer>

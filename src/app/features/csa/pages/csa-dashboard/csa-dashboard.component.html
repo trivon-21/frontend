@@ -1,0 +1,194 @@
+<div class="csa-dashboard-container">
+
+  <!-- DASHBOARD HEADER -->
+  <div class="dash-header">
+    <div>
+      <h1 class="dash-title">Customer Support Overview</h1>
+      <p class="dash-subtitle">Welcome back. Here is today's real-time customer support metrics & activity.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="loadStats()" [disabled]="isLoading">
+        <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- ERROR ALERT -->
+  <div class="alert-banner error" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- TOP METRIC CARDS -->
+  <div class="metrics-grid">
+    
+    <!-- CARD 1: CUSTOMERS -->
+    <a routerLink="/csa/customers" class="metric-card">
+      <div class="metric-icon-wrap blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ dashboardData?.metrics?.totalCustomers || 0 }}</span>
+        <span class="metric-label">Registered Customers</span>
+      </div>
+      <div class="metric-arrow">→</div>
+    </a>
+
+    <!-- CARD 2: ACTIVE SERVICE TICKETS -->
+    <a routerLink="/csa/service-tickets" class="metric-card">
+      <div class="metric-icon-wrap red">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ dashboardData?.metrics?.activeTickets || 0 }}</span>
+        <span class="metric-label">Active Service Tickets</span>
+        <span class="metric-sub-tag" *ngIf="(dashboardData?.metrics?.highPriorityTickets || 0) > 0">
+          {{ dashboardData?.metrics?.highPriorityTickets }} Urgent
+        </span>
+      </div>
+      <div class="metric-arrow">→</div>
+    </a>
+
+    <!-- CARD 3: PENDING INQUIRIES -->
+    <a routerLink="/csa/inquiries" class="metric-card">
+      <div class="metric-icon-wrap amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ dashboardData?.metrics?.pendingInquiries || 0 }}</span>
+        <span class="metric-label">Ongoing Inquiries</span>
+      </div>
+      <div class="metric-arrow">→</div>
+    </a>
+
+    <!-- CARD 4: MAINTENANCE SCHEDULES -->
+    <a routerLink="/csa/maintenance-schedules" class="metric-card">
+      <div class="metric-icon-wrap green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ dashboardData?.metrics?.pendingMaintenance || 0 }}</span>
+        <span class="metric-label">Maintenance Plans</span>
+      </div>
+      <div class="metric-arrow">→</div>
+    </a>
+
+  </div>
+
+  <!-- TWO-COLUMN DASHBOARD CONTENT -->
+  <div class="dashboard-grid">
+    
+    <!-- LEFT: RECENT SERVICE TICKETS -->
+    <div class="dash-card flex-3">
+      <div class="dash-card-header">
+        <div>
+          <h3 class="card-title">Recent Service Requests</h3>
+          <p class="card-subtitle">Latest repair and maintenance tickets submitted</p>
+        </div>
+        <a routerLink="/csa/service-tickets" class="card-link">View All Tickets →</a>
+      </div>
+
+      <div class="dash-card-body">
+        <div class="table-responsive" *ngIf="(dashboardData?.recentTickets?.length || 0) > 0">
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Customer</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of dashboardData?.recentTickets">
+                <td>
+                  <span class="table-subject">{{ t.subject || 'Service Request' }}</span>
+                </td>
+                <td>
+                  <span class="table-customer">{{ t.customerId ? t.customerId.fullName : 'Customer' }}</span>
+                </td>
+                <td>
+                  <span class="badge-tag">{{ t.category | uppercase }}</span>
+                </td>
+                <td>
+                  <span class="priority-pill" [class.high]="t.priority === 'high'" [class.med]="t.priority === 'medium'">
+                    {{ t.priority | uppercase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill">{{ t.status }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-hint" *ngIf="(dashboardData?.recentTickets?.length || 0) === 0 && !isLoading">
+          No service tickets submitted yet.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: LIVE CUSTOMER INQUIRIES & RECENT CUSTOMERS -->
+    <div class="dash-card flex-2">
+      
+      <div class="dash-card-header">
+        <div>
+          <h3 class="card-title">Recent Inquiries</h3>
+          <p class="card-subtitle">Direct messages from customers</p>
+        </div>
+        <a routerLink="/csa/inquiries" class="card-link">Open Inbox →</a>
+      </div>
+
+      <div class="dash-card-body inquiries-feed">
+        <div *ngFor="let inq of dashboardData?.recentInquiries" class="inquiry-feed-item">
+          <div class="inq-feed-top">
+            <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
+            <span class="inq-feed-status" [class.ongoing]="inq.status === 'Ongoing'">{{ inq.status }}</span>
+          </div>
+          <div class="inq-feed-msg">{{ inq.message }}</div>
+          <div class="inq-feed-time">{{ formatDate(inq.createdAt) }} • Ref: {{ inq.inquiryRef }}</div>
+        </div>
+
+        <div class="empty-hint" *ngIf="(dashboardData?.recentInquiries?.length || 0) === 0 && !isLoading">
+          No customer inquiries received.
+        </div>
+      </div>
+
+      <!-- RECENTLY JOINED CUSTOMERS -->
+      <div class="dash-card-header customer-sub-header">
+        <div>
+          <h3 class="card-title">New Customer Profiles</h3>
+        </div>
+        <a routerLink="/csa/customers" class="card-link">View All →</a>
+      </div>
+
+      <div class="dash-card-body">
+        <div class="customer-mini-list">
+          <div *ngFor="let c of dashboardData?.recentCustomers" class="customer-mini-item">
+            <div class="mini-avatar">{{ getInitials(c.fullName) }}</div>
+            <div class="mini-info">
+              <div class="mini-name">{{ c.fullName }} {{ c.lastName || '' }}</div>
+              <div class="mini-contact">{{ c.phoneNumber || c.email || 'No contact' }}</div>
+            </div>
+            <div class="mini-date">{{ formatDate(c.createdAt) }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

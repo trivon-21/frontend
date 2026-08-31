@@ -22,7 +22,8 @@ interface ServiceRequestApiItem {
   _id?: string;
   ticketId?: string | number;
   customerName?: string;
-  customerId?: string | { name?: string; address?: string };
+  fullName?: string;
+  customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
   location?: string;
   serviceDate?: string;
@@ -170,7 +171,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
   /** Maps a backend service request record into the view model used by the table. */
   private mapApiRequest(item: ServiceRequestApiItem): ServiceRequest {
     const displayDate = this.formatDisplayDate(item.serviceDate);
-    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
+    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
     const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
@@ -181,7 +182,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
 
     return {
       id: normalizedId,
-      customerName: item.customerName || populatedCustomerName || '-',
+      customerName: item.fullName || item.customerName || populatedCustomerName || '-',
       productType: item.productType || '-',
       location: populatedCustomerAddress || item.location || '-',
       date: displayDate.date,

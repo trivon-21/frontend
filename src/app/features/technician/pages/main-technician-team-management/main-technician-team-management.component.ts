@@ -39,6 +39,7 @@ interface PendingJob {
   location: string;
   type: 'Installation' | 'Service' | 'Maintenance';
   productType: string;
+  warehouseStatusVersion?: number;
 }
 
 type RawTeamMember = {
@@ -71,6 +72,7 @@ type RawPendingJob = {
   location?: string;
   requestType?: 'Installation' | 'Service' | 'Maintenance';
   productType?: string;
+  warehouseStatusVersion?: number;
 };
 
 @Component({
@@ -83,6 +85,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | Team['status'] = 'All';
   showAssignModal: boolean = false;
+  showViewModal: boolean = false;
   selectedPendingJobId: string | null = null;
   pendingAssignmentCount = 0;
   isLoading = false;
@@ -166,7 +169,8 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       customer: job.customerName || 'Unknown Customer',
       location: job.location || '-',
       type: job.requestType || 'Service',
-      productType: job.productType || '-'
+      productType: job.productType || '-',
+      warehouseStatusVersion: job.warehouseStatusVersion,
     };
   }
 
@@ -248,13 +252,20 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       return matchesSearch && matchesStatus;
     });
 
-    if (!this.selectedTeam || !this.filteredTeams.some((team) => team.id === this.selectedTeam?.id)) {
-      this.selectedTeam = this.filteredTeams[0] ?? null;
+    if (this.selectedTeam && !this.filteredTeams.some((team) => team.id === this.selectedTeam?.id)) {
+      this.selectedTeam = null;
+      this.showViewModal = false;
     }
   }
 
   selectTeam(team: Team) {
     this.selectedTeam = team;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.selectedTeam = null;
   }
 
   openAssignModal(): void {
@@ -280,7 +291,8 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       .post<{ success: boolean; message?: string; error?: string }>(`${this.teamsApiUrl}/assign-service`, {
         serviceRequestId,
         teamId,
-        requestType: selectedPendingJob.type
+        requestType: selectedPendingJob.type,
+        warehouseStatusVersion: selectedPendingJob.warehouseStatusVersion,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
@@ -302,7 +314,7 @@ export class MainTechnicianTeamManagementComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error assigning service request to team:', err);
-        this.error = `Failed to assign service request: ${err.message || 'Unknown error'}`;
+        this.error = err.error?.error || err.error?.message || `Failed to assign service request: ${err.message || 'Unknown error'}`;
       }
     });
 }
