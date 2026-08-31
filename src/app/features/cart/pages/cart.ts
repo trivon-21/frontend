@@ -6,11 +6,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, HttpClientModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, DecimalPipe, HttpClientModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './cart.html',
   styleUrl: './cart.css',
 })
