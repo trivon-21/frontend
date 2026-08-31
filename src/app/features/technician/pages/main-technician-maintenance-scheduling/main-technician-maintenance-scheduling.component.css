@@ -405,6 +405,7 @@
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
+  margin-bottom: 20px;
 }
 
 .workflow-hint svg { flex-shrink: 0; margin-top: 1px; }
@@ -431,6 +432,41 @@
   background-color: #dcfce7;
   color: #15803d;
   border: 1px solid #bbf7d0;
+}
+
+/* ===== MODAL ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 18px;
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
 /* ===== DETAILS SECTION ===== */
