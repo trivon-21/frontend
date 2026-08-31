@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-order-success',
   standalone: true,
-  imports: [CommonModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './order-success.html',
   styleUrl: './order-success.css'
 })
