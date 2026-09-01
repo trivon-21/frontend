@@ -32,8 +32,8 @@
 
   <div class="portal-state" *ngIf="loading && items.length === 0" aria-live="polite">Loading operations…</div>
 
-  <div class="alx-table-container" *ngIf="!loadError">
-    <table class="alx-table">
+  <div class="alx-table-container" *ngIf="!loadError" role="region" aria-label="Manager operational work items" tabindex="0">
+    <table class="alx-table alx-table--wide">
       <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Priority</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let item of items; trackBy: trackItem" [class.row-updating]="updatingId === item.id">
@@ -41,8 +41,8 @@
           <td>{{ item.customer?.fullName || 'Unknown customer' }}</td>
           <td class="cap">{{ item.sourceType }}</td>
           <td>{{ item.domainStatus || 'Not recorded' }}</td>
-          <td><span class="pill priority" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></td>
-          <td><span class="pill status" [ngClass]="item.operationalStatus">{{ statusLabel(item.operationalStatus) }}</span></td>
+          <td><span class="pill priority alx-table-status" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></td>
+          <td><span class="pill status alx-table-status" [ngClass]="item.operationalStatus">{{ statusLabel(item.operationalStatus) }}</span></td>
           <td><span class="sla" [class.overdue]="slaOverdue(item)">{{ slaText(item) }}</span></td>
           <td>
             <span *ngIf="item.assignedTeam || item.assignedTechnician; else unassigned">{{ item.assignedTeam?.teamName || 'No team' }}<span *ngIf="item.assignedTechnician"> · {{ item.assignedTechnician.fullName }}</span></span>

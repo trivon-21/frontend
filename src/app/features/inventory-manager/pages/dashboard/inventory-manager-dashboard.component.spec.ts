@@ -54,6 +54,12 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('.live-time')).toBeNull();
     expect(root.querySelector<HTMLButtonElement>('.btn-new-order')?.textContent).toContain('Create New Order');
+    const reorderRegion = root.querySelector<HTMLElement>('.reorder-card .alx-table-container')!;
+    const reorderTable = reorderRegion.querySelector<HTMLTableElement>('.alx-table')!;
+    expect(reorderRegion.getAttribute('role')).toBe('region');
+    expect(reorderRegion.tabIndex).toBe(0);
+    expect(reorderTable.classList).toContain('alx-table--fixed');
+    expect(reorderTable.classList).toContain('alx-table--sticky-header');
     fixture.destroy();
   });
 

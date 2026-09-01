@@ -197,28 +197,20 @@
   color: var(--error);
 }
 
-.name-cell strong,
+.product-name,
 .alx-table td > strong {
   display: block;
 }
 
-.name-cell small,
+.product-name {
+  font-weight: 400;
+}
+
 .alx-table td > small {
   display: block;
   margin-top: var(--spacing-xs);
   color: var(--text-muted);
   font-size: 11px;
-}
-
-.stock-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  text-transform: uppercase;
 }
 
 .stock-pill.in-stock {

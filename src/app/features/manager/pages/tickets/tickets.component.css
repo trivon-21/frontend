@@ -168,17 +168,6 @@
   max-width: 260px;
 }
 
-/* Pills */
-.pill {
-  display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
 .pill.priority.high {
   background: var(--error-light);
   color: var(--error);
@@ -338,12 +327,6 @@
 .lifecycle-controls textarea:focus-visible {
   outline: 2px solid #00843d;
   outline-offset: 2px;
-}
-
-.alx-table-container {
-  overflow-x: auto;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
 }
 
 @keyframes fade-in-up {

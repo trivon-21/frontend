@@ -1,6 +1,6 @@
 import { ElementRef } from '@angular/core';
-import { fakeAsync, tick } from '@angular/core/testing';
-import { convertToParamMap, ActivatedRoute } from '@angular/router';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { convertToParamMap, ActivatedRoute, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { TicketsComponent } from './tickets.component';
 import { OperationalWorkItem, TicketsService, WorkItemsResponse } from '../../services/tickets.service';
@@ -73,6 +73,40 @@ describe('TicketsComponent pagination', () => {
 
     expect(component.page).toBe(1);
     expect(service.getWorkItems).toHaveBeenCalledWith(jasmine.objectContaining({ page: 1, priority: 'high' }));
+  });
+});
+
+describe('TicketsComponent table presentation contract', () => {
+  it('uses the shared wide table and accessible scroll region', async () => {
+    const response: WorkItemsResponse = {
+      status: 'Live',
+      summary: { total: 1, open: 1, inProgress: 0, escalated: 0, awaitingVerification: 0, closed: 0 },
+      page: 1,
+      limit: 25,
+      total: 1,
+      items: [workItem],
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [TicketsComponent],
+      providers: [
+        { provide: TicketsService, useValue: { getWorkItems: () => of(response) } },
+        provideRouter([]),
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(TicketsComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const region = root.querySelector<HTMLElement>('.alx-table-container')!;
+    const table = region.querySelector<HTMLTableElement>('.alx-table')!;
+
+    expect(region.getAttribute('role')).toBe('region');
+    expect(region.tabIndex).toBe(0);
+    expect(region.getAttribute('aria-label')).toContain('operational work items');
+    expect(table.classList).toContain('alx-table--wide');
+    expect(table.querySelector('.alx-table-status')).not.toBeNull();
+    fixture.destroy();
   });
 });
 

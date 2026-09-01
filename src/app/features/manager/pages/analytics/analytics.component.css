@@ -576,34 +576,6 @@ section {
   background: var(--warning);
 }
 
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--text-secondary);
-  font-size: 13.5px;
-  white-space: nowrap;
-}
-
-th,
-td {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-light);
-  text-align: left;
-}
-
-th {
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 750;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 .period-btn:focus-visible,
 .export-btn:focus-visible,
 .retry-btn:focus-visible,
@@ -613,16 +585,16 @@ th {
   outline-offset: 2px;
 }
 
-td strong,
-td small {
+.alx-table td strong,
+.alx-table td small {
   display: block;
 }
 
-td strong {
+.alx-table td strong {
   color: var(--text-primary);
 }
 
-td small {
+.alx-table td small {
   margin-top: 2px;
   color: var(--text-muted);
 }

@@ -9,10 +9,6 @@
         <lucide-angular name="clipboard-check" [size]="16" class="inline-icon"></lucide-angular>
         Procurement
       </button>
-      <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/catalog-health']">
-        <lucide-angular name="list" [size]="16" class="inline-icon"></lucide-angular>
-        Catalog Health
-      </button>
       <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/product-wizard']">
         <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
         New Product
@@ -208,8 +204,8 @@
   <div class="state-card" *ngIf="loading">Loading inventory…</div>
   <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadInventory()">Retry</button></div>
 
-  <div class="table-container alx-table-container" *ngIf="!loading && !error">
-    <table class="alx-table">
+  <div class="table-container alx-table-container" *ngIf="!loading && !error" role="region" aria-label="Inventory items" tabindex="0">
+    <table class="alx-table alx-table--wide">
       <thead>
         <tr>
           <th>SKU / Asset Tag</th>
@@ -220,7 +216,7 @@
           <th>Reserved</th>
           <th>Stock Status</th>
           <th>Location</th>
-          <th>Actions</th>
+          <th class="actions-cell">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -236,8 +232,8 @@
           [class.selected-row]="isRowSelected(item)"
         >
           <td class="sku-cell">{{ item.sku }}</td>
-          <td class="name-cell" (click)="openDetailModal(item); $event.stopPropagation()">
-            <strong>{{ item.name }}</strong>
+          <td (click)="openDetailModal(item); $event.stopPropagation()">
+            <span class="product-name">{{ item.name }}</span>
             <small *ngIf="item.manufacturerPartNumber">{{ item.manufacturerPartNumber }}</small>
           </td>
           <td>
@@ -248,7 +244,7 @@
           <td class="num-cell">{{ item.available }} {{ item.unit }}</td>
           <td class="num-cell">{{ item.reserved }} {{ item.unit }}</td>
           <td>
-            <span class="stock-pill" [ngClass]="getStockStatus(item)">
+            <span class="stock-pill alx-table-status" [ngClass]="getStockStatus(item)">
               {{ getStockStatusLabel(item) }}
             </span>
           </td>

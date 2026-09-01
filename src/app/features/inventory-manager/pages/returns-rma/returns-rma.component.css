@@ -525,11 +525,6 @@ select.form-input {
   color: var(--error);
 }
 
-/* ── RMA Log Table — base from global alx-* system ── */
-.log-table-container {
-  overflow-x: auto;
-}
-
 .serial-cell, .fault-cell {
   display: flex;
   flex-direction: column;
@@ -552,15 +547,7 @@ select.form-input {
   color: var(--text-secondary);
 }
 
-/* ── RMA Status Badges ── */
-.rma-status-badge {
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
+/* ── RMA Status Colours ── */
 .status-reported {
   background: var(--info-light);
   color: var(--info);
@@ -684,34 +671,6 @@ select.form-input {
   font-size: 12px;
   font-weight: 700;
   color: var(--error);
-}
-
-.quarantine-table-container {
-  background: var(--background-card, var(--background-card));
-  padding-bottom: 8px;
-  overflow-x: auto;
-}
-
-.quarantine-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.quarantine-table th {
-  text-align: left;
-  padding: 16px 20px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--error);
-  border-bottom: 1px solid var(--error-light);
-  background: var(--error-light);
-}
-
-.quarantine-table td {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 13px;
-  color: var(--text-secondary);
 }
 
 /* ── Modal ── */

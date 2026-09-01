@@ -13,7 +13,14 @@ describe('ManagerDashboardComponent presentation contract', () => {
       openTickets: { total: 8, subStats: [] },
       unassignedTickets: { total: 2, subStats: [] },
       slaRisk: { total: 1, subStats: [] },
-      pendingApprovals: { total: 3, subStats: [] },
+      pendingApprovals: {
+        total: 3,
+        subStats: [
+          { label: 'Urgent', value: 1 },
+          { label: 'Value', value: 2500 },
+          { label: 'Non-PO', value: 1 },
+        ],
+      },
     },
     inventoryKpis: {
       reservedItems: { label: 'Reserved Items', value: 4, icon: 'clipboard-check' },
@@ -41,18 +48,36 @@ describe('ManagerDashboardComponent presentation contract', () => {
     return fixture;
   }
 
-  it('renders navigation-only summary cards as semantic links with unchanged destinations', async () => {
+  it('renders interactive summary cards with independent approval destinations', async () => {
     const fixture = await create({ getDashboard: () => of(dashboard) });
     const root = fixture.nativeElement as HTMLElement;
-    const cards = Array.from(root.querySelectorAll<HTMLAnchorElement>('a.summary-card'));
+    const summaryCards = Array.from(
+      root.querySelectorAll<HTMLElement>('.summary-grid > .summary-card'),
+    );
+    const ticketCards = Array.from(root.querySelectorAll<HTMLAnchorElement>('a.summary-card'));
+    const approvalCard = root.querySelector<HTMLElement>('.approval-card')!;
+    const approvalPrimary = approvalCard.querySelector<HTMLAnchorElement>('.approval-card-primary')!;
+    const approvalLinks = Array.from(
+      approvalCard.querySelectorAll<HTMLAnchorElement>('.approval-links a'),
+    );
 
-    expect(cards.length).toBe(4);
-    expect(cards.map((card) => card.getAttribute('href'))).toEqual([
+    expect(summaryCards.length).toBe(4);
+    expect(summaryCards.every((card) => card.classList.contains('clickable'))).toBeTrue();
+    expect(ticketCards.map((card) => card.getAttribute('href'))).toEqual([
       '/manager/work-items',
       '/manager/work-items?assignment=unassigned',
       '/manager/work-items?sla=overdue',
-      '/manager/orders?status=pending-manager',
     ]);
+    expect(approvalPrimary.getAttribute('href')).toBe(
+      '/manager/orders?type=purchase&status=pending-manager',
+    );
+    expect(approvalLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/manager/orders?type=purchase&status=pending-manager',
+      '/manager/orders?type=non-po&status=pending',
+    ]);
+    expect(approvalCard.querySelector('a a')).toBeNull();
+    expect(approvalPrimary.contains(approvalLinks[0])).toBeFalse();
+    expect(approvalPrimary.contains(approvalLinks[1])).toBeFalse();
     expect(root.querySelector('.live-time')).toBeNull();
     const workQueue = root.querySelector<HTMLButtonElement>('.btn-new-order')!;
     expect(workQueue.textContent).toContain('Open Work Queue');

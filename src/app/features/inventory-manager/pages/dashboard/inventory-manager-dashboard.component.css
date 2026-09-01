@@ -504,24 +504,16 @@
   transition: all 0.2s;
 }
 
-.timeline-marker.return {
+.timeline-marker.return,
+.timeline-marker.request {
   color: var(--info);
   background: var(--info-light);
 }
 
-.timeline-marker.dispatch {
+.timeline-marker.dispatch,
+.timeline-marker.grn {
   color: var(--success);
   background: var(--success-light);
-}
-
-.timeline-marker.request {
-  color: var(--warning);
-  background: var(--warning-light);
-}
-
-.timeline-marker.grn {
-  color: var(--primary-main);
-  background: var(--primary-lighter);
 }
 
 .timeline-marker.alert {
@@ -578,37 +570,8 @@
 
 /* Component-specific overrides only */
 .table-container {
-  padding: 0 0 var(--spacing-lg);
   max-height: 480px;
   overflow-y: auto;
-}
-
-.reorder-table {
-  table-layout: fixed;
-}
-
-.reorder-table th {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--background-card);
-  box-shadow: 0 1px 0 var(--border-light);
-}
-
-/* Edge alignment with card header padding */
-.reorder-table th:first-child,
-.reorder-table td:first-child {
-  padding-left: var(--spacing-xl) !important;
-}
-
-.reorder-table th:last-child,
-.reorder-table td:last-child {
-  padding-right: var(--spacing-xl) !important;
-  text-align: right;
-}
-
-.reorder-table th.text-right {
-  text-align: right;
 }
 
 /* Column widths */
@@ -623,10 +586,6 @@
 
 .reorder-table th:nth-child(3),
 .reorder-table td:nth-child(3) { width: 25%; }
-
-.reorder-table td.text-right {
-  text-align: right;
-}
 
 /* ── Clean Status Styling ── */
 .item-cell-wrapper {

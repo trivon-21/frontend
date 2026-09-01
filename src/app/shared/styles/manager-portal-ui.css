@@ -209,11 +209,6 @@
   border-radius: 12px;
 }
 
-.manager-portal-shell :is(.alx-table-container, .table-wrap) {
-  max-width: 100%;
-  overflow-x: auto;
-}
-
 .manager-portal-shell :is(.detail-grid input, .detail-grid select, .lifecycle-controls textarea,
   .portal-dialog input, .portal-dialog select, .portal-dialog textarea) {
   box-sizing: border-box;
