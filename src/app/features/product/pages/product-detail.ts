@@ -8,11 +8,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
