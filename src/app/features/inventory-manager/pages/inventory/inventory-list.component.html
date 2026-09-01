@@ -58,7 +58,7 @@
       </label>
 
       <label class="filter-field">
-        <span>Location</span>
+        <span>Warehouse</span>
         <select [(ngModel)]="selectedLocation" (change)="applyFilters()">
           <option>All Locations</option>
           <option *ngFor="let location of locationOptions" [value]="location">{{ location }}</option>
@@ -294,6 +294,43 @@
       </div>
     </div>
   </div>
+
+  <ng-container *ngIf="savedProduct as product">
+    <div class="modal-overlay" *ngIf="showSaveConfirmation" (click)="closeSaveConfirmation()">
+      <div class="modal-content save-confirmation-modal" role="alertdialog" aria-modal="true" aria-labelledby="save-confirmation-title" aria-describedby="save-confirmation-message" (click)="$event.stopPropagation()">
+        <div class="modal-header save-confirmation-header">
+          <div class="header-title-group">
+            <span class="save-confirmation-icon" aria-hidden="true">
+              <lucide-angular name="circle-check-big" [size]="24"></lucide-angular>
+            </span>
+            <h2 id="save-confirmation-title">Product saved</h2>
+          </div>
+          <button class="btn-close im-btn im-btn--close" type="button" aria-label="Close save confirmation" (click)="closeSaveConfirmation()">
+            <lucide-angular name="x" [size]="20"></lucide-angular>
+          </button>
+        </div>
+
+        <div class="modal-body save-confirmation-body">
+          <strong>{{ product.name }}</strong>
+          <p id="save-confirmation-message">Your changes were saved. The updated product is selected in the inventory list.</p>
+          <span class="sku-badge">{{ product.sku }}</span>
+        </div>
+
+        <div class="modal-footer im-action-group">
+          <button class="btn-secondary im-btn im-btn--secondary" type="button" (click)="closeSaveConfirmation()">Close</button>
+          <button
+            class="btn-primary im-btn im-btn--primary"
+            type="button"
+            [routerLink]="['/inventory-manager/procurement']"
+            [queryParams]="{ inventoryId: getItemId(product) }"
+            (click)="closeSaveConfirmation()"
+          >
+            Receive Stock
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 
   <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="inventory-detail-title" (click)="$event.stopPropagation()">

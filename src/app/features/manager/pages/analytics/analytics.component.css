@@ -263,6 +263,91 @@ section {
   color: var(--error);
 }
 
+.kpi-card.negative-money .kpi-value {
+  color: var(--error);
+}
+
+.financial-position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+.financial-position-grid article {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--background-card);
+}
+
+.financial-position-grid span,
+.financial-position-grid small,
+.financial-basis {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.financial-position-grid strong {
+  color: var(--text-primary);
+  font-size: 20px;
+}
+
+.financial-trend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
+}
+
+.financial-trend-row {
+  display: grid;
+  grid-template-columns: 76px minmax(160px, 1fr) 150px;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.financial-trend-row strong {
+  color: var(--text-primary);
+  font-size: 11px;
+  text-align: right;
+}
+
+.financial-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.financial-bar {
+  min-width: 2px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.financial-bar.revenue,
+.swatch.revenue {
+  background: var(--success);
+}
+
+.financial-bar.spend,
+.swatch.spend {
+  background: var(--warning);
+}
+
+.financial-basis {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-left: 3px solid var(--info);
+  background: var(--info-light);
+}
+
 .position-panel,
 .coverage-panel {
   padding: 20px 24px;
@@ -817,7 +902,8 @@ section {
   }
 
   .position-grid,
-  .signal-grid {
+  .signal-grid,
+  .financial-position-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -855,7 +941,8 @@ section {
   }
 
   .position-grid,
-  .signal-grid {
+  .signal-grid,
+  .financial-position-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -872,6 +959,7 @@ section {
   .kpi-row,
   .position-grid,
   .signal-grid,
+  .financial-position-grid,
   .exception-actions {
     grid-template-columns: 1fr;
   }
@@ -909,5 +997,13 @@ section {
 
   .trend-wrap {
     overflow-x: auto;
+  }
+
+  .financial-trend-row {
+    grid-template-columns: 62px minmax(100px, 1fr);
+  }
+
+  .financial-trend-row strong {
+    grid-column: 2;
   }
 }

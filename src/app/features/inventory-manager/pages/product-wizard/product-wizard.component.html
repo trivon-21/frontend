@@ -21,7 +21,7 @@
 
   <ng-container *ngIf="!savedItem">
     <nav class="stepper" aria-label="Product form steps">
-      <button type="button" *ngFor="let step of [1, 2, 3]" [class.active]="currentStep === step" [class.complete]="currentStep > step" [attr.aria-current]="currentStep === step ? 'step' : null" (click)="goToStep(step)">
+      <button type="button" *ngFor="let step of [1, 2, 3]" [class.active]="currentStep === step" [class.complete]="currentStep !== step && isStepValid(step)" [attr.aria-current]="currentStep === step ? 'step' : null" (click)="goToStep(step)">
         <span>{{ step }}</span>
         <strong>{{ step === 1 ? 'Identity' : step === 2 ? 'Inventory settings' : 'Compatibility' }}</strong>
       </button>
@@ -106,12 +106,20 @@
             <small class="error" *ngIf="form.hasError('stockLevels') && form.controls['maxStockLevel'].touched">Maximum stock must be at least the reorder level.</small>
           </label>
           <label class="field">
-            <span>Warehouse / area <b>*</b></span>
-            <input formControlName="location" placeholder="e.g., Main Warehouse">
+            <span>Warehouse <b>*</b></span>
+            <select formControlName="location" (change)="onWarehouseChange()">
+              <option value="" disabled>Select a warehouse</option>
+              <option *ngFor="let location of locations" [value]="location.warehouse">{{ location.warehouse }}</option>
+            </select>
           </label>
           <label class="field">
-            <span>Shelf / bin</span>
-            <input formControlName="binLocation" placeholder="e.g., A-03-02">
+            <span>Placement area <b>*</b></span>
+            <select formControlName="binLocation" [attr.disabled]="!form.controls['location'].value ? true : null">
+              <option value="" disabled>Select a placement area</option>
+              <option *ngFor="let area of availablePlacementAreas" [value]="area">{{ area }}</option>
+            </select>
+            <small class="error" *ngIf="form.hasError('storageLocation') && form.controls['binLocation'].touched">Choose an area in the selected warehouse.</small>
+            <small class="hint" *ngIf="isEditMode && form.hasError('storageLocation')">Legacy free-text locations must be replaced before saving.</small>
           </label>
           <label class="field span-2">
             <span>Preferred supplier</span>
@@ -185,8 +193,10 @@
       <footer class="wizard-footer im-action-group">
         <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="previousStep()" [disabled]="currentStep === 1 || isSubmitting">Back</button>
         <span>Step {{ currentStep }} of {{ totalSteps }}</span>
-        <button type="button" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep < totalSteps" (click)="nextStep()">Continue</button>
-        <button type="submit" class="btn-primary im-btn im-btn--primary" *ngIf="currentStep === totalSteps" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Product') }}</button>
+        <div class="footer-actions">
+          <button type="button" class="btn-secondary im-btn im-btn--secondary" *ngIf="currentStep < totalSteps" (click)="nextStep()">Next section</button>
+          <button type="submit" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Product') }}</button>
+        </div>
       </footer>
     </form>
   </ng-container>

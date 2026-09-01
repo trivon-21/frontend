@@ -272,6 +272,45 @@
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.save-confirmation-modal {
+  max-width: 520px;
+}
+
+.save-confirmation-header {
+  background: var(--success-light);
+}
+
+.save-confirmation-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--border-radius-full);
+  background: var(--primary-main);
+  color: var(--text-inverse);
+}
+
+.save-confirmation-body {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.save-confirmation-body strong {
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.save-confirmation-body p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.save-confirmation-body .sku-badge {
+  justify-self: start;
+  margin-top: var(--spacing-xs);
+}
+
 .modal-header {
   padding: 20px 24px;
   border-bottom: 1px solid var(--border-light);

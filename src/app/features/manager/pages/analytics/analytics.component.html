@@ -1,8 +1,8 @@
 <div class="analytics-page">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Operational Analytics</h1>
-      <p class="page-subtitle">Period performance and the company’s current operational position.</p>
+      <h1 class="page-title">Manager Analytics</h1>
+      <p class="page-subtitle">Operational, financial, purchasing, and inventory performance in one controlled view.</p>
     </div>
     <div class="header-controls mgr-action-group">
       <span class="status-chip" [class.offline]="!!errorMessage">
@@ -86,6 +86,85 @@
         <a routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }" class="position-item"><span>Pending approval value</span><strong>LKR {{ report.currentPosition.pendingApprovalValue.value | number:'1.0-0' }}</strong></a>
         <div class="position-item risk informational" title="Inventory Managers resolve stock levels; this is a Manager monitoring signal."><span>Stock-risk items</span><strong>{{ report.currentPosition.stockRiskItems.value }}</strong></div>
       </div>
+    </section>
+
+    <section *ngIf="section === 'financial'" aria-labelledby="financial-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="financial-heading">Financial Overview</h2>
+          <p>Collected customer revenue against stock physically received during the selected period.</p>
+        </div>
+        <span class="scope-badge period">{{ activePeriod }}</span>
+      </div>
+
+      <div class="kpi-row financial-kpis">
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Collected Revenue</span><span class="kpi-icon"><lucide-angular name="dollar-sign" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">LKR {{ report.financial.collectedRevenue.current | number:'1.0-0' }}</strong>
+          <span class="kpi-detail">Verified payments in period</span>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.financial.collectedRevenue)">{{ deltaText(report.financial.collectedRevenue) }}</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Procurement Spend</span><span class="kpi-icon"><lucide-angular name="package" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">LKR {{ report.financial.procurementSpend.current | number:'1.0-0' }}</strong>
+          <span class="kpi-detail">Goods physically received</span>
+          <span class="kpi-delta">{{ deltaText(report.financial.procurementSpend) }}</span>
+        </article>
+        <article class="kpi-card" [class.negative-money]="report.financial.operatingContribution.current < 0">
+          <div class="kpi-top"><span class="kpi-label">Operating Contribution</span><span class="kpi-icon"><lucide-angular name="arrow-right-left" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">LKR {{ report.financial.operatingContribution.current | number:'1.0-0' }}</strong>
+          <span class="kpi-detail">Collected revenue less received stock cost</span>
+          <span class="kpi-delta" [ngClass]="deltaClass(report.financial.operatingContribution)">{{ deltaText(report.financial.operatingContribution) }}</span>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">Outstanding Receivables</span><span class="kpi-icon"><lucide-angular name="timer" [size]="18"></lucide-angular></span></div>
+          <strong class="kpi-value">LKR {{ report.financial.outstandingReceivables.value | number:'1.0-0' }}</strong>
+          <span class="kpi-detail">{{ report.financial.outstandingReceivables.count }} payment records</span>
+          <span class="kpi-delta neutral">Current snapshot</span>
+        </article>
+      </div>
+
+      <div class="financial-position-grid">
+        <article><span>Pending payment review</span><strong>LKR {{ report.financial.pendingPaymentReview.value | number:'1.0-0' }}</strong><small>{{ report.financial.pendingPaymentReview.count }} records</small></article>
+        <article><span>Outstanding purchase commitments</span><strong>LKR {{ report.financial.purchaseCommitments.value | number:'1.0-0' }}</strong><small>Approved / ordered, not yet received</small></article>
+        <article><span>Unreconciled Non-PO receipts</span><strong>LKR {{ report.financial.unreconciledNonPo.value | number:'1.0-0' }}</strong><small>{{ report.financial.unreconciledNonPo.count }} awaiting Finance</small></article>
+      </div>
+
+      <article class="chart-card financial-trend-card">
+        <div class="chart-header">
+          <div><h3>Revenue and Procurement Spend</h3><p>Cash collected and goods-receipt cost by reporting bucket.</p></div>
+          <div class="legend" aria-label="Financial chart legend"><span><i class="swatch revenue"></i>Collected revenue</span><span><i class="swatch spend"></i>Procurement spend</span></div>
+        </div>
+        <div class="empty-state compact" *ngIf="financialTrendMax(report) === 1 && report.financial.collectedRevenue.current === 0 && report.financial.procurementSpend.current === 0">No collected revenue or received procurement spend in this period.</div>
+        <div class="financial-trend" *ngIf="report.financial.collectedRevenue.current !== 0 || report.financial.procurementSpend.current !== 0" role="img" aria-label="Collected revenue and procurement spend by reporting bucket">
+          <div class="financial-trend-row" *ngFor="let label of report.financial.trend.labels; let index = index">
+            <span>{{ label }}</span>
+            <div class="financial-bars">
+              <div class="financial-bar revenue" [style.width.%]="financialBarWidth(report.financial.trend.collectedRevenue[index], report)" [attr.title]="'Revenue: LKR ' + report.financial.trend.collectedRevenue[index]"></div>
+              <div class="financial-bar spend" [style.width.%]="financialBarWidth(report.financial.trend.procurementSpend[index], report)" [attr.title]="'Spend: LKR ' + report.financial.trend.procurementSpend[index]"></div>
+            </div>
+            <strong>{{ report.financial.trend.collectedRevenue[index] | number:'1.0-0' }} / {{ report.financial.trend.procurementSpend[index] | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <div class="chart-grid two">
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Collected Revenue Sources</h3><p>Only verified payments within the selected period.</p></div></div>
+          <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="report.financial.revenueBySource.length; else noRevenue" role="region" aria-label="Collected revenue by source" tabindex="0">
+            <table class="alx-table alx-table--narrow"><thead><tr><th>Source</th><th class="text-right">Transactions</th><th class="text-right">Collected</th></tr></thead><tbody><tr *ngFor="let item of report.financial.revenueBySource"><td>{{ item.label }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">LKR {{ item.value | number:'1.0-0' }}</td></tr></tbody></table>
+          </div>
+          <ng-template #noRevenue><div class="empty-state compact">No verified collections in this period.</div></ng-template>
+        </article>
+        <article class="chart-card">
+          <div class="chart-header"><div><h3>Procurement Spend Mix</h3><p>Posted receipt cost, separated by purchase route.</p></div></div>
+          <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="report.financial.spendByMode.length; else noSpend" role="region" aria-label="Procurement spend by mode" tabindex="0">
+            <table class="alx-table alx-table--narrow"><thead><tr><th>Mode</th><th class="text-right">Receipts</th><th class="text-right">Spend</th></tr></thead><tbody><tr *ngFor="let item of report.financial.spendByMode"><td>{{ item.label }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">LKR {{ item.value | number:'1.0-0' }}</td></tr></tbody></table>
+          </div>
+          <ng-template #noSpend><div class="empty-state compact">No goods-receipt spend in this period.</div></ng-template>
+        </article>
+      </div>
+      <p class="financial-basis">Operating contribution is a control metric, not profit: overhead and cost-of-goods allocation are not currently available.</p>
     </section>
 
     <section *ngIf="section === 'service'" aria-labelledby="service-heading">
