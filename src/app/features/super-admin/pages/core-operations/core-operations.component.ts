@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   SuperAdminService,
   InquiryItem,
@@ -72,11 +73,30 @@ export class CoreOperationsComponent implements OnInit {
   isSendingReply = false;
   isUpdatingInquiryStatus = false;
 
-  constructor(private superAdminService: SuperAdminService) {}
+  constructor(
+    private superAdminService: SuperAdminService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadCounts();
-    this.loadCurrentTabData();
+    this.route.queryParams.subscribe((params) => {
+      const tab = params['tab'];
+      if (tab === 'orders' || tab === 'service' || tab === 'inquiries') {
+        this.activeTab = tab;
+      }
+      if (params['status']) {
+        if (this.activeTab === 'orders') {
+          this.orderStatusFilter = params['status'];
+        } else if (this.activeTab === 'service') {
+          this.serviceStatusFilter = params['status'];
+        } else if (this.activeTab === 'inquiries') {
+          this.inquiryStatusFilter = params['status'];
+        }
+      }
+      this.loadCurrentTabData();
+    });
   }
 
   loadCounts(): void {
@@ -96,6 +116,11 @@ export class CoreOperationsComponent implements OnInit {
     this.activeTab = tab;
     this.error = null;
     this.successMessage = null;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab, status: null },
+      queryParamsHandling: 'merge'
+    });
     this.loadCurrentTabData();
   }
 

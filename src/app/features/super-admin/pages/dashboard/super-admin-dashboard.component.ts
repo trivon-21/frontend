@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { SuperAdminDashboardSummary, SuperAdminService } from '../../services/super-admin.service';
 
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './super-admin-dashboard.component.html',
   styleUrls: ['./super-admin-dashboard.component.css'],
 })
-export class SuperAdminDashboardComponent {
+export class SuperAdminDashboardComponent implements OnInit {
   data: SuperAdminDashboardSummary | null = null;
   loading = true;
   error: string | null = null;
