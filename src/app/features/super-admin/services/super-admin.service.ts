@@ -81,6 +81,137 @@ export interface ReactivationRequestsResponse {
   };
 }
 
+export interface InquiryThreadMessage {
+  sender: 'Customer' | 'Support';
+  message: string;
+  createdAt?: string;
+}
+
+export interface InquiryItem {
+  _id: string;
+  inquiryRef: string;
+  customer?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    role: string;
+  };
+  name?: string;
+  email?: string;
+  phone?: string;
+  inquiryType: string;
+  subject: string;
+  message: string;
+  attachmentUrl?: string;
+  thread: InquiryThreadMessage[];
+  status: 'Ongoing' | 'Addressed' | 'Closed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InquiriesListResponse {
+  message: string;
+  data: InquiryItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface ServiceRequestItem {
+  _id: string;
+  serviceRequestRef: string;
+  customer?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    address?: string;
+  };
+  acUnitModel?: string;
+  acUnitSerial?: string;
+  acWarrantyStatus?: string;
+  acAmcStatus?: string;
+  serviceType: string;
+  serviceTypeOther?: string;
+  problemDescription?: string;
+  problemImageUrl?: string;
+  preferredDate?: string;
+  preferredTimeSlot?: string;
+  estimatedCharges?: number;
+  paymentRequired?: boolean;
+  status: 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceRequestsListResponse {
+  message: string;
+  data: ServiceRequestItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface OrderItemProduct {
+  product?: string;
+  name?: string;
+  itemName?: string;
+  quantity?: number;
+  price?: number;
+  purchaseType?: string;
+}
+
+export interface OrderItem {
+  _id: string;
+  orderRef?: string;
+  orderNumber?: string;
+  customer?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    address?: string;
+  };
+  customerInfo?: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+  };
+  items?: OrderItemProduct[];
+  itemName?: string;
+  quantity?: number;
+  amount?: number;
+  total?: number;
+  status: string;
+  paymentStatus: string;
+  orderType: string;
+  orderStatus?: string;
+  paymentSlipUrl?: string;
+  paymentMethod?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrdersListResponse {
+  message: string;
+  data: OrderItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
 export interface SuperAdminDashboardSummary {
   users: {
     total: number;
@@ -211,4 +342,96 @@ export class SuperAdminService {
       userReason
     });
   }
+
+  /**
+   * List inquiries
+   */
+  listInquiries(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { inquiryType?: string; status?: string; search?: string }
+  ): Observable<InquiriesListResponse> {
+    let params = new HttpParams();
+    params = params.set('page', page.toString());
+    params = params.set('limit', limit.toString());
+    if (filters?.inquiryType) params = params.set('inquiryType', filters.inquiryType);
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.search) params = params.set('search', filters.search);
+    return this.apiService.get<InquiriesListResponse>('/super-admin/inquiries', params);
+  }
+
+  /**
+   * Update inquiry status
+   */
+  updateInquiryStatus(id: string, status: string): Observable<{ message: string; data: InquiryItem }> {
+    return this.apiService.patch<{ message: string; data: InquiryItem }>(`/super-admin/inquiries/${id}/status`, {
+      status
+    });
+  }
+
+  /**
+   * Reply to inquiry
+   */
+  replyInquiry(id: string, message: string): Observable<{ message: string; data: InquiryItem }> {
+    return this.apiService.post<{ message: string; data: InquiryItem }>(`/super-admin/inquiries/${id}/reply`, {
+      message
+    });
+  }
+
+  /**
+   * List service requests
+   */
+  listServiceRequests(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { serviceType?: string; status?: string; search?: string }
+  ): Observable<ServiceRequestsListResponse> {
+    let params = new HttpParams();
+    params = params.set('page', page.toString());
+    params = params.set('limit', limit.toString());
+    if (filters?.serviceType) params = params.set('serviceType', filters.serviceType);
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.search) params = params.set('search', filters.search);
+    return this.apiService.get<ServiceRequestsListResponse>('/super-admin/service-requests', params);
+  }
+
+  /**
+   * Update service request status
+   */
+  updateServiceRequestStatus(id: string, status: string): Observable<{ message: string; data: ServiceRequestItem }> {
+    return this.apiService.patch<{ message: string; data: ServiceRequestItem }>(
+      `/super-admin/service-requests/${id}/status`,
+      { status }
+    );
+  }
+
+  /**
+   * List orders
+   */
+  listOrders(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { orderType?: string; status?: string; paymentStatus?: string; search?: string }
+  ): Observable<OrdersListResponse> {
+    let params = new HttpParams();
+    params = params.set('page', page.toString());
+    params = params.set('limit', limit.toString());
+    if (filters?.orderType) params = params.set('orderType', filters.orderType);
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.paymentStatus) params = params.set('paymentStatus', filters.paymentStatus);
+    if (filters?.search) params = params.set('search', filters.search);
+    return this.apiService.get<OrdersListResponse>('/super-admin/orders', params);
+  }
+
+  /**
+   * Update order status
+   */
+  updateOrderStatus(
+    id: string,
+    data: { status?: string; paymentStatus?: string; orderStatus?: string }
+  ): Observable<{ message: string; data: OrderItem }> {
+    return this.apiService.patch<{ message: string; data: OrderItem }>(`/super-admin/orders/${id}/status`, data);
+  }
 }
+
+

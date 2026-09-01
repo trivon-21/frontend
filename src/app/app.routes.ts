@@ -301,6 +301,20 @@ export const routes: Routes = [
       },
 
       {
+        path: 'core-operations',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/core-operations/core-operations.component'
+          ).then((m) => m.CoreOperationsComponent),
+      },
+
+      {
+        path: 'requests',
+        redirectTo: 'core-operations',
+        pathMatch: 'full'
+      },
+
+      {
         path: 'system-config',
         loadComponent: () =>
           import(
