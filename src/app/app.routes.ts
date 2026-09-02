@@ -72,7 +72,7 @@ import { FinancialReportComponent } from './features/finance/pages/financial-rep
 import { PurchaseRequestVerificationComponent } from './features/finance/pages/purchase-request-verification/purchase-request-verification.component';
 import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
 import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
-import { MaterialRequestApprovalComponent } from './features/finance/pages/material-request-approval/material-request-approval.component';
+
 
 // Inspection
 import { InspectionPaymentComponent } from './features/customer/pages/inspection-payment/inspection-payment.component';
@@ -390,10 +390,6 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: DashboardComponent,
-      },
-      {
-        path: 'material-requests',
-        component: MaterialRequestApprovalComponent,
       },
 
       {

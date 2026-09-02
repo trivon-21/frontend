@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 import { GlobalSearchService } from '../../services/global-search.service';
@@ -54,10 +54,7 @@ type RawMaterialRequest = {
   status?: MaterialRequest['status'];
   fulfillmentStatus?: MaterialRequest['fulfillmentStatus'];
   statusVersion?: number;
-  materials?: Array<{
-    item?: string;
-    quantity?: string;
-  }>;
+  materials?: any[];
 };
 
 type TicketDropdownItem = {
@@ -82,7 +79,7 @@ type TicketDropdownItem = {
 @Component({
   selector: 'app-main-technician-materials',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './main-technician-materials.component.html',
   styleUrl: './main-technician-materials.component.css'})
 export class MainTechnicianMaterialsComponent implements OnInit {
@@ -105,6 +102,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     rejectedStatus: '',
     rejectionReason: '',
     serviceType: '',
+    status: '',
     siteDetails: {} as any
   };
 
@@ -121,6 +119,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   requests: MaterialRequest[] = [];
+  private apiRequests: MaterialRequest[] = [];
+  private dropdownRequests: MaterialRequest[] = [];
   materialCatalog: MaterialCatalogItem[] = [];
   filteredRequests: MaterialRequest[] = [];
   selectedRequest: MaterialRequest | null = null;
@@ -145,8 +145,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         this.searchQuery = query;
         this.applyFilters();
       });
-    this.loadMaterialRequests();
-    this.loadNewStatusTicketIds();
+    
+    // Load catalog first, then the requests
     this.loadMaterialCatalog();
   }
 
@@ -155,8 +155,16 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .get<{ success: boolean; data: MaterialCatalogItem[] }>(`${this.apiUrl}/catalog`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: response => { this.materialCatalog = response.data || []; },
-        error: () => { this.error = 'The material catalog could not be loaded.'; },
+        next: response => { 
+          this.materialCatalog = response.data || []; 
+          this.loadMaterialRequests();
+          this.loadNewStatusTicketIds();
+        },
+        error: () => { 
+          this.error = 'The material catalog could not be loaded.'; 
+          this.loadMaterialRequests();
+          this.loadNewStatusTicketIds();
+        },
       });
   }
 
@@ -195,11 +203,31 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       status: item.status || 'New',
       fulfillmentStatus: item.fulfillmentStatus || 'NOT_SENT',
       statusVersion: item.statusVersion || 0,
-      items: (item.materials || []).map((material) => ({
-        name: material.item || '-',
-        quantity: material.quantity || '-'
-      }))
+        items: (item.materials || []).map((material) => {
+          const catalogItem = this.materialCatalog.find(c => c._id === material.inventoryId);
+          return {
+            name: material.item || material.itemName || material.name || (catalogItem ? catalogItem.name : '-'),
+            quantity: material.quantity || '-'
+          };
+        })
     };
+  }
+
+  private mergeRequests(): void {
+    // Only add dropdown requests that don't already exist in the apiRequests list
+    const combined = [...this.apiRequests];
+    
+    this.dropdownRequests.forEach(dr => {
+      if (!combined.some(ar => ar.id === dr.id)) {
+        combined.push(dr);
+      }
+    });
+    
+    // Sort combined by date descending
+    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    this.requests = combined;
+    this.applyFilters();
   }
 
   loadMaterialRequests(): void {
@@ -207,25 +235,25 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.error = null;
 
     this.http
-      .get<{ success: boolean; data: RawMaterialRequest[] }>(this.apiUrl)
+      .get<{ success: boolean; data: RawMaterialRequest[] }>(`${this.apiUrl}/new-requests`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.requests = response.data.map((item) => this.mapApiMaterialRequest(item));
-            this.applyFilters();
+            this.apiRequests = response.data.map((item) => this.mapApiMaterialRequest(item));
+            this.mergeRequests();
           } else {
             this.error = 'Failed to load material requests';
-            this.requests = [];
-            this.filteredRequests = [];
+            this.apiRequests = [];
+            this.mergeRequests();
           }
           this.isLoading = false;
         },
         error: (err) => {
           console.error('Error loading material requests:', err);
           this.error = `Failed to load material requests: ${err.message || 'Unknown error'}`;
-          this.requests = [];
-          this.filteredRequests = [];
+          this.apiRequests = [];
+          this.mergeRequests();
           this.isLoading = false;
         }
       });
@@ -258,9 +286,18 @@ export class MainTechnicianMaterialsComponent implements OnInit {
               location: item.location || '',
               siteDetails: item.siteDetails || {}
             }))
-            .filter((ticket) => ticket.id !== '#N/A');
+            .filter((ticket) => 
+              ticket.id !== '#N/A' && 
+              (ticket.status === 'New' || ticket.status === 'Finance Rejected' || ticket.status === 'REJECTED')
+            );
 
           this.dropdownTickets = tickets;
+          this.dropdownRequests = tickets.map((ticket: any) => this.mapApiMaterialRequest({
+            ...ticket,
+            ticketId: ticket.id.replace('#', '')
+          }));
+          this.mergeRequests();
+          
           const ids = tickets.map((ticket) => ticket.id);
 
           this.newStatusTicketIds = Array.from(new Set(ids));
@@ -424,6 +461,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       rejectedStatus: '',
       rejectionReason: '',
       serviceType: '',
+      status: '',
       siteDetails: {}
     };
   }
@@ -446,10 +484,14 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const selectedTicket = this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
     const materials = this.newRequest.items
-      .map((item) => ({
-        inventoryId: item.inventoryId,
-        quantity: Number(item.quantity)
-      }))
+      .map((item) => {
+        const catalogItem = this.materialCatalog.find(c => c._id === item.inventoryId);
+        return {
+          inventoryId: item.inventoryId,
+          item: catalogItem ? catalogItem.name : item.name,
+          quantity: Number(item.quantity)
+        };
+      })
       .filter((item) => item.inventoryId && Number.isInteger(item.quantity) && item.quantity > 0);
 
     if (!normalizedTicketId) {
@@ -465,7 +507,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.error = null;
 
     this.http
-      .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance`, {
+      .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance-custom`, {
         newRequestId: normalizedTicketId,
         ticketId: normalizedTicketId,
         customerName: this.newRequest.customerName,
@@ -522,7 +564,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     };
 
     this.http
-      .patch<{ success: boolean }>(`${this.apiUrl}/${encodeURIComponent(materialRequestId)}/send-to-im`, inventoryManagerData)
+      .patch<{ success: boolean }>(`${this.apiUrl}/${encodeURIComponent(materialRequestId)}/send-to-im-custom`, inventoryManagerData)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {

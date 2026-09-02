@@ -25,12 +25,14 @@ interface InstallationDetail {
   status?: string;
   siteDetails?: {
     buildingType?: string;
-    floors?: number;
+    floors?: string | number;
     rooms?: number;
     ceilingHeight?: string;
     wallType?: string;
     powerSupply?: string;
     outdoorAccess?: string;
+    elevatorAvailability?: string;
+    parkingAvailability?: string;
   };
   materials?: Array<{ item?: string; quantity?: string }>;
   labour?: {

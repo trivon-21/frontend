@@ -41,8 +41,13 @@ interface RawTechTeam {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: (string | { date?: string; timeSlot?: string })[];
   members?: RawTeamMember[];
+}
+
+export interface TimeSlot {
+  date: string;
+  timeSlot: string;
 }
 
 export interface TeamDetailsApiTeam {
@@ -51,7 +56,7 @@ export interface TeamDetailsApiTeam {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: TimeSlot[];
   members?: TeamMember[];
 }
 
@@ -61,7 +66,7 @@ export interface TeamDetailsApiPayload {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: TimeSlot[];
   teamLeader?: TeamMember | null;
   teamMembers?: TeamMember[];
   members?: TeamMember[];
@@ -74,7 +79,7 @@ export interface TeamDetails {
     teamType: string;
     status: string;
     activeJobsCount: number;
-    availableSlots: string[];
+    availableSlots: TimeSlot[];
   };
   teamLeader: TeamMember | null;
   teamMembers: TeamMember[];
@@ -159,7 +164,7 @@ export class TaskService {
           name: String(member.name || '').trim() || 'Unknown Member',
           role: String(member.role || '').trim() || 'Technician',
         }));
-        const teamLeader = teamMembers.find((member) => member.role === 'Team Leader') || null;
+        const teamLeader = teamMembers.find((member) => member.role === 'Team Leader' || member.role === 'Lead') || null;
 
         return {
           success: true,
@@ -170,7 +175,17 @@ export class TaskService {
               teamType: matchedTeam.teamType || 'Service',
               status: matchedTeam.status || 'Unknown',
               activeJobsCount: matchedTeam.activeJobsCount || 0,
-              availableSlots: (matchedTeam.availableSlots || []).filter((slot): slot is string => typeof slot === 'string' && Boolean(slot.trim())),
+              availableSlots: (matchedTeam.availableSlots || [])
+                .map((slot): TimeSlot | null => {
+                  if (typeof slot === 'string') {
+                    return { date: slot, timeSlot: '' };
+                  }
+                  if (slot && typeof slot === 'object' && slot.date) {
+                    return { date: String(slot.date), timeSlot: String(slot.timeSlot || '') };
+                  }
+                  return null;
+                })
+                .filter((slot): slot is TimeSlot => slot !== null),
               members: teamMembers,
             },
             teamLeader,

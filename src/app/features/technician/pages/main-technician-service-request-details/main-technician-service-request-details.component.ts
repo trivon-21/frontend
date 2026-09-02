@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 
@@ -28,7 +28,7 @@ type ServiceRequestView = {
   requestDetails?: {
     specificProduct?: string;
     description?: string;
-    materials?: Array<{ item?: string; quantity?: string }>;
+    materials?: Array<{ item?: string; itemName?: string; name?: string; inventoryId?: string; quantity?: string | number }>;
   };
   assignment?: {
     teamName?: string;
@@ -44,14 +44,20 @@ type ServiceRequestApiDetails = {
   location?: string;
   serviceDate?: string;
   productType?: string;
+  acUnitModel?: string;
   serviceDescription?: string;
+  description?: string;
+  notes?: string;
   assignedTeamName?: string;
   assignedTeamId?: string | number;
   materials?: Array<{ item?: string; quantity?: string }>;
   customerId?: {
     name?: string;
+    fullName?: string;
     email?: string;
     contactNo?: string;
+    contactNumber?: string;
+    phoneNumber?: string;
     address?: string;
   };
   assignedTeam?: {
@@ -71,7 +77,7 @@ type TechTeamApiItem = {
 @Component({
   selector: 'app-main-technician-service-request-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-service-request-details.component.html',
   styleUrl: './main-technician-service-request-details.component.css'})
 export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
@@ -192,7 +198,7 @@ export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
           }
 
           const teamMembers = matchedTeam.members || [];
-          const teamLead = teamMembers.find((member) => member.role === 'Team Leader')?.name || '-';
+          const teamLead = teamMembers.find((member) => member.role === 'Team Leader' || member.role === 'Lead')?.name || '-';
 
           if (!this.serviceView) {
             return;
@@ -220,7 +226,7 @@ export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
 
   /** Maps ServiceRequests API shape into the UI view model used by this page. */
   private mapApiDetailsToView(item: ServiceRequestApiDetails): ServiceRequestView {
-    const customerName = item.customerName || item.customerId?.name || '-';
+    const customerName = item.customerName || item.customerId?.fullName || item.customerId?.name || '-';
     const customerAddress = item.customerId?.address || item.location || '-';
     const teamName = item.assignedTeam?.teamName || item.assignedTeamName || 'Assigned Team';
 
@@ -230,15 +236,15 @@ export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
       customerName,
       location: customerAddress,
       serviceDate: item.serviceDate,
-      productType: item.productType || '-',
+      productType: item.productType || item.acUnitModel || '-',
       customerDetails: {
-        phone: item.customerId?.contactNo || '-',
+        phone: item.customerId?.phoneNumber || item.customerId?.contactNo || item.customerId?.contactNumber || '-',
         email: item.customerId?.email || '-',
         address: customerAddress,
       },
       requestDetails: {
-        specificProduct: item.productType || '-',
-        description: item.serviceDescription || '-',
+        specificProduct: item.productType || item.acUnitModel || '-',
+        description: item.serviceDescription || item.description || item.notes || '-',
         materials: item.materials || [],
       },
       assignment: {
