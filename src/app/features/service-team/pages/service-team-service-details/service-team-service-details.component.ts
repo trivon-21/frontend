@@ -22,6 +22,10 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
   statusUpdateSuccess = '';
   reportSubmitError = '';
   reportSubmitSuccess = '';
+  showAdditionalService = false;
+  isSubmittingAdditionalService = false;
+  additionalServiceError = '';
+  additionalServiceSuccess = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -262,6 +266,57 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
       },
       complete: () => {
         this.isSubmittingReport = false;
+      }
+    });
+  }
+
+  toggleAdditionalService(): void {
+    this.showAdditionalService = !this.showAdditionalService;
+    this.additionalServiceError = '';
+    this.additionalServiceSuccess = '';
+  }
+
+  submitAdditionalService(descInput: HTMLTextAreaElement): void {
+    if (!this.ticket || this.isSubmittingAdditionalService) {
+      return;
+    }
+
+    const desc = descInput.value.trim();
+    if (!desc) {
+      this.additionalServiceSuccess = '';
+      this.additionalServiceError = 'Please provide a description.';
+      return;
+    }
+
+    this.isSubmittingAdditionalService = true;
+    this.additionalServiceError = '';
+    this.additionalServiceSuccess = '';
+
+    const recordId = this.ticket.sourceId || this.ticket._id || this.ticket.id;
+
+    // Intercept fallback tickets for local preview
+    if (['238489782', '238489783', '238489784'].includes(String(recordId))) {
+      setTimeout(() => {
+        this.additionalServiceSuccess = 'Additional service added (Local Preview).';
+        descInput.value = '';
+        this.isSubmittingAdditionalService = false;
+        this.showAdditionalService = false;
+      }, 500);
+      return;
+    }
+
+    this.taskService.addAdditionalService(String(recordId), desc).subscribe({
+      next: () => {
+        this.additionalServiceSuccess = 'Additional service added successfully.';
+        descInput.value = '';
+        this.showAdditionalService = false;
+      },
+      error: (err) => {
+        this.additionalServiceError = err?.error?.message || 'Failed to add additional service.';
+        this.isSubmittingAdditionalService = false;
+      },
+      complete: () => {
+        this.isSubmittingAdditionalService = false;
       }
     });
   }

@@ -215,4 +215,13 @@ export class TaskService {
       teamName: this.teamSessionService.getTeamName()
     });
   }
+
+  /**
+   * Adds an additional service to a task.
+   */
+  addAdditionalService(id: string, description: string): Observable<GenericApiPayload> {
+    return this.http.post<GenericApiPayload>(this.withTeamQuery(`${this.apiUrl}/tasks/${id}/additional-service`), {
+      description
+    });
+  }
 }
