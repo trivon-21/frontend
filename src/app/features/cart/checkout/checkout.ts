@@ -7,11 +7,12 @@ import { OrderService } from './order.service';
 import { PaymentService, BankDetails } from '../../../core/services/payment.service';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
