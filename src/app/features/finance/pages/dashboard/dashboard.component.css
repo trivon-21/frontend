@@ -605,6 +605,12 @@ tbody tr:last-child td {
   gap: 6px;
 }
 
+.page-ellipsis {
+  padding: 6px 4px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
 .page-btn {
   padding: 7px 13px;
 

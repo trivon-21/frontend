@@ -400,6 +400,29 @@
   margin: 0 0 10px;
 }
 
+.slip-preview-section {
+  margin-top: 16px;
+}
+
+.slip-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-top: 8px;
+}
+
+.slip-link {
+  color: #4a7c4e;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.no-slip {
+  color: #9ca3af;
+  font-style: italic;
+}
 
 /* =========================================================
    MODAL FOOTER

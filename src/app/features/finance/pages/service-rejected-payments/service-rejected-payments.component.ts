@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { ServicePaymentService } from '../../services/service-payment.service';
 
 @Component({
@@ -13,8 +12,8 @@ import { ServicePaymentService } from '../../services/service-payment.service';
 })
 export class ServiceRejectedPaymentsComponent implements OnInit, OnDestroy {
 
-  serviceType = 'REPAIR';
-  pageTitle = 'Repair Rejected Payments';
+  serviceType = 'MAINTENANCE';
+  pageTitle = 'Maintenance Rejected Payments';
   payments: any[] = [];
   filteredPayments: any[] = [];
   selectedPayment: any = null;
@@ -26,26 +25,17 @@ export class ServiceRejectedPaymentsComponent implements OnInit, OnDestroy {
   totalItems = 0;
   private pollInterval: any;
 
-  constructor(
-    private servicePaymentService: ServicePaymentService,
-    private route: ActivatedRoute
-  ) { }
+  constructor(private servicePaymentService: ServicePaymentService) { }
 
   ngOnInit(): void {
-    const url = this.route.snapshot.url.map(s => s.path).join('/');
-    if (url.includes('maintenance')) {
-      this.serviceType = 'MAINTENANCE';
-      this.pageTitle = 'Maintenance Rejected Payments';
-    }
     this.loadPayments();
-    // Poll every 10s to detect reuploads
     this.pollInterval = setInterval(() => this.loadPayments(), 10000);
   }
 
   ngOnDestroy(): void { clearInterval(this.pollInterval); }
 
   loadPayments(): void {
-    this.servicePaymentService.getRejectedPayments(this.serviceType).subscribe({
+    this.servicePaymentService.getRejectedPayments().subscribe({
       next: (data) => { this.payments = data; this.applyFilters(); },
       error: (err) => console.error(err)
     });
@@ -54,12 +44,11 @@ export class ServiceRejectedPaymentsComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     this.filteredPayments = this.payments.filter(p => {
       const matchesSearch = this.searchQuery
-        ? p.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        ? p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
-        ? new Date(p.rejectedAt || p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
+        ? new Date(p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
         : true;
       return matchesSearch && matchesDate;
     });
