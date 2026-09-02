@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import {
   CreateInventoryCatalogItemInput,
   InventoryItem,
+  InventoryLocationOption,
   UpdateInventoryMasterDataInput,
 } from './inventory-domain';
 import { PurchaseRequest, ReceiptAuthorization } from './purchase-workflow';
@@ -14,6 +15,7 @@ export type {
   InventoryItem,
   InventoryItemClass,
   InventoryItemForm,
+  InventoryLocationOption,
   InventorySystemType,
   StockStatus,
   UpdateInventoryMasterDataInput,
@@ -51,6 +53,22 @@ export interface ReorderItem {
   status: 'critical' | 'warning' | 'normal';
 }
 
+export interface ProcurementWorkflowSummary {
+  awaitingManager: number;
+  awaitingFinanceApproval: number;
+  readyToIssue: number;
+  readyToReceive: number;
+  awaitingReceiptReconciliation: number;
+  breakdown: {
+    awaitingManager: { purchaseRequests: number; receiptAuthorizations: number };
+    readyToReceive: { purchaseOrders: number; receiptAuthorizations: number };
+  };
+  /** @deprecated Use readyToReceive. */
+  awaitingReceipt: number;
+  /** @deprecated Use awaitingReceiptReconciliation. */
+  awaitingFinance: number;
+}
+
 export interface InventoryDashboardData {
   managerName: string;
   currentDate: Date;
@@ -58,7 +76,23 @@ export interface InventoryDashboardData {
   stats: SummaryStats;
   recentActivity: ActivityItem[];
   reorderList: ReorderItem[];
-  procurementWorkflow: { awaitingManager: number; awaitingReceipt: number; awaitingFinance: number };
+  procurementWorkflow: ProcurementWorkflowSummary;
+}
+
+function emptyProcurementWorkflow(): ProcurementWorkflowSummary {
+  return {
+    awaitingManager: 0,
+    awaitingFinanceApproval: 0,
+    readyToIssue: 0,
+    readyToReceive: 0,
+    awaitingReceiptReconciliation: 0,
+    breakdown: {
+      awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
+      readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
+    },
+    awaitingReceipt: 0,
+    awaitingFinance: 0,
+  };
 }
 
 function emptyDashboard(status = 'Offline'): InventoryDashboardData {
@@ -74,7 +108,7 @@ function emptyDashboard(status = 'Offline'): InventoryDashboardData {
     },
     recentActivity: [],
     reorderList: [],
-    procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
+    procurementWorkflow: emptyProcurementWorkflow(),
   };
 }
 
@@ -83,6 +117,11 @@ export function normalizeInventoryDashboard(
 ): InventoryDashboardData {
   const fallback = emptyDashboard(data?.status || 'Offline');
   const stats = data?.stats;
+  const workflow = data?.procurementWorkflow;
+  const readyToReceive = workflow?.readyToReceive ?? workflow?.awaitingReceipt ?? 0;
+  const awaitingReceiptReconciliation = workflow?.awaitingReceiptReconciliation
+    ?? workflow?.awaitingFinance
+    ?? 0;
   return {
     ...fallback,
     ...data,
@@ -100,8 +139,25 @@ export function normalizeInventoryDashboard(
     }),
     reorderList: data?.reorderList || [],
     procurementWorkflow: {
-      ...fallback.procurementWorkflow,
-      ...(data?.procurementWorkflow || {}),
+      awaitingManager: workflow?.awaitingManager ?? 0,
+      awaitingFinanceApproval: workflow?.awaitingFinanceApproval ?? 0,
+      readyToIssue: workflow?.readyToIssue ?? 0,
+      readyToReceive,
+      awaitingReceiptReconciliation,
+      breakdown: {
+        awaitingManager: {
+          purchaseRequests: workflow?.breakdown?.awaitingManager?.purchaseRequests
+            ?? workflow?.awaitingManager
+            ?? 0,
+          receiptAuthorizations: workflow?.breakdown?.awaitingManager?.receiptAuthorizations ?? 0,
+        },
+        readyToReceive: {
+          purchaseOrders: workflow?.breakdown?.readyToReceive?.purchaseOrders ?? readyToReceive,
+          receiptAuthorizations: workflow?.breakdown?.readyToReceive?.receiptAuthorizations ?? 0,
+        },
+      },
+      awaitingReceipt: readyToReceive,
+      awaitingFinance: awaitingReceiptReconciliation,
     },
   };
 }
@@ -202,6 +258,10 @@ export class InventoryManagerDashboardService {
 
   getLeftoverReturns(): Observable<LeftoverReturnItem[]> {
     return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`);
+  }
+
+  getLocations(): Observable<InventoryLocationOption[]> {
+    return this.http.get<InventoryLocationOption[]>(`${this.apiUrl}/locations`);
   }
 
   getHandedOverMaterialRequests(): Observable<HandedOverMaterialRequest[]> {

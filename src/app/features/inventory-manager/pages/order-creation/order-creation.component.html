@@ -96,8 +96,11 @@
   <div class="tracking-section">
     <!-- Tabs -->
     <div class="tabs-nav" role="tablist" aria-label="Order status">
-      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending'" [class.active]="activeTab === 'pending'" (click)="setActiveTab('pending')">
-        Awaiting Approval
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending-manager'" [class.active]="activeTab === 'pending-manager'" (click)="setActiveTab('pending-manager')">
+        Awaiting Manager
+      </button>
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending-finance'" [class.active]="activeTab === 'pending-finance'" (click)="setActiveTab('pending-finance')">
+        Awaiting Finance
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'approved'" [class.active]="activeTab === 'approved'" (click)="setActiveTab('approved')">
         Approved
@@ -122,26 +125,26 @@
     </div>
 
     <!-- Table -->
-    <div class="table-card" *ngIf="!loading && !loadError">
-      <table class="orders-table" *ngIf="currentOrders.length > 0">
+    <div class="table-card alx-table-container" *ngIf="!loading && !loadError" role="region" aria-label="Purchase order requests" tabindex="0">
+      <table class="orders-table alx-table" *ngIf="currentOrders.length > 0">
         <thead>
           <tr>
             <th>ORDER ID</th>
             <th>SUPPLIER</th>
             <th>ITEMS</th>
-            <th>ESTIMATED TOTAL</th>
+            <th class="text-right">ESTIMATED TOTAL</th>
             <th>DATE</th>
-            <th>ACTION</th>
+            <th class="actions-cell">ACTION</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of currentOrders" (click)="openDetail(order)">
-            <td class="id-cell">{{ order.requestId }}</td>
+          <tr *ngFor="let order of currentOrders" class="clickable-row" (click)="openDetail(order)">
+            <td class="id-cell sku-cell">{{ order.requestId }}</td>
             <td>{{ order.supplierName }}</td>
             <td>{{ order.items.length }} Items</td>
-            <td class="total-cell">{{ formatCurrency(order.totalEstimate) }}</td>
-            <td>{{ formatDate(order.createdAt) }}</td>
-            <td>
+            <td class="total-cell num-cell">{{ formatCurrency(order.totalEstimate) }}</td>
+            <td class="date-cell">{{ formatDate(order.createdAt) }}</td>
+            <td class="actions-cell">
               <button type="button" class="btn-action-view im-btn im-btn--secondary im-btn--compact" [attr.aria-label]="'View order ' + order.requestId">View</button>
             </td>
           </tr>
@@ -207,9 +210,9 @@
         </div>
 
         <!-- Items Table -->
-        <div class="detail-items-container">
+        <div class="detail-items-container alx-table-container alx-table-container--embedded" role="region" aria-label="Ordered line items" tabindex="0">
           <label class="section-label">ORDERED ITEMS</label>
-          <table class="detail-items-table">
+          <table class="detail-items-table alx-table alx-table--medium">
             <thead>
               <tr>
                 <th>ITEM</th>
@@ -221,11 +224,11 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of selectedOrder.items">
-                <td class="name">{{ item.name }}</td>
-                <td class="sku">{{ item.sku }}</td>
+                <td class="name name-cell">{{ item.name }}</td>
+                <td class="sku sku-cell">{{ item.sku }}</td>
                 <td class="text-center">{{ item.quantity }}</td>
-                <td class="text-right">{{ formatCurrency(item.unitCost) }}</td>
-                <td class="text-right price">{{ formatCurrency(item.quantity * item.unitCost) }}</td>
+                <td class="num-cell">{{ formatCurrency(item.unitCost) }}</td>
+                <td class="price num-cell">{{ formatCurrency(item.quantity * item.unitCost) }}</td>
               </tr>
             </tbody>
           </table>

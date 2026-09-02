@@ -29,7 +29,19 @@ export class InventoryManagerDashboardComponent implements OnInit {
     },
     recentActivity: [],
     reorderList: [],
-    procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
+    procurementWorkflow: {
+      awaitingManager: 0,
+      awaitingFinanceApproval: 0,
+      readyToIssue: 0,
+      readyToReceive: 0,
+      awaitingReceiptReconciliation: 0,
+      breakdown: {
+        awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
+        readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
+      },
+      awaitingReceipt: 0,
+      awaitingFinance: 0,
+    },
   };
   loading = false; // Structure should load immediately
   error: string | null = null;

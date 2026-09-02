@@ -32,6 +32,11 @@ export const MANAGER_ROUTES: Routes = [
         data: { analyticsSection: 'service' },
       },
       {
+        path: 'analytics/financial-overview',
+        component: AnalyticsComponent,
+        data: { analyticsSection: 'financial' },
+      },
+      {
         path: 'analytics/purchasing-approvals',
         component: AnalyticsComponent,
         data: { analyticsSection: 'purchasing' },

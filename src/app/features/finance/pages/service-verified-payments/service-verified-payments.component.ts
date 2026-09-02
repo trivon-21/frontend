@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { ServicePaymentService } from '../../services/service-payment.service';
 
 @Component({
@@ -13,8 +12,8 @@ import { ServicePaymentService } from '../../services/service-payment.service';
 })
 export class ServiceVerifiedPaymentsComponent implements OnInit {
 
-  serviceType = 'REPAIR';
-  pageTitle = 'Repair Verified Payments';
+  serviceType = 'MAINTENANCE';
+  pageTitle = 'Maintenance Verified Payments';
   payments: any[] = [];
   filteredPayments: any[] = [];
   selectedPayment: any = null;
@@ -25,22 +24,14 @@ export class ServiceVerifiedPaymentsComponent implements OnInit {
   itemsPerPage = 8;
   totalItems = 0;
 
-  constructor(
-    private servicePaymentService: ServicePaymentService,
-    private route: ActivatedRoute
-  ) { }
+  constructor(private servicePaymentService: ServicePaymentService) { }
 
   ngOnInit(): void {
-    const url = this.route.snapshot.url.map(s => s.path).join('/');
-    if (url.includes('maintenance')) {
-      this.serviceType = 'MAINTENANCE';
-      this.pageTitle = 'Maintenance Verified Payments';
-    }
     this.loadPayments();
   }
 
   loadPayments(): void {
-    this.servicePaymentService.getVerifiedPayments(this.serviceType).subscribe({
+    this.servicePaymentService.getVerifiedPayments().subscribe({
       next: (data) => { this.payments = data; this.applyFilters(); },
       error: (err) => console.error(err)
     });
@@ -49,12 +40,11 @@ export class ServiceVerifiedPaymentsComponent implements OnInit {
   applyFilters(): void {
     this.filteredPayments = this.payments.filter(p => {
       const matchesSearch = this.searchQuery
-        ? p.orderId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        ? p.ticketId?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          p.customerName?.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchesDate = this.selectedDate
-        ? new Date(p.approvedAt || p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
+        ? new Date(p.updatedAt).toDateString() === new Date(this.selectedDate).toDateString()
         : true;
       return matchesSearch && matchesDate;
     });
@@ -77,4 +67,8 @@ export class ServiceVerifiedPaymentsComponent implements OnInit {
 
   openModal(p: any) { this.selectedPayment = p; this.showModal = true; }
   closeModal() { this.selectedPayment = null; this.showModal = false; }
+  isImage(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return url.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+}
 }

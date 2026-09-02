@@ -1,3 +1,4 @@
+
 <div class="rma-container">
   <!-- Success Toast -->
   <div class="toast toast-success" *ngIf="successMessage" role="status">
@@ -163,7 +164,7 @@
         <span>Create a new RMA case to track defective items</span>
       </div>
 
-      <div class="log-table-container alx-table-container" *ngIf="filteredRmaCases.length > 0">
+      <div class="log-table-container alx-table-container" *ngIf="filteredRmaCases.length > 0" role="region" aria-label="RMA cases" tabindex="0">
         <table class="alx-table">
           <thead>
             <tr>
@@ -171,7 +172,7 @@
               <th>FAULT DESCRIPTION</th>
               <th>DATE</th>
               <th>STATUS</th>
-              <th>ACTION</th>
+              <th class="actions-cell">ACTION</th>
             </tr>
           </thead>
           <tbody>
@@ -188,9 +189,9 @@
                   <span class="by" *ngIf="rma.itemName">Item: {{ rma.itemName }}</span>
                 </div>
               </td>
-              <td class="date">{{ formatDate(rma.createdAt) }}</td>
-              <td>
-                <span class="rma-status-badge" [ngClass]="'status-' + rma.status">
+              <td class="date date-cell">{{ formatDate(rma.createdAt) }}</td>
+              <td class="actions-cell">
+                <span class="rma-status-badge alx-table-status" [ngClass]="'status-' + rma.status">
                   {{ rmaStatusLabels[rma.status] }}
                 </span>
               </td>
@@ -234,8 +235,8 @@
       <p>No items in quarantine</p>
     </div>
 
-    <div class="quarantine-table-container" *ngIf="filteredQuarantineItems.length > 0">
-      <table class="quarantine-table">
+    <div class="quarantine-table-container alx-table-container" *ngIf="filteredQuarantineItems.length > 0" role="region" aria-label="Quarantined inventory items" tabindex="0">
+      <table class="quarantine-table alx-table alx-table--danger">
         <thead>
           <tr>
             <th>ITEM NAME</th>
@@ -243,17 +244,17 @@
             <th>REASON</th>
             <th>DATE ADDED</th>
             <th>LOCATION</th>
-            <th>ACTION</th>
+            <th class="actions-cell">ACTION</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of filteredQuarantineItems">
             <td>{{ item.itemName }}</td>
-            <td>{{ item.quantity }} {{ item.unit }}</td>
+            <td class="num-cell">{{ item.quantity }} {{ item.unit }}</td>
             <td>{{ item.reason }}</td>
-            <td>{{ formatDate(item.createdAt) }}</td>
+            <td class="date-cell">{{ formatDate(item.createdAt) }}</td>
             <td>{{ item.location || '—' }}</td>
-            <td>
+            <td class="actions-cell">
               <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId">
                 <button type="button" class="btn-danger im-btn im-btn--danger im-btn--compact" (click)="confirmDispose(item.quarantineId)">Dispose</button>
               </div>

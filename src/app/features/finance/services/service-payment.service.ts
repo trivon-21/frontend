@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class ServicePaymentService {
 
-  private apiUrl = 'http://127.0.0.1:5000/api/service-payments';
+  private apiUrl = 'http://127.0.0.1:5000/api/maintenance-payments';
 
   constructor(private http: HttpClient) { }
 
@@ -14,8 +14,8 @@ export class ServicePaymentService {
     return throwError(() => new Error(error.error?.message || error.message || 'Request failed'));
   }
 
-  getPendingVerification(serviceType: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/pending/${serviceType}`)
+  getPendingVerification(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/pending`)
       .pipe(catchError(this.handleError));
   }
 
@@ -29,13 +29,13 @@ export class ServicePaymentService {
       .pipe(catchError(this.handleError));
   }
 
-  getVerifiedPayments(serviceType: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/verified/${serviceType}`)
+  getVerifiedPayments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/verified`)
       .pipe(catchError(this.handleError));
   }
 
-  getRejectedPayments(serviceType: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/rejected/${serviceType}`)
+  getRejectedPayments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/rejected`)
       .pipe(catchError(this.handleError));
   }
 }

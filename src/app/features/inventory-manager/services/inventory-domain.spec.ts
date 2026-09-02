@@ -1,6 +1,8 @@
 import {
   isValidSubcategory,
   normalizeInventoryList,
+  supplierIdOf,
+  supplierNameOf,
 } from './inventory-domain';
 
 describe('inventory domain', () => {
@@ -11,5 +13,12 @@ describe('inventory domain', () => {
 
   it('normalizes chip values without duplicates or blanks', () => {
     expect(normalizeInventoryList([' R32 ', 'R410A', 'R32', ''])).toEqual(['R32', 'R410A']);
+  });
+
+  it('handles an explicitly cleared supplier reference', () => {
+    const item = { supplierId: null } as never;
+
+    expect(supplierIdOf(item)).toBe('');
+    expect(supplierNameOf(item)).toBe('');
   });
 });

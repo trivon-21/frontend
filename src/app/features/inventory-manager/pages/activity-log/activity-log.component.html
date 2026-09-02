@@ -29,8 +29,8 @@
       <p>No activity logs found.</p>
     </div>
 
-    <div class="activity-table-wrapper" *ngIf="!loading && !errorMessage && activities.length > 0">
-      <table class="activity-table">
+    <div class="activity-table-wrapper alx-table-container" *ngIf="!loading && !errorMessage && activities.length > 0" role="region" aria-label="Inventory activity log" tabindex="0">
+      <table class="activity-table alx-table alx-table--medium alx-table--fixed">
         <thead>
           <tr>
             <th>Event</th>
@@ -47,7 +47,7 @@
               <span class="event-title">{{ activity.title }}</span>
             </td>
             <td class="desc-cell">{{ activity.description }}</td>
-            <td class="time-cell">
+            <td class="time-cell date-cell">
               <span class="full-date">{{ activity.timestamp | date: 'medium' }}</span>
               <span class="time-ago">{{ activity.timeAgo }}</span>
             </td>

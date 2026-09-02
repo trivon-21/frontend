@@ -10,14 +10,14 @@
         <p class="subtitle">Receive approved purchases and update stock with a traceable Goods Received Note (GRN).</p>
       </div>
     </div>
-    <div class="header-actions">
-      <a class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/inventory">
+    <div class="header-actions im-action-group">
+      <a class="im-btn im-btn--primary" routerLink="/inventory-manager/inventory">
         <lucide-angular name="package" [size]="16"></lucide-angular>
         <span>Inventory Items</span>
       </a>
-      <a class="btn-secondary im-btn im-btn--secondary" routerLink="/inventory-manager/order-creation">
-        <lucide-angular name="shopping-cart" [size]="16"></lucide-angular>
-        <span>Purchase Orders</span>
+      <a class="im-btn im-btn--primary" routerLink="/inventory-manager/order-creation">
+        <lucide-angular name="plus" [size]="16"></lucide-angular>
+        <span>Create Order</span>
       </a>
     </div>
   </div>
@@ -208,18 +208,25 @@
             <input class="form-input readonly-input" [value]="selectedItem?.unit || '—'" readonly />
           </div>
           <div class="form-group">
-            <label class="field-label">WAREHOUSE / LOCATION *</label>
+            <label class="field-label">WAREHOUSE *</label>
             <div class="input-icon-wrap">
               <lucide-angular name="box" [size]="16" class="input-icon"></lucide-angular>
-              <input class="form-input" formControlName="location" placeholder="e.g. Main Warehouse" />
+              <select class="form-select" formControlName="location" (change)="onWarehouseChange()">
+                <option value="" disabled>Select a warehouse</option>
+                <option *ngFor="let location of locations" [value]="location.warehouse">{{ location.warehouse }}</option>
+              </select>
             </div>
           </div>
           <div class="form-group">
-            <label class="field-label">SHELF / BIN CODE *</label>
+            <label class="field-label">PLACEMENT AREA *</label>
             <div class="input-icon-wrap">
               <lucide-angular name="layout-grid" [size]="16" class="input-icon"></lucide-angular>
-              <input class="form-input" formControlName="binLocation" placeholder="e.g. A-01-04" />
+              <select class="form-select" formControlName="binLocation" [attr.disabled]="!receiptForm.get('stock.location')?.value ? true : null">
+                <option value="" disabled>Select a placement area</option>
+                <option *ngFor="let area of availablePlacementAreas" [value]="area">{{ area }}</option>
+              </select>
             </div>
+            <small class="field-help" *ngIf="receiptForm.get('stock')?.hasError('storageLocation')">Choose an area in the selected warehouse.</small>
           </div>
           <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && selectedQuantity > 0">
             <div class="serials-header">
@@ -281,6 +288,50 @@
       </div>
     </form>
   </div>
+
+  <section class="authorization-section content-card" *ngIf="!loading && !loadError" aria-labelledby="authorization-queue-title">
+    <div class="section-top-bar">
+      <div class="section-title">
+        <h2 id="authorization-queue-title">Non-PO Authorization Queue</h2>
+        <p class="subtitle">Track authorization, receiving, and Finance reconciliation status.</p>
+      </div>
+      <div class="filter-pills" aria-label="Authorization status filters">
+        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'all'" [attr.aria-pressed]="authorizationStatus === 'all'" (click)="authorizationStatus = 'all'">All</button>
+        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'pending'" [attr.aria-pressed]="authorizationStatus === 'pending'" (click)="authorizationStatus = 'pending'">Awaiting Manager</button>
+        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'ready'" [attr.aria-pressed]="authorizationStatus === 'ready'" (click)="authorizationStatus = 'ready'">Ready to Receive</button>
+        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'completed'" [attr.aria-pressed]="authorizationStatus === 'completed'" (click)="authorizationStatus = 'completed'">Completed</button>
+        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'rejected'" [attr.aria-pressed]="authorizationStatus === 'rejected'" (click)="authorizationStatus = 'rejected'">Rejected</button>
+      </div>
+    </div>
+    <div class="alx-table-container" role="region" aria-label="Non-PO receipt authorizations" tabindex="0">
+      <table class="authorization-table alx-table alx-table--medium alx-table--fixed" *ngIf="filteredAuthorizationQueue.length > 0">
+        <thead>
+          <tr>
+            <th>Authorization</th>
+            <th>Item</th>
+            <th>Reason</th>
+            <th>Received</th>
+            <th>Approval</th>
+            <th>Finance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let authorization of filteredAuthorizationQueue">
+            <td class="sku-cell">{{ authorization.authorizationNumber }}</td>
+            <td class="name-cell">{{ authorizationItemName(authorization) }}</td>
+            <td>{{ reasonLabel(authorization.nonPoReason) }}</td>
+            <td class="num-cell">{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
+            <td><span class="queue-status" [ngClass]="authorization.status">{{ authorizationStatusLabel(authorization.status) }}</span></td>
+            <td><span class="queue-status" [ngClass]="authorization.financeReviewStatus">{{ authorization.financeReviewStatus | titlecase }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="empty-results" *ngIf="filteredAuthorizationQueue.length === 0">
+        <lucide-angular name="clipboard-list" [size]="40" class="empty-icon"></lucide-angular>
+        <p>No authorizations match this workflow stage.</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Recent GRN Entries Section -->
   <div class="shipments-section" *ngIf="!loading && !loadError">

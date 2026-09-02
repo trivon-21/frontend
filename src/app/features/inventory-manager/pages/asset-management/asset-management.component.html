@@ -136,8 +136,8 @@
         <span class="loan-count">Tools currently checked out by technicians</span>
       </div>
 
-      <div class="table-scroll">
-        <table>
+      <div class="table-scroll alx-table-container" role="region" aria-label="Active tool loans" tabindex="0">
+        <table class="alx-table alx-table--wide">
           <thead>
             <tr>
               <th>TOOL NAME</th>
@@ -146,22 +146,22 @@
               <th>CHECKED OUT</th>
               <th>DUE DATE</th>
               <th>STATUS</th>
-              <th>ACTIONS</th>
+              <th class="actions-cell">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let loan of filteredLoans">
               <td class="tool-name">{{ loan.toolName }}</td>
-              <td class="asset-tag">{{ loan.assetTag }}</td>
+              <td class="asset-tag sku-cell">{{ loan.assetTag }}</td>
               <td class="held-by">{{ loan.technicianName }}</td>
               <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
               <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
               <td>
-                <span class="status-pill" [class.overdue]="loan.status === 'Overdue'">
+                <span class="status-pill alx-table-status" [class.overdue]="loan.status === 'Overdue'">
                   {{ loan.status }}
                 </span>
               </td>
-              <td>
+              <td class="actions-cell">
                 <button
                   type="button"
                   class="btn-small im-btn im-btn--secondary im-btn--compact"
@@ -207,8 +207,8 @@
         <span class="loan-count">Tools recently returned by technicians</span>
       </div>
 
-      <div class="table-scroll">
-        <table>
+      <div class="table-scroll alx-table-container" role="region" aria-label="Tool return logs" tabindex="0">
+        <table class="alx-table">
           <thead>
             <tr>
               <th>TOOL NAME</th>

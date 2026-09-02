@@ -109,10 +109,12 @@
     id="logistics-orders-panel"
     class="table-container alx-table-container glass-panel"
     role="tabpanel"
+    aria-label="Dispatch and logistics orders"
+    tabindex="0"
     [attr.aria-labelledby]="'logistics-' + activeTab + '-tab'"
     *ngIf="!loading && !loadError"
   >
-    <table class="alx-table">
+    <table class="alx-table alx-table--wide">
       <thead>
         <tr>
           <th>Order ID</th>
@@ -120,7 +122,7 @@
           <th *ngIf="activeTab !== 'to-pack'">CUSTOMER NAME</th>
           <th *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">TRACK ID</th>
           <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
-          <th class="text-right">ACTION{{ activeTab === 'to-pack' ? 'S' : '' }}</th>
+          <th class="actions-cell">ACTION{{ activeTab === 'to-pack' ? 'S' : '' }}</th>
         </tr>
       </thead>
       <tbody>
@@ -129,12 +131,12 @@
           (click)="selectOrder(order.id)"
           [class.selected-row]="selectedOrderId === order.id"
         >
-          <td>{{ order.id }}</td>
+          <td class="sku-cell">{{ order.id }}</td>
           <td>{{ order.customer }}</td>
-          <td *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">
+          <td class="sku-cell" *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">
             {{ order.trackId || 'N/A' }}
           </td>
-          <td *ngIf="activeTab === 'completed'">{{ order.completedAt }}</td>
+          <td class="date-cell" *ngIf="activeTab === 'completed'">{{ order.completedAt }}</td>
           <td class="actions-cell">
             <ng-container *ngIf="selectedOrderId === order.id">
               <ng-container *ngIf="activeTab === 'to-pack'">
@@ -239,13 +241,13 @@
           </div>
         </div>
 
-        <div class="items-verification-full">
+        <div class="items-verification-full alx-table-container alx-table-container--embedded" role="region" aria-label="Dispatch order line items" tabindex="0">
           <div class="section-header">
             <h3>MATERIALS LIST</h3>
             <span class="items-count">{{ selectedOrder?.items?.length || 0 }} Items</span>
           </div>
 
-          <table class="verification-table">
+          <table class="verification-table alx-table alx-table--medium">
             <thead>
               <tr>
                 <th>ITEM NAME</th>
@@ -267,9 +269,9 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of selectedOrder?.items">
-                <td class="item-name">{{ item.name }}</td>
-                <td class="item-sku">{{ item.sku }}</td>
-                <td class="item-qty"><span class="qty-symbol">×</span>{{ item.qty }}</td>
+                <td class="item-name name-cell">{{ item.name }}</td>
+                <td class="item-sku sku-cell">{{ item.sku }}</td>
+                <td class="item-qty num-cell"><span class="qty-symbol">×</span>{{ item.qty }}</td>
                 <td class="text-center" *ngIf="!isViewingDetailsFromAssign">
                   <ng-container *ngIf="activeTab === 'to-pack'">
                     <button
@@ -288,7 +290,7 @@
                     </button>
                   </ng-container>
                   <ng-container *ngIf="activeTab !== 'to-pack'">
-                    <div class="btn-confirm reservation-status" [class.confirmed]="item.confirmed">
+                    <div class="btn-confirm reservation-status alx-table-status" [class.confirmed]="item.confirmed">
                       <lucide-angular
                         name="check"
                         [size]="14"
