@@ -19,11 +19,12 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 })
 export class OrderCreationComponent implements OnInit {
   // Tab state
-  activeTab: 'pending' | 'approved' | 'receiving' | 'received' | 'rejected' = 'pending';
+  activeTab: 'pending-manager' | 'pending-finance' | 'approved' | 'receiving' | 'received' | 'rejected' = 'pending-manager';
   searchQuery = '';
 
   // Orders data
-  pendingOrders: PurchaseRequest[] = [];
+  pendingManagerOrders: PurchaseRequest[] = [];
+  pendingFinanceOrders: PurchaseRequest[] = [];
   approvedOrders: PurchaseRequest[] = [];
   rejectedOrders: PurchaseRequest[] = [];
   draftOrders: PurchaseRequest[] = [];
@@ -58,6 +59,14 @@ export class OrderCreationComponent implements OnInit {
       if (params['success']) {
         this.successMessage = params['success'];
         setTimeout(() => this.successMessage = '', 5000);
+      }
+      const requestedStatus = params['status'];
+      if (requestedStatus === 'pending-manager' || requestedStatus === 'pending-finance'
+        || requestedStatus === 'approved' || requestedStatus === 'received'
+        || requestedStatus === 'rejected') {
+        this.activeTab = requestedStatus;
+      } else if (requestedStatus === 'ordered' || requestedStatus === 'partially-received') {
+        this.activeTab = 'receiving';
       }
     });
   }
@@ -95,12 +104,13 @@ export class OrderCreationComponent implements OnInit {
     this.router.navigate(['/inventory-manager/order-creation/new']);
   }
 
-  setActiveTab(tab: 'pending' | 'approved' | 'receiving' | 'received' | 'rejected'): void {
+  setActiveTab(tab: typeof this.activeTab): void {
     this.activeTab = tab;
   }
 
   get currentOrders(): PurchaseRequest[] {
-    let list = this.activeTab === 'pending' ? this.pendingOrders :
+    let list = this.activeTab === 'pending-manager' ? this.pendingManagerOrders :
+               this.activeTab === 'pending-finance' ? this.pendingFinanceOrders :
                this.activeTab === 'approved' ? this.approvedOrders :
                this.activeTab === 'receiving' ? this.receivingOrders :
                this.activeTab === 'received' ? this.receivedOrders :
@@ -166,7 +176,8 @@ export class OrderCreationComponent implements OnInit {
   // ── Helpers ──
 
   getStatusLabel(status: PurchaseStatus | typeof this.activeTab): string {
-    if (status === 'pending') return 'Awaiting Approval';
+    if (status === 'pending-manager') return 'Awaiting Manager';
+    if (status === 'pending-finance') return 'Awaiting Finance Approval';
     if (status === 'receiving') return 'Ordered / Receiving';
     return purchaseStatusLabel(status as PurchaseStatus);
   }
@@ -184,7 +195,8 @@ export class OrderCreationComponent implements OnInit {
 
   private applyOrders(data: PurchaseRequest[]): void {
     this.draftOrders = data.filter(o => o.status === 'draft');
-    this.pendingOrders = data.filter(o => ['pending-manager', 'pending-finance'].includes(o.status));
+    this.pendingManagerOrders = data.filter(o => o.status === 'pending-manager');
+    this.pendingFinanceOrders = data.filter(o => o.status === 'pending-finance');
     this.approvedOrders = data.filter(o => o.status === 'approved');
     this.receivingOrders = data.filter(o => ['ordered', 'partially-received'].includes(o.status));
     this.receivedOrders = data.filter(o => o.status === 'received');

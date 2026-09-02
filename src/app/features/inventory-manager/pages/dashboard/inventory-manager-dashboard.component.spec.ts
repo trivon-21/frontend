@@ -20,7 +20,19 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
     },
     recentActivity: [],
     reorderList: [],
-    procurementWorkflow: { awaitingManager: 2, awaitingReceipt: 3, awaitingFinance: 1 },
+    procurementWorkflow: {
+      awaitingManager: 2,
+      awaitingFinanceApproval: 1,
+      readyToIssue: 3,
+      readyToReceive: 4,
+      awaitingReceiptReconciliation: 1,
+      breakdown: {
+        awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 1 },
+        readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
+      },
+      awaitingReceipt: 4,
+      awaitingFinance: 1,
+    },
   };
 
   async function create(
@@ -54,6 +66,39 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('.live-time')).toBeNull();
     expect(root.querySelector<HTMLButtonElement>('.btn-new-order')?.textContent).toContain('Create New Order');
+    const reorderRegion = root.querySelector<HTMLElement>('.reorder-card .alx-table-container')!;
+    const reorderTable = reorderRegion.querySelector<HTMLTableElement>('.alx-table')!;
+    expect(reorderRegion.getAttribute('role')).toBe('region');
+    expect(reorderRegion.tabIndex).toBe(0);
+    expect(reorderTable.classList).toContain('alx-table--fixed');
+    expect(reorderTable.classList).toContain('alx-table--sticky-header');
+    fixture.destroy();
+  });
+
+  it('renders five distinct workflow stages with stage-specific destinations', async () => {
+    const fixture = await create({ getDashboard: () => of(dashboard) });
+    const root = fixture.nativeElement as HTMLElement;
+    const stages = Array.from(root.querySelectorAll<HTMLElement>('.workflow-stage'));
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('.workflow-card a'));
+
+    expect(stages.length).toBe(5);
+    expect(stages.map((stage) => stage.textContent)).toEqual([
+      jasmine.stringContaining('Awaiting Manager'),
+      jasmine.stringContaining('Awaiting Finance Approval'),
+      jasmine.stringContaining('Ready to Issue'),
+      jasmine.stringContaining('Ready to Receive'),
+      jasmine.stringContaining('Receipt Reconciliation'),
+    ]);
+    expect(root.querySelector('a.workflow-card')).toBeNull();
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/inventory-manager/order-creation?status=pending-manager',
+      '/inventory-manager/procurement?authorizationStatus=pending',
+      '/inventory-manager/order-creation?status=pending-finance',
+      '/inventory-manager/order-creation?status=approved',
+      '/inventory-manager/procurement?mode=PO',
+      '/inventory-manager/procurement?mode=NON_PO&authorizationStatus=ready',
+      '/inventory-manager/procurement?grnFilter=FINANCE',
+    ]);
     fixture.destroy();
   });
 

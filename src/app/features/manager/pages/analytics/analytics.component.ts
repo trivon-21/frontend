@@ -33,7 +33,7 @@ interface DonutSegment extends NamedValue {
   styleUrls: ['./analytics.component.css'],
 })
 export class AnalyticsComponent implements OnInit {
-  section: 'performance' | 'service' | 'purchasing' | 'inventory' = 'performance';
+  section: 'performance' | 'service' | 'financial' | 'purchasing' | 'inventory' = 'performance';
   readonly periods: Array<{ key: AnalyticsPeriod; label: string }> = [
     { key: '7d', label: '7 Days' },
     { key: '30d', label: '30 Days' },
@@ -110,6 +110,18 @@ export class AnalyticsComponent implements OnInit {
   poProgress(report: AnalyticsData): number {
     const ordered = report.purchasing.poProgress.orderedQuantity;
     return ordered ? Math.min(100, (report.purchasing.poProgress.receivedQuantity / ordered) * 100) : 0;
+  }
+
+  financialTrendMax(report: AnalyticsData): number {
+    return Math.max(
+      1,
+      ...report.financial.trend.collectedRevenue,
+      ...report.financial.trend.procurementSpend,
+    );
+  }
+
+  financialBarWidth(value: number, report: AnalyticsData): number {
+    return Math.max(0, (value / this.financialTrendMax(report)) * 100);
   }
 
   deltaText(metric: ComparisonMetric): string {
@@ -220,6 +232,26 @@ export class AnalyticsComponent implements OnInit {
       ['SLA risk tickets', 'current-snapshot', report.currentPosition.slaRiskTickets.value, report.currentPosition.slaRiskTickets.asOf.toString()],
       ['Pending approval value', 'current-snapshot', report.currentPosition.pendingApprovalValue.value, report.currentPosition.pendingApprovalValue.asOf.toString()],
       ['Stock risk items', 'current-snapshot', report.currentPosition.stockRiskItems.value, report.currentPosition.stockRiskItems.asOf.toString()],
+      [],
+      ['Financial metric', 'Scope', 'Current', 'Previous', 'Delta type', 'Delta percent'],
+      ['Collected revenue', 'period', report.financial.collectedRevenue.current, report.financial.collectedRevenue.previous, report.financial.collectedRevenue.deltaKind, report.financial.collectedRevenue.deltaPercent ?? ''],
+      ['Received procurement spend', 'period', report.financial.procurementSpend.current, report.financial.procurementSpend.previous, report.financial.procurementSpend.deltaKind, report.financial.procurementSpend.deltaPercent ?? ''],
+      ['Operating contribution before overhead', 'period', report.financial.operatingContribution.current, report.financial.operatingContribution.previous, report.financial.operatingContribution.deltaKind, report.financial.operatingContribution.deltaPercent ?? ''],
+      [],
+      ['Financial position', 'Count', 'Value', 'As of'],
+      ['Outstanding receivables', report.financial.outstandingReceivables.count, report.financial.outstandingReceivables.value, report.financial.outstandingReceivables.asOf.toString()],
+      ['Pending payment review', report.financial.pendingPaymentReview.count, report.financial.pendingPaymentReview.value, report.financial.pendingPaymentReview.asOf.toString()],
+      ['Purchase commitments', '', report.financial.purchaseCommitments.value, report.financial.purchaseCommitments.asOf.toString()],
+      ['Unreconciled Non-PO receipts', report.financial.unreconciledNonPo.count, report.financial.unreconciledNonPo.value, report.financial.unreconciledNonPo.asOf.toString()],
+      [],
+      ['Revenue source', 'Transactions', 'Value'],
+      ...report.financial.revenueBySource.map((item) => [item.label, item.count, item.value]),
+      [],
+      ['Procurement spend mode', 'Receipts', 'Value'],
+      ...report.financial.spendByMode.map((item) => [item.label, item.count, item.value]),
+      [],
+      ['Financial bucket', 'Collected revenue', 'Received procurement spend'],
+      ...report.financial.trend.labels.map((label, index) => [label, report.financial.trend.collectedRevenue[index], report.financial.trend.procurementSpend[index]]),
       [],
       ['Bucket', 'Tickets created', 'Tickets resolved'],
       ...report.serviceOperations.ticketTrend.labels.map((item, index) => [item, report.serviceOperations.ticketTrend.created[index], report.serviceOperations.ticketTrend.resolved[index]]),

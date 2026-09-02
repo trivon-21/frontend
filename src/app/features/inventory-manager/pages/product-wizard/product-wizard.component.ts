@@ -20,6 +20,7 @@ import {
   InventoryItem,
   InventoryItemClass,
   InventoryItemForm,
+  InventoryLocationOption,
   InventoryPhase,
   InventorySystemType,
   UpdateInventoryMasterDataInput,
@@ -54,6 +55,7 @@ export class ProductWizardComponent implements OnInit {
   itemId: string | null = null;
   item: InventoryItem | null = null;
   suppliers: SupplierOption[] = [];
+  locations: InventoryLocationOption[] = [];
   loading = false;
   isSubmitting = false;
   savedItem: InventoryItem | null = null;
@@ -83,8 +85,8 @@ export class ProductWizardComponent implements OnInit {
         reorderLevel: [10, [Validators.required, Validators.min(0)]],
         maxStockLevel: [100, [Validators.required, Validators.min(0)]],
         unitCost: [0, [Validators.required, Validators.min(0)]],
-        location: ['Warehouse', Validators.required],
-        binLocation: [''],
+        location: ['', Validators.required],
+        binLocation: ['', Validators.required],
         supplierId: [''],
         isSerialized: [false],
         compatibleModels: this.fb.control<string[]>([]),
@@ -95,12 +97,13 @@ export class ProductWizardComponent implements OnInit {
         phase: ['Not Applicable'],
         specsUrl: ['', Validators.pattern(/^https?:\/\/\S+$/i)],
       },
-      { validators: [this.stockLevelsValidator, this.classificationValidator] },
+      { validators: [this.stockLevelsValidator, this.classificationValidator, this.storageLocationValidator] },
     );
   }
 
   ngOnInit(): void {
     this.loadSuppliers();
+    this.loadLocations();
 
     this.itemId = this.route.snapshot.paramMap.get('id');
     if (this.itemId) this.loadItem(this.itemId);
@@ -113,12 +116,27 @@ export class ProductWizardComponent implements OnInit {
     });
   }
 
+  loadLocations(): void {
+    this.inventoryService.getLocations().subscribe({
+      next: (locations) => {
+        this.locations = locations;
+        this.form.updateValueAndValidity();
+      },
+      error: () => this.errorMessage = 'Warehouse locations could not be loaded. Retry before saving this product.',
+    });
+  }
+
   get isEditMode(): boolean {
     return !!this.itemId;
   }
 
   get availableSubcategories(): string[] {
     return INVENTORY_SUBCATEGORIES[this.form.controls['itemClass'].value as InventoryItemClass] || ['Unclassified'];
+  }
+
+  get availablePlacementAreas(): string[] {
+    const warehouse = this.form.controls['location'].value;
+    return this.locations.find((location) => location.warehouse === warehouse)?.placementAreas || [];
   }
 
   get compatibleModels(): string[] {
@@ -147,6 +165,12 @@ export class ProductWizardComponent implements OnInit {
     this.form.updateValueAndValidity();
   }
 
+  onWarehouseChange(): void {
+    const placementArea = this.form.controls['binLocation'];
+    if (!this.availablePlacementAreas.includes(placementArea.value)) placementArea.setValue('');
+    this.form.updateValueAndValidity();
+  }
+
   addCompatibleModel(): void {
     this.addTag('compatibleModels', this.compatibleModelInput);
     this.compatibleModelInput = '';
@@ -164,8 +188,6 @@ export class ProductWizardComponent implements OnInit {
   }
 
   nextStep(): void {
-    this.touchStep(this.currentStep);
-    if (!this.isStepValid(this.currentStep)) return;
     this.currentStep = Math.min(this.totalSteps, this.currentStep + 1);
   }
 
@@ -174,7 +196,7 @@ export class ProductWizardComponent implements OnInit {
   }
 
   goToStep(step: number): void {
-    if (step < this.currentStep) this.currentStep = step;
+    if (step >= 1 && step <= this.totalSteps) this.currentStep = step;
   }
 
   save(): void {
@@ -196,11 +218,17 @@ export class ProductWizardComponent implements OnInit {
     request.subscribe({
       next: (item) => {
         this.item = item;
-        this.savedItem = item;
         this.createdNewProduct = creating;
         this.itemId = item._id || item.id || this.itemId;
         this.isSubmitting = false;
         this.form.markAsPristine();
+        if (!creating && this.itemId) {
+          void this.router.navigate(['/inventory-manager/inventory'], {
+            queryParams: { selected: this.itemId, editSaved: '1' },
+          });
+          return;
+        }
+        this.savedItem = item;
       },
       error: (error) => {
         this.isSubmitting = false;
@@ -290,7 +318,7 @@ export class ProductWizardComponent implements OnInit {
       compatibleModels: normalizeInventoryList(value.compatibleModels || []),
       systemType: value.systemType as InventorySystemType,
       refrigerants: normalizeInventoryList(value.refrigerants || []),
-      capacityBtu: capacity === null || capacity === '' ? undefined : Number(capacity),
+      capacityBtu: capacity === null || capacity === '' ? null : Number(capacity),
       voltage: value.voltage?.trim() || '',
       phase: value.phase as InventoryPhase,
       specsUrl: value.specsUrl?.trim() || '',
@@ -304,15 +332,10 @@ export class ProductWizardComponent implements OnInit {
     control.markAsDirty();
   }
 
-  private touchStep(step: number): void {
-    this.stepFields(step).forEach((name) => this.form.controls[name].markAsTouched());
-    this.form.updateValueAndValidity();
-  }
-
-  private isStepValid(step: number): boolean {
+  isStepValid(step: number): boolean {
     return this.stepFields(step).every((name) => this.form.controls[name].valid)
       && !(step === 1 && this.form.hasError('classification'))
-      && !(step === 2 && this.form.hasError('stockLevels'));
+      && !(step === 2 && (this.form.hasError('stockLevels') || this.form.hasError('storageLocation')));
   }
 
   private firstInvalidStep(): number {
@@ -332,6 +355,9 @@ export class ProductWizardComponent implements OnInit {
     if (code === 'DUPLICATE_SKU') this.form.controls['sku'].setErrors({ server: true });
     if (code === 'SUPPLIER_NOT_FOUND') this.form.controls['supplierId'].setErrors({ server: true });
     if (code === 'INVALID_CLASSIFICATION') this.form.controls['subcategory'].setErrors({ server: true });
+    if (code === 'INVALID_STORAGE_LOCATION') this.form.controls['binLocation'].setErrors({ server: true });
+    if (['DUPLICATE_SKU', 'IMMUTABLE_SKU', 'INVALID_CLASSIFICATION'].includes(code)) this.currentStep = 1;
+    if (['SUPPLIER_NOT_FOUND', 'INVALID_SUPPLIER_ID', 'INVALID_STOCK_LEVELS', 'INVALID_STORAGE_LOCATION', 'SERIALIZATION_LOCKED'].includes(code)) this.currentStep = 2;
     this.errorMessage = error?.error?.message || 'Unable to save the product. Review the highlighted fields and try again.';
   }
 
@@ -346,4 +372,11 @@ export class ProductWizardComponent implements OnInit {
     const subcategory = group.get('subcategory')?.value;
     return itemClass !== 'Unclassified' && isValidSubcategory(itemClass, subcategory) ? null : { classification: true };
   }
+
+  private storageLocationValidator = (group: AbstractControl): ValidationErrors | null => {
+    const warehouse = group.get('location')?.value;
+    const placementArea = group.get('binLocation')?.value;
+    const location = this.locations.find((entry) => entry.warehouse === warehouse);
+    return location?.placementAreas.includes(placementArea) ? null : { storageLocation: true };
+  };
 }

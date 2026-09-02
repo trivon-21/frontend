@@ -343,18 +343,7 @@
 }
 
 .workflow-card {
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
   overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.workflow-card:hover,
-.workflow-card:focus-visible {
-  border-color: var(--primary-main);
-  box-shadow: var(--shadow-medium);
-  outline: none;
 }
 
 .workflow-card .card-header {
@@ -380,7 +369,7 @@
 
 .workflow-stages {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--spacing-md);
   padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl);
 }
@@ -394,6 +383,16 @@
   border: 1px solid var(--border-light);
   border-radius: 10px;
   background: var(--background-page);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+a.workflow-stage:hover,
+a.workflow-stage:focus-visible {
+  border-color: var(--primary-main);
+  background: var(--primary-lighter);
+  outline: none;
 }
 
 .workflow-stage-label {
@@ -504,24 +503,36 @@
   transition: all 0.2s;
 }
 
-.timeline-marker.return {
+.timeline-marker.return,
+.timeline-marker.request {
   color: var(--info);
   background: var(--info-light);
 }
 
-.timeline-marker.dispatch {
+.workflow-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.workflow-breakdown a {
+  color: var(--primary-main);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.workflow-breakdown a:hover,
+.workflow-breakdown a:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.timeline-marker.dispatch,
+.timeline-marker.grn {
   color: var(--success);
   background: var(--success-light);
-}
-
-.timeline-marker.request {
-  color: var(--warning);
-  background: var(--warning-light);
-}
-
-.timeline-marker.grn {
-  color: var(--primary-main);
-  background: var(--primary-lighter);
 }
 
 .timeline-marker.alert {
@@ -578,37 +589,8 @@
 
 /* Component-specific overrides only */
 .table-container {
-  padding: 0 0 var(--spacing-lg);
   max-height: 480px;
   overflow-y: auto;
-}
-
-.reorder-table {
-  table-layout: fixed;
-}
-
-.reorder-table th {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--background-card);
-  box-shadow: 0 1px 0 var(--border-light);
-}
-
-/* Edge alignment with card header padding */
-.reorder-table th:first-child,
-.reorder-table td:first-child {
-  padding-left: var(--spacing-xl) !important;
-}
-
-.reorder-table th:last-child,
-.reorder-table td:last-child {
-  padding-right: var(--spacing-xl) !important;
-  text-align: right;
-}
-
-.reorder-table th.text-right {
-  text-align: right;
 }
 
 /* Column widths */
@@ -623,10 +605,6 @@
 
 .reorder-table th:nth-child(3),
 .reorder-table td:nth-child(3) { width: 25%; }
-
-.reorder-table td.text-right {
-  text-align: right;
-}
 
 /* ── Clean Status Styling ── */
 .item-cell-wrapper {
@@ -660,13 +638,16 @@
 .reorder-link:hover { color: #00843d; text-decoration: underline; }
 
 .summary-card:focus-visible,
-.workflow-card:focus-visible,
 .reorder-link:focus-visible,
 .activity-btn:focus-visible,
 .btn-new-order:focus-visible,
 .view-all-link:focus-visible {
   outline: 2px solid #00843d;
   outline-offset: 2px;
+}
+
+@media (width <= 1180px) {
+  .workflow-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 .item-avail, .item-rsvd {

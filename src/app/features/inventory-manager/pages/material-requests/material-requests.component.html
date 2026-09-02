@@ -95,25 +95,27 @@
     id="reservation-panel"
     class="table-container alx-table-container glass-panel"
     role="tabpanel"
+    aria-label="Material reservation requests"
+    tabindex="0"
     [attr.aria-labelledby]="'reservation-' + activeTab + '-tab'"
     *ngIf="!loading && !loadError"
   >
-    <table class="alx-table">
+    <table class="alx-table alx-table--wide">
       <thead>
         <tr>
           <th>Request ID</th>
           <th>REQUESTER NAME</th>
           <th>LOCATION</th>
           <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
-          <th class="text-right">ACTION</th>
+          <th class="actions-cell">ACTION</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let req of currentRequests" [class.selected-row]="selectedRequestId === req.id">
-          <td>{{ req.id }}</td>
+          <td class="sku-cell">{{ req.id }}</td>
           <td>{{ req.requester }}</td>
           <td>{{ req.location }}</td>
-          <td *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
+          <td class="date-cell" *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
           <td class="actions-cell">
             <button type="button" class="btn-view im-btn im-btn--secondary im-btn--compact" (click)="openModal(req.id)">
               <lucide-angular name="eye" [size]="14"></lucide-angular>
@@ -160,13 +162,13 @@
       </div>
 
       <div class="modal-body">
-        <div class="items-verification-full">
+        <div class="items-verification-full alx-table-container alx-table-container--embedded" role="region" aria-label="Material request line items" tabindex="0">
           <div class="section-header">
             <h3>MATERIALS LIST</h3>
             <span class="items-count">{{ selectedRequest?.items?.length || 0 }} Items</span>
           </div>
 
-          <table class="verification-table">
+          <table class="verification-table alx-table alx-table--medium">
             <thead>
               <tr>
                 <th>ITEM NAME</th>
@@ -179,10 +181,10 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of selectedRequest?.items">
-                <td class="item-name">{{ item.name }}</td>
-                <td class="item-sku">{{ item.sku }}</td>
-                <td class="item-qty"><span class="qty-symbol">×</span>{{ item.qty }}</td>
-                <td class="item-qty" [class.warning]="item.shortage > 0">
+                <td class="item-name name-cell">{{ item.name }}</td>
+                <td class="item-sku sku-cell">{{ item.sku }}</td>
+                <td class="item-qty num-cell"><span class="qty-symbol">×</span>{{ item.qty }}</td>
+                <td class="item-qty num-cell" [class.warning]="item.shortage > 0">
                   {{ item.available }} {{ item.unit }}
                   <small *ngIf="item.shortage > 0">Short {{ item.shortage }}</small>
                 </td>
@@ -204,7 +206,7 @@
                     </button>
                   </ng-container>
                   <ng-container *ngIf="activeTab !== 'pending'">
-                    <div class="btn-confirm reservation-status" [class.confirmed]="item.confirmed">
+                    <div class="btn-confirm reservation-status alx-table-status" [class.confirmed]="item.confirmed">
                       <lucide-angular
                         name="check"
                         [size]="14"

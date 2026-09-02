@@ -10,20 +10,23 @@ export interface SystemInfo {
   address: string;
 }
 
+const DEFAULT_SYSTEM_INFO: SystemInfo = {
+  systemName: 'AirLux',
+  supportEmail: 'support@airlux.lk',
+  supportPhoneNumber: '+94 11 234 5678',
+  address: '123 Galle Road, Colombo 03, Sri Lanka',
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class SystemInfoService {
-  private systemInfoSubject = new BehaviorSubject<SystemInfo>({
-    systemName: 'AirLux',
-    supportEmail: 'support@airlux.lk',
-    supportPhoneNumber: '+94 11 234 5678',
-    address: '123 Galle Road, Colombo 03, Sri Lanka',
-  });
+  private systemInfoSubject = new BehaviorSubject<SystemInfo>(DEFAULT_SYSTEM_INFO);
 
   public systemInfo$ = this.systemInfoSubject.asObservable();
 
   constructor(private apiService: ApiService) {
+    this.setDocumentTitle(DEFAULT_SYSTEM_INFO.systemName);
     this.loadSystemInfo();
   }
 
@@ -35,9 +38,7 @@ export class SystemInfoService {
         tap((data) => {
           if (data) {
             this.systemInfoSubject.next(data);
-            if (typeof document !== 'undefined') {
-              document.title = data.systemName || 'AirLux';
-            }
+            this.setDocumentTitle(data.systemName);
           }
         })
       )
@@ -48,5 +49,11 @@ export class SystemInfoService {
 
   getSystemInfo(): SystemInfo {
     return this.systemInfoSubject.value;
+  }
+
+  private setDocumentTitle(systemName: string | null | undefined): void {
+    if (typeof document !== 'undefined') {
+      document.title = systemName?.trim() || DEFAULT_SYSTEM_INFO.systemName;
+    }
   }
 }

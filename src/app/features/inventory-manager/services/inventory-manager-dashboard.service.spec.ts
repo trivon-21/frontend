@@ -21,11 +21,25 @@ describe('normalizeInventoryDashboard', () => {
       },
       recentActivity: [],
       reorderList: [],
-      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 },
+      procurementWorkflow: {
+        awaitingManager: 3,
+        awaitingFinanceApproval: 1,
+        readyToIssue: 2,
+        readyToReceive: 4,
+        awaitingReceiptReconciliation: 1,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 2, receiptAuthorizations: 1 },
+          readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
+        },
+        awaitingReceipt: 4,
+        awaitingFinance: 1,
+      },
     });
 
     expect(data.stats.materialReservations.total).toBe(3);
-    expect(data.procurementWorkflow).toEqual({ awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 });
+    expect(data.procurementWorkflow.readyToReceive).toBe(4);
+    expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(1);
+    expect(data.procurementWorkflow.breakdown.awaitingManager.receiptAuthorizations).toBe(1);
   });
 
   it('fills every nested collection and procurement count in an incomplete HTTP-200 fallback', () => {
@@ -34,7 +48,19 @@ describe('normalizeInventoryDashboard', () => {
     expect(data.recentActivity).toEqual([]);
     expect(data.reorderList).toEqual([]);
     expect(data.stats.stockAlerts).toEqual({ total: 0, subStats: [] });
-    expect(data.procurementWorkflow).toEqual({ awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 });
+    expect(data.procurementWorkflow.readyToReceive).toBe(0);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(0);
+  });
+
+  it('maps legacy three-stage responses into safe compatibility defaults', () => {
+    const data = normalizeInventoryDashboard({
+      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 } as never,
+    });
+
+    expect(data.procurementWorkflow.readyToReceive).toBe(2);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(3);
+    expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(0);
+    expect(data.procurementWorkflow.readyToIssue).toBe(0);
   });
 });
 
@@ -83,7 +109,19 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
         timestamp: '2026-08-24T12:00:00.000Z',
       }],
       reorderList: [],
-      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 },
+      procurementWorkflow: {
+        awaitingManager: 1,
+        awaitingFinanceApproval: 2,
+        readyToIssue: 3,
+        readyToReceive: 4,
+        awaitingReceiptReconciliation: 5,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 0 },
+          readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
+        },
+        awaitingReceipt: 4,
+        awaitingFinance: 5,
+      },
     });
 
     expect(result?.currentDate).toEqual(new Date('2026-08-24T00:00:00.000Z'));
@@ -94,6 +132,7 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
   it('uses the exact read-only inventory and procurement endpoints', () => {
     const reads: Array<[string, () => void]> = [
       ['/list', () => service.getInventory().subscribe()],
+      ['/locations', () => service.getLocations().subscribe()],
       ['/item/item-1', () => service.getItem('item-1').subscribe()],
       ['/suppliers', () => service.getSuppliers().subscribe()],
       ['/procurements', () => service.getProcurements().subscribe()],

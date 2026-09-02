@@ -31,6 +31,7 @@ describe('ManagerLayoutComponent presentation contract', () => {
           { path: 'manager/orders', component: EmptyRouteComponent },
           { path: 'manager/work-items', component: EmptyRouteComponent },
           { path: 'manager/analytics/period-performance', component: EmptyRouteComponent },
+          { path: 'manager/analytics/financial-overview', component: EmptyRouteComponent },
           { path: 'login', component: EmptyRouteComponent },
         ]),
       ],
@@ -70,7 +71,7 @@ describe('ManagerLayoutComponent presentation contract', () => {
     const submenu = root.querySelector<HTMLElement>('#manager-analytics-submenu')!;
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(submenu).not.toBeNull();
-    expect(submenu.querySelectorAll('a').length).toBe(4);
+    expect(submenu.querySelectorAll('a').length).toBe(5);
   });
 
   it('connects the avatar to its menu and keeps the Manager logout behavior', async () => {

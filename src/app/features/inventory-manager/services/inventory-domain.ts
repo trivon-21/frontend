@@ -50,6 +50,11 @@ export const INVENTORY_ITEM_FORMS: InventoryItemForm[] = ['Single', 'Kit', 'Bund
 export const INVENTORY_UNITS = ['units', 'kits', 'sets', 'meters', 'rolls', 'kg', 'cylinders', 'liters'];
 export const INVENTORY_PHASES: InventoryPhase[] = ['Single Phase', 'Three Phase', 'Not Applicable'];
 
+export interface InventoryLocationOption {
+  warehouse: string;
+  placementAreas: string[];
+}
+
 export interface SupplierReference {
   _id: string;
   name?: string;
@@ -75,12 +80,12 @@ export interface InventoryItem {
   compatibleModels?: string[];
   systemType?: InventorySystemType;
   refrigerants?: string[];
-  capacityBtu?: number;
+  capacityBtu?: number | null;
   voltage?: string;
   phase?: InventoryPhase;
   location: string;
   binLocation?: string;
-  supplierId?: string | SupplierReference;
+  supplierId?: string | SupplierReference | null;
   supplierName?: string;
   unit: string;
   unitCost: number;
@@ -111,13 +116,13 @@ export interface InventoryMasterDataInput {
   maxStockLevel: number;
   unitCost: number;
   location: string;
-  binLocation?: string;
+  binLocation: string;
   supplierId?: string | null;
   isSerialized: boolean;
   compatibleModels: string[];
   systemType: InventorySystemType;
   refrigerants: string[];
-  capacityBtu?: number;
+  capacityBtu?: number | null;
   voltage?: string;
   phase: InventoryPhase;
   specsUrl?: string;
@@ -147,9 +152,9 @@ export function deriveStockStatus(item: Pick<InventoryItem, 'available' | 'reord
 
 export function supplierNameOf(item: InventoryItem): string {
   if (item.supplierName) return item.supplierName;
-  return typeof item.supplierId === 'object' ? item.supplierId.name || '' : '';
+  return item.supplierId && typeof item.supplierId === 'object' ? item.supplierId.name || '' : '';
 }
 
 export function supplierIdOf(item: InventoryItem): string {
-  return typeof item.supplierId === 'object' ? item.supplierId._id : item.supplierId || '';
+  return item.supplierId && typeof item.supplierId === 'object' ? item.supplierId._id : item.supplierId || '';
 }

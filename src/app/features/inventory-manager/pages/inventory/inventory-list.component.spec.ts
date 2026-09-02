@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   InventoryItem,
   InventoryManagerDashboardService,
@@ -28,8 +28,8 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
     capacityBtu: 24000,
     voltage: '230 V',
     phase: 'Single Phase',
-    location: 'Main Warehouse',
-    binLocation: 'SP-A01',
+    location: 'Central Warehouse',
+    binLocation: 'Small Parts Racking',
     unit: 'units',
     unitCost: 185000,
     isSerialized: true,
@@ -39,10 +39,18 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
   };
 }
 
-function createComponent(items: InventoryItem[]): InventoryListComponent {
-  const service = { getInventory: () => of(items) } as InventoryManagerDashboardService;
-  const route = { queryParams: of({}) } as ActivatedRoute;
-  const component = new InventoryListComponent(service, route);
+function createComponent(items: InventoryItem[], params: Record<string, string> = {}): InventoryListComponent {
+  const service = {
+    getInventory: () => of(items),
+    getLocations: () => of([
+      { warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking'] },
+      { warehouse: 'Equipment Warehouse', placementAreas: ['Indoor Unit Storage'] },
+      { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
+    ]),
+  } as InventoryManagerDashboardService;
+  const route = { queryParams: of(params) } as ActivatedRoute;
+  const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+  const component = new InventoryListComponent(service, route, router);
   component.ngOnInit();
   return component;
 }
@@ -74,7 +82,8 @@ describe('InventoryListComponent filtering', () => {
       itemClass: 'Tools and Test Equipment',
       subcategory: 'Vacuum Pump',
       brand: 'Fieldpiece',
-      location: 'Tool Store',
+      location: 'Service Warehouse',
+      binLocation: 'Tool Crib',
       available: 7,
       reorderLevel: 2,
     });
@@ -82,7 +91,7 @@ describe('InventoryListComponent filtering', () => {
     component.selectedItemClass = 'Spare Parts';
     component.selectedBrand = 'Copeland';
     component.selectedStockStatus = 'low-stock';
-    component.selectedLocation = 'Main Warehouse';
+    component.selectedLocation = 'Central Warehouse';
 
     component.applyFilters();
 
@@ -112,6 +121,7 @@ describe('InventoryListComponent filtering', () => {
 
     expect(component.brandOptions).toEqual(['Copeland']);
     expect(component.itemClassOptions).toEqual(['Spare Parts', 'Unclassified']);
+    expect(component.locationOptions).toEqual(['Central Warehouse', 'Equipment Warehouse', 'Service Warehouse']);
     component.selectedItemClass = 'Unclassified';
     component.applyFilters();
     expect(component.filteredItems).toEqual([legacy]);
@@ -134,5 +144,21 @@ describe('InventoryListComponent filtering', () => {
     expect(component.totalItems).toBe(12);
     expect(component.searchQuery).toBe('');
     expect(component.hasAdvancedFilters).toBeFalse();
+  });
+
+  it('selects a saved product on its page and opens the save confirmation', () => {
+    const items = Array.from({ length: 12 }, (_, index) => inventoryItem({
+      _id: `item-${index}`,
+      sku: `SKU-${index}`,
+      name: `Product ${String(index).padStart(2, '0')}`,
+    }));
+
+    const component = createComponent(items, { selected: 'item-11', editSaved: '1' });
+
+    expect(component.currentPage).toBe(2);
+    expect(component.selectedRowId).toBe('item-11');
+    expect(component.inventoryItems.some((item) => item._id === 'item-11')).toBeTrue();
+    expect(component.showSaveConfirmation).toBeTrue();
+    expect(component.savedProduct?._id).toBe('item-11');
   });
 });

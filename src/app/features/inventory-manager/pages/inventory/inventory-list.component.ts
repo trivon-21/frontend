@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import {
   InventoryItem,
   InventoryManagerDashboardService,
@@ -58,6 +59,7 @@ export class InventoryListComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   allInventoryItems: InventoryItem[] = [];
+  locationOptions: string[] = [];
   filteredItems: InventoryItem[] = [];
   inventoryItems: InventoryItem[] = [];
   loading = true;
@@ -65,6 +67,8 @@ export class InventoryListComponent implements OnInit {
 
   showDetailModal = false;
   selectedItem: InventoryItem | null = null;
+  showSaveConfirmation = false;
+  savedProduct: InventoryItem | null = null;
 
   currentPage = 1;
   itemsPerPage = 10;
@@ -75,6 +79,7 @@ export class InventoryListComponent implements OnInit {
   constructor(
     private inventoryService: InventoryManagerDashboardService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -84,12 +89,27 @@ export class InventoryListComponent implements OnInit {
   loadInventory(): void {
     this.loading = true;
     this.error = null;
-    this.inventoryService.getInventory().subscribe({
-      next: (items) => {
+    forkJoin({
+      items: this.inventoryService.getInventory(),
+      locations: this.inventoryService.getLocations(),
+    }).subscribe({
+      next: ({ items, locations }) => {
         this.allInventoryItems = items;
+        this.locationOptions = locations.map((location) => location.warehouse);
         this.route.queryParams.subscribe((params) => {
           if (params['search']) this.searchQuery = params['search'];
           this.applyFilters();
+          const selected = params['selected'] ? this.selectItemById(params['selected']) : null;
+          if (params['editSaved'] === '1' && selected) {
+            this.savedProduct = selected;
+            this.showSaveConfirmation = true;
+            void this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { editSaved: null },
+              queryParamsHandling: 'merge',
+              replaceUrl: true,
+            });
+          }
         });
         this.loading = false;
       },
@@ -113,13 +133,6 @@ export class InventoryListComponent implements OnInit {
 
   get brandOptions(): string[] {
     return this.unique(this.allInventoryItems.map((item) => item.brand));
-  }
-
-  get locationOptions(): string[] {
-    return this.unique(this.allInventoryItems.flatMap((item) => [
-      item.location,
-      item.binLocation ? this.getDisplayLocation(item) : undefined,
-    ]));
   }
 
   get systemTypeOptions(): string[] {
@@ -193,8 +206,7 @@ export class InventoryListComponent implements OnInit {
         && (this.selectedStockStatus === 'all'
           || (this.selectedStockStatus === 'reserved' ? item.reserved > 0 : stockStatus === this.selectedStockStatus))
         && (this.selectedLocation === 'All Locations'
-          || item.location === this.selectedLocation
-          || this.getDisplayLocation(item) === this.selectedLocation)
+          || item.location === this.selectedLocation)
         && (this.selectedBrand === 'All Brands' || item.brand === this.selectedBrand)
         && (this.selectedSystemType === 'All Systems' || item.systemType === this.selectedSystemType)
         && (this.selectedRefrigerant === 'All Refrigerants' || item.refrigerants?.includes(this.selectedRefrigerant))
@@ -293,6 +305,11 @@ export class InventoryListComponent implements OnInit {
     this.selectedItem = null;
   }
 
+  closeSaveConfirmation(): void {
+    this.showSaveConfirmation = false;
+    this.savedProduct = null;
+  }
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -369,6 +386,16 @@ export class InventoryListComponent implements OnInit {
 
   private itemClassOf(item: InventoryItem): string {
     return item.itemClass || 'Unclassified';
+  }
+
+  private selectItemById(id: string): InventoryItem | null {
+    const index = this.filteredItems.findIndex((item) => this.getItemId(item) === id);
+    if (index < 0) return null;
+    const item = this.filteredItems[index];
+    this.currentPage = Math.floor(index / this.itemsPerPage) + 1;
+    this.updatePaginatedItems();
+    this.selectRow(item);
+    return item;
   }
 
   private supplierOf(item: InventoryItem): string {

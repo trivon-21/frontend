@@ -116,35 +116,61 @@
     </a>
   </div>
 
-  <a class="content-card workflow-card" routerLink="/inventory-manager/procurement" aria-label="Open Purchasing Workflow">
+  <section class="content-card workflow-card" aria-labelledby="purchasing-workflow-title">
     <div class="card-header">
       <div class="title-with-icon">
         <lucide-angular name="clipboard-list" [size]="18"></lucide-angular>
         <div>
-          <h2 class="card-title">Purchasing Workflow</h2>
+          <h2 class="card-title" id="purchasing-workflow-title">Purchasing Workflow</h2>
           <p class="workflow-description">Track approvals, receiving, and finance review.</p>
         </div>
       </div>
-      <span class="workflow-link">Open procurement <lucide-angular name="chevron-right" [size]="16"></lucide-angular></span>
+      <span class="workflow-link">Five-stage operational view</span>
     </div>
     <div class="workflow-stages">
       <div class="workflow-stage">
         <span class="workflow-stage-label">Awaiting Manager</span>
         <strong>{{ data.procurementWorkflow.awaitingManager }}</strong>
-        <span class="workflow-stage-hint">Requests to approve</span>
+        <span class="workflow-stage-hint">Pending operational review</span>
+        <div class="workflow-breakdown">
+          <a routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-manager' }">
+            Purchase requests {{ data.procurementWorkflow.breakdown.awaitingManager.purchaseRequests }}
+          </a>
+          <a routerLink="/inventory-manager/procurement" [queryParams]="{ authorizationStatus: 'pending' }">
+            Non-PO {{ data.procurementWorkflow.breakdown.awaitingManager.receiptAuthorizations }}
+          </a>
+        </div>
       </div>
+      <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-finance' }">
+        <span class="workflow-stage-label">Awaiting Finance Approval</span>
+        <strong>{{ data.procurementWorkflow.awaitingFinanceApproval }}</strong>
+        <span class="workflow-stage-hint">Pre-order financial review</span>
+      </a>
+      <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'approved' }">
+        <span class="workflow-stage-label">Ready to Issue</span>
+        <strong>{{ data.procurementWorkflow.readyToIssue }}</strong>
+        <span class="workflow-stage-hint">Approved requests needing a PO</span>
+      </a>
       <div class="workflow-stage">
-        <span class="workflow-stage-label">Approved to Receive</span>
-        <strong>{{ data.procurementWorkflow.awaitingReceipt }}</strong>
-        <span class="workflow-stage-hint">Orders ready for GRN</span>
+        <span class="workflow-stage-label">Ready to Receive</span>
+        <strong>{{ data.procurementWorkflow.readyToReceive }}</strong>
+        <span class="workflow-stage-hint">Outstanding authorized stock</span>
+        <div class="workflow-breakdown">
+          <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'PO' }">
+            Purchase orders {{ data.procurementWorkflow.breakdown.readyToReceive.purchaseOrders }}
+          </a>
+          <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'NON_PO', authorizationStatus: 'ready' }">
+            Non-PO {{ data.procurementWorkflow.breakdown.readyToReceive.receiptAuthorizations }}
+          </a>
+        </div>
       </div>
-      <div class="workflow-stage">
-        <span class="workflow-stage-label">Awaiting Finance</span>
-        <strong>{{ data.procurementWorkflow.awaitingFinance }}</strong>
-        <span class="workflow-stage-hint">Receipts to review</span>
-      </div>
+      <a class="workflow-stage" routerLink="/inventory-manager/procurement" [queryParams]="{ grnFilter: 'FINANCE' }">
+        <span class="workflow-stage-label">Receipt Reconciliation</span>
+        <strong>{{ data.procurementWorkflow.awaitingReceiptReconciliation }}</strong>
+        <span class="workflow-stage-hint">Non-PO receipts with Finance</span>
+      </a>
     </div>
-  </a>
+  </section>
 
   <!-- Main Grid Content -->
   <div class="dashboard-main-grid">
@@ -186,8 +212,8 @@
           </div>
           <span class="count-badge">{{ data.reorderList.length }} Items</span>
         </div>
-        <div class="table-container alx-table-container">
-          <table class="reorder-table alx-table">
+        <div class="table-container alx-table-container" role="region" aria-label="Inventory reorder list" tabindex="0">
+          <table class="reorder-table alx-table alx-table--fixed alx-table--sticky-header">
             <thead>
               <tr>
                 <th>Item</th>

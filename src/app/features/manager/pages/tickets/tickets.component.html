@@ -9,8 +9,6 @@
     </span>
   </div>
 
-  <div class="error-message" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
-
   <div class="portal-state portal-state--error" role="alert" *ngIf="loadError">
     <div><strong>Operations unavailable</strong><p>{{ loadError }}</p></div>
     <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()" [disabled]="loading">Retry</button>
@@ -34,8 +32,8 @@
 
   <div class="portal-state" *ngIf="loading && items.length === 0" aria-live="polite">Loading operations…</div>
 
-  <div class="alx-table-container" *ngIf="!loadError">
-    <table class="alx-table">
+  <div class="alx-table-container" *ngIf="!loadError" role="region" aria-label="Manager operational work items" tabindex="0">
+    <table class="alx-table alx-table--wide">
       <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Priority</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let item of items; trackBy: trackItem" [class.row-updating]="updatingId === item.id">
@@ -43,14 +41,14 @@
           <td>{{ item.customer?.fullName || 'Unknown customer' }}</td>
           <td class="cap">{{ item.sourceType }}</td>
           <td>{{ item.domainStatus || 'Not recorded' }}</td>
-          <td><span class="pill priority" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></td>
-          <td><span class="pill status" [ngClass]="item.operationalStatus">{{ statusLabel(item.operationalStatus) }}</span></td>
+          <td><span class="pill priority alx-table-status" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></td>
+          <td><span class="pill status alx-table-status" [ngClass]="item.operationalStatus">{{ statusLabel(item.operationalStatus) }}</span></td>
           <td><span class="sla" [class.overdue]="slaOverdue(item)">{{ slaText(item) }}</span></td>
           <td>
             <span *ngIf="item.assignedTeam || item.assignedTechnician; else unassigned">{{ item.assignedTeam?.teamName || 'No team' }}<span *ngIf="item.assignedTechnician"> · {{ item.assignedTechnician.fullName }}</span></span>
             <ng-template #unassigned><span class="muted">Awaiting Main Technician</span></ng-template>
           </td>
-          <td class="actions-cell"><button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
+          <td class="actions-cell"><button #viewButton type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item, viewButton)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
         </tr>
         <tr *ngIf="!loading && items.length === 0"><td colspan="9" class="empty-cell">No operational work matches the current filters.</td></tr>
       </tbody>
@@ -66,43 +64,60 @@
     </div>
   </nav>
 
-  <section class="ticket-detail" *ngIf="selectedItem as item">
-    <div class="detail-header">
-      <div><span class="sku-cell">{{ item.reference }}</span><h2>{{ item.sourceType | titlecase }} work item</h2></div>
-      <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" type="button" (click)="closeDetails()">Close panel</button>
-    </div>
-
-    <div class="detail-grid">
-      <div><span class="detail-label">Customer</span><strong>{{ item.customer?.fullName || 'Unknown customer' }}</strong><span>{{ item.customer?.phoneNumber || 'No phone recorded' }}</span><span>{{ item.customer?.email || 'No email recorded' }}</span><span>{{ item.customer?.address || 'No address recorded' }}</span></div>
-      <div><span class="detail-label">Technical state</span><strong>{{ item.domainStatus }}</strong><span>Manager view: {{ statusLabel(item.operationalStatus) }}</span><span>Report: {{ item.reportComplete ? 'Submitted' : 'Not yet submitted' }}</span></div>
-      <div><span class="detail-label">Read-only assignment</span><strong>{{ item.assignedTeam?.teamName || 'No team assigned' }}</strong><span>{{ item.assignedTechnician?.fullName || 'No technician assigned' }}</span><span class="muted">Assignments are controlled by the Main Technician.</span></div>
-    </div>
-
-    <div class="detail-grid control-grid" *ngIf="can('update-control')">
-      <div><label class="detail-label" for="priority">Priority</label><select id="priority" [(ngModel)]="selectedPriority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
-      <div><label class="detail-label" for="sla">SLA deadline</label><input id="sla" type="datetime-local" [(ngModel)]="selectedSla"></div>
-      <div><span class="detail-label">Manager controls</span><button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
-    </div>
-
-    <p class="muted" *ngIf="item.allowedActions.length === 0">This record is read-only here. Use its owning inspection or installation workflow to make changes.</p>
-
-    <div class="lifecycle-controls" *ngIf="can('escalate') || can('clear-escalation') || can('close') || can('reopen')">
-      <label class="detail-label" for="action-reason">Reason for escalation or closure action</label>
-      <textarea id="action-reason" rows="2" [(ngModel)]="actionReason" placeholder="Required for every lifecycle action"></textarea>
-      <div class="row-actions mgr-action-group">
-        <button class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" *ngIf="can('escalate')" (click)="runAction('escalate')">Escalate</button>
-        <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('clear-escalation')" (click)="runAction('clear-escalation')">Clear escalation</button>
-        <button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" *ngIf="can('close')" (click)="runAction('close')">Verify and close</button>
-        <button class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('reopen')" (click)="runAction('reopen')">Reopen</button>
+  <div class="portal-dialog-backdrop" *ngIf="selectedItem as item" (click)="onDetailsBackdrop($event)">
+    <section
+      class="portal-dialog work-item-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="work-item-dialog-title"
+      aria-describedby="work-item-dialog-description"
+      [attr.aria-busy]="updatingId === item.id"
+    >
+      <div class="portal-dialog__header work-item-dialog__header">
+        <div>
+          <span class="sku-cell">{{ item.reference }}</span>
+          <h2 id="work-item-dialog-title">{{ item.sourceType | titlecase }} work item</h2>
+          <p id="work-item-dialog-description">Review operational details and use the manager controls available for this work item.</p>
+        </div>
+        <button #detailsCloseButton type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close work item details" (click)="closeDetails()" [disabled]="updatingId === item.id">×</button>
       </div>
-    </div>
 
-    <div class="detail-grid" *ngIf="item.blockers.length">
-      <div *ngFor="let blocker of item.blockers"><span class="detail-label">{{ blocker.type }}</span><strong>{{ blocker.message }}</strong><span *ngIf="blocker.status">Status: {{ blocker.status }}</span></div>
-    </div>
+      <div class="error-message" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-    <div class="detail-grid" *ngIf="item.children.length">
-      <div *ngFor="let child of item.children"><span class="detail-label">{{ child.type }}</span><strong>{{ child.status || child.repairStatus || 'Linked record' }}</strong><span *ngIf="child.itemCount !== undefined">{{ child.itemCount }} material lines</span><span *ngIf="child.submittedAt">Submitted {{ child.submittedAt | date:'medium' }}</span><span *ngIf="child.nextServiceDate">Next service {{ child.nextServiceDate | date:'mediumDate' }}</span><span *ngIf="child.authorizationNumber">{{ child.authorizationNumber }}</span></div>
-    </div>
-  </section>
+      <div class="work-item-dialog__content">
+        <div class="detail-grid">
+          <div><span class="detail-label">Customer</span><strong>{{ item.customer?.fullName || 'Unknown customer' }}</strong><span>{{ item.customer?.phoneNumber || 'No phone recorded' }}</span><span>{{ item.customer?.email || 'No email recorded' }}</span><span>{{ item.customer?.address || 'No address recorded' }}</span></div>
+          <div><span class="detail-label">Technical state</span><strong>{{ item.domainStatus }}</strong><span>Manager view: {{ statusLabel(item.operationalStatus) }}</span><span>Report: {{ item.reportComplete ? 'Submitted' : 'Not yet submitted' }}</span></div>
+          <div><span class="detail-label">Read-only assignment</span><strong>{{ item.assignedTeam?.teamName || 'No team assigned' }}</strong><span>{{ item.assignedTechnician?.fullName || 'No technician assigned' }}</span><span class="muted">Assignments are controlled by the Main Technician.</span></div>
+        </div>
+
+        <div class="detail-grid control-grid" *ngIf="can('update-control')">
+          <div><label class="detail-label" for="priority">Priority</label><select id="priority" [(ngModel)]="selectedPriority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+          <div><label class="detail-label" for="sla">SLA deadline</label><input id="sla" type="datetime-local" [(ngModel)]="selectedSla"></div>
+          <div><span class="detail-label">Manager controls</span><button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
+        </div>
+
+        <p class="muted read-only-note" *ngIf="item.allowedActions.length === 0">This record is read-only here. Use its owning inspection or installation workflow to make changes.</p>
+
+        <div class="lifecycle-controls" *ngIf="can('escalate') || can('clear-escalation') || can('close') || can('reopen')">
+          <label class="detail-label" for="action-reason">Reason for escalation or closure action</label>
+          <textarea id="action-reason" rows="2" [(ngModel)]="actionReason" placeholder="Required for every lifecycle action"></textarea>
+          <div class="row-actions mgr-action-group">
+            <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" *ngIf="can('escalate')" (click)="runAction('escalate')" [disabled]="updatingId === item.id">Escalate</button>
+            <button type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('clear-escalation')" (click)="runAction('clear-escalation')" [disabled]="updatingId === item.id">Clear escalation</button>
+            <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" *ngIf="can('close')" (click)="runAction('close')" [disabled]="updatingId === item.id">Verify and close</button>
+            <button type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('reopen')" (click)="runAction('reopen')" [disabled]="updatingId === item.id">Reopen</button>
+          </div>
+        </div>
+
+        <div class="detail-grid" *ngIf="item.blockers.length">
+          <div *ngFor="let blocker of item.blockers"><span class="detail-label">{{ blocker.type }}</span><strong>{{ blocker.message }}</strong><span *ngIf="blocker.status">Status: {{ blocker.status }}</span></div>
+        </div>
+
+        <div class="detail-grid" *ngIf="item.children.length">
+          <div *ngFor="let child of item.children"><span class="detail-label">{{ child.type }}</span><strong>{{ child.status || child.repairStatus || 'Linked record' }}</strong><span *ngIf="child.itemCount !== undefined">{{ child.itemCount }} material lines</span><span *ngIf="child.submittedAt">Submitted {{ child.submittedAt | date:'medium' }}</span><span *ngIf="child.nextServiceDate">Next service {{ child.nextServiceDate | date:'mediumDate' }}</span><span *ngIf="child.authorizationNumber">{{ child.authorizationNumber }}</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>

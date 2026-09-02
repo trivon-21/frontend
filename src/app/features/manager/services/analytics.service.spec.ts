@@ -44,6 +44,16 @@ describe('AnalyticsService', () => {
       purchasing: {
         pendingApprovalValue: snapshot(1500, '2026-08-24T12:00:05.000Z'),
       },
+      financial: {
+        collectedRevenue: {}, procurementSpend: {}, operatingContribution: {},
+        outstandingReceivables: { ...snapshot(3000, '2026-08-24T12:00:05.000Z'), count: 2 },
+        pendingPaymentReview: { ...snapshot(1200, '2026-08-24T12:00:06.000Z'), count: 1 },
+        purchaseCommitments: snapshot(5000, '2026-08-24T12:00:07.000Z'),
+        unreconciledNonPo: { ...snapshot(400, '2026-08-24T12:00:08.000Z'), count: 1 },
+        revenueBySource: [], spendByMode: [],
+        trend: { labels: [], collectedRevenue: [], procurementSpend: [] },
+        basis: 'cash-collected-vs-goods-received',
+      },
       inventoryRisk: {
         lowStockItems: snapshot(2, '2026-08-24T12:00:06.000Z'),
         outOfStockItems: snapshot(1, '2026-08-24T12:00:07.000Z'),
@@ -73,6 +83,8 @@ describe('AnalyticsService', () => {
     expect(result?.reportingPeriod.previousEnd).toEqual(new Date('2026-07-25T23:59:59.999Z'));
     expect(result?.currentPosition.openTickets.asOf).toEqual(new Date('2026-08-24T12:00:00.000Z'));
     expect(result?.purchasing.pendingApprovalValue.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
+    expect(result?.financial.outstandingReceivables.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
+    expect(result?.financial.pendingPaymentReview.count).toBe(1);
     expect(result?.inventoryRisk.approvedAwaitingReceipt.asOf).toEqual(
       new Date('2026-08-24T12:00:10.000Z'),
     );
