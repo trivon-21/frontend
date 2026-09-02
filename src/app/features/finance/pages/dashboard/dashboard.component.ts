@@ -16,7 +16,7 @@ import { InvoiceService } from '../../services/invoice.service';
 })
 export class DashboardComponent implements OnInit {
 
-  activeFilter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'REPAIR' | 'MAINTENANCE' = 'ALL';
+  activeFilter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'MAINTENANCE' = 'ALL';
   searchText = '';
   selectedStatus = 'ALL';
   selectedDate = '';
@@ -62,12 +62,9 @@ export class DashboardComponent implements OnInit {
       inspVerified: this.ticketService.getVerifiedPayments(),
       inspPending: this.ticketService.getPendingVerification(),
       inspRejected: this.ticketService.getRejectedPayments(),
-      repairPending: this.servicePaymentService.getPendingVerification('REPAIR'),
-      repairVerified: this.servicePaymentService.getVerifiedPayments('REPAIR'),
-      repairRejected: this.servicePaymentService.getRejectedPayments('REPAIR'),
-      maintPending: this.servicePaymentService.getPendingVerification('MAINTENANCE'),
-      maintVerified: this.servicePaymentService.getVerifiedPayments('MAINTENANCE'),
-      maintRejected: this.servicePaymentService.getRejectedPayments('MAINTENANCE'),
+      maintPending: this.servicePaymentService.getPendingVerification(),
+      maintVerified: this.servicePaymentService.getVerifiedPayments(),
+      maintRejected: this.servicePaymentService.getRejectedPayments(),
       invoicePaid: this.invoiceService.getPaidInvoices(),
       invoiceAccepted: this.invoiceService.getAcceptedInvoices(),
       invoicePending: this.invoiceService.getPendingInvoices(),
@@ -82,12 +79,9 @@ export class DashboardComponent implements OnInit {
         const inspPending = (res.inspPending || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.date || p.updatedAt }));
         const inspVerified = (res.inspVerified || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
         const inspRejected = (res.inspRejected || []).map((p: any) => ({ ...p, paymentType: 'INSPECTION', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
-        const repairPending = (res.repairPending || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.slipUploadedAt || p.updatedAt }));
-        const repairVerified = (res.repairVerified || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.approvedAt || p.updatedAt }));
-        const repairRejected = (res.repairRejected || []).map((p: any) => ({ ...p, paymentType: 'REPAIR', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.rejectedAt || p.updatedAt }));
-        const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.slipUploadedAt || p.updatedAt }));
-        const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.approvedAt || p.updatedAt }));
-        const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.rejectedAt || p.updatedAt }));
+        const maintPending = (res.maintPending || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'PENDING', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
+        const maintVerified = (res.maintVerified || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'APPROVED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
+        const maintRejected = (res.maintRejected || []).map((p: any) => ({ ...p, paymentType: 'MAINTENANCE', status: 'REJECTED', invoiceId: p.ticketId, orderId: this.resolveOrderDisplay(p), displayDate: p.updatedAt }));
 
         const invoicePaid = (res.invoicePaid || []).map((p: any) => ({
           ...p,
@@ -159,7 +153,6 @@ export class DashboardComponent implements OnInit {
         this.allPayments = [
           ...buyPending, ...buyVerified, ...buyRejected,
           ...inspPending, ...inspVerified, ...inspRejected,
-          ...repairPending, ...repairVerified, ...repairRejected,
           ...maintPending, ...maintVerified, ...maintRejected,
           ...invoicePaid, ...invoiceAccepted, ...invoiceDraft,
           ...repairInvoicePaid, ...repairInvoiceAccepted, ...repairInvoiceDraft,
@@ -185,7 +178,7 @@ export class DashboardComponent implements OnInit {
     this.rejectedPercentage = Math.round((this.rejectedCount / total) * 100);
   }
 
-  setFilter(filter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'REPAIR' | 'MAINTENANCE') {
+  setFilter(filter: 'ALL' | 'BUY_ONLY' | 'INSPECTION' | 'INVOICE' | 'MAINTENANCE') {
     this.activeFilter = filter;
     this.applyFilters();
   }
@@ -241,7 +234,6 @@ export class DashboardComponent implements OnInit {
       case 'BUY_ONLY': return 'Buy Only';
       case 'INSPECTION': return 'Inspection';
       case 'INVOICE': return 'Invoice';
-      case 'REPAIR': return 'Repair';
       case 'MAINTENANCE': return 'Maintenance';
       default: return type;
     }
@@ -252,7 +244,6 @@ export class DashboardComponent implements OnInit {
       case 'BUY_ONLY': return 'type-buy';
       case 'INSPECTION': return 'type-inspection';
       case 'INVOICE': return 'type-invoice';
-      case 'REPAIR': return 'type-repair';
       case 'MAINTENANCE': return 'type-maintenance';
       default: return '';
     }
@@ -268,5 +259,25 @@ export class DashboardComponent implements OnInit {
   }
 
   openDatePicker(el: HTMLInputElement) { el.showPicker(); }
-}
 
+  get visiblePages(): (number | string)[] {
+  const total = this.totalPages.length;
+  const current = this.currentPage;
+  const maxVisible = 3;
+
+  if (total <= maxVisible + 1) {
+    return this.totalPages;
+  }
+
+  const pages: (number | string)[] = [1, 2, 3];
+  if (current > 4 && current < total - 1) {
+    pages.push('...', current, '...', total);
+  } else if (current >= total - 1) {
+    pages.push('...', total - 1, total);
+  } else {
+    pages.push('...', total);
+  }
+
+  return pages;
+}
+}

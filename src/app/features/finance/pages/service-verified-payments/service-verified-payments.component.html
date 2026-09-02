@@ -21,7 +21,6 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>ORDER ID</th>
           <th>TICKET ID</th>
           <th>CUSTOMER</th>
           <th>SERVICE</th>
@@ -32,7 +31,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let p of paginatedPayments">
-          <td>{{ p.orderId }}</td>
           <td>{{ p.ticketId }}</td>
           <td>{{ p.customerName }}</td>
           <td>{{ p.serviceType }}</td>
@@ -66,16 +64,21 @@
 <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg></button>
       </div>
-      <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
-        <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
-        <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
-        <p><strong>Service:</strong> {{ selectedPayment?.serviceType }}</p>
-        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
-        <p><strong>Approved:</strong> {{ (selectedPayment?.approvedAt || selectedPayment?.updatedAt) | date:'dd MMM
-          yyyy' }}</p>
-      </div>
+  <div class="modal-body">
+  <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
+  <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
+  <p><strong>Service:</strong> {{ selectedPayment?.serviceType }}</p>
+  <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
+  <p><strong>Approved:</strong> {{ (selectedPayment?.approvedAt || selectedPayment?.updatedAt) | date:'dd MMM
+    yyyy' }}</p>
+
+  <div class="slip-preview-section" *ngIf="selectedPayment?.slipUrl">
+    <p><strong>Payment Slip:</strong></p>
+    <img *ngIf="isImage(selectedPayment?.slipUrl)" [src]="selectedPayment?.slipUrl" class="slip-image" alt="Payment Slip" />
+    <a *ngIf="!isImage(selectedPayment?.slipUrl)" [href]="selectedPayment?.slipUrl" target="_blank" class="slip-link">View Slip Document</a>
+  </div>
+  <p *ngIf="!selectedPayment?.slipUrl" class="no-slip">No slip uploaded</p>
+</div>
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeModal()">Close</button>
       </div>

@@ -21,7 +21,6 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>ORDER ID</th>
           <th>TICKET ID</th>
           <th>CUSTOMER</th>
           <th>SERVICE</th>
@@ -32,7 +31,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let p of paginatedPayments">
-          <td>{{ p.orderId }}</td>
           <td>{{ p.ticketId }}</td>
           <td>{{ p.customerName }}</td>
           <td>{{ p.serviceType }}</td>
@@ -67,10 +65,8 @@
   </svg></button>
       </div>
       <div class="modal-body">
-        <p><strong>Order ID:</strong> {{ selectedPayment?.orderId }}</p>
         <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
         <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Email:</strong> {{ selectedPayment?.customerEmail }}</p>
         <p><strong>Service:</strong> {{ selectedPayment?.serviceType }}</p>
         <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
         <p style="color:#dc2626;font-weight:600;">
