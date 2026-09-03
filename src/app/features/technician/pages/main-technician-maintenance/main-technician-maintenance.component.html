@@ -72,7 +72,7 @@
           </td>
           <td>{{ ticket.assignedTeam }}</td>
           <td>
-            <button class="view-btn" (click)="viewDetails(ticket._id)">View</button>
+            <button class="view-btn" (click)="viewDetails(ticket.ticketId || ticket._id)">View</button>
           </td>
         </tr>
         <tr *ngIf="filteredTickets.length === 0">

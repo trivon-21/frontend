@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 
 type ServiceRequestView = {
-  ticketId?: number;
+  ticketId?: number | string;
   status?: string;
   fullName?: string;
   customerName?: string;
@@ -231,7 +231,7 @@ export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
     const teamName = item.assignedTeam?.teamName || item.assignedTeamName || 'Assigned Team';
 
     return {
-      ticketId: Number.parseInt(this.id || '', 10) || undefined,
+      ticketId: this.id || undefined,
       status: item.status || 'Unknown',
       customerName,
       location: customerAddress,
