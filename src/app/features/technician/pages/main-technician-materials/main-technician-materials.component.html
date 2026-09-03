@@ -321,7 +321,8 @@
 
           <div class="modal-actions">
             <button class="cancel-modal-btn" (click)="showCreateModal = false">Cancel</button>
-            <button class="send-finance-btn" (click)="submitToFinance()">Send to Finance</button>
+            <button *ngIf="newRequest.isUnderWarranty && newRequest.isFreeOfCharge" class="send-finance-btn" (click)="submitToIMDirectly()">Send to IM</button>
+            <button *ngIf="!(newRequest.isUnderWarranty && newRequest.isFreeOfCharge)" class="send-finance-btn" (click)="submitToFinance()">Send to Finance</button>
           </div>
         </div>
       </div>

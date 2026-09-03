@@ -541,6 +541,65 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       });
   }
 
+  submitToIMDirectly(): void {
+    const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
+    const materials = this.newRequest.items
+      .map((item) => {
+        const catalogItem = this.materialCatalog.find(c => c._id === item.inventoryId);
+        return {
+          inventoryId: item.inventoryId,
+          item: catalogItem ? catalogItem.name : item.name,
+          quantity: Number(item.quantity)
+        };
+      })
+      .filter((item) => item.inventoryId && Number.isInteger(item.quantity) && item.quantity > 0);
+
+    if (!normalizedTicketId) {
+      this.error = 'Please select a service ticket.';
+      return;
+    }
+
+    if (materials.length === 0) {
+      this.error = 'Please add at least one material item with quantity.';
+      return;
+    }
+
+    this.error = null;
+
+    const inventoryManagerData = {
+      serviceRequestId: normalizedTicketId,
+      customerName: this.newRequest.customerName,
+      customerEmail: this.newRequest.customerEmail,
+      customerContactNo: this.newRequest.customerContactNo,
+      location: this.newRequest.customerAddress,
+      materials: materials,
+      isUnderWarranty: this.newRequest.isUnderWarranty,
+      isFreeOfCharge: this.newRequest.isFreeOfCharge,
+    };
+
+    this.http
+      .patch<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/${encodeURIComponent(normalizedTicketId)}/send-to-im-custom`, inventoryManagerData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.error = response.error || response.message || 'Failed to send material request to IM.';
+            return;
+          }
+
+          this.showCreateModal = false;
+          this.resetCreateForm();
+
+          this.loadMaterialRequests();
+          this.loadNewStatusTicketIds();
+        },
+        error: (err) => {
+          console.error('Error sending material request to IM:', err);
+          this.error = `Failed to send to IM: ${err.message || 'Unknown error'}`;
+        }
+      });
+  }
+
   sendToInventoryManager(): void {
     if (!this.selectedRequest || this.selectedRequest.status !== 'Finance Approved') {
       return;
