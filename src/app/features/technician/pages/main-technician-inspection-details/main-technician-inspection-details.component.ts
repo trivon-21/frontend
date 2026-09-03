@@ -18,11 +18,8 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
   
   inspectionData: any = null;
   inspectionDate: string | Date | null = null;
-  assignedTeamMembers: Array<{ name?: string; role?: string }> = [];
-  resolvedInspectionTeamName = 'Inspection Team A';
 
   private readonly apiUrl = `${environment.apiBaseUrl}/inspections`;
-  private readonly teamsApiUrl = `${environment.apiBaseUrl}/tech-teams`;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,11 +50,9 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
           if (response.success && response.data) {
             this.inspectionData = response.data;
             this.inspectionDate = this.extractInspectionDate(response.data);
-            this.loadInspectionTeamADetails();
           } else {
             this.error = 'Failed to load inspection details';
             this.inspectionDate = null;
-            this.assignedTeamMembers = [];
           }
           this.isLoading = false;
         },
@@ -65,87 +60,8 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
           console.error('Error loading inspection:', err);
           this.error = `Failed to load inspection: ${err.message || 'Unknown error'}`;
           this.inspectionDate = null;
-          this.assignedTeamMembers = [];
           this.isLoading = false;
         },
-      });
-  }
-
-  get assignedTeamName(): string {
-    return this.resolvedInspectionTeamName || 'Inspection Team A';
-  }
-
-  get teamLeadLabel(): string {
-    const lead = this.assignedTeamMembers.find((member) => member.role === 'Team Leader' || member.role === 'Lead');
-    if (!lead?.name) {
-      return 'Team Lead - -';
-    }
-    return `Team Lead - ${lead.name}`;
-  }
-
-  get nonLeadTeamMembers(): string[] {
-    return this.assignedTeamMembers
-      .filter((member) => member.role !== 'Team Leader' && member.role !== 'Lead' && Boolean(member.name))
-      .map((member) => `${member.name}${member.role ? ` (${member.role})` : ''}`);
-  }
-
-  private loadInspectionTeamADetails(): void {
-    const assignedTeam = this.inspectionData?.assignedTeam;
-    const targetTeamId = String(
-      (assignedTeam && typeof assignedTeam === 'object' ? assignedTeam._id : null)
-      || this.inspectionData?.assignedTeamId
-      || (typeof assignedTeam === 'string' ? assignedTeam : '')
-      || ''
-    ).trim();
-
-    const teamNameCandidates = [
-      assignedTeam && typeof assignedTeam === 'object' ? assignedTeam.teamName : '',
-      this.inspectionData?.assignedTeamName,
-      this.inspectionData?.teamName,
-      this.inspectionData?.inspectionMeta?.team,
-      'Inspection Team A',
-    ]
-      .map((value) => String(value || '').trim())
-      .filter(Boolean);
-
-    const normalizedNameCandidates = teamNameCandidates.map((value) => value.toLowerCase());
-
-    this.http
-      .get<{ success: boolean; data: Array<{ _id?: string; teamName?: string; teamType?: string; members?: Array<{ name?: string; role?: string }> }> }>(this.teamsApiUrl)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (!response.success || !Array.isArray(response.data)) {
-            this.assignedTeamMembers = [];
-            this.resolvedInspectionTeamName = 'Inspection Team A';
-            return;
-          }
-
-          const inspectionTeams = response.data.filter((team) => String(team.teamType || '').toLowerCase() === 'inspection team');
-
-          const matchedById = targetTeamId
-            ? inspectionTeams.find((team) => String(team._id || '').trim() === targetTeamId)
-            : undefined;
-
-          const matchedByExactName = inspectionTeams.find((team) => {
-            const name = String(team.teamName || '').trim().toLowerCase();
-            return normalizedNameCandidates.includes(name);
-          });
-
-          const matchedByContains = inspectionTeams.find((team) => {
-            const name = String(team.teamName || '').trim().toLowerCase();
-            return normalizedNameCandidates.some((candidate) => name.includes(candidate) || candidate.includes(name));
-          });
-
-          const matchedTeam = matchedById || matchedByExactName || matchedByContains || inspectionTeams[0];
-
-          this.assignedTeamMembers = matchedTeam?.members || [];
-          this.resolvedInspectionTeamName = matchedTeam?.teamName || teamNameCandidates[0] || 'Inspection Team A';
-        },
-        error: () => {
-          this.assignedTeamMembers = [];
-          this.resolvedInspectionTeamName = teamNameCandidates[0] || 'Inspection Team A';
-        }
       });
   }
 
