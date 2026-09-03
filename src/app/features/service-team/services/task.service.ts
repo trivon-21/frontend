@@ -137,63 +137,10 @@ export class TaskService {
    * Retrieves team details either by explicit team name or current session.
    */
   getTeamDetails(teamName?: string): Observable<TeamDetailsResponse> {
-    const activeTeamName = teamName?.trim() || this.teamSessionService.getSession()?.teamName?.trim();
+    const activeTeamName = teamName?.trim() || this.teamSessionService.getTeamName();
+    const query = activeTeamName ? `?teamName=${encodeURIComponent(activeTeamName)}` : '';
 
-    if (!activeTeamName) {
-      return throwError(() => new Error('No active service team session found.'));
-    }
-
-    return this.http.get<{ success: boolean; data: RawTechTeam[] }>(`${this.apiUrl}/tech-teams`).pipe(
-      map((response) => {
-        if (!response.success || !Array.isArray(response.data)) {
-          throw new Error('Invalid team list response');
-        }
-
-        const normalizedTeamName = activeTeamName.toLowerCase();
-        const matchedTeam = response.data.find((team) => {
-          const currentTeamName = String(team.teamName || '').trim().toLowerCase();
-          return currentTeamName === normalizedTeamName;
-        });
-
-        if (!matchedTeam) {
-          throw new Error(`Team not found for ${activeTeamName}`);
-        }
-
-        const teamMembers = (matchedTeam.members || []).map((member) => ({
-          id: '',
-          name: String(member.name || '').trim() || 'Unknown Member',
-          role: String(member.role || '').trim() || 'Technician',
-        }));
-        const teamLeader = teamMembers.find((member) => member.role === 'Team Leader' || member.role === 'Lead') || null;
-
-        return {
-          success: true,
-          data: {
-            team: {
-              id: matchedTeam._id || '',
-              teamName: matchedTeam.teamName || activeTeamName,
-              teamType: matchedTeam.teamType || 'Service',
-              status: matchedTeam.status || 'Unknown',
-              activeJobsCount: matchedTeam.activeJobsCount || 0,
-              availableSlots: (matchedTeam.availableSlots || [])
-                .map((slot): TimeSlot | null => {
-                  if (typeof slot === 'string') {
-                    return { date: slot, timeSlot: '' };
-                  }
-                  if (slot && typeof slot === 'object' && slot.date) {
-                    return { date: String(slot.date), timeSlot: String(slot.timeSlot || '') };
-                  }
-                  return null;
-                })
-                .filter((slot): slot is TimeSlot => slot !== null),
-              members: teamMembers,
-            },
-            teamLeader,
-            teamMembers,
-          },
-        };
-      })
-    );
+    return this.http.get<TeamDetailsResponse>(`${this.apiUrl}/team-details${query}`);
   }
 
   /**

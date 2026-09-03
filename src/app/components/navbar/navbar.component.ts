@@ -80,6 +80,6 @@ export class NavbarComponent implements OnInit {
   }
 
   getDashboardUrl(): string {
-    return roleHomeUrl(this.currentUser?.role);
+    return roleHomeUrl(this.currentUser?.role, this.currentUser);
   }
 }

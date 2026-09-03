@@ -144,9 +144,37 @@ export const routes: Routes = [
     ]
   },
 
-  // ── Service Team portal
+  // ── Service Team A portal
+  {
+    path: 'service-team-a',
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team portal (Generic/Fallback)
   {
     path: 'service-team',
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team B portal
+  {
+    path: 'service-team-b',
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

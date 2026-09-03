@@ -25,7 +25,13 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
     'sent to im',
   ]);
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private router: Router) {}
+
+  get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
 
   ngOnInit() {
     this.loadTasks();

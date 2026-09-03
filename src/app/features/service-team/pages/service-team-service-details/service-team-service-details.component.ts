@@ -197,9 +197,15 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     return status;
   }
 
+  get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
+
   viewServiceHistory(): void {
     if (this.ticketId) {
-      this.router.navigate(['/service-team/service-history', this.ticketId]);
+      this.router.navigate([this.baseRoute + '/service-history', this.ticketId]);
     }
   }
 
