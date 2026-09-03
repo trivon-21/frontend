@@ -92,7 +92,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Phone Number</span>
-              <span class="info-value">{{ installation.customerId?.contactNo || installation.customerId?.phoneNumber || installation.customerId?.contactNumber || '-' }}</span>
+              <span class="info-value">{{ installation.customerId?.contactNo || installation.customerId?.phoneNumber || installation.customerId?.contactNumber || installation.customerPhone || '-' }}</span>
             </div>
           </div>
 
@@ -102,7 +102,7 @@
             </div>
             <div class="info-details">
               <span class="info-label">Email Address</span>
-              <span class="info-value">{{ installation.customerId?.email || '-' }}</span>
+              <span class="info-value">{{ installation.customerId?.email || installation.customerEmail || '-' }}</span>
             </div>
           </div>
 

@@ -76,7 +76,7 @@
         <span class="status-badge" [ngClass]="statusClass(task.status)" style="display: inline-block;">
           {{ displayStatus(task.status) }}
         </span>
-        <button class="btn-primary view-btn" [routerLink]="['/service-team/service-details', task.id]" style="padding: 10px 24px;">
+        <button class="btn-primary view-btn" [routerLink]="[baseRoute + '/service-details', task.id]" style="padding: 10px 24px;">
           View
         </button>
       </div>

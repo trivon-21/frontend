@@ -103,13 +103,15 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
       .filter((member): member is TeamMember => Boolean(member))
       .map((member) => ({
         id: member.id ?? '',
-        name: member.name?.trim() || 'Unknown Member',
+        name: member.name?.trim() || (member as any).fullName?.trim() || 'Unknown Member',
         role: member.role?.trim() || 'Technician',
       }));
   }
 
   private normalizeSlots(slots: TimeSlot[]): TimeSlot[] {
-    return slots.filter((slot): slot is TimeSlot => Boolean(slot) && Boolean(slot.date));
+    return slots
+      .filter((slot): slot is TimeSlot => Boolean(slot) && Boolean(slot.date))
+      .slice(0, 4);
   }
 
   private findLeader(member: TeamMember | null): TeamMember | null {
@@ -119,7 +121,7 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
 
     return {
       id: member.id ?? '',
-      name: member.name?.trim() || 'Unknown Member',
+      name: member.name?.trim() || (member as any).fullName?.trim() || 'Unknown Member',
       role: member.role?.trim() || 'Team Leader',
     };
   }
