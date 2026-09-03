@@ -19,6 +19,8 @@ interface InstallationDetail {
     address?: string;
   };
   productType?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   location?: string;
   serviceDate?: string;
   date?: string;
