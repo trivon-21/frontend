@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { forkJoin } from 'rxjs';
+import { isLoanOverdue } from '../../services/inventory-domain';
 
 interface ActiveLoan {
   _id?: string;
@@ -233,7 +234,7 @@ export class AssetManagementDashboardComponent implements OnInit {
   private withLoanStatus(loans: ActiveLoan[]): ActiveLoan[] {
     return loans.map((loan) => ({
       ...loan,
-      status: new Date(loan.dueDate) < new Date() ? 'Overdue' : 'On Time',
+      status: isLoanOverdue(loan.dueDate) ? 'Overdue' : 'On Time',
     }));
   }
 }

@@ -115,4 +115,32 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     expect(component.showReturnModal).toBeFalse();
     expect(component.activeReturnLoan).toBeNull();
   });
+
+  it('keeps a loan on time when due today and marks overdue when due yesterday', () => {
+    component.fetchData();
+    const fixtures: Array<[string, object]> = [
+      ['/technicians', []],
+      ['/available-tools', []],
+      ['/asset-loans', [
+        {
+          _id: 'loan-today', toolId: 'tool-1', toolName: 'Vacuum Pump', assetTag: 'TAG-1',
+          technicianId: 'tech-1', technicianName: 'Tech',
+          checkedOutAt: '2026-08-20T00:00:00.000Z', dueDate: '2026-08-24T00:00:00.000Z',
+        },
+        {
+          _id: 'loan-yesterday', toolId: 'tool-2', toolName: 'Recovery Machine', assetTag: 'TAG-2',
+          technicianId: 'tech-1', technicianName: 'Tech',
+          checkedOutAt: '2026-08-20T00:00:00.000Z', dueDate: '2026-08-23T00:00:00.000Z',
+        },
+      ]],
+      ['/asset-return-logs', []],
+    ];
+    for (const [path, body] of fixtures) {
+      http.expectOne(`${baseUrl}${path}`).flush(body);
+    }
+
+    expect(component.loans[0].status).toBe('On Time');
+    expect(component.loans[1].status).toBe('Overdue');
+  });
 });
+

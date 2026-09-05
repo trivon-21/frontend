@@ -146,4 +146,11 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
     expect(component.receiptForm.get('stock')?.hasError('storageLocation')).toBeTrue();
   });
+
+  it('initializes receivedDate with business date string', () => {
+    const { component } = create();
+    const receivedDate = component.receiptForm.get('source.receivedDate')?.value;
+    expect(receivedDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 });
+

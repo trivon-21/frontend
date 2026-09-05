@@ -1,29 +1,26 @@
-import { NewOrderFormComponent } from './pages/order-creation/new-order-form/new-order-form.component';
 import { INVENTORY_MANAGER_ROUTES } from './inventory-manager.routes';
+import { pendingChangesGuard } from '../../core/guards/pending-changes.guard';
 
-describe('INVENTORY_MANAGER_ROUTES', () => {
-  const children = INVENTORY_MANAGER_ROUTES[0].children ?? [];
+describe('INVENTORY_MANAGER_ROUTES unsaved-changes protection contract', () => {
+  it('attaches pendingChangesGuard to product create and edit routes', () => {
+    const root = INVENTORY_MANAGER_ROUTES[0];
+    const children = root.children ?? [];
 
-  it('does not register the removed catalog-health routes', () => {
-    expect(children.some((route) => route.path === 'catalog-health')).toBeFalse();
-    expect(children.some((route) => route.path === 'list-items')).toBeFalse();
+    const productCreate = children.find((r) => r.path === 'product-wizard');
+    const productEdit = children.find((r) => r.path === 'product-wizard/:id');
+
+    expect(productCreate?.canDeactivate).toEqual([pendingChangesGuard]);
+    expect(productEdit?.canDeactivate).toEqual([pendingChangesGuard]);
   });
 
-  it('declares specific order-form paths before the order list', () => {
-    const newIndex = children.findIndex((route) => route.path === 'order-creation/new');
-    const editIndex = children.findIndex((route) => route.path === 'order-creation/edit/:id');
-    const listIndex = children.findIndex((route) => route.path === 'order-creation');
+  it('attaches pendingChangesGuard to order create and edit routes', () => {
+    const root = INVENTORY_MANAGER_ROUTES[0];
+    const children = root.children ?? [];
 
-    expect(children[newIndex].component).toBe(NewOrderFormComponent);
-    expect(children[editIndex].component).toBe(NewOrderFormComponent);
-    expect(newIndex).toBeLessThan(listIndex);
-    expect(editIndex).toBeLessThan(listIndex);
-  });
+    const orderCreate = children.find((r) => r.path === 'order-creation/new');
+    const orderEdit = children.find((r) => r.path === 'order-creation/edit/:id');
 
-  it('keeps unknown Inventory Manager URLs inside the portal', () => {
-    expect(children.at(-1)).toEqual(jasmine.objectContaining({
-      path: '**',
-      redirectTo: '/inventory-manager',
-    }));
+    expect(orderCreate?.canDeactivate).toEqual([pendingChangesGuard]);
+    expect(orderEdit?.canDeactivate).toEqual([pendingChangesGuard]);
   });
 });

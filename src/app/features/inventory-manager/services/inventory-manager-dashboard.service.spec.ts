@@ -48,9 +48,33 @@ describe('normalizeInventoryDashboard', () => {
 
     expect(data.recentActivity).toEqual([]);
     expect(data.reorderList).toEqual([]);
+    expect(data.logistics).toEqual([]);
     expect(data.stats.stockAlerts).toEqual({ total: 0, subStats: [] });
     expect(data.procurementWorkflow.readyToReceive).toBe(0);
     expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(0);
+  });
+
+  it('preserves and normalizes logistics rows', () => {
+    const data = normalizeInventoryDashboard({
+      logistics: [
+        {
+          id: 'ORD-101',
+          orderId: 'ORD-101',
+          customer: 'Test Customer',
+          status: 'to-pack',
+          statusVersion: 0,
+          type: 'standard',
+          courier: 'DHL',
+          trackId: 'DHL-1234',
+          itemCount: 3,
+        },
+      ],
+    });
+
+    expect(data.logistics.length).toBe(1);
+    expect(data.logistics[0].orderId).toBe('ORD-101');
+    expect(data.logistics[0].status).toBe('to-pack');
+    expect(data.logistics[0].courier).toBe('DHL');
   });
 
   it('maps legacy three-stage responses into safe compatibility defaults', () => {
@@ -62,6 +86,51 @@ describe('normalizeInventoryDashboard', () => {
     expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(3);
     expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(0);
     expect(data.procurementWorkflow.readyToIssue).toBe(0);
+  });
+
+  it('safely normalizes null, undefined, or malformed responses', () => {
+    const data = normalizeInventoryDashboard(null);
+
+    expect(data.managerName).toBe('Manager');
+    expect(data.status).toBe('Offline');
+    expect(data.stats.materialReservations.total).toBe(0);
+    expect(data.stats.stockAlerts.subStats).toEqual([]);
+    expect(data.recentActivity).toEqual([]);
+    expect(data.reorderList).toEqual([]);
+    expect(data.procurementWorkflow.readyToReceive).toBe(0);
+  });
+
+  it('normalizes valid empty dashboard response preserving operational status', () => {
+    const data = normalizeInventoryDashboard({
+      managerName: 'Manager',
+      currentDate: new Date('2026-08-24T00:00:00.000Z'),
+      status: 'Operational',
+      stats: {
+        materialReservations: { total: 0, subStats: [] },
+        dispatchQueue: { total: 0, subStats: [] },
+        assetHealth: { total: 0, subStats: [] },
+        stockAlerts: { total: 0, subStats: [] },
+      },
+      recentActivity: [],
+      reorderList: [],
+      procurementWorkflow: {
+        awaitingManager: 0,
+        awaitingFinanceApproval: 0,
+        readyToIssue: 0,
+        readyToReceive: 0,
+        awaitingReceiptReconciliation: 0,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
+          readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
+        },
+        awaitingReceipt: 0,
+        awaitingFinance: 0,
+      },
+    });
+
+    expect(data.status).toBe('Operational');
+    expect(data.stats.materialReservations.total).toBe(0);
+    expect(data.reorderList).toEqual([]);
   });
 });
 
@@ -128,6 +197,26 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
     expect(result?.currentDate).toEqual(new Date('2026-08-24T00:00:00.000Z'));
     expect(result?.recentActivity[0].timestamp).toEqual(new Date('2026-08-24T12:00:00.000Z'));
     expect(result?.recentActivity[0].timeAgo).toBe('30m ago');
+  });
+
+  it('propagates HTTP 503 INVENTORY_DASHBOARD_UNAVAILABLE failure to subscriber', () => {
+    let errorResponse: any;
+
+    service.getDashboard().subscribe({
+      next: () => fail('expected request to fail with 503'),
+      error: (err) => (errorResponse = err),
+    });
+
+    const request = http.expectOne(`${baseUrl}/dashboard`);
+    expect(request.request.method).toBe('GET');
+    request.flush(
+      { code: 'INVENTORY_DASHBOARD_UNAVAILABLE', message: 'Inventory dashboard is currently unavailable' },
+      { status: 503, statusText: 'Service Unavailable' },
+    );
+
+    expect(errorResponse.status).toBe(503);
+    expect(errorResponse.error.code).toBe('INVENTORY_DASHBOARD_UNAVAILABLE');
+    expect(errorResponse.error.message).toBe('Inventory dashboard is currently unavailable');
   });
 
   it('uses the exact read-only inventory and procurement endpoints', () => {

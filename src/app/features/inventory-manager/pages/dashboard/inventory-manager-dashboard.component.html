@@ -1,248 +1,296 @@
 <div class="inventory-dashboard">
-  <!-- Offline Warning Banner -->
-  <div class="offline-banner" *ngIf="data.status === 'Offline'">
-    <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
-    <div class="banner-text">
-      <strong>Database Offline</strong>
-      <span
-        >The system is currently running in local mode. Live data and updates are unavailable.</span
-      >
-    </div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">
-      {{ loading ? 'Retrying…' : 'Retry' }}
-    </button>
-  </div>
-
   <div class="portal-state portal-state--error" *ngIf="error" role="alert">
     <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
     <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
   </div>
 
-  <!-- Header Section -->
-  <div class="welcome-banner">
-    <div class="banner-content">
-      <div class="title-row">
-        <h1 class="welcome-title">Welcome back!</h1>
-        <span class="status-badge" [class.offline]="data.status === 'Offline'">
-          <span class="dot" [class.syncing]="loading"></span>
-          {{ loading ? 'Syncing...' : data.status }}
-        </span>
-      </div>
-    </div>
-    <div class="dashboard-actions">
-      <button class="btn-new-order im-btn im-btn--primary" routerLink="/inventory-manager/order-creation">
-        <lucide-angular name="plus" [size]="16"></lucide-angular>
-        Create New Order
-      </button>
+  <div class="portal-state portal-state--warning stale-banner" *ngIf="isStale" role="status">
+    <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+    <div>
+      <strong>Displaying stale data</strong>
+      <p>Unable to refresh latest metrics from server. Showing last successful snapshot.</p>
     </div>
   </div>
 
-  <!-- Summary Cards Section -->
-  <div class="summary-grid">
-    <!-- Material Reservations -->
-    <a class="summary-card clickable" routerLink="/inventory-manager/material-requests">
-      <div class="card-main">
-        <div class="card-info">
-          <span class="card-label">Stock Reservations</span>
-          <span class="card-value">{{ data.stats.materialReservations.total }}</span>
-        </div>
-        <div class="card-icon">
-          <lucide-angular name="clipboard-check" [size]="24"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div *ngFor="let sub of data.stats.materialReservations.subStats" class="sub-stat">
-          <span class="sub-label">{{ sub.label }}</span>
-          <span class="sub-value">{{ sub.value }}</span>
+  <ng-container *ngIf="hasLoadedSuccess">
+    <!-- Header Section -->
+    <div class="welcome-banner">
+      <div class="banner-content">
+        <div class="title-row">
+          <h1 class="welcome-title">Welcome back!</h1>
+          <span class="status-badge" [class.offline]="data.status === 'Offline'" [class.stale]="isStale">
+            <span class="dot" [class.syncing]="loading"></span>
+            {{ loading ? 'Syncing...' : (isStale ? 'Stale' : data.status) }}
+          </span>
         </div>
       </div>
-    </a>
-
-    <!-- Dispatch Queue -->
-    <a class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
-      <div class="card-main">
-        <div class="card-info">
-          <span class="card-label">Dispatch Queue</span>
-          <span class="card-value">{{ data.stats.dispatchQueue.total }}</span>
-        </div>
-        <div class="card-icon">
-          <lucide-angular name="truck" [size]="24"></lucide-angular>
-        </div>
+      <div class="dashboard-actions">
+        <button class="btn-new-order im-btn im-btn--primary" routerLink="/inventory-manager/order-creation">
+          <lucide-angular name="plus" [size]="16"></lucide-angular>
+          Create New Order
+        </button>
       </div>
-      <div class="card-footer">
-        <div *ngFor="let sub of data.stats.dispatchQueue.subStats" class="sub-stat">
-          <span class="sub-label">{{ sub.label }}</span>
-          <span class="sub-value">{{ sub.value }}</span>
-        </div>
-      </div>
-    </a>
-
-    <!-- Asset Health -->
-    <a class="summary-card clickable" routerLink="/inventory-manager/asset-management">
-      <div class="card-main">
-        <div class="card-info">
-          <span class="card-label">Tool Status</span>
-          <span class="card-value">{{ data.stats.assetHealth.total }}</span>
-        </div>
-        <div class="card-icon">
-          <lucide-angular name="wrench" [size]="24"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div *ngFor="let sub of data.stats.assetHealth.subStats" class="sub-stat">
-          <span class="sub-label">{{ sub.label }}</span>
-          <span class="sub-value">{{ sub.value }}</span>
-        </div>
-      </div>
-    </a>
-
-    <!-- Stock Alerts -->
-    <a class="summary-card clickable" routerLink="/inventory-manager/inventory">
-      <div class="card-main">
-        <div class="card-info">
-          <span class="card-label">Stock Alerts</span>
-          <span class="card-value">{{ data.stats.stockAlerts.total }}</span>
-        </div>
-        <div class="card-icon">
-          <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div *ngFor="let sub of data.stats.stockAlerts.subStats" class="sub-stat">
-          <span class="sub-label">{{ sub.label }}</span>
-          <span class="sub-value">{{ sub.value }}</span>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <section class="content-card workflow-card" aria-labelledby="purchasing-workflow-title">
-    <div class="card-header">
-      <div class="title-with-icon">
-        <lucide-angular name="clipboard-list" [size]="18"></lucide-angular>
-        <div>
-          <h2 class="card-title" id="purchasing-workflow-title">Purchasing Workflow</h2>
-          <p class="workflow-description">Track approvals, receiving, and finance review.</p>
-        </div>
-      </div>
-      <span class="workflow-link">Five-stage operational view</span>
     </div>
-    <div class="workflow-stages">
-      <div class="workflow-stage">
-        <span class="workflow-stage-label">Awaiting Manager</span>
-        <strong>{{ data.procurementWorkflow.awaitingManager }}</strong>
-        <span class="workflow-stage-hint">Pending operational review</span>
-        <div class="workflow-breakdown">
-          <a routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-manager' }">
-            Purchase requests {{ data.procurementWorkflow.breakdown.awaitingManager.purchaseRequests }}
-          </a>
-          <a routerLink="/inventory-manager/procurement" [queryParams]="{ authorizationStatus: 'pending' }">
-            Non-PO {{ data.procurementWorkflow.breakdown.awaitingManager.receiptAuthorizations }}
-          </a>
+
+    <!-- Summary Cards Section -->
+    <div class="summary-grid">
+      <!-- Material Reservations -->
+      <a class="summary-card clickable" routerLink="/inventory-manager/material-requests">
+        <div class="card-main">
+          <div class="card-info">
+            <span class="card-label">Stock Reservations</span>
+            <span class="card-value">{{ data.stats.materialReservations.total }}</span>
+          </div>
+          <div class="card-icon">
+            <lucide-angular name="clipboard-check" [size]="24"></lucide-angular>
+          </div>
         </div>
-      </div>
-      <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-finance' }">
-        <span class="workflow-stage-label">Awaiting Finance Approval</span>
-        <strong>{{ data.procurementWorkflow.awaitingFinanceApproval }}</strong>
-        <span class="workflow-stage-hint">Pre-order financial review</span>
-      </a>
-      <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'approved' }">
-        <span class="workflow-stage-label">Ready to Issue</span>
-        <strong>{{ data.procurementWorkflow.readyToIssue }}</strong>
-        <span class="workflow-stage-hint">Approved requests needing a PO</span>
-      </a>
-      <div class="workflow-stage">
-        <span class="workflow-stage-label">Ready to Receive</span>
-        <strong>{{ data.procurementWorkflow.readyToReceive }}</strong>
-        <span class="workflow-stage-hint">Outstanding authorized stock</span>
-        <div class="workflow-breakdown">
-          <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'PO' }">
-            Purchase orders {{ data.procurementWorkflow.breakdown.readyToReceive.purchaseOrders }}
-          </a>
-          <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'NON_PO', authorizationStatus: 'ready' }">
-            Non-PO {{ data.procurementWorkflow.breakdown.readyToReceive.receiptAuthorizations }}
-          </a>
+        <div class="card-footer">
+          <div *ngFor="let sub of data.stats.materialReservations.subStats" class="sub-stat">
+            <span class="sub-label">{{ sub.label }}</span>
+            <span class="sub-value">{{ sub.value }}</span>
+          </div>
         </div>
-      </div>
-      <a class="workflow-stage" routerLink="/inventory-manager/procurement" [queryParams]="{ grnFilter: 'FINANCE' }">
-        <span class="workflow-stage-label">Receipt Reconciliation</span>
-        <strong>{{ data.procurementWorkflow.awaitingReceiptReconciliation }}</strong>
-        <span class="workflow-stage-hint">Non-PO receipts with Finance</span>
+      </a>
+
+      <!-- Dispatch Queue -->
+      <a class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
+        <div class="card-main">
+          <div class="card-info">
+            <span class="card-label">Dispatch Queue</span>
+            <span class="card-value">{{ data.stats.dispatchQueue.total }}</span>
+          </div>
+          <div class="card-icon">
+            <lucide-angular name="truck" [size]="24"></lucide-angular>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div *ngFor="let sub of data.stats.dispatchQueue.subStats" class="sub-stat">
+            <span class="sub-label">{{ sub.label }}</span>
+            <span class="sub-value">{{ sub.value }}</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Asset Health -->
+      <a class="summary-card clickable" routerLink="/inventory-manager/asset-management">
+        <div class="card-main">
+          <div class="card-info">
+            <span class="card-label">Tool Status</span>
+            <span class="card-value">{{ data.stats.assetHealth.total }}</span>
+          </div>
+          <div class="card-icon">
+            <lucide-angular name="wrench" [size]="24"></lucide-angular>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div *ngFor="let sub of data.stats.assetHealth.subStats" class="sub-stat">
+            <span class="sub-label">{{ sub.label }}</span>
+            <span class="sub-value">{{ sub.value }}</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Stock Alerts -->
+      <a class="summary-card clickable" routerLink="/inventory-manager/inventory">
+        <div class="card-main">
+          <div class="card-info">
+            <span class="card-label">Stock Alerts</span>
+            <span class="card-value">{{ data.stats.stockAlerts.total }}</span>
+          </div>
+          <div class="card-icon">
+            <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div *ngFor="let sub of data.stats.stockAlerts.subStats" class="sub-stat">
+            <span class="sub-label">{{ sub.label }}</span>
+            <span class="sub-value">{{ sub.value }}</span>
+          </div>
+        </div>
       </a>
     </div>
-  </section>
 
-  <!-- Main Grid Content -->
-  <div class="dashboard-main-grid">
-    <!-- Left Column: Activity Feed -->
-    <div class="content-card activity-card">
+    <section class="content-card workflow-card" aria-labelledby="purchasing-workflow-title">
       <div class="card-header">
-        <h2 class="card-title">Recent Activity</h2>
-        <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
-      </div>
-      <div class="timeline-container">
-        <div *ngFor="let activity of data.recentActivity" class="timeline-item">
-          <div class="timeline-line"></div>
-          <div class="timeline-marker" [ngClass]="activity.type">
-            <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
-          </div>
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <p class="activity-title">{{ activity.title }}</p>
-              <span class="activity-time">{{ activity.timeAgo }}</span>
-            </div>
-            <div class="activity-actions" *ngIf="activity.actionLabel">
-              <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
-                {{ activity.actionLabel }}
-              </button>
-            </div>
+        <div class="title-with-icon">
+          <lucide-angular name="clipboard-list" [size]="18"></lucide-angular>
+          <div>
+            <h2 class="card-title" id="purchasing-workflow-title">Purchasing Workflow</h2>
+            <p class="workflow-description">Track approvals, receiving, and finance review.</p>
           </div>
         </div>
+        <span class="workflow-link">Five-stage operational view</span>
       </div>
-    </div>
+      <div class="workflow-stages">
+        <div class="workflow-stage">
+          <span class="workflow-stage-label">Awaiting Manager</span>
+          <strong>{{ data.procurementWorkflow.awaitingManager }}</strong>
+          <span class="workflow-stage-hint">Pending operational review</span>
+          <div class="workflow-breakdown">
+            <a routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-manager' }">
+              Purchase requests {{ data.procurementWorkflow.breakdown.awaitingManager.purchaseRequests }}
+            </a>
+            <a routerLink="/inventory-manager/procurement" [queryParams]="{ authorizationStatus: 'pending' }">
+              Non-PO {{ data.procurementWorkflow.breakdown.awaitingManager.receiptAuthorizations }}
+            </a>
+          </div>
+        </div>
+        <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-finance' }">
+          <span class="workflow-stage-label">Awaiting Finance Approval</span>
+          <strong>{{ data.procurementWorkflow.awaitingFinanceApproval }}</strong>
+          <span class="workflow-stage-hint">Pre-order financial review</span>
+        </a>
+        <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'approved' }">
+          <span class="workflow-stage-label">Ready to Issue</span>
+          <strong>{{ data.procurementWorkflow.readyToIssue }}</strong>
+          <span class="workflow-stage-hint">Approved requests needing a PO</span>
+        </a>
+        <div class="workflow-stage">
+          <span class="workflow-stage-label">Ready to Receive</span>
+          <strong>{{ data.procurementWorkflow.readyToReceive }}</strong>
+          <span class="workflow-stage-hint">Outstanding authorized stock</span>
+          <div class="workflow-breakdown">
+            <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'PO' }">
+              Purchase orders {{ data.procurementWorkflow.breakdown.readyToReceive.purchaseOrders }}
+            </a>
+            <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'NON_PO', authorizationStatus: 'ready' }">
+              Non-PO {{ data.procurementWorkflow.breakdown.readyToReceive.receiptAuthorizations }}
+            </a>
+          </div>
+        </div>
+        <a class="workflow-stage" routerLink="/inventory-manager/procurement" [queryParams]="{ grnFilter: 'FINANCE' }">
+          <span class="workflow-stage-label">Receipt Reconciliation</span>
+          <strong>{{ data.procurementWorkflow.awaitingReceiptReconciliation }}</strong>
+          <span class="workflow-stage-hint">Non-PO receipts with Finance</span>
+        </a>
+      </div>
+    </section>
 
-    <!-- Right Column: Reorder & Logistics -->
-    <div class="side-column">
-      <!-- Reorder List -->
-      <div class="content-card reorder-card">
+    <!-- Main Grid Content -->
+    <div class="dashboard-main-grid">
+      <!-- Left Column: Activity Feed -->
+      <div class="content-card activity-card">
         <div class="card-header">
-          <div class="title-with-icon">
-            <lucide-angular name="triangle-alert" class="error-icon" [size]="18"></lucide-angular>
-            <h2 class="card-title">Reorder List</h2>
-          </div>
-          <span class="count-badge">{{ data.reorderList.length }} Items</span>
+          <h2 class="card-title">Recent Activity</h2>
+          <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
         </div>
-        <div class="table-container alx-table-container" role="region" aria-label="Inventory reorder list" tabindex="0">
-          <table class="reorder-table alx-table alx-table--fixed alx-table--sticky-header">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th class="text-right">Available</th>
-                <th class="text-right">Reserved</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of data.reorderList"
-                  class="clickable-row"
-                  routerLink="/inventory-manager/order-creation/new">
-                <td class="item-name-cell">
-                  <div class="item-cell-wrapper">
-                    <div class="status-dot" [ngClass]="item.status"></div>
-                    <a class="item-name reorder-link" routerLink="/inventory-manager/order-creation/new">{{ item.name }}</a>
-                  </div>
-                </td>
-                <td class="item-avail text-right" [class.critical]="item.available === 0">
-                  {{ item.available }}
-                </td>
-                <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
-                  {{ item.reserved }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="timeline-container">
+          <div *ngFor="let activity of data.recentActivity" class="timeline-item">
+            <div class="timeline-line"></div>
+            <div class="timeline-marker" [ngClass]="activity.type">
+              <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <p class="activity-title">{{ activity.title }}</p>
+                <span class="activity-time">{{ activity.timeAgo }}</span>
+              </div>
+              <div class="activity-actions" *ngIf="activity.actionLabel">
+                <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
+                  {{ activity.actionLabel }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- Right Column: Reorder & Logistics -->
+      <div class="side-column">
+        <!-- Reorder List -->
+        <div class="content-card reorder-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <lucide-angular name="triangle-alert" class="error-icon" [size]="18"></lucide-angular>
+              <h2 class="card-title">Reorder List</h2>
+            </div>
+            <span class="count-badge">{{ data.reorderList.length }} Items</span>
+          </div>
+          <div class="table-container alx-table-container" role="region" aria-label="Inventory reorder list" tabindex="0">
+            <table class="reorder-table alx-table alx-table--fixed alx-table--sticky-header">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-right">Available</th>
+                  <th class="text-right">Reserved</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of data.reorderList"
+                    class="clickable-row"
+                    routerLink="/inventory-manager/order-creation/new">
+                  <td class="item-name-cell">
+                    <div class="item-cell-wrapper">
+                      <div class="status-dot" [ngClass]="item.status"></div>
+                      <a class="item-name reorder-link" routerLink="/inventory-manager/order-creation/new">{{ item.name }}</a>
+                    </div>
+                  </td>
+                  <td class="item-avail text-right" [class.critical]="item.available === 0">
+                    {{ item.available }}
+                  </td>
+                  <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
+                    {{ item.reserved }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dispatch Logistics Panel -->
+        <div class="content-card logistics-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <lucide-angular name="truck" class="info-icon" [size]="18"></lucide-angular>
+              <h2 class="card-title">Dispatch Logistics</h2>
+            </div>
+            <div class="card-header-actions">
+              <span class="count-badge">{{ data.logistics.length }} Orders</span>
+              <a routerLink="/inventory-manager/dispatch-logistics" class="view-all-link">View All</a>
+            </div>
+          </div>
+          <div class="table-container alx-table-container" role="region" aria-label="Dispatch logistics list" tabindex="0">
+            <table *ngIf="data.logistics.length > 0; else emptyLogistics" class="logistics-table alx-table alx-table--fixed alx-table--sticky-header">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Status</th>
+                  <th>Courier / Track</th>
+                  <th class="text-right">Last Moved</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of data.logistics"
+                    class="clickable-row"
+                    routerLink="/inventory-manager/dispatch-logistics">
+                  <td class="order-id-cell">
+                    <div class="order-cell-wrapper">
+                      <a class="order-id-link" routerLink="/inventory-manager/dispatch-logistics">{{ order.orderId }}</a>
+                      <span class="order-customer" *ngIf="order.customer">{{ order.customer }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="logistics-status-badge" [ngClass]="order.status">{{ order.status }}</span>
+                  </td>
+                  <td class="courier-cell">
+                    <span class="courier-text">{{ order.courier || 'Unassigned' }}</span>
+                    <span class="track-id-text" *ngIf="order.trackId">{{ order.trackId }}</span>
+                  </td>
+                  <td class="text-right last-moved-cell">
+                    {{ (order.lastMovedAt || order.date) | date:'shortDate' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #emptyLogistics>
+              <div class="empty-logistics-state">
+                <p>No dispatch orders recorded.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </ng-container>
 </div>

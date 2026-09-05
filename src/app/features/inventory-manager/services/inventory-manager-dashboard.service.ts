@@ -69,6 +69,21 @@ export interface ProcurementWorkflowSummary {
   awaitingFinance: number;
 }
 
+export interface LogisticsDashboardItem {
+  id: string;
+  orderId: string;
+  customer: string;
+  status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
+  statusVersion: number;
+  type: string;
+  courier?: string;
+  trackId?: string;
+  itemCount: number;
+  date?: string;
+  lastMovedAt?: string | Date;
+  completedAt?: string | Date;
+}
+
 export interface InventoryDashboardData {
   managerName: string;
   currentDate: Date;
@@ -77,6 +92,7 @@ export interface InventoryDashboardData {
   recentActivity: ActivityItem[];
   reorderList: ReorderItem[];
   procurementWorkflow: ProcurementWorkflowSummary;
+  logistics: LogisticsDashboardItem[];
 }
 
 export interface ReceiveInventoryInput {
@@ -174,6 +190,7 @@ function emptyDashboard(status = 'Offline'): InventoryDashboardData {
     recentActivity: [],
     reorderList: [],
     procurementWorkflow: emptyProcurementWorkflow(),
+    logistics: [],
   };
 }
 
@@ -224,6 +241,7 @@ export function normalizeInventoryDashboard(
       awaitingReceipt: readyToReceive,
       awaitingFinance: awaitingReceiptReconciliation,
     },
+    logistics: (data?.logistics || []).map((l) => ({ ...l })),
   };
 }
 

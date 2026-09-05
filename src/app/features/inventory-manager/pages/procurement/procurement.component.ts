@@ -12,6 +12,7 @@ import {
   ReceiveInventoryInput,
 } from '../../services/inventory-manager-dashboard.service';
 import { NonPoReason, PurchaseLine, PurchaseRequest, ReceiptAuthorization, ReceiptMode, outstanding } from '../../services/purchase-workflow';
+import { toBusinessDateString } from '../../services/inventory-domain';
 
 interface RecentProcurement {
   _id?: string;
@@ -232,7 +233,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   private today(): string {
-    return new Date().toISOString().substring(0, 10);
+    return toBusinessDateString(new Date());
   }
 
   loadAllData(): void {

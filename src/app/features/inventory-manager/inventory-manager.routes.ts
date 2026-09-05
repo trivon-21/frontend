@@ -12,6 +12,8 @@ import { ProcurementDashboardComponent } from './pages/procurement/procurement.c
 import { ProductWizardComponent } from './pages/product-wizard/product-wizard.component';
 import { ReturnsRmaDashboardComponent } from './pages/returns-rma/returns-rma.component';
 
+import { pendingChangesGuard } from '../../core/guards/pending-changes.guard';
+
 export const INVENTORY_MANAGER_ROUTES: Routes = [
   {
     path: '',
@@ -19,13 +21,13 @@ export const INVENTORY_MANAGER_ROUTES: Routes = [
     children: [
       { path: '', component: InventoryManagerDashboardComponent, pathMatch: 'full' },
       { path: 'inventory', component: InventoryListComponent },
-      { path: 'product-wizard/:id', component: ProductWizardComponent },
-      { path: 'product-wizard', component: ProductWizardComponent },
+      { path: 'product-wizard/:id', component: ProductWizardComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'product-wizard', component: ProductWizardComponent, canDeactivate: [pendingChangesGuard] },
       { path: 'asset-management', component: AssetManagementDashboardComponent },
       { path: 'material-requests', component: MaterialRequestsDashboardComponent },
       { path: 'dispatch-logistics', component: DispatchLogisticsDashboardComponent },
-      { path: 'order-creation/new', component: NewOrderFormComponent },
-      { path: 'order-creation/edit/:id', component: NewOrderFormComponent },
+      { path: 'order-creation/new', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'order-creation/edit/:id', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
       { path: 'order-creation', component: OrderCreationComponent },
       { path: 'procurement', component: ProcurementDashboardComponent },
       { path: 'returns-rma', component: ReturnsRmaDashboardComponent },
