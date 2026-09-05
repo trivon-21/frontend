@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-completed-inspections',
@@ -34,14 +35,18 @@ export class CompletedInspectionsComponent implements OnInit {
   constructor(
     private officerService: InspectionOfficerService,
     private notificationService: NotificationService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
   loadInspections(): void {
     this.isLoading = true;
-    this.officerService.getCompletedInspections().subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    const inspectorId = currentUser?.id;
+
+    this.officerService.getCompletedInspections(inspectorId).subscribe({
       next: (data: any[]) => {
         this.inspections = data;
         this.applyFilters();
