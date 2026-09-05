@@ -77,4 +77,42 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     expect(request.request.body).toEqual({ condition: 'damaged' });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
+
+  it('manages return modal state and posts condition with notes when confirmed', () => {
+    const loan = {
+      _id: 'loan-42',
+      toolId: 'tool-42',
+      toolName: 'Manifold Gauge',
+      assetTag: 'TAG-42',
+      technicianId: 'tech-1',
+      technicianName: 'Alice Tech',
+      checkedOutAt: '2026-08-20T00:00:00.000Z',
+      dueDate: '2026-08-25T00:00:00.000Z',
+    };
+
+    component.openReturnModal(loan);
+    expect(component.showReturnModal).toBeTrue();
+    expect(component.activeReturnLoan).toBe(loan);
+    expect(component.returnCondition).toBe('good');
+
+    component.returnCondition = 'damaged';
+    component.returnNotes = 'Cracked sight glass';
+    component.confirmReturn();
+
+    const request = http.expectOne(`${baseUrl}/asset-loans/return/loan-42`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      condition: 'damaged',
+      notes: 'Cracked sight glass',
+    });
+    request.flush({ success: true });
+
+    // Expect data refresh calls after successful return
+    http.expectOne(`${baseUrl}/asset-loans`).flush([]);
+    http.expectOne(`${baseUrl}/asset-return-logs`).flush([]);
+    http.expectOne(`${baseUrl}/available-tools`).flush([]);
+
+    expect(component.showReturnModal).toBeFalse();
+    expect(component.activeReturnLoan).toBeNull();
+  });
 });

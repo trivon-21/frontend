@@ -58,6 +58,10 @@ export class AssetManagementDashboardComponent implements OnInit {
   checkingOut = false;
   returningIds = new Set<string>();
   returnConditions: Record<string, ReturnCondition> = {};
+  showReturnModal = false;
+  activeReturnLoan: ActiveLoan | null = null;
+  returnCondition: ReturnCondition = 'good';
+  returnNotes = '';
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
@@ -185,12 +189,36 @@ export class AssetManagementDashboardComponent implements OnInit {
     });
   }
 
-  markReturned(id: string, condition: ReturnCondition = this.returnConditions[id] || 'good') {
+  openReturnModal(loan: ActiveLoan): void {
+    this.activeReturnLoan = loan;
+    this.returnCondition = this.returnConditions[loan._id!] || 'good';
+    this.returnNotes = '';
+    this.showReturnModal = true;
+  }
+
+  closeReturnModal(): void {
+    if (this.activeReturnLoan && this.returningIds.has(this.activeReturnLoan._id!)) return;
+    this.showReturnModal = false;
+    this.activeReturnLoan = null;
+    this.returnNotes = '';
+  }
+
+  confirmReturn(): void {
+    if (!this.activeReturnLoan?._id) return;
+    this.markReturned(this.activeReturnLoan._id, this.returnCondition, this.returnNotes);
+  }
+
+  markReturned(id: string, condition: ReturnCondition = this.returnConditions[id] || 'good', notes: string = '') {
     if (this.returningIds.has(id)) return;
     this.returningIds.add(id);
-    this.apiService.post(`/inventory/asset-loans/return/${id}`, { condition }).subscribe({
+    const payload: { condition: ReturnCondition; notes?: string } = { condition };
+    if (notes && notes.trim()) {
+      payload.notes = notes.trim();
+    }
+    this.apiService.post(`/inventory/asset-loans/return/${id}`, payload).subscribe({
       next: () => {
         this.returningIds.delete(id);
+        this.closeReturnModal();
         this.fetchLoans();
         this.fetchReturnLogs();
         this.fetchAvailableTools();

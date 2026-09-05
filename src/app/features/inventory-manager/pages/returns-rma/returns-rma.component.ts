@@ -82,16 +82,27 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     'reported': 'Reported',
     'under-review': 'Under Review',
     'sent-to-supplier': 'Sent to Supplier',
+    'replacement-pending': 'Replacement Pending',
     'resolved': 'Resolved',
     'closed': 'Closed',
   };
 
   rmaNextStatus: Record<string, string> = {
     'reported': 'under-review',
-    'under-review': 'sent-to-supplier',
-    'sent-to-supplier': 'resolved',
+    'sent-to-supplier': 'replacement-pending',
     'resolved': 'closed',
   };
+
+  // Internal repair modal
+  showInternalRepairModal = false;
+  internalRepairRma: RmaCaseItem | null = null;
+  internalRepairNote = '';
+
+  // Supplier replacement modal
+  showReplacementModal = false;
+  replacementRma: RmaCaseItem | null = null;
+  replacementSerialNumber = '';
+  replacementNotes = '';
 
   constructor(private dashboardService: InventoryManagerDashboardService) {}
 
@@ -327,6 +338,98 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   getNextStatusLabel(status: string): string {
     const next = this.rmaNextStatus[status];
     return next ? this.rmaStatusLabels[next] : '';
+  }
+
+  sendToSupplier(rma: RmaCaseItem): void {
+    if (this.pendingActionIds.has(rma.rmaId)) return;
+    this.pendingActionIds.add(rma.rmaId);
+    this.dashboardService.updateRmaCase(rma.rmaId, { status: 'sent-to-supplier' }).subscribe({
+      next: () => {
+        this.pendingActionIds.delete(rma.rmaId);
+        this.refreshData();
+        this.successMessage = `RMA ${rma.rmaId} sent to supplier.`;
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.pendingActionIds.delete(rma.rmaId);
+        this.error = err.error?.message || 'Failed to update RMA status.';
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
+
+  openInternalRepairModal(rma: RmaCaseItem): void {
+    this.internalRepairRma = rma;
+    this.internalRepairNote = '';
+    this.showInternalRepairModal = true;
+  }
+
+  closeInternalRepairModal(): void {
+    this.showInternalRepairModal = false;
+    this.internalRepairRma = null;
+    this.internalRepairNote = '';
+  }
+
+  submitInternalRepair(): void {
+    if (!this.internalRepairRma || !this.internalRepairNote.trim() || this.submitting) return;
+    this.submitting = true;
+    const rma = this.internalRepairRma;
+    this.dashboardService.updateRmaCase(rma.rmaId, {
+      status: 'resolved',
+      resolutionType: 'internal-repair',
+      resolution: this.internalRepairNote.trim(),
+      resolutionNote: this.internalRepairNote.trim(),
+    }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.closeInternalRepairModal();
+        this.refreshData();
+        this.successMessage = `RMA ${rma.rmaId} resolved via internal repair and returned to service.`;
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || 'Failed to resolve RMA.';
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
+
+  openReplacementModal(rma: RmaCaseItem): void {
+    this.replacementRma = rma;
+    this.replacementSerialNumber = '';
+    this.replacementNotes = '';
+    this.showReplacementModal = true;
+  }
+
+  closeReplacementModal(): void {
+    this.showReplacementModal = false;
+    this.replacementRma = null;
+    this.replacementSerialNumber = '';
+    this.replacementNotes = '';
+  }
+
+  submitReplacementReceipt(): void {
+    if (!this.replacementRma || !this.replacementSerialNumber.trim() || this.submitting) return;
+    this.submitting = true;
+    const rma = this.replacementRma;
+    this.dashboardService.receiveRmaReplacement(rma.rmaId, {
+      serialNumber: this.replacementSerialNumber.trim(),
+      notes: this.replacementNotes.trim() || undefined,
+    }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.closeReplacementModal();
+        this.refreshData();
+        this.successMessage = `Replacement serial ${this.replacementSerialNumber.trim()} received for RMA ${rma.rmaId}.`;
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || 'Failed to receive replacement.';
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
   }
 
   // ── Quarantine ──

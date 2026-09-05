@@ -357,6 +357,10 @@ export class InventoryManagerDashboardService {
     return this.http.patch<RmaCaseItem>(`${this.apiUrl}/rma-cases/${rmaId}`, data);
   }
 
+  receiveRmaReplacement(rmaId: string, data: { serialNumber: string; notes?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/rma-cases/${rmaId}/replacement`, data);
+  }
+
   getQuarantineItems(): Observable<QuarantineItemData[]> {
     return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`);
   }
@@ -421,10 +425,13 @@ export interface RmaCaseItem {
   itemSku: string;
   faultDescription: string;
   reportedBy: string;
-  status: 'reported' | 'under-review' | 'sent-to-supplier' | 'resolved' | 'closed';
+  status: 'reported' | 'under-review' | 'sent-to-supplier' | 'replacement-pending' | 'resolved' | 'closed';
   type: 'Single' | 'Kit' | 'Bundle';
+  resolutionType?: 'internal-repair' | 'supplier-replacement' | '';
+  resolutionNote?: string;
   resolution: string;
   resolvedAt?: string;
+  replacementSerializedAssetId?: string;
   createdAt: string;
 }
 
