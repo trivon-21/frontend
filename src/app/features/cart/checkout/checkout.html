@@ -290,6 +290,7 @@
           </span>
           <div class="upload-text">Click to upload slip</div>
           <div class="upload-subtext">(PDF, PNG or JPG, MAX 5MB)</div>
+          <div class="upload-subtext" style="font-size: 11px; color: #64748b; margin-top: 4px;">(Bank transfer receipt or deposit slip)</div>
         </div>
         <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)" accept=".png,.jpg,.jpeg,.pdf">
       </div>
@@ -312,11 +313,9 @@
         </div>
         <button class="remove-file-btn" (click)="removeFile()">Remove</button>
       </div>
- 
-      <div class="upload-subtext error" *ngIf="isBuyOnly && uploadError" style="color: #ff4d4f; font-size: 12px; margin-bottom: 12px; text-align: center;">{{ uploadError }}</div>
 
       <!-- SUMMARY ERROR BANNER (Right side - for Buy Only) -->
-      <div class="summary-error-banner" *ngIf="isBuyOnly && showSummaryError && (shippingForm.invalid || !selectedFile)" id="sidebar-error">
+      <div class="summary-error-banner" *ngIf="isBuyOnly && showSummaryError && (shippingForm.invalid || !selectedFile || uploadError)" id="sidebar-error">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -325,9 +324,10 @@
         <span>{{ getSummaryErrorMessage() }}</span>
       </div>
  
-      <button class="confirm-btn" (click)="placeOrder()" [disabled]="isInitializing" *ngIf="isBuyOnly">
+      <button class="confirm-btn" (click)="placeOrder()" [disabled]="isInitializing || isSubmittingPayment" *ngIf="isBuyOnly">
         <span *ngIf="isInitializing">Initializing Order...</span>
-        <span *ngIf="!isInitializing">
+        <span *ngIf="isSubmittingPayment">Verifying Slip & Placing Order...</span>
+        <span *ngIf="!isInitializing && !isSubmittingPayment">
           {{ isOrderInitialized ? 'Upload Slip & Complete' : 'Confirm & Get Reference' }} &nbsp;→
         </span>
       </button>

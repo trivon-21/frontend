@@ -66,7 +66,7 @@ export class InvoiceGenerateComponent implements OnInit {
       },
       error: (err: any) => {
         console.error(err); this.isLoading = false;
-        this.notificationService.show('❌ Failed to generate invoice: ' + (err.error?.message || err.message), 'error');
+        this.notificationService.show('Failed to generate invoice: ' + (err.error?.message || err.message), 'error');
       }
     });
   }
@@ -109,7 +109,7 @@ export class InvoiceGenerateComponent implements OnInit {
       },
       error: (err: any) => {
         console.error(err); this.isRepairLoading = false;
-        this.notificationService.show('❌ Failed to generate repair invoice: ' + (err.error?.message || err.message), 'error');
+        this.notificationService.show('Failed to generate repair invoice: ' + (err.error?.message || err.message), 'error');
       }
     });
   }
