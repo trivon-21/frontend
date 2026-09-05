@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-scheduled-inspections',
@@ -26,7 +27,8 @@ export class ScheduledInspectionsComponent implements OnInit {
   constructor(
     private officerService: InspectionOfficerService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void { this.loadInspections(); }
@@ -64,7 +66,12 @@ export class ScheduledInspectionsComponent implements OnInit {
   confirmStartInspection(): void {
     if (!this.arrivalTime.trim()) { this.notificationService.show('Please enter arrival time.', 'warning'); return; }
     this.isLoading = true;
-    this.officerService.startInspection(this.startingTicketId, this.arrivalTime).subscribe({
+
+    // Record which inspector started this job, sourced from the authenticated user
+    const currentUser = this.authService.getCurrentUser();
+    const inspectorId = currentUser?.id;
+
+    this.officerService.startInspection(this.startingTicketId, this.arrivalTime, inspectorId).subscribe({
       next: () => {
         this.notificationService.show('✅ Inspection started! Arrival time email sent to customer.', 'success');
         this.closeArrivalModal();

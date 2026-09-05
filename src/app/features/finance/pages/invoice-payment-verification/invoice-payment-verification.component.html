@@ -43,7 +43,7 @@
             <td><span class="invoice-id">{{ payment.invoiceId }}</span></td>
             <td><span class="customer-name">{{ payment.customerName }}</span></td>
             <td><span class="amount">LKR {{ payment.amount | number:'1.2-2' }}</span></td>
-            <td><button class="view-invoice-btn" (click)="viewDetails(payment)">View Invoice</button></td>
+            <td><button class="view-invoice-btn" (click)="viewDetails(payment)">View Slip</button></td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-approve" (click)="approvePayment(payment)" [disabled]="isLoading">Approve</button>
