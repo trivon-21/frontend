@@ -134,7 +134,10 @@
   color: #9ca3af;
   margin-left: 4px;
 }
-
+.required-asterisk {
+  color: #dc2626;
+  margin-left: 2px;
+}
 /* RADIO */
 .radio-group {
   display: flex;

@@ -93,26 +93,22 @@
             Sections 3–8 will repeat for each room on the next page.
           </p>
           <button class="add-room-btn" (click)="addRoom()">
-            <span class="plus-icon"><svg xmlns="http://www.w3.org/2000/svg"
-     width="18" height="18"
-     viewBox="0 0 24 24"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10"></circle>
-  <line x1="12" y1="8" x2="12" y2="16"></line>
-  <line x1="8" y1="12" x2="16" y2="12"></line>
-</svg></span> Add Room
+            <span class="plus-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg></span> Add Room
           </button>
           <div class="room-chips">
             <div class="room-chip" *ngFor="let room of rooms; let i = index">
               <span>Room {{ i+1 }}{{ room.name ? ': '+room.name : '' }}</span>
-              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove">  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
+              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove"> <svg
+                  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg></button>
             </div>
           </div>
         </div>
@@ -146,13 +142,13 @@
             <div class="form-group">
               <label>Dimensions (L x W x H)</label>
               <div class="dimensions-row">
-                <input type="number" placeholder="Length (ft)" [(ngModel)]="room.length"
+                <input type="number" min="0" placeholder="Length (ft)" [(ngModel)]="room.length"
                   (ngModelChange)="calcArea(room)" class="dim-input" />
                 <span class="dim-x">X</span>
-                <input type="number" placeholder="Width (ft)" [(ngModel)]="room.width" (ngModelChange)="calcArea(room)"
-                  class="dim-input" />
+                <input type="number" min="0" placeholder="Width (ft)" [(ngModel)]="room.width"
+                  (ngModelChange)="calcArea(room)" class="dim-input" />
                 <span class="dim-x">X</span>
-                <input type="number" placeholder="Height (ft)" [(ngModel)]="room.height" class="dim-input" />
+                <input type="number" min="0" placeholder="Height (ft)" [(ngModel)]="room.height" class="dim-input" />
               </div>
             </div>
             <div class="form-group">
@@ -176,7 +172,7 @@
             </div>
             <div class="form-group">
               <label>No. of Windows</label>
-              <input type="number" [(ngModel)]="room.windows" />
+              <input type="number" min="0" [(ngModel)]="room.windows" />
             </div>
           </div>
 
@@ -221,7 +217,7 @@
             <div class="form-group">
               <label>Indoor — Outdoor distance (approx.)</label>
               <div class="inline-row">
-                <input type="number" [(ngModel)]="room.indoorOutdoorDistance" class="small-input" />
+                <input type="number" min="0" [(ngModel)]="room.indoorOutdoorDistance" class="small-input" />
                 <span class="unit-tag">m</span>
                 <select [(ngModel)]="room.distanceMeasured" class="small-select">
                   <option>Measured</option>
@@ -244,7 +240,7 @@
             </div>
             <div class="form-group">
               <label>Estimated Number of Bends</label>
-              <input type="number" [(ngModel)]="room.estimatedBends" />
+              <input type="number" min="0" [(ngModel)]="room.estimatedBends" />
             </div>
             <div class="form-group toggle-row">
               <label>Drain Outlet Availability Nearby</label>
@@ -288,13 +284,13 @@
             </div>
             <div class="form-group">
               <label>Number of Drill points (Approx.)</label>
-              <input type="number" [(ngModel)]="room.drillPoints" />
+              <input type="number" min="0" [(ngModel)]="room.drillPoints" />
             </div>
             <div class="form-group">
               <label>Vertical Height Difference (Approx.)
                 <span class="unit">In meters</span>
               </label>
-              <input type="number" [(ngModel)]="room.verticalHeightDiff" />
+              <input type="number" min="0" [(ngModel)]="room.verticalHeightDiff" />
             </div>
           </div>
 
@@ -387,10 +383,12 @@
             <div class="photo-entry" *ngFor="let entry of photoEntries; let i = index">
               <div class="photo-entry-img">
                 <img [src]="entry.dataUrl" class="photo-preview" />
-                <button class="remove-photo-btn" (click)="removePhoto(i)">  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
+                <button class="remove-photo-btn" (click)="removePhoto(i)"> <svg xmlns="http://www.w3.org/2000/svg"
+                    width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg></button>
               </div>
               <span class="photo-entry-name">{{ entry.name }}</span>
             </div>
@@ -407,8 +405,8 @@
         <div class="form-card">
           <h3 class="section-title">10. Acknowledgement</h3>
           <div class="form-group">
-            <label>Inspector Name</label>
-            <input type="text" [(ngModel)]="inspectorName" />
+            <label>Inspector Name <span class="required-asterisk">*</span></label>
+            <input type="text" [(ngModel)]="inspectorName" required />
           </div>
           <div class="form-group">
             <label>Date</label>

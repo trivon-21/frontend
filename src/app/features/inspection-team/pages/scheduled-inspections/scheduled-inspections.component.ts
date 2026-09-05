@@ -73,14 +73,14 @@ export class ScheduledInspectionsComponent implements OnInit {
 
     this.officerService.startInspection(this.startingTicketId, this.arrivalTime, inspectorId).subscribe({
       next: () => {
-        this.notificationService.show('✅ Inspection started! Arrival time email sent to customer.', 'success');
+        this.notificationService.show('Inspection started! Arrival time email sent to customer.', 'success');
         this.closeArrivalModal();
         this.loadInspections();
       },
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        this.notificationService.show('❌ Failed to start inspection.', 'error');
+        this.notificationService.show('Failed to start inspection.', 'error');
       }
     });
   }
