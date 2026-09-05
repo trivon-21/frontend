@@ -70,10 +70,10 @@ export class ServicePaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.servicePaymentService.approvePayment(payment._id).subscribe({
       next: () => {
-        this.notificationService.show('✅ Payment approved! Email sent to customer.', 'success');
+        this.notificationService.show('Payment approved! Email sent to customer.', 'success');
         this.loadPayments();
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Approval failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Approval failed.', 'error'); }
     });
   }
 
@@ -90,10 +90,10 @@ export class ServicePaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.servicePaymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
       next: () => {
-        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent to customer.', 'success');
+        this.notificationService.show('Payment rejected. Email with re-upload link sent to customer.', 'success');
         this.closeRejectModal(); this.loadPayments();
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Rejection failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Rejection failed.', 'error'); }
     });
   }
 }
