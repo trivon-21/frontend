@@ -20,11 +20,11 @@ export class PurchaseRequestService {
     return this.http.get<any[]>(`${this.api}/rejected`);
   }
 
-  approveRequest(id: string): Observable<any> {
-    return this.http.put<any>(`${this.api}/approve/${id}`, {});
+  approveRequest(id: string, statusVersion: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/approve/${id}`, { statusVersion });
   }
 
-  rejectRequest(id: string, rejectionReason: string): Observable<any> {
-    return this.http.put<any>(`${this.api}/reject/${id}`, { rejectionReason });
+  rejectRequest(id: string, rejectionReason: string, statusVersion: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/reject/${id}`, { rejectionReason, statusVersion });
   }
 }

@@ -262,6 +262,7 @@ export class NewOrderFormComponent implements OnInit {
     this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).subscribe({
       next: (data) => {
         this.isSubmitting = false;
+        this.statusVersion = data.statusVersion;
         if (!this.isEditMode) {
           this.isEditMode = true;
           this.orderId = data.requestId;
@@ -296,7 +297,7 @@ export class NewOrderFormComponent implements OnInit {
       notes: this.orderNotes,
       source: this.sourceMaterialRequestId ? 'material-request' : 'manual',
       ...(this.sourceMaterialRequestId ? { sourceMaterialRequestId: this.sourceMaterialRequestId } : {}),
-      ...(this.isEditMode ? { expectedVersion: this.statusVersion } : {}),
+      ...(this.isEditMode ? { statusVersion: this.statusVersion } : {}),
     };
   }
 

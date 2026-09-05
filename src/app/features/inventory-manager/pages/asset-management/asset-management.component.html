@@ -165,7 +165,7 @@
                 <button
                   type="button"
                   class="btn-small im-btn im-btn--secondary im-btn--compact"
-                  (click)="markReturned(loan._id!)"
+                  (click)="markReturned(loan._id!, returnConditions[loan._id!] || 'good')"
                   [disabled]="returningIds.has(loan._id!)"
                 >
                   <lucide-angular
@@ -186,6 +186,18 @@
 
       <div class="table-footer" *ngIf="loans.length > 0">
         <div class="warning-badge">
+                <label class="visually-hidden" [for]="'return-condition-' + loan._id">Return condition</label>
+                <select
+                  class="form-select form-select--compact"
+                  [id]="'return-condition-' + loan._id"
+                  [ngModel]="returnConditions[loan._id!] || 'good'"
+                  (ngModelChange)="returnConditions[loan._id!] = $event"
+                  [disabled]="returningIds.has(loan._id!)"
+                >
+                  <option value="good">Good</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="incomplete">Incomplete</option>
+                </select>
           <span class="dot"></span>
           {{ loans.length }} items currently out
         </div>

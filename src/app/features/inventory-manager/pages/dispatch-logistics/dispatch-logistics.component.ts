@@ -15,6 +15,7 @@ interface DispatchOrder {
   orderId?: string; // from backend
   customer: string;
   status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
+  statusVersion: number;
   type: string;
   items: DispatchItem[];
   time?: string;
@@ -80,6 +81,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         id: o.orderId,
         customer: o.customer,
         status: o.status,
+        statusVersion: o.statusVersion ?? 0,
         type: o.type,
         items: o.items,
         time: o.date,
@@ -190,7 +192,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         status: 'ready',
         courier: this.courierService,
         trackId: this.trackingId,
-        lastMovedAt: new Date().toISOString(),
+        statusVersion: order.statusVersion,
       };
 
       this.runOrderUpdate(order, updateData, () => {
@@ -248,6 +250,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       const updateData = {
         courier: this.editCourier,
         trackId: this.editTrackId,
+        statusVersion: order.statusVersion,
       };
       this.runOrderUpdate(order, updateData, () => {
         order.courier = this.editCourier;
@@ -264,7 +267,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       const updateData = {
         status: 'in-transit',
-        lastMovedAt: new Date().toISOString(),
+        statusVersion: order.statusVersion,
       };
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('in-transit');
@@ -280,8 +283,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       const updateData = {
         status: 'completed',
-        completedAt: new Date().toISOString().split('T')[0],
-        lastMovedAt: new Date().toISOString(),
+        statusVersion: order.statusVersion,
       };
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('completed');
@@ -311,13 +313,13 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     let targetTab: 'to-pack' | 'ready' | 'in-transit' = 'to-pack';
 
     if (order.status === 'completed') {
-      updateData = { status: 'in-transit', completedAt: null, lastMovedAt: null };
+      updateData = { status: 'in-transit', undo: true, statusVersion: order.statusVersion };
       targetTab = 'in-transit';
     } else if (order.status === 'in-transit') {
-      updateData = { status: 'ready', lastMovedAt: null };
+      updateData = { status: 'ready', undo: true, statusVersion: order.statusVersion };
       targetTab = 'ready';
     } else if (order.status === 'ready') {
-      updateData = { status: 'to-pack', lastMovedAt: null };
+      updateData = { status: 'to-pack', undo: true, statusVersion: order.statusVersion };
       targetTab = 'to-pack';
     }
 
@@ -336,7 +338,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;
     if (order) {
-      this.runOrderUpdate(order, { items: order.items }, () => {
+      this.runOrderUpdate(order, { items: order.items, statusVersion: order.statusVersion }, () => {
         this.fetchOrders();
         this.closeModals();
       });
@@ -371,7 +373,13 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     this.saving = true;
     this.mutationError = '';
     this.apiService.patch(`/inventory/orders/${order.id}`, updateData).subscribe({
-      next: () => { this.saving = false; onSuccess(); },
+      next: (updated: any) => {
+        order.statusVersion = updated.statusVersion ?? order.statusVersion;
+        order.lastMovedAt = updated.lastMovedAt ?? order.lastMovedAt;
+        order.completedAt = updated.completedAt ?? order.completedAt;
+        this.saving = false;
+        onSuccess();
+      },
       error: (error) => {
         this.saving = false;
         this.mutationError = error.error?.message || 'The dispatch change could not be saved.';

@@ -8,6 +8,7 @@ interface ActiveLoan {
   _id?: string;
   id?: string;
   toolId: string;
+  serializedAssetId?: string | { _id: string; serialNumber: string; status: string };
   toolName: string;
   assetTag: string;
   technicianId: string;
@@ -25,6 +26,8 @@ interface ReturnLog {
   returnedAt: string;
   condition?: 'good' | 'damaged' | 'incomplete';
 }
+
+type ReturnCondition = 'good' | 'damaged' | 'incomplete';
 
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
@@ -54,6 +57,7 @@ export class AssetManagementDashboardComponent implements OnInit {
   loadError = '';
   checkingOut = false;
   returningIds = new Set<string>();
+  returnConditions: Record<string, ReturnCondition> = {};
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
@@ -181,10 +185,10 @@ export class AssetManagementDashboardComponent implements OnInit {
     });
   }
 
-  markReturned(id: string) {
+  markReturned(id: string, condition: ReturnCondition = this.returnConditions[id] || 'good') {
     if (this.returningIds.has(id)) return;
     this.returningIds.add(id);
-    this.apiService.post(`/inventory/asset-loans/return/${id}`).subscribe({
+    this.apiService.post(`/inventory/asset-loans/return/${id}`, { condition }).subscribe({
       next: () => {
         this.returningIds.delete(id);
         this.fetchLoans();

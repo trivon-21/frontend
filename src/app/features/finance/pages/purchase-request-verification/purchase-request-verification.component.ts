@@ -64,7 +64,7 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     });
     if (!confirmed) return;
     this.isLoading = true;
-    this.requestService.approveRequest(request._id).subscribe({
+    this.requestService.approveRequest(request._id, request.statusVersion).subscribe({
       next: () => {
         this.notificationService.show('✅ Purchase request approved! Confirmation email sent.', 'success');
         this.requests = this.requests.filter(r => r._id !== request._id);
@@ -86,7 +86,11 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     if (!this.rejectionReason.trim()) { this.reasonError = true; return; }
     this.reasonError = false;
     this.isLoading = true;
-    this.requestService.rejectRequest(this.selectedRequest._id, this.rejectionReason).subscribe({
+    this.requestService.rejectRequest(
+      this.selectedRequest._id,
+      this.rejectionReason,
+      this.selectedRequest.statusVersion,
+    ).subscribe({
       next: () => {
         this.notificationService.show('✅ Purchase request rejected. Email sent.', 'success');
         this.requests = this.requests.filter(r => r._id !== this.selectedRequest._id);

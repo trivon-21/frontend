@@ -35,19 +35,25 @@ describe('ProcurementDashboardComponent workflow queues', () => {
   function create(params: Record<string, string> = {}) {
     const service = jasmine.createSpyObj<InventoryManagerDashboardService>(
       'InventoryManagerDashboardService',
-      ['getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getLocations', 'receiveInventory'],
+      ['getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getReceiptDiscrepancies', 'getLocations', 'receiveInventory'],
     );
     service.getProcurements.and.returnValue(of([]));
     service.getInventory.and.returnValue(of([]));
     service.getOrderRequests.and.returnValue(of([]));
     service.getReceiptAuthorizations.and.returnValue(of([newItemAuthorization]));
+    service.getReceiptDiscrepancies.and.returnValue(of([]));
     service.getLocations.and.returnValue(of([
       { warehouse: 'Central Warehouse', placementAreas: ['Consumables Storage', 'Small Parts Racking'] },
       { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
     ]));
     service.receiveInventory.and.returnValue(of({
       item: { ...newItemAuthorization.newItemSnapshot, available: 2, reserved: 0, status: 'normal', category: 'Consumables' } as never,
-      procurement: {},
+      procurement: {
+        _id: 'procurement-1', acceptedQuantity: 2, damagedQuantity: 0, missingQuantity: 0,
+        acceptedTotalCost: 200, disputedTotalCost: 0,
+      },
+      discrepancy: null,
+      quarantine: null,
     }));
     const route = { snapshot: { queryParamMap: convertToParamMap(params) } };
     const component = new ProcurementDashboardComponent(new FormBuilder(), service, route as never);
@@ -79,6 +85,55 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     expect(payload['inventoryId']).toBeUndefined();
     expect(payload['receiptAuthorizationId']).toBe('authorization-1');
     expect(payload['receiptMode']).toBe('NON_PO');
+    expect(payload['acceptedQuantity']).toBe(2);
+    expect(payload['damagedQuantity']).toBe(0);
+    expect(payload['missingQuantity']).toBe(0);
+  });
+
+  it('submits an incomplete delivery with only accepted units destined for stock', () => {
+    const { component, service } = create({ mode: 'NON_PO' });
+    component.selectAuthorization({ ...newItemAuthorization, authorizedQuantity: 3 });
+    component.receiptForm.patchValue({
+      source: { sourceDocumentNumber: 'DELIVERY-2', receivedDate: '2026-09-02', condition: 'Incomplete' },
+      stock: {
+        quantity: 3, acceptedQuantity: 1, damagedQuantity: 0, missingQuantity: 2,
+        location: 'Central Warehouse', binLocation: 'Consumables Storage',
+      },
+    });
+    component.currentStep = 3;
+
+    component.onSubmit();
+
+    const payload = service.receiveInventory.calls.mostRecent().args[0];
+    expect(payload.acceptedQuantity).toBe(1);
+    expect(payload.missingQuantity).toBe(2);
+    expect(payload.condition).toBe('Incomplete');
+  });
+
+  it('defaults a damaged delivery to quarantine-only disposition', () => {
+    const { component } = create({ mode: 'NON_PO' });
+    component.selectAuthorization(newItemAuthorization);
+    component.receiptForm.get('source.condition')?.setValue('Damaged');
+
+    expect(component.acceptedQuantity).toBe(0);
+    expect(component.damagedQuantity).toBe(2);
+    expect(component.receiptBreakdownValid).toBeTrue();
+  });
+
+  it('blocks posting when the disposition does not equal the expected delivery', () => {
+    const { component } = create({ mode: 'NON_PO' });
+    component.selectAuthorization(newItemAuthorization);
+    component.receiptForm.patchValue({
+      source: { sourceDocumentNumber: 'DELIVERY-3', receivedDate: '2026-09-02', condition: 'Incomplete' },
+      stock: {
+        quantity: 2, acceptedQuantity: 1, damagedQuantity: 0, missingQuantity: 0,
+        location: 'Central Warehouse', binLocation: 'Consumables Storage',
+      },
+    });
+    component.currentStep = 3;
+
+    expect(component.receiptBreakdownValid).toBeFalse();
+    expect(component.canGoNext()).toBeFalse();
   });
 
   it('rejects a placement area from a different warehouse in the receipt form', () => {

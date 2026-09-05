@@ -69,11 +69,12 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
 
-  it('posts an empty body to the exact tool-return endpoint', () => {
+  it('posts the selected return condition to the exact tool-return endpoint', () => {
+    component.returnConditions['loan-1'] = 'damaged';
     component.markReturned('loan-1');
     const request = http.expectOne(`${baseUrl}/asset-loans/return/loan-1`);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({});
+    expect(request.request.body).toEqual({ condition: 'damaged' });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
 });

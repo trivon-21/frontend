@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import {
   InventoryManagerDashboardService,
+  ReceiveInventoryInput,
   normalizeInventoryDashboard,
 } from './inventory-manager-dashboard.service';
 
@@ -136,6 +137,7 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
       ['/item/item-1', () => service.getItem('item-1').subscribe()],
       ['/suppliers', () => service.getSuppliers().subscribe()],
       ['/procurements', () => service.getProcurements().subscribe()],
+      ['/receipt-discrepancies', () => service.getReceiptDiscrepancies().subscribe()],
       ['/order-requests', () => service.getOrderRequests().subscribe()],
       ['/returns-summary', () => service.getReturnsSummary().subscribe()],
       ['/leftover-returns', () => service.getLeftoverReturns().subscribe()],
@@ -173,9 +175,12 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
     expect(request.request.body).toEqual({ name: 'Summit Cooling' });
     request.flush({});
 
-    const receipt = {
+    const receipt: ReceiveInventoryInput = {
       receiptMode: 'PO', orderRequestId: 'order-1', orderLineId: 'line-1', quantity: 2,
-      sourceDocumentNumber: 'INV-1', receiptEventId: 'event-1', serialNumbers: [],
+      acceptedQuantity: 2, damagedQuantity: 0, missingQuantity: 0,
+      sourceDocumentNumber: 'INV-1', receivedDate: '2026-09-02', condition: 'Good',
+      location: 'Central Warehouse', binLocation: 'General Storage', unitCost: 100,
+      receiptEventId: 'event-1', serialNumbers: [], damagedSerialNumbers: [],
     };
     service.receiveInventory(receipt).subscribe();
     request = http.expectOne(`${baseUrl}/receipts`);

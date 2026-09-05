@@ -79,6 +79,71 @@ export interface InventoryDashboardData {
   procurementWorkflow: ProcurementWorkflowSummary;
 }
 
+export interface ReceiveInventoryInput {
+  inventoryId?: string;
+  quantity: number;
+  acceptedQuantity: number;
+  damagedQuantity: number;
+  missingQuantity: number;
+  serialNumbers: string[];
+  damagedSerialNumbers: string[];
+  supplierId?: string;
+  invoiceNumber?: string;
+  sourceDocumentNumber: string;
+  supportingDocumentUrl?: string;
+  receivedDate: string;
+  condition: 'Good' | 'Damaged' | 'Incomplete';
+  location: string;
+  binLocation: string;
+  unitCost: number;
+  receiptEventId: string;
+  receiptMode: 'PO' | 'NON_PO';
+  orderRequestId?: string;
+  orderLineId?: string;
+  receiptAuthorizationId?: string;
+  discrepancyId?: string;
+}
+
+export interface ReceiptDiscrepancy {
+  _id: string;
+  discrepancyId: string;
+  inventoryId: InventoryItem | string;
+  supplierId: { _id: string; name: string } | string;
+  supplierName: string;
+  itemName: string;
+  sku: string;
+  receiptMode: 'PO' | 'NON_PO';
+  orderRequestId?: { _id: string; requestId: string; poNumber?: string; status: string } | string;
+  orderLineId?: string;
+  receiptAuthorizationId?: { _id: string; authorizationNumber: string; status: string } | string;
+  sourceDocumentNumber: string;
+  expectedQuantity: number;
+  acceptedQuantity: number;
+  damagedQuantity: number;
+  missingQuantity: number;
+  outstandingQuantity: number;
+  resolvedQuantity: number;
+  unit: string;
+  unitCost: number;
+  disputedValue: number;
+  status: 'open' | 'supplier-contacted' | 'replacement-pending' | 'resolved' | 'waived';
+  createdAt: string;
+}
+
+export interface ReceiveInventoryResult {
+  item: InventoryItem;
+  procurement: {
+    _id: string;
+    acceptedQuantity: number;
+    damagedQuantity: number;
+    missingQuantity: number;
+    acceptedTotalCost: number;
+    disputedTotalCost: number;
+  };
+  discrepancy: ReceiptDiscrepancy | null;
+  quarantine: QuarantineItemData | null;
+}
+
 function emptyProcurementWorkflow(): ProcurementWorkflowSummary {
   return {
     awaitingManager: 0,
@@ -210,8 +275,8 @@ export class InventoryManagerDashboardService {
     return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
   }
 
-  receiveInventory(data: Record<string, unknown>): Observable<{ item: InventoryItem; procurement: any }> {
-    return this.http.post<{ item: InventoryItem; procurement: any }>(`${this.apiUrl}/receipts`, data);
+  receiveInventory(data: ReceiveInventoryInput): Observable<ReceiveInventoryResult> {
+    return this.http.post<ReceiveInventoryResult>(`${this.apiUrl}/receipts`, data);
   }
 
   getSuppliers(): Observable<any[]> {
@@ -224,6 +289,12 @@ export class InventoryManagerDashboardService {
 
   getProcurements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/procurements`);
+  }
+
+  getReceiptDiscrepancies(status = 'all'): Observable<ReceiptDiscrepancy[]> {
+    return this.http.get<ReceiptDiscrepancy[]>(`${this.apiUrl}/receipt-discrepancies`, {
+      params: status === 'all' ? {} : { status },
+    });
   }
 
   getOrderRequests(): Observable<PurchaseRequest[]> {
@@ -345,6 +416,7 @@ export interface RmaCaseItem {
   _id: string;
   rmaId: string;
   serialNumber: string;
+  serializedAssetId?: string | { _id: string; serialNumber: string; status: string };
   itemName: string;
   itemSku: string;
   faultDescription: string;
@@ -364,7 +436,7 @@ export interface QuarantineItemData {
   unit: string;
   reason: string;
   location: string;
-  source: 'leftover-return' | 'rma' | 'manual';
+  source: 'leftover-return' | 'rma' | 'receipt' | 'manual';
   sourceRefId: string;
   status: 'quarantined' | 'disposed' | 'returned-to-supplier';
   disposedAt?: string;

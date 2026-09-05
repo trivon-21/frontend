@@ -11,7 +11,8 @@ describe('DispatchLogisticsDashboardComponent HTTP contract', () => {
   const url = `${environment.apiUrl}/inventory/orders`;
   const toPack = {
     orderId: 'DSP-001', customer: 'Fixture Customer', status: 'to-pack', type: 'Delivery',
-    date: '2026-08-24', items: [{ name: 'Filter', sku: 'FLT-1', qty: 1, confirmed: true }],
+    date: '2026-08-24', statusVersion: 3,
+    items: [{ name: 'Filter', sku: 'FLT-1', qty: 1, confirmed: true }],
   };
 
   beforeEach(() => {
@@ -48,7 +49,7 @@ describe('DispatchLogisticsDashboardComponent HTTP contract', () => {
     component.saveStatus();
     const request = http.expectOne(`${url}/DSP-001`);
     expect(request.request.method).toBe('PATCH');
-    expect(request.request.body).toEqual({ items: toPack.items });
+    expect(request.request.body).toEqual({ items: toPack.items, statusVersion: 3 });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
 
@@ -64,7 +65,7 @@ describe('DispatchLogisticsDashboardComponent HTTP contract', () => {
       status: 'ready',
       courier: 'Fixture Courier',
       trackId: 'TRACK-001',
-      lastMovedAt: '2026-08-24T10:30:00.000Z',
+      statusVersion: 3,
     });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
@@ -76,7 +77,7 @@ describe('DispatchLogisticsDashboardComponent HTTP contract', () => {
     let request = http.expectOne(`${url}/DSP-001`);
     expect(request.request.body).toEqual({
       status: 'in-transit',
-      lastMovedAt: '2026-08-24T10:30:00.000Z',
+      statusVersion: 3,
     });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
 
@@ -86,16 +87,22 @@ describe('DispatchLogisticsDashboardComponent HTTP contract', () => {
     request = http.expectOne(`${url}/DSP-001`);
     expect(request.request.body).toEqual({
       status: 'completed',
-      completedAt: '2026-08-24',
-      lastMovedAt: '2026-08-24T10:30:00.000Z',
+      statusVersion: 3,
     });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
 
-    load({ ...toPack, status: 'completed', completedAt: '2026-08-24' });
+    load({
+      ...toPack,
+      status: 'completed',
+      completedAt: '2026-08-24',
+      lastMovedAt: '2026-08-24T10:00:00.000Z',
+    });
     component.openAssignModal('DSP-001');
     component.undoAction();
     request = http.expectOne(`${url}/DSP-001`);
-    expect(request.request.body).toEqual({ status: 'in-transit', completedAt: null, lastMovedAt: null });
+    expect(request.request.body).toEqual({
+      status: 'in-transit', undo: true, statusVersion: 3,
+    });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });
 });
