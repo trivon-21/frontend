@@ -89,12 +89,12 @@ export class InvoiceCreatorComponent implements OnInit {
     this.invoiceService.confirmInvoice(this.invoiceId).subscribe({
       next: () => {
         this.isConfirming = false;
-        this.notificationService.show('✅ Invoice confirmed! It has been moved to Pending Invoices.', 'success');
+        this.notificationService.show('Invoice confirmed! It has been moved to Pending Invoices.', 'success');
         this.router.navigate(['/finance/invoice/pending']);
       },
       error: (err: any) => {
         this.isConfirming = false;
-        this.notificationService.show('❌ Failed to confirm: ' + (err.error?.message || err.message), 'error');
+        this.notificationService.show('Failed to confirm: ' + (err.error?.message || err.message), 'error');
       }
     });
   }

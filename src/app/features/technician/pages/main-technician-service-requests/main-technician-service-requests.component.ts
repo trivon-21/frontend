@@ -21,6 +21,7 @@ interface ServiceRequest {
 interface ServiceRequestApiItem {
   _id?: string;
   ticketId?: string | number;
+  serviceRequestRef?: string;
   customerName?: string;
   fullName?: string;
   customerId?: string | { name?: string; address?: string; fullName?: string };
@@ -173,7 +174,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
     const displayDate = this.formatDisplayDate(item.serviceDate);
     const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
-    const ticketId = String(item.ticketId || item._id || '');
+    const ticketId = String(item.serviceRequestRef || item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
 
     const assignedTeamName = typeof item.assignedTeam === 'object'

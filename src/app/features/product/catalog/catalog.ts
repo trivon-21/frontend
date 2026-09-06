@@ -6,12 +6,13 @@ import { RouterModule, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-catalog',
   templateUrl: './catalog.html',
   styleUrl: './catalog.css',
-  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective],
+  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
 })
 export class Catalog implements OnInit {
   products: any[] = [];

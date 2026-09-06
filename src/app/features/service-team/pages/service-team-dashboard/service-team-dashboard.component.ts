@@ -9,6 +9,7 @@ interface DashboardSummary {
   activeJobs: number;
   serviceRequests: number;
   installations: number;
+  maintenances: number;
 }
 
 interface DashboardActivityApiItem {
@@ -49,7 +50,8 @@ export class ServiceTeamDashboardComponent implements OnInit {
   dashboardData: DashboardSummary = {
     activeJobs: 0,
     serviceRequests: 0,
-    installations: 0
+    installations: 0,
+    maintenances: 0
   };
 
   constructor(
@@ -62,9 +64,24 @@ export class ServiceTeamDashboardComponent implements OnInit {
 
   /** Loads dashboard summary, activity, and alerts after the component starts. */
   ngOnInit(): void {
+    this.fetchTeamDetails();
     this.fetchDashboardSummary();
     this.fetchRecentActivity();
     this.fetchUrgentAlerts();
+  }
+
+  /** Fetches the team details to display the actual team name instead of the logged-in user's name. */
+  fetchTeamDetails(): void {
+    this.http.get<any>(`${environment.apiBaseUrl}/team-details${this.teamSessionService.buildTeamQuery()}`).subscribe({
+      next: (response) => {
+        if (response.success && response.data?.team?.teamName) {
+          this.teamLabel = response.data.team.teamName;
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching team details:', err);
+      }
+    });
   }
 
   /** Fetches the dashboard summary from the backend API. */
@@ -74,13 +91,15 @@ export class ServiceTeamDashboardComponent implements OnInit {
         if (response.success && response.data) {
           const inProgressServiceRequests = Number(response.data.inProgressServiceRequests ?? 0);
           const inProgressInstallations = Number(response.data.inProgressInstallations ?? 0);
-          const activeJobsFromParts = inProgressServiceRequests + inProgressInstallations;
+          const inProgressMaintenances = Number(response.data.inProgressMaintenances ?? 0);
+          const activeJobsFromParts = inProgressServiceRequests + inProgressInstallations + inProgressMaintenances;
 
           this.dashboardData = {
             activeJobs: response.data.activeJobs ?? activeJobsFromParts,
             serviceRequests: response.data.serviceRequests ?? 0,
             // Keep compatibility with older payloads that still return teamAvailable.
-            installations: response.data.installations ?? response.data.teamAvailable ?? 0
+            installations: response.data.installations ?? response.data.teamAvailable ?? 0,
+            maintenances: response.data.maintenances ?? 0
           };
         }
       },
@@ -130,13 +149,14 @@ export class ServiceTeamDashboardComponent implements OnInit {
 
   /** Returns the icon SVG for a dashboard activity type. */
   private getActivityIcon(type: string): string {
-    const iconMap: Record<'inspection' | 'installation' | 'service', string> = {
+    const iconMap: Record<'inspection' | 'installation' | 'service' | 'maintenance', string> = {
       inspection: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>`,
       installation: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
       service: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/><path d="m3 7 2 2"/><path d="m21 15-2-2"/></svg>`,
+      maintenance: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`
     };
     const normalizedType = type.toLowerCase();
-    if (normalizedType === 'inspection' || normalizedType === 'installation' || normalizedType === 'service') {
+    if (normalizedType === 'inspection' || normalizedType === 'installation' || normalizedType === 'service' || normalizedType === 'maintenance') {
       return iconMap[normalizedType];
     }
     return iconMap.inspection;
@@ -158,9 +178,15 @@ export class ServiceTeamDashboardComponent implements OnInit {
     return date.toLocaleDateString();
   }
 
+  private get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
+
   /** Navigates the user to the Assigned Jobs tab. */
   navigateToInspections(): void {
-    this.router.navigate(['/service-team/assigned-jobs']);
+    this.router.navigate([this.baseRoute + '/assigned-jobs']);
   }
 
   /** Navigates the user to the materials request page. */
@@ -170,19 +196,19 @@ export class ServiceTeamDashboardComponent implements OnInit {
 
   /** Navigates the user to the team management page. */
   navigateToTeamManagement(): void {
-    this.router.navigate(['/service-team/team-details']);
+    this.router.navigate([this.baseRoute + '/team-details']);
   }
 
   /** Handles the selected dashboard alert action. */
   onAlertAction(alert: DashboardAlertItem): void {
     if (alert.action === 'Assign') {
-      this.router.navigate(['/service-team/team-details']);
+      this.router.navigate([this.baseRoute + '/team-details']);
     } else if (alert.action === 'Review') {
       // Route based on alert type
       if (alert.title === 'Team Status') {
-        this.router.navigate(['/service-team/team-details']);
+        this.router.navigate([this.baseRoute + '/team-details']);
       } else if (alert.title === 'Jobs Completed') {
-        this.router.navigate(['/service-team/assigned-jobs']);
+        this.router.navigate([this.baseRoute + '/assigned-jobs']);
       } else {
         // Default to materials for other review actions
         this.router.navigate(['/main-technician-materials']);

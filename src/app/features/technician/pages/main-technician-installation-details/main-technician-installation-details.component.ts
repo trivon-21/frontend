@@ -19,18 +19,22 @@ interface InstallationDetail {
     address?: string;
   };
   productType?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   location?: string;
   serviceDate?: string;
   date?: string;
   status?: string;
   siteDetails?: {
     buildingType?: string;
-    floors?: number;
+    floors?: string | number;
     rooms?: number;
     ceilingHeight?: string;
     wallType?: string;
     powerSupply?: string;
     outdoorAccess?: string;
+    elevatorAvailability?: string;
+    parkingAvailability?: string;
   };
   materials?: Array<{ item?: string; quantity?: string }>;
   labour?: {

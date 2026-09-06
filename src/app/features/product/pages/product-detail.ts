@@ -8,11 +8,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -143,10 +144,22 @@ export class ProductDetail implements OnInit {
   // Reviews
   newReview = {
     userName: '',
-    rating: 5,
+    rating: 1,
     comment: ''
   };
   submittingReview = false;
+  reviewError = '';
+  reviewSuccess = false;
+  eligibilityState: 'LOADING' | 'NOT_LOGGED_IN' | 'NOT_A_BUYER' | 'VERIFIED_BUYER' = 'LOADING';
+
+  // Set rating on click; clicking the already-selected star removes it (rating − 1, min 1)
+  setRating(star: number) {
+    if (star === this.newReview.rating) {
+      this.newReview.rating = Math.max(1, star - 1);
+    } else {
+      this.newReview.rating = star;
+    }
+  }
 
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
@@ -167,6 +180,9 @@ export class ProductDetail implements OnInit {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
       this.username = user ? user.fullName.split(' ')[0] : 'Customer';
+      if (this.product?._id) {
+        this.checkReviewEligibility();
+      }
     });
 
     this.route.queryParams.subscribe(params => {
@@ -236,6 +252,7 @@ export class ProductDetail implements OnInit {
           }
           // Check if already in cart
           this.checkIfInCart(this.product._id);
+          this.checkReviewEligibility();
         } else {
           this.error = 'Product not found.';
         }
@@ -348,6 +365,206 @@ export class ProductDetail implements OnInit {
       state: { 
         productId: this.product._id,
         productName: this.product.name
+      }
+    });
+  }
+
+  get userFullName(): string {
+    if (this.newReview.userName) return this.newReview.userName;
+    if (!this.currentUser) return '';
+    const full = [this.currentUser.fullName, this.currentUser.lastName].filter(Boolean).join(' ').trim();
+    return full || this.currentUser.fullName || '';
+  }
+
+  // --- Review Eligibility Check ---
+  checkReviewEligibility() {
+    if (!this.product?._id) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.eligibilityState = 'NOT_LOGGED_IN';
+      return;
+    }
+
+    this.eligibilityState = 'LOADING';
+    this.http.get<any>(`${this.API_BASE}/${this.product._id}/review-eligibility`).subscribe({
+      next: (res) => {
+        if (res && res.isVerifiedBuyer) {
+          this.eligibilityState = 'VERIFIED_BUYER';
+          this.newReview.userName = res.userName || this.userFullName;
+        } else if (res && res.reason === 'NOT_LOGGED_IN') {
+          this.eligibilityState = 'NOT_LOGGED_IN';
+        } else {
+          this.eligibilityState = 'NOT_A_BUYER';
+        }
+      },
+      error: () => {
+        this.eligibilityState = this.authService.isLoggedIn() ? 'NOT_A_BUYER' : 'NOT_LOGGED_IN';
+      }
+    });
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+  }
+
+  goToSignup() {
+    this.router.navigate(['/signup'], { queryParams: { returnUrl: this.router.url } });
+  }
+
+  // --- Submit Review ---
+  submitReview() {
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginPromptModal = true;
+      return;
+    }
+
+    if (this.eligibilityState !== 'VERIFIED_BUYER') {
+      this.reviewError = 'Only verified buyers who have purchased this product can leave a review.';
+      return;
+    }
+
+    if (!this.newReview.comment?.trim()) {
+      this.reviewError = 'Please write a review comment.';
+      return;
+    }
+
+    if (!this.product?._id) return;
+
+    this.submittingReview = true;
+    this.reviewError = '';
+    this.reviewSuccess = false;
+
+    this.http.post<any>(`${this.API_BASE}/${this.product._id}/reviews`, {
+      userName: this.userFullName || 'Verified Customer',
+      rating: Number(this.newReview.rating),
+      comment: this.newReview.comment.trim()
+    }).subscribe({
+      next: (res) => {
+        this.submittingReview = false;
+        this.reviewSuccess = true;
+        if (res && res.data) {
+          this.product.reviews = res.data.reviews || [];
+          this.product.averageRating = res.data.averageRating;
+          this.product.reviewCount = res.data.reviewCount;
+        }
+        // Reset comment & rating
+        this.newReview.comment = '';
+        this.newReview.rating = 1;
+        setTimeout(() => {
+          this.reviewSuccess = false;
+        }, 4000);
+      },
+      error: (err) => {
+        this.submittingReview = false;
+        this.reviewError = err.error?.message || 'Failed to submit review. Please try again.';
+      }
+    });
+  }
+
+  // --- Edit & Delete Review Methods ---
+  editingReviewId: string | null = null;
+  editReviewForm = {
+    rating: 1,
+    comment: ''
+  };
+  savingEditReview = false;
+  editReviewError = '';
+  deletingReviewId: string | null = null;
+  confirmDeleteReviewId: string | null = null;
+
+  isMyReview(review: any): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) return false;
+    if (review.userId && String(review.userId) === String(user.id)) {
+      return true;
+    }
+    const fullName = this.userFullName || [user.fullName, user.lastName].filter(Boolean).join(' ').trim();
+    return Boolean(fullName && review.userName === fullName);
+  }
+
+  hasUserReviewed(): boolean {
+    if (!this.product?.reviews || this.product.reviews.length === 0) return false;
+    return this.product.reviews.some((r: any) => this.isMyReview(r));
+  }
+
+  startEditReview(review: any) {
+    this.editingReviewId = review._id;
+    this.editReviewForm = {
+      rating: review.rating || 1,
+      comment: review.comment || ''
+    };
+    this.editReviewError = '';
+    this.confirmDeleteReviewId = null;
+  }
+
+  cancelEditReview() {
+    this.editingReviewId = null;
+    this.editReviewError = '';
+  }
+
+  setEditRating(star: number) {
+    if (star === this.editReviewForm.rating) {
+      this.editReviewForm.rating = Math.max(1, star - 1);
+    } else {
+      this.editReviewForm.rating = star;
+    }
+  }
+
+  saveEditReview(reviewId: string) {
+    if (!this.editReviewForm.comment.trim()) {
+      this.editReviewError = 'Please write a review comment.';
+      return;
+    }
+    if (!this.product?._id) return;
+
+    this.savingEditReview = true;
+    this.editReviewError = '';
+
+    this.http.put<any>(`${this.API_BASE}/${this.product._id}/reviews/${reviewId}`, {
+      rating: Number(this.editReviewForm.rating),
+      comment: this.editReviewForm.comment.trim()
+    }).subscribe({
+      next: (res) => {
+        this.savingEditReview = false;
+        this.editingReviewId = null;
+        if (res && res.data) {
+          this.product.reviews = res.data.reviews || [];
+          this.product.averageRating = res.data.averageRating;
+          this.product.reviewCount = res.data.reviewCount;
+        }
+      },
+      error: (err) => {
+        this.savingEditReview = false;
+        this.editReviewError = err.error?.message || 'Failed to update review. Please try again.';
+      }
+    });
+  }
+
+  promptDeleteReview(reviewId: string) {
+    this.confirmDeleteReviewId = reviewId;
+  }
+
+  cancelDeleteReview() {
+    this.confirmDeleteReviewId = null;
+  }
+
+  deleteReview(reviewId: string) {
+    if (!this.product?._id) return;
+
+    this.deletingReviewId = reviewId;
+    this.http.delete<any>(`${this.API_BASE}/${this.product._id}/reviews/${reviewId}`).subscribe({
+      next: (res) => {
+        this.deletingReviewId = null;
+        this.confirmDeleteReviewId = null;
+        if (res && res.data) {
+          this.product.reviews = res.data.reviews || [];
+          this.product.averageRating = res.data.averageRating;
+          this.product.reviewCount = res.data.reviewCount;
+        }
+      },
+      error: (err) => {
+        this.deletingReviewId = null;
+        alert(err.error?.message || 'Failed to delete review. Please try again.');
       }
     });
   }

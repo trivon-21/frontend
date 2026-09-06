@@ -55,80 +55,75 @@
 </div>
 
 <!-- NAVBAR -->
-<nav class="pd-navbar">
-    <div class="pd-navbar-left">
-        <a routerLink="/" class="pd-logo">AirLux</a>
-    </div>
-    <div class="pd-navbar-links">
-        <a routerLink="/" class="pd-nav-link">Home</a>
-        <a routerLink="/catalog" class="pd-nav-link active">View products</a>
-        <a routerLink="/" fragment="services" class="pd-nav-link">Our Services</a>
-        <a href="/cart" (click)="onCartNavClick($event)" class="pd-nav-cart" title="Go to Cart">
-            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-            <span>Cart</span>
-        </a>
-    </div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a routerLink="/" class="brand">AirLux</a>
 
-    <!-- Guest buttons -->
-    <div class="navbar-actions" *ngIf="!currentUser">
-        <a routerLink="/login" class="btn btn-outline">Log in</a>
-        <a routerLink="/signup" class="btn btn-primary">Sign up</a>
-    </div>
-
-    <!-- Logged-in user area -->
-    <div class="user-area" *ngIf="currentUser">
-        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
-        <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
-            <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
-                <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
-                <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
-                <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
-                    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <nav class="navlinks">
+            <a routerLink="/">Home</a>
+            <a routerLink="/catalog" class="active">View products</a>
+            <a routerLink="/" fragment="services">Our Services</a>
+            <a href="/cart" (click)="onCartNavClick($event)" class="cart-link" title="Go to Cart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                 </svg>
-            </button>
+                <span>Cart</span>
+            </a>
+        </nav>
 
-            <div class="dropdown" *ngIf="showDropdown">
-                <div class="dropdown-header">
-                    <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
-                    <div>
-                        <div class="dropdown-name">{{ currentUser.fullName }}</div>
-                        <div class="dropdown-email">{{ currentUser.email }}</div>
-                    </div>
-                </div>
-                <div class="dropdown-divider"></div>
-                <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-                    My Dashboard
-                </a>
-                <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                    My Profile
-                </a>
-                <div class="dropdown-divider"></div>
-                <button class="dropdown-item logout-item" (click)="logout()">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
-                    Sign out
+        <!-- Guest buttons -->
+        <div class="authbtns" *ngIf="!currentUser">
+            <a routerLink="/login" class="btn ghost">Log in</a>
+            <a routerLink="/signup" class="btn solid">Sign up</a>
+        </div>
+
+        <!-- Logged-in user area -->
+        <div class="user-area" *ngIf="currentUser">
+            <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
+            <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
+                <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
+                    <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
+                    <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
+                    <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
+                        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </button>
+
+                <div class="dropdown" *ngIf="showDropdown">
+                    <div class="dropdown-header">
+                        <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
+                        <div>
+                            <div class="dropdown-name">{{ currentUser.fullName }}</div>
+                            <div class="dropdown-email">{{ currentUser.email }}</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                        My Dashboard
+                    </a>
+                    <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                        My Profile
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item logout-item" (click)="logout()">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
+                        Sign out
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
 <!-- HERO BANNER -->
 <section class="pd-hero-banner">
     <div class="pd-hero-content">
         <h1>Premium Cooling<br>Solutions</h1>
         <p>Discover our curated collection of high-performance air conditioning systems</p>
-    </div>
-    <div class="pd-hero-user-row" *ngIf="currentUser">
-        <span class="pd-hero-welcome">Welcome {{ currentUser.fullName.split(' ')[0] }}!</span>
-        <div class="pd-hero-image">
-            <div class="avatar avatar-hero">{{ getInitials(currentUser.fullName) }}</div>
-        </div>
     </div>
 </section>
 
@@ -380,12 +375,139 @@
         <div class="pd-tab-panel" *ngIf="activeTab === 'reviews'" id="panel-reviews">
             <div class="pd-reviews-list" *ngIf="product.reviews && product.reviews.length > 0">
                 <div class="pd-review-item" *ngFor="let review of product.reviews">
-                    <div class="pd-review-header">
-                        <span class="pd-review-user">{{ review.userName }}</span>
-                        <span class="pd-review-stars">{{ getStars(review.rating) }}</span>
-                        <span class="pd-review-date">{{ review.date | date:'mediumDate' }}</span>
+                    <!-- Standard Display Mode -->
+                    <ng-container *ngIf="editingReviewId !== review._id">
+                        <div class="pd-review-header">
+                            <span class="pd-review-user">
+                                {{ review.userName }}
+                                <span *ngIf="review.isVerifiedBuyer !== false" class="pd-verified-badge">✓ Verified Buyer</span>
+                            </span>
+                            <span class="pd-review-stars">{{ getStars(review.rating) }}</span>
+                            <span class="pd-review-date">{{ review.date | date:'mediumDate' }}</span>
+
+                            <!-- Actions for Review Owner -->
+                            <div class="pd-review-actions" *ngIf="isMyReview(review)">
+                                <button type="button" class="pd-review-action-btn pd-review-edit-btn" (click)="startEditReview(review)" title="Edit your review">
+                                    Edit
+                                </button>
+                                <button type="button" class="pd-review-action-btn pd-review-delete-btn" (click)="promptDeleteReview(review._id)" title="Delete your review">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        <p class="pd-review-comment">{{ review.comment }}</p>
+
+                        <!-- Inline Delete Confirmation Prompt -->
+                        <div class="pd-review-delete-confirm" *ngIf="confirmDeleteReviewId === review._id">
+                            <span>Are you sure you want to delete this review?</span>
+                            <div class="pd-review-delete-confirm-btns">
+                                <button type="button" class="pd-btn-confirm-delete" [disabled]="deletingReviewId === review._id" (click)="deleteReview(review._id)">
+                                    {{ deletingReviewId === review._id ? 'Deleting...' : 'Yes, Delete' }}
+                                </button>
+                                <button type="button" class="pd-btn-cancel-delete" (click)="cancelDeleteReview()">Cancel</button>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Inline Edit Mode -->
+                    <div class="pd-review-edit-box" *ngIf="editingReviewId === review._id">
+                        <div class="pd-review-edit-header">
+                            <span style="font-weight: 600; font-size: 0.95rem; color: #133B1F;">Edit Your Review</span>
+                            <div class="pd-star-input">
+                                <span
+                                    *ngFor="let star of [1,2,3,4,5]"
+                                    class="pd-star-btn"
+                                    [class.pd-star-active]="star <= editReviewForm.rating"
+                                    (click)="setEditRating(star)"
+                                    [title]="star + ' star' + (star > 1 ? 's' : '')"
+                                    aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
+                                >★</span>
+                            </div>
+                        </div>
+                        <textarea rows="3" class="pd-review-edit-textarea" [(ngModel)]="editReviewForm.comment" placeholder="Update your review comment..."></textarea>
+                        
+                        <div *ngIf="editReviewError" style="color: #e53e3e; font-size: 0.85rem; margin-top: 6px;">{{ editReviewError }}</div>
+
+                        <div class="pd-review-edit-actions">
+                            <button type="button" class="pd-btn-save-edit" [disabled]="savingEditReview || !editReviewForm.comment.trim()" (click)="saveEditReview(review._id)">
+                                {{ savingEditReview ? 'Saving...' : 'Save Changes' }}
+                            </button>
+                            <button type="button" class="pd-btn-cancel-edit" (click)="cancelEditReview()">Cancel</button>
+                        </div>
                     </div>
-                    <p class="pd-review-comment">{{ review.comment }}</p>
+                </div>
+            </div>
+
+            <p *ngIf="!product.reviews || product.reviews.length === 0" style="color: #666; font-size: 0.95rem; margin-bottom: 24px;">
+                No reviews yet for this product. Be the first verified buyer to share your experience!
+            </p>
+
+            <!-- Case 1: NOT LOGGED IN -->
+            <div class="pd-add-review" *ngIf="eligibilityState === 'NOT_LOGGED_IN'">
+                <h3>Leave a Review</h3>
+                <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.5; margin-bottom: 18px;">
+                    Only verified customers who have purchased this product can leave a review. Please sign in to verify your purchase.
+                </p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="button" class="pd-btn-submit-review" (click)="goToLogin()">Log In to Review</button>
+                    <button type="button" class="pd-btn-submit-review" style="background: transparent; color: #10A760; border: 1.5px solid #10A760;" (click)="goToSignup()">Create Account</button>
+                </div>
+            </div>
+
+            <!-- Case 2: LOGGED IN BUT NOT A VERIFIED BUYER -->
+            <div class="pd-add-review" *ngIf="eligibilityState === 'NOT_A_BUYER'" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
+                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🔒</div>
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Verified Purchase Required</h4>
+                        <p style="color: #64748b; font-size: 0.92rem; line-height: 1.5; margin: 0;">
+                            To ensure authentic, high-quality feedback, product reviews are reserved for customers who have a confirmed order for this air conditioner.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case 3: VERIFIED BUYER (Has not reviewed yet) -->
+            <div class="pd-add-review" *ngIf="eligibilityState === 'VERIFIED_BUYER' && !hasUserReviewed()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0;">Leave a Review</h3>
+                    <span class="pd-verified-badge" style="font-size: 0.82rem; padding: 4px 10px;">✓ Verified Buyer</span>
+                </div>
+                <form class="pd-review-form" (ngSubmit)="submitReview()">
+                    <div class="pd-form-row">
+                        <input type="text" [value]="userFullName" readonly disabled style="background: #f1f5f9; cursor: not-allowed; opacity: 0.9;" title="Posting as your verified account name">
+                        <div class="pd-star-input">
+                            <span
+                                *ngFor="let star of [1,2,3,4,5]"
+                                class="pd-star-btn"
+                                [class.pd-star-active]="star <= newReview.rating"
+                                (click)="setRating(star)"
+                                [title]="star + ' star' + (star > 1 ? 's' : '')"
+                                aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
+                            >★</span>
+                        </div>
+                    </div>
+                    <textarea placeholder="Write your verified review here..." rows="4" [(ngModel)]="newReview.comment" name="comment" required></textarea>
+
+                    <div *ngIf="reviewError" style="color: #e53e3e; font-size: 0.88rem; font-weight: 500;">{{ reviewError }}</div>
+                    <div *ngIf="reviewSuccess" style="color: #10A760; font-size: 0.88rem; font-weight: 600;">✓ Thank you! Your verified review has been added.</div>
+
+                    <button type="submit" class="pd-btn-submit-review" [disabled]="submittingReview || !newReview.comment.trim()">
+                        {{ submittingReview ? 'Submitting Review...' : 'Submit Review' }}
+                    </button>
+                </form>
+            </div>
+
+            <!-- Case 4: VERIFIED BUYER (Already reviewed this product) -->
+            <div class="pd-add-review" *ngIf="eligibilityState === 'VERIFIED_BUYER' && hasUserReviewed()" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 20px 24px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; font-weight: 700;">✓</div>
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; color: #166534; margin: 0 0 4px 0;">You have already reviewed this product</h4>
+                        <p style="color: #15803d; font-size: 0.9rem; margin: 0; line-height: 1.4;">
+                            Thank you for sharing your feedback! You can edit or delete your review anytime from the reviews list above.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -393,87 +515,4 @@
 </div><!-- /.pd-container -->
 
 <!-- FOOTER -->
-<footer class="footer">
-    <div class="footer-inner">
-        <div class="footer-content">
-            <!-- Brand -->
-            <div class="footer-col footer-brand">
-                <span class="footer-logo">AirLux</span>
-                <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling
-                    needs.</p>
-            </div>
-            <!-- Contact -->
-            <div class="footer-col footer-contact">
-                <h3>Contact Us</h3>
-                <p>
-                    <span class="footer-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                        </svg>
-                    </span>
-                    123 Galle Road, Colombo 03, Sri Lanka
-                </p>
-                <p>
-                    <span class="footer-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.68 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 1.2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81A2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-.8a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                    </span>
-                    +94 11 234 5678
-                </p>
-                <p>
-                    <span class="footer-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                            <polyline points="22,6 12,13 2,6" />
-                        </svg>
-                    </span>
-                    support&#64;airlux.lk
-                </p>
-            </div>
-            <!-- Social -->
-            <div class="footer-col footer-social">
-                <h3>Follow Us</h3>
-                <div class="social-icons">
-                    <a href="#" class="social-btn" title="Facebook">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                            fill="currentColor">
-                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                        </svg>
-                    </a>
-                    <a href="#" class="social-btn" title="Twitter">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                            fill="currentColor">
-                            <path
-                                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
-                        </svg>
-                    </a>
-                    <a href="#" class="social-btn" title="Instagram">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                        </svg>
-                    </a>
-                    <a href="#" class="social-btn" title="LinkedIn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                            fill="currentColor">
-                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                            <rect x="2" y="9" width="4" height="12" />
-                            <circle cx="4" cy="4" r="2" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            &copy; 2026 AirLux. All rights reserved. &nbsp;|&nbsp; AC Service Management System
-        </div>
-    </div>
-</footer>
+<app-footer></app-footer>

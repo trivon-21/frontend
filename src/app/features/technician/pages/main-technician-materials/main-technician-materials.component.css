@@ -445,10 +445,10 @@
       justify-content: center;
     }
 
-    .drafts-icon { background-color: #f0fdf4; color: #16a34a; }
+    .drafts-icon { background-color: #eff6ff; color: #3b82f6; }
     .pending-icon { background-color: #fff7ed; color: #ea580c; }
     .approved-icon { background-color: #f0fdf4; color: #16a34a; }
-    .send-icon { background-color: #f0fdf4; color: #16a34a; }
+    .send-icon { background-color: #f0fdfa; color: #0d9488; }
 
     .card-label {
       font-size: 14px;
@@ -472,30 +472,58 @@
       border: 1px solid #f1f5f9;
     }
 
-    .request-card {
-      padding: 24px 32px;
-      cursor: pointer;
+    .table-container {
+      padding: 24px;
+    }
+
+    .requests-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requests-table th {
+      padding: 16px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #1a1a1b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       border-bottom: 1px solid #f1f5f9;
-      transition: all 0.2s;
     }
 
-    .request-card:hover { background-color: #f8fafc; }
-    .request-card.selected { background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding-left: 28px; }
-
-    .request-id-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .requests-table td {
+      padding: 24px 16px;
+      font-size: 13px;
+      color: #475569;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
     }
 
-    .id-type {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .req-id { font-size: 13px; font-weight: 700; color: #1e293b; }
+
+    .status-cell strong {
+      font-size: 11px;
+      font-weight: 800;
+      color: #1a1a1b;
+      letter-spacing: 0.05em;
     }
 
-    .req-id { font-size: 16px; font-weight: 700; color: #1e293b; }
-    .req-type { font-size: 13px; color: #64748b; }
+    .view-btn {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .view-btn:hover {
+      background-color: #15803d;
+    }
 
     .status-chip {
       padding: 6px 16px;

@@ -72,7 +72,7 @@ import { FinancialReportComponent } from './features/finance/pages/financial-rep
 import { PurchaseRequestVerificationComponent } from './features/finance/pages/purchase-request-verification/purchase-request-verification.component';
 import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
 import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
-import { MaterialRequestApprovalComponent } from './features/finance/pages/material-request-approval/material-request-approval.component';
+
 
 // Inspection
 import { InspectionPaymentComponent } from './features/customer/pages/inspection-payment/inspection-payment.component';
@@ -144,9 +144,37 @@ export const routes: Routes = [
     ]
   },
 
-  // ── Service Team portal
+  // ── Service Team A portal
+  {
+    path: 'service-team-a',
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team portal (Generic/Fallback)
   {
     path: 'service-team',
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team B portal
+  {
+    path: 'service-team-b',
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -391,10 +419,6 @@ export const routes: Routes = [
         path: 'dashboard',
         component: DashboardComponent,
       },
-      {
-        path: 'material-requests',
-        component: MaterialRequestApprovalComponent,
-      },
 
       {
         path: 'payment-verification',
@@ -617,6 +641,27 @@ export const routes: Routes = [
       { path: 'service-tickets', component: CsaServiceTicketsComponent },
       { path: 'inquiries', component: CsaInquiriesComponent },
       { path: 'maintenance-schedules', component: CsaMaintenanceSchedulesComponent },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/profile/customer-profile.component'
+          ).then((m) => m.CustomerProfileComponent),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import(
+            './features/csa/pages/csa-settings/csa-settings.component'
+          ).then((m) => m.CsaSettingsComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/notifications/notifications.component'
+          ).then((m) => m.NotificationsPageComponent),
+      },
     ]
   },
 

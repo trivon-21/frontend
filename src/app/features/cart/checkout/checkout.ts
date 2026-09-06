@@ -7,11 +7,12 @@ import { OrderService } from './order.service';
 import { PaymentService, BankDetails } from '../../../core/services/payment.service';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
@@ -56,6 +57,7 @@ export class Checkout implements OnInit {
   selectedFile: File | null = null;
   filePreview: string = '';
   uploadError: string = '';
+  isSubmittingPayment: boolean = false;
 
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
@@ -193,6 +195,9 @@ export class Checkout implements OnInit {
   }
 
   getSummaryErrorMessage(): string {
+    if (this.uploadError) {
+      return this.uploadError;
+    }
     const isShippingInvalid = this.shippingForm.invalid;
     const isSlipMissing = !this.selectedFile;
 
@@ -267,17 +272,22 @@ export class Checkout implements OnInit {
     if (file) {
       const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
+        this.selectedFile = null;
+        this.filePreview = '';
         this.uploadError = 'Only PNG, JPG, JPEG and PDF files are allowed';
-        this.removeFile();
+        this.showSummaryError = true;
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
+        this.selectedFile = null;
+        this.filePreview = '';
         this.uploadError = 'File size must be less than 5MB';
-        this.removeFile();
+        this.showSummaryError = true;
         return;
       }
       this.selectedFile = file;
       this.uploadError = '';
+      this.showSummaryError = false;
 
       // Create preview for images
       if (file.type.startsWith('image/')) {
@@ -296,6 +306,7 @@ export class Checkout implements OnInit {
     this.selectedFile = null;
     this.filePreview = '';
     this.uploadError = '';
+    this.showSummaryError = false;
   }
 
   initializeOrder(silent: boolean = false) {
@@ -347,6 +358,7 @@ export class Checkout implements OnInit {
     }
 
     this.showSummaryError = false;
+    this.uploadError = '';
     const formData = new FormData();
     formData.append('orderReference', this.generatedOrderId);
     
@@ -359,8 +371,10 @@ export class Checkout implements OnInit {
       formData.append('slip', this.selectedFile);
     }
 
+    this.isSubmittingPayment = true;
     this.orderService.submitPayment(formData).subscribe({
       next: (res) => {
+        this.isSubmittingPayment = false;
         this.router.navigate(['/order-success'], { 
           state: { 
             orderId: this.generatedOrderId,
@@ -369,8 +383,14 @@ export class Checkout implements OnInit {
         });
       },
       error: (err) => {
+        this.isSubmittingPayment = false;
         console.error('Finalization failed:', err);
-        alert('Failed to submit payment: ' + (err.error?.message || err.message));
+        const errMsg = err.error?.message || err.message || 'Failed to submit payment';
+        this.uploadError = errMsg;
+        this.showSummaryError = true;
+        setTimeout(() => {
+          document.getElementById('sidebar-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
       }
     });
   }

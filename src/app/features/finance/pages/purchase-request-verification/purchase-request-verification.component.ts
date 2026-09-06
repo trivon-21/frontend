@@ -67,11 +67,11 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     this.isLoading = true;
     this.requestService.approveRequest(request._id, request.statusVersion).subscribe({
       next: () => {
-        this.notificationService.show('✅ Purchase request approved! Confirmation email sent.', 'success');
+        this.notificationService.show('Purchase request approved! Confirmation email sent.', 'success');
         this.requests = this.requests.filter(r => r._id !== request._id);
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Approval failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Approval failed.', 'error'); }
     });
   }
 
@@ -94,12 +94,12 @@ export class PurchaseRequestVerificationComponent implements OnInit {
       this.selectedRequest.statusVersion,
     ).subscribe({
       next: () => {
-        this.notificationService.show('✅ Purchase request rejected. Email sent.', 'success');
+        this.notificationService.show('Purchase request rejected. Email sent.', 'success');
         this.requests = this.requests.filter(r => r._id !== this.selectedRequest?._id);
         this.closeRejectModal();
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Rejection failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Rejection failed.', 'error'); }
     });
   }
 
