@@ -46,7 +46,7 @@
 
     <section *ngIf="section === 'performance'" aria-labelledby="performance-heading">
       <div class="section-heading">
-        <div><h2 id="performance-heading">Period Performance</h2><p>Compared with the immediately preceding equivalent period.</p></div>
+        <div><h2 id="performance-heading">Performance Summary</h2><p>Compared with the immediately preceding equivalent period.</p></div>
         <span class="scope-badge period">{{ activePeriod }}</span>
       </div>
       <div class="kpi-row">
@@ -245,7 +245,7 @@
     </section>
 
     <section *ngIf="section === 'purchasing'" aria-labelledby="purchasing-heading">
-      <div class="section-heading"><div><h2 id="purchasing-heading">Purchasing and Approvals</h2><p>Current pipeline position is separated from decisions made during the period.</p></div></div>
+      <div class="section-heading"><div><h2 id="purchasing-heading">Purchasing & Approvals</h2><p>Current pipeline position is separated from decisions made during the period.</p></div></div>
       <div class="chart-grid two">
         <article class="chart-card">
           <div class="chart-header"><div><h3>Current Purchase Pipeline</h3><p>Request count and value at each current stage.</p></div><span class="scope-badge current">Current</span></div>
@@ -269,7 +269,7 @@
     </section>
 
     <section *ngIf="section === 'inventory'" id="inventory-risk" aria-labelledby="risk-heading">
-      <div class="section-heading"><div><h2 id="risk-heading">Inventory and Exception Control</h2><p>Live stock constraints and Non-PO activity in the selected period.</p></div></div>
+      <div class="section-heading"><div><h2 id="risk-heading">Inventory & Exceptions</h2><p>Live stock constraints and Non-PO activity in the selected period.</p></div></div>
       <div class="signal-grid">
         <article><span>Low stock</span><strong>{{ report.inventoryRisk.lowStockItems.value }}</strong></article>
         <article class="danger"><span>Out of stock</span><strong>{{ report.inventoryRisk.outOfStockItems.value }}</strong></article>
