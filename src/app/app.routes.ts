@@ -641,6 +641,27 @@ export const routes: Routes = [
       { path: 'service-tickets', component: CsaServiceTicketsComponent },
       { path: 'inquiries', component: CsaInquiriesComponent },
       { path: 'maintenance-schedules', component: CsaMaintenanceSchedulesComponent },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/profile/customer-profile.component'
+          ).then((m) => m.CustomerProfileComponent),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import(
+            './features/csa/pages/csa-settings/csa-settings.component'
+          ).then((m) => m.CsaSettingsComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/notifications/notifications.component'
+          ).then((m) => m.NotificationsPageComponent),
+      },
     ]
   },
 
