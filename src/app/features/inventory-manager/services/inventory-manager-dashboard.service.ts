@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -82,6 +82,25 @@ export interface LogisticsDashboardItem {
   date?: string;
   lastMovedAt?: string | Date;
   completedAt?: string | Date;
+}
+
+export interface InventoryListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  itemClass?: string;
+  subcategory?: string;
+  supplierId?: string;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface InventoryPagedResult {
+  items: InventoryItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface InventoryDashboardData {
@@ -279,6 +298,23 @@ export class InventoryManagerDashboardService {
 
   getInventory(): Observable<InventoryItem[]> {
     return this.http.get<InventoryItem[]>(`${this.apiUrl}/list`);
+  }
+
+  /**
+   * Server-side paginated inventory query (Epic 22 / AR-05).
+   * Delegates filtering, search, sorting and pagination to the backend.
+   */
+  getInventoryPaged(params: InventoryListParams): Observable<InventoryPagedResult> {
+    let httpParams = new HttpParams();
+    if (params.page !== undefined) httpParams = httpParams.set('page', String(params.page));
+    if (params.pageSize !== undefined) httpParams = httpParams.set('pageSize', String(params.pageSize));
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.itemClass) httpParams = httpParams.set('itemClass', params.itemClass);
+    if (params.subcategory) httpParams = httpParams.set('subcategory', params.subcategory);
+    if (params.supplierId) httpParams = httpParams.set('supplierId', params.supplierId);
+    if (params.sortField) httpParams = httpParams.set('sortField', params.sortField);
+    if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
+    return this.http.get<InventoryPagedResult>(`${this.apiUrl}/list`, { params: httpParams });
   }
 
   getItem(id: string): Observable<InventoryItem> {

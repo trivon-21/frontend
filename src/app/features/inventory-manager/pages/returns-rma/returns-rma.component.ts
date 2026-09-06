@@ -455,7 +455,16 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.pendingActionIds.delete(quarantineId);
-        this.error = err.error?.message || 'Failed to dispose item.';
+        this.confirmDisposeId = null;
+        if (err?.status === 409 || err?.error?.code === 'QUARANTINE_ALREADY_DISPOSED') {
+          this.error = 'This quarantine item has already been disposed.';
+          this.refreshData();
+        } else if (err?.status === 404 || err?.error?.code === 'QUARANTINE_NOT_FOUND') {
+          this.error = 'Quarantine item could not be found.';
+          this.refreshData();
+        } else {
+          this.error = err?.error?.message || 'Failed to dispose item.';
+        }
         setTimeout(() => (this.error = null), 5000);
       },
     });

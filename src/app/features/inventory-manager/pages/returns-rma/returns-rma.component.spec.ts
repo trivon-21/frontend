@@ -155,4 +155,69 @@ describe('ReturnsRmaDashboardComponent', () => {
     expect(component.replacementRma).toBeNull();
     expect(component.refreshData).toHaveBeenCalled();
   });
+
+  it('disposes quarantine item successfully and refreshes data', () => {
+    spyOn(component, 'refreshData');
+    component.confirmDispose('QZ-001');
+    expect(component.confirmDisposeId).toBe('QZ-001');
+
+    component.disposeItem('QZ-001');
+    expect(component.pendingActionIds.has('QZ-001')).toBeTrue();
+
+    const req = http.expectOne(`${baseUrl}/quarantine/QZ-001/dispose`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush({ quarantineId: 'QZ-001', status: 'disposed' });
+
+    expect(component.pendingActionIds.has('QZ-001')).toBeFalse();
+    expect(component.confirmDisposeId).toBeNull();
+    expect(component.successMessage).toBe('Item disposed successfully.');
+    expect(component.refreshData).toHaveBeenCalled();
+  });
+
+  it('handles 409 conflict on already-disposed item and reconciles without duplicate action', () => {
+    spyOn(component, 'refreshData');
+    component.confirmDispose('QZ-002');
+    expect(component.confirmDisposeId).toBe('QZ-002');
+
+    component.disposeItem('QZ-002');
+    expect(component.pendingActionIds.has('QZ-002')).toBeTrue();
+
+    const req = http.expectOne(`${baseUrl}/quarantine/QZ-002/dispose`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush(
+      { message: 'Quarantine item is already disposed', code: 'QUARANTINE_ALREADY_DISPOSED' },
+      { status: 409, statusText: 'Conflict' }
+    );
+
+    expect(component.pendingActionIds.has('QZ-002')).toBeFalse();
+    expect(component.confirmDisposeId).toBeNull();
+    expect(component.error).toBe('This quarantine item has already been disposed.');
+    expect(component.refreshData).toHaveBeenCalled();
+  });
+
+  it('handles 404 on missing quarantine item and refreshes data', () => {
+    spyOn(component, 'refreshData');
+    component.confirmDispose('QZ-404');
+
+    component.disposeItem('QZ-404');
+
+    const req = http.expectOne(`${baseUrl}/quarantine/QZ-404/dispose`);
+    req.flush(
+      { message: 'Quarantine item not found', code: 'QUARANTINE_NOT_FOUND' },
+      { status: 404, statusText: 'Not Found' }
+    );
+
+    expect(component.pendingActionIds.has('QZ-404')).toBeFalse();
+    expect(component.confirmDisposeId).toBeNull();
+    expect(component.error).toBe('Quarantine item could not be found.');
+    expect(component.refreshData).toHaveBeenCalled();
+  });
+
+  it('ignores dispose clicks when an item action is already pending', () => {
+    component.pendingActionIds.add('QZ-003');
+    component.disposeItem('QZ-003');
+
+    http.expectNone(`${baseUrl}/quarantine/QZ-003/dispose`);
+    expect(component.pendingActionIds.has('QZ-003')).toBeTrue();
+  });
 });
