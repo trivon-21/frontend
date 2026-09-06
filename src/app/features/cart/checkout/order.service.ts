@@ -36,6 +36,18 @@ export class OrderService {
     return this.http.get<any>(`${this.apiUrl}/id/${orderId}`);
   }
 
+  getOrder(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  trackOrderByRef(ref: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/track`, { params: { ref } });
+  }
+
+  reuploadPayment(id: string, paymentSlipUrl: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/reupload-payment`, { paymentSlipUrl });
+  }
+
   // Deprecated - use createBuyOnlyOrder + submitPayment
   placeOrder(formData: FormData): Observable<any> {
     return this.submitPayment(formData);

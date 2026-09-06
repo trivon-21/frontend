@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CustomerOrderService, TrackedOrder } from '../../../features/customer/services/customer-order.service';
 
 interface TimelineStep {
@@ -130,6 +131,15 @@ export class TrackOrderModalComponent {
 
   canReupload(): boolean {
     return this.order?.paymentStatus === 'Rejected';
+  }
+
+  private router = inject(Router);
+
+  goToReupload(): void {
+    if (!this.order) return;
+    const targetId = this.order.id;
+    this.closed.emit();
+    this.router.navigate(['/checkout'], { queryParams: { orderId: targetId } });
   }
 
   cancelOrder() {
