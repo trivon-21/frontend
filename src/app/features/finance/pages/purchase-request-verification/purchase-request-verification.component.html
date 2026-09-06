@@ -132,7 +132,7 @@
 
           <td>
             <span class="items-count">
-              {{ request.items?.length || 0 }} item(s)
+              {{ request.items.length || 0 }} item(s)
             </span>
           </td>
 
@@ -251,7 +251,7 @@
           </span>
 
           <span class="field-value">
-            {{ selectedRequest.requestId || getRequestRef(selectedRequest)}}
+            {{ selectedRequest?.requestId || getRequestRef(selectedRequest)}}
           </span>
 
         </div>
@@ -309,7 +309,7 @@
 
         <table
           class="invoice-items-table"
-          *ngIf="selectedRequest?.items?.length > 0"
+          *ngIf="(selectedRequest?.items?.length || 0) > 0"
         >
 
           <thead>

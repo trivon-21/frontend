@@ -1,11 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InventoryItem,
+  InventoryListParams,
   InventoryManagerDashboardService,
+  InventoryPagedResult,
 } from '../../services/inventory-manager-dashboard.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
@@ -32,9 +36,14 @@ export type InventorySortField =
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.css'],
 })
-export class InventoryListComponent implements OnInit {
+export class InventoryListComponent implements OnInit, OnDestroy {
   Math = Math;
+  private queryParamsSub?: Subscription;
+  private searchSub?: Subscription;
+  private searchSubject = new Subject<string>();
+  private currentParams: Params = {};
   searchQuery = '';
+  isServerPaged = false;
   selectedItemClass = 'All Product Classes';
   selectedSubcategory = 'All Subcategories';
   selectedStockStatus: StockFilter = 'all';
@@ -80,10 +89,38 @@ export class InventoryListComponent implements OnInit {
     private inventoryService: InventoryManagerDashboardService,
     private route: ActivatedRoute,
     private router: Router,
+    @Optional() private destroyRef?: DestroyRef,
   ) {}
 
   ngOnInit(): void {
+    const stream$ = this.destroyRef
+      ? this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef))
+      : this.route.queryParams;
+
+    this.queryParamsSub = stream$.subscribe((params) => {
+      this.currentParams = params || {};
+      this.applyRouteParams(this.currentParams);
+    });
+
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ).subscribe((term) => {
+      this.searchQuery = term;
+      this.applyFilters();
+    });
+
     this.loadInventory();
+  }
+
+  ngOnDestroy(): void {
+    this.queryParamsSub?.unsubscribe();
+    this.searchSub?.unsubscribe();
+    this.searchSubject.complete();
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
   }
 
   loadInventory(): void {
@@ -96,21 +133,7 @@ export class InventoryListComponent implements OnInit {
       next: ({ items, locations }) => {
         this.allInventoryItems = items;
         this.locationOptions = locations.map((location) => location.warehouse);
-        this.route.queryParams.subscribe((params) => {
-          if (params['search']) this.searchQuery = params['search'];
-          this.applyFilters();
-          const selected = params['selected'] ? this.selectItemById(params['selected']) : null;
-          if (params['editSaved'] === '1' && selected) {
-            this.savedProduct = selected;
-            this.showSaveConfirmation = true;
-            void this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: { editSaved: null },
-              queryParamsHandling: 'merge',
-              replaceUrl: true,
-            });
-          }
-        });
+        this.applyRouteParams(this.currentParams || this.route.snapshot?.queryParams || {});
         this.loading = false;
       },
       error: () => {
@@ -118,6 +141,40 @@ export class InventoryListComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  loadInventoryPaged(params: InventoryListParams): void {
+    this.loading = true;
+    this.error = null;
+    this.inventoryService.getInventoryPaged(params).subscribe({
+      next: (result) => {
+        this.inventoryItems = result.items;
+        this.totalItems = result.total;
+        this.totalPages = result.totalPages;
+        this.currentPage = result.page;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Failed to load inventory';
+        this.loading = false;
+      },
+    });
+  }
+
+  private applyRouteParams(params: Params): void {
+    if (params['search']) this.searchQuery = params['search'];
+    this.applyFilters();
+    const selected = params['selected'] ? this.selectItemById(params['selected']) : null;
+    if (params['editSaved'] === '1' && selected) {
+      this.savedProduct = selected;
+      this.showSaveConfirmation = true;
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { editSaved: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
 
   get itemClassOptions(): string[] {

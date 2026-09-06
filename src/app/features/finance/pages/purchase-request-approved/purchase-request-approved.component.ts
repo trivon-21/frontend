@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PurchaseRequestService } from '../../services/purchase-request.service';
+import { PurchaseRequestItem, PurchaseRequestService } from '../../services/purchase-request.service';
 
 @Component({
   selector: 'app-purchase-request-approved',
@@ -12,9 +12,9 @@ import { PurchaseRequestService } from '../../services/purchase-request.service'
 })
 export class PurchaseRequestApprovedComponent implements OnInit {
 
-  requests: any[] = [];
+  requests: PurchaseRequestItem[] = [];
   searchQuery = '';
-  selectedRequest: any = null;
+  selectedRequest: PurchaseRequestItem | null = null;
   showModal = false;
   isLoading = false;
 
@@ -30,16 +30,20 @@ export class PurchaseRequestApprovedComponent implements OnInit {
     });
   }
 
-  get filteredRequests(): any[] {
+  get filteredRequests(): PurchaseRequestItem[] {
     if (!this.searchQuery.trim()) return this.requests;
     const q = this.searchQuery.toLowerCase();
-    return this.requests.filter(r => r.requestedBy?.toLowerCase().includes(q));
+    return this.requests.filter(r =>
+      r.requestedBy?.toLowerCase().includes(q) ||
+      (r.reason || r.notes)?.toLowerCase().includes(q)
+    );
   }
 
-  getRequestRef(r: any): string {
-    return r?._id ? `PR-${r._id.toString().slice(-6).toUpperCase()}` : '—';
+  getRequestRef(r: PurchaseRequestItem | null): string {
+    if (!r) return '—';
+    return r.requestId || (r._id ? `PR-${r._id.toString().slice(-6).toUpperCase()}` : '—');
   }
 
-  openModal(request: any) { this.selectedRequest = request; this.showModal = true; }
+  openModal(request: PurchaseRequestItem) { this.selectedRequest = request; this.showModal = true; }
   closeModal() { this.selectedRequest = null; this.showModal = false; }
 }

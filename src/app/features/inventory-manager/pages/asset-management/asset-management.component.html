@@ -165,7 +165,7 @@
                 <button
                   type="button"
                   class="btn-small im-btn im-btn--secondary im-btn--compact"
-                  (click)="markReturned(loan._id!)"
+                  (click)="openReturnModal(loan)"
                   [disabled]="returningIds.has(loan._id!)"
                 >
                   <lucide-angular
@@ -215,6 +215,7 @@
               <th>TECHNICIAN</th>
               <th>CHECKED OUT</th>
               <th>RETURNED AT</th>
+              <th>CONDITION</th>
             </tr>
           </thead>
           <tbody>
@@ -228,12 +229,77 @@
               <td class="held-by">{{ log.technicianName }}</td>
               <td class="date-cell">{{ log.checkedOutAt | date: 'short' }}</td>
               <td class="date-cell">{{ log.returnedAt | date: 'short' }}</td>
+              <td>
+                <span class="status-pill alx-table-status" [ngClass]="log.condition || 'good'">
+                  {{ (log.condition || 'good') | titlecase }}
+                </span>
+              </td>
             </tr>
             <tr *ngIf="filteredReturnLogs.length === 0">
-              <td colspan="4" class="empty-state">No return logs matching your search.</td>
+              <td colspan="5" class="empty-state">No return logs matching your search.</td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return Confirmation Modal (US7.1) -->
+  <div class="modal-overlay" *ngIf="showReturnModal && activeReturnLoan" (click)="closeReturnModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="return-modal-title">
+      <div class="modal-header">
+        <h3 id="return-modal-title">Confirm Tool Return</h3>
+        <button type="button" class="btn-close" (click)="closeReturnModal()" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="loan-summary">
+          <p><strong>Tool:</strong> {{ activeReturnLoan.toolName }}</p>
+          <p><strong>Asset Tag:</strong> <span class="sku-cell">{{ activeReturnLoan.assetTag }}</span></p>
+          <p><strong>Held By:</strong> {{ activeReturnLoan.technicianName }}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="modal-return-condition">Return Condition <span class="required">*</span></label>
+          <select id="modal-return-condition" class="form-select" [(ngModel)]="returnCondition">
+            <option value="good">Good (Normal Condition)</option>
+            <option value="damaged">Damaged (Requires RMA / Quarantine)</option>
+            <option value="incomplete">Incomplete (Inspection Hold)</option>
+          </select>
+        </div>
+
+        <div class="disposition-alert" [ngClass]="returnCondition">
+          <div *ngIf="returnCondition === 'good'" class="disposition-text">
+            <strong>Resulting Disposition:</strong> Tool will be returned to service and immediately available for checkout.
+          </div>
+          <div *ngIf="returnCondition === 'damaged'" class="disposition-text">
+            <strong>Resulting Disposition:</strong> Tool will be placed in quarantine and an RMA case will be filed for supplier return.
+          </div>
+          <div *ngIf="returnCondition === 'incomplete'" class="disposition-text">
+            <strong>Resulting Disposition:</strong> Tool will be placed on inspection hold until missing components are resolved.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modal-return-notes">Notes / Observations</label>
+          <textarea
+            id="modal-return-notes"
+            class="form-textarea"
+            [(ngModel)]="returnNotes"
+            rows="3"
+            placeholder="Add details regarding item condition, damage description, or missing parts..."
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="im-btn im-btn--secondary" (click)="closeReturnModal()">Cancel</button>
+        <button
+          type="button"
+          class="im-btn im-btn--primary"
+          [disabled]="returningIds.has(activeReturnLoan._id!)"
+          (click)="confirmReturn()"
+        >
+          Confirm Return
+        </button>
       </div>
     </div>
   </div>

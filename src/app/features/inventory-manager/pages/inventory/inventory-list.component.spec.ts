@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   InventoryItem,
@@ -48,7 +48,10 @@ function createComponent(items: InventoryItem[], params: Record<string, string> 
       { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
     ]),
   } as InventoryManagerDashboardService;
-  const route = { queryParams: of(params) } as ActivatedRoute;
+  const route = {
+    queryParams: of(params),
+    snapshot: { queryParams: params },
+  } as unknown as ActivatedRoute;
   const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
   const component = new InventoryListComponent(service, route, router);
   component.ngOnInit();
@@ -161,4 +164,70 @@ describe('InventoryListComponent filtering', () => {
     expect(component.showSaveConfirmation).toBeTrue();
     expect(component.savedProduct?._id).toBe('item-11');
   });
+
+  it('triggers exactly one filter and navigation update after multiple retries when query params change', () => {
+    const items = [inventoryItem({ _id: 'item-1', sku: 'AC-COMP-001' })];
+    const service = {
+      getInventory: jasmine.createSpy('getInventory').and.returnValue(of(items)),
+      getLocations: () => of([{ warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking'] }]),
+    } as unknown as InventoryManagerDashboardService;
+
+    const queryParams$ = new Subject<Record<string, string>>();
+    const route = {
+      queryParams: queryParams$.asObservable(),
+      snapshot: { queryParams: {} },
+    } as unknown as ActivatedRoute;
+    const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+
+    const component = new InventoryListComponent(service, route, router);
+    component.ngOnInit();
+
+    // Multiple retries
+    component.loadInventory();
+    component.loadInventory();
+    component.loadInventory();
+
+    expect(service.getInventory).toHaveBeenCalledTimes(4); // 1 on init + 3 retries
+    expect(router.navigate).toHaveBeenCalledTimes(0);
+
+    const applyFiltersSpy = spyOn(component, 'applyFilters').and.callThrough();
+
+    // Now emit a query parameter change with editSaved
+    queryParams$.next({ search: 'AC-COMP-001', selected: 'item-1', editSaved: '1' });
+
+    // With decoupled subscription, applyFilters and router.navigate are called exactly ONCE
+    expect(applyFiltersSpy).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(component.showSaveConfirmation).toBeTrue();
+    expect(component.savedProduct?._id).toBe('item-1');
+
+    component.ngOnDestroy();
+  });
+
+  it('tears down query parameter subscription on destroy and ignores further route changes', () => {
+    const items = [inventoryItem({ _id: 'item-1' })];
+    const service = {
+      getInventory: () => of(items),
+      getLocations: () => of([]),
+    } as unknown as InventoryManagerDashboardService;
+
+    const queryParams$ = new Subject<Record<string, string>>();
+    const route = {
+      queryParams: queryParams$.asObservable(),
+      snapshot: { queryParams: {} },
+    } as unknown as ActivatedRoute;
+    const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+
+    const component = new InventoryListComponent(service, route, router);
+    component.ngOnInit();
+
+    component.ngOnDestroy();
+
+    const applyFiltersSpy = spyOn(component, 'applyFilters').and.callThrough();
+    queryParams$.next({ search: 'New Search' });
+
+    expect(applyFiltersSpy).not.toHaveBeenCalled();
+    expect(component.searchQuery).toBe('');
+  });
 });
+

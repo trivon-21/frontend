@@ -62,13 +62,13 @@ export class OrderCreationService {
 
   submitForManager(order: PurchaseRequest): Observable<PurchaseRequest> {
     return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${order.requestId}/submit`, {
-      expectedVersion: order.statusVersion,
+      statusVersion: order.statusVersion,
     });
   }
 
   issuePurchaseOrder(order: PurchaseRequest): Observable<PurchaseRequest> {
     return this.apiService.post<PurchaseRequest>(`/inventory/order-requests/${order.requestId}/issue-po`, {
-      expectedVersion: order.statusVersion,
+      statusVersion: order.statusVersion,
     });
   }
 }

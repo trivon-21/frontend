@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -69,6 +69,40 @@ export interface ProcurementWorkflowSummary {
   awaitingFinance: number;
 }
 
+export interface LogisticsDashboardItem {
+  id: string;
+  orderId: string;
+  customer: string;
+  status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
+  statusVersion: number;
+  type: string;
+  courier?: string;
+  trackId?: string;
+  itemCount: number;
+  date?: string;
+  lastMovedAt?: string | Date;
+  completedAt?: string | Date;
+}
+
+export interface InventoryListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  itemClass?: string;
+  subcategory?: string;
+  supplierId?: string;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface InventoryPagedResult {
+  items: InventoryItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface InventoryDashboardData {
   managerName: string;
   currentDate: Date;
@@ -77,6 +111,72 @@ export interface InventoryDashboardData {
   recentActivity: ActivityItem[];
   reorderList: ReorderItem[];
   procurementWorkflow: ProcurementWorkflowSummary;
+  logistics: LogisticsDashboardItem[];
+}
+
+export interface ReceiveInventoryInput {
+  inventoryId?: string;
+  quantity: number;
+  acceptedQuantity: number;
+  damagedQuantity: number;
+  missingQuantity: number;
+  serialNumbers: string[];
+  damagedSerialNumbers: string[];
+  supplierId?: string;
+  invoiceNumber?: string;
+  sourceDocumentNumber: string;
+  supportingDocumentUrl?: string;
+  receivedDate: string;
+  condition: 'Good' | 'Damaged' | 'Incomplete';
+  location: string;
+  binLocation: string;
+  unitCost: number;
+  receiptEventId: string;
+  receiptMode: 'PO' | 'NON_PO';
+  orderRequestId?: string;
+  orderLineId?: string;
+  receiptAuthorizationId?: string;
+  discrepancyId?: string;
+}
+
+export interface ReceiptDiscrepancy {
+  _id: string;
+  discrepancyId: string;
+  inventoryId: InventoryItem | string;
+  supplierId: { _id: string; name: string } | string;
+  supplierName: string;
+  itemName: string;
+  sku: string;
+  receiptMode: 'PO' | 'NON_PO';
+  orderRequestId?: { _id: string; requestId: string; poNumber?: string; status: string } | string;
+  orderLineId?: string;
+  receiptAuthorizationId?: { _id: string; authorizationNumber: string; status: string } | string;
+  sourceDocumentNumber: string;
+  expectedQuantity: number;
+  acceptedQuantity: number;
+  damagedQuantity: number;
+  missingQuantity: number;
+  outstandingQuantity: number;
+  resolvedQuantity: number;
+  unit: string;
+  unitCost: number;
+  disputedValue: number;
+  status: 'open' | 'supplier-contacted' | 'replacement-pending' | 'resolved' | 'waived';
+  createdAt: string;
+}
+
+export interface ReceiveInventoryResult {
+  item: InventoryItem;
+  procurement: {
+    _id: string;
+    acceptedQuantity: number;
+    damagedQuantity: number;
+    missingQuantity: number;
+    acceptedTotalCost: number;
+    disputedTotalCost: number;
+  };
+  discrepancy: ReceiptDiscrepancy | null;
+  quarantine: QuarantineItemData | null;
 }
 
 function emptyProcurementWorkflow(): ProcurementWorkflowSummary {
@@ -109,6 +209,7 @@ function emptyDashboard(status = 'Offline'): InventoryDashboardData {
     recentActivity: [],
     reorderList: [],
     procurementWorkflow: emptyProcurementWorkflow(),
+    logistics: [],
   };
 }
 
@@ -159,6 +260,7 @@ export function normalizeInventoryDashboard(
       awaitingReceipt: readyToReceive,
       awaitingFinance: awaitingReceiptReconciliation,
     },
+    logistics: (data?.logistics || []).map((l) => ({ ...l })),
   };
 }
 
@@ -198,6 +300,23 @@ export class InventoryManagerDashboardService {
     return this.http.get<InventoryItem[]>(`${this.apiUrl}/list`);
   }
 
+  /**
+   * Server-side paginated inventory query (Epic 22 / AR-05).
+   * Delegates filtering, search, sorting and pagination to the backend.
+   */
+  getInventoryPaged(params: InventoryListParams): Observable<InventoryPagedResult> {
+    let httpParams = new HttpParams();
+    if (params.page !== undefined) httpParams = httpParams.set('page', String(params.page));
+    if (params.pageSize !== undefined) httpParams = httpParams.set('pageSize', String(params.pageSize));
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.itemClass) httpParams = httpParams.set('itemClass', params.itemClass);
+    if (params.subcategory) httpParams = httpParams.set('subcategory', params.subcategory);
+    if (params.supplierId) httpParams = httpParams.set('supplierId', params.supplierId);
+    if (params.sortField) httpParams = httpParams.set('sortField', params.sortField);
+    if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
+    return this.http.get<InventoryPagedResult>(`${this.apiUrl}/list`, { params: httpParams });
+  }
+
   getItem(id: string): Observable<InventoryItem> {
     return this.http.get<InventoryItem>(`${this.apiUrl}/item/${id}`);
   }
@@ -210,8 +329,8 @@ export class InventoryManagerDashboardService {
     return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
   }
 
-  receiveInventory(data: Record<string, unknown>): Observable<{ item: InventoryItem; procurement: any }> {
-    return this.http.post<{ item: InventoryItem; procurement: any }>(`${this.apiUrl}/receipts`, data);
+  receiveInventory(data: ReceiveInventoryInput): Observable<ReceiveInventoryResult> {
+    return this.http.post<ReceiveInventoryResult>(`${this.apiUrl}/receipts`, data);
   }
 
   getSuppliers(): Observable<any[]> {
@@ -224,6 +343,12 @@ export class InventoryManagerDashboardService {
 
   getProcurements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/procurements`);
+  }
+
+  getReceiptDiscrepancies(status = 'all'): Observable<ReceiptDiscrepancy[]> {
+    return this.http.get<ReceiptDiscrepancy[]>(`${this.apiUrl}/receipt-discrepancies`, {
+      params: status === 'all' ? {} : { status },
+    });
   }
 
   getOrderRequests(): Observable<PurchaseRequest[]> {
@@ -286,6 +411,10 @@ export class InventoryManagerDashboardService {
     return this.http.patch<RmaCaseItem>(`${this.apiUrl}/rma-cases/${rmaId}`, data);
   }
 
+  receiveRmaReplacement(rmaId: string, data: { serialNumber: string; notes?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/rma-cases/${rmaId}/replacement`, data);
+  }
+
   getQuarantineItems(): Observable<QuarantineItemData[]> {
     return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`);
   }
@@ -345,14 +474,18 @@ export interface RmaCaseItem {
   _id: string;
   rmaId: string;
   serialNumber: string;
+  serializedAssetId?: string | { _id: string; serialNumber: string; status: string };
   itemName: string;
   itemSku: string;
   faultDescription: string;
   reportedBy: string;
-  status: 'reported' | 'under-review' | 'sent-to-supplier' | 'resolved' | 'closed';
+  status: 'reported' | 'under-review' | 'sent-to-supplier' | 'replacement-pending' | 'resolved' | 'closed';
   type: 'Single' | 'Kit' | 'Bundle';
+  resolutionType?: 'internal-repair' | 'supplier-replacement' | '';
+  resolutionNote?: string;
   resolution: string;
   resolvedAt?: string;
+  replacementSerializedAssetId?: string;
   createdAt: string;
 }
 
@@ -364,7 +497,7 @@ export interface QuarantineItemData {
   unit: string;
   reason: string;
   location: string;
-  source: 'leftover-return' | 'rma' | 'manual';
+  source: 'leftover-return' | 'rma' | 'receipt' | 'manual';
   sourceRefId: string;
   status: 'quarantined' | 'disposed' | 'returned-to-supplier';
   disposedAt?: string;
