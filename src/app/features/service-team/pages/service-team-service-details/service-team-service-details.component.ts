@@ -155,12 +155,33 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     this.reportSubmitSuccess = '';
 
     const recordId = this.ticket.sourceId || this.ticket._id || this.ticket.id;
-    
+
+    // Derive onModel from the ticket type returned by the backend.
+    // Backend formatTask() returns: 'Installation', 'Maintenance', or 'Service Request'.
+    let onModel: string;
+    if (this.ticket.type === 'Installation') {
+      onModel = 'Installation';
+    } else if (this.ticket.type === 'Maintenance') {
+      onModel = 'Maintenance';
+    } else {
+      onModel = 'ServiceRequest';
+    }
+
+    // Send a clean, explicit payload — do NOT spread the whole ticket object as
+    // that can overwrite backend-derived fields and send unexpected properties.
     const payload = {
-      ...this.ticket,
-      _id: recordId,
       serviceRequestId: recordId,
-      onModel: this.ticket.type === 'Installation' ? 'Installation' : (this.ticket.type === 'Maintenance' ? 'Maintenance' : 'ServiceRequest'),
+      onModel,
+      teamName: this.ticket.teamName || '',
+      serviceType: this.ticket.serviceType || '',
+      customer: this.ticket.customer || {},
+      location: this.ticket.location || '',
+      scheduledDate: this.ticket.scheduledDate || null,
+      productDetails: {
+        generalType: this.ticket.serviceType || '',
+        detailedType: this.ticket.detailedProductType || this.ticket.serviceType || '',
+        description: this.ticket.description || '',
+      },
       materialsUsed: Array.isArray(this.ticket.materials) ? this.ticket.materials : [],
       notesFromMainTechnician: note,
       technicianComment: note,
