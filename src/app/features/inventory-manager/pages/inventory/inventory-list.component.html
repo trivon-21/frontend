@@ -23,7 +23,7 @@
         <input
           type="text"
           [(ngModel)]="searchQuery"
-          (input)="applyFilters()"
+          (input)="onSearchInput(searchQuery)"
           placeholder="Search name, SKU, model, OEM part or asset tag..."
         >
       </label>

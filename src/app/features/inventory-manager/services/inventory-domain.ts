@@ -158,3 +158,61 @@ export function supplierNameOf(item: InventoryItem): string {
 export function supplierIdOf(item: InventoryItem): string {
   return item.supplierId && typeof item.supplierId === 'object' ? item.supplierId._id : item.supplierId || '';
 }
+
+export const BUSINESS_TIMEZONE = 'Asia/Colombo';
+
+export function toBusinessDateString(
+  date: Date | string | number = new Date(),
+  timeZone: string = BUSINESS_TIMEZONE,
+): string {
+  if (!date) return '';
+  if (typeof date === 'string') {
+    const trimmed = date.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    const isoMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})T00:00:00(\.000)?Z?$/);
+    if (isoMatch) {
+      return isoMatch[1];
+    }
+  }
+
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+
+  if (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 && d.getUTCSeconds() === 0 && d.getUTCMilliseconds() === 0) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  if (timeZone) {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(d);
+    } catch {
+      // Fallback
+    }
+  }
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function isLoanOverdue(
+  dueDate: Date | string | number | null | undefined,
+  referenceDate: Date | string | number = new Date(),
+  timeZone: string = BUSINESS_TIMEZONE,
+): boolean {
+  if (!dueDate) return false;
+  const dueStr = toBusinessDateString(dueDate, timeZone);
+  const currentStr = toBusinessDateString(referenceDate, timeZone);
+  if (!dueStr || !currentStr) return false;
+  return dueStr < currentStr;
+}
+

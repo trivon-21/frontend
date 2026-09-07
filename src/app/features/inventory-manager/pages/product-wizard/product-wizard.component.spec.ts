@@ -120,4 +120,63 @@ describe('ProductWizardComponent', () => {
     expect(component.form.controls['binLocation'].value).toBe('');
     expect(component.form.hasError('storageLocation')).toBeTrue();
   });
+
+  describe('unsaved changes protection', () => {
+    it('allows pristine navigation without confirmation prompt', () => {
+      const { component } = createComponent('507f1f77bcf86cd799439011');
+      spyOn(window, 'confirm');
+
+      expect(component.canDeactivate()).toBeTrue();
+      expect(window.confirm).not.toHaveBeenCalled();
+    });
+
+    it('prompts user and aborts navigation when dirty and cancelled', () => {
+      const { component } = createComponent('507f1f77bcf86cd799439011');
+      component.form.controls['name'].setValue('Dirty Name Change');
+      component.form.controls['name'].markAsDirty();
+      spyOn(window, 'confirm').and.returnValue(false);
+
+      expect(component.canDeactivate()).toBeFalse();
+      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved product changes?');
+    });
+
+    it('prompts user and permits navigation when dirty and discarded', () => {
+      const { component } = createComponent('507f1f77bcf86cd799439011');
+      component.form.controls['name'].setValue('Dirty Name Change');
+      component.form.controls['name'].markAsDirty();
+      spyOn(window, 'confirm').and.returnValue(true);
+
+      expect(component.canDeactivate()).toBeTrue();
+      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved product changes?');
+    });
+
+    it('permits navigation without prompt after successful save', () => {
+      const { component } = createComponent('507f1f77bcf86cd799439011');
+      component.savedItem = inventoryItem();
+      spyOn(window, 'confirm');
+
+      expect(component.canDeactivate()).toBeTrue();
+      expect(window.confirm).not.toHaveBeenCalled();
+    });
+
+    it('prevents browser beforeunload when dirty and allows when clean or saved', () => {
+      const { component } = createComponent('507f1f77bcf86cd799439011');
+      const event = jasmine.createSpyObj<BeforeUnloadEvent>('BeforeUnloadEvent', ['preventDefault']);
+
+      // Pristine
+      component.beforeUnload(event);
+      expect(event.preventDefault).not.toHaveBeenCalled();
+
+      // Dirty
+      component.form.controls['name'].setValue('Dirty Name Change');
+      component.form.controls['name'].markAsDirty();
+      component.beforeUnload(event);
+      expect(event.preventDefault).toHaveBeenCalledTimes(1);
+
+      // Saved
+      component.savedItem = inventoryItem();
+      component.beforeUnload(event);
+      expect(event.preventDefault).toHaveBeenCalledTimes(1); // not called again
+    });
+  });
 });

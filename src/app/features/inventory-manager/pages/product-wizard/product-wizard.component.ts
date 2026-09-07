@@ -30,6 +30,7 @@ import {
   supplierIdOf,
 } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
+import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
 
 interface SupplierOption {
   _id: string;
@@ -43,7 +44,7 @@ interface SupplierOption {
   templateUrl: './product-wizard.component.html',
   styleUrls: ['./product-wizard.component.css'],
 })
-export class ProductWizardComponent implements OnInit {
+export class ProductWizardComponent implements OnInit, HasPendingChanges {
   readonly itemClasses = INVENTORY_ITEM_CLASSES;
   readonly itemForms = INVENTORY_ITEM_FORMS;
   readonly systemTypes = INVENTORY_SYSTEM_TYPES;

@@ -54,7 +54,7 @@ describe('OrderCreationService HTTP contract', () => {
     expect(request.request.body).toEqual(createPayload);
     request.flush({});
 
-    const editPayload = { ...createPayload, expectedVersion: 4 };
+    const editPayload = { ...createPayload, statusVersion: 4 };
     service.submitOrderRequest(editPayload, true, 'REQ-001').subscribe();
     request = http.expectOne(`${baseUrl}/order-requests/REQ-001`);
     expect(request.request.method).toBe('PATCH');
@@ -76,13 +76,13 @@ describe('OrderCreationService HTTP contract', () => {
     service.submitForManager(order).subscribe();
     let request = http.expectOne(`${baseUrl}/order-requests/REQ-001/submit`);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ expectedVersion: 6 });
+    expect(request.request.body).toEqual({ statusVersion: 6 });
     request.flush(order);
 
     service.issuePurchaseOrder(order).subscribe();
     request = http.expectOne(`${baseUrl}/order-requests/REQ-001/issue-po`);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ expectedVersion: 6 });
+    expect(request.request.body).toEqual({ statusVersion: 6 });
     request.flush(order);
   });
 });

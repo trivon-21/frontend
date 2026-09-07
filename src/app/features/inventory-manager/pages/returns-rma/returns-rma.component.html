@@ -196,18 +196,84 @@
                 </span>
               </td>
               <td>
-                <button
-                  type="button"
-                  class="btn-advance"
-                  *ngIf="rmaNextStatus[rma.status]"
-                  (click)="advanceRmaStatus(rma)"
-                  [disabled]="pendingActionIds.has(rma.rmaId)"
-                  [title]="'Move to ' + getNextStatusLabel(rma.status)"
-                >
-                  <lucide-angular name="chevron-right" [size]="14" class="inline-icon"></lucide-angular>
-                  {{ getNextStatusLabel(rma.status) }}
-                </button>
-                <span class="closed-label" *ngIf="!rmaNextStatus[rma.status]">Closed</span>
+                <div class="rma-action-buttons">
+                  <!-- Under Review: Internal Repair or Send to Supplier -->
+                  <ng-container *ngIf="rma.status === 'under-review'">
+                    <button
+                      type="button"
+                      class="btn-advance"
+                      (click)="openInternalRepairModal(rma)"
+                      [disabled]="pendingActionIds.has(rma.rmaId)"
+                      title="Resolve via internal repair"
+                    >
+                      <lucide-angular name="wrench" [size]="14" class="inline-icon"></lucide-angular>
+                      Internal Repair
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-advance"
+                      (click)="sendToSupplier(rma)"
+                      [disabled]="pendingActionIds.has(rma.rmaId)"
+                      title="Send to supplier"
+                    >
+                      <lucide-angular name="truck" [size]="14" class="inline-icon"></lucide-angular>
+                      Send to Supplier
+                    </button>
+                  </ng-container>
+
+                  <!-- Sent to Supplier: advance to replacement pending or receive directly -->
+                  <ng-container *ngIf="rma.status === 'sent-to-supplier'">
+                    <button
+                      type="button"
+                      class="btn-advance"
+                      (click)="advanceRmaStatus(rma)"
+                      [disabled]="pendingActionIds.has(rma.rmaId)"
+                      title="Move to Replacement Pending"
+                    >
+                      <lucide-angular name="clock" [size]="14" class="inline-icon"></lucide-angular>
+                      Awaiting Repl.
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-advance"
+                      (click)="openReplacementModal(rma)"
+                      [disabled]="pendingActionIds.has(rma.rmaId)"
+                      title="Receive supplier replacement"
+                    >
+                      <lucide-angular name="package-check" [size]="14" class="inline-icon"></lucide-angular>
+                      Receive Repl.
+                    </button>
+                  </ng-container>
+
+                  <!-- Replacement Pending: receive replacement -->
+                  <ng-container *ngIf="rma.status === 'replacement-pending'">
+                    <button
+                      type="button"
+                      class="btn-advance"
+                      (click)="openReplacementModal(rma)"
+                      [disabled]="pendingActionIds.has(rma.rmaId)"
+                      title="Receive supplier replacement"
+                    >
+                      <lucide-angular name="package-check" [size]="14" class="inline-icon"></lucide-angular>
+                      Receive Repl.
+                    </button>
+                  </ng-container>
+
+                  <!-- Standard next status for reported, resolved -->
+                  <button
+                    type="button"
+                    class="btn-advance"
+                    *ngIf="rmaNextStatus[rma.status] && rma.status !== 'under-review' && rma.status !== 'sent-to-supplier'"
+                    (click)="advanceRmaStatus(rma)"
+                    [disabled]="pendingActionIds.has(rma.rmaId)"
+                    [title]="'Move to ' + getNextStatusLabel(rma.status)"
+                  >
+                    <lucide-angular name="chevron-right" [size]="14" class="inline-icon"></lucide-angular>
+                    {{ getNextStatusLabel(rma.status) }}
+                  </button>
+
+                  <span class="closed-label" *ngIf="rma.status === 'closed'">Closed</span>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -311,6 +377,97 @@
         <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeRmaModal()">Cancel</button>
         <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
           {{ submitting ? 'Creating...' : 'Create RMA Case' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Internal Repair Resolution Modal (US7.4) -->
+  <div class="modal-overlay" *ngIf="showInternalRepairModal && internalRepairRma" (click)="closeInternalRepairModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="internal-repair-title">
+      <div class="modal-header">
+        <h3 id="internal-repair-title">Resolve RMA via Internal Repair</h3>
+        <button type="button" class="btn-close" (click)="closeInternalRepairModal()" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="dialog-description">
+          Provide notes detailing the internal repair or servicing. The serialized tool will be returned to service and restored to available stock.
+        </p>
+        <div class="loan-summary">
+          <p><strong>RMA ID:</strong> {{ internalRepairRma.rmaId }}</p>
+          <p><strong>Serial Number:</strong> <span class="sku-cell">{{ internalRepairRma.serialNumber }}</span></p>
+          <p><strong>Defect:</strong> {{ internalRepairRma.faultDescription }}</p>
+        </div>
+        <div class="form-group">
+          <label for="internal-repair-note">Resolution / Repair Note <span class="required">*</span></label>
+          <textarea
+            id="internal-repair-note"
+            class="form-input form-textarea"
+            [(ngModel)]="internalRepairNote"
+            rows="3"
+            placeholder="Describe the repair performed and confirm tool is safe to return to service..."
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeInternalRepairModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn-primary im-btn im-btn--primary"
+          [disabled]="!internalRepairNote.trim() || submitting"
+          (click)="submitInternalRepair()"
+        >
+          {{ submitting ? 'Resolving...' : 'Confirm Return to Service' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Replacement Receipt Modal (US7.3) -->
+  <div class="modal-overlay" *ngIf="showReplacementModal && replacementRma" (click)="closeReplacementModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="replacement-modal-title">
+      <div class="modal-header">
+        <h3 id="replacement-modal-title">Receive Supplier Replacement</h3>
+        <button type="button" class="btn-close" (click)="closeReplacementModal()" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="dialog-description">
+          Record the new serial number provided by the supplier. The original damaged unit will be retired from active stock with preserved audit lineage, and the replacement will become immediately available.
+        </p>
+        <div class="loan-summary">
+          <p><strong>RMA ID:</strong> {{ replacementRma.rmaId }}</p>
+          <p><strong>Original Serial:</strong> <span class="sku-cell">{{ replacementRma.serialNumber }}</span></p>
+        </div>
+        <div class="form-group">
+          <label for="replacement-serial">New Replacement Serial Number <span class="required">*</span></label>
+          <input
+            id="replacement-serial"
+            type="text"
+            class="form-input"
+            [(ngModel)]="replacementSerialNumber"
+            placeholder="e.g., CAR-IND-2026-REPL-01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="replacement-notes">Receipt Notes / Delivery Reference</label>
+          <textarea
+            id="replacement-notes"
+            class="form-input form-textarea"
+            [(ngModel)]="replacementNotes"
+            rows="2"
+            placeholder="Delivery note number or supplier invoice reference..."
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeReplacementModal()">Cancel</button>
+        <button
+          type="button"
+          class="btn-primary im-btn im-btn--primary"
+          [disabled]="!replacementSerialNumber.trim() || submitting"
+          (click)="submitReplacementReceipt()"
+        >
+          {{ submitting ? 'Receiving...' : 'Register Replacement' }}
         </button>
       </div>
     </div>

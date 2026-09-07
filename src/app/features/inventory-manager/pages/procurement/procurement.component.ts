@@ -5,8 +5,15 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
-import { InventoryItem, InventoryLocationOption, InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
+import {
+  InventoryItem,
+  InventoryLocationOption,
+  InventoryManagerDashboardService,
+  ReceiptDiscrepancy,
+  ReceiveInventoryInput,
+} from '../../services/inventory-manager-dashboard.service';
 import { NonPoReason, PurchaseLine, PurchaseRequest, ReceiptAuthorization, ReceiptMode, outstanding } from '../../services/purchase-workflow';
+import { toBusinessDateString } from '../../services/inventory-domain';
 
 interface RecentProcurement {
   _id?: string;
@@ -17,6 +24,12 @@ interface RecentProcurement {
   itemName: string;
   sku: string;
   quantity: number;
+  acceptedQuantity?: number;
+  damagedQuantity?: number;
+  missingQuantity?: number;
+  acceptedTotalCost?: number;
+  disputedTotalCost?: number;
+  discrepancyId?: { discrepancyId?: string; status?: string } | string;
   unit: string;
   receivedDate: string;
   condition: string;
@@ -55,6 +68,8 @@ export class ProcurementDashboardComponent implements OnInit {
 
   purchaseOrders: PurchaseRequest[] = [];
   authorizations: ReceiptAuthorization[] = [];
+  discrepancies: ReceiptDiscrepancy[] = [];
+  discrepancyFilter: 'active' | 'resolved' | 'all' = 'active';
   allAuthorizations: ReceiptAuthorization[] = [];
   procurements: RecentProcurement[] = [];
   inventoryItems: InventoryItem[] = [];
@@ -63,6 +78,7 @@ export class ProcurementDashboardComponent implements OnInit {
   selectedPurchaseLine: PurchaseLine | null = null;
   selectedAuthorization: ReceiptAuthorization | null = null;
   selectedItem: InventoryItem | null = null;
+  selectedReplacement: ReceiptDiscrepancy | null = null;
   private readonly preselectedInventoryId: string | null;
   private pendingReceiptEventId = '';
 
@@ -103,8 +119,34 @@ export class ProcurementDashboardComponent implements OnInit {
     return (this.receiptForm.get('stock.serialNumbers') as FormArray).controls;
   }
 
+  get damagedSerialNumbersControls(): AbstractControl[] {
+    return (this.receiptForm.get('stock.damagedSerialNumbers') as FormArray).controls;
+  }
+
   get selectedQuantity(): number {
     return Number(this.receiptForm?.get('stock.quantity')?.value || 0);
+  }
+
+  get acceptedQuantity(): number {
+    return Number(this.receiptForm?.get('stock.acceptedQuantity')?.value || 0);
+  }
+
+  get damagedQuantity(): number {
+    return Number(this.receiptForm?.get('stock.damagedQuantity')?.value || 0);
+  }
+
+  get missingQuantity(): number {
+    return Number(this.receiptForm?.get('stock.missingQuantity')?.value || 0);
+  }
+
+  get receiptBreakdownValid(): boolean {
+    const condition = this.receiptForm?.get('source.condition')?.value;
+    const values = [this.selectedQuantity, this.acceptedQuantity, this.damagedQuantity, this.missingQuantity];
+    if (!values.every(Number.isInteger) || values.some((value) => value < 0) || this.selectedQuantity < 1) return false;
+    if (this.acceptedQuantity + this.damagedQuantity + this.missingQuantity !== this.selectedQuantity) return false;
+    if (condition === 'Good') return this.acceptedQuantity === this.selectedQuantity;
+    if (condition === 'Damaged') return this.damagedQuantity > 0 && this.missingQuantity === 0;
+    return condition === 'Incomplete' && this.missingQuantity > 0;
   }
 
   get selectedUnitCost(): number {
@@ -120,7 +162,11 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   get estimatedTotal(): number {
-    return this.selectedQuantity * this.selectedUnitCost;
+    return this.acceptedQuantity * this.selectedUnitCost;
+  }
+
+  get disputedTotal(): number {
+    return (this.damagedQuantity + this.missingQuantity) * this.selectedUnitCost;
   }
 
   get availablePoLines(): PurchaseLine[] {
@@ -155,6 +201,12 @@ export class ProcurementDashboardComponent implements OnInit {
     return this.allAuthorizations.filter((authorization) => authorization.status === this.authorizationStatus);
   }
 
+  get filteredDiscrepancies(): ReceiptDiscrepancy[] {
+    if (this.discrepancyFilter === 'all') return this.discrepancies;
+    if (this.discrepancyFilter === 'resolved') return this.discrepancies.filter((item) => item.status === 'resolved');
+    return this.discrepancies.filter((item) => !['resolved', 'waived'].includes(item.status));
+  }
+
   private initForm(): void {
     this.receiptForm = this.fb.group({
       source: this.fb.group({
@@ -166,16 +218,23 @@ export class ProcurementDashboardComponent implements OnInit {
       }),
       stock: this.fb.group({
         quantity: [null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
+        acceptedQuantity: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
+        damagedQuantity: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
+        missingQuantity: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
         location: ['', Validators.required],
         binLocation: ['', Validators.required],
         serialNumbers: this.fb.array([]),
+        damagedSerialNumbers: this.fb.array([]),
       }, { validators: this.storageLocationValidator }),
     });
-    this.receiptForm.get('stock.quantity')?.valueChanges.subscribe((q) => this.updateSerialNumbers(Number(q || 0)));
+    this.receiptForm.get('stock.quantity')?.valueChanges.subscribe(() => this.applyDispositionDefaults());
+    this.receiptForm.get('source.condition')?.valueChanges.subscribe(() => this.applyDispositionDefaults());
+    this.receiptForm.get('stock.acceptedQuantity')?.valueChanges.subscribe((q) => this.updateSerialNumbers(Number(q || 0)));
+    this.receiptForm.get('stock.damagedQuantity')?.valueChanges.subscribe((q) => this.updateDamagedSerialNumbers(Number(q || 0)));
   }
 
   private today(): string {
-    return new Date().toISOString().substring(0, 10);
+    return toBusinessDateString(new Date());
   }
 
   loadAllData(): void {
@@ -186,12 +245,14 @@ export class ProcurementDashboardComponent implements OnInit {
       inventoryItems: this.inventoryService.getInventory(),
       orders: this.inventoryService.getOrderRequests(),
       authorizations: this.inventoryService.getReceiptAuthorizations(),
+      discrepancies: this.inventoryService.getReceiptDiscrepancies(),
       locations: this.inventoryService.getLocations(),
     }).subscribe({
-      next: ({ procurements, inventoryItems, orders, authorizations, locations }) => {
+      next: ({ procurements, inventoryItems, orders, authorizations, discrepancies, locations }) => {
         this.procurements = procurements;
         this.inventoryItems = inventoryItems;
         this.locations = locations;
+        this.discrepancies = discrepancies;
         this.purchaseOrders = orders.filter((order) => {
           const isReady = order.workflowStages
             ? order.workflowStages.includes('ready-to-receive')
@@ -227,10 +288,12 @@ export class ProcurementDashboardComponent implements OnInit {
     this.selectedPurchaseLine = null;
     this.selectedAuthorization = null;
     this.selectedItem = null;
+    this.selectedReplacement = null;
     this.resetForm();
   }
 
   selectPurchaseOrder(orderId: string): void {
+    this.selectedReplacement = null;
     this.selectedPurchaseOrder = this.purchaseOrders.find((order) => order._id === orderId) || null;
     this.selectedPurchaseLine = null;
     this.selectedItem = null;
@@ -259,6 +322,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   selectAuthorization(authorization: ReceiptAuthorization): void {
+    this.selectedReplacement = null;
     if (!['approved', 'partially-received'].includes(authorization.status)) return;
     const inventoryId = this.inventoryIdOf(authorization.inventoryId);
     const populatedItem = authorization.inventoryId && typeof authorization.inventoryId !== 'string' ? authorization.inventoryId : null;
@@ -281,15 +345,17 @@ export class ProcurementDashboardComponent implements OnInit {
     const placement = this.validPlacement(this.selectedItem);
     this.receiptForm.patchValue({
       source: { sourceDocumentNumber: '', invoiceNumber: '', receivedDate: this.today(), condition: 'Good', supportingDocumentUrl: '' },
-      stock: { quantity, location: placement.location, binLocation: placement.binLocation },
+      stock: { quantity, acceptedQuantity: quantity, damagedQuantity: 0, missingQuantity: 0, location: placement.location, binLocation: placement.binLocation },
     });
     this.updateSerialNumbers(quantity);
+    this.updateDamagedSerialNumbers(0);
     this.errorMessage = '';
   }
 
   private clearSelectionFields(): void {
-    this.receiptForm.get('stock')?.reset({ quantity: null, location: '', binLocation: '' });
+    this.receiptForm.get('stock')?.reset({ quantity: null, acceptedQuantity: 0, damagedQuantity: 0, missingQuantity: 0, location: '', binLocation: '' });
     this.clearSerialNumbers();
+    this.clearDamagedSerialNumbers();
   }
 
   private findInventoryItem(id: string): InventoryItem | null {
@@ -376,8 +442,33 @@ export class ProcurementDashboardComponent implements OnInit {
     while (serials.length > target) serials.removeAt(serials.length - 1);
   }
 
+  private updateDamagedSerialNumbers(quantity: number): void {
+    const serials = this.receiptForm.get('stock.damagedSerialNumbers') as FormArray;
+    const target = this.selectedItem?.isSerialized ? quantity : 0;
+    while (serials.length < target) serials.push(this.fb.control('', Validators.required));
+    while (serials.length > target) serials.removeAt(serials.length - 1);
+  }
+
+  private applyDispositionDefaults(): void {
+    const quantity = this.selectedQuantity;
+    const condition = this.receiptForm.get('source.condition')?.value;
+    const allocation = condition === 'Damaged'
+      ? { acceptedQuantity: 0, damagedQuantity: quantity, missingQuantity: 0 }
+      : condition === 'Incomplete'
+        ? { acceptedQuantity: 0, damagedQuantity: 0, missingQuantity: quantity }
+        : { acceptedQuantity: quantity, damagedQuantity: 0, missingQuantity: 0 };
+    this.receiptForm.get('stock')?.patchValue(allocation, { emitEvent: false });
+    this.updateSerialNumbers(allocation.acceptedQuantity);
+    this.updateDamagedSerialNumbers(allocation.damagedQuantity);
+  }
+
   private clearSerialNumbers(): void {
     const serials = this.receiptForm.get('stock.serialNumbers') as FormArray;
+    while (serials.length) serials.removeAt(0);
+  }
+
+  private clearDamagedSerialNumbers(): void {
+    const serials = this.receiptForm.get('stock.damagedSerialNumbers') as FormArray;
     while (serials.length) serials.removeAt(0);
   }
 
@@ -393,7 +484,10 @@ export class ProcurementDashboardComponent implements OnInit {
       return !!this.selectedItem && (this.receiptMode === 'PO' ? !!this.selectedPurchaseLine : !!this.selectedAuthorization);
     }
     if (this.currentStep === 2) return this.receiptForm.get('source')!.valid;
-    return this.receiptForm.valid && this.selectedQuantity <= this.remainingQuantity && !!this.selectedItem;
+    return this.receiptForm.valid
+      && this.receiptBreakdownValid
+      && this.selectedQuantity <= this.remainingQuantity
+      && !!this.selectedItem;
   }
 
   nextStep(): void {
@@ -428,11 +522,14 @@ export class ProcurementDashboardComponent implements OnInit {
     this.errorMessage = '';
     const source = this.receiptForm.get('source')!.value;
     const stock = this.receiptForm.get('stock')!.value;
-    this.inventoryService
-      .receiveInventory({
+    const request: ReceiveInventoryInput = {
         inventoryId: this.selectedItem._id || this.selectedItem.id,
         quantity: Number(stock.quantity),
+        acceptedQuantity: Number(stock.acceptedQuantity),
+        damagedQuantity: Number(stock.damagedQuantity),
+        missingQuantity: Number(stock.missingQuantity),
         serialNumbers: stock.serialNumbers,
+        damagedSerialNumbers: stock.damagedSerialNumbers,
         supplierId: this.supplierIdForSelectedSource(),
         invoiceNumber: source.invoiceNumber,
         sourceDocumentNumber: source.sourceDocumentNumber,
@@ -447,11 +544,14 @@ export class ProcurementDashboardComponent implements OnInit {
         orderRequestId: this.selectedPurchaseOrder?._id,
         orderLineId: this.selectedPurchaseLine?.lineId,
         receiptAuthorizationId: this.selectedAuthorization?._id,
-      })
+        discrepancyId: this.selectedReplacement?._id,
+      };
+    this.inventoryService
+      .receiveInventory(request)
       .subscribe({
-        next: ({ item }) => {
+        next: ({ item, procurement }) => {
           this.isSubmitting = false;
-          this.successMessage = `GRN posted for ${item.name}. Stock and workflow records were updated together.`;
+          this.successMessage = `GRN posted for ${item.name}: ${procurement.acceptedQuantity} accepted, ${procurement.damagedQuantity} damaged, ${procurement.missingQuantity} missing.`;
           this.resetForm();
           this.loadAllData();
         },
@@ -471,11 +571,52 @@ export class ProcurementDashboardComponent implements OnInit {
     this.currentStep = 1;
     this.receiptForm.reset({
       source: { sourceDocumentNumber: '', invoiceNumber: '', receivedDate: this.today(), condition: 'Good', supportingDocumentUrl: '' },
-      stock: { quantity: null, location: '', binLocation: '' },
+      stock: { quantity: null, acceptedQuantity: 0, damagedQuantity: 0, missingQuantity: 0, location: '', binLocation: '' },
     });
     this.clearSerialNumbers();
+    this.clearDamagedSerialNumbers();
+    this.selectedReplacement = null;
     this.pendingReceiptEventId = '';
     this.errorMessage = '';
+  }
+
+  startReplacement(discrepancy: ReceiptDiscrepancy): void {
+    const quantity = discrepancy.outstandingQuantity;
+    if (quantity < 1) return;
+
+    if (discrepancy.receiptMode === 'PO') {
+      const orderId = this.relationId(discrepancy.orderRequestId);
+      const order = this.purchaseOrders.find((item) => item._id === orderId);
+      const line = order?.items.find((item) => item.lineId === discrepancy.orderLineId);
+      if (!order || !line) {
+        this.errorMessage = 'The original purchase order is no longer available for receiving.';
+        return;
+      }
+      this.receiptMode = 'PO';
+      this.selectedPurchaseOrder = order;
+      this.selectPurchaseLine(line.lineId);
+    } else {
+      const authorizationId = this.relationId(discrepancy.receiptAuthorizationId);
+      const authorization = this.authorizations.find((item) => item._id === authorizationId);
+      if (!authorization) {
+        this.errorMessage = 'The original receipt authorization is no longer available for receiving.';
+        return;
+      }
+      this.receiptMode = 'NON_PO';
+      this.selectAuthorization(authorization);
+    }
+
+    this.selectedReplacement = discrepancy;
+    const replacementQuantity = Math.min(quantity, this.remainingQuantity);
+    this.receiptForm.patchValue({
+      source: { condition: 'Good' },
+      stock: { quantity: replacementQuantity, acceptedQuantity: replacementQuantity, damagedQuantity: 0, missingQuantity: 0 },
+    });
+    this.currentStep = 2;
+  }
+
+  private relationId(value: { _id: string } | string | undefined): string {
+    return typeof value === 'string' ? value : value?._id || '';
   }
 
   viewProcurementDetails(procurement: RecentProcurement): void {
@@ -490,5 +631,10 @@ export class ProcurementDashboardComponent implements OnInit {
 
   reasonLabel(reason?: string): string {
     return reason ? this.nonPoReasonLabels[reason] || reason : '—';
+  }
+
+  procurementDiscrepancyLabel(value?: RecentProcurement['discrepancyId']): string {
+    if (!value) return '—';
+    return typeof value === 'string' ? value : value.discrepancyId || '—';
   }
 }

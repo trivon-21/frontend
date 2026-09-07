@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PurchaseRequestService } from '../../services/purchase-request.service';
+import { PurchaseRequestItem, PurchaseRequestService } from '../../services/purchase-request.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 
@@ -14,11 +14,11 @@ import { ConfirmService } from '../../../../services/confirm.service';
 })
 export class PurchaseRequestVerificationComponent implements OnInit {
 
-  requests: any[] = [];
+  requests: PurchaseRequestItem[] = [];
   searchQuery = '';
   showDetailsModal = false;
   showRejectModal = false;
-  selectedRequest: any = null;
+  selectedRequest: PurchaseRequestItem | null = null;
   rejectionReason = '';
   reasonError = false;
   isLoading = false;
@@ -39,23 +39,24 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     });
   }
 
-  get filteredRequests(): any[] {
+  get filteredRequests(): PurchaseRequestItem[] {
     if (!this.searchQuery.trim()) return this.requests;
     const q = this.searchQuery.toLowerCase();
     return this.requests.filter(r =>
       r.requestedBy?.toLowerCase().includes(q) ||
-      r.reason?.toLowerCase().includes(q)
+      (r.reason || r.notes)?.toLowerCase().includes(q)
     );
   }
 
-  getRequestRef(r: any): string {
-    return r?._id ? `PR-${r._id.toString().slice(-6).toUpperCase()}` : '—';
+  getRequestRef(r: PurchaseRequestItem | null): string {
+    if (!r) return '—';
+    return r.requestId || (r._id ? `PR-${r._id.toString().slice(-6).toUpperCase()}` : '—');
   }
 
-  openDetailsModal(request: any) { this.selectedRequest = request; this.showDetailsModal = true; }
+  openDetailsModal(request: PurchaseRequestItem) { this.selectedRequest = request; this.showDetailsModal = true; }
   closeDetailsModal() { this.showDetailsModal = false; this.selectedRequest = null; }
 
-  async approveRequest(request: any): Promise<void> {
+  async approveRequest(request: PurchaseRequestItem): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Approve Purchase Request',
       message: `Approve purchase request from ${request.requestedBy}?`,
@@ -64,7 +65,7 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     });
     if (!confirmed) return;
     this.isLoading = true;
-    this.requestService.approveRequest(request._id).subscribe({
+    this.requestService.approveRequest(request._id, request.statusVersion).subscribe({
       next: () => {
         this.notificationService.show('Purchase request approved! Confirmation email sent.', 'success');
         this.requests = this.requests.filter(r => r._id !== request._id);
@@ -74,7 +75,7 @@ export class PurchaseRequestVerificationComponent implements OnInit {
     });
   }
 
-  openRejectModal(request: any): void {
+  openRejectModal(request: PurchaseRequestItem): void {
     this.selectedRequest = request; this.rejectionReason = ''; this.reasonError = false; this.showRejectModal = true;
   }
 
@@ -83,13 +84,18 @@ export class PurchaseRequestVerificationComponent implements OnInit {
   }
 
   rejectRequest(): void {
+    if (!this.selectedRequest) return;
     if (!this.rejectionReason.trim()) { this.reasonError = true; return; }
     this.reasonError = false;
     this.isLoading = true;
-    this.requestService.rejectRequest(this.selectedRequest._id, this.rejectionReason).subscribe({
+    this.requestService.rejectRequest(
+      this.selectedRequest._id,
+      this.rejectionReason,
+      this.selectedRequest.statusVersion,
+    ).subscribe({
       next: () => {
         this.notificationService.show('Purchase request rejected. Email sent.', 'success');
-        this.requests = this.requests.filter(r => r._id !== this.selectedRequest._id);
+        this.requests = this.requests.filter(r => r._id !== this.selectedRequest?._id);
         this.closeRejectModal();
         this.isLoading = false;
       },
@@ -98,6 +104,6 @@ export class PurchaseRequestVerificationComponent implements OnInit {
   }
 
   getItemsTotal(items: any[]): number {
-    return (items || []).reduce((s, i) => s + (i.total || 0), 0);
+    return (items || []).reduce((s, i) => s + (i.total || i.estimatedTotal || 0), 0);
   }
 }

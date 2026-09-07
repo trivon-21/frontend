@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -11,6 +11,7 @@ import { OrderSuggestedGridComponent } from './components/order-suggested-grid/o
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
+import { HasPendingChanges } from '../../../../../core/guards/pending-changes.guard';
 
 @Component({
   selector: 'app-new-order-form',
@@ -28,7 +29,7 @@ import { forkJoin } from 'rxjs';
   templateUrl: './new-order-form.component.html',
   styleUrls: ['./new-order-form.component.css']
 })
-export class NewOrderFormComponent implements OnInit {
+export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   inventoryItems: InventoryItem[] = [];
   suppliers: Supplier[] = [];
   suggestedItems: InventoryItem[] = [];
@@ -50,11 +51,50 @@ export class NewOrderFormComponent implements OnInit {
   statusVersion = 0;
   sourceMaterialRequestId = '';
 
+  private initialSnapshot = '';
+  private submittedSuccessfully = false;
+
   constructor(
     private orderCreationService: OrderCreationService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
+
+  takeSnapshot(): string {
+    return JSON.stringify({
+      supplier: this.selectedSupplier,
+      notes: this.orderNotes.trim(),
+      items: this.orderItems.map((i) => ({
+        inventoryId: i.inventoryId,
+        quantity: i.quantity,
+        unitCost: i.unitCost,
+      })),
+    });
+  }
+
+  get isDirty(): boolean {
+    if (this.submittedSuccessfully) {
+      return false;
+    }
+    if (!this.initialSnapshot) {
+      return this.orderItems.length > 0 || !!this.selectedSupplier || !!this.orderNotes.trim();
+    }
+    return this.takeSnapshot() !== this.initialSnapshot;
+  }
+
+  canDeactivate(): boolean {
+    if (!this.isDirty) {
+      return true;
+    }
+    return window.confirm('Discard your unsaved order changes?');
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty) {
+      event.preventDefault();
+    }
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -129,6 +169,9 @@ export class NewOrderFormComponent implements OnInit {
         this.suppliers = suppliers;
         this.suggestedItems = suggestedItems;
         this.loading = false;
+        if (!this.isEditMode) {
+          this.initialSnapshot = this.takeSnapshot();
+        }
       },
       error: () => {
         this.loadError = 'Order form data could not be loaded. No partial options have been shown.';
@@ -150,6 +193,7 @@ export class NewOrderFormComponent implements OnInit {
             inventoryId: typeof i.inventoryId === 'object' ? i.inventoryId._id : i.inventoryId || '',
             supplierId: typeof i.supplierId === 'object' ? i.supplierId._id : i.supplierId || '',
           }));
+          this.initialSnapshot = this.takeSnapshot();
         }
       },
       error: () => this.loadError = 'The draft order could not be loaded.'
@@ -238,6 +282,7 @@ export class NewOrderFormComponent implements OnInit {
     ).subscribe({
       next: (data) => {
         this.isSubmitting = false;
+        this.submittedSuccessfully = true;
         const msgId = this.isEditMode ? this.orderId : data.requestId;
         this.router.navigate(['/inventory-manager/order-creation'], {
           queryParams: { success: `Order ${msgId} submitted successfully!` }
@@ -262,10 +307,12 @@ export class NewOrderFormComponent implements OnInit {
     this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).subscribe({
       next: (data) => {
         this.isSubmitting = false;
+        this.statusVersion = data.statusVersion;
         if (!this.isEditMode) {
           this.isEditMode = true;
           this.orderId = data.requestId;
         }
+        this.initialSnapshot = this.takeSnapshot();
         this.successMessage = 'Draft saved successfully.';
         setTimeout(() => this.successMessage = '', 3000);
       },
@@ -296,7 +343,7 @@ export class NewOrderFormComponent implements OnInit {
       notes: this.orderNotes,
       source: this.sourceMaterialRequestId ? 'material-request' : 'manual',
       ...(this.sourceMaterialRequestId ? { sourceMaterialRequestId: this.sourceMaterialRequestId } : {}),
-      ...(this.isEditMode ? { expectedVersion: this.statusVersion } : {}),
+      ...(this.isEditMode ? { statusVersion: this.statusVersion } : {}),
     };
   }
 

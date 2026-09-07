@@ -195,17 +195,40 @@
       <div class="step-content animate-fade" formGroupName="stock" *ngIf="currentStep === 3">
         <div class="step-intro">
           <h3>Stock Placement & Location</h3>
-          <p class="step-desc">Confirm incoming count and designate where items will be stored.</p>
+          <p class="step-desc">Separate accepted stock from damaged and missing units before posting.</p>
+        </div>
+        <div class="replacement-notice" *ngIf="selectedReplacement">
+          Replacement receipt for {{ selectedReplacement.discrepancyId }} — {{ selectedReplacement.outstandingQuantity }} {{ selectedReplacement.unit }} outstanding.
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="field-label">RECEIVED QUANTITY *</label>
+            <label class="field-label">EXPECTED DELIVERY QUANTITY *</label>
             <input type="number" min="1" [max]="remainingQuantity" step="1" class="form-input highlight-input" formControlName="quantity" placeholder="Enter quantity" />
             <small class="field-help">Maximum outstanding: {{ remainingQuantity }} {{ selectedItem?.unit || 'units' }}.</small>
           </div>
           <div class="form-group">
             <label class="field-label">UNIT OF MEASURE</label>
             <input class="form-input readonly-input" [value]="selectedItem?.unit || '—'" readonly />
+          </div>
+          <div class="form-group">
+            <label class="field-label">ACCEPTED QUANTITY *</label>
+            <input type="number" min="0" step="1" class="form-input disposition-accepted" formControlName="acceptedQuantity" />
+            <small class="field-help">Only accepted units increase available stock.</small>
+          </div>
+          <div class="form-group">
+            <label class="field-label">DAMAGED QUANTITY *</label>
+            <input type="number" min="0" step="1" class="form-input disposition-damaged" formControlName="damagedQuantity" />
+            <small class="field-help">Damaged units are placed in quarantine.</small>
+          </div>
+          <div class="form-group">
+            <label class="field-label">MISSING QUANTITY *</label>
+            <input type="number" min="0" step="1" class="form-input disposition-missing" formControlName="missingQuantity" />
+            <small class="field-help">Missing units remain outstanding from the supplier.</small>
+          </div>
+          <div class="form-group breakdown-status" [class.invalid]="!receiptBreakdownValid">
+            <label class="field-label">DISPOSITION CHECK</label>
+            <span>{{ acceptedQuantity + damagedQuantity + missingQuantity }} / {{ selectedQuantity }} allocated</span>
+            <small class="field-help" *ngIf="!receiptBreakdownValid">The breakdown must equal the expected quantity and match the selected condition.</small>
           </div>
           <div class="form-group">
             <label class="field-label">WAREHOUSE *</label>
@@ -228,15 +251,27 @@
             </div>
             <small class="field-help" *ngIf="receiptForm.get('stock')?.hasError('storageLocation')">Choose an area in the selected warehouse.</small>
           </div>
-          <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && selectedQuantity > 0">
+          <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && acceptedQuantity > 0">
             <div class="serials-header">
-              <label class="field-label">SERIAL NUMBERS ({{ selectedQuantity }} REQUIRED) *</label>
-              <span class="serials-tip">Enter one unique serial number per unit</span>
+              <label class="field-label">ACCEPTED SERIAL NUMBERS ({{ acceptedQuantity }} REQUIRED) *</label>
+              <span class="serials-tip">These serials become available stock</span>
             </div>
             <div formArrayName="serialNumbers" class="serials-grid">
               <div class="serial-item" *ngFor="let control of serialNumbersControls; let i = index">
                 <span class="serial-idx">#{{ i + 1 }}</span>
                 <input class="form-input serial-input" [formControlName]="i" placeholder="Serial No. {{ i + 1 }}" />
+              </div>
+            </div>
+          </div>
+          <div class="form-group full-span serials-section damaged-serials" *ngIf="selectedItem?.isSerialized && damagedQuantity > 0">
+            <div class="serials-header">
+              <label class="field-label">DAMAGED SERIAL NUMBERS ({{ damagedQuantity }} REQUIRED) *</label>
+              <span class="serials-tip">These serials are recorded in quarantine only</span>
+            </div>
+            <div formArrayName="damagedSerialNumbers" class="serials-grid">
+              <div class="serial-item" *ngFor="let control of damagedSerialNumbersControls; let i = index">
+                <span class="serial-idx">#{{ i + 1 }}</span>
+                <input class="form-input serial-input" [formControlName]="i" placeholder="Damaged serial {{ i + 1 }}" />
               </div>
             </div>
           </div>
@@ -261,12 +296,16 @@
               <span class="value">{{ selectedItem.name }} ({{ selectedItem.sku }})</span>
             </div>
             <div class="calc-row">
-              <span class="label">Quantity Received:</span>
-              <span class="value highlight">{{ selectedQuantity }} {{ selectedItem.unit }}</span>
+              <span class="label">Disposition:</span>
+              <span class="value highlight">{{ acceptedQuantity }} accepted · {{ damagedQuantity }} damaged · {{ missingQuantity }} missing</span>
             </div>
             <div class="calc-row total-row">
-              <span class="label">Estimated Total Value:</span>
+              <span class="label">Accepted Stock Value:</span>
               <span class="value total-price">LKR {{ estimatedTotal | number:'1.2-2' }}</span>
+            </div>
+            <div class="calc-row" *ngIf="disputedTotal > 0">
+              <span class="label">Supplier Disputed Value:</span>
+              <span class="value discrepancy-value">LKR {{ disputedTotal | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
@@ -333,6 +372,55 @@
     </div>
   </section>
 
+  <section class="discrepancy-section content-card" *ngIf="!loading && !loadError" aria-labelledby="supplier-discrepancies-title">
+    <div class="section-top-bar">
+      <div class="section-title">
+        <h2 id="supplier-discrepancies-title">Supplier Discrepancies</h2>
+        <p class="subtitle">Damaged and missing units remain outstanding until accepted replacements arrive.</p>
+      </div>
+      <div class="filter-pills" aria-label="Supplier discrepancy filters">
+        <button type="button" class="pill-btn" [class.active]="discrepancyFilter === 'active'" [attr.aria-pressed]="discrepancyFilter === 'active'" (click)="discrepancyFilter = 'active'">Active</button>
+        <button type="button" class="pill-btn" [class.active]="discrepancyFilter === 'resolved'" [attr.aria-pressed]="discrepancyFilter === 'resolved'" (click)="discrepancyFilter = 'resolved'">Resolved</button>
+        <button type="button" class="pill-btn" [class.active]="discrepancyFilter === 'all'" [attr.aria-pressed]="discrepancyFilter === 'all'" (click)="discrepancyFilter = 'all'">All</button>
+      </div>
+    </div>
+    <div class="alx-table-container" role="region" aria-label="Supplier receipt discrepancies" tabindex="0">
+      <table class="authorization-table alx-table alx-table--medium alx-table--fixed" *ngIf="filteredDiscrepancies.length > 0">
+        <thead>
+          <tr>
+            <th>Discrepancy</th>
+            <th>Item / Supplier</th>
+            <th>Damaged</th>
+            <th>Missing</th>
+            <th>Outstanding</th>
+            <th>Disputed Value</th>
+            <th>Status / Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let discrepancy of filteredDiscrepancies">
+            <td class="sku-cell">{{ discrepancy.discrepancyId }}</td>
+            <td class="name-cell">{{ discrepancy.itemName }}<small>{{ discrepancy.supplierName }}</small></td>
+            <td class="num-cell">{{ discrepancy.damagedQuantity }}</td>
+            <td class="num-cell">{{ discrepancy.missingQuantity }}</td>
+            <td class="num-cell">{{ discrepancy.outstandingQuantity }} {{ discrepancy.unit }}</td>
+            <td class="num-cell">LKR {{ discrepancy.disputedValue | number:'1.2-2' }}</td>
+            <td>
+              <span class="queue-status" [ngClass]="discrepancy.status">{{ discrepancy.status | titlecase }}</span>
+              <button type="button" class="im-btn im-btn--secondary im-btn--compact replacement-btn"
+                *ngIf="discrepancy.outstandingQuantity > 0 && discrepancy.status !== 'waived'"
+                (click)="startReplacement(discrepancy)">Receive replacement</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="empty-results" *ngIf="filteredDiscrepancies.length === 0">
+        <lucide-angular name="circle-check" [size]="40" class="empty-icon"></lucide-angular>
+        <p>No supplier discrepancies match this filter.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Recent GRN Entries Section -->
   <div class="shipments-section" *ngIf="!loading && !loadError">
     <div class="section-top-bar">
@@ -374,7 +462,7 @@
               <lucide-angular name="package" [size]="14"></lucide-angular>
               {{ p.itemName }} ({{ p.sku }})
             </span>
-            <span class="detail-badge qty-badge">{{ p.quantity }} {{ p.unit }}</span>
+            <span class="detail-badge qty-badge">{{ p.acceptedQuantity ?? p.quantity }} accepted / {{ p.quantity }} expected {{ p.unit }}</span>
             <span class="detail-badge ref-badge">Ref: {{ p.poNumber || p.receiptAuthorizationId?.authorizationNumber || '—' }}</span>
             <span class="detail-badge condition-badge" [class.damaged]="p.condition === 'Damaged'">Condition: {{ p.condition }}</span>
           </div>
@@ -411,6 +499,9 @@
           <div class="detail-card"><span class="label">Supplier Name</span><span class="val">{{ selectedProcurement.supplierName }}</span></div>
           <div class="detail-card"><span class="label">Item & SKU</span><span class="val">{{ selectedProcurement.itemName }} ({{ selectedProcurement.sku }})</span></div>
           <div class="detail-card"><span class="label">Quantity Received</span><span class="val highlight">{{ selectedProcurement.quantity }} {{ selectedProcurement.unit }}</span></div>
+          <div class="detail-card"><span class="label">Accepted</span><span class="val highlight">{{ selectedProcurement.acceptedQuantity ?? selectedProcurement.quantity }} {{ selectedProcurement.unit }}</span></div>
+          <div class="detail-card"><span class="label">Damaged / Missing</span><span class="val">{{ selectedProcurement.damagedQuantity || 0 }} / {{ selectedProcurement.missingQuantity || 0 }} {{ selectedProcurement.unit }}</span></div>
+          <div class="detail-card" *ngIf="selectedProcurement.discrepancyId"><span class="label">Supplier Discrepancy</span><span class="val">{{ procurementDiscrepancyLabel(selectedProcurement.discrepancyId) }}</span></div>
           <div class="detail-card"><span class="label">Receipt Condition</span><span class="val status" [class.damaged]="selectedProcurement.condition === 'Damaged'">{{ selectedProcurement.condition }}</span></div>
           <div class="detail-card full-span" *ngIf="selectedProcurement.receivedBy"><span class="label">Received By</span><span class="val">{{ selectedProcurement.receivedBy }}</span></div>
         </div>
