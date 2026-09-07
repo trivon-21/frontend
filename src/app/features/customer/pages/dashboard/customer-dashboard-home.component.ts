@@ -6,6 +6,7 @@ import { RequestServiceModalComponent } from '../../../../components/modals/requ
 import { InquiryModalComponent } from '../../../../components/modals/inquiry-modal/inquiry-modal.component';
 import { FeedbackModalComponent } from '../../../../components/modals/feedback-modal/feedback-modal.component';
 import { ServiceRequestsListModalComponent } from '../../../../components/modals/service-requests-list-modal/service-requests-list-modal.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-customer-dashboard-home',
@@ -16,7 +17,8 @@ import { ServiceRequestsListModalComponent } from '../../../../components/modals
     RequestServiceModalComponent,
     InquiryModalComponent,
     FeedbackModalComponent,
-    ServiceRequestsListModalComponent
+    ServiceRequestsListModalComponent,
+    PortalIconsModule
   ],
   templateUrl: './customer-dashboard-home.component.html',
   styleUrl: './customer-dashboard-home.component.css'

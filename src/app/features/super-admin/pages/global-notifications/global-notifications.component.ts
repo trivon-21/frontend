@@ -6,11 +6,12 @@ import {
   GlobalNotificationItem,
   CreateGlobalNotificationPayload
 } from '../../services/super-admin.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-global-notifications',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './global-notifications.component.html',
   styleUrls: ['./global-notifications.component.css']
 })

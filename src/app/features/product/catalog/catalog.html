@@ -168,7 +168,9 @@
       <div class="product-meta">{{ product.brand }} · {{ product.category }}</div>
       <h3 class="product-title">{{ product.name }}</h3>
       <div class="product-rating" *ngIf="product.averageRating || product.reviewCount">
-        <span class="stars">{{ getStars(product.averageRating || 0) }}</span>
+        <span class="stars" style="display:inline-flex; align-items:center; gap:2px;">
+          <lucide-angular *ngFor="let s of getStars(product.averageRating || 0)" name="star" [size]="14" [style.fill]="s ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular>
+        </span>
         <span class="rating-text">({{ product.averageRating || '0.0' }})</span>
       </div>
       <div class="product-capacity">Capacity: {{ product.capacity }} BTU</div>

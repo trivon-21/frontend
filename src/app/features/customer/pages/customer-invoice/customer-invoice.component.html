@@ -90,17 +90,12 @@
       <p class="action-question">Would You Like to,</p>
    <div class="action-buttons">
   <button class="btn-accept" (click)="acceptInvoice()" [disabled]="isSubmitting">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"></polyline>
-    </svg>
+    <lucide-angular name="check" [size]="18"></lucide-angular>
     Accept Invoice
   </button>
 
   <button class="btn-reject" (click)="openRejectModal()" [disabled]="isSubmitting">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
+    <lucide-angular name="x" [size]="18"></lucide-angular>
     Reject Invoice
   </button>
 </div>
@@ -113,7 +108,9 @@
 
     <!-- ACCEPTED STATE -->
     <div class="success-card" *ngIf="isAccepted">
-      <div class="success-icon">✓</div>
+      <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="check" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Accepted!</h3>
       <p>Thank you for accepting the invoice. Our team will be in touch shortly.</p>
       <p *ngIf="invoice.paymentDeadline" style="color:#dc2626;font-weight:600;">
@@ -127,7 +124,9 @@
 
     <!-- REJECTED STATE -->
     <div class="rejected-card" *ngIf="isRejected">
-      <div class="rejected-icon">✕</div>
+      <div class="rejected-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Rejected</h3>
       <p>Your rejection has been recorded.</p>
       <p><strong>Reason:</strong> {{ invoice.rejectionReason }}</p>
@@ -149,7 +148,9 @@
 
     <!-- AUTO CANCELLED STATE -->
     <div class="rejected-card" *ngIf="isAutoCancelled">
-      <div class="rejected-icon">✕</div>
+      <div class="rejected-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Auto-Cancelled</h3>
       <p>This invoice has been automatically cancelled.</p>
       <div class="rejected-badge" style="background:#fef3c7;color:#92400e;">Status: Auto Cancelled</div>
@@ -163,7 +164,9 @@
   <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Reject Invoice</h3>
-      <button class="modal-close" (click)="closeRejectModal()">✕</button>
+      <button class="modal-close" (click)="closeRejectModal()" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="18"></lucide-angular>
+      </button>
     </div>
     <div class="modal-body">
       <p>Please provide a reason for rejecting this invoice.</p>

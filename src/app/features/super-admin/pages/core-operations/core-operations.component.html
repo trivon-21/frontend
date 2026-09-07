@@ -8,11 +8,7 @@
 
     <div class="hero-actions">
       <button class="btn btn-outline refresh-btn" (click)="refreshCurrentTab()" title="Refresh operational data">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <polyline points="1 20 1 14 7 14"></polyline>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-        </svg>
+        <lucide-angular name="refresh-cw" [size]="15" strokeWidth="2"></lucide-angular>
         <span>Refresh</span>
       </button>
     </div>
@@ -21,19 +17,23 @@
   <!-- Error Banner -->
   <div class="alert-banner error" *ngIf="error">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <lucide-angular name="circle-alert" [size]="18" strokeWidth="2"></lucide-angular>
       <span>{{ error }}</span>
     </div>
-    <button class="btn-banner-close" (click)="error = null">×</button>
+    <button class="btn-banner-close" (click)="error = null" aria-label="Dismiss error">
+      <lucide-angular name="x" [size]="15"></lucide-angular>
+    </button>
   </div>
 
   <!-- Success Banner -->
   <div class="alert-banner success" *ngIf="successMessage">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <lucide-angular name="circle-check-big" [size]="18" strokeWidth="2"></lucide-angular>
       <span>{{ successMessage }}</span>
     </div>
-    <button class="btn-banner-close" (click)="successMessage = null">×</button>
+    <button class="btn-banner-close" (click)="successMessage = null" aria-label="Dismiss success">
+      <lucide-angular name="x" [size]="15"></lucide-angular>
+    </button>
   </div>
 
   <!-- Tabs Navigation -->
@@ -192,9 +192,7 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && orders.length === 0">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
-      </svg>
+      <lucide-angular name="package" [size]="44" strokeWidth="1.5" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
       <p>No customer orders found matching your criteria.</p>
     </div>
 
@@ -338,9 +336,7 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && serviceRequests.length === 0">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-      </svg>
+      <lucide-angular name="wrench" [size]="44" strokeWidth="1.5" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
       <p>No service requests found matching your criteria.</p>
     </div>
 
@@ -471,9 +467,7 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && inquiries.length === 0">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
+      <lucide-angular name="message-circle" [size]="44" strokeWidth="1.5" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
       <p>No inquiries found matching your filters.</p>
     </div>
 
@@ -507,7 +501,9 @@
           <h2>{{ selectedOrder.orderRef || selectedOrder.orderNumber || 'Order Details' }}</h2>
           <small style="color: #616b78;">Placed on {{ selectedOrder.createdAt | date: 'medium' }}</small>
         </div>
-        <button class="btn-close" (click)="closeOrderModal()">×</button>
+        <button class="btn-close" (click)="closeOrderModal()" aria-label="Close modal">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
       </div>
 
       <div class="modal-body">
@@ -583,8 +579,10 @@
           </div>
 
           <div *ngIf="selectedOrder.paymentSlipUrl" style="margin-top: 10px;">
-            <a [href]="selectedOrder.paymentSlipUrl" target="_blank" class="attachment-link">
-              📄 View Bank Deposit / Payment Slip
+            <a [href]="selectedOrder.paymentSlipUrl" target="_blank" class="attachment-link" style="display: inline-flex; align-items: center; gap: 6px;">
+              <lucide-angular name="file-text" [size]="15" strokeWidth="2"></lucide-angular>
+              <span>View Bank Deposit / Payment Slip</span>
+              <lucide-angular name="external-link" [size]="12"></lucide-angular>
             </a>
           </div>
         </div>
@@ -613,7 +611,9 @@
           <h2>{{ selectedServiceRequest.serviceRequestRef }} — {{ selectedServiceRequest.serviceType }}</h2>
           <small style="color: #616b78;">Created On: {{ selectedServiceRequest.createdAt | date: 'medium' }}</small>
         </div>
-        <button class="btn-close" (click)="closeServiceModal()">×</button>
+        <button class="btn-close" (click)="closeServiceModal()" aria-label="Close modal">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
       </div>
 
       <div class="modal-body">
@@ -688,8 +688,10 @@
             <p style="margin: 6px 0 0;">{{ selectedServiceRequest.problemDescription || 'No description provided' }}</p>
           </div>
           <div *ngIf="selectedServiceRequest.problemImageUrl" style="margin-top: 12px;">
-            <a [href]="selectedServiceRequest.problemImageUrl" target="_blank" class="attachment-link">
-              📷 View Issue Photo Attachment
+            <a [href]="selectedServiceRequest.problemImageUrl" target="_blank" class="attachment-link" style="display: inline-flex; align-items: center; gap: 6px;">
+              <lucide-angular name="image" [size]="15" strokeWidth="2"></lucide-angular>
+              <span>View Issue Photo Attachment</span>
+              <lucide-angular name="external-link" [size]="12"></lucide-angular>
             </a>
           </div>
         </div>
@@ -711,7 +713,9 @@
           <h2>{{ selectedInquiry.inquiryRef }} — {{ selectedInquiry.inquiryType }}</h2>
           <small style="color: #616b78;">From: {{ selectedInquiry.name || selectedInquiry.customer?.fullName }} ({{ selectedInquiry.email || selectedInquiry.customer?.email }})</small>
         </div>
-        <button class="btn-close" (click)="closeInquiryModal()">×</button>
+        <button class="btn-close" (click)="closeInquiryModal()" aria-label="Close modal">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
       </div>
 
       <div class="modal-body">
@@ -745,8 +749,10 @@
             </div>
             <p *ngIf="selectedInquiry.subject" style="font-weight: 600; margin-bottom: 4px;">{{ selectedInquiry.subject }}</p>
             <p>{{ selectedInquiry.message }}</p>
-            <a *ngIf="selectedInquiry.attachmentUrl" [href]="selectedInquiry.attachmentUrl" target="_blank" class="attachment-link">
-              📎 View Attachment
+            <a *ngIf="selectedInquiry.attachmentUrl" [href]="selectedInquiry.attachmentUrl" target="_blank" class="attachment-link" style="display: inline-flex; align-items: center; gap: 6px;">
+              <lucide-angular name="paperclip" [size]="15" strokeWidth="2"></lucide-angular>
+              <span>View Attachment</span>
+              <lucide-angular name="external-link" [size]="12"></lucide-angular>
             </a>
           </div>
 
@@ -782,8 +788,10 @@
           class="btn btn-primary"
           (click)="sendInquiryReply()"
           [disabled]="isSendingReply || !replyMessage.trim()"
+          style="display: inline-flex; align-items: center; gap: 6px;"
         >
-          {{ isSendingReply ? 'Sending...' : 'Send Response' }}
+          <lucide-angular name="send" [size]="14"></lucide-angular>
+          <span>{{ isSendingReply ? 'Sending...' : 'Send Response' }}</span>
         </button>
         <button class="btn btn-outline" (click)="closeInquiryModal()">Close</button>
       </div>

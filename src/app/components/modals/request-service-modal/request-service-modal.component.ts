@@ -2,11 +2,12 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerServiceRequestService } from '../../../features/customer/services/customer-service-request.service';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-request-service-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './request-service-modal.component.html',
   styleUrl: './request-service-modal.component.css',
 })

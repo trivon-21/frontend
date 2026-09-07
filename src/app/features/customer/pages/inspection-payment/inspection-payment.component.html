@@ -83,33 +83,17 @@
           style="display:none" />
 
         <div *ngIf="!uploadedFile" class="drop-content">
-          <span class="camera-icon"><svg xmlns="http://www.w3.org/2000/svg"
-     width="25" height="25"
-     viewBox="0 0 24 24"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round">
-  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
-  <circle cx="12" cy="13" r="3"></circle>
-</svg></span>
+          <span class="camera-icon">
+            <lucide-angular name="camera" [size]="25"></lucide-angular>
+          </span>
           <p>Click<br>or<br>Drag and Drop<br>here to upload</p>
           <span class="file-types">(PDF or PNG)</span>
         </div>
 
         <div *ngIf="uploadedFile" class="file-selected">
-          <span class="file-icon"><svg xmlns="http://www.w3.org/2000/svg"
-     width="24" height="24"
-     viewBox="0 0 24 24"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10"></circle>
-  <polyline points="8 12 11 15 16 9"></polyline>
-</svg></span>
+          <span class="file-icon">
+            <lucide-angular name="circle-check-big" [size]="24"></lucide-angular>
+          </span>
           <p class="file-name">{{ uploadedFile.name }}</p>
           <button class="remove-file" (click)="removeFile($event)">Remove</button>
         </div>
@@ -127,7 +111,9 @@
   <!-- AFTER SUBMIT: Success State -->
   <div class="success-card" *ngIf="slipSubmitted">
     <h2 class="success-title">Inspection Payment<br>Successful</h2>
-    <div class="success-tick">✓</div>
+    <div class="success-tick" style="display: flex; align-items: center; justify-content: center;">
+      <lucide-angular name="check" [size]="32"></lucide-angular>
+    </div>
     <div class="success-status-badge">Status: Under Review</div>
     <p class="success-message">We will let you know shortly !<br>Stay connected</p>
   </div>
