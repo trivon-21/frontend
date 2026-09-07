@@ -61,11 +61,11 @@ export class TeamSessionService {
    * Returns the active team name with a safe default.
    */
   getTeamName(): string {
-    const url = window.location.pathname;
-    if (url.includes('/service-team-a')) {
+    const url = decodeURIComponent(window.location.pathname);
+    if (url.includes('/service-team-a') || url.includes('/service team a')) {
       return 'Colombo Installation Team A';
     }
-    if (url.includes('/service-team-b')) {
+    if (url.includes('/service-team-b') || url.includes('/service team b')) {
       return 'Service Team B';
     }
 

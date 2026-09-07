@@ -48,8 +48,9 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
   ) {}
 
   get baseRoute(): string {
-    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
-    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    const url = decodeURIComponent(this.router.url);
+    if (url.includes('/service-team-a') || url.includes('/service team a')) return '/service-team-a';
+    if (url.includes('/service-team-b') || url.includes('/service team b')) return '/service-team-b';
     return '/service-team';
   }
 
@@ -84,7 +85,10 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
   }
 
   fetchServiceHistory(id: string): void {
-    this.http.get<any>(`${environment.apiBaseUrl}/service-history/${id}${this.teamSessionService.buildTeamQuery()}`).subscribe({
+    const source = 'service';
+    const query = this.teamSessionService.buildTeamQuery();
+    const url = `${environment.apiBaseUrl}/service-requests/${encodeURIComponent(id)}/history?source=${encodeURIComponent(source)}${query ? '&' + query.substring(1) : ''}`;
+    this.http.get<any>(url).subscribe({
       next: (res) => {
         if (res.success) {
           this.summary = {
@@ -93,9 +97,12 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
             location: res.data.summary?.location || this.summary.location,
           };
           this.historyItems = [...(res.data.history || [])].sort((a, b) => {
-            const aTime = a.date ? new Date(a.date).getTime() : Number.POSITIVE_INFINITY;
-            const bTime = b.date ? new Date(b.date).getTime() : Number.POSITIVE_INFINITY;
-            return aTime - bTime;
+            const aTime = a.date && !Number.isNaN(new Date(a.date).getTime()) ? new Date(a.date).getTime() : null;
+            const bTime = b.date && !Number.isNaN(new Date(b.date).getTime()) ? new Date(b.date).getTime() : null;
+            if (aTime === null && bTime === null) return 0;
+            if (aTime === null) return 1;
+            if (bTime === null) return -1;
+            return bTime - aTime;
           });
         }
       },
@@ -160,7 +167,11 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
         warrantyStatus: 'Warranty Claimed'
       }
     ];
-    return commonHistory;
+    let teamPrefix = 'Service Team';
+    if (this.router.url.includes('service-team-a') || this.router.url.includes('service team a') || this.router.url.includes('service%20team%20a')) teamPrefix = 'Service Team A';
+    else if (this.router.url.includes('service-team-b') || this.router.url.includes('service team b') || this.router.url.includes('service%20team%20b')) teamPrefix = 'Service Team B';
+
+    return commonHistory.filter(item => item.assignedTeam.includes(teamPrefix));
   }
 
   getWarrantyClass(status: string): string {

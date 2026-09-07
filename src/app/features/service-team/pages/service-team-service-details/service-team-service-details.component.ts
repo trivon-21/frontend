@@ -198,8 +198,9 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
   }
 
   get baseRoute(): string {
-    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
-    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    const url = decodeURIComponent(this.router.url);
+    if (url.includes('/service-team-a') || url.includes('/service team a')) return '/service-team-a';
+    if (url.includes('/service-team-b') || url.includes('/service team b')) return '/service-team-b';
     return '/service-team';
   }
 
