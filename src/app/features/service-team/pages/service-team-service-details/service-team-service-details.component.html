@@ -8,7 +8,7 @@
   <!-- Header Row -->
   <header class="page-header" style="margin-bottom: 24px;">
     <h1 class="page-title">#{{ ticket.id }} {{ ticket.type }}</h1>
-    <span class="status-badge" [ngClass]="ticket.status.toLowerCase().replace(' ', '-')">
+    <span class="status-badge" [ngClass]="statusClass(ticket.status)">
       {{ ticket.status }}
     </span>
   </header>

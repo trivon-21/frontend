@@ -28,8 +28,9 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
   constructor(private taskService: TaskService, private router: Router) {}
 
   get baseRoute(): string {
-    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
-    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    const url = decodeURIComponent(this.router.url);
+    if (url.includes('/service-team-a') || url.includes('/service team a')) return '/service-team-a';
+    if (url.includes('/service-team-b') || url.includes('/service team b')) return '/service-team-b';
     return '/service-team';
   }
 
@@ -88,7 +89,7 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
     const normalizedFilter = this.normalizeStatus(this.statusFilter);
 
     this.filteredTasks = this.tasks.filter(task => {
-      const taskId = String(task?.id ?? '').toLowerCase();
+      const taskId = String(task?.sourceId || task?.id || '').toLowerCase();
       const customerName = String(task?.customer?.name || task?.customer || '').toLowerCase();
       const taskStatus = this.normalizeStatus(task?.status);
 

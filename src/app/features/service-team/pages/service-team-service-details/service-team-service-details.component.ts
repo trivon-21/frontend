@@ -197,6 +197,10 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     return status;
   }
 
+  statusClass(status: string): string {
+    return String(status || '').trim().toLowerCase().replace(/[\s_]+/g, '-');
+  }
+
   get baseRoute(): string {
     const url = decodeURIComponent(this.router.url);
     if (url.includes('/service-team-a') || url.includes('/service team a')) return '/service-team-a';
