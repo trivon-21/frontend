@@ -4,7 +4,7 @@ import { ApiService } from './api.service';
 
 export interface Notification {
   id: string;
-  type: 'order' | 'inquiry' | 'service' | 'feedback' | 'general';
+  type: 'order' | 'inquiry' | 'service' | 'feedback' | 'general' | 'system_alert' | 'announcement' | string;
   title: string;
   message: string;
   read: boolean;
