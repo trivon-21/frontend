@@ -4,11 +4,12 @@ import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService, Notification } from '../../../../core/services/notification.service';
 import { ClickOutsideDirective } from '../../../../directives/click-outside.directive';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-csa-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, ClickOutsideDirective],
+  imports: [CommonModule, RouterLink, ClickOutsideDirective, PortalIconsModule],
   template: `
     <header class="csa-header">
       <div class="header-left">
@@ -82,7 +83,7 @@ import { ClickOutsideDirective } from '../../../../directives/click-outside.dire
                   <div class="notif-message">{{ notif.message }}</div>
                 </div>
                 <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete">
-                  ✕
+                  <lucide-angular name="x" [size]="14"></lucide-angular>
                 </button>
               </div>
             </div>

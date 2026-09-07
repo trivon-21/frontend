@@ -43,7 +43,7 @@
         <!-- Maintenance Notice -->
         @if (maintenanceService.isMaintenanceActive$ | async) {
         <div class="maintenance-notice">
-          <div class="notice-icon">🔧</div>
+          <div class="notice-icon"><lucide-angular name="wrench" [size]="20"></lucide-angular></div>
           <div class="notice-content">
             <h2 class="notice-title">System Maintenance</h2>
             <p class="notice-message">{{ maintenanceService.message$ | async }}</p>

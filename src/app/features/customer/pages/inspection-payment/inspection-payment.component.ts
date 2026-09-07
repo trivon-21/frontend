@@ -5,11 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
 import { NavbarComponent } from '../../../../components/navbar/navbar.component';
 import { FooterComponent } from '../../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-inspection-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './inspection-payment.component.html',
   styleUrls: ['./inspection-payment.component.css']
 })

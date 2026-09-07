@@ -8,11 +8,12 @@ import {
   ServiceRequestItem,
   OrderItem
 } from '../../services/super-admin.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-core-operations',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './core-operations.component.html',
   styleUrls: ['./core-operations.component.css']
 })

@@ -11,7 +11,7 @@
             <span class="pd-success-title">Added to Cart!</span>
             <span class="pd-success-sub">{{ product?.name }} has been saved to your cart.</span>
         </div>
-        <button class="pd-success-close" (click)="closeSuccessToast()">✕</button>
+        <button class="pd-success-close" (click)="closeSuccessToast()"><lucide-angular name="x" [size]="16"></lucide-angular></button>
     </div>
 </div>
 
@@ -30,7 +30,7 @@
             <span class="pd-success-title">Already in Cart</span>
             <span class="pd-success-sub">{{ product?.name }} is already in your cart.</span>
         </div>
-        <button class="pd-success-close" (click)="closeAlreadyInCartToast()">✕</button>
+        <button class="pd-success-close" (click)="closeAlreadyInCartToast()"><lucide-angular name="x" [size]="16"></lucide-angular></button>
     </div>
 </div>
 
@@ -185,7 +185,9 @@
             <div class="pd-name-rating-row">
                 <h2 class="pd-product-name">{{ product.name }}</h2>
                 <div class="pd-rating" *ngIf="product.averageRating || product.reviewCount">
-                    <span class="pd-stars">{{ getStars(product.averageRating || 0) }}</span>
+                    <span class="pd-stars" style="display:inline-flex; align-items:center; gap:2px;">
+                        <lucide-angular *ngFor="let s of getStars(product.averageRating || 0)" name="star" [size]="14" [style.fill]="s ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular>
+                    </span>
                     <span class="pd-rating-text">{{ (product.averageRating || 0) | number:'1.1-1' }} ({{ product.reviewCount || 0 }} {{ product.reviewCount === 1 ? 'Review' : 'Reviews' }})</span>
                 </div>
             </div>
@@ -380,9 +382,13 @@
                         <div class="pd-review-header">
                             <span class="pd-review-user">
                                 {{ review.userName }}
-                                <span *ngIf="review.isVerifiedBuyer !== false" class="pd-verified-badge">✓ Verified Buyer</span>
+                                <span *ngIf="review.isVerifiedBuyer !== false" class="pd-verified-badge" style="display:inline-flex; align-items:center; gap:4px;">
+                                    <lucide-angular name="check" [size]="12"></lucide-angular> Verified Buyer
+                                </span>
                             </span>
-                            <span class="pd-review-stars">{{ getStars(review.rating) }}</span>
+                            <span class="pd-review-stars" style="display:inline-flex; align-items:center; gap:2px;">
+                                <lucide-angular *ngFor="let s of getStars(review.rating)" name="star" [size]="13" [style.fill]="s ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular>
+                            </span>
                             <span class="pd-review-date">{{ review.date | date:'mediumDate' }}</span>
 
                             <!-- Actions for Review Owner -->
@@ -421,7 +427,7 @@
                                     (click)="setEditRating(star)"
                                     [title]="star + ' star' + (star > 1 ? 's' : '')"
                                     aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
-                                >★</span>
+                                ><lucide-angular name="star" [size]="18" [style.fill]="star <= editReviewForm.rating ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular></span>
                             </div>
                         </div>
                         <textarea rows="3" class="pd-review-edit-textarea" [(ngModel)]="editReviewForm.comment" placeholder="Update your review comment..."></textarea>
@@ -457,7 +463,9 @@
             <!-- Case 2: LOGGED IN BUT NOT A VERIFIED BUYER -->
             <div class="pd-add-review" *ngIf="eligibilityState === 'NOT_A_BUYER'" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
                 <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🔒</div>
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <lucide-angular name="lock" [size]="18"></lucide-angular>
+                    </div>
                     <div>
                         <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Verified Purchase Required</h4>
                         <p style="color: #64748b; font-size: 0.92rem; line-height: 1.5; margin: 0;">
@@ -471,7 +479,9 @@
             <div class="pd-add-review" *ngIf="eligibilityState === 'VERIFIED_BUYER' && !hasUserReviewed()">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0;">Leave a Review</h3>
-                    <span class="pd-verified-badge" style="font-size: 0.82rem; padding: 4px 10px;">✓ Verified Buyer</span>
+                    <span class="pd-verified-badge" style="font-size: 0.82rem; padding: 4px 10px; display:inline-flex; align-items:center; gap:4px;">
+                        <lucide-angular name="check" [size]="12"></lucide-angular> Verified Buyer
+                    </span>
                 </div>
                 <form class="pd-review-form" (ngSubmit)="submitReview()">
                     <div class="pd-form-row">
@@ -484,13 +494,15 @@
                                 (click)="setRating(star)"
                                 [title]="star + ' star' + (star > 1 ? 's' : '')"
                                 aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
-                            >★</span>
+                            ><lucide-angular name="star" [size]="18" [style.fill]="star <= newReview.rating ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular></span>
                         </div>
                     </div>
                     <textarea placeholder="Write your verified review here..." rows="4" [(ngModel)]="newReview.comment" name="comment" required></textarea>
 
                     <div *ngIf="reviewError" style="color: #e53e3e; font-size: 0.88rem; font-weight: 500;">{{ reviewError }}</div>
-                    <div *ngIf="reviewSuccess" style="color: #10A760; font-size: 0.88rem; font-weight: 600;">✓ Thank you! Your verified review has been added.</div>
+                    <div *ngIf="reviewSuccess" style="color: #10A760; font-size: 0.88rem; font-weight: 600; display:flex; align-items:center; gap:6px;">
+                        <lucide-angular name="check" [size]="16"></lucide-angular> Thank you! Your verified review has been added.
+                    </div>
 
                     <button type="submit" class="pd-btn-submit-review" [disabled]="submittingReview || !newReview.comment.trim()">
                         {{ submittingReview ? 'Submitting Review...' : 'Submit Review' }}
@@ -501,7 +513,9 @@
             <!-- Case 4: VERIFIED BUYER (Already reviewed this product) -->
             <div class="pd-add-review" *ngIf="eligibilityState === 'VERIFIED_BUYER' && hasUserReviewed()" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 20px 24px;">
                 <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; font-weight: 700;">✓</div>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <lucide-angular name="check" [size]="20"></lucide-angular>
+                    </div>
                     <div>
                         <h4 style="font-size: 1rem; font-weight: 700; color: #166534; margin: 0 0 4px 0;">You have already reviewed this product</h4>
                         <p style="color: #15803d; font-size: 0.9rem; margin: 0; line-height: 1.4;">

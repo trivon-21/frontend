@@ -2,11 +2,12 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CsaInquiryService, CustomerInquiry } from '../../services/csa-inquiry.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-csa-inquiries',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './csa-inquiries.component.html',
   styleUrl: './csa-inquiries.component.css'
 })

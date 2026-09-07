@@ -362,8 +362,9 @@
 
       <div class="modal-footer">
         <button class="btn-cancel" (click)="closeModal()">Close</button>
-        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-edit" (click)="startEditing()">✏
-          Edit</button>
+        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-edit" (click)="startEditing()">
+          <lucide-angular name="edit" [size]="15" style="display:inline-block; vertical-align:middle; margin-right:4px;"></lucide-angular>Edit
+        </button>
         <button *ngIf="isEditing" class="btn-save" (click)="saveEdit()" [disabled]="isLoading">
           {{ isLoading ? 'Saving...' : 'Save Changes' }}
         </button>

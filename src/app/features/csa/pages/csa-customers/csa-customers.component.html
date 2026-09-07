@@ -6,7 +6,7 @@
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
     </svg>
     <span>{{ successToast }}</span>
-    <button class="toast-close" (click)="successToast = ''">✕</button>
+    <button class="toast-close" (click)="successToast = ''"><lucide-angular name="x" [size]="16"></lucide-angular></button>
   </div>
 
   <!-- PAGE HEADER -->
@@ -59,7 +59,7 @@
         [(ngModel)]="searchQuery" 
         (ngModelChange)="onSearchChange()"
       />
-      <button *ngIf="searchQuery" class="clear-search" (click)="searchQuery = ''; onSearchChange()">✕</button>
+      <button *ngIf="searchQuery" class="clear-search" (click)="searchQuery = ''; onSearchChange()"><lucide-angular name="x" [size]="14"></lucide-angular></button>
     </div>
     <button class="btn-refresh" (click)="loadCustomers()" [disabled]="isLoading">
       <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -156,7 +156,7 @@
           <h2 class="modal-title">Create Customer Profile</h2>
           <p class="modal-subtitle">Add a customer account directly into the system</p>
         </div>
-        <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeCreateModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <form [formGroup]="customerForm" (ngSubmit)="submitCreateCustomer()">
@@ -266,7 +266,7 @@
           <h2 class="modal-title">Customer Details</h2>
           <p class="modal-subtitle">Profile and order history summary</p>
         </div>
-        <button class="modal-close-btn" (click)="closeDetailsModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeDetailsModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <div class="modal-body" *ngIf="isLoadingDetails">

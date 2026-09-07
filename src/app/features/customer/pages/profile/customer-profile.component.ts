@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { CustomerProfileService } from '../../services/customer-profile.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthUser } from '../../../../core/services/auth.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PortalIconsModule],
   templateUrl: './customer-profile.component.html',
   styleUrl: './customer-profile.component.css'
 })

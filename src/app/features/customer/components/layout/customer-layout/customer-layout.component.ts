@@ -6,11 +6,12 @@ import { MaintenanceService } from '../../../../../core/services/maintenance.ser
 import { NotificationService, Notification } from '../../../../../core/services/notification.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
+import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-customer-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ClickOutsideDirective],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ClickOutsideDirective, PortalIconsModule],
   templateUrl: './customer-layout.component.html',
   styleUrl: './customer-layout.component.css'
 })

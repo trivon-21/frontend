@@ -5,11 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { InvoiceService } from '../../../finance/services/invoice.service';
 import { NavbarComponent } from '../../../../components/navbar/navbar.component';
 import { FooterComponent } from '../../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-invoice-payment-upload',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './invoice-payment-upload.component.html',
   styleUrls: ['./invoice-payment-upload.component.css']
 })

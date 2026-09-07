@@ -7,11 +7,12 @@ import { MaintenanceService } from '../../../../../core/services/maintenance.ser
 import { NotificationService, Notification } from '../../../../../core/services/notification.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
+import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-super-admin-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ClickOutsideDirective],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ClickOutsideDirective, PortalIconsModule],
   templateUrl: './super-admin-layout.component.html',
   styleUrls: ['./super-admin-layout.component.css'],
 })

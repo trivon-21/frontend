@@ -9,11 +9,12 @@ import { environment } from '../../../../environments/environment';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 import { FooterComponent } from '../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent, PortalIconsModule],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -350,9 +351,9 @@ export class ProductDetail implements OnInit {
   }
 
   // --- Rating ---
-  getStars(rating: number): string {
+  getStars(rating: number): boolean[] {
     const full = Math.round(rating);
-    return '★'.repeat(full) + '☆'.repeat(5 - full);
+    return Array.from({ length: 5 }, (_, i) => i < full);
   }
 
   onGetExpertAdvice() {

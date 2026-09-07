@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuperAdminService } from '../../features/super-admin/services/super-admin.service';
+import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-reactivation-request',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './reactivation-request.component.html',
   styleUrls: ['./reactivation-request.component.css'],
 })

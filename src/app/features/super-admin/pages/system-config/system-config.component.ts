@@ -14,6 +14,7 @@ import { BusinessRulesFormComponent } from './components/business-rules-form.com
 import { FeatureFlagsFormComponent } from './components/feature-flags-form.component';
 import { MaintenanceFormComponent } from './components/maintenance-form.component';
 import { SystemInfoFormComponent } from './components/system-info-form.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
 
@@ -26,6 +27,7 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
     FeatureFlagsFormComponent,
     MaintenanceFormComponent,
     SystemInfoFormComponent,
+    PortalIconsModule,
   ],
   template: `
     <div class="system-config-container">
@@ -51,10 +53,12 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
         <!-- Error Message -->
         <div *ngIf="error" class="alert-banner">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
             <span>{{ error }}</span>
           </div>
-          <button (click)="error = null" class="close-btn">&times;</button>
+          <button (click)="error = null" class="close-btn" style="display: flex; align-items: center;">
+            <lucide-angular name="x" [size]="16"></lucide-angular>
+          </button>
         </div>
 
         <!-- Loading State -->
