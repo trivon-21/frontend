@@ -41,7 +41,9 @@
           </div>
           <span class="step-label">AC Unit</span>
         </div>
+
         <div class="step-connector" [ngClass]="{'connector-done': step > 1}"></div>
+
         <div class="step-item" [ngClass]="{'step-active': step === 2, 'step-done': step > 2}">
           <div class="step-circle">
             <lucide-angular *ngIf="step > 2" name="check" [size]="12" strokeWidth="3" style="color: white;"></lucide-angular>
@@ -49,9 +51,22 @@
           </div>
           <span class="step-label">Service</span>
         </div>
-        <div class="step-connector" [ngClass]="{'connector-done': step > 2}"></div>
-        <div class="step-item" [ngClass]="{'step-active': step === 3}">
-          <div class="step-circle"><span>3</span></div>
+
+        <ng-container *ngIf="serviceType === 'Maintenance'">
+          <div class="step-connector" [ngClass]="{'connector-done': step > 3}"></div>
+          <div class="step-item" [ngClass]="{'step-active': step === 3, 'step-done': step > 3}">
+            <div class="step-circle">
+              <lucide-angular *ngIf="step > 3" name="check" [size]="12" strokeWidth="3" style="color: white;"></lucide-angular>
+              <span *ngIf="step <= 3">3</span>
+            </div>
+            <span class="step-label">Payment</span>
+          </div>
+        </ng-container>
+
+        <div class="step-connector" [ngClass]="{'connector-done': isSummaryStep}"></div>
+
+        <div class="step-item" [ngClass]="{'step-active': isSummaryStep}">
+          <div class="step-circle"><span>{{ totalSteps }}</span></div>
           <span class="step-label">Summary</span>
         </div>
       </div>
@@ -91,8 +106,8 @@
         <!-- Validation banner -->
         <div class="coverage-banner" [ngClass]="isFreeService ? 'banner--green' : 'banner--orange'">
           <lucide-angular name="info" [size]="16" strokeWidth="2"></lucide-angular>
-          <span *ngIf="isFreeService">Service is covered — <strong>Free of charge</strong> (Warranty or AMC active)</span>
-          <span *ngIf="!isFreeService">Warranty/AMC not active — <strong>Service charges apply</strong></span>
+          <span *ngIf="isFreeService">Service coverage detected — <strong>Warranty / AMC is active</strong></span>
+          <span *ngIf="!isFreeService">Standard service fee applies per service type</span>
         </div>
 
         <div class="step-footer">
@@ -117,14 +132,25 @@
           </div>
         </div>
 
-        <div *ngIf="serviceType === 'Other'" class="form-group">
-          <label class="form-label">Please specify</label>
-          <input class="form-input" type="text" placeholder="Describe the service needed" [(ngModel)]="serviceTypeOther" />
+        <!-- Service notice -->
+        <div *ngIf="serviceType === 'Maintenance'" class="service-notice-banner">
+          <lucide-angular name="info" [size]="16" strokeWidth="2" style="color: #1f5b45; flex-shrink: 0;"></lucide-angular>
+          <div>
+            <strong>Routine Maintenance Visit:</strong> Fixed fee of <strong>LKR {{ maintenanceFee | number:'1.2-2' }}</strong>. You will upload your bank transfer receipt in the next step for finance officer verification.
+          </div>
+        </div>
+
+        <div *ngIf="serviceType === 'Repair'" class="service-notice-banner">
+          <lucide-angular name="info" [size]="16" strokeWidth="2" style="color: #1f5b45; flex-shrink: 0;"></lucide-angular>
+          <div>
+            <strong>Repair & Diagnostics:</strong> A technician will inspect the unit on site.
+            <span *ngIf="isFreeService"> Covered under active Warranty / AMC.</span>
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Problem Description</label>
-          <textarea class="form-textarea" rows="3" placeholder="Describe the issue in detail..." [(ngModel)]="problemDescription"></textarea>
+          <label class="form-label">Problem / Service Description</label>
+          <textarea class="form-textarea" rows="3" placeholder="Describe the service needed or issue in detail..." [(ngModel)]="problemDescription"></textarea>
         </div>
 
         <div class="form-row">
@@ -145,12 +171,115 @@
 
         <div class="step-footer">
           <button class="btn-ghost" (click)="prevStep()">Back</button>
-          <button class="btn-primary" (click)="nextStep()">Review</button>
+          <button class="btn-primary" (click)="nextStep()">
+            {{ serviceType === 'Maintenance' ? 'Proceed to Payment →' : 'Review Request →' }}
+          </button>
         </div>
       </div>
 
-      <!-- STEP 3: Summary -->
-      <div *ngIf="step === 3" class="step-body">
+      <!-- STEP 3: Maintenance Payment & Slip Upload (Maintenance only) -->
+      <div *ngIf="isPaymentStep" class="step-body">
+        <div class="payment-step-header">
+          <h3 class="payment-title">Maintenance Payment</h3>
+          <p class="payment-desc">Please transfer the service fee to the AirLux bank account below and upload your deposit slip or transaction screenshot.</p>
+        </div>
+
+        <!-- Amount Box -->
+        <div class="fee-card">
+          <div class="fee-row">
+            <span class="fee-label">Maintenance Fee</span>
+            <span class="fee-value">LKR {{ maintenanceFee | number:'1.2-2' }}</span>
+          </div>
+          <div class="fee-sub">Status: <span class="status-badge badge--purple">Pending Verification</span></div>
+        </div>
+
+        <!-- Bank Details Card -->
+        <div class="bank-card">
+          <div class="bank-card-title">
+            <lucide-angular name="building" [size]="16" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
+            <span>AirLux Bank Details</span>
+          </div>
+          <div class="bank-card-grid">
+            <div class="bank-item">
+              <span class="bank-item-label">Bank</span>
+              <span class="bank-item-val">{{ bankDetails.bankName }}</span>
+            </div>
+            <div class="bank-item">
+              <span class="bank-item-label">Account No</span>
+              <span class="bank-item-val mono">{{ bankDetails.accountNumber }}</span>
+            </div>
+            <div class="bank-item">
+              <span class="bank-item-label">Account Name</span>
+              <span class="bank-item-val">{{ bankDetails.accountName }}</span>
+            </div>
+            <div class="bank-item">
+              <span class="bank-item-label">Branch</span>
+              <span class="bank-item-val">{{ bankDetails.branch }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slip Upload Area -->
+        <div class="form-group">
+          <label class="form-label">Upload Payment Slip / Receipt <span class="required">*</span></label>
+
+          <div
+            class="drop-zone"
+            [ngClass]="{'has-file': uploadedFile, 'drag-over': isDragOver}"
+            (click)="fileInput.click()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event)"
+          >
+            <input
+              #fileInput
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp"
+              (change)="onFileSelected($event)"
+              style="display:none"
+            />
+
+            <!-- Empty Drop State -->
+            <div *ngIf="!uploadedFile" class="drop-content">
+              <div class="upload-icon-circle">
+                <lucide-angular name="upload-cloud" [size]="22" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
+              </div>
+              <p class="drop-prompt"><strong>Click to browse</strong> or drag & drop slip here</p>
+              <span class="drop-hint">Supports PDF, PNG, JPG (Max 5MB)</span>
+            </div>
+
+            <!-- Uploaded File State -->
+            <div *ngIf="uploadedFile" class="file-uploaded-state" (click)="$event.stopPropagation()">
+              <div class="file-info-col">
+                <img *ngIf="filePreviewUrl" [src]="filePreviewUrl" alt="Slip Preview" class="slip-thumbnail" />
+                <div *ngIf="!filePreviewUrl" class="pdf-icon-box">
+                  <lucide-angular name="file-text" [size]="24" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
+                </div>
+                <div class="file-details">
+                  <span class="file-name">{{ uploadedFile.name }}</span>
+                  <span class="file-size">{{ (uploadedFile.size / 1024).toFixed(1) }} KB</span>
+                </div>
+              </div>
+              <button type="button" class="btn-remove-file" (click)="removeFile($event)">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="finance-route-notice">
+          <lucide-angular name="shield-check" [size]="16" strokeWidth="2" style="color: #1f5b45; flex-shrink: 0;"></lucide-angular>
+          <span>Your payment slip will be routed directly to the <strong>Finance Officer</strong> for verification with <strong>Pending</strong> status.</span>
+        </div>
+
+        <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+        <div class="step-footer">
+          <button class="btn-ghost" (click)="prevStep()">Back</button>
+          <button class="btn-primary" (click)="nextStep()">Review Request →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 (or 3 for Repair): Summary -->
+      <div *ngIf="isSummaryStep" class="step-body">
         <h3 class="summary-heading">Review your request</h3>
 
         <div class="summary-grid">
@@ -176,10 +305,10 @@
           </div>
           <div class="summary-row">
             <span class="meta-label">Service Type</span>
-            <span class="meta-value">{{ serviceType === 'Other' ? serviceTypeOther || 'Other' : serviceType }}</span>
+            <span class="meta-value bold">{{ serviceType }}</span>
           </div>
           <div class="summary-row" *ngIf="problemDescription">
-            <span class="meta-label">Problem</span>
+            <span class="meta-label">Problem / Notes</span>
             <span class="meta-value">{{ problemDescription }}</span>
           </div>
           <div class="summary-row" *ngIf="preferredDate">
@@ -190,15 +319,26 @@
             <span class="meta-label">Time Slot</span>
             <span class="meta-value">{{ preferredTimeSlot }}</span>
           </div>
+
+          <!-- Charges & Payment Row -->
           <div class="summary-row summary-row--highlight">
-            <span class="meta-label">Estimated Charges</span>
-            <span class="meta-value" [ngClass]="isFreeService ? 'text-green' : 'text-bold'">
-              {{ isFreeService ? 'Free (Covered)' : '$' + estimatedCharges }}
+            <span class="meta-label">Service Fee</span>
+            <span class="meta-value" [ngClass]="estimatedCharges === 0 ? 'text-green' : 'text-bold'">
+              {{ estimatedCharges === 0 ? 'Free (Covered)' : 'LKR ' + (estimatedCharges | number:'1.2-2') }}
             </span>
           </div>
+
+          <div class="summary-row" *ngIf="serviceType === 'Maintenance'">
+            <span class="meta-label">Payment Slip</span>
+            <span class="meta-value text-green">
+              <lucide-angular name="check" [size]="14" strokeWidth="2.5"></lucide-angular>
+              Attached (Pending Finance Approval)
+            </span>
+          </div>
+
           <div class="summary-row">
-            <span class="meta-label">Payment Required</span>
-            <span class="meta-value">{{ !isFreeService && estimatedCharges > 0 ? 'Yes' : 'No' }}</span>
+            <span class="meta-label">Status</span>
+            <span class="status-badge badge--purple">Pending</span>
           </div>
         </div>
 

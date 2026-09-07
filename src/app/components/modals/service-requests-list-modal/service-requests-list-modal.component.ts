@@ -75,13 +75,15 @@ export class ServiceRequestsListModalComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      'Pending':    'badge--purple',
-      'Assigned':   'badge--blue',
-      'In Progress':'badge--orange',
-      'Completed':  'badge--green',
-      'Cancelled':  'badge--red',
+      'Pending':          'badge--purple',
+      'Finance Approved': 'badge--green',
+      'Finance Rejected': 'badge--red',
+      'Assigned':         'badge--blue',
+      'In Progress':      'badge--orange',
+      'Completed':        'badge--green',
+      'Cancelled':        'badge--red',
     };
-    return map[status] || '';
+    return map[status] || 'badge--purple';
   }
 
   formatDate(dateStr: string | null | undefined): string {
@@ -90,7 +92,7 @@ export class ServiceRequestsListModalComponent implements OnInit {
   }
 
   formatAmount(n: number): string {
-    return n === 0 ? 'Free' : `$${n}`;
+    return n === 0 ? 'Free' : `LKR ${n.toLocaleString()}`;
   }
 
   get ongoing(): number { return this.requests.filter(r => ['Pending','Assigned','In Progress'].includes(r.status)).length; }
