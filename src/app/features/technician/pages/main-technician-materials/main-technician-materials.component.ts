@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -129,6 +129,52 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   isLoading = false;
   isTicketDropdownLoading = false;
   error: string | null = null;
+
+  // ── Custom catalog dropdown state ──────────────────────────────────
+  openDropdownIndex: number | null = null;
+  catalogSearchQueries: string[] = [];
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeDropdown();
+  }
+
+  toggleDropdown(index: number): void {
+    if (this.openDropdownIndex === index) {
+      this.closeDropdown();
+    } else {
+      this.openDropdownIndex = index;
+      if (!this.catalogSearchQueries[index]) {
+        this.catalogSearchQueries[index] = '';
+      }
+    }
+  }
+
+  closeDropdown(): void {
+    this.openDropdownIndex = null;
+  }
+
+  getCatalogItem(inventoryId: string): MaterialCatalogItem | undefined {
+    return this.materialCatalog.find(m => m._id === inventoryId);
+  }
+
+  getFilteredCatalog(index: number): MaterialCatalogItem[] {
+    const q = (this.catalogSearchQueries[index] || '').toLowerCase().trim();
+    if (!q) return this.materialCatalog;
+    return this.materialCatalog.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.sku.toLowerCase().includes(q) ||
+      (m.unit || '').toLowerCase().includes(q)
+    );
+  }
+
+  selectCatalogItem(item: MaterialItem, material: MaterialCatalogItem, index: number): void {
+    item.inventoryId = material._id;
+    item.name = material.name;
+    item.sku = material.sku;
+    this.closeDropdown();
+  }
+  // ──────────────────────────────────────────────────────────────────
 
   private readonly apiUrl = `${environment.apiBaseUrl}/material-requests`;
 
