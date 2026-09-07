@@ -121,6 +121,8 @@ export const routes: Routes = [
   // ── Technician / Manager portal
   {
     path: '',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MAIN_TECH', 'SUPER_ADMIN'] },
     component: TechnicianLayoutComponent,
     children: [
       { path: 'main-technician-dashboard', component: MainTechnicianDashboardComponent },
@@ -147,6 +149,8 @@ export const routes: Routes = [
   // ── Service Team A portal
   {
     path: 'service-team-a',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'], team: 'A' },
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -161,6 +165,8 @@ export const routes: Routes = [
   // ── Service Team portal (Generic/Fallback)
   {
     path: 'service-team',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'] },
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -175,6 +181,8 @@ export const routes: Routes = [
   // ── Service Team B portal
   {
     path: 'service-team-b',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'], team: 'B' },
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -246,7 +254,8 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
-    canActivate: [authGuard, maintenanceGuard],
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['CUSTOMER', 'SUPER_ADMIN'] },
     loadComponent: () =>
       import(
         './features/customer/components/layout/customer-layout/customer-layout.component'
@@ -428,6 +437,8 @@ export const routes: Routes = [
 
   {
     path: 'finance',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['FINANCE', 'SUPER_ADMIN'] },
     component: FinanceLayoutComponent,
 
     children: [
@@ -593,6 +604,8 @@ export const routes: Routes = [
 
   {
     path: 'inspection-officer',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INSPECTION', 'SUPER_ADMIN'] },
     component: InspectionLayoutComponent,
 
     children: [
@@ -655,6 +668,8 @@ export const routes: Routes = [
   // =========================================================
   {
     path: 'csa',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['CSA', 'SUPER_ADMIN'] },
     component: CsaLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

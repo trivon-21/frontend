@@ -22,6 +22,8 @@ export function roleHomeUrl(role: string | null | undefined, user?: any): string
       return '/finance/dashboard';
     case 'INSPECTION':
       return '/inspection-officer/dashboard';
+    case 'CSA':
+      return '/csa/dashboard';
     default:
       return '/';
   }

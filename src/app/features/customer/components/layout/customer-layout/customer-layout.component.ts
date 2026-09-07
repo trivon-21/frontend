@@ -7,6 +7,7 @@ import { NotificationService, Notification } from '../../../../../core/services/
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
 import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
+import { roleHomeUrl } from '../../../../../core/routing/role-home';
 
 @Component({
   selector: 'app-customer-layout',
@@ -36,27 +37,9 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
-    if (user && user.role !== 'CUSTOMER') {
-      switch (user.role) {
-        case 'SUPER_ADMIN':
-          this.router.navigate(['/super-admin']);
-          break;
-        case 'MAIN_TECH':
-          this.router.navigate(['/main-technician-dashboard']);
-          break;
-        case 'SERVICE_TEAM':
-          this.router.navigate(['/service-team/dashboard']);
-          break;
-        case 'FINANCE':
-          this.router.navigate(['/finance/dashboard']);
-          break;
-        case 'INSPECTION':
-          this.router.navigate(['/inspection-officer/dashboard']);
-          break;
-        default:
-          this.router.navigate(['/']);
-          break;
-      }
+    if (user && user.role !== 'CUSTOMER' && user.role !== 'SUPER_ADMIN') {
+      const targetUrl = roleHomeUrl(user.role, user);
+      this.router.navigateByUrl(targetUrl);
       return;
     }
 
