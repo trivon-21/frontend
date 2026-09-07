@@ -256,7 +256,7 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
       ...this.ticket,
       _id: recordId,
       serviceRequestId: recordId,
-      onModel: this.ticket.type === 'Installation' ? 'Installation' : 'ServiceRequest',
+      onModel: this.ticket.type === 'Installation' ? 'Installation' : (this.ticket.type === 'Maintenance' ? 'Maintenance' : 'ServiceRequest'),
       materialsUsed: Array.isArray(this.ticket.materials) ? this.ticket.materials : [],
       notesFromMainTechnician: note,
       technicianComment: note,
