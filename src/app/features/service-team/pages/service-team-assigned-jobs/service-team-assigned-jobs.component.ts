@@ -44,44 +44,15 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
         if (Array.isArray(tasks) && tasks.length > 0) {
           this.tasks = tasks;
         } else {
-          this.tasks = this.getFallbackTasks();
+          this.tasks = [];
         }
         this.filterTasks();
       },
       error: () => {
-        this.tasks = this.getFallbackTasks();
+        this.tasks = [];
         this.filterTasks();
       }
     });
-  }
-
-  private getFallbackTasks(): any[] {
-    return [
-      {
-        id: '238489782',
-        type: 'Service Request',
-        customer: { name: 'John Anderson' },
-        location: 'Logistic Area 1',
-        serviceType: 'Split AC - 3 Units',
-        status: 'Assigned'
-      },
-      {
-        id: '238489783',
-        type: 'Installation',
-        customer: { name: 'Nimal Perera' },
-        location: 'Galle Road, Colombo 03',
-        serviceType: 'Cassette AC - 2 Units',
-        status: 'In Progress'
-      },
-      {
-        id: '238489784',
-        type: 'Service Request',
-        customer: { name: 'Kavindi Silva' },
-        location: 'Malabe Tech Park',
-        serviceType: 'Ducted AC - 1 Unit',
-        status: 'On Hold'
-      }
-    ];
   }
 
   filterTasks() {
