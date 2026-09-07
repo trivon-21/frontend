@@ -6,7 +6,7 @@
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
     </svg>
     <span>{{ successToast }}</span>
-    <button class="toast-close" (click)="successToast = ''">✕</button>
+    <button class="toast-close" (click)="successToast = ''"><lucide-angular name="x" [size]="16"></lucide-angular></button>
   </div>
 
   <!-- PAGE HEADER -->
@@ -216,7 +216,7 @@
           <h2 class="modal-title">Create Service Ticket</h2>
           <p class="modal-subtitle">Log a service, repair, or maintenance request for a customer</p>
         </div>
-        <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeCreateModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <form [formGroup]="ticketForm" (ngSubmit)="submitCreateTicket()">
@@ -334,7 +334,7 @@
           <h2 class="modal-title">Service Ticket #{{ selectedTicket?._id?.substring(18) | uppercase }}</h2>
           <p class="modal-subtitle">{{ selectedTicket?.subject }}</p>
         </div>
-        <button class="modal-close-btn" (click)="closeDetailsModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeDetailsModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <div class="modal-body" *ngIf="selectedTicket">

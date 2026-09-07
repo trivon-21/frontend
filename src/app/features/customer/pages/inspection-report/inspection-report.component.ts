@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { HeaderComponent } from '../../../inspection-team/layout/header/header.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface Room {
   name: string;
@@ -52,7 +53,7 @@ interface PhotoEntry {
 @Component({
   selector: 'app-inspection-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, PortalIconsModule],
   templateUrl: './inspection-report.component.html',
   styleUrls: ['./inspection-report.component.css']
 })

@@ -14,9 +14,7 @@
   <div class="page-header-right">
     <button class="track-order-btn" (click)="showTrackOrder = true">Track Order</button>
     <div class="page-search-wrap">
-      <svg class="page-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
+      <lucide-angular name="search" [size]="15" class="page-search-icon"></lucide-angular>
       <input class="page-search" type="text" placeholder="Search here" />
     </div>
   </div>
@@ -28,15 +26,11 @@
   <div class="stat-card">
     <div class="stat-card-top">
       <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
+        <lucide-angular name="shopping-bag" [size]="22"></lucide-angular>
       </div>
       <div class="stat-dropdown-container">
-        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('tp', $event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('tp', $event)" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
         <div *ngIf="openDropdown === 'tp'" class="stat-dropdown">
           <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'tp')">View Details</button>
@@ -52,13 +46,11 @@
   <div class="stat-card">
     <div class="stat-card-top">
       <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
-        </svg>
+        <lucide-angular name="rotate-ccw" [size]="22"></lucide-angular>
       </div>
       <div class="stat-dropdown-container">
-        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('ro', $event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('ro', $event)" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
         <div *ngIf="openDropdown === 'ro'" class="stat-dropdown">
           <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'ro')">View Details</button>
@@ -74,14 +66,11 @@
   <div class="stat-card">
     <div class="stat-card-top">
       <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 6v6l4 2"/>
-        </svg>
+        <lucide-angular name="clock" [size]="22"></lucide-angular>
       </div>
       <div class="stat-dropdown-container">
-        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('pp', $event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('pp', $event)" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
         <div *ngIf="openDropdown === 'pp'" class="stat-dropdown">
           <button class="dropdown-item" (click)="onMenuItemClick('pay-now', 'pp')">View Details</button>
@@ -96,14 +85,11 @@
   <div class="stat-card">
     <div class="stat-card-top">
       <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
+        <lucide-angular name="minus" [size]="22"></lucide-angular>
       </div>
       <div class="stat-dropdown-container">
-        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('rp', $event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('rp', $event)" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
         <div *ngIf="openDropdown === 'rp'" class="stat-dropdown">
           <button class="dropdown-item" (click)="onMenuItemClick('retry-payment', 'rp')">Retry Payment</button>
@@ -119,13 +105,11 @@
   <div class="stat-card">
     <div class="stat-card-top">
       <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-        </svg>
+        <lucide-angular name="box" [size]="22"></lucide-angular>
       </div>
       <div class="stat-dropdown-container">
-        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('comp', $event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="toggleDropdown('comp', $event)" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
         <div *ngIf="openDropdown === 'comp'" class="stat-dropdown">
           <button class="dropdown-item" (click)="onMenuItemClick('view-orders', 'comp')">View Orders</button>
@@ -147,18 +131,12 @@
       <h3 class="oh-title">Order History</h3>
       <div class="oh-search-wrap">
         <input class="oh-search" type="text" placeholder="Search for anything...." />
-        <svg class="oh-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+        <lucide-angular name="search" [size]="15" class="oh-search-icon"></lucide-angular>
       </div>
       <div class="oh-date-wrap">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
+        <lucide-angular name="calendar" [size]="15"></lucide-angular>
         <span>10 May - 20 May</span>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+        <lucide-angular name="chevron-down" [size]="13"></lucide-angular>
       </div>
     </div>
 
@@ -201,8 +179,8 @@
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="panel-card-title">Service Requests</span>
-        <button class="more-btn" aria-label="More options" (click)="showServiceRequestsList = true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="showServiceRequestsList = true" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-horizontal" [size]="16"></lucide-angular>
         </button>
       </div>
       <div class="panel-stat-row">
@@ -224,8 +202,8 @@
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="panel-card-title">Inquiries</span>
-        <button class="more-btn" aria-label="More options" (click)="showInquiryList = true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+        <button class="more-btn" aria-label="More options" (click)="showInquiryList = true" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="more-horizontal" [size]="16"></lucide-angular>
         </button>
       </div>
       <div class="panel-stat-row">
@@ -254,10 +232,8 @@
            filterMode === 'returned' ? 'Returned Orders' :
            filterMode === 'rejected' ? 'Rejected Orders' : 'All Orders' }}
       </h2>
-      <button class="modal-close" (click)="closeFilteredOrders()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+      <button class="modal-close" (click)="closeFilteredOrders()" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="20"></lucide-angular>
       </button>
     </div>
     <div class="modal-body">

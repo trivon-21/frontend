@@ -72,11 +72,6 @@
   }
 }
 
-@keyframes kenBurns {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.08); }
-}
-
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -113,20 +108,13 @@
   background-color: var(--color-forest-dark);
 }
 
-/* Zooming Background Image */
+/* Hero Background Image */
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
   background: url('/assets/Landing-Background.png') center / cover no-repeat;
   z-index: 0;
-  transform-origin: center;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero::after {
-    animation: kenBurns 20s ease-in-out infinite alternate;
-  }
 }
 
 /* Dark Legibility Overlay */
@@ -1118,7 +1106,6 @@
 /* ---------- ACCESSIBILITY: REDUCED MOTION OVERRIDES ---------- */
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll,
-  .hero::after,
   .hero-title,
   .hero-sub,
   .hero-btns,

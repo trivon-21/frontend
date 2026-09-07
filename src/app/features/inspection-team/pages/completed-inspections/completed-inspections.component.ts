@@ -5,11 +5,12 @@ import { InspectionOfficerService } from '../../services/inspection-officer.serv
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-completed-inspections',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './completed-inspections.component.html',
   styleUrls: ['./completed-inspections.component.css']
 })

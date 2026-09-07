@@ -8,12 +8,13 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { ChangePasswordModalComponent } from '../../components/modals/change-password-modal/change-password-modal.component';
+import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 import { roleHomeUrl } from '../../core/routing/role-home';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, ChangePasswordModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, ChangePasswordModalComponent, PortalIconsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

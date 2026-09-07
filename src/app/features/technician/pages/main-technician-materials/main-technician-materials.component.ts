@@ -76,10 +76,12 @@ type TicketDropdownItem = {
   siteDetails?: any;
 };
 
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+
 @Component({
   selector: 'app-main-technician-materials',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './main-technician-materials.component.html',
   styleUrl: './main-technician-materials.component.css'})
 export class MainTechnicianMaterialsComponent implements OnInit {

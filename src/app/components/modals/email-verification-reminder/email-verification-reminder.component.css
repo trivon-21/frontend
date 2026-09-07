@@ -97,16 +97,9 @@
   font-size: 14px;
   color: #374151;
   margin-bottom: 8px;
-  padding-left: 20px;
-  position: relative;
-}
-
-.benefits-list li:before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #059669;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .otp-info {
