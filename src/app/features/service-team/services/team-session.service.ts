@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 
 export type TeamKey = 'A' | 'B';
 
@@ -23,6 +24,8 @@ const DEFAULT_TEAM_KEY: TeamKey = 'B';
 export class TeamSessionService {
   private readonly sessionSubject = new BehaviorSubject<TeamSessionState | null>(this.readSession());
   readonly session$ = this.sessionSubject.asObservable();
+
+  constructor(private authService: AuthService) {}
 
   /**
    * Persists and broadcasts a team session state.
@@ -58,7 +61,23 @@ export class TeamSessionService {
    * Returns the active team name with a safe default.
    */
   getTeamName(): string {
-    return this.sessionSubject.value?.teamName || DEFAULT_TEAM_NAME;
+    const url = window.location.pathname;
+    if (url.includes('/service-team-a')) {
+      return 'Colombo Installation Team A';
+    }
+    if (url.includes('/service-team-b')) {
+      return 'Service Team B';
+    }
+
+    const sessionName = this.sessionSubject.value?.teamName;
+    if (sessionName) return sessionName;
+
+    const user = this.authService.getCurrentUser();
+    if (user && user.fullName) {
+      return user.fullName;
+    }
+
+    return DEFAULT_TEAM_NAME;
   }
 
   /**

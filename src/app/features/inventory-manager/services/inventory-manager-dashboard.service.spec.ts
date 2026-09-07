@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import {
   InventoryManagerDashboardService,
+  ReceiveInventoryInput,
   normalizeInventoryDashboard,
 } from './inventory-manager-dashboard.service';
 
@@ -21,11 +22,25 @@ describe('normalizeInventoryDashboard', () => {
       },
       recentActivity: [],
       reorderList: [],
-      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 },
+      procurementWorkflow: {
+        awaitingManager: 3,
+        awaitingFinanceApproval: 1,
+        readyToIssue: 2,
+        readyToReceive: 4,
+        awaitingReceiptReconciliation: 1,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 2, receiptAuthorizations: 1 },
+          readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
+        },
+        awaitingReceipt: 4,
+        awaitingFinance: 1,
+      },
     });
 
     expect(data.stats.materialReservations.total).toBe(3);
-    expect(data.procurementWorkflow).toEqual({ awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 });
+    expect(data.procurementWorkflow.readyToReceive).toBe(4);
+    expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(1);
+    expect(data.procurementWorkflow.breakdown.awaitingManager.receiptAuthorizations).toBe(1);
   });
 
   it('fills every nested collection and procurement count in an incomplete HTTP-200 fallback', () => {
@@ -33,8 +48,89 @@ describe('normalizeInventoryDashboard', () => {
 
     expect(data.recentActivity).toEqual([]);
     expect(data.reorderList).toEqual([]);
+    expect(data.logistics).toEqual([]);
     expect(data.stats.stockAlerts).toEqual({ total: 0, subStats: [] });
-    expect(data.procurementWorkflow).toEqual({ awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 });
+    expect(data.procurementWorkflow.readyToReceive).toBe(0);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(0);
+  });
+
+  it('preserves and normalizes logistics rows', () => {
+    const data = normalizeInventoryDashboard({
+      logistics: [
+        {
+          id: 'ORD-101',
+          orderId: 'ORD-101',
+          customer: 'Test Customer',
+          status: 'to-pack',
+          statusVersion: 0,
+          type: 'standard',
+          courier: 'DHL',
+          trackId: 'DHL-1234',
+          itemCount: 3,
+        },
+      ],
+    });
+
+    expect(data.logistics.length).toBe(1);
+    expect(data.logistics[0].orderId).toBe('ORD-101');
+    expect(data.logistics[0].status).toBe('to-pack');
+    expect(data.logistics[0].courier).toBe('DHL');
+  });
+
+  it('maps legacy three-stage responses into safe compatibility defaults', () => {
+    const data = normalizeInventoryDashboard({
+      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 } as never,
+    });
+
+    expect(data.procurementWorkflow.readyToReceive).toBe(2);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(3);
+    expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(0);
+    expect(data.procurementWorkflow.readyToIssue).toBe(0);
+  });
+
+  it('safely normalizes null, undefined, or malformed responses', () => {
+    const data = normalizeInventoryDashboard(null);
+
+    expect(data.managerName).toBe('Manager');
+    expect(data.status).toBe('Offline');
+    expect(data.stats.materialReservations.total).toBe(0);
+    expect(data.stats.stockAlerts.subStats).toEqual([]);
+    expect(data.recentActivity).toEqual([]);
+    expect(data.reorderList).toEqual([]);
+    expect(data.procurementWorkflow.readyToReceive).toBe(0);
+  });
+
+  it('normalizes valid empty dashboard response preserving operational status', () => {
+    const data = normalizeInventoryDashboard({
+      managerName: 'Manager',
+      currentDate: new Date('2026-08-24T00:00:00.000Z'),
+      status: 'Operational',
+      stats: {
+        materialReservations: { total: 0, subStats: [] },
+        dispatchQueue: { total: 0, subStats: [] },
+        assetHealth: { total: 0, subStats: [] },
+        stockAlerts: { total: 0, subStats: [] },
+      },
+      recentActivity: [],
+      reorderList: [],
+      procurementWorkflow: {
+        awaitingManager: 0,
+        awaitingFinanceApproval: 0,
+        readyToIssue: 0,
+        readyToReceive: 0,
+        awaitingReceiptReconciliation: 0,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
+          readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
+        },
+        awaitingReceipt: 0,
+        awaitingFinance: 0,
+      },
+    });
+
+    expect(data.status).toBe('Operational');
+    expect(data.stats.materialReservations.total).toBe(0);
+    expect(data.reorderList).toEqual([]);
   });
 });
 
@@ -83,7 +179,19 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
         timestamp: '2026-08-24T12:00:00.000Z',
       }],
       reorderList: [],
-      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 },
+      procurementWorkflow: {
+        awaitingManager: 1,
+        awaitingFinanceApproval: 2,
+        readyToIssue: 3,
+        readyToReceive: 4,
+        awaitingReceiptReconciliation: 5,
+        breakdown: {
+          awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 0 },
+          readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
+        },
+        awaitingReceipt: 4,
+        awaitingFinance: 5,
+      },
     });
 
     expect(result?.currentDate).toEqual(new Date('2026-08-24T00:00:00.000Z'));
@@ -91,12 +199,34 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
     expect(result?.recentActivity[0].timeAgo).toBe('30m ago');
   });
 
+  it('propagates HTTP 503 INVENTORY_DASHBOARD_UNAVAILABLE failure to subscriber', () => {
+    let errorResponse: any;
+
+    service.getDashboard().subscribe({
+      next: () => fail('expected request to fail with 503'),
+      error: (err) => (errorResponse = err),
+    });
+
+    const request = http.expectOne(`${baseUrl}/dashboard`);
+    expect(request.request.method).toBe('GET');
+    request.flush(
+      { code: 'INVENTORY_DASHBOARD_UNAVAILABLE', message: 'Inventory dashboard is currently unavailable' },
+      { status: 503, statusText: 'Service Unavailable' },
+    );
+
+    expect(errorResponse.status).toBe(503);
+    expect(errorResponse.error.code).toBe('INVENTORY_DASHBOARD_UNAVAILABLE');
+    expect(errorResponse.error.message).toBe('Inventory dashboard is currently unavailable');
+  });
+
   it('uses the exact read-only inventory and procurement endpoints', () => {
     const reads: Array<[string, () => void]> = [
       ['/list', () => service.getInventory().subscribe()],
+      ['/locations', () => service.getLocations().subscribe()],
       ['/item/item-1', () => service.getItem('item-1').subscribe()],
       ['/suppliers', () => service.getSuppliers().subscribe()],
       ['/procurements', () => service.getProcurements().subscribe()],
+      ['/receipt-discrepancies', () => service.getReceiptDiscrepancies().subscribe()],
       ['/order-requests', () => service.getOrderRequests().subscribe()],
       ['/returns-summary', () => service.getReturnsSummary().subscribe()],
       ['/leftover-returns', () => service.getLeftoverReturns().subscribe()],
@@ -134,9 +264,12 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
     expect(request.request.body).toEqual({ name: 'Summit Cooling' });
     request.flush({});
 
-    const receipt = {
+    const receipt: ReceiveInventoryInput = {
       receiptMode: 'PO', orderRequestId: 'order-1', orderLineId: 'line-1', quantity: 2,
-      sourceDocumentNumber: 'INV-1', receiptEventId: 'event-1', serialNumbers: [],
+      acceptedQuantity: 2, damagedQuantity: 0, missingQuantity: 0,
+      sourceDocumentNumber: 'INV-1', receivedDate: '2026-09-02', condition: 'Good',
+      location: 'Central Warehouse', binLocation: 'General Storage', unitCost: 100,
+      receiptEventId: 'event-1', serialNumbers: [], damagedSerialNumbers: [],
     };
     service.receiveInventory(receipt).subscribe();
     request = http.expectOne(`${baseUrl}/receipts`);

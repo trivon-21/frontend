@@ -1,4 +1,4 @@
-export function roleHomeUrl(role: string | null | undefined): string {
+export function roleHomeUrl(role: string | null | undefined, user?: any): string {
   switch (role) {
     case 'SUPER_ADMIN':
       return '/super-admin';
@@ -11,6 +11,12 @@ export function roleHomeUrl(role: string | null | undefined): string {
     case 'MAIN_TECH':
       return '/main-technician-dashboard';
     case 'SERVICE_TEAM':
+      if (user?.fullName?.includes('Supun Silva') || user?.fullName?.includes('A')) {
+        return '/service-team-a/dashboard';
+      }
+      if (user?.fullName?.includes('Nuwan Jayewardene') || user?.fullName?.includes('Nuwan Jayawardene') || user?.fullName?.includes('B')) {
+        return '/service-team-b/dashboard';
+      }
       return '/service-team/dashboard';
     case 'FINANCE':
       return '/finance/dashboard';

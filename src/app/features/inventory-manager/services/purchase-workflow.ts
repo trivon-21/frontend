@@ -46,6 +46,7 @@ export interface PurchaseRequest {
   decisionHistory?: PurchaseDecisionHistory[];
   source?: 'manual' | 'low-stock' | 'material-request';
   sourceMaterialRequestId?: string;
+  workflowStages?: PurchaseWorkflowStage[];
 }
 
 export interface PurchaseDecision {
@@ -88,7 +89,15 @@ export interface ReceiptAuthorization {
   approvalComment?: string;
   rejectionReason?: string;
   createdAt?: string;
+  workflowStages?: PurchaseWorkflowStage[];
 }
+
+export type PurchaseWorkflowStage =
+  | 'awaiting-manager'
+  | 'awaiting-finance-approval'
+  | 'ready-to-issue'
+  | 'ready-to-receive'
+  | 'awaiting-receipt-reconciliation';
 
 export function outstanding(line: PurchaseLine): number {
   return Math.max(0, Number(line.orderedQuantity ?? line.quantity) - Number(line.receivedQuantity || 0));

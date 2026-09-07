@@ -165,19 +165,20 @@
 }
 
 .detail-label {
-  font-size: 11px;
-  color: #8a9e96;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  font-weight: 500;
   display: block;
-  margin-bottom: 6px;
 }
 
 .detail-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #2D3139;
+  color: #1e293b;
+  line-height: 1.4;
+  margin: 0;
+  display: block;
 }
 
 .description-text {

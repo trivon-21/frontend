@@ -61,8 +61,8 @@
   <div class="portal-state" *ngIf="activeType === 'non-po' && authorizationLoading && authorizations.length === 0">Loading Non-PO approvals…</div>
 
   <!-- Table -->
-  <div class="alx-table-container" *ngIf="activeType === 'purchase' && !loadError">
-    <table class="alx-table">
+  <div class="alx-table-container" *ngIf="activeType === 'purchase' && !loadError" role="region" aria-label="Purchase approval requests" tabindex="0">
+    <table class="alx-table alx-table--wide">
       <thead>
         <tr>
           <th>Request</th>
@@ -82,10 +82,10 @@
             <td>{{ o.items.length }} line{{ o.items.length === 1 ? '' : 's' }}</td>
             <td class="num-cell">{{ formatCurrency(o.totalEstimate) }}</td>
             <td>
-              <span class="pill priority" [ngClass]="o.priority">{{ o.priority | uppercase }}</span>
+              <span class="pill priority alx-table-status" [ngClass]="o.priority">{{ o.priority | uppercase }}</span>
             </td>
             <td>
-              <span class="pill status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
+              <span class="pill status alx-table-status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
             </td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
               <div class="row-actions mgr-action-group" *ngIf="o.status === 'pending-manager'">
@@ -107,14 +107,18 @@
                     Reason: {{ o.rejectionReason }}
                   </span>
                 </div>
-                <table class="detail-table">
-                  <tr *ngFor="let it of o.items">
-                    <td class="di-name">{{ it.name }}</td>
-                    <td class="di-sku">{{ it.sku }}</td>
-                    <td class="di-qty">×{{ it.quantity }}</td>
-                    <td class="di-total">{{ formatCurrency(it.estimatedTotal || 0) }}</td>
-                  </tr>
-                </table>
+                <div class="alx-table-container alx-table-container--embedded" role="region" aria-label="Purchase request line items" tabindex="0">
+                  <table class="detail-table alx-table alx-table--narrow">
+                    <tbody>
+                      <tr *ngFor="let it of o.items">
+                        <td class="di-name name-cell">{{ it.name }}</td>
+                        <td class="di-sku sku-cell">{{ it.sku }}</td>
+                        <td class="di-qty num-cell">×{{ it.quantity }}</td>
+                        <td class="di-total num-cell">{{ formatCurrency(it.estimatedTotal || 0) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </td>
           </tr>
@@ -126,8 +130,8 @@
     </table>
   </div>
 
-  <div class="alx-table-container" *ngIf="activeType === 'non-po' && !authorizationLoadError">
-    <table class="alx-table">
+  <div class="alx-table-container" *ngIf="activeType === 'non-po' && !authorizationLoadError" role="region" aria-label="Non-PO authorization requests" tabindex="0">
+    <table class="alx-table alx-table--wide">
       <thead><tr><th>Authorization</th><th>Reason / Item</th><th>Supplier</th><th>Quantity</th><th>Est. Total</th><th>Status</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
         <ng-container *ngFor="let authorization of authorizations">
@@ -137,7 +141,7 @@
             <td>{{ authorization.supplierName }}</td>
             <td>{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
             <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
-            <td><span class="pill status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
+            <td><span class="pill status alx-table-status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
               <div class="row-actions mgr-action-group" *ngIf="authorization.status === 'pending'">
                 <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="decideAuthorization(authorization, 'approved')">Approve</button>

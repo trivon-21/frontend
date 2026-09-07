@@ -2,7 +2,7 @@
   <a routerLink="/" class="sidebar-brand">AirLux</a>
   <nav class="sidebar-nav">
     <a
-      routerLink="/service-team/dashboard"
+      [routerLink]="baseRoute + '/dashboard'"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
       class="nav-item"
@@ -13,7 +13,7 @@
       <span>Dashboard</span>
     </a>
     <a
-      routerLink="/service-team/assigned-jobs"
+      [routerLink]="baseRoute + '/assigned-jobs'"
       routerLinkActive="active"
       class="nav-item"
     >
@@ -23,7 +23,7 @@
       <span>Assigned Jobs</span>
     </a>
     <a
-      routerLink="/service-team/team-details"
+      [routerLink]="baseRoute + '/team-details'"
       routerLinkActive="active"
       class="nav-item"
     >

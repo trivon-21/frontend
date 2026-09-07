@@ -50,6 +50,11 @@ export const INVENTORY_ITEM_FORMS: InventoryItemForm[] = ['Single', 'Kit', 'Bund
 export const INVENTORY_UNITS = ['units', 'kits', 'sets', 'meters', 'rolls', 'kg', 'cylinders', 'liters'];
 export const INVENTORY_PHASES: InventoryPhase[] = ['Single Phase', 'Three Phase', 'Not Applicable'];
 
+export interface InventoryLocationOption {
+  warehouse: string;
+  placementAreas: string[];
+}
+
 export interface SupplierReference {
   _id: string;
   name?: string;
@@ -75,12 +80,12 @@ export interface InventoryItem {
   compatibleModels?: string[];
   systemType?: InventorySystemType;
   refrigerants?: string[];
-  capacityBtu?: number;
+  capacityBtu?: number | null;
   voltage?: string;
   phase?: InventoryPhase;
   location: string;
   binLocation?: string;
-  supplierId?: string | SupplierReference;
+  supplierId?: string | SupplierReference | null;
   supplierName?: string;
   unit: string;
   unitCost: number;
@@ -111,13 +116,13 @@ export interface InventoryMasterDataInput {
   maxStockLevel: number;
   unitCost: number;
   location: string;
-  binLocation?: string;
+  binLocation: string;
   supplierId?: string | null;
   isSerialized: boolean;
   compatibleModels: string[];
   systemType: InventorySystemType;
   refrigerants: string[];
-  capacityBtu?: number;
+  capacityBtu?: number | null;
   voltage?: string;
   phase: InventoryPhase;
   specsUrl?: string;
@@ -147,9 +152,67 @@ export function deriveStockStatus(item: Pick<InventoryItem, 'available' | 'reord
 
 export function supplierNameOf(item: InventoryItem): string {
   if (item.supplierName) return item.supplierName;
-  return typeof item.supplierId === 'object' ? item.supplierId.name || '' : '';
+  return item.supplierId && typeof item.supplierId === 'object' ? item.supplierId.name || '' : '';
 }
 
 export function supplierIdOf(item: InventoryItem): string {
-  return typeof item.supplierId === 'object' ? item.supplierId._id : item.supplierId || '';
+  return item.supplierId && typeof item.supplierId === 'object' ? item.supplierId._id : item.supplierId || '';
 }
+
+export const BUSINESS_TIMEZONE = 'Asia/Colombo';
+
+export function toBusinessDateString(
+  date: Date | string | number = new Date(),
+  timeZone: string = BUSINESS_TIMEZONE,
+): string {
+  if (!date) return '';
+  if (typeof date === 'string') {
+    const trimmed = date.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    const isoMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})T00:00:00(\.000)?Z?$/);
+    if (isoMatch) {
+      return isoMatch[1];
+    }
+  }
+
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+
+  if (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 && d.getUTCSeconds() === 0 && d.getUTCMilliseconds() === 0) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  if (timeZone) {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(d);
+    } catch {
+      // Fallback
+    }
+  }
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function isLoanOverdue(
+  dueDate: Date | string | number | null | undefined,
+  referenceDate: Date | string | number = new Date(),
+  timeZone: string = BUSINESS_TIMEZONE,
+): boolean {
+  if (!dueDate) return false;
+  const dueStr = toBusinessDateString(dueDate, timeZone);
+  const currentStr = toBusinessDateString(referenceDate, timeZone);
+  if (!dueStr || !currentStr) return false;
+  return dueStr < currentStr;
+}
+

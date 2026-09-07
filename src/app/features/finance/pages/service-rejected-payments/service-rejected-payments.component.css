@@ -1,5 +1,5 @@
 /* =========================================================
-   REJECTED / INSPECTION PAGE
+   FINANCE PAGE
    Trivon Finance Theme
    Styling ONLY — HTML/Angular functionality unchanged
    ========================================================= */
@@ -49,53 +49,52 @@
 
 .controls-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
   margin-bottom: 16px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #ffffff;
+  position: relative;
+  width: 340px;
+  max-width: 100%;
+}
+
+.search-wrapper svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #9aaa9f;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px 11px 44px;
   border: 1px solid #e1e8e4;
   border-radius: 10px;
-  padding: 10px 14px;
-  flex: 1;
-  max-width: 400px;
-  min-width: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  background: #ffffff;
+  color: #1b2f27;
+  outline: none;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-.search-wrapper:focus-within {
-  border-color: #6da78a;
-  box-shadow: 0 0 0 3px rgba(109, 167, 138, 0.12);
-}
-
-.search-wrapper svg {
-  width: 18px;
-  height: 18px;
-  color: #9aaa9f;
-  flex-shrink: 0;
-}
-
-.search-wrapper input {
-  border: none;
-  outline: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  color: #1b2f27;
-  background: transparent;
-  flex: 1;
-  min-width: 0;
-}
-
 .search-wrapper input::placeholder {
   color: #9aaa9f;
+}
+
+.search-wrapper input:focus {
+  border-color: #6da78a;
+  box-shadow: 0 0 0 3px rgba(109, 167, 138, 0.12);
 }
 
 
@@ -106,7 +105,8 @@
 .filters-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .filter-label {
@@ -114,6 +114,27 @@
   font-size: 13px;
   color: #71837a;
   font-weight: 500;
+}
+
+.filters-section select {
+  padding: 9px 14px;
+  border-radius: 9px;
+  border: 1px solid #e1e8e4;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  color: #52665d;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.filters-section select:hover,
+.filters-section select:focus {
+  border-color: #6da78a;
+  box-shadow: 0 0 0 3px rgba(109, 167, 138, 0.1);
 }
 
 
@@ -133,7 +154,8 @@
   cursor: pointer;
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .date-input:hover,
@@ -209,9 +231,9 @@
   height: 30px;
   padding: 0 16px;
   border-radius: 20px;
-  border: 1px solid #f0caca;
-  background: #fceaea;
-  color: #c45151;
+  border: 1px solid #c9e8d8;
+  background: #e5f5ed;
+  color: #2f7d5a;
   font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 600;
@@ -223,9 +245,9 @@
 }
 
 .view-btn:hover {
-  background: #f8dcdc;
-  border-color: #e6aaaa;
-  color: #a83f3f;
+  background: #d5eddf;
+  border-color: #a9d7bd;
+  color: #25664a;
 }
 
 
@@ -268,7 +290,7 @@
     background 0.2s ease;
 }
 
-.pages button:hover:not(:disabled) {
+.pages button:hover {
   border-color: #6da78a;
   color: #2f7d5a;
   background: #f8fbf9;
@@ -452,8 +474,8 @@
   }
 
   .search-wrapper {
-    max-width: 100%;
     width: 100%;
+    max-width: 100%;
   }
 
   .filters-section {
@@ -467,8 +489,8 @@
   }
 
   .pagination {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: center;
   }
 
   .pages {
@@ -478,10 +500,6 @@
 
   .modal-overlay {
     padding: 12px;
-  }
-
-  .modal {
-    max-width: none;
   }
 }
 

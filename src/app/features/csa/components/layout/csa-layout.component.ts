@@ -23,7 +23,7 @@ import { CsaHeaderComponent } from '../header/csa-header.component';
       display: flex;
       height: 100vh;
       overflow: hidden;
-      background-color: #f5f7fa;
+      background-color: #f3f4f2;
     }
     .csa-main {
       flex: 1;
@@ -35,7 +35,7 @@ import { CsaHeaderComponent } from '../header/csa-header.component';
     .csa-content {
       flex: 1;
       overflow-y: auto;
-      padding: 28px 32px;
+      padding: 24px 32px 40px;
     }
   `]
 })

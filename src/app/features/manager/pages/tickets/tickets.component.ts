@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -19,6 +19,7 @@ import {
   styleUrls: ['./tickets.component.css'],
 })
 export class TicketsComponent implements OnInit {
+  @ViewChild('detailsCloseButton') detailsCloseButton?: ElementRef<HTMLButtonElement>;
   items: OperationalWorkItem[] = [];
   selectedItem: OperationalWorkItem | null = null;
   summary: WorkItemSummary = {
@@ -46,6 +47,7 @@ export class TicketsComponent implements OnInit {
   activePriority = 'all';
   activeAssignment = 'all';
   activeSla = 'all';
+  private detailsTrigger: HTMLElement | null = null;
 
   constructor(private readonly ticketsService: TicketsService, private readonly route: ActivatedRoute) {}
 
@@ -108,15 +110,32 @@ export class TicketsComponent implements OnInit {
     this.load();
   }
 
-  openDetails(item: OperationalWorkItem): void {
+  openDetails(item: OperationalWorkItem, trigger?: HTMLElement): void {
+    if (trigger) this.detailsTrigger = trigger;
     this.selectedItem = item;
     this.selectedPriority = item.priority;
     this.selectedSla = item.slaDueAt ? this.toLocalDateTime(item.slaDueAt) : '';
     this.actionReason = '';
     this.errorMessage = '';
+    setTimeout(() => this.detailsCloseButton?.nativeElement.focus());
   }
 
-  closeDetails(): void { this.selectedItem = null; }
+  closeDetails(): void {
+    if (this.updatingId) return;
+    this.selectedItem = null;
+    this.actionReason = '';
+    this.errorMessage = '';
+    const trigger = this.detailsTrigger;
+    this.detailsTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  onDetailsBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeDetails();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeDetails(); }
 
   saveControls(): void {
     if (!this.selectedItem) return;

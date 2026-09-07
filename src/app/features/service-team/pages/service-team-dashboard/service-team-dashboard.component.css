@@ -90,60 +90,7 @@
   color: #9aa09e;
 }
 
-/* ── Assigned Vehicle Banner ── */
-.assigned-vehicle-banner {
-  background: var(--primary-lighter);
-  border-radius: 14px;
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border: 1px solid rgba(0, 132, 61, 0.08);
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 132, 61, 0.02);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
 
-.assigned-vehicle-banner:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 132, 61, 0.05);
-}
-
-.vehicle-icon {
-  width: 44px;
-  height: 44px;
-  color: var(--primary-main);
-  background: #fff;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(0, 132, 61, 0.08);
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
-}
-
-.vehicle-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.vehicle-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  color: #8a9e96;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-}
-
-.vehicle-id {
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1b2f27;
-}
 
 /* ── Summary Metric Cards ── */
 .summary-cards {

@@ -172,7 +172,7 @@
       <!-- Action Buttons -->
       <div class="action-row">
         <button *ngIf="canCancel()" class="btn-danger" (click)="cancelOrder()">Cancel Order</button>
-        <button *ngIf="canReupload()" class="btn-secondary">Re-upload Payment Slip</button>
+        <button *ngIf="canReupload()" class="btn-secondary" (click)="goToReupload()">Re-upload Payment Slip</button>
         <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
       </div>
 

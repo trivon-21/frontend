@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TaskService, TeamDetails, TeamDetailsApiPayload, TeamMember } from '../../services/task.service';
+import { TaskService, TeamDetails, TeamDetailsApiPayload, TeamMember, TimeSlot } from '../../services/task.service';
 import { catchError, EMPTY, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
@@ -52,10 +52,10 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
               status: 'Available',
               activeJobsCount: 3,
               availableSlots: [
-                new Date('2026-08-22T09:00:00Z').toISOString(),
-                new Date('2026-08-23T09:00:00Z').toISOString(),
-                new Date('2026-08-25T09:00:00Z').toISOString(),
-                new Date('2026-08-26T09:00:00Z').toISOString()
+                { date: new Date(Date.now() + 86400000).toISOString(), timeSlot: '9:00 AM - 11:00 AM' },
+                { date: new Date(Date.now() + 86400000).toISOString(), timeSlot: '11:00 AM - 1:00 PM' },
+                { date: new Date(Date.now() + 2 * 86400000).toISOString(), timeSlot: '9:00 AM - 11:00 AM' },
+                { date: new Date(Date.now() + 2 * 86400000).toISOString(), timeSlot: '1:00 PM - 3:00 PM' }
               ],
             },
             teamLeader: {
@@ -80,7 +80,7 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
     const teamMembers = this.normalizeMembers(payload.teamMembers ?? rawTeam.members ?? payload.members ?? []);
     const teamLeader =
       this.findLeader(payload.teamLeader ?? null) ??
-      this.findLeader((rawTeam.members || teamMembers).find((member) => member.role === 'Team Leader') ?? null);
+      this.findLeader((rawTeam.members || teamMembers).find((member) => member.role === 'Team Leader' || member.role === 'Lead') ?? null);
 
     const membersWithoutLeader = teamMembers.filter((member) => !this.isSameMember(member, teamLeader));
 
@@ -103,13 +103,15 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
       .filter((member): member is TeamMember => Boolean(member))
       .map((member) => ({
         id: member.id ?? '',
-        name: member.name?.trim() || 'Unknown Member',
+        name: member.name?.trim() || (member as any).fullName?.trim() || 'Unknown Member',
         role: member.role?.trim() || 'Technician',
       }));
   }
 
-  private normalizeSlots(slots: string[]): string[] {
-    return slots.filter((slot): slot is string => typeof slot === 'string' && Boolean(slot.trim()));
+  private normalizeSlots(slots: TimeSlot[]): TimeSlot[] {
+    return slots
+      .filter((slot): slot is TimeSlot => Boolean(slot) && Boolean(slot.date))
+      .slice(0, 4);
   }
 
   private findLeader(member: TeamMember | null): TeamMember | null {
@@ -119,7 +121,7 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
 
     return {
       id: member.id ?? '',
-      name: member.name?.trim() || 'Unknown Member',
+      name: member.name?.trim() || (member as any).fullName?.trim() || 'Unknown Member',
       role: member.role?.trim() || 'Team Leader',
     };
   }

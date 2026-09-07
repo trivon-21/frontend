@@ -197,28 +197,20 @@
   color: var(--error);
 }
 
-.name-cell strong,
+.product-name,
 .alx-table td > strong {
   display: block;
 }
 
-.name-cell small,
+.product-name {
+  font-weight: 400;
+}
+
 .alx-table td > small {
   display: block;
   margin-top: var(--spacing-xs);
   color: var(--text-muted);
   font-size: 11px;
-}
-
-.stock-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  text-transform: uppercase;
 }
 
 .stock-pill.in-stock {
@@ -278,6 +270,45 @@
   box-shadow: var(--shadow-modal);
   overflow: hidden;
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.save-confirmation-modal {
+  max-width: 520px;
+}
+
+.save-confirmation-header {
+  background: var(--success-light);
+}
+
+.save-confirmation-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--border-radius-full);
+  background: var(--primary-main);
+  color: var(--text-inverse);
+}
+
+.save-confirmation-body {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.save-confirmation-body strong {
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.save-confirmation-body p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.save-confirmation-body .sku-badge {
+  justify-self: start;
+  margin-top: var(--spacing-xs);
 }
 
 .modal-header {

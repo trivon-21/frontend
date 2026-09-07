@@ -112,10 +112,10 @@ export class InvoicePaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.invoiceService.approveInvoicePayment(payment._id).subscribe({
       next: () => {
-        this.notificationService.show('✅ Payment approved! Email sent to customer.', 'success');
+        this.notificationService.show('Payment approved! Email sent to customer.', 'success');
         this.loadPayments(); this.loadRepairPayments();
       },
-      error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Failed to approve.', 'error'); }
+      error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('Failed to approve.', 'error'); }
     });
   }
 
@@ -132,14 +132,14 @@ export class InvoicePaymentVerificationComponent implements OnInit {
   }
 
   rejectPayment(): void {
-    if (!this.rejectionReason.trim()) { this.notificationService.show('⚠️ Please enter a reason.', 'warning'); return; }
+    if (!this.rejectionReason.trim()) { this.notificationService.show('Please enter a reason.', 'warning'); return; }
     this.isLoading = true;
     this.invoiceService.rejectInvoicePayment(this.selectedPayment._id, this.rejectionReason).subscribe({
       next: () => {
-        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent.', 'success');
+        this.notificationService.show('Payment rejected. Email with re-upload link sent.', 'success');
         this.closeRejectModal(); this.loadPayments(); this.loadRepairPayments();
       },
-      error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Failed to reject.', 'error'); }
+      error: (err: any) => { console.error(err); this.isLoading = false; this.notificationService.show('Failed to reject.', 'error'); }
     });
   }
 }

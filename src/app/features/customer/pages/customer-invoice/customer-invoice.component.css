@@ -362,6 +362,18 @@
   margin-bottom: 16px;
 }
 
+.action-buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-buttons button svg {
+  flex-shrink: 0;
+  display: block;
+}
+
 
 /* =========================================================
    ACCEPT BUTTON
@@ -730,6 +742,8 @@
   color: #526059;
 
   transition: all 0.2s ease;
+  margin-left: 16px;
+  margin-bottom: 4px;
 }
 
 .btn-cancel:hover {
@@ -751,6 +765,8 @@
   font-weight: 600;
 
   cursor: pointer;
+  margin-left: 24px;
+  margin-bottom: 4px;
 }
 
 .btn-confirm-reject:hover:not(:disabled) {

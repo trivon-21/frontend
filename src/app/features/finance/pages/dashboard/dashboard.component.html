@@ -7,7 +7,6 @@
     <button [class.active]="activeFilter==='BUY_ONLY'" (click)="setFilter('BUY_ONLY')">Buy Only</button>
     <button [class.active]="activeFilter==='INSPECTION'" (click)="setFilter('INSPECTION')">Inspection</button>
     <button [class.active]="activeFilter==='INVOICE'" (click)="setFilter('INVOICE')">Invoice</button>
-    <button [class.active]="activeFilter==='REPAIR'" (click)="setFilter('REPAIR')">Repair</button>
     <button [class.active]="activeFilter==='MAINTENANCE'" (click)="setFilter('MAINTENANCE')">Maintenance</button>
   </div>
 
@@ -102,20 +101,20 @@
       <div class="table-container">
         <table>
           <thead>
-            <tr>
-              <th>ORDER ID</th>
-              <th *ngIf="activeFilter !== 'BUY_ONLY'">TICKET / INVOICE ID</th>
-              <th>TYPE</th>
-              <th>CUSTOMER</th>
-              <th>DATE</th>
-              <th>AMOUNT</th>
-              <th>STATUS</th>
-            </tr>
+           <tr>
+  <th *ngIf="activeFilter !== 'MAINTENANCE'">ORDER ID</th>
+  <th *ngIf="activeFilter !== 'BUY_ONLY'">TICKET / INVOICE ID</th>
+  <th>TYPE</th>
+  <th>CUSTOMER</th>
+  <th>DATE</th>
+  <th>AMOUNT</th>
+  <th>STATUS</th>
+</tr>
           </thead>
           <tbody>
-            <tr *ngFor="let p of paginatedPayments">
-              <td>{{ p.orderId }}</td>
-              <td *ngIf="activeFilter !== 'BUY_ONLY'">{{ p.invoiceId }}</td>
+        <tr *ngFor="let p of paginatedPayments">
+  <td *ngIf="activeFilter !== 'MAINTENANCE'">{{ p.orderId }}</td>
+  <td *ngIf="activeFilter !== 'BUY_ONLY'">{{ p.invoiceId }}</td>
               <td>
                 <span class="type-badge" [ngClass]="getTypeBadgeClass(p.paymentType)">
                   {{ getTypeLabel(p.paymentType) }}
@@ -139,12 +138,15 @@
 
       <div class="pagination">
         <span class="showing">Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} items</span>
-        <div class="pagination-controls">
-          <button class="page-btn" [disabled]="currentPage===1" (click)="prevPage()">Previous</button>
-          <button *ngFor="let page of totalPages" class="page-number" [class.active]="currentPage===page"
-            (click)="goToPage(page)">{{ page }}</button>
-          <button class="page-btn" [disabled]="currentPage*itemsPerPage>=totalItems" (click)="nextPage()">Next</button>
-        </div>
+     <div class="pagination-controls">
+  <button class="page-btn" [disabled]="currentPage===1" (click)="prevPage()">Previous</button>
+  <ng-container *ngFor="let page of visiblePages">
+    <button *ngIf="page !== '...'" class="page-number" [class.active]="currentPage===page"
+  (click)="goToPage($any(page))">{{ page }}</button>
+    <span *ngIf="page === '...'" class="page-ellipsis">...</span>
+  </ng-container>
+  <button class="page-btn" [disabled]="currentPage*itemsPerPage>=totalItems" (click)="nextPage()">Next</button>
+</div>
       </div>
     </div>
 

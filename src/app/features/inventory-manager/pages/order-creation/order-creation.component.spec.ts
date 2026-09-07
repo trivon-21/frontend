@@ -47,7 +47,7 @@ describe('OrderCreationComponent HTTP contract', () => {
     }]);
 
     expect(component.loading).toBeFalse();
-    expect(component.pendingOrders[0].requestId).toBe('REQ-001');
+    expect(component.pendingManagerOrders[0].requestId).toBe('REQ-001');
     expect(component.suggestedItems[0].sku).toBe('FLT-1');
   });
 
@@ -60,6 +60,21 @@ describe('OrderCreationComponent HTTP contract', () => {
 
     expect(component.loading).toBeFalse();
     expect(component.loadError).toContain('No partial data');
-    expect(component.pendingOrders).toEqual([]);
+    expect(component.pendingManagerOrders).toEqual([]);
+  });
+
+  it('selects Manager and Finance queues from dashboard query parameters', () => {
+    const financeComponent = new OrderCreationComponent(
+      TestBed.inject(ApiService),
+      {} as OrderCreationService,
+      { navigate: jasmine.createSpy() } as unknown as Router,
+      { queryParams: of({ status: 'pending-finance' }) } as unknown as ActivatedRoute,
+    );
+
+    financeComponent.ngOnInit();
+
+    expect(financeComponent.activeTab).toBe('pending-finance');
+    http.expectOne(`${baseUrl}/order-requests`).flush([]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
   });
 });

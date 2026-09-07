@@ -125,7 +125,7 @@ export class PaymentAuditLogComponent implements OnInit {
     // Simple approach: open a fetch via the audit log service or directly
     this.auditLogService.getInvoiceById(this.selectedLog.invoiceId).subscribe({
       next: (inv: any) => { this.invoiceToShow = inv; this.showInvoicePopup = true; },
-      error: () => { this.notificationService.show('❌ Could not load invoice details.', 'error'); }
+      error: () => { this.notificationService.show('Could not load invoice details.', 'error'); }
     });
   }
 

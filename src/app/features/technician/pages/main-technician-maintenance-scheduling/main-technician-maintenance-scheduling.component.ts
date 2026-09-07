@@ -273,6 +273,8 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
         next: (response) => {
           if (response.success) {
             this.successMessage = `Schedule ${this.selectedSchedule!.ticketId} sent to CSA successfully!`;
+            this.showViewModal = false;
+            this.selectedSchedule = null;
             this.loadSchedules();
           } else {
             this.error = 'Failed to send schedule to CSA';

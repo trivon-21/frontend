@@ -14,21 +14,25 @@ export class InspectionOfficerService {
     return throwError(() => new Error(error.error?.message || error.message || 'Request failed'));
   }
 
-  getDashboardStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard`).pipe(catchError(this.handleError));
-  }
+ getDashboardStats(inspectorId?: string): Observable<any> {
+  const url = inspectorId ? `${this.apiUrl}/dashboard?inspectorId=${inspectorId}` : `${this.apiUrl}/dashboard`;
+  return this.http.get<any>(url).pipe(catchError(this.handleError));
+}
 
   getScheduledInspections(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/scheduled`).pipe(catchError(this.handleError));
   }
 
-  startInspection(ticketId: string, arrivalTime: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/start/${ticketId}`, { arrivalTime }).pipe(catchError(this.handleError));
+  // Now optionally records which inspector started this job — additive only,
+  // existing callers that don't pass inspectorId keep working exactly as before
+  startInspection(ticketId: string, arrivalTime: string, inspectorId?: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/start/${ticketId}`, { arrivalTime, inspectorId }).pipe(catchError(this.handleError));
   }
 
-  getOngoingInspections(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/ongoing`).pipe(catchError(this.handleError));
-  }
+ getOngoingInspections(inspectorId?: string): Observable<any[]> {
+  const url = inspectorId ? `${this.apiUrl}/ongoing?inspectorId=${inspectorId}` : `${this.apiUrl}/ongoing`;
+  return this.http.get<any[]>(url).pipe(catchError(this.handleError));
+}
 
   saveReport(ticketId: string, reportData: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/save-report/${ticketId}`, reportData).pipe(catchError(this.handleError));
@@ -38,9 +42,11 @@ export class InspectionOfficerService {
     return this.http.put<any>(`${this.apiUrl}/record-report/${ticketId}`, reportData).pipe(catchError(this.handleError));
   }
 
-  getCompletedInspections(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/completed`).pipe(catchError(this.handleError));
-  }
+ getCompletedInspections(inspectorId?: string): Observable<any[]> {
+  const url = inspectorId ? `${this.apiUrl}/completed?inspectorId=${inspectorId}` : `${this.apiUrl}/completed`;
+  return this.http.get<any[]>(url).pipe(catchError(this.handleError));
+}
+
 
   getReport(ticketId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/report/${ticketId}`).pipe(catchError(this.handleError));
