@@ -35,20 +35,13 @@
 
 /* Table — base styles from global alx-* system in styles.css */
 
-/* Component-specific overrides only */
-
-.alx-table {
-  table-layout: fixed;
-}
+/* Component-specific column sizing */
 
 .item-column { width: 30%; }
 .sku-column,
 .price-column { width: 20%; }
 .stock-column,
 .action-column { width: 15%; }
-
-.alx-table .text-right { text-align: right; }
-.alx-table .text-center { text-align: center; }
 
 .item-name-bold {
   font-weight: 700;

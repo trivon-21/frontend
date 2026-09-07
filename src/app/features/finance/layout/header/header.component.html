@@ -42,7 +42,7 @@
           <span class="notif-total" *ngIf="totalPending > 0">{{ totalPending }} pending</span>
         </div>
         <div class="notif-empty" *ngIf="notifications.length === 0">
-          ✅ All caught up! No pending actions.
+          All caught up! No pending actions.
         </div>
         <div class="notif-item" *ngFor="let n of notifications">
           <div class="notif-dot" [ngClass]="'dot-' + n.type"></div>

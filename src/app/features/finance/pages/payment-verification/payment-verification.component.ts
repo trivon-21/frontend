@@ -68,12 +68,12 @@ export class PaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.paymentService.approvePayment(payment._id).subscribe({
       next: (response: any) => {
-        this.notificationService.show('✅ Payment approved! Confirmation email sent to customer.', 'success');
+        this.notificationService.show('Payment approved! Confirmation email sent to customer.', 'success');
         // Remove from list immediately
         this.payments = this.payments.filter(p => p._id !== payment._id);
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Approval failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Approval failed.', 'error'); }
     });
   }
 
@@ -90,13 +90,13 @@ export class PaymentVerificationComponent implements OnInit {
     this.isLoading = true;
     this.paymentService.rejectPayment(this.selectedPayment._id, this.rejectionReason).subscribe({
       next: (response: any) => {
-        this.notificationService.show('✅ Payment rejected. Email with re-upload link sent to customer.', 'success');
+        this.notificationService.show('Payment rejected. Email with re-upload link sent to customer.', 'success');
         // Remove from list immediately
         this.payments = this.payments.filter(p => p._id !== this.selectedPayment._id);
         this.closeRejectModal();
         this.isLoading = false;
       },
-      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('❌ Rejection failed.', 'error'); }
+      error: (err) => { console.error(err); this.isLoading = false; this.notificationService.show('Rejection failed.', 'error'); }
     });
   }
 }

@@ -148,26 +148,26 @@
           <span class="detail-label">Materials Required</span>
           
           <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width: 70%;">ITEM</th>
-                  <th>QUANTITY</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (material of serviceView.requestDetails?.materials || []; track material.item) {
+              <table>
+                <thead>
                   <tr>
-                    <td>{{ material.item || '-' }}</td>
-                    <td>{{ material.quantity || '-' }}</td>
+                    <th style="width: 70%;">ITEM</th>
+                    <th style="width: 30%;">QUANTITY</th>
                   </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="2" class="empty-text">No materials listed</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (material of serviceView.requestDetails?.materials || []; track material.item || material.itemName || material.inventoryId) {
+                    <tr>
+                      <td>{{ material.item || material.itemName || material.name || '-' }}</td>
+                      <td>{{ material.quantity || '-' }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="2" class="empty-text">No materials listed</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
           </div>
         </div>
       </div>

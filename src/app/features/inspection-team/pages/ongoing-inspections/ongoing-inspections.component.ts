@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-ongoing-inspections',
@@ -25,14 +26,18 @@ export class OngoingInspectionsComponent implements OnInit {
 
   constructor(
     private officerService: InspectionOfficerService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
   loadInspections(): void {
     this.isLoading = true;
-    this.officerService.getOngoingInspections().subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    const inspectorId = currentUser?.id;
+
+    this.officerService.getOngoingInspections(inspectorId).subscribe({
       next: (data: any[]) => {
         this.inspections = data;
         this.applyFilters();

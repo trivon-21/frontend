@@ -16,6 +16,7 @@ export interface ComparisonMetric {
   semantic: MetricSemantic;
 }
 export interface SnapshotMetric { value: number; scope: 'current-snapshot'; asOf: Date; }
+export interface MoneyCountSnapshot extends SnapshotMetric { count: number; }
 export interface PipelineSummary { status: string; count: number; value: number; }
 export interface DecisionSummary { stage: 'manager' | 'finance'; decision: 'approved' | 'rejected'; count: number; value: number; }
 export interface WorkloadRow {
@@ -83,6 +84,19 @@ export interface AnalyticsData {
     pendingApprovalValue: SnapshotMetric;
     oldestPendingAgeHours: number;
   };
+  financial: {
+    collectedRevenue: ComparisonMetric;
+    procurementSpend: ComparisonMetric;
+    operatingContribution: ComparisonMetric;
+    outstandingReceivables: MoneyCountSnapshot;
+    pendingPaymentReview: MoneyCountSnapshot;
+    purchaseCommitments: SnapshotMetric;
+    unreconciledNonPo: MoneyCountSnapshot;
+    revenueBySource: Array<{ label: string; count: number; value: number }>;
+    spendByMode: Array<{ label: string; count: number; value: number }>;
+    trend: { labels: string[]; collectedRevenue: number[]; procurementSpend: number[] };
+    basis: 'cash-collected-vs-goods-received';
+  };
   inventoryRisk: {
     lowStockItems: SnapshotMetric;
     outOfStockItems: SnapshotMetric;
@@ -138,6 +152,13 @@ export class AnalyticsService {
         purchasing: {
           ...data.purchasing,
           pendingApprovalValue: hydrateSnapshot(data.purchasing.pendingApprovalValue),
+        },
+        financial: {
+          ...data.financial,
+          outstandingReceivables: hydrateSnapshot(data.financial.outstandingReceivables) as MoneyCountSnapshot,
+          pendingPaymentReview: hydrateSnapshot(data.financial.pendingPaymentReview) as MoneyCountSnapshot,
+          purchaseCommitments: hydrateSnapshot(data.financial.purchaseCommitments),
+          unreconciledNonPo: hydrateSnapshot(data.financial.unreconciledNonPo) as MoneyCountSnapshot,
         },
         inventoryRisk: {
           ...data.inventoryRisk,

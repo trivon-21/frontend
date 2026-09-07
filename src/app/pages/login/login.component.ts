@@ -60,7 +60,8 @@ export class LoginComponent {
       return this.returnUrl;
     }
 
-    return roleHomeUrl(this.authService.getCurrentUser()?.role);
+    const user = this.authService.getCurrentUser();
+    return roleHomeUrl(user?.role, user);
   }
 
   onIdentifierChange(identifier: string) {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { RouterModule } from '@angular/router';
 import { InventoryItem, OrderItem } from '../../../../../services/order-creation.service';
+import { supplierIdOf, supplierNameOf } from '../../../../../services/inventory-domain';
 
 @Component({
   selector: 'app-order-item-search',
@@ -86,12 +87,8 @@ export class OrderItemSearchComponent implements OnChanges {
         subcategory: this.selectedItem.subcategory || 'Unclassified',
         unit: this.selectedItem.unit,
         manufacturerPartNumber: this.selectedItem.manufacturerPartNumber,
-        supplierId: typeof this.selectedItem.supplierId === 'object'
-          ? this.selectedItem.supplierId._id
-          : this.selectedItem.supplierId,
-        supplierName: typeof this.selectedItem.supplierId === 'object'
-          ? this.selectedItem.supplierId.name
-          : this.selectedItem.supplierName,
+        supplierId: supplierIdOf(this.selectedItem),
+        supplierName: supplierNameOf(this.selectedItem),
     });
     this.clearSelection();
   }

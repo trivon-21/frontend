@@ -11,14 +11,14 @@
       <p class="empty-text">No items added yet.</p>
     </div>
 
-    <div class="line-items-container" *ngIf="orderItems.length > 0">
-      <table class="line-items-table">
+    <div class="line-items-container alx-table-container alx-table-container--embedded" *ngIf="orderItems.length > 0" role="region" aria-label="Order cart line items" tabindex="0">
+      <table class="line-items-table alx-table alx-table--narrow">
         <thead>
           <tr>
             <th>ITEM</th>
             <th class="text-center">QTY</th>
             <th class="text-right">TOTAL</th>
-            <th></th>
+            <th class="actions-cell" aria-label="Actions"></th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@
               <span class="qty-static" *ngIf="selectedLineItemIndex !== i">×{{ item.quantity }}</span>
             </td>
             <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
-            <td class="text-center">
+            <td class="actions-cell">
               <button type="button" class="btn-delete-row im-btn im-btn--danger im-btn--compact im-btn--icon" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
                 <lucide-angular name="trash-2" [size]="16"></lucide-angular>
               </button>

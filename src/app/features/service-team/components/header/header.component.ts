@@ -96,6 +96,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isDropdownOpen = false;
   }
 
+  get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/']);

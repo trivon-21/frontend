@@ -29,10 +29,26 @@ export class InventoryManagerDashboardComponent implements OnInit {
     },
     recentActivity: [],
     reorderList: [],
-    procurementWorkflow: { awaitingManager: 0, awaitingReceipt: 0, awaitingFinance: 0 },
+    procurementWorkflow: {
+      awaitingManager: 0,
+      awaitingFinanceApproval: 0,
+      readyToIssue: 0,
+      readyToReceive: 0,
+      awaitingReceiptReconciliation: 0,
+      breakdown: {
+        awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
+        readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
+      },
+      awaitingReceipt: 0,
+      awaitingFinance: 0,
+    },
+    logistics: [],
   };
   loading = false; // Structure should load immediately
   error: string | null = null;
+  hasLoadedSuccess = false;
+  isStale = false;
+
   constructor(
     private dashboardService: InventoryManagerDashboardService,
     private iconMappingService: IconMappingService,
@@ -49,11 +65,16 @@ export class InventoryManagerDashboardComponent implements OnInit {
     this.dashboardService.getDashboard().subscribe({
       next: (data: InventoryDashboardData) => {
         this.data = data;
+        this.hasLoadedSuccess = true;
+        this.isStale = false;
         this.loading = false;
       },
       error: (err: any) => {
         this.error = err.error?.message || 'Failed to load dashboard data';
         this.loading = false;
+        if (this.hasLoadedSuccess) {
+          this.isStale = true;
+        }
       },
     });
   }

@@ -79,7 +79,6 @@
       <thead>
 
         <tr>
-          <th>ORDER ID</th>
           <th>TICKET ID</th>
           <th>CUSTOMER</th>
           <th>SERVICE TYPE</th>
@@ -95,15 +94,6 @@
       <tbody>
 
         <tr *ngFor="let payment of filteredPayments">
-
-          <!-- ORDER ID -->
-
-          <td>
-            <span class="order-id">
-              {{ payment.orderId }}
-            </span>
-          </td>
-
 
           <!-- TICKET ID -->
 
@@ -145,7 +135,7 @@
 
           <td>
             <span class="date">
-              {{ payment.slipUploadedAt | date:'dd MMM yyyy, hh:mm a' }}
+              {{ payment.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
             </span>
           </td>
 

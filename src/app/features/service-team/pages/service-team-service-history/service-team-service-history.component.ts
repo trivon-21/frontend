@@ -1,7 +1,7 @@
 // service-team-service-history.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { TeamSessionService } from '../../services/team-session.service';
@@ -43,8 +43,15 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
-    private readonly teamSessionService: TeamSessionService
+    private readonly teamSessionService: TeamSessionService,
+    private router: Router
   ) {}
+
+  get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');

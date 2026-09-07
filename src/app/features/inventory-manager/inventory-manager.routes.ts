@@ -5,13 +5,14 @@ import { AssetManagementDashboardComponent } from './pages/asset-management/asse
 import { InventoryManagerDashboardComponent } from './pages/dashboard/inventory-manager-dashboard.component';
 import { DispatchLogisticsDashboardComponent } from './pages/dispatch-logistics/dispatch-logistics.component';
 import { InventoryListComponent } from './pages/inventory/inventory-list.component';
-import { ListItemsComponent } from './pages/list-items/list-items.component';
 import { MaterialRequestsDashboardComponent } from './pages/material-requests/material-requests.component';
 import { NewOrderFormComponent } from './pages/order-creation/new-order-form/new-order-form.component';
 import { OrderCreationComponent } from './pages/order-creation/order-creation.component';
 import { ProcurementDashboardComponent } from './pages/procurement/procurement.component';
 import { ProductWizardComponent } from './pages/product-wizard/product-wizard.component';
 import { ReturnsRmaDashboardComponent } from './pages/returns-rma/returns-rma.component';
+
+import { pendingChangesGuard } from '../../core/guards/pending-changes.guard';
 
 export const INVENTORY_MANAGER_ROUTES: Routes = [
   {
@@ -20,15 +21,13 @@ export const INVENTORY_MANAGER_ROUTES: Routes = [
     children: [
       { path: '', component: InventoryManagerDashboardComponent, pathMatch: 'full' },
       { path: 'inventory', component: InventoryListComponent },
-      { path: 'catalog-health', component: ListItemsComponent },
-      { path: 'list-items', redirectTo: 'catalog-health', pathMatch: 'full' },
-      { path: 'product-wizard/:id', component: ProductWizardComponent },
-      { path: 'product-wizard', component: ProductWizardComponent },
+      { path: 'product-wizard/:id', component: ProductWizardComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'product-wizard', component: ProductWizardComponent, canDeactivate: [pendingChangesGuard] },
       { path: 'asset-management', component: AssetManagementDashboardComponent },
       { path: 'material-requests', component: MaterialRequestsDashboardComponent },
       { path: 'dispatch-logistics', component: DispatchLogisticsDashboardComponent },
-      { path: 'order-creation/new', component: NewOrderFormComponent },
-      { path: 'order-creation/edit/:id', component: NewOrderFormComponent },
+      { path: 'order-creation/new', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'order-creation/edit/:id', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
       { path: 'order-creation', component: OrderCreationComponent },
       { path: 'procurement', component: ProcurementDashboardComponent },
       { path: 'returns-rma', component: ReturnsRmaDashboardComponent },

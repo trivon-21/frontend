@@ -63,44 +63,9 @@
   overflow: hidden;
 }
 
-.activity-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.activity-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed;
-}
-
-.activity-table th {
-  padding: 16px 20px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--background-page);
-  border-bottom: 1px solid var(--background-hover);
-}
-
 .activity-table th:nth-child(1) { width: 30%; }
 .activity-table th:nth-child(2) { width: 45%; }
 .activity-table th:nth-child(3) { width: 25%; }
-
-.activity-table td {
-  padding: 16px 20px;
-  font-size: 13.5px;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--background-hover);
-  vertical-align: middle;
-}
-
-.activity-table tr:hover {
-  background: var(--background-page);
-}
 
 .event-cell {
   display: flex;

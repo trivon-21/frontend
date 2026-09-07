@@ -14,6 +14,7 @@ describe('MANAGER_ROUTES', () => {
     const expected = new Map([
       ['analytics/period-performance', 'performance'],
       ['analytics/service-operations', 'service'],
+      ['analytics/financial-overview', 'financial'],
       ['analytics/purchasing-approvals', 'purchasing'],
       ['analytics/inventory-exception-control', 'inventory'],
     ]);

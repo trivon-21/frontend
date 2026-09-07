@@ -295,47 +295,6 @@ button:disabled {
   font-weight: 700;
 }
 
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  min-width: 780px;
-  border-collapse: collapse;
-  background: #fff;
-}
-
-th {
-  padding: 16px 20px;
-  border-bottom: 1.5px solid rgb(0 0 0 / 8%);
-  background: #fff;
-  color: #1b2f27;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-align: left;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-td {
-  padding: 16px 20px;
-  border-bottom: 1px solid rgb(0 0 0 / 5%);
-  color: var(--text-primary);
-  font-size: 13.5px;
-  vertical-align: middle;
-}
-
-tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-tbody tr:hover td {
-  background: rgb(0 0 0 / 1%);
-}
-
 .tool-name,
 .held-by,
 .tool-info .name {
@@ -360,16 +319,8 @@ tbody tr:hover td {
 }
 
 .status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 8px;
   background: var(--primary-lighter);
   color: var(--primary-main);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
 }
 
 .status-pill.overdue {
