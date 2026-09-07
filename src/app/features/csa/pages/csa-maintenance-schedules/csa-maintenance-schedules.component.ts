@@ -25,6 +25,7 @@ interface MaintenanceSchedule {
   sentToCustomerAt?: string;
   csaNotes?: string;
   customerNotes?: string;
+  updatedAt?: string;
 }
 
 @Component({

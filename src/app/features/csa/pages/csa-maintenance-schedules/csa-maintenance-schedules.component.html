@@ -96,6 +96,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             {{ sched.location || '—' }}
           </span>
+          <span class="ticket-dispatched-date" *ngIf="sched.status === 'Sent to Customer'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Dispatched: {{ formatDate(sched.sentToCustomerAt || sched.updatedAt) }}
+          </span>
         </div>
       </div>
 
@@ -129,7 +133,7 @@
         <!-- Dispatched banner -->
         <div class="action-banner done" *ngIf="selectedSchedule.status === 'Sent to Customer'">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Dispatched to customer on {{ formatDate(selectedSchedule.sentToCustomerAt) }}.
+          Dispatched to customer on {{ formatDate(selectedSchedule.sentToCustomerAt || selectedSchedule.updatedAt) }}.
         </div>
       </div>
 
@@ -154,6 +158,10 @@
         <div class="info-block" *ngIf="selectedSchedule.customerPhone">
           <span class="info-label">PHONE</span>
           <span class="info-value">{{ selectedSchedule.customerPhone }}</span>
+        </div>
+        <div class="info-block" *ngIf="selectedSchedule.status === 'Sent to Customer'">
+          <span class="info-label">DISPATCHED DATE</span>
+          <span class="info-value dispatched-highlight">{{ formatDate(selectedSchedule.sentToCustomerAt || selectedSchedule.updatedAt) }}</span>
         </div>
         <div class="info-block" *ngIf="selectedSchedule.sentToCsaAt">
           <span class="info-label">RECEIVED FROM TECHNICIAN</span>
