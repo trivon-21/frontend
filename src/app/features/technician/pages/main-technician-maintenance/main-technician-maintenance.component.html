@@ -24,6 +24,12 @@
         </span>
         <select [(ngModel)]="statusFilter" (change)="applyFilters()">
           <option value="All">All</option>
+          <option value="New">New</option>
+          <option value="Pending">Pending</option>
+          <option value="Finance Approved">Finance Approved</option>
+          <option value="Finance Rejected">Finance Rejected</option>
+          <option value="Sent to IM">Sent to IM</option>
+          <option value="Materials Ready">Materials Ready</option>
           <option value="Assigned">Assigned</option>
           <option value="In Progress">In Progress</option>
           <option value="Scheduled">Scheduled</option>

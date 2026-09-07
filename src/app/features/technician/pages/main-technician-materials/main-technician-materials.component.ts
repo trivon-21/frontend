@@ -650,28 +650,22 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'Finance Approved': return 'approved';
-      case 'New': return 'draft';
-      case 'Pending':
-      case 'Pending Approval': return 'pending';
-      case 'Sent to IM': return 'im';
-      default: return '';
-    }
+    const s = (status || '').toLowerCase();
+    if (s.includes('finance approved')) return 'approved';
+    if (s.includes('new')) return 'draft';
+    if (s.includes('pending')) return 'pending';
+    if (s.includes('sent to im')) return 'im';
+    return '';
   }
 
-  private getStatusFilterKey(status: MaterialRequest['status']): 'approved' | 'draft' | 'pending' | 'sent' {
-    switch (status) {
-      case 'Finance Approved':
-        return 'approved';
-      case 'New':
-        return 'draft';
-      case 'Pending':
-      case 'Pending Approval':
-        return 'pending';
-      case 'Sent to IM':
-        return 'sent';
-    }
+  private getStatusFilterKey(status: string): 'approved' | 'draft' | 'pending' | 'sent' {
+    const s = (status || '').toLowerCase();
+    if (s.includes('finance approved')) return 'approved';
+    if (s.includes('new')) return 'draft';
+    if (s.includes('pending')) return 'pending';
+    if (s.includes('sent to im')) return 'sent';
+    // Default fallback to prevent undefined
+    return 'draft';
   }
 }
 

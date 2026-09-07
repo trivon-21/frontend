@@ -30,7 +30,7 @@ interface MaintenanceDetail {
     teamLead?: { name: string; position?: string };
     helpers?: { name: string; position?: string }[];
   };
-  materialList?: { item: string; quantity: string }[];
+  materialList?: { item?: string; name?: string; itemName?: string; quantity: string | number }[];
 }
 
 @Component({
@@ -47,12 +47,31 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
   error: string | null = null;
   private readonly apiUrl = `${environment.apiBaseUrl}/maintenance`;
 
-  // Mocks for UI based on image since it isn't in backend currently
-  mockDescription = 'Water has been leaking from the outside unit and cooling process is not properly happening.';
-  mockTeamLead = 'Anil Fernando (Technician)';
-  mockHelper = 'Rajesh Kumar ( Helper)';
-  mockStartDate = '10 March 2026 10:00 AM';
-  mockEstimatedDate = '10 March 2026 12:00 AM';
+  // We use getters to safely access ticket data with fallbacks
+  get description(): string {
+    return (this.ticket as any)?.description || (this.ticket as any)?.serviceDescription || 'No description provided.';
+  }
+
+  get teamLead(): string {
+    const lead = this.ticket?.assignedTeamData?.teamLead;
+    return lead ? lead.name : '-';
+  }
+
+  get helpers(): any[] {
+    return this.ticket?.assignedTeamData?.helpers || [];
+  }
+
+  get startDate(): string {
+    return this.formatDate(this.ticket?.date);
+  }
+
+  get estimatedDate(): string {
+    return this.formatDate(this.ticket?.date); // Simplified fallback
+  }
+
+  get productType(): string {
+    return this.ticket?.productType || (this.ticket as any)?.acUnitModel || 'N/A';
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -78,6 +97,7 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             this.ticket = response.data;
+            this.loadAssignedTeamDetails(response.data);
           } else {
             this.error = 'Failed to load maintenance details.';
           }
@@ -89,6 +109,50 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
           this.isLoading = false;
         }
       });
+  }
+
+  loadAssignedTeamDetails(item: any): void {
+    let matchedTeam = item.assignedTeamId && typeof item.assignedTeamId === 'object' ? item.assignedTeamId : null;
+    
+    if (matchedTeam) {
+      this.setTeamData(matchedTeam);
+      return;
+    }
+
+    const teamKey = String(item.assignedTeamName || item.assignedTeam || item.assignedTeamId || '').trim();
+    if (!teamKey || teamKey === 'undefined' || teamKey === 'null') return;
+
+    this.http.get<{ success: boolean; data: any[] }>(`${environment.apiBaseUrl}/tech-teams`)
+      .subscribe({
+        next: (res) => {
+          if (!res.success || !Array.isArray(res.data)) return;
+
+          matchedTeam = res.data.find(team => {
+            const teamId = String(team._id || '').trim();
+            const teamName = String(team.teamName || '').trim();
+            return teamId === teamKey || teamName === teamKey || teamName.toLowerCase() === teamKey.toLowerCase();
+          });
+
+          if (matchedTeam) {
+            this.setTeamData(matchedTeam);
+          }
+        },
+        error: (err) => console.error('Error loading team details', err)
+      });
+  }
+
+  private setTeamData(matchedTeam: any): void {
+      const members = matchedTeam.members || [];
+      const lead = members.find((m: any) => m.role === 'Team Leader' || m.role === 'Lead');
+      const helpersList = members.filter((m: any) => m.role !== 'Team Leader' && m.role !== 'Lead');
+
+      if (this.ticket) {
+        this.ticket.assignedTeam = matchedTeam.teamName;
+        this.ticket.assignedTeamData = {
+          teamLead: lead ? { name: lead.name, position: lead.role } : undefined,
+          helpers: helpersList.map((h: any) => ({ name: h.name, position: h.role }))
+        };
+      }
   }
 
   goBack(): void {

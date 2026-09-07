@@ -142,6 +142,8 @@
 
     .job-type-chip.installation { background-color: #e0f2fe; color: #0369a1; }
     .job-type-chip.service { background-color: #f1f5f9; color: #475569; }
+    .job-type-chip.maintenance { background-color: #fce7f3; color: #be185d; }
+    .job-type-chip.inspection { background-color: #f3e8ff; color: #7e22ce; }
 
     .job-customer {
       display: block;

@@ -64,7 +64,7 @@
         </div>
         <div class="card-content">
           <span class="card-label">Product Type</span>
-          <span class="card-value-small" [title]="ticket.productType">{{ ticket.productType }}</span>
+          <span class="card-value-small" [title]="productType">{{ productType }}</span>
         </div>
       </div>
     </div>
@@ -128,12 +128,12 @@
 
         <div class="detail-block">
           <span class="detail-label">Product Type</span>
-          <span class="detail-value">{{ ticket.productType }}</span>
+          <span class="detail-value">{{ productType }}</span>
         </div>
 
         <div class="detail-block">
           <span class="detail-label">Description</span>
-          <p class="description-text">{{ mockDescription }}</p>
+          <p class="description-text">{{ description }}</p>
         </div>
 
         <div class="materials-block">
@@ -150,26 +150,13 @@
               <tbody>
                 <ng-container *ngIf="ticket.materialList && ticket.materialList.length > 0; else noMaterials">
                   <tr *ngFor="let mat of ticket.materialList">
-                    <td>{{ mat.item }}</td>
+                    <td>{{ mat.item || mat.name || mat.itemName }}</td>
                     <td>{{ mat.quantity }}</td>
                   </tr>
                 </ng-container>
                 <ng-template #noMaterials>
                   <tr>
-                    <td>Copper piping (3/8" + 5/8")</td>
-                    <td>45 meters</td>
-                  </tr>
-                  <tr>
-                    <td>Electrical cable (3-core, 4mm²)</td>
-                    <td>60 meters</td>
-                  </tr>
-                  <tr>
-                    <td>Wall mounting brackets (heavy duty)</td>
-                    <td>6 units</td>
-                  </tr>
-                  <tr>
-                    <td>Drainage PVC pipes & fittings</td>
-                    <td>30 meters</td>
+                    <td colspan="2" style="text-align: center; color: #64748b; padding: 24px;">No materials required or specified.</td>
                   </tr>
                 </ng-template>
               </tbody>
@@ -181,13 +168,24 @@
 
     <!-- Bottom Section: Service Team -->
     <div class="team-timeline-card card-panel">
-      <h2>Service Team - {{ ticket.assignedTeam || 'Team A' }}</h2>
+      <h2>{{ ticket.assignedTeam || 'Service Team' }}</h2>
       
       <div class="lead-info">
         <span class="lead-label">Team Lead</span>
-        <span class="lead-value">{{ mockTeamLead }}</span>
+        <span class="lead-value">{{ teamLead }}</span>
       </div>
-      <p class="helper-text">{{ mockHelper }}</p>
+      
+      <div class="members-list-wrapper" style="margin-top: 16px;">
+        <span class="detail-label">Helpers & Members</span>
+        <ng-container *ngIf="helpers && helpers.length > 0; else noHelpers">
+          <p class="helper-text" style="margin-bottom: 6px;" *ngFor="let member of helpers">
+            {{ member.name || member }}
+          </p>
+        </ng-container>
+        <ng-template #noHelpers>
+          <p class="helper-text">-</p>
+        </ng-template>
+      </div>
 
       <hr class="divider">
 
@@ -196,11 +194,11 @@
       <div class="timeline-grid">
         <div class="timeline-item">
           <span class="timeline-label">Start Date</span>
-          <span class="timeline-value">{{ mockStartDate }}</span>
+          <span class="timeline-value">{{ startDate }}</span>
         </div>
         <div class="timeline-item">
           <span class="timeline-label">Estimated Completion Date</span>
-          <span class="timeline-value">{{ mockEstimatedDate }}</span>
+          <span class="timeline-value">{{ estimatedDate }}</span>
         </div>
       </div>
 
