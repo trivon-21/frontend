@@ -30,10 +30,17 @@ export class ProductDetail implements OnInit {
   // Purchase flow options
   purchaseOption: 'buy-only' | 'buy-install' | null = null;
   awarenessOption: 'know' | 'unsure' | null = null;
+  purchaseOptionError = '';
 
   selectAwareness(option: 'know' | 'unsure') {
     this.awarenessOption = option;
     this.purchaseOption = null; // always reset purchase choice on awareness change
+    this.purchaseOptionError = '';
+  }
+
+  selectPurchaseOption(option: 'buy-only' | 'buy-install') {
+    this.purchaseOption = option;
+    this.purchaseOptionError = '';
   }
 
   // Success toast
@@ -83,6 +90,19 @@ export class ProductDetail implements OnInit {
       this.showLoginPromptModal = true;
       return;
     }
+
+    // Must choose an awareness option
+    if (this.awarenessOption !== 'know') {
+      return;
+    }
+
+    // Validate that user selected a purchase option (Buy Only or Buy & Install)
+    if (!this.purchaseOption) {
+      this.purchaseOptionError = 'Please select a purchase option (Buy Only or Buy & Install) to continue.';
+      return;
+    }
+
+    this.purchaseOptionError = '';
 
     // Determine purchase type from the selected option
     const purchaseType: 'buy_only' | 'buy_and_install' =
@@ -352,7 +372,7 @@ export class ProductDetail implements OnInit {
 
   // --- Rating ---
   getStars(rating: number): boolean[] {
-    const full = Math.round(rating);
+    const full = Math.round(Number(rating) || 0);
     return Array.from({ length: 5 }, (_, i) => i < full);
   }
 

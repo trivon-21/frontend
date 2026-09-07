@@ -84,11 +84,19 @@
       <div class="form-grid two-col">
         <div class="form-field">
           <label class="form-label">Full Name</label>
-          <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" />
+          <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" [class.input-error]="isInvalid('fullName')" />
+          <div class="error-msg" *ngIf="isInvalid('fullName')">
+            <span *ngIf="hasError('fullName', 'required')">First name is required</span>
+            <span *ngIf="hasError('fullName', 'pattern')">Only letters allowed</span>
+          </div>
         </div>
         <div class="form-field">
           <label class="form-label">Last Name</label>
-          <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" />
+          <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" [class.input-error]="isInvalid('lastName')" />
+          <div class="error-msg" *ngIf="isInvalid('lastName')">
+            <span *ngIf="hasError('lastName', 'required')">Last name is required</span>
+            <span *ngIf="hasError('lastName', 'pattern')">Only letters allowed</span>
+          </div>
         </div>
       </div>
 
@@ -96,7 +104,7 @@
         <div class="form-field">
           <label class="form-label">Gender</label>
           <div class="select-wrap">
-            <select formControlName="gender" class="form-input form-select">
+            <select formControlName="gender" class="form-input form-select" [class.input-error]="isInvalid('gender')">
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -104,17 +112,28 @@
             </select>
             <lucide-angular name="chevron-down" [size]="14" class="select-arrow"></lucide-angular>
           </div>
+          <div class="error-msg" *ngIf="isInvalid('gender')">
+            <span *ngIf="hasError('gender', 'required')">Please select a gender</span>
+          </div>
         </div>
         <div class="form-field">
           <label class="form-label">Address</label>
-          <input formControlName="address" type="text" class="form-input" placeholder="Your Address" />
+          <input formControlName="address" type="text" class="form-input" placeholder="Your Address" [class.input-error]="isInvalid('address')" />
+          <div class="error-msg" *ngIf="isInvalid('address')">
+            <span *ngIf="hasError('address', 'required')">Address is required</span>
+            <span *ngIf="hasError('address', 'minlength')">Address must be at least 5 characters</span>
+          </div>
         </div>
       </div>
 
       <div class="form-grid one-col">
         <div class="form-field">
           <label class="form-label">Contact Number</label>
-          <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" />
+          <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" [class.input-error]="isInvalid('phoneNumber')" />
+          <div class="error-msg" *ngIf="isInvalid('phoneNumber')">
+            <span *ngIf="hasError('phoneNumber', 'required')">Contact number is required</span>
+            <span *ngIf="hasError('phoneNumber', 'pattern')">Must be 10 digits starting with 0 or +94 format</span>
+          </div>
         </div>
       </div>
     </form>
