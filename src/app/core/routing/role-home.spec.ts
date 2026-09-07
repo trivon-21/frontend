@@ -13,11 +13,12 @@ describe('roleHomeUrl', () => {
     expect(roleHomeUrl('SERVICE_TEAM')).toBe('/service-team/dashboard');
     expect(roleHomeUrl('FINANCE')).toBe('/finance/dashboard');
     expect(roleHomeUrl('INSPECTION')).toBe('/inspection-officer/dashboard');
+    expect(roleHomeUrl('CSA')).toBe('/csa/dashboard');
   });
 
   it('routes missing and unsupported roles to the public home page', () => {
     expect(roleHomeUrl(undefined)).toBe('/');
     expect(roleHomeUrl(null)).toBe('/');
-    expect(roleHomeUrl('CSA')).toBe('/');
+    expect(roleHomeUrl('UNKNOWN_ROLE')).toBe('/');
   });
 });
