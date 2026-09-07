@@ -315,6 +315,14 @@ export const routes: Routes = [
       },
 
       {
+        path: 'global-notifications',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/global-notifications/global-notifications.component'
+          ).then((m) => m.GlobalNotificationsComponent),
+      },
+
+      {
         path: 'system-config',
         loadComponent: () =>
           import(

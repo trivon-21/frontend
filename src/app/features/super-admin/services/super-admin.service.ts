@@ -212,6 +212,51 @@ export interface OrdersListResponse {
   };
 }
 
+export interface GlobalNotificationItem {
+  _id: string;
+  title: string;
+  message: string;
+  type: 'general' | 'system_alert' | 'announcement' | 'order' | 'service' | 'inquiry' | 'feedback';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  actionUrl?: string;
+  targetRoles: string[];
+  isScheduled: boolean;
+  scheduledFor?: string | null;
+  status: 'Draft' | 'Scheduled' | 'Sent' | 'Cancelled';
+  sentAt?: string | null;
+  recipientCount?: number;
+  createdBy?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    role: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateGlobalNotificationPayload {
+  title: string;
+  message: string;
+  type?: string;
+  priority?: string;
+  actionUrl?: string;
+  targetRoles: string[];
+  isScheduled?: boolean;
+  scheduledFor?: string | null;
+}
+
+export interface GlobalNotificationsListResponse {
+  message: string;
+  data: GlobalNotificationItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
 export interface SuperAdminDashboardSummary {
   users: {
     total: number;
@@ -432,6 +477,53 @@ export class SuperAdminService {
   ): Observable<{ message: string; data: OrderItem }> {
     return this.apiService.patch<{ message: string; data: OrderItem }>(`/super-admin/orders/${id}/status`, data);
   }
+
+  /**
+   * Create or Schedule Global Notification
+   */
+  createGlobalNotification(
+    payload: CreateGlobalNotificationPayload
+  ): Observable<{ message: string; data: GlobalNotificationItem }> {
+    return this.apiService.post<{ message: string; data: GlobalNotificationItem }>(
+      '/super-admin/global-notifications',
+      payload
+    );
+  }
+
+  /**
+   * List Global Notifications
+   */
+  listGlobalNotifications(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { status?: string; type?: string; search?: string }
+  ): Observable<GlobalNotificationsListResponse> {
+    let params = new HttpParams();
+    params = params.set('page', page.toString());
+    params = params.set('limit', limit.toString());
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.type) params = params.set('type', filters.type);
+    if (filters?.search) params = params.set('search', filters.search);
+    return this.apiService.get<GlobalNotificationsListResponse>('/super-admin/global-notifications', params);
+  }
+
+  /**
+   * Cancel Scheduled Notification
+   */
+  cancelGlobalNotification(id: string): Observable<{ message: string; data: GlobalNotificationItem }> {
+    return this.apiService.patch<{ message: string; data: GlobalNotificationItem }>(
+      `/super-admin/global-notifications/${id}/cancel`,
+      {}
+    );
+  }
+
+  /**
+   * Delete Global Notification
+   */
+  deleteGlobalNotification(id: string): Observable<{ message: string }> {
+    return this.apiService.delete<{ message: string }>(`/super-admin/global-notifications/${id}`);
+  }
 }
+
 
 
