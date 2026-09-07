@@ -275,18 +275,6 @@
   color: #566463;
 }
 
-.priority-pill {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #f3f4f2;
-  color: #566463;
-}
-
-.priority-pill.high { background: #fee2e2; color: #dc2626; }
-.priority-pill.med { background: #fef3c7; color: #d97706; }
-
 .status-pill {
   font-size: 11px;
   font-weight: 600;
