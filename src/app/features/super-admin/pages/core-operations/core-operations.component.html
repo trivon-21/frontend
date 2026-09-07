@@ -1,0 +1,792 @@
+<div class="operations-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Core Operations</h1>
+      <p class="page-subtitle">Centralized hub for all platform operations: customer orders, field service tickets, and customer inquiries.</p>
+    </div>
+
+    <div class="hero-actions">
+      <button class="btn btn-outline refresh-btn" (click)="refreshCurrentTab()" title="Refresh operational data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  <div class="alert-banner error" *ngIf="error">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-banner-close" (click)="error = null">×</button>
+  </div>
+
+  <!-- Success Banner -->
+  <div class="alert-banner success" *ngIf="successMessage">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span>{{ successMessage }}</span>
+    </div>
+    <button class="btn-banner-close" (click)="successMessage = null">×</button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-navigation">
+    <button
+      [class.active]="activeTab === 'orders'"
+      (click)="switchTab('orders')"
+      class="tab-button"
+    >
+      Customer Orders ({{ ordersCount }})
+    </button>
+    <button
+      [class.active]="activeTab === 'service'"
+      (click)="switchTab('service')"
+      class="tab-button"
+    >
+      Service &amp; Repair ({{ serviceRequestsCount }})
+    </button>
+    <button
+      [class.active]="activeTab === 'inquiries'"
+      (click)="switchTab('inquiries')"
+      class="tab-button"
+    >
+      Customer Inquiries ({{ inquiriesCount }})
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: CUSTOMER ORDERS                                       -->
+  <!-- ============================================================ -->
+  <div *ngIf="activeTab === 'orders'" class="tab-content">
+    <!-- Filters Panel -->
+    <div class="filters-panel">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Search Orders</label>
+          <input
+            type="text"
+            [(ngModel)]="orderSearch"
+            placeholder="Order ref, customer, or item..."
+            class="filter-input"
+            (keyup.enter)="applyOrderFilters()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label>Order Type</label>
+          <select [(ngModel)]="orderTypeFilter" class="filter-input">
+            <option value="">All Order Types</option>
+            <option value="Buy Only">Buy Only</option>
+            <option value="Buy & Install">Buy &amp; Install</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Order Status</label>
+          <select [(ngModel)]="orderStatusFilter" class="filter-input">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Pending Payment">Pending Payment</option>
+            <option value="Under Review (Finance)">Under Review (Finance)</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Payment Status</label>
+          <select [(ngModel)]="orderPaymentStatusFilter" class="filter-input">
+            <option value="">All Payment Statuses</option>
+            <option value="Pending Payment">Pending Payment</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Confirmed">Confirmed / Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" (click)="applyOrderFilters()">Apply Filters</button>
+        <button class="btn btn-outline" (click)="clearOrderFilters()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Synchronizing customer orders...</p>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="table-wrap" *ngIf="!loading && orders.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Order Ref &amp; Customer</th>
+            <th>Type &amp; Items</th>
+            <th>Total Amount</th>
+            <th>Payment Status</th>
+            <th>Order Status</th>
+            <th>Placed On</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders" class="clickable-row" (click)="openOrderModal(order)">
+            <td>
+              <span class="badge badge-role">{{ order.orderRef || order.orderNumber || 'ORD' }}</span>
+              <div style="margin-top: 4px;">
+                <strong>{{ order.customerInfo?.fullName || order.customer?.fullName || 'Customer' }}</strong>
+                <div style="font-size: 12px; color: #616b78;">
+                  {{ order.customerInfo?.email || order.customer?.email || '-' }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" style="background: #eef5f1; color: #1b2f27; font-weight: 600; margin-bottom: 4px; display: inline-block;">
+                {{ order.orderType || 'Buy Only' }}
+              </span>
+              <div style="font-size: 12.5px; color: #1b2f27; max-width: 240px;">
+                <span *ngIf="order.itemName">{{ order.itemName }}</span>
+                <span *ngIf="!order.itemName && order.items && order.items.length > 0">
+                  {{ order.items[0].name || order.items[0].itemName || 'AC Product' }} (x{{ order.items[0].quantity || 1 }})
+                  <small *ngIf="order.items.length > 1" style="color: #8a9e96;"> +{{ order.items.length - 1 }} more</small>
+                </span>
+              </div>
+            </td>
+            <td>
+              <strong style="color: #1b2f27; font-size: 14px;">
+                Rs. {{ getOrderTotal(order) | number:'1.2-2' }}
+              </strong>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusBadgeClass(order.paymentStatus)">
+                {{ order.paymentStatus || 'Pending Payment' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusBadgeClass(order.status)">
+                {{ order.status || 'Pending' }}
+              </span>
+            </td>
+            <td>{{ order.createdAt | date: 'MMM d, yyyy' }}</td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-outline" (click)="openOrderModal(order)">
+                  Manage Order
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && orders.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      <p>No customer orders found matching your criteria.</p>
+    </div>
+
+    <!-- Pagination Bar -->
+    <div class="pagination-bar" *ngIf="!loading && orderTotalPages > 1">
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="orderPage = orderPage - 1; loadOrders()"
+        [disabled]="orderPage === 1"
+      >
+        Previous
+      </button>
+      <span>Page <strong>{{ orderPage }}</strong> of {{ orderTotalPages }}</span>
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="orderPage = orderPage + 1; loadOrders()"
+        [disabled]="orderPage === orderTotalPages"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: SERVICE & REPAIR REQUESTS                             -->
+  <!-- ============================================================ -->
+  <div *ngIf="activeTab === 'service'" class="tab-content">
+    <!-- Filters Panel -->
+    <div class="filters-panel">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Search Service Requests</label>
+          <input
+            type="text"
+            [(ngModel)]="serviceSearch"
+            placeholder="Reference, model, serial, or issue..."
+            class="filter-input"
+            (keyup.enter)="applyServiceFilters()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label>Service Type</label>
+          <select [(ngModel)]="serviceTypeFilter" class="filter-input">
+            <option value="">All Service Types</option>
+            <option value="Repair">Repair</option>
+            <option value="General Service">General Service</option>
+            <option value="Gas Refill">Gas Refill</option>
+            <option value="Installation Issue">Installation Issue</option>
+            <option value="AMC Service">AMC Service</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Status</label>
+          <select [(ngModel)]="serviceStatusFilter" class="filter-input">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" (click)="applyServiceFilters()">Apply Filters</button>
+        <button class="btn btn-outline" (click)="clearServiceFilters()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading service requests...</p>
+    </div>
+
+    <!-- Service Requests Table -->
+    <div class="table-wrap" *ngIf="!loading && serviceRequests.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Ref &amp; Customer</th>
+            <th>Unit / AC Details</th>
+            <th>Service Type</th>
+            <th>Preferred Schedule</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of serviceRequests" class="clickable-row" (click)="openServiceModal(s)">
+            <td>
+              <span class="badge badge-role">{{ s.serviceRequestRef }}</span>
+              <div style="margin-top: 4px;">
+                <strong>{{ s.customer?.fullName || 'Customer' }}</strong>
+                <div style="font-size: 12px; color: #616b78;">{{ s.customer?.email || s.customer?.phoneNumber || '-' }}</div>
+              </div>
+            </td>
+            <td>
+              <strong>{{ s.acUnitModel || 'AC Unit' }}</strong>
+              <div style="font-size: 12px; color: #616b78;">
+                <span>SN: {{ s.acUnitSerial || 'N/A' }}</span>
+                <span *ngIf="s.acWarrantyStatus" style="margin-left: 6px; font-weight: 500;">
+                  (Warranty: {{ s.acWarrantyStatus }})
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="badge" style="background: #eef5f1; color: #1b2f27; font-weight: 600;">
+                {{ s.serviceType }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="s.preferredDate; else noDate">
+                <div>{{ s.preferredDate | date: 'MMM d, yyyy' }}</div>
+                <small style="color: #8a9e96;">{{ s.preferredTimeSlot || 'Anytime' }}</small>
+              </div>
+              <ng-template #noDate>
+                <span style="color: #8a9e96; font-size: 12px;">Immediate / Unset</span>
+              </ng-template>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusBadgeClass(s.status)">
+                {{ s.status }}
+              </span>
+            </td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-outline" (click)="openServiceModal(s)">
+                  View Details
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && serviceRequests.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+      <p>No service requests found matching your criteria.</p>
+    </div>
+
+    <!-- Pagination Bar -->
+    <div class="pagination-bar" *ngIf="!loading && serviceTotalPages > 1">
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="servicePage = servicePage - 1; loadServiceRequests()"
+        [disabled]="servicePage === 1"
+      >
+        Previous
+      </button>
+      <span>Page <strong>{{ servicePage }}</strong> of {{ serviceTotalPages }}</span>
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="servicePage = servicePage + 1; loadServiceRequests()"
+        [disabled]="servicePage === serviceTotalPages"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 3: CUSTOMER INQUIRIES                                    -->
+  <!-- ============================================================ -->
+  <div *ngIf="activeTab === 'inquiries'" class="tab-content">
+    <!-- Filters Panel -->
+    <div class="filters-panel">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Search Inquiry</label>
+          <input
+            type="text"
+            [(ngModel)]="inquirySearch"
+            placeholder="Reference, name, email, or message..."
+            class="filter-input"
+            (keyup.enter)="applyInquiryFilters()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label>Category / Type</label>
+          <select [(ngModel)]="inquiryTypeFilter" class="filter-input">
+            <option value="">All Categories</option>
+            <option value="Product">Product</option>
+            <option value="Pricing">Pricing</option>
+            <option value="Installation">Installation</option>
+            <option value="Warranty">Warranty</option>
+            <option value="AMC">AMC</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Status</label>
+          <select [(ngModel)]="inquiryStatusFilter" class="filter-input">
+            <option value="">All Statuses</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Addressed">Addressed</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" (click)="applyInquiryFilters()">Apply Filters</button>
+        <button class="btn btn-outline" (click)="clearInquiryFilters()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading inquiries...</p>
+    </div>
+
+    <!-- Inquiries Table -->
+    <div class="table-wrap" *ngIf="!loading && inquiries.length > 0">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Ref &amp; Customer</th>
+            <th>Category</th>
+            <th>Message Preview</th>
+            <th>Received On</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inq of inquiries" class="clickable-row" (click)="openInquiryModal(inq)">
+            <td>
+              <span class="badge badge-role">{{ inq.inquiryRef }}</span>
+              <div style="margin-top: 4px;">
+                <strong>{{ inq.name || inq.customer?.fullName || 'Anonymous' }}</strong>
+                <div style="font-size: 12px; color: #616b78;">{{ inq.email || inq.customer?.email || '-' }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" style="background: #f0f4f2; color: #1b2f27; font-weight: 600;">
+                {{ inq.inquiryType || 'General' }}
+              </span>
+            </td>
+            <td>
+              <div style="max-width: 280px; font-size: 13px; color: #1b2f27; line-height: 1.4;">
+                <strong *ngIf="inq.subject" style="display: block; margin-bottom: 2px;">{{ inq.subject }}</strong>
+                <span style="color: #616b78;">{{ inq.message ? ((inq.message.length > 60 ? (inq.message | slice: 0:60) + '...' : inq.message)) : '-' }}</span>
+              </div>
+            </td>
+            <td>{{ inq.createdAt | date: 'MMM d, yyyy • h:mm a' }}</td>
+            <td>
+              <span class="status-badge" [class]="getStatusBadgeClass(inq.status)">
+                {{ inq.status }}
+              </span>
+            </td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-outline" (click)="openInquiryModal(inq)">
+                  View &amp; Reply
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && inquiries.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; opacity: 0.5;">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <p>No inquiries found matching your filters.</p>
+    </div>
+
+    <!-- Pagination Bar -->
+    <div class="pagination-bar" *ngIf="!loading && inquiryTotalPages > 1">
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="inquiryPage = inquiryPage - 1; loadInquiries()"
+        [disabled]="inquiryPage === 1"
+      >
+        Previous
+      </button>
+      <span>Page <strong>{{ inquiryPage }}</strong> of {{ inquiryTotalPages }}</span>
+      <button
+        class="btn btn-outline btn-sm"
+        (click)="inquiryPage = inquiryPage + 1; loadInquiries()"
+        [disabled]="inquiryPage === inquiryTotalPages"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: ORDER DETAILS & STATUS UPDATE                         -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" *ngIf="showOrderModal && selectedOrder">
+    <div class="modal-container" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedOrder.orderRef || selectedOrder.orderNumber || 'Order Details' }}</h2>
+          <small style="color: #616b78;">Placed on {{ selectedOrder.createdAt | date: 'medium' }}</small>
+        </div>
+        <button class="btn-close" (click)="closeOrderModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-section">
+          <h3>Customer Details</h3>
+          <div class="detail-row">
+            <span class="detail-label">Full Name:</span>
+            <span class="detail-value"><strong>{{ selectedOrder.customerInfo?.fullName || selectedOrder.customer?.fullName || '-' }}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email / Phone:</span>
+            <span class="detail-value">{{ selectedOrder.customerInfo?.email || selectedOrder.customer?.email || '-' }} • {{ selectedOrder.customerInfo?.phone || selectedOrder.customer?.phoneNumber || '-' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedOrder.customerInfo?.address || selectedOrder.customer?.address">
+            <span class="detail-label">Delivery Address:</span>
+            <span class="detail-value">{{ selectedOrder.customerInfo?.address || selectedOrder.customer?.address }} {{ selectedOrder.customerInfo?.city ? ', ' + selectedOrder.customerInfo?.city : '' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Order Items &amp; Pricing</h3>
+          <div class="detail-row">
+            <span class="detail-label">Order Type:</span>
+            <span class="badge" style="background: #eef5f1; color: #1b2f27; font-weight: 600;">{{ selectedOrder.orderType }}</span>
+          </div>
+
+          <div *ngIf="selectedOrder.items && selectedOrder.items.length > 0; else singleItem" style="margin-top: 8px;">
+            <div *ngFor="let item of selectedOrder.items" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 13px;">
+              <span>{{ item.name || item.itemName }} (x{{ item.quantity || 1 }})</span>
+              <strong>Rs. {{ (item.price || 0) * (item.quantity || 1) | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+          <ng-template #singleItem>
+            <div class="detail-row" *ngIf="selectedOrder.itemName">
+              <span class="detail-label">Product Name:</span>
+              <span class="detail-value">{{ selectedOrder.itemName }} (x{{ selectedOrder.quantity || 1 }})</span>
+            </div>
+          </ng-template>
+
+          <div class="detail-row" style="margin-top: 8px; padding-top: 8px; border-top: 1.5px solid rgba(0,0,0,0.08);">
+            <span class="detail-label" style="font-weight: 700; color: #1b2f27;">Total Amount:</span>
+            <span class="detail-value" style="font-size: 16px; font-weight: 800; color: #1b2a22;">
+              Rs. {{ getOrderTotal(selectedOrder) | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Manage Operational Status</h3>
+          <div class="filters-grid" style="margin-bottom: 0;">
+            <div class="filter-group">
+              <label>Order Status</label>
+              <select [(ngModel)]="orderEditStatus" class="filter-input">
+                <option value="Pending">Pending</option>
+                <option value="Pending Payment">Pending Payment</option>
+                <option value="Under Review (Finance)">Under Review (Finance)</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Payment Status</label>
+              <select [(ngModel)]="orderEditPaymentStatus" class="filter-input">
+                <option value="Pending Payment">Pending Payment</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          <div *ngIf="selectedOrder.paymentSlipUrl" style="margin-top: 10px;">
+            <a [href]="selectedOrder.paymentSlipUrl" target="_blank" class="attachment-link">
+              📄 View Bank Deposit / Payment Slip
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-primary"
+          (click)="saveOrderStatus()"
+          [disabled]="isUpdatingOrderStatus"
+        >
+          {{ isUpdatingOrderStatus ? 'Saving Changes...' : 'Save Status' }}
+        </button>
+        <button class="btn btn-outline" (click)="closeOrderModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: SERVICE REQUEST DETAIL                                -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" *ngIf="showServiceModal && selectedServiceRequest">
+    <div class="modal-container" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedServiceRequest.serviceRequestRef }} — {{ selectedServiceRequest.serviceType }}</h2>
+          <small style="color: #616b78;">Created On: {{ selectedServiceRequest.createdAt | date: 'medium' }}</small>
+        </div>
+        <button class="btn-close" (click)="closeServiceModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="inquiry-status-row">
+          <span>Status:</span>
+          <span class="status-badge" [class]="getStatusBadgeClass(selectedServiceRequest.status)">
+            {{ selectedServiceRequest.status }}
+          </span>
+
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 12px; font-weight: 600; color: #8a9e96;">Change Status:</label>
+            <select
+              [ngModel]="selectedServiceRequest.status"
+              (ngModelChange)="changeServiceStatus(selectedServiceRequest, $event)"
+              class="filter-input"
+              style="width: auto; padding: 4px 8px; font-size: 12px;"
+              [disabled]="isUpdatingServiceStatus"
+            >
+              <option value="Pending">Pending</option>
+              <option value="Assigned">Assigned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Customer Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value"><strong>{{ selectedServiceRequest.customer?.fullName || '-' }}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email / Phone:</span>
+            <span class="detail-value">{{ selectedServiceRequest.customer?.email || '-' }} • {{ selectedServiceRequest.customer?.phoneNumber || '-' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedServiceRequest.customer?.address">
+            <span class="detail-label">Location Address:</span>
+            <span class="detail-value">{{ selectedServiceRequest.customer?.address }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>AC Unit &amp; Coverage</h3>
+          <div class="detail-row">
+            <span class="detail-label">AC Model:</span>
+            <span class="detail-value">{{ selectedServiceRequest.acUnitModel || 'Not Specified' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Serial Number:</span>
+            <span class="detail-value">{{ selectedServiceRequest.acUnitSerial || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Warranty Status:</span>
+            <span class="detail-value">{{ selectedServiceRequest.acWarrantyStatus || 'Unknown' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">AMC Coverage:</span>
+            <span class="detail-value">{{ selectedServiceRequest.acAmcStatus || 'Not Active' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Service Schedule &amp; Problem Details</h3>
+          <div class="detail-row" *ngIf="selectedServiceRequest.preferredDate">
+            <span class="detail-label">Preferred Date/Slot:</span>
+            <span class="detail-value">{{ selectedServiceRequest.preferredDate | date: 'MMM d, yyyy' }} ({{ selectedServiceRequest.preferredTimeSlot || 'Anytime' }})</span>
+          </div>
+          <div class="appeal-box" style="margin-top: 10px;">
+            <strong>Problem Description:</strong>
+            <p style="margin: 6px 0 0;">{{ selectedServiceRequest.problemDescription || 'No description provided' }}</p>
+          </div>
+          <div *ngIf="selectedServiceRequest.problemImageUrl" style="margin-top: 12px;">
+            <a [href]="selectedServiceRequest.problemImageUrl" target="_blank" class="attachment-link">
+              📷 View Issue Photo Attachment
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeServiceModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: INQUIRY THREAD & REPLY                                -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" *ngIf="showInquiryModal && selectedInquiry">
+    <div class="modal-container" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedInquiry.inquiryRef }} — {{ selectedInquiry.inquiryType }}</h2>
+          <small style="color: #616b78;">From: {{ selectedInquiry.name || selectedInquiry.customer?.fullName }} ({{ selectedInquiry.email || selectedInquiry.customer?.email }})</small>
+        </div>
+        <button class="btn-close" (click)="closeInquiryModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="inquiry-status-row">
+          <span>Current Status:</span>
+          <span class="status-badge" [class]="getStatusBadgeClass(selectedInquiry.status)">
+            {{ selectedInquiry.status }}
+          </span>
+
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 12px; font-weight: 600; color: #8a9e96;">Change Status:</label>
+            <select
+              [ngModel]="selectedInquiry.status"
+              (ngModelChange)="changeInquiryStatus(selectedInquiry, $event)"
+              class="filter-input"
+              style="width: auto; padding: 4px 8px; font-size: 12px;"
+              [disabled]="isUpdatingInquiryStatus"
+            >
+              <option value="Ongoing">Ongoing</option>
+              <option value="Addressed">Addressed</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="thread-history">
+          <div class="thread-message customer-msg">
+            <div class="thread-header">
+              <strong>{{ selectedInquiry.name || selectedInquiry.customer?.fullName || 'Customer' }}</strong>
+              <small>{{ selectedInquiry.createdAt | date: 'medium' }}</small>
+            </div>
+            <p *ngIf="selectedInquiry.subject" style="font-weight: 600; margin-bottom: 4px;">{{ selectedInquiry.subject }}</p>
+            <p>{{ selectedInquiry.message }}</p>
+            <a *ngIf="selectedInquiry.attachmentUrl" [href]="selectedInquiry.attachmentUrl" target="_blank" class="attachment-link">
+              📎 View Attachment
+            </a>
+          </div>
+
+          <div
+            *ngFor="let msg of selectedInquiry.thread"
+            class="thread-message"
+            [class.support-msg]="msg.sender === 'Support'"
+            [class.customer-msg]="msg.sender === 'Customer'"
+          >
+            <div class="thread-header">
+              <strong>{{ msg.sender === 'Support' ? 'AirLux Support (Super Admin)' : (selectedInquiry.name || 'Customer') }}</strong>
+              <small *ngIf="msg.createdAt">{{ msg.createdAt | date: 'medium' }}</small>
+            </div>
+            <p>{{ msg.message }}</p>
+          </div>
+        </div>
+
+        <div class="reply-box-container">
+          <label style="font-weight: 600; font-size: 13px; color: #1b2f27; display: block; margin-bottom: 6px;">
+            Write Response
+          </label>
+          <textarea
+            [(ngModel)]="replyMessage"
+            class="filter-input"
+            rows="3"
+            placeholder="Type your response to the customer..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-primary"
+          (click)="sendInquiryReply()"
+          [disabled]="isSendingReply || !replyMessage.trim()"
+        >
+          {{ isSendingReply ? 'Sending...' : 'Send Response' }}
+        </button>
+        <button class="btn btn-outline" (click)="closeInquiryModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

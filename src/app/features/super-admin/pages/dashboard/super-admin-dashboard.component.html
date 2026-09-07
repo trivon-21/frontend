@@ -22,7 +22,7 @@
     <section class="overview-section">
       <h2 class="section-title">Identity & Access</h2>
       <div class="metrics-grid">
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View all users">
           <div class="metric-icon blue">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
@@ -30,9 +30,12 @@
             <span class="metric-label">Total Users</span>
             <strong class="metric-value">{{ data.users.total }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View active users">
           <div class="metric-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           </div>
@@ -40,9 +43,12 @@
             <span class="metric-label">Active Users</span>
             <strong class="metric-value">{{ data.users.active }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'deactivated' }" title="View deactivated users">
           <div class="metric-icon red">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8" cy="7" r="4"/><line x1="18" y1="9" x2="23" y2="14"/><line x1="23" y1="9" x2="18" y2="14"/></svg>
           </div>
@@ -50,9 +56,12 @@
             <span class="metric-label">Deactivated</span>
             <strong class="metric-value">{{ data.users.deactivated }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'reactivation' }" title="View pending reactivation requests">
           <div class="metric-icon orange">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
@@ -60,7 +69,10 @@
             <span class="metric-label">Pending Reactivations</span>
             <strong class="metric-value">{{ data.users.pendingReactivationRequests }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
       </div>
     </section>
 
@@ -68,7 +80,7 @@
     <section class="overview-section">
       <h2 class="section-title">Core Operations</h2>
       <div class="metrics-grid">
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders' }" title="View all customer orders">
           <div class="metric-icon blue">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
           </div>
@@ -76,9 +88,12 @@
             <span class="metric-label">Total Orders</span>
             <strong class="metric-value">{{ data.operations.totalOrders }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders', status: 'Pending' }" title="View pending orders">
           <div class="metric-icon orange">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
@@ -86,9 +101,12 @@
             <span class="metric-label">Pending Orders</span>
             <strong class="metric-value">{{ data.operations.pendingOrders }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries' }" title="View all inquiries">
           <div class="metric-icon info">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           </div>
@@ -96,9 +114,12 @@
             <span class="metric-label">Total Inquiries</span>
             <strong class="metric-value">{{ data.operations.totalInquiries }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries', status: 'Ongoing' }" title="View open inquiries">
           <div class="metric-icon red">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
@@ -106,9 +127,12 @@
             <span class="metric-label">Open Inquiries</span>
             <strong class="metric-value">{{ data.operations.openInquiries }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service' }" title="View all service requests">
           <div class="metric-icon blue">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
@@ -116,9 +140,12 @@
             <span class="metric-label">Service Requests</span>
             <strong class="metric-value">{{ data.operations.totalServiceRequests }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
 
-        <article class="metric-card">
+        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service', status: 'Pending' }" title="View open service requests">
           <div class="metric-icon orange">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
@@ -126,7 +153,10 @@
             <span class="metric-label">Open Service Requests</span>
             <strong class="metric-value">{{ data.operations.openServiceRequests }}</strong>
           </div>
-        </article>
+          <div class="card-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
       </div>
     </section>
 

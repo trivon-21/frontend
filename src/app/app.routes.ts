@@ -329,6 +329,28 @@ export const routes: Routes = [
       },
 
       {
+        path: 'core-operations',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/core-operations/core-operations.component'
+          ).then((m) => m.CoreOperationsComponent),
+      },
+
+      {
+        path: 'requests',
+        redirectTo: 'core-operations',
+        pathMatch: 'full'
+      },
+
+      {
+        path: 'global-notifications',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/global-notifications/global-notifications.component'
+          ).then((m) => m.GlobalNotificationsComponent),
+      },
+
+      {
         path: 'system-config',
         loadComponent: () =>
           import(
