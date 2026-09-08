@@ -9,14 +9,16 @@ import {
   FeatureFlags,
   MaintenanceMode,
   SystemInfo,
+  BankDetails,
 } from '../../models/system-config.model';
 import { BusinessRulesFormComponent } from './components/business-rules-form.component';
 import { FeatureFlagsFormComponent } from './components/feature-flags-form.component';
 import { MaintenanceFormComponent } from './components/maintenance-form.component';
 import { SystemInfoFormComponent } from './components/system-info-form.component';
+import { BankDetailsFormComponent } from './components/bank-details-form.component';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
-type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
+type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 'bank-details';
 
 @Component({
   selector: 'app-system-config',
@@ -27,6 +29,7 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
     FeatureFlagsFormComponent,
     MaintenanceFormComponent,
     SystemInfoFormComponent,
+    BankDetailsFormComponent,
     PortalIconsModule,
   ],
   template: `
@@ -107,6 +110,16 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info';
               (save)="saveSystemInfo($event)"
               (error)="handleError($event)"
             ></app-system-info-form>
+          </section>
+
+          <!-- Bank Details Tab -->
+          <section *ngIf="activeTab === 'bank-details'" class="tab-section">
+            <app-bank-details-form
+              [config]="config"
+              [isSaving]="isSaving['bank-details']"
+              (save)="saveBankDetails($event)"
+              (error)="handleError($event)"
+            ></app-bank-details-form>
           </section>
         </div>
       </div>
@@ -280,6 +293,7 @@ export class SystemConfigComponent implements OnInit {
     { id: 'feature-flags' as Tab, label: 'Feature Flags' },
     { id: 'maintenance' as Tab, label: 'Maintenance Mode' },
     { id: 'system-info' as Tab, label: 'System Info' },
+    { id: 'bank-details' as Tab, label: 'Bank Details' },
   ];
 
   constructor(
@@ -385,6 +399,23 @@ export class SystemConfigComponent implements OnInit {
         console.error('Error saving system info:', error);
         this.error = error.error?.message || 'Failed to save system info';
         this.isSaving['system-info'] = false;
+      },
+    });
+  }
+
+  saveBankDetails(data: { bankDetails: Partial<BankDetails>; reason?: string }): void {
+    this.isSaving['bank-details'] = true;
+    this.error = null;
+
+    this.systemConfigService.updateBankDetails(data.bankDetails, data.reason).subscribe({
+      next: (response: any) => {
+        this.config = response.data;
+        this.isSaving['bank-details'] = false;
+      },
+      error: (error: any) => {
+        console.error('Error saving bank details:', error);
+        this.error = error.error?.message || 'Failed to save bank details';
+        this.isSaving['bank-details'] = false;
       },
     });
   }
