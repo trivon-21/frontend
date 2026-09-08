@@ -37,6 +37,7 @@
     <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4]"></div>
   </div>
 
+
   <ng-container *ngIf="data as report">
     <div class="report-scope">
       <span class="scope-badge period">Selected period</span>
@@ -84,7 +85,6 @@
         <a routerLink="/manager/work-items" [queryParams]="{ assignment: 'unassigned' }" class="position-item"><span>Unassigned</span><strong>{{ report.currentPosition.unassignedTickets.value }}</strong></a>
         <a routerLink="/manager/work-items" [queryParams]="{ status: 'escalated' }" class="position-item risk"><span>SLA / escalation risk</span><strong>{{ report.currentPosition.slaRiskTickets.value }}</strong></a>
         <a routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }" class="position-item"><span>Pending approval value</span><strong>LKR {{ report.currentPosition.pendingApprovalValue.value | number:'1.0-0' }}</strong></a>
-        <div class="position-item risk informational" title="Inventory Managers resolve stock levels; this is a Manager monitoring signal."><span>Stock-risk items</span><strong>{{ report.currentPosition.stockRiskItems.value }}</strong></div>
       </div>
     </section>
 
@@ -124,10 +124,8 @@
         </article>
       </div>
 
-      <div class="financial-position-grid">
-        <article><span>Pending payment review</span><strong>LKR {{ report.financial.pendingPaymentReview.value | number:'1.0-0' }}</strong><small>{{ report.financial.pendingPaymentReview.count }} records</small></article>
+      <div class="financial-position-grid single-item">
         <article><span>Outstanding purchase commitments</span><strong>LKR {{ report.financial.purchaseCommitments.value | number:'1.0-0' }}</strong><small>Approved / ordered, not yet received</small></article>
-        <article><span>Unreconciled Non-PO receipts</span><strong>LKR {{ report.financial.unreconciledNonPo.value | number:'1.0-0' }}</strong><small>{{ report.financial.unreconciledNonPo.count }} awaiting Finance</small></article>
       </div>
 
       <article class="chart-card financial-trend-card">
@@ -147,23 +145,6 @@
           </div>
         </div>
       </article>
-
-      <div class="chart-grid two">
-        <article class="chart-card">
-          <div class="chart-header"><div><h3>Collected Revenue Sources</h3><p>Only verified payments within the selected period.</p></div></div>
-          <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="report.financial.revenueBySource.length; else noRevenue" role="region" aria-label="Collected revenue by source" tabindex="0">
-            <table class="alx-table alx-table--narrow"><thead><tr><th>Source</th><th class="text-right">Transactions</th><th class="text-right">Collected</th></tr></thead><tbody><tr *ngFor="let item of report.financial.revenueBySource"><td>{{ item.label }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">LKR {{ item.value | number:'1.0-0' }}</td></tr></tbody></table>
-          </div>
-          <ng-template #noRevenue><div class="empty-state compact">No verified collections in this period.</div></ng-template>
-        </article>
-        <article class="chart-card">
-          <div class="chart-header"><div><h3>Procurement Spend Mix</h3><p>Posted receipt cost, separated by purchase route.</p></div></div>
-          <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="report.financial.spendByMode.length; else noSpend" role="region" aria-label="Procurement spend by mode" tabindex="0">
-            <table class="alx-table alx-table--narrow"><thead><tr><th>Mode</th><th class="text-right">Receipts</th><th class="text-right">Spend</th></tr></thead><tbody><tr *ngFor="let item of report.financial.spendByMode"><td>{{ item.label }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">LKR {{ item.value | number:'1.0-0' }}</td></tr></tbody></table>
-          </div>
-          <ng-template #noSpend><div class="empty-state compact">No goods-receipt spend in this period.</div></ng-template>
-        </article>
-      </div>
       <p class="financial-basis">Operating contribution is a control metric, not profit: overhead and cost-of-goods allocation are not currently available.</p>
     </section>
 
@@ -260,12 +241,6 @@
           <div class="approval-times"><span>Manager average <strong>{{ decisionCount(report, 'manager') ? (report.purchasing.averageManagerApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span><span>Finance average <strong>{{ decisionCount(report, 'finance') ? (report.purchasing.averageFinanceApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span></div>
         </article>
       </div>
-      <article class="chart-card po-card">
-        <div class="chart-header"><div><h3>PO Fulfilment</h3><p>Ordered quantities and values against physically received stock.</p></div><span class="scope-badge current">Current lifecycle</span></div>
-        <div class="progress-label"><span>Units received</span><strong>{{ report.purchasing.poProgress.receivedQuantity }} / {{ report.purchasing.poProgress.orderedQuantity }}</strong></div>
-        <div class="progress-track"><div class="progress-fill" [style.width.%]="poProgress(report)"></div></div>
-        <div class="po-values"><span>Ordered value <strong>{{ report.purchasing.poProgress.orderedValue | number:'1.0-0' }}</strong></span><span>Received value <strong>{{ report.purchasing.poProgress.receivedValue | number:'1.0-0' }}</strong></span></div>
-      </article>
     </section>
 
     <section *ngIf="section === 'inventory'" id="inventory-risk" aria-labelledby="risk-heading">
@@ -273,9 +248,7 @@
       <div class="signal-grid">
         <article><span>Low stock</span><strong>{{ report.inventoryRisk.lowStockItems.value }}</strong></article>
         <article class="danger"><span>Out of stock</span><strong>{{ report.inventoryRisk.outOfStockItems.value }}</strong></article>
-        <article><span>Reserved units</span><strong>{{ report.inventoryRisk.reservedUnits.value }}</strong></article>
-        <article><span>Material requests</span><strong>{{ report.inventoryRisk.pendingMaterialRequests.value }}</strong></article>
-        <article><span>Awaiting receipt</span><strong>{{ report.inventoryRisk.approvedAwaitingReceipt.value }}</strong></article>
+        <article><span>Pending material requests</span><strong>{{ report.inventoryRisk.pendingMaterialRequests.value }}</strong></article>
       </div>
       <div class="chart-grid two">
         <article class="chart-card">
@@ -285,16 +258,13 @@
         </article>
         <article class="chart-card">
           <div class="chart-header"><div><h3>Non-PO Exceptions</h3><p>Receipts posted during the selected period.</p></div><span class="scope-badge period">{{ activePeriod }}</span></div>
-          <div class="exception-kpis"><div><span>Non-PO</span><strong>{{ report.exceptions.nonPoCount }}</strong><small>{{ report.exceptions.nonPoValue | number:'1.0-0' }}</small></div><div><span>Emergency</span><strong>{{ report.exceptions.emergencyCount }}</strong><small>{{ report.exceptions.emergencyValue | number:'1.0-0' }}</small></div><div><span>Procurement share</span><strong>{{ report.exceptions.nonPoPercentage }}%</strong><small>Non-PO value</small></div><div><span>Approval time</span><strong>{{ report.exceptions.averageAuthorizationHours | number:'1.0-1' }}h</strong><small>Average</small></div></div>
+          <div class="exception-kpis"><div><span>Non-PO</span><strong>{{ report.exceptions.nonPoCount }}</strong><small>{{ report.exceptions.nonPoValue | number:'1.0-0' }}</small></div><div><span>Emergency</span><strong>{{ report.exceptions.emergencyCount }}</strong><small>{{ report.exceptions.emergencyValue | number:'1.0-0' }}</small></div><div><span>Procurement share</span><strong>{{ report.exceptions.nonPoPercentage }}%</strong><small>Non-PO value</small></div></div>
           <div class="exception-actions"><a routerLink="/manager/orders" [queryParams]="{ type: 'non-po', status: 'approved' }"><span>Approved, awaiting receipt</span><strong>{{ report.exceptions.awaitingReceipt.value }}</strong></a><a routerLink="/manager/orders" [queryParams]="{ type: 'non-po' }"><span>Awaiting Finance</span><strong>{{ report.exceptions.awaitingFinance.value }}</strong></a><span class="exception-action" *ngIf="report.exceptions.slaProtectedJobs > 0"><span>SLA-supported jobs</span><strong>{{ report.exceptions.slaProtectedJobs }}</strong></span></div>
-          <div class="progress-label"><span>Authorized vs received value</span><strong>{{ report.exceptions.receivedAuthorizedValue | number:'1.0-0' }} / {{ report.exceptions.authorizedValue | number:'1.0-0' }}</strong></div>
-          <div class="progress-track"><div class="progress-fill warning" [style.width.%]="percentage(report.exceptions.receivedAuthorizedValue, report.exceptions.authorizedValue)"></div></div>
         </article>
       </div>
 
-      <div class="chart-grid two" *ngIf="report.exceptions.byReason.length || report.exceptions.repeatedSkus.length">
-        <article class="chart-card" *ngIf="report.exceptions.byReason.length"><div class="chart-header"><div><h3>Exception Breakdown</h3><p>Non-PO receipt count and value for the selected period.</p></div></div><h4 class="subsection-title">By reason</h4><div class="table-wrap alx-table-container alx-table-container--embedded" role="region" aria-label="Non-PO exceptions by reason" tabindex="0"><table class="alx-table alx-table--narrow"><thead><tr><th>Reason</th><th class="text-right">Count</th><th class="text-right">Value</th></tr></thead><tbody><tr *ngFor="let item of report.exceptions.byReason"><td>{{ label(item.label) }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">{{ item.value | number:'1.0-0' }}</td></tr></tbody></table></div><h4 class="subsection-title" *ngIf="report.exceptions.bySupplier.length">By supplier</h4><div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="report.exceptions.bySupplier.length" role="region" aria-label="Non-PO exceptions by supplier" tabindex="0"><table class="alx-table alx-table--narrow"><thead><tr><th>Supplier</th><th class="text-right">Count</th><th class="text-right">Value</th></tr></thead><tbody><tr *ngFor="let item of report.exceptions.bySupplier"><td>{{ item.label }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">{{ item.value | number:'1.0-0' }}</td></tr></tbody></table></div></article>
-        <article class="chart-card" *ngIf="report.exceptions.repeatedSkus.length"><div class="chart-header"><div><h3>Repeated Non-PO SKUs</h3><p>Items that may require normal replenishment planning.</p></div></div><div class="repeat-list"><span *ngFor="let item of report.exceptions.repeatedSkus"><strong>{{ item.sku }}</strong>{{ item.count }} receipts</span></div></article>
+      <div class="chart-grid single" *ngIf="report.exceptions.byReason.length">
+        <article class="chart-card"><div class="chart-header"><div><h3>Exception Breakdown by Reason</h3><p>Non-PO receipt count and value for the selected period.</p></div></div><div class="table-wrap alx-table-container alx-table-container--embedded" role="region" aria-label="Non-PO exceptions by reason" tabindex="0"><table class="alx-table alx-table--narrow"><thead><tr><th>Reason</th><th class="text-right">Count</th><th class="text-right">Value</th></tr></thead><tbody><tr *ngFor="let item of report.exceptions.byReason"><td>{{ label(item.label) }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">{{ item.value | number:'1.0-0' }}</td></tr></tbody></table></div></article>
       </div>
     </section>
 

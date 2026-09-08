@@ -64,6 +64,7 @@ export interface InventoryItem {
   _id?: string;
   id?: string;
   name: string;
+  description?: string;
   sku: string;
   available: number;
   reserved: number;
@@ -106,6 +107,7 @@ export interface InventoryItem {
 
 export interface InventoryMasterDataInput {
   name: string;
+  description?: string;
   itemClass: InventoryItemClass;
   subcategory: string;
   brand: string;

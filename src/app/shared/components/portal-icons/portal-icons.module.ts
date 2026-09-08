@@ -13,6 +13,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   Circle,
   CircleAlert,
   CircleCheckBig,
@@ -48,6 +49,7 @@ import {
   TriangleAlert,
   Truck,
   UserRoundX,
+  Users,
   Wrench,
   X,
 } from 'lucide-angular';
@@ -66,6 +68,7 @@ export const PORTAL_ICONS = {
   Check,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   Circle,
   CircleAlert,
   CircleCheckBig,
@@ -100,6 +103,7 @@ export const PORTAL_ICONS = {
   TriangleAlert,
   Truck,
   UserRoundX,
+  Users,
   Wrench,
   X,
 };
@@ -107,12 +111,12 @@ export const PORTAL_ICONS = {
 export const PORTAL_ICON_NAMES = [
   'activity', 'arrow-down-wide-narrow', 'arrow-left', 'arrow-right-left', 'arrow-up-narrow-wide',
   'bar-chart-3', 'bell', 'box', 'calendar', 'chart-no-axes-column', 'check', 'chevron-down',
-  'chevron-right', 'circle', 'circle-alert', 'circle-check-big', 'clipboard-check', 'clipboard-list',
+  'chevron-right', 'chevron-up', 'circle', 'circle-alert', 'circle-check-big', 'clipboard-check', 'clipboard-list',
   'dollar-sign', 'download', 'edit', 'eye', 'file-text', 'history', 'info', 'layout-dashboard',
   'layout-grid', 'list', 'log-out', 'message-circle', 'minus', 'package', 'plus', 'rotate-ccw',
   'search', 'shield-check', 'shopping-bag', 'shopping-cart', 'sliders-horizontal', 'star',
   'ticket-plus', 'timer', 'timer-off', 'trash-2', 'triangle-alert', 'truck', 'user-round-x',
-  'wrench', 'x',
+  'users', 'wrench', 'x',
 ] as const;
 
 @NgModule({

@@ -474,3 +474,7 @@
     margin-left: 0;
   }
 }
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}

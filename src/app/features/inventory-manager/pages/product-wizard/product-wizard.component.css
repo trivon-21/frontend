@@ -19,8 +19,8 @@
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-lg); }
 .field { display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 650; }
 .field b { color: var(--error); }
-.field input, .field select, .tag-entry input { width: 100%; box-sizing: border-box; border: 1.5px solid var(--border-light); border-radius: 10px; padding: 10px 16px; background: var(--background-input); color: var(--text-primary); font: inherit; font-size: 13.5px; font-weight: 400; }
-.field input:focus, .field select:focus, .tag-entry input:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-main); }
+.field input, .field select, .field textarea, .tag-entry input { width: 100%; box-sizing: border-box; border: 1.5px solid var(--border-light); border-radius: 10px; padding: 10px 16px; background: var(--background-input); color: var(--text-primary); font: inherit; font-size: 13.5px; font-weight: 400; resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus, .tag-entry input:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-main); }
 .field input.locked, .field input:disabled, .checkbox-card.locked { background: var(--background-disabled); color: var(--text-secondary); }
 .span-2 { grid-column: span 2; }
 .hint { color: var(--text-secondary); font-weight: 400; }

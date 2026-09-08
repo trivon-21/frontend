@@ -24,6 +24,10 @@
       </div>
     </div>
     <div class="dashboard-actions mgr-action-group">
+      <a class="btn-inventory-nav mgr-btn mgr-btn--secondary" routerLink="/manager/inventory">
+        <lucide-angular name="package" [size]="16"></lucide-angular>
+        View Inventory
+      </a>
       <button class="btn-new-order mgr-btn mgr-btn--primary" routerLink="/manager/work-items">
         <lucide-angular name="clipboard-list" [size]="16"></lucide-angular>
         Open Work Queue
@@ -81,50 +85,301 @@
     </article>
   </div>
 
-  <div class="inventory-kpi-row">
-    <div class="kpi-mini-card">
-      <div class="kpi-icon-wrapper reserved"><lucide-angular name="clipboard-check" [size]="20"></lucide-angular></div>
-      <div class="kpi-details"><span class="kpi-value">{{ data.inventoryKpis.reservedItems.value }}</span><span class="kpi-label">Reserved Items</span></div>
+  <!-- KEY ANALYTICS & QUICK INSIGHTS -->
+  <section class="analytics-insights-section" aria-labelledby="insights-heading">
+    <div class="insights-header">
+      <div class="insights-title-group">
+        <div class="insights-icon-box">
+          <lucide-angular name="bar-chart-3" [size]="20"></lucide-angular>
+        </div>
+        <div>
+          <h2 id="insights-heading" class="insights-title">Key Analytics & Insights</h2>
+          <p class="insights-subtitle">Live 7-day executive pulse across operations, finance, purchasing, and risk.</p>
+        </div>
+      </div>
+      <div class="insights-header-actions">
+        <span class="insights-period-chip">Last 7 Days</span>
+        <a routerLink="/manager/analytics/period-performance" class="insights-all-btn mgr-btn mgr-btn--secondary mgr-btn--compact">
+          Full Analytics
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
     </div>
-    <div class="kpi-mini-card">
-      <div class="kpi-icon-wrapper alert" [class.critical]="data.inventoryKpis.blockedMaterialRequests.value > 0"><lucide-angular name="triangle-alert" [size]="20"></lucide-angular></div>
-      <div class="kpi-details"><span class="kpi-value" [class.critical-text]="data.inventoryKpis.blockedMaterialRequests.value > 0">{{ data.inventoryKpis.blockedMaterialRequests.value }}</span><span class="kpi-label">Blocked Material Requests</span></div>
+
+    <div class="insights-grid">
+      <!-- 1. Service Operations Pillar -->
+      <article class="insight-card">
+        <div class="insight-card-top">
+          <div class="insight-meta">
+            <span class="insight-pillar">Service Operations</span>
+            <span class="insight-highlight">{{ totalTicketsResolved }} Resolved</span>
+          </div>
+          <div class="insight-icon-bubble service">
+            <lucide-angular name="circle-check-big" [size]="18"></lucide-angular>
+          </div>
+        </div>
+        <div class="insight-metrics-row">
+          <div class="insight-metric">
+            <span class="metric-label">Avg Resolution</span>
+            <strong class="metric-value">{{ averageResolutionHours | number:'1.0-1' }}h</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">Created</span>
+            <strong class="metric-value">{{ analyticsData?.performance?.ticketsCreated?.current ?? 0 }}</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">SLA Overdue</span>
+            <strong class="metric-value" [class.risk-text]="(data.stats.slaRisk.subStats[0]?.value || 0) > 0">
+              {{ data.stats.slaRisk.subStats[0]?.value || 0 }}
+            </strong>
+          </div>
+        </div>
+        <div class="insight-card-footer">
+          <a routerLink="/manager/analytics/service-operations" class="insight-jump-link">
+            <span>View Operations Flow</span>
+            <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+          </a>
+        </div>
+      </article>
+
+      <!-- 2. Financial Overview Pillar -->
+      <article class="insight-card">
+        <div class="insight-card-top">
+          <div class="insight-meta">
+            <span class="insight-pillar">Financial Overview</span>
+            <span class="insight-highlight">{{ formatCurrency(collectedRevenue) }}</span>
+          </div>
+          <div class="insight-icon-bubble finance">
+            <lucide-angular name="dollar-sign" [size]="18"></lucide-angular>
+          </div>
+        </div>
+        <div class="insight-metrics-row">
+          <div class="insight-metric">
+            <span class="metric-label">Operating Contrib.</span>
+            <strong class="metric-value">{{ formatCurrency(operatingContribution) }}</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">Commitments</span>
+            <strong class="metric-value">{{ formatCurrency(purchaseCommitments) }}</strong>
+          </div>
+        </div>
+        <div class="insight-card-footer">
+          <a routerLink="/manager/analytics/financial-overview" class="insight-jump-link">
+            <span>View Financial Details</span>
+            <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+          </a>
+        </div>
+      </article>
+
+      <!-- 3. Purchasing & Approvals Pillar -->
+      <article class="insight-card">
+        <div class="insight-card-top">
+          <div class="insight-meta">
+            <span class="insight-pillar">Purchasing & Approvals</span>
+            <span class="insight-highlight">{{ formatCurrency(data.stats.pendingApprovals.subStats[1]?.value || pendingApprovalValue) }}</span>
+          </div>
+          <div class="insight-icon-bubble purchasing">
+            <lucide-angular name="shopping-bag" [size]="18"></lucide-angular>
+          </div>
+        </div>
+        <div class="insight-metrics-row">
+          <div class="insight-metric">
+            <span class="metric-label">Pending Decisions</span>
+            <strong class="metric-value">{{ data.stats.pendingApprovals.total }} queue</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">Oldest Pending</span>
+            <strong class="metric-value">{{ oldestPendingAgeHours > 0 ? (oldestPendingAgeHours + 'h') : 'None' }}</strong>
+          </div>
+          <div class="insight-metric" *ngIf="managerApprovalTurnaround > 0">
+            <span class="metric-label">Avg Speed</span>
+            <strong class="metric-value">{{ managerApprovalTurnaround | number:'1.0-1' }}h</strong>
+          </div>
+        </div>
+        <div class="insight-card-footer">
+          <a routerLink="/manager/analytics/purchasing-approvals" class="insight-jump-link">
+            <span>View Approval Pipeline</span>
+            <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+          </a>
+        </div>
+      </article>
+
+      <!-- 4. Critical Risk & Exceptions Pillar -->
+      <article class="insight-card">
+        <div class="insight-card-top">
+          <div class="insight-meta">
+            <span class="insight-pillar">Risk & Exceptions</span>
+            <span class="insight-highlight" [class.risk-text]="outOfStockCount > 0">
+              {{ outOfStockCount }} Out of Stock
+            </span>
+          </div>
+          <div class="insight-icon-bubble alert" [class.critical]="outOfStockCount > 0 || (data.stats.slaRisk.total > 0)">
+            <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+          </div>
+        </div>
+        <div class="insight-metrics-row">
+          <div class="insight-metric">
+            <span class="metric-label">Low Stock</span>
+            <strong class="metric-value">{{ analyticsData?.inventoryRisk?.lowStockItems?.value ?? data.inventoryKpis.lowStockAlerts.value }}</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">Non-PO Receipts</span>
+            <strong class="metric-value">{{ nonPoExceptionsCount }}</strong>
+          </div>
+        </div>
+        <div class="insight-card-footer">
+          <a routerLink="/manager/analytics/inventory-exception-control" class="insight-jump-link">
+            <span>View Exception Control</span>
+            <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+          </a>
+        </div>
+      </article>
     </div>
-    <div class="kpi-mini-card">
-      <div class="kpi-icon-wrapper alert" [class.critical]="data.inventoryKpis.lowStockAlerts.value > 0"><lucide-angular name="triangle-alert" [size]="20"></lucide-angular></div>
-      <div class="kpi-details"><span class="kpi-value" [class.critical-text]="data.inventoryKpis.lowStockAlerts.value > 0">{{ data.inventoryKpis.lowStockAlerts.value }}</span><span class="kpi-label">Low Stock Alerts</span></div>
-    </div>
-    <div class="kpi-mini-card">
-      <div class="kpi-icon-wrapper pending"><lucide-angular name="package" [size]="20"></lucide-angular></div>
-      <div class="kpi-details"><span class="kpi-value">{{ data.inventoryKpis.pendingMaterialRequests.value }}</span><span class="kpi-label">Pending Material Requests</span></div>
-    </div>
-  </div>
+  </section>
 
   <div class="dashboard-main-grid">
+    <!-- PENDING ACTIONS & APPROVALS (PRIMARY / WIDE COLUMN) -->
+    <div class="content-card actions-card">
+      <div class="card-header">
+        <div class="title-with-icon">
+          <lucide-angular name="clipboard-check" class="primary-icon" [size]="18"></lucide-angular>
+          <h2 class="card-title">Pending Actions & Approvals</h2>
+        </div>
+        <div class="header-badges">
+          <span class="count-badge count-badge--approval" *ngIf="data.stats.pendingApprovals.total > 0">
+            {{ data.stats.pendingApprovals.total }} Approvals
+          </span>
+          <span class="count-badge count-badge--neutral">
+            {{ data.pendingActions.length }} Total
+          </span>
+        </div>
+      </div>
+
+      <!-- APPROVALS QUICK SUMMARY BANNER -->
+      <div class="approvals-quick-banner" *ngIf="data.stats.pendingApprovals.total > 0">
+        <div class="banner-summary-pills">
+          <div class="summary-pill">
+            <lucide-angular name="shopping-bag" [size]="14" class="summary-pill-icon"></lucide-angular>
+            <span class="summary-pill-title">Purchase Orders:</span>
+            <span class="summary-pill-tag" [class.urgent]="(data.stats.pendingApprovals.subStats[0]?.value || 0) > 0">
+              {{ data.stats.pendingApprovals.subStats[0]?.value || 0 }} urgent
+            </span>
+            <span class="summary-pill-dot">·</span>
+            <span class="summary-pill-value">{{ formatCurrency(data.stats.pendingApprovals.subStats[1]?.value) }}</span>
+          </div>
+
+          <div class="summary-pill" *ngIf="data.stats.pendingApprovals.subStats[2]?.value">
+            <lucide-angular name="file-text" [size]="14" class="summary-pill-icon"></lucide-angular>
+            <span class="summary-pill-title">Non-PO:</span>
+            <span class="summary-pill-tag warning">
+              {{ data.stats.pendingApprovals.subStats[2]?.value || 0 }} pending
+            </span>
+          </div>
+        </div>
+
+        <a class="banner-queue-btn mgr-btn mgr-btn--ghost mgr-btn--compact" routerLink="/manager/orders" [queryParams]="{ type: 'purchase', status: 'pending-manager' }">
+          Review Queue
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
+
+      <!-- FILTER TABS -->
+      <div class="action-filters-bar">
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="activeActionFilter === 'all'"
+          (click)="setActionFilter('all')"
+        >
+          <span>All</span>
+          <span class="filter-count-badge">{{ data.pendingActions.length }}</span>
+        </button>
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="activeActionFilter === 'approvals'"
+          (click)="setActionFilter('approvals')"
+          *ngIf="approvalActionsCount > 0"
+        >
+          <span>Approvals</span>
+          <span class="filter-count-badge filter-count-badge--approval">{{ approvalActionsCount }}</span>
+        </button>
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="activeActionFilter === 'tickets'"
+          (click)="setActionFilter('tickets')"
+          *ngIf="ticketActionsCount > 0"
+        >
+          <span>Work Items & SLA</span>
+          <span class="filter-count-badge">{{ ticketActionsCount }}</span>
+        </button>
+      </div>
+
+      <!-- ACTIONS LIST -->
+      <div class="actions-list">
+        <div *ngFor="let action of filteredActions" class="action-item" [class.action-item--approval]="isApprovalAction(action)">
+          <div class="action-header">
+            <div class="action-header-left">
+              <span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span>
+              <span *ngIf="isApprovalAction(action)" class="action-type-tag approval-tag" [class.non-po]="action.approvalType === 'non-po'">
+                {{ action.approvalType === 'non-po' ? 'NON-PO EXCEPTION' : 'PURCHASE REQUEST' }}
+              </span>
+              <span *ngIf="!isApprovalAction(action)" class="action-type-tag">{{ action.type | uppercase }}</span>
+            </div>
+            <div class="action-header-right" *ngIf="action.amount">
+              <span class="action-amount-badge">{{ formatCurrency(action.amount) }}</span>
+            </div>
+          </div>
+
+          <h3 class="action-title">{{ action.title }}</h3>
+          <p class="action-desc">{{ action.description }}</p>
+
+          <div class="action-footer">
+            <div class="action-footer-meta">
+              <span *ngIf="action.supplierName" class="meta-tag">
+                <lucide-angular name="package" [size]="12"></lucide-angular>
+                {{ action.supplierName }}
+              </span>
+              <span *ngIf="action.reasons && action.reasons.length > 0 && !action.supplierName" class="meta-tag">
+                {{ action.reasons[0] }}
+              </span>
+            </div>
+            <a
+              class="action-btn-primary mgr-btn mgr-btn--primary mgr-btn--compact"
+              [routerLink]="action.route"
+              [queryParams]="action.queryParams"
+            >
+              {{ isApprovalAction(action) ? 'Review Approval' : 'Open Ticket' }}
+            </a>
+          </div>
+        </div>
+
+        <div *ngIf="filteredActions.length === 0" class="empty-state">
+          No pending {{ activeActionFilter === 'all' ? 'actions or approvals' : activeActionFilter }} requiring your attention.
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY (COMPACT / SIDE COLUMN) -->
     <div class="content-card activity-card">
-      <div class="card-header"><h2 class="card-title">Recent Activity</h2></div>
+      <div class="card-header">
+        <div class="title-with-icon">
+          <lucide-angular name="activity" class="primary-icon" [size]="18"></lucide-angular>
+          <h2 class="card-title">Recent Activity</h2>
+        </div>
+        <span class="count-badge count-badge--neutral">{{ data.recentActivity.length }} Events</span>
+      </div>
       <div class="timeline-container">
         <a *ngFor="let activity of data.recentActivity" class="timeline-item" [routerLink]="activity.route" [queryParams]="activity.queryParams">
           <div class="timeline-line"></div>
           <div class="timeline-marker" [ngClass]="activity.type"><lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular></div>
-          <div class="timeline-content"><div class="timeline-header"><p class="activity-title">{{ activity.title }}</p><span class="activity-time">{{ activity.timeAgo }}</span></div><p class="activity-desc">{{ activity.description }}</p></div>
+          <div class="timeline-content">
+            <div class="timeline-header"><p class="activity-title">{{ activity.title }}</p><span class="activity-time">{{ activity.timeAgo }}</span></div>
+            <p class="activity-desc">{{ activity.description }}</p>
+          </div>
         </a>
         <div *ngIf="data.recentActivity.length === 0" class="empty-state">No recent operational activity.</div>
-      </div>
-    </div>
-
-    <div class="side-column">
-      <div class="content-card actions-card">
-        <div class="card-header"><div class="title-with-icon"><lucide-angular name="clipboard-list" class="primary-icon" [size]="18"></lucide-angular><h2 class="card-title">Pending Actions</h2></div><span class="count-badge">{{ data.pendingActions.length }} Items</span></div>
-        <div class="actions-list">
-          <div *ngFor="let action of data.pendingActions" class="action-item">
-            <div class="action-header"><span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span><span class="action-type-tag">{{ action.type | uppercase }}</span></div>
-            <h3 class="action-title">{{ action.title }}</h3>
-            <p class="action-desc">{{ action.description }}</p>
-            <div class="action-footer"><a class="action-btn-primary mgr-btn mgr-btn--primary mgr-btn--compact" [routerLink]="action.route" [queryParams]="action.queryParams">Open</a></div>
-          </div>
-          <div *ngIf="data.pendingActions.length === 0" class="empty-state">No unresolved actions.</div>
-        </div>
       </div>
     </div>
   </div>

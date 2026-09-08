@@ -229,5 +229,41 @@ describe('InventoryListComponent filtering', () => {
     expect(applyFiltersSpy).not.toHaveBeenCalled();
     expect(component.searchQuery).toBe('');
   });
+
+  it('applies query parameters for stockStatus and location on initialization', () => {
+    const matching = inventoryItem({ _id: 'item-1', available: 2, reorderLevel: 5, location: 'Central Warehouse' });
+    const other = inventoryItem({ _id: 'item-2', available: 10, reorderLevel: 5, location: 'Equipment Warehouse' });
+    const component = createComponent([matching, other], { stockStatus: 'low-stock', location: 'Central Warehouse' });
+
+    expect(component.selectedStockStatus).toBe('low-stock');
+    expect(component.selectedLocation).toBe('Central Warehouse');
+    expect(component.filteredItems.length).toBe(1);
+    expect(component.filteredItems[0]._id).toBe('item-1');
+  });
+
+  it('initializes readOnly from route snapshot data and suppresses save confirmation', () => {
+    const items = [inventoryItem({ _id: 'item-1' })];
+    const service = {
+      getInventory: () => of(items),
+      getLocations: () => of([]),
+    } as unknown as InventoryManagerDashboardService;
+    const route = {
+      queryParams: of({ editSaved: '1', selected: 'item-1' }),
+      snapshot: {
+        queryParams: { editSaved: '1', selected: 'item-1' },
+        data: { readOnly: true },
+      },
+    } as unknown as ActivatedRoute;
+    const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+
+    const component = new InventoryListComponent(service, route, router);
+    expect(component.readOnly).toBeFalse();
+    component.ngOnInit();
+    expect(component.readOnly).toBeTrue();
+    // Save confirmation should NOT be triggered in readOnly mode
+    expect(component.showSaveConfirmation).toBeFalse();
+    component.ngOnDestroy();
+  });
 });
+
 

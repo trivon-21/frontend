@@ -4,7 +4,7 @@
       <h1>Inventory</h1>
       <p>Equipment, parts, materials, consumables and tools</p>
     </div>
-    <div class="header-actions">
+    <div class="header-actions" *ngIf="!readOnly">
       <button class="btn-primary im-btn im-btn--primary" [routerLink]="['/inventory-manager/procurement']">
         <lucide-angular name="clipboard-check" [size]="16" class="inline-icon"></lucide-angular>
         Procurement
@@ -347,6 +347,7 @@
       <div class="modal-body detail-view">
         <div class="detail-grid">
           <div class="detail-item"><span class="label">Product</span><span class="value">{{ selectedItem.name }}</span></div>
+          <div class="detail-item full-width" *ngIf="selectedItem.description"><span class="label">Description</span><span class="value">{{ selectedItem.description }}</span></div>
           <div class="detail-item"><span class="label">OEM Part / Model</span><span class="value">{{ selectedItem.manufacturerPartNumber || '—' }}</span></div>
           <div class="detail-item"><span class="label">Class</span><span class="value">{{ selectedItem.itemClass || 'Unclassified' }}</span></div>
           <div class="detail-item"><span class="label">Subcategory</span><span class="value">{{ selectedItem.subcategory || 'Unclassified' }}</span></div>
@@ -372,6 +373,7 @@
       <div class="modal-footer im-action-group">
         <button class="btn-secondary im-btn im-btn--secondary" (click)="closeDetailModal()">Close</button>
         <button
+          *ngIf="!readOnly"
           class="btn-primary im-btn im-btn--primary"
           [routerLink]="['/inventory-manager/product-wizard', getItemId(selectedItem)]"
           (click)="closeDetailModal()"

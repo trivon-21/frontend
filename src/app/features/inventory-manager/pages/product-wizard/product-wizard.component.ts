@@ -76,6 +76,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     this.form = this.fb.group(
       {
         name: ['', [Validators.required, Validators.maxLength(160)]],
+        description: ['', [Validators.maxLength(500)]],
         sku: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._-]+$')]],
         itemClass: ['Unclassified', Validators.required],
         subcategory: ['Unclassified', Validators.required],
@@ -264,6 +265,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
         this.item = item;
         this.form.patchValue({
           name: item.name,
+          description: item.description || '',
           sku: item.sku,
           itemClass: item.itemClass || 'Unclassified',
           subcategory: item.subcategory || 'Unclassified',
@@ -303,6 +305,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     const capacity = value.capacityBtu;
     return {
       name: value.name.trim(),
+      description: value.description?.trim() || '',
       itemClass: value.itemClass as InventoryItemClass,
       subcategory: value.subcategory,
       brand: value.brand.trim(),
@@ -346,7 +349,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   private stepFields(step: number): string[] {
-    if (step === 1) return ['name', 'sku', 'itemClass', 'subcategory', 'brand', 'manufacturerPartNumber', 'type'];
+    if (step === 1) return ['name', 'description', 'sku', 'itemClass', 'subcategory', 'brand', 'manufacturerPartNumber', 'type'];
     if (step === 2) return ['unit', 'reorderLevel', 'maxStockLevel', 'unitCost', 'location', 'binLocation', 'supplierId', 'isSerialized'];
     return ['compatibleModels', 'systemType', 'refrigerants', 'capacityBtu', 'voltage', 'phase', 'specsUrl'];
   }

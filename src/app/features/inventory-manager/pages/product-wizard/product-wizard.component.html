@@ -39,6 +39,11 @@
             <input formControlName="name" placeholder="e.g., Copeland scroll compressor ZR61KCE">
             <small class="error" *ngIf="hasError('name')">Product name is required.</small>
           </label>
+          <label class="field span-2">
+            <span>Description</span>
+            <textarea formControlName="description" rows="3" placeholder="Technical specifications, capacity details, packaging, and application notes"></textarea>
+            <small class="error" *ngIf="hasError('description', 'maxlength')">Description cannot exceed 500 characters.</small>
+          </label>
           <label class="field">
             <span>SKU <b>*</b></span>
             <input formControlName="sku" placeholder="e.g., COMP-ZR61KCE" [class.locked]="isEditMode">

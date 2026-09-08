@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, DestroyRef, Input, OnDestroy, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -37,6 +37,7 @@ export type InventorySortField =
   styleUrls: ['./inventory-list.component.css'],
 })
 export class InventoryListComponent implements OnInit, OnDestroy {
+  @Input() readOnly = false;
   Math = Math;
   private queryParamsSub?: Subscription;
   private searchSub?: Subscription;
@@ -93,6 +94,10 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    if (this.route.snapshot?.data?.['readOnly'] !== undefined) {
+      this.readOnly = Boolean(this.route.snapshot.data['readOnly']);
+    }
+
     const stream$ = this.destroyRef
       ? this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef))
       : this.route.queryParams;
@@ -163,9 +168,18 @@ export class InventoryListComponent implements OnInit, OnDestroy {
 
   private applyRouteParams(params: Params): void {
     if (params['search']) this.searchQuery = params['search'];
+    if (params['stockStatus']) {
+      const status = String(params['stockStatus']).toLowerCase();
+      if (['all', 'in-stock', 'low-stock', 'out-of-stock', 'reserved'].includes(status)) {
+        this.selectedStockStatus = status as StockFilter;
+      }
+    }
+    if (params['itemClass']) this.selectedItemClass = params['itemClass'];
+    if (params['subcategory']) this.selectedSubcategory = params['subcategory'];
+    if (params['location']) this.selectedLocation = params['location'];
     this.applyFilters();
     const selected = params['selected'] ? this.selectItemById(params['selected']) : null;
-    if (params['editSaved'] === '1' && selected) {
+    if (params['editSaved'] === '1' && selected && !this.readOnly) {
       this.savedProduct = selected;
       this.showSaveConfirmation = true;
       void this.router.navigate([], {
@@ -245,6 +259,7 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     this.filteredItems = this.allInventoryItems.filter((item) => {
       const searchable = [
         item.name,
+        item.description,
         item.sku,
         item.brand,
         item.category,

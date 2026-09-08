@@ -1,7 +1,9 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
+import { OrderLookupResponse } from './manager-customers.service';
 
 export interface CardStat {
   total: number;
@@ -42,6 +44,36 @@ export interface PendingAction extends DashboardLink {
   description: string;
   priority: 'high' | 'medium' | 'low';
   createdAt?: Date | string;
+  reasons?: string[];
+  amount?: number;
+  supplierName?: string;
+  reference?: string;
+  itemsCount?: number;
+  category?: string;
+  approvalType?: 'purchase' | 'non-po';
+}
+
+export interface RecentCustomerOrder {
+  id: string;
+  category: string;
+  reference: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  summary: string;
+  orderType: string;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  orderStatus: string;
+  createdAt: string | Date;
+  timeAgo?: string;
+}
+
+export interface RecentOrdersResponse {
+  success: boolean;
+  count: number;
+  orders: RecentCustomerOrder[];
 }
 
 export interface ManagerDashboardData {
@@ -57,6 +89,7 @@ export interface ManagerDashboardData {
   };
   recentActivity: ActivityItem[];
   pendingActions: PendingAction[];
+  recentOrders?: RecentCustomerOrder[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -72,8 +105,30 @@ export class ManagerDashboardService {
           const timestamp = new Date(activity.timestamp);
           return { ...activity, timestamp, timeAgo: this.getTimeAgo(timestamp) };
         }),
+        recentOrders: (data.recentOrders || []).map((order) => {
+          const created = new Date(order.createdAt);
+          return { ...order, createdAt: created, timeAgo: this.getTimeAgo(created) };
+        }),
       })),
     );
+  }
+
+  getRecentOrders(limit = 50): Observable<RecentOrdersResponse> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.api.get<RecentOrdersResponse>('/manager/recent-orders', params).pipe(
+      map((res) => ({
+        ...res,
+        orders: (res.orders || []).map((order) => {
+          const created = new Date(order.createdAt);
+          return { ...order, createdAt: created, timeAgo: this.getTimeAgo(created) };
+        }),
+      })),
+    );
+  }
+
+  lookupOrder(ref: string): Observable<OrderLookupResponse> {
+    const params = new HttpParams().set('ref', ref.trim());
+    return this.api.get<OrderLookupResponse>('/manager/orders/lookup', params);
   }
 
   private getTimeAgo(date: Date): string {

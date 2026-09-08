@@ -9,6 +9,7 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
   return {
     _id: '507f1f77bcf86cd799439011',
     name: 'Existing Compressor',
+    description: 'Existing scroll compressor',
     sku: 'COMP-EDIT-1',
     available: 0,
     reserved: 0,
@@ -79,6 +80,7 @@ describe('ProductWizardComponent', () => {
     const { component, service, router } = createComponent(id);
     component.goToStep(2);
     component.form.controls['name'].setValue('Updated Compressor');
+    component.form.controls['description'].setValue('High-performance scroll compressor');
     component.form.controls['unitCost'].setValue(250);
     component.form.controls['capacityBtu'].setValue(null);
 
@@ -88,6 +90,7 @@ describe('ProductWizardComponent', () => {
       id,
       jasmine.objectContaining({
         name: 'Updated Compressor',
+        description: 'High-performance scroll compressor',
         unitCost: 250,
         capacityBtu: null,
       }),
