@@ -48,9 +48,9 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
   };
   isLoading = false;
   error: string | null = null;
-  source: 'service' | 'installation' | 'inspection' = 'service';
+  source: 'service' | 'installation' | 'inspection' | 'maintenance' = 'service';
   searchQuery = '';
-  selectedTypeFilter: 'all' | 'inspection' | 'installation' | 'service' = 'all';
+  selectedTypeFilter: 'all' | 'inspection' | 'installation' | 'service' | 'maintenance' = 'all';
   private readonly apiUrl = `${environment.apiBaseUrl}/service-requests`;
 
   constructor(
@@ -60,8 +60,8 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     const sourceParam = this.route.snapshot.paramMap.get('source');
-    if (sourceParam === 'service' || sourceParam === 'installation' || sourceParam === 'inspection') {
-      this.source = sourceParam;
+    if (sourceParam === 'service' || sourceParam === 'installation' || sourceParam === 'inspection' || sourceParam === 'maintenance') {
+      this.source = sourceParam as 'service' | 'installation' | 'inspection' | 'maintenance';
     }
 
     const id = this.route.snapshot.paramMap.get('id');

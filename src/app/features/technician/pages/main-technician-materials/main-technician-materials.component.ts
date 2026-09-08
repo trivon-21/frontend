@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -132,6 +132,52 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   isTicketDropdownLoading = false;
   error: string | null = null;
 
+  // ── Custom catalog dropdown state ──────────────────────────────────
+  openDropdownIndex: number | null = null;
+  catalogSearchQueries: string[] = [];
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeDropdown();
+  }
+
+  toggleDropdown(index: number): void {
+    if (this.openDropdownIndex === index) {
+      this.closeDropdown();
+    } else {
+      this.openDropdownIndex = index;
+      if (!this.catalogSearchQueries[index]) {
+        this.catalogSearchQueries[index] = '';
+      }
+    }
+  }
+
+  closeDropdown(): void {
+    this.openDropdownIndex = null;
+  }
+
+  getCatalogItem(inventoryId: string): MaterialCatalogItem | undefined {
+    return this.materialCatalog.find(m => m._id === inventoryId);
+  }
+
+  getFilteredCatalog(index: number): MaterialCatalogItem[] {
+    const q = (this.catalogSearchQueries[index] || '').toLowerCase().trim();
+    if (!q) return this.materialCatalog;
+    return this.materialCatalog.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.sku.toLowerCase().includes(q) ||
+      (m.unit || '').toLowerCase().includes(q)
+    );
+  }
+
+  selectCatalogItem(item: MaterialItem, material: MaterialCatalogItem, index: number): void {
+    item.inventoryId = material._id;
+    item.name = material.name;
+    item.sku = material.sku;
+    this.closeDropdown();
+  }
+  // ──────────────────────────────────────────────────────────────────
+
   private readonly apiUrl = `${environment.apiBaseUrl}/material-requests`;
 
   constructor(
@@ -193,7 +239,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
   private mapApiMaterialRequest(item: RawMaterialRequest & { fullName?: string; customerId?: any }): MaterialRequest {
     return {
-      id: this.normalizeTicketId(item.ticketId || item._id),
+      id: this.normalizeTicketId(item.ticketId),
       materialRequestId: item.materialRequestId || String(item._id || item.ticketId || ''),
       // Show 'Maintenance' explicitly when the API indicates a maintenance service
       type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
@@ -225,10 +271,13 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       }
     });
     
-    // Sort combined by date descending
-    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Exclude entries with no valid ticket ID
+    const filtered = combined.filter(r => r.id && r.id !== '#N/A');
     
-    this.requests = combined;
+    // Sort by date descending
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    this.requests = filtered;
     this.applyFilters();
   }
 
@@ -290,7 +339,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             }))
             .filter((ticket) => 
               ticket.id !== '#N/A' && 
-              (ticket.status === 'New' || ticket.status === 'Finance Rejected' || ticket.status === 'REJECTED')
+              ticket.status === 'New'
             );
 
           this.dropdownTickets = tickets;
@@ -652,28 +701,22 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'Finance Approved': return 'approved';
-      case 'New': return 'draft';
-      case 'Pending':
-      case 'Pending Approval': return 'pending';
-      case 'Sent to IM': return 'im';
-      default: return '';
-    }
+    const s = (status || '').toLowerCase();
+    if (s.includes('finance approved')) return 'approved';
+    if (s.includes('new')) return 'draft';
+    if (s.includes('pending')) return 'pending';
+    if (s.includes('sent to im')) return 'im';
+    return '';
   }
 
-  private getStatusFilterKey(status: MaterialRequest['status']): 'approved' | 'draft' | 'pending' | 'sent' {
-    switch (status) {
-      case 'Finance Approved':
-        return 'approved';
-      case 'New':
-        return 'draft';
-      case 'Pending':
-      case 'Pending Approval':
-        return 'pending';
-      case 'Sent to IM':
-        return 'sent';
-    }
+  private getStatusFilterKey(status: string): 'approved' | 'draft' | 'pending' | 'sent' {
+    const s = (status || '').toLowerCase();
+    if (s.includes('finance approved')) return 'approved';
+    if (s.includes('new')) return 'draft';
+    if (s.includes('pending')) return 'pending';
+    if (s.includes('sent to im')) return 'sent';
+    // Default fallback to prevent undefined
+    return 'draft';
   }
 }
 

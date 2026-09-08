@@ -2,31 +2,38 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .back-btn {
-  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
 }
 
+/* ── Header ── */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: #1b2f27;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
+/* ── Summary Cards ── */
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  margin-bottom: 24px;
 }
 
 .summary-cards .card {
@@ -38,6 +45,23 @@
   align-items: center;
   gap: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-cards .card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--primary-main);
+  opacity: 0.7;
+}
+
+.summary-cards .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .card-icon {
@@ -50,6 +74,13 @@
   background: var(--primary-lighter);
   color: var(--primary-main);
   flex-shrink: 0;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.summary-cards .card:hover .card-icon {
+  transform: scale(1.05);
+  background: var(--primary-main);
+  color: #fff;
 }
 
 .card-content {
@@ -76,24 +107,27 @@
   display: block;
 }
 
+/* ── Table Card ── */
 .card-panel {
   background: #fff;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-}
-
-.table-wrapper {
-  border-radius: 10px;
   overflow: hidden;
 }
 
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
+/* ── Desktop Table ── */
+.desktop-table-wrap {
+  overflow-x: auto;
 }
 
-.table-wrapper table th {
+.desktop-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.desktop-table-wrap table th {
   background: #f4f6f5;
   color: #1b2f27;
   font-weight: 700;
@@ -102,41 +136,156 @@
   letter-spacing: 0.5px;
   padding: 16px 20px;
   text-align: left;
+  white-space: nowrap;
 }
 
-.table-wrapper table td {
+.desktop-table-wrap table td {
   padding: 16px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-size: 13.5px;
   color: #2D3139;
 }
 
-.table-wrapper table tr:last-child td {
+.desktop-table-wrap table tr:last-child td {
   border-bottom: none;
 }
 
-/* Warranty status badges */
-.w-not-started {
-  background: #f3f4f6;
-  color: #6b7280;
+.desktop-table-wrap table tbody tr:hover {
+  background: #f8faf9;
 }
 
-.w-activated {
-  background: #ecfdf5;
-  color: #059669;
+.ticket-id {
+  font-weight: 700;
+  color: var(--primary-main);
 }
 
-.w-claimed {
-  background: #fef3c7;
-  color: #d97706;
+.year {
+  font-size: 11px;
+  color: #8a9e96;
+  font-weight: 500;
 }
 
-.w-not-claimed {
-  background: #fff7ed;
-  color: #ea580c;
+.empty-cell {
+  text-align: center;
+  color: #8a9e96;
+  padding: 32px 20px;
 }
 
-.w-over {
-  background: #fef2f2;
-  color: #dc2626;
+/* ── Warranty badges ── */
+.warranty-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.w-not-started { background: #f3f4f6; color: #6b7280; }
+.w-activated { background: #ecfdf5; color: #059669; }
+.w-claimed { background: #fef3c7; color: #d97706; }
+.w-not-claimed { background: #fff7ed; color: #ea580c; }
+.w-over { background: #fef2f2; color: #dc2626; }
+
+/* ── Mobile History Cards ── */
+.mobile-history-list {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+}
+
+.history-card {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.15s;
+}
+
+.history-card:last-child {
+  border-bottom: none;
+}
+
+.history-card:hover {
+  background: #f8faf9;
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.history-ticket-id {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-main);
+}
+
+.history-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.history-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-field-label {
+  font-size: 10px;
+  color: #8a9e96;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.history-field-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2D3139;
+}
+
+.empty-mobile {
+  padding: 32px 20px;
+  text-align: center;
+  color: #8a9e96;
+  font-size: 14px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .details-page-container {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .desktop-table-wrap {
+    display: none;
+  }
+
+  .mobile-history-list {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .history-card-body {
+    grid-template-columns: 1fr;
+  }
 }

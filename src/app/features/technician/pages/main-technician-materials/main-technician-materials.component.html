@@ -297,13 +297,76 @@
                 <div *ngFor="let item of newRequest.items; let i = index" class="item-row">
                   <div class="input-group">
                     <span class="input-label">ITEM DESCRIPTION</span>
-                    <select [(ngModel)]="item.inventoryId" (ngModelChange)="onMaterialSelection(item)">
-                      <option value="" disabled>Select catalog material</option>
-                      <option *ngFor="let material of materialCatalog" [value]="material._id">
-                        {{ material.name }} ({{ material.sku }}) — {{ material.available }} {{ material.unit }} available
-                      </option>
-                    </select>
+
+                    <!-- Custom Catalog Dropdown -->
+                    <div class="catalog-dropdown" [class.open]="openDropdownIndex === i" (click)="$event.stopPropagation()">
+                      <!-- Trigger button -->
+                      <button type="button" class="catalog-trigger" (click)="toggleDropdown(i)">
+                        <ng-container *ngIf="item.inventoryId; else placeholderTpl">
+                          <div class="selected-item-preview">
+                            <span class="selected-name">{{ item.name }}</span>
+                            <span class="selected-sku">{{ getCatalogItem(item.inventoryId)?.sku }}</span>
+                          </div>
+                        </ng-container>
+                        <ng-template #placeholderTpl>
+                          <span class="catalog-placeholder">Select catalog material</span>
+                        </ng-template>
+                        <svg class="chevron-icon" [class.rotated]="openDropdownIndex === i"
+                          xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                      </button>
+
+                      <!-- Dropdown panel -->
+                      <div class="catalog-panel" *ngIf="openDropdownIndex === i">
+                        <!-- Search -->
+                        <div class="catalog-search-wrap">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                          </svg>
+                          <input
+                            type="text"
+                            class="catalog-search"
+                            placeholder="Search materials..."
+                            [(ngModel)]="catalogSearchQueries[i]"
+                            (click)="$event.stopPropagation()"
+                            autofocus
+                          >
+                        </div>
+
+                        <!-- Option list -->
+                        <div class="catalog-options">
+                          <ng-container *ngFor="let material of getFilteredCatalog(i)">
+                            <div
+                              class="catalog-option"
+                              [class.selected]="item.inventoryId === material._id"
+                              (click)="selectCatalogItem(item, material, i)"
+                            >
+                              <div class="option-main">
+                                <span class="option-name">{{ material.name }}</span>
+                                <span class="option-sku">{{ material.sku }}</span>
+                              </div>
+                              <span class="option-stock" [class.low]="material.available < 5">
+                                {{ material.available }} {{ material.unit }}
+                              </span>
+                            </div>
+                          </ng-container>
+                          <div class="catalog-empty" *ngIf="getFilteredCatalog(i).length === 0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                            </svg>
+                            No matches found
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Custom Catalog Dropdown -->
+
                   </div>
+
                   <div class="input-group quantity-group">
                     <span class="input-label">QUANTITY</span>
                     <input type="number" min="1" step="1" [(ngModel)]="item.quantity">
