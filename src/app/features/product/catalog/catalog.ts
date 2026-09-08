@@ -245,7 +245,7 @@ export class Catalog implements OnInit {
   }
 
   getStars(rating: number): boolean[] {
-    const full = Math.round(rating);
+    const full = Math.round(Number(rating) || 0);
     return Array.from({ length: 5 }, (_, i) => i < full);
   }
 }

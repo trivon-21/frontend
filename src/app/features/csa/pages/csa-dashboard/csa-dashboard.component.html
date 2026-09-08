@@ -48,9 +48,6 @@
       <div class="metric-content">
         <span class="metric-value">{{ dashboardData?.metrics?.activeTickets || 0 }}</span>
         <span class="metric-label">Active Service Tickets</span>
-        <span class="metric-sub-tag" *ngIf="(dashboardData?.metrics?.highPriorityTickets || 0) > 0">
-          {{ dashboardData?.metrics?.highPriorityTickets }} Urgent
-        </span>
       </div>
       <div class="metric-arrow">→</div>
     </a>
@@ -106,7 +103,6 @@
                 <th>Subject</th>
                 <th>Customer</th>
                 <th>Category</th>
-                <th>Priority</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -120,11 +116,6 @@
                 </td>
                 <td>
                   <span class="badge-tag">{{ t.category | uppercase }}</span>
-                </td>
-                <td>
-                  <span class="priority-pill" [class.high]="t.priority === 'high'" [class.med]="t.priority === 'medium'">
-                    {{ t.priority | uppercase }}
-                  </span>
                 </td>
                 <td>
                   <span class="status-pill">{{ t.status }}</span>

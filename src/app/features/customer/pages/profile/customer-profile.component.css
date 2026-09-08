@@ -312,6 +312,23 @@
   border-color: rgba(0, 0, 0, 0.07);
 }
 
+.input-error {
+  border-color: #e53e3e !important;
+  background-color: #fff5f5 !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1) !important;
+}
+
+.error-msg {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+  display: block;
+}
+
 .select-wrap {
   position: relative;
 }

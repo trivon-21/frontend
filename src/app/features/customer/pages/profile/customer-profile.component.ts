@@ -65,11 +65,11 @@ export class CustomerProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: [''],
-      gender: [''],
-      address: [''],
-      phoneNumber: ['']
+      fullName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
+      lastName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
+      gender: ['', [Validators.required]],
+      address: ['', [Validators.required, Validators.minLength(5)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^(?:\+94|0)\d{9}$/)]]
     });
     this.loadProfile();
   }
@@ -138,7 +138,18 @@ export class CustomerProfileComponent implements OnInit {
     }
   }
 
+  hasError(controlName: string, errorName: string): boolean {
+    const control = this.profileForm.get(controlName);
+    return control ? control.hasError(errorName) && (control.dirty || control.touched) : false;
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.profileForm.get(controlName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
   saveProfile(): void {
+    this.profileForm.markAllAsTouched();
     if (this.profileForm.invalid) return;
     this.saving = true;
     this.error = '';

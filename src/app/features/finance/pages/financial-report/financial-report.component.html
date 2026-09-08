@@ -8,14 +8,25 @@
     </div>
     <div class="fr-header-actions">
       <div class="date-range">
-        <div class="date-field">
-          <label>From</label>
-          <input type="date" [(ngModel)]="startDate" (change)="applyDateFilter()" />
-        </div>
-        <div class="date-field">
-          <label>To</label>
-          <input type="date" [(ngModel)]="endDate" (change)="applyDateFilter()" />
-        </div>
+  <div class="date-field">
+  <label>From</label>
+  <input
+    type="date"
+    [(ngModel)]="startDate"
+    [max]="endDate"
+    (change)="applyDateFilter()"
+  />
+</div>
+
+<div class="date-field">
+  <label>To</label>
+  <input
+    type="date"
+    [(ngModel)]="endDate"
+    [min]="startDate"
+    (change)="applyDateFilter()"
+  />
+</div>
       </div>
       <!-- export btn -->
       <div style="display:flex; gap:8px;">

@@ -1,5 +1,8 @@
 export interface BusinessRules {
-  quotationApprovalThreshold: number;
+  quotationApprovalThreshold?: number;
+  standardMaintenanceFee: number;
+  standardRepairFee: number;
+  standardSiteInspectionFee: number;
   logRetentionDays: number;
   paymentAutoCancelDays: number;
   defaultWarrantyMonths: number;

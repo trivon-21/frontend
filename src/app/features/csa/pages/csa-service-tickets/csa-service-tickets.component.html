@@ -12,8 +12,8 @@
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Service Tickets</h1>
-      <p class="page-subtitle">Create, view, and track customer repair, maintenance, and installation requests</p>
+      <h1 class="page-title">Service Tickets & Maintenance</h1>
+      <p class="page-subtitle">Track customer repair requests, technician maintenance schedules, and warranty service dispatches</p>
     </div>
     <button class="btn-primary" (click)="openCreateModal()">
       Create Service Ticket
@@ -46,15 +46,17 @@
       </div>
     </div>
 
-    <div class="summary-card">
-      <div class="summary-icon red">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- PENDING CSA ACTION CARD — clickable shortcut to the approval queue -->
+    <div class="summary-card awaiting-approval-card" [class.highlight-alert]="countPendingCSA > 0" (click)="filterByPendingCSA()" [class.clickable-card]="countPendingCSA > 0" [title]="countPendingCSA > 0 ? 'Click to view items awaiting your approval' : ''">
+      <div class="summary-icon amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
       </div>
       <div class="summary-info">
-        <span class="summary-count">{{ countHighPriority }}</span>
-        <span class="summary-label">High Priority</span>
+        <span class="summary-count" [class.count-alert]="countPendingCSA > 0">{{ countPendingCSA }}</span>
+        <span class="summary-label">Awaiting Your Approval</span>
+        <span class="card-hint" *ngIf="countPendingCSA > 0">Click to review →</span>
       </div>
     </div>
 
@@ -66,16 +68,19 @@
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countResolved }}</span>
-        <span class="summary-label">Resolved</span>
+        <span class="summary-label">Resolved / Dispatched</span>
       </div>
     </div>
   </div>
 
   <!-- FILTER TABS & SEARCH -->
   <div class="filter-tabs">
-    <button [class.active]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')">All Categories</button>
+    <button [class.active]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')">All Tickets</button>
     <button [class.active]="selectedCategory === 'repair'" (click)="setCategoryFilter('repair')">Repairs</button>
-    <button [class.active]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')">Maintenance</button>
+    <button [class.active]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')">
+      Maintenance
+      <span class="tab-badge" *ngIf="countPendingCSA > 0">{{ countPendingCSA }}</span>
+    </button>
     <button [class.active]="selectedCategory === 'installation'" (click)="setCategoryFilter('installation')">Installation</button>
     <button [class.active]="selectedCategory === 'inspection'" (click)="setCategoryFilter('inspection')">Inspection</button>
   </div>
@@ -87,7 +92,7 @@
       </svg>
       <input 
         type="text" 
-        placeholder="Search tickets by subject, description, or AC model..." 
+        placeholder="Search tickets by ID, subject, customer name, phone, or location..." 
         [(ngModel)]="searchQuery" 
         (ngModelChange)="applyFilters()"
       />
@@ -106,17 +111,7 @@
         </select>
       </div>
 
-      <div class="filter-group">
-        <label>Priority:</label>
-        <select [(ngModel)]="selectedPriority" (change)="applyFilters()">
-          <option value="ALL">All Priorities</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-      </div>
-
-      <button class="btn-refresh" (click)="loadTickets()" [disabled]="isLoading">
+      <button class="btn-refresh" (click)="loadAllData()" [disabled]="isLoading">
         <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
         </svg>
@@ -136,18 +131,20 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Subject / Ticket</th>
+            <th>Ticket & Subject</th>
             <th>Customer</th>
             <th>Category</th>
-            <th>Priority</th>
             <th>Status</th>
-            <th>Date Created</th>
+            <th>Date</th>
             <th style="text-align: right;">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let ticket of tickets">
+          <tr *ngFor="let ticket of tickets" [class.csa-pending-row]="ticket.status === 'Sent to CSA'">
             <td>
+              <div class="ticket-header-line">
+                <span class="ticket-id-tag">{{ getFormattedTicketId(ticket) }}</span>
+              </div>
               <div class="ticket-subject">{{ ticket.subject || 'Service Request' }}</div>
               <div class="ticket-unit" *ngIf="ticket.acUnitModel">Unit: {{ ticket.acUnitModel }}</div>
             </td>
@@ -155,27 +152,33 @@
               <div class="customer-info-cell">
                 <div class="customer-name">{{ ticket.customerId ? ticket.customerId.fullName + ' ' + (ticket.customerId.lastName || '') : 'Unknown Customer' }}</div>
                 <div class="customer-phone">{{ ticket.customerId ? (ticket.customerId.phoneNumber || 'No phone') : '—' }}</div>
+                <div class="customer-address" *ngIf="ticket.customerId?.address">{{ ticket.customerId.address }}</div>
               </div>
             </td>
             <td>
-              <span class="category-badge">{{ ticket.category || 'Repair' | uppercase }}</span>
+              <span class="category-badge" [ngClass]="'cat-' + ticket.category">{{ ticket.category || 'Repair' | uppercase }}</span>
+              <span class="source-tag" *ngIf="ticket.isMaintenanceSchedule">TECH SCHEDULE</span>
             </td>
             <td>
-              <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
-                {{ ticket.priority || 'medium' | uppercase }}
-              </span>
-            </td>
-            <td>
-              <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
-                {{ ticket.status }}
-              </span>
+              <div class="status-cell">
+                <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+                  {{ ticket.status === 'Sent to CSA' ? 'Awaiting Approval' : ticket.status }}
+                </span>
+                <span class="action-required-badge" *ngIf="ticket.status === 'Sent to CSA'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                  ACTION REQUIRED
+                </span>
+              </div>
             </td>
             <td>
               <span class="date-text">{{ formatDate(ticket.createdAt) }}</span>
             </td>
             <td style="text-align: right;">
-              <button class="btn-table-action" (click)="viewDetails(ticket)">
-                View & Manage
+              <button
+                class="btn-table-action"
+                [class.btn-review-approve]="ticket.status === 'Sent to CSA'"
+                (click)="viewDetails(ticket)">
+                {{ ticket.status === 'Sent to CSA' ? '⚡ Review & Approve' : 'View & Manage' }}
               </button>
             </td>
           </tr>
@@ -186,7 +189,7 @@
     <!-- LOADING STATE -->
     <div class="empty-state" *ngIf="isLoading">
       <div class="spinner"></div>
-      <p>Loading service tickets...</p>
+      <p>Loading tickets and maintenance schedules...</p>
     </div>
 
     <!-- EMPTY STATE -->
@@ -196,11 +199,11 @@
           <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
         </svg>
       </div>
-      <h3>No Service Tickets Found</h3>
-      <p *ngIf="searchQuery || selectedCategory !== 'ALL' || selectedStatus !== 'ALL' || selectedPriority !== 'ALL'">
-        No tickets matching your filter criteria.
+      <h3>No Tickets Found</h3>
+      <p *ngIf="searchQuery || selectedCategory !== 'ALL' || selectedStatus !== 'ALL'">
+        No tickets matching your current search or filter criteria.
       </p>
-      <p *ngIf="!searchQuery && selectedCategory === 'ALL' && selectedStatus === 'ALL' && selectedPriority === 'ALL'">
+      <p *ngIf="!searchQuery && selectedCategory === 'ALL' && selectedStatus === 'ALL'">
         No service tickets created yet. Use the Create Service Ticket button above to log a new ticket.
       </p>
     </div>
@@ -251,39 +254,23 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group flex-2">
-              <label>Ticket Subject <span class="req">*</span></label>
-              <input type="text" formControlName="subject" placeholder="e.g. AC Not Cooling / Water Leakage" />
-              <span class="field-error" *ngIf="ticketForm.get('subject')?.touched && ticketForm.get('subject')?.invalid">
-                Subject is required (min 3 characters).
-              </span>
-            </div>
-
-            <div class="form-group flex-1">
-              <label>Priority</label>
-              <select formControlName="priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High (Urgent)</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Subject / Summary <span class="req">*</span></label>
+            <input type="text" formControlName="subject" placeholder="e.g. AC unit leaking water in living room" />
+            <span class="field-error" *ngIf="ticketForm.get('subject')?.touched && ticketForm.get('subject')?.invalid">
+              Subject is required.
+            </span>
           </div>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group flex-1">
               <label>AC Unit Model</label>
-              <select formControlName="acUnitModel">
-                <option value="">-- Select AC Unit Model --</option>
-                <option *ngFor="let prod of products" [value]="prod.name">
-                  {{ prod.name }} ({{ prod.brand }}{{ prod.capacity ? ' - ' + prod.capacity + ' BTU' : '' }})
-                </option>
-              </select>
+              <input type="text" formControlName="acUnitModel" placeholder="e.g. AirLux Inverter 12,000 BTU" />
             </div>
 
-            <div class="form-group">
-              <label>Serial Number (Optional)</label>
-              <input type="text" formControlName="acUnitSerial" placeholder="e.g. SN-ALX-98231" />
+            <div class="form-group flex-1">
+              <label>Unit Serial Number</label>
+              <input type="text" formControlName="acUnitSerial" placeholder="e.g. SN-ALX-98234" />
             </div>
           </div>
 
@@ -325,19 +312,35 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: TICKET DETAILS & STATUS MANAGEMENT  -->
+  <!-- MODAL: TICKET DETAILS & MAINTENANCE MANAGE -->
   <!-- ========================================== -->
   <div class="modal-backdrop" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title">Service Ticket #{{ selectedTicket?._id?.substring(18) | uppercase }}</h2>
+          <h2 class="modal-title">
+            {{ getFormattedTicketId(selectedTicket) }}
+          </h2>
           <p class="modal-subtitle">{{ selectedTicket?.subject }}</p>
         </div>
         <button class="modal-close-btn" (click)="closeDetailsModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <div class="modal-body" *ngIf="selectedTicket">
+
+        <!-- ⚡ ACTION REQUIRED BANNER — only shown when technician has submitted for CSA approval -->
+        <div class="action-required-banner" *ngIf="selectedTicket.status === 'Sent to CSA'">
+          <div class="banner-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="banner-text">
+            <strong>Action Required — Awaiting Your Approval</strong>
+            <span>The technician has finalised this maintenance schedule and submitted it for your review. Please review the services below, then approve and dispatch to the customer.</span>
+          </div>
+        </div>
+
         <!-- TICKET OVERVIEW -->
         <div class="ticket-overview-card">
           <div class="overview-item">
@@ -349,42 +352,112 @@
             <span>Phone: {{ selectedTicket.customerId ? (selectedTicket.customerId.phoneNumber || 'No phone') : 'No phone' }} | Email: {{ selectedTicket.customerId ? (selectedTicket.customerId.email || 'No email') : 'No email' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">Address:</span>
-            <span>Address: {{ selectedTicket.customerId ? (selectedTicket.customerId.address || 'No address') : 'No address' }}</span>
+            <span class="lbl">Address / Location:</span>
+            <span>{{ selectedTicket.customerId ? (selectedTicket.customerId.address || 'No address') : 'No address' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">AC Model / Serial:</span>
+            <span class="lbl">Product / AC Model:</span>
             <span>{{ selectedTicket.acUnitModel || 'Not specified' }} {{ selectedTicket.acUnitSerial ? '(' + selectedTicket.acUnitSerial + ')' : '' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">Preferred Appointment:</span>
-            <span>{{ formatDate(selectedTicket.preferredDate) }} - {{ selectedTicket.preferredTimeSlot || 'Flexible' }}</span>
+            <span class="lbl">Installation / Service Date:</span>
+            <span>{{ formatDate(selectedTicket.preferredDate) }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Current Status:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedTicket.status)">{{ selectedTicket.status }}</span>
           </div>
         </div>
 
-        <div class="desc-box">
-          <span class="desc-title">Problem Description:</span>
-          <p>{{ selectedTicket.description }}</p>
+        <!-- ────────────────────────────────────────── -->
+        <!-- TECHNICIAN MAINTENANCE SCHEDULE SECTION    -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="maintenance-schedule-review" *ngIf="selectedTicket.isMaintenanceSchedule && selectedTicket.maintenanceScheduleData">
+          <h4 class="section-subheading">Technician Planned Maintenance Services</h4>
+
+          <!-- Technician Notes Callout -->
+          <div class="tech-notes-box" *ngIf="selectedTicket.maintenanceScheduleData.csaNotes">
+            <strong>Notes from Technician:</strong>
+            <p>{{ selectedTicket.maintenanceScheduleData.csaNotes }}</p>
+          </div>
+
+          <!-- Services Grid / Table -->
+          <div class="services-list-container">
+            <div class="service-schedule-row" *ngFor="let srv of selectedTicket.maintenanceScheduleData.services; let i = index">
+              <div class="srv-num">{{ i + 1 }}</div>
+              <div class="srv-info">
+                <span class="srv-name">{{ srv.serviceName }}</span>
+                <span class="srv-date">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Scheduled: <strong>{{ formatDate(srv.date) }}</strong>
+                </span>
+              </div>
+              <div class="srv-badge">
+                <span class="warranty-tag" [class.in-warranty]="srv.underWarranty">
+                  {{ srv.underWarranty ? 'Under Warranty' : 'Paid Routine' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PENDING CSA DISPATCH ACTION BOX -->
+          <div class="dispatch-action-card" *ngIf="selectedTicket.status === 'Sent to CSA'">
+            <div class="dispatch-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>The technician has completed schedule planning and requested CSA dispatch to the customer.</span>
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+              <label>Notes for Customer (optional):</label>
+              <textarea [(ngModel)]="customerNotes" rows="2" placeholder="e.g. Schedule verified with customer via telephone."></textarea>
+            </div>
+            <button class="btn-primary btn-dispatch" (click)="sendScheduleToCustomer()" [disabled]="isSendingToCustomer">
+              <span *ngIf="!isSendingToCustomer">Approve & Send Schedule to Customer</span>
+              <span *ngIf="isSendingToCustomer">Dispatching to Customer...</span>
+            </button>
+          </div>
+
+          <!-- ALREADY DISPATCHED NOTICE -->
+          <div class="dispatched-notice" *ngIf="selectedTicket.status === 'Sent to Customer'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span><strong>Dispatched to Customer:</strong> This maintenance schedule is active and was transmitted to the customer on {{ formatDate(selectedTicket.maintenanceScheduleData.sentToCustomerAt || selectedTicket.maintenanceScheduleData.updatedAt) }}.</span>
+            <p *ngIf="selectedTicket.maintenanceScheduleData?.customerNotes" class="customer-notes-echo">
+              CSA Note: {{ selectedTicket.maintenanceScheduleData.customerNotes }}
+            </p>
+          </div>
         </div>
 
-        <!-- STATUS UPDATE SECTION -->
-        <div class="status-manage-section">
-          <h4 class="section-subheading">Update Ticket Status</h4>
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>Status:</label>
-              <select [(ngModel)]="statusUpdateForm.status">
-                <option value="New">New</option>
-                <option value="Reviewed">Reviewed</option>
-                <option value="Assigned">Assigned to Technician</option>
-                <option value="resolved">Resolved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
+        <!-- ────────────────────────────────────────── -->
+        <!-- REGULAR SERVICE TICKET STATUS UPDATE       -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="standard-ticket-section" *ngIf="!selectedTicket.isMaintenanceSchedule">
+          <div class="desc-box">
+            <span class="desc-title">Problem Description:</span>
+            <p>{{ selectedTicket.description }}</p>
+          </div>
 
-            <div class="form-group flex-2" *ngIf="statusUpdateForm.status === 'Rejected'">
-              <label>Rejection Reason:</label>
-              <input type="text" [(ngModel)]="statusUpdateForm.rejectionReason" placeholder="e.g. Out of service area" />
+          <!-- STATUS UPDATE SECTION -->
+          <div class="status-manage-section">
+            <h4 class="section-subheading">Update Ticket Status</h4>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Status:</label>
+                <select [(ngModel)]="statusUpdateForm.status">
+                  <option value="New">New</option>
+                  <option value="Reviewed">Reviewed</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div class="form-group flex-2" *ngIf="statusUpdateForm.status === 'Rejected'">
+                <label>Rejection Reason:</label>
+                <input type="text" [(ngModel)]="statusUpdateForm.rejectionReason" placeholder="e.g. Out of service area" />
+              </div>
             </div>
           </div>
         </div>
@@ -393,7 +466,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-ghost" (click)="closeDetailsModal()">Close</button>
-        <button type="button" class="btn-primary" (click)="updateTicketStatus()" [disabled]="isUpdatingStatus">
+        <button *ngIf="!selectedTicket?.isMaintenanceSchedule" type="button" class="btn-primary" (click)="updateTicketStatus()" [disabled]="isUpdatingStatus">
           <span *ngIf="!isUpdatingStatus">Save Status</span>
           <span *ngIf="isUpdatingStatus">Saving...</span>
         </button>
