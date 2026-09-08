@@ -14,6 +14,7 @@ import { FooterComponent } from '../../../components/footer/footer.component';
 })
 export class OrderSuccess implements OnInit {
   orderId: string = '';
+  rawOrderId: string = '';
   username: string = '';
   currentUser: AuthUser | null = null;
   showDropdown: boolean = false;
@@ -33,7 +34,12 @@ export class OrderSuccess implements OnInit {
     const state = history.state;
     if (state) {
       if (state.orderId) this.orderId = state.orderId;
+      if (state.rawOrderId) this.rawOrderId = state.rawOrderId;
       if (state.isBuyAndInstall) this.isBuyAndInstall = state.isBuyAndInstall;
+    }
+    if (!this.rawOrderId) {
+      const savedMongoId = sessionStorage.getItem('activeCheckoutMongoId');
+      if (savedMongoId) this.rawOrderId = savedMongoId;
     }
   }
 
@@ -70,5 +76,12 @@ export class OrderSuccess implements OnInit {
 
   goToCatalog() {
     this.router.navigate(['/catalog']);
+  }
+
+  goToInspectionPayment(): void {
+    const targetId = this.rawOrderId || this.orderId;
+    this.router.navigate(['/inspection-payment'], {
+      queryParams: { orderId: targetId }
+    });
   }
 }
