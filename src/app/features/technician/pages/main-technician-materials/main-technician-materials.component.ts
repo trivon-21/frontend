@@ -239,7 +239,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
   private mapApiMaterialRequest(item: RawMaterialRequest & { fullName?: string; customerId?: any }): MaterialRequest {
     return {
-      id: this.normalizeTicketId(item.ticketId || item._id),
+      id: this.normalizeTicketId(item.ticketId),
       materialRequestId: item.materialRequestId || String(item._id || item.ticketId || ''),
       // Show 'Maintenance' explicitly when the API indicates a maintenance service
       type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
@@ -271,10 +271,13 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       }
     });
     
-    // Sort combined by date descending
-    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Exclude entries with no valid ticket ID
+    const filtered = combined.filter(r => r.id && r.id !== '#N/A');
     
-    this.requests = combined;
+    // Sort by date descending
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    this.requests = filtered;
     this.applyFilters();
   }
 
@@ -336,7 +339,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             }))
             .filter((ticket) => 
               ticket.id !== '#N/A' && 
-              (ticket.status === 'New' || ticket.status === 'Finance Rejected' || ticket.status === 'REJECTED')
+              ticket.status === 'New'
             );
 
           this.dropdownTickets = tickets;
