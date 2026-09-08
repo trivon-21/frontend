@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 
 interface TeamMember {
@@ -81,7 +81,8 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
-    private location: Location
+    private location: Location,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -143,6 +144,12 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  viewServiceHistory(): void {
+    if (this.ticketId) {
+      this.router.navigate(['/main-technician-service-history', 'maintenance', this.ticketId]);
+    }
   }
 
   getStatusClass(status: string | undefined): string {

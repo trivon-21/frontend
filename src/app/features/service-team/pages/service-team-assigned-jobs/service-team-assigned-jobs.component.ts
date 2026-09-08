@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { TaskService, Task } from '../../services/task.service';
 import { FormsModule } from '@angular/forms';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-service-team-assigned-jobs',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, PortalIconsModule],
   templateUrl: './service-team-assigned-jobs.component.html',
   styleUrl: './service-team-assigned-jobs.component.css'
 })

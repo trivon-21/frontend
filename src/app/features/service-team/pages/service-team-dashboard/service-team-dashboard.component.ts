@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { TeamSessionService } from '../../services/team-session.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface DashboardSummary {
   activeJobs: number;
@@ -34,7 +35,7 @@ interface DashboardAlertItem {
 @Component({
   selector: 'app-main-technician-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule, HttpClientModule, PortalIconsModule],
   templateUrl: './service-team-dashboard.component.html',
   styleUrl: './service-team-dashboard.component.css'
 })

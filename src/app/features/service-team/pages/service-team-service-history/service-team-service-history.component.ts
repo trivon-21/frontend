@@ -5,6 +5,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { TeamSessionService } from '../../services/team-session.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface ServiceHistoryItem {
   ticketId: string;
@@ -26,7 +27,7 @@ interface ServiceHistorySummary {
 @Component({
   selector: 'app-service-team-service-history',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule, HttpClientModule, PortalIconsModule],
   templateUrl: './service-team-service-history.component.html',
   styleUrl: './service-team-service-history.component.css'
 })
@@ -81,7 +82,7 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
   }
 
   fetchServiceHistory(id: string): void {
-    const source = 'service';
+    const source = this.route.snapshot.queryParamMap.get('source') || 'service';
     const query = this.teamSessionService.buildTeamQuery();
     const url = `${environment.apiBaseUrl}/service-requests/${encodeURIComponent(id)}/history?source=${encodeURIComponent(source)}${query ? '&' + query.substring(1) : ''}`;
     this.http.get<any>(url).subscribe({

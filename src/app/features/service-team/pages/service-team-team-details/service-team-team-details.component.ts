@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { TaskService, TeamDetails, TeamDetailsApiPayload, TeamMember, TimeSlot } from '../../services/task.service';
 import { catchError, EMPTY, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-service-team-team-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PortalIconsModule],
   templateUrl: './service-team-team-details.component.html',
   styleUrl: './service-team-team-details.component.css'
 })

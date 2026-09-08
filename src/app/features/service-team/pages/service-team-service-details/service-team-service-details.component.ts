@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-service-team-service-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PortalIconsModule],
   templateUrl: './service-team-service-details.component.html',
   styleUrl: './service-team-service-details.component.css'
 })
@@ -120,7 +121,12 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
 
   viewServiceHistory(): void {
     if (this.ticketId) {
-      this.router.navigate([this.baseRoute + '/service-history', this.ticketId]);
+      const type = (this.ticket?.type || '').toLowerCase();
+      let source = 'service';
+      if (type === 'installation') source = 'installation';
+      else if (type === 'maintenance') source = 'maintenance';
+      
+      this.router.navigate([this.baseRoute + '/service-history', this.ticketId], { queryParams: { source } });
     }
   }
 
