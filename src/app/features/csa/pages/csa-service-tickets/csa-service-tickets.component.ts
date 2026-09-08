@@ -17,16 +17,17 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 export class CsaServiceTicketsComponent implements OnInit {
   tickets: ServiceTicket[] = [];
   rawTickets: ServiceTicket[] = [];
-  rawSchedules: MaintenanceSchedule[] = [];
+  rawMaintenances: any[] = [];
   customers: CustomerProfile[] = [];
   products: any[] = [];
   totalTickets = 0;
   
-  // KPI Stats
+  // Status Filter Counts
   countTotal = 0;
   countNew = 0;
-  countPendingCSA = 0;
+  countAssigned = 0;
   countResolved = 0;
+  countPendingCSA = 0;
 
   // Filters
   selectedCategory = 'ALL';
@@ -110,58 +111,71 @@ export class CsaServiceTicketsComponent implements OnInit {
           return of({ success: false, tickets: [], total: 0, page: 1, totalPages: 1 });
         })
       ),
-      scheduleRes: this.ticketService.getMaintenanceSchedules().pipe(
+      maintenanceRes: this.ticketService.getMaintenanceTickets().pipe(
         catchError((err) => {
-          console.error('Failed to load maintenance schedules:', err);
+          console.error('Failed to load maintenance records:', err);
           return of({ success: false, data: [], count: 0 });
         })
       )
     }).subscribe({
-      next: ({ ticketRes, scheduleRes }) => {
+      next: ({ ticketRes, maintenanceRes }) => {
         this.isLoading = false;
 
         this.rawTickets = (ticketRes && ticketRes.success) ? (ticketRes.tickets || []) : [];
-        this.rawSchedules = (scheduleRes && scheduleRes.success) ? (scheduleRes.data || []) : [];
+        this.rawMaintenances = (maintenanceRes && maintenanceRes.success) ? (maintenanceRes.data || []) : [];
 
         this.applyFilters();
       },
       error: (err) => {
         this.isLoading = false;
         console.error('Failed to load portal data:', err);
-        this.errorMessage = 'Failed to load tickets and schedules. Please refresh.';
+        this.errorMessage = 'Failed to load tickets and maintenance records. Please refresh.';
       }
     });
   }
 
-  private mapScheduleToTicket(sched: MaintenanceSchedule): ServiceTicket {
-    const formattedId = sched.ticketId ? (sched.ticketId.startsWith('#') ? sched.ticketId : `#${sched.ticketId}`) : '#MS-1001';
+  private mapMaintenanceToTicket(m: any): ServiceTicket {
+    const rawId = m.ticketId || (m._id ? `M-${m._id.slice(-4).toUpperCase()}` : 'M-1001');
+    const formattedId = rawId.startsWith('#') ? rawId : `#${rawId}`;
+    const cust = m.customerId && typeof m.customerId === 'object' ? m.customerId : {};
+    const custName = m.fullName || m.customerName || cust.fullName || 'Customer';
+    const custAddress = m.location || cust.address || 'N/A';
+    const custPhone = m.customerPhone || cust.phoneNumber || cust.phone || '';
+    const custEmail = m.customerEmail || cust.email || '';
+    const product = m.productType || m.acUnitModel || 'AirLux AC';
+    const maintenanceType = m.maintenanceType || (m.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated');
+
     return {
-      _id: sched._id,
+      _id: m._id,
       ticketId: formattedId,
-      isMaintenanceSchedule: true,
-      maintenanceScheduleData: sched,
+      isMaintenanceRecord: true,
+      maintenanceRecordData: m,
       customerId: {
-        _id: (sched as any).customerId?._id || '',
-        fullName: sched.customerName || 'Customer',
-        email: sched.customerEmail || '',
-        phoneNumber: sched.customerPhone || '',
-        address: sched.location || ''
+        _id: cust._id || (typeof m.customerId === 'string' ? m.customerId : ''),
+        fullName: custName,
+        email: custEmail,
+        phoneNumber: custPhone,
+        address: custAddress
       },
       category: 'maintenance',
-      requestType: 'Maintenance',
-      subject: `Maintenance Plan (${formattedId}) - ${sched.productType || 'AirLux AC'}`,
-      description: `Technician maintenance schedule at ${sched.location || 'Location'}. Total services: ${sched.services?.length || 0}.`,
+      requestType: maintenanceType,
+      subject: `Maintenance (${formattedId}) - ${product}`,
+      description: m.description || m.scheduledServiceType || `${maintenanceType} Maintenance for ${product} at ${custAddress}. Assigned Team: ${m.assignedTeam || 'Not Assigned'}.`,
       priority: 'medium',
-      status: sched.status as any,
-      acUnitModel: sched.productType || 'AirLux AC',
-      preferredDate: sched.installationDate,
-      preferredTimeSlot: 'Quarterly Routine',
-      createdAt: sched.createdAt || new Date().toISOString()
+      status: m.status || 'New',
+      acUnitModel: product,
+      preferredDate: m.date || m.createdAt,
+      preferredTimeSlot: m.scheduledServiceType || 'Scheduled Routine',
+      createdAt: m.createdAt || m.date || new Date().toISOString()
     };
   }
 
   getFormattedTicketId(ticket: ServiceTicket | null | undefined): string {
     if (!ticket) return '';
+    const anyT = ticket as any;
+    if (anyT.serviceRequestRef) {
+      return anyT.serviceRequestRef.startsWith('#') ? anyT.serviceRequestRef : `#${anyT.serviceRequestRef}`;
+    }
     if (ticket.ticketId) {
       return ticket.ticketId.startsWith('#') ? ticket.ticketId : `#${ticket.ticketId}`;
     }
@@ -179,19 +193,64 @@ export class CsaServiceTicketsComponent implements OnInit {
     }
   }
 
+  private getUnifiedTickets(): ServiceTicket[] {
+    const mappedMaintenances = this.rawMaintenances.map(m => this.mapMaintenanceToTicket(m));
+    const maintenanceTicketIds = new Set(
+      mappedMaintenances.map(m => (m.ticketId || '').replace('#', '').trim().toUpperCase())
+    );
+
+    const normalizedTickets: ServiceTicket[] = [];
+
+    for (const t of this.rawTickets) {
+      const anyT = t as any;
+      const ref = anyT.serviceRequestRef || (anyT.ticketId ? anyT.ticketId.replace('#', '') : '');
+      const refUpper = ref ? ref.trim().toUpperCase() : '';
+
+      // Skip duplicate if this maintenance ticket is already present from the live maintenance collection
+      if (refUpper && maintenanceTicketIds.has(refUpper)) {
+        continue;
+      }
+
+      let category = (t.category || '').toLowerCase();
+      if (!category) {
+        const servType = (anyT.serviceType || '').toLowerCase();
+        const subj = (t.subject || '').toLowerCase();
+        if (servType === 'maintenance' || subj.includes('maintenance')) {
+          category = 'maintenance';
+        } else if (servType === 'installation' || subj.includes('installation')) {
+          category = 'installation';
+        } else if (servType === 'inspection' || subj.includes('inspection')) {
+          category = 'inspection';
+        } else {
+          category = 'repair';
+        }
+      }
+
+      let displayTicketId = t.ticketId;
+      if (anyT.serviceRequestRef) {
+        displayTicketId = anyT.serviceRequestRef.startsWith('#')
+          ? anyT.serviceRequestRef
+          : `#${anyT.serviceRequestRef}`;
+      }
+
+      normalizedTickets.push({
+        ...t,
+        category: category as any,
+        ticketId: displayTicketId
+      });
+    }
+
+    return [...normalizedTickets, ...mappedMaintenances];
+  }
+
   applyFilters(): void {
-    const mappedSchedules = this.rawSchedules.map(s => this.mapScheduleToTicket(s));
+    const allUnified = this.getUnifiedTickets();
     let combined: ServiceTicket[] = [];
 
     if (this.selectedCategory === 'ALL') {
-      combined = [...this.rawTickets, ...mappedSchedules];
-    } else if (this.selectedCategory === 'maintenance') {
-      // Under maintenance: include both CSA-logged maintenance tickets and technician maintenance schedules
-      const csaMaintenance = this.rawTickets.filter(t => t.category === 'maintenance');
-      combined = [...csaMaintenance, ...mappedSchedules];
+      combined = allUnified;
     } else {
-      // Other categories: repairs, installations, inspections
-      combined = this.rawTickets.filter(t => (t.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
+      combined = allUnified.filter(t => (t.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
     }
 
     // Apply Status Filter
@@ -200,10 +259,13 @@ export class CsaServiceTicketsComponent implements OnInit {
         const s = (t.status || '').toLowerCase();
         const target = this.selectedStatus.toLowerCase();
         if (target === 'resolved') {
-          return s === 'resolved' || s === 'sent to customer';
+          return s === 'resolved' || s === 'completed' || s === 'sent to customer';
         }
         if (target === 'new') {
-          return s === 'new' || s === 'sent to csa';
+          return s === 'new' || s === 'pending';
+        }
+        if (target === 'assigned') {
+          return s === 'assigned' || s === 'in-progress' || s === 'in progress' || s === 'finance approved' || s === 'materials ready' || s === 'scheduled';
         }
         return s === target;
       });
@@ -231,28 +293,43 @@ export class CsaServiceTicketsComponent implements OnInit {
   }
 
   calculateStats(): void {
-    const allMappedSchedules = this.rawSchedules.map(s => this.mapScheduleToTicket(s));
-    const allCombined = [...this.rawTickets, ...allMappedSchedules];
+    const allUnified = this.getUnifiedTickets();
+    let baseList: ServiceTicket[] = [];
 
-    this.countTotal = allCombined.length;
-    this.countNew = allCombined.filter(t => (t.status || '').toLowerCase() === 'new').length;
-    this.countPendingCSA = this.rawSchedules.filter(s => s.status === 'Sent to CSA').length;
-    this.countResolved = allCombined.filter(t => {
+    if (this.selectedCategory === 'ALL') {
+      baseList = allUnified;
+    } else {
+      baseList = allUnified.filter(t => (t.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
+    }
+
+    this.countTotal = baseList.length;
+    this.countNew = baseList.filter(t => {
       const s = (t.status || '').toLowerCase();
-      return s === 'resolved' || s === 'sent to customer';
+      return s === 'new' || s === 'pending';
     }).length;
+    this.countAssigned = baseList.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      return s === 'assigned' || s === 'in-progress' || s === 'in progress' || s === 'finance approved' || s === 'materials ready' || s === 'scheduled';
+    }).length;
+    this.countResolved = baseList.filter(t => {
+      const s = (t.status || '').toLowerCase();
+      return s === 'resolved' || s === 'completed' || s === 'sent to customer';
+    }).length;
+
+    this.countPendingCSA = allUnified.filter(t => {
+      if ((t.category || '').toLowerCase() !== 'maintenance') return false;
+      const s = (t.status || '').toLowerCase();
+      return s === 'pending' || s === 'finance approved' || s === 'materials ready';
+    }).length;
+  }
+
+  setStatusFilter(status: string): void {
+    this.selectedStatus = status;
+    this.applyFilters();
   }
 
   setCategoryFilter(cat: string): void {
     this.selectedCategory = cat;
-    this.applyFilters();
-  }
-
-  /** Quick-filter shortcut: clicking the "Awaiting Your Approval" KPI card
-   *  jumps the agent straight to the approval queue. */
-  filterByPendingCSA(): void {
-    this.selectedStatus = 'New';
-    this.selectedCategory = 'maintenance';
     this.applyFilters();
   }
 
@@ -389,13 +466,21 @@ export class CsaServiceTicketsComponent implements OnInit {
     switch ((status || '').toLowerCase()) {
       case 'new': return 'status-new';
       case 'assigned':
-      case 'in-progress': return 'status-in-progress';
-      // 'Sent to CSA' = technician submitted for CSA approval — shown as "Awaiting Approval"
+      case 'in-progress':
+      case 'in progress': return 'status-in-progress';
       case 'sent to csa': return 'status-pending-csa';
       case 'sent to customer':
+      case 'completed':
       case 'resolved': return 'status-resolved';
-      case 'draft saved': return 'status-draft';
+      case 'draft saved':
+      case 'on hold':
+      case 'on-hold': return 'status-draft';
+      case 'finance approved':
+      case 'materials ready':
+      case 'scheduled':
       case 'reviewed': return 'status-reviewed';
+      case 'finance rejected':
+      case 'cancelled':
       case 'rejected': return 'status-rejected';
       default: return 'status-default';
     }

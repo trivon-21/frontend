@@ -7,6 +7,7 @@ export interface DashboardMetrics {
   totalCustomers: number;
   activeTickets: number;
   highPriorityTickets: number;
+  awaitingInquiries?: number;
   pendingInquiries: number;
   pendingMaintenance: number;
 }
