@@ -6,6 +6,7 @@ import {
   ManagerDashboardData,
   ManagerDashboardService,
   PendingAction,
+  WorkloadEntry,
 } from '../../services/manager-dashboard.service';
 import {
   AnalyticsData,
@@ -38,13 +39,14 @@ export class ManagerDashboardComponent implements OnInit {
     },
     recentActivity: [],
     pendingActions: [],
+    workloadPreview: [],
   };
   analyticsData: AnalyticsData | null = null;
   analyticsLoading = false;
   loading = true;
   errorMessage = '';
 
-  activeActionFilter: 'all' | 'approvals' | 'tickets' = 'all';
+  activeActionFilter: 'all' | 'approvals' | 'tickets' | 'inventory' = 'all';
 
   constructor(
     private dashboardService: ManagerDashboardService,
@@ -81,7 +83,7 @@ export class ManagerDashboardComponent implements OnInit {
     });
   }
 
-  setActionFilter(filter: 'all' | 'approvals' | 'tickets'): void {
+  setActionFilter(filter: 'all' | 'approvals' | 'tickets' | 'inventory'): void {
     this.activeActionFilter = filter;
   }
 
@@ -97,6 +99,11 @@ export class ManagerDashboardComponent implements OnInit {
         (a) => a.type === 'ticket' || a.type === 'sla' || a.type === 'escalation',
       );
     }
+    if (this.activeActionFilter === 'inventory') {
+      return actions.filter(
+        (a) => a.type === 'inventory' || a.category === 'inventory',
+      );
+    }
     return actions;
   }
 
@@ -109,6 +116,12 @@ export class ManagerDashboardComponent implements OnInit {
   get ticketActionsCount(): number {
     return (this.data.pendingActions || []).filter(
       (a) => a.type === 'ticket' || a.type === 'sla' || a.type === 'escalation',
+    ).length;
+  }
+
+  get inventoryActionsCount(): number {
+    return (this.data.pendingActions || []).filter(
+      (a) => a.type === 'inventory' || a.category === 'inventory',
     ).length;
   }
 
@@ -165,6 +178,50 @@ export class ManagerDashboardComponent implements OnInit {
 
   get outOfStockCount(): number {
     return this.analyticsData?.inventoryRisk?.outOfStockItems?.value ?? 0;
+  }
+
+  get lowStockCount(): number {
+    return (
+      this.data.inventoryKpis?.lowStockAlerts?.value ??
+      this.analyticsData?.inventoryRisk?.lowStockItems?.value ??
+      0
+    );
+  }
+
+  get totalStockRiskCount(): number {
+    return this.lowStockCount + this.outOfStockCount;
+  }
+
+  get reservedItemsCount(): number {
+    return (
+      this.data.inventoryKpis?.reservedItems?.value ??
+      this.analyticsData?.inventoryRisk?.reservedUnits?.value ??
+      0
+    );
+  }
+
+  get blockedRequestsCount(): number {
+    return this.data.inventoryKpis?.blockedMaterialRequests?.value ?? 0;
+  }
+
+  get workloadList(): WorkloadEntry[] {
+    return this.data.workloadPreview || [];
+  }
+
+  get totalTechniciansActive(): number {
+    return this.workloadList.length;
+  }
+
+  get topLoadedTechnician(): WorkloadEntry | null {
+    return this.workloadList.length > 0 ? this.workloadList[0] : null;
+  }
+
+  get totalWorkloadSlaRisk(): number {
+    return this.workloadList.reduce((sum, item) => sum + (item.slaRisk || 0), 0);
+  }
+
+  get totalWorkloadActiveTickets(): number {
+    return this.workloadList.reduce((sum, item) => sum + (item.active || 0), 0);
   }
 
   get nonPoExceptionsCount(): number {

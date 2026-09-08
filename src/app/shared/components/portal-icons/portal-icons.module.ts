@@ -48,6 +48,7 @@ import {
   Trash2,
   TriangleAlert,
   Truck,
+  User,
   UserRoundX,
   Users,
   Wrench,
@@ -102,6 +103,7 @@ export const PORTAL_ICONS = {
   Trash2,
   TriangleAlert,
   Truck,
+  User,
   UserRoundX,
   Users,
   Wrench,
@@ -115,7 +117,7 @@ export const PORTAL_ICON_NAMES = [
   'dollar-sign', 'download', 'edit', 'eye', 'file-text', 'history', 'info', 'layout-dashboard',
   'layout-grid', 'list', 'log-out', 'message-circle', 'minus', 'package', 'plus', 'rotate-ccw',
   'search', 'shield-check', 'shopping-bag', 'shopping-cart', 'sliders-horizontal', 'star',
-  'ticket-plus', 'timer', 'timer-off', 'trash-2', 'triangle-alert', 'truck', 'user-round-x',
+  'ticket-plus', 'timer', 'timer-off', 'trash-2', 'triangle-alert', 'truck', 'user', 'user-round-x',
   'users', 'wrench', 'x',
 ] as const;
 

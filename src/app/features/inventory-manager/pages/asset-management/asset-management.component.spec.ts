@@ -142,5 +142,108 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     expect(component.loans[0].status).toBe('On Time');
     expect(component.loans[1].status).toBe('Overdue');
   });
+
+  it('enforces notes requirement when tool condition is damaged or incomplete, but allows optional notes for good', () => {
+    const loan = {
+      _id: 'loan-notes-1',
+      toolId: 'tool-1',
+      toolName: 'Flaring Tool',
+      assetTag: 'TAG-FLARE-1',
+      technicianId: 'tech-1',
+      technicianName: 'Bob Tech',
+      checkedOutAt: '2026-08-20T00:00:00.000Z',
+      dueDate: '2026-08-26T00:00:00.000Z',
+    };
+
+    component.openReturnModal(loan);
+    expect(component.showReturnModal).toBeTrue();
+    expect(component.returnCondition).toBe('good');
+    expect(component.isNotesRequired).toBeFalse();
+    expect(component.isConfirmDisabled).toBeFalse();
+
+    // Change to damaged - notes become required
+    component.returnCondition = 'damaged';
+    expect(component.isNotesRequired).toBeTrue();
+    expect(component.isConfirmDisabled).toBeTrue();
+
+    // Calling confirmReturn directly without notes sets modalError and blocks submission
+    component.confirmReturn();
+    expect(component.modalError).toContain('Please provide notes');
+    http.expectNone(`${baseUrl}/asset-loans/return/loan-notes-1`);
+
+    // Changing to incomplete - notes remain required
+    component.returnCondition = 'incomplete';
+    component.onConditionChange();
+    expect(component.modalError).toBe('');
+    expect(component.isNotesRequired).toBeTrue();
+    expect(component.isConfirmDisabled).toBeTrue();
+
+    // Providing notes enables confirmation
+    component.returnNotes = 'Missing flaring cone adapter';
+    expect(component.isConfirmDisabled).toBeFalse();
+
+    component.confirmReturn();
+    const request = http.expectOne(`${baseUrl}/asset-loans/return/loan-notes-1`);
+    expect(request.request.body).toEqual({
+      condition: 'incomplete',
+      notes: 'Missing flaring cone adapter',
+    });
+    request.flush({ success: true });
+
+    http.expectOne(`${baseUrl}/asset-loans`).flush([]);
+    http.expectOne(`${baseUrl}/asset-return-logs`).flush([]);
+    http.expectOne(`${baseUrl}/available-tools`).flush([]);
+    expect(component.showReturnModal).toBeFalse();
+  });
+
+  it('handles tool return failure by displaying error inside the modal', () => {
+    const loan = {
+      _id: 'loan-err-1',
+      toolId: 'tool-1',
+      toolName: 'Recovery Unit',
+      assetTag: 'TAG-REC-1',
+      technicianId: 'tech-1',
+      technicianName: 'Bob Tech',
+      checkedOutAt: '2026-08-20T00:00:00.000Z',
+      dueDate: '2026-08-26T00:00:00.000Z',
+    };
+
+    component.openReturnModal(loan);
+    component.confirmReturn();
+
+    const request = http.expectOne(`${baseUrl}/asset-loans/return/loan-err-1`);
+    request.flush({ message: 'Serialized asset loan state is inconsistent' }, { status: 409, statusText: 'Conflict' });
+
+    expect(component.modalError).toBe('Serialized asset loan state is inconsistent');
+    expect(component.showReturnModal).toBeTrue();
+    expect(component.returningIds.has('loan-err-1')).toBeFalse();
+  });
+
+  it('closes return modal on Escape key press unless currently submitting', () => {
+    const loan = {
+      _id: 'loan-esc-1',
+      toolId: 'tool-1',
+      toolName: 'Vacuum Pump',
+      assetTag: 'TAG-VAC-1',
+      technicianId: 'tech-1',
+      technicianName: 'Bob Tech',
+      checkedOutAt: '2026-08-20T00:00:00.000Z',
+      dueDate: '2026-08-26T00:00:00.000Z',
+    };
+
+    component.openReturnModal(loan);
+    expect(component.showReturnModal).toBeTrue();
+
+    // Escape closes modal
+    component.onEscapeKey();
+    expect(component.showReturnModal).toBeFalse();
+    expect(component.activeReturnLoan).toBeNull();
+
+    // While submitting, Escape is ignored
+    component.openReturnModal(loan);
+    component.returningIds.add('loan-esc-1');
+    component.onEscapeKey();
+    expect(component.showReturnModal).toBeTrue();
+  });
 });
 

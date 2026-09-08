@@ -1,73 +1,121 @@
-<div class="customers-view-container">
+<div class="mgr-page customers-page customers-view-container">
 
   <!-- PAGE HEADER -->
   <header class="page-header">
     <div>
-      <h1 class="page-title">Past Customers & Prior Engagements</h1>
+      <h1 class="page-title">Past Customers &amp; Prior Engagements</h1>
       <p class="page-subtitle">
         Review customer accounts and see how many times they have worked with AirLux before and what those instances were.
       </p>
     </div>
-    <div class="header-actions-group">
-      <button class="btn-refresh" (click)="loadCustomers()" [disabled]="isLoading" title="Refresh list">
+    <div class="header-actions mgr-action-group">
+      <span class="status-chip" [class.offline]="!!errorMessage">
+        <span class="dot" [class.syncing]="isLoading"></span>
+        {{ isLoading ? 'Syncing…' : 'Active Directory' }}
+      </span>
+      <button
+        type="button"
+        class="btn-refresh mgr-btn mgr-btn--secondary"
+        (click)="loadCustomers()"
+        [disabled]="isLoading"
+        title="Refresh list"
+      >
         <lucide-angular name="rotate-ccw" [size]="16" [class.spin]="isLoading"></lucide-angular>
         <span>Refresh</span>
       </button>
     </div>
   </header>
 
-  <!-- KPI SUMMARY CARDS -->
-  <section class="summary-cards-grid" aria-label="Customer Engagement Summary">
+  <!-- ERROR ALERT -->
+  <div class="portal-state portal-state--error alert-banner error" *ngIf="errorMessage" role="alert">
+    <lucide-angular name="circle-alert" [size]="20"></lucide-angular>
+    <div class="error-content">
+      <strong>Customer data unavailable</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadCustomers()" [disabled]="isLoading">Retry</button>
+  </div>
+
+  <!-- SUMMARY KPI CARDS (Standard Manager 4-Column Grid) -->
+  <section class="summary-grid summary-cards-grid" aria-label="Customer Engagement Summary">
     <div class="summary-card">
-      <div class="card-icon-badge blue">
-        <lucide-angular name="users" [size]="22"></lucide-angular>
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Total Customers</span>
+          <span class="card-value">{{ summary.totalCustomers | number }}</span>
+        </div>
+        <div class="card-icon card-icon--primary">
+          <lucide-angular name="users" [size]="22"></lucide-angular>
+        </div>
       </div>
-      <div class="card-content">
-        <span class="card-label">Total Customers</span>
-        <span class="card-value">{{ summary.totalCustomers | number }}</span>
-        <span class="card-subtext">{{ summary.activeCustomers }} active accounts</span>
+      <div class="card-footer">
+        <div class="sub-stat">
+          <span class="sub-label">Active Accounts</span>
+          <span class="sub-value">{{ summary.activeCustomers }}</span>
+        </div>
       </div>
     </div>
 
     <div class="summary-card">
-      <div class="card-icon-badge green">
-        <lucide-angular name="clipboard-check" [size]="22"></lucide-angular>
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Clients with Prior Work</span>
+          <span class="card-value">{{ summary.customersWithHistory | number }}</span>
+        </div>
+        <div class="card-icon card-icon--emerald">
+          <lucide-angular name="clipboard-check" [size]="22"></lucide-angular>
+        </div>
       </div>
-      <div class="card-content">
-        <span class="card-label">Clients with Prior Work</span>
-        <span class="card-value">{{ summary.customersWithHistory | number }}</span>
-        <span class="card-subtext">Worked with AirLux before</span>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="card-icon-badge purple">
-        <lucide-angular name="history" [size]="22"></lucide-angular>
-      </div>
-      <div class="card-content">
-        <span class="card-label">Total Recorded Instances</span>
-        <span class="card-value">{{ summary.totalInstances | number }}</span>
-        <span class="card-subtext">Orders, services & installations</span>
+      <div class="card-footer">
+        <div class="sub-stat">
+          <span class="sub-label">Prior History</span>
+          <span class="sub-value">Worked with AirLux</span>
+        </div>
       </div>
     </div>
 
     <div class="summary-card">
-      <div class="card-icon-badge gray">
-        <lucide-angular name="list" [size]="22"></lucide-angular>
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Total Recorded Instances</span>
+          <span class="card-value">{{ summary.totalInstances | number }}</span>
+        </div>
+        <div class="card-icon card-icon--pine">
+          <lucide-angular name="history" [size]="22"></lucide-angular>
+        </div>
       </div>
-      <div class="card-content">
-        <span class="card-label">Loaded in View</span>
-        <span class="card-value">{{ customers.length }}</span>
-        <span class="card-subtext">Page {{ currentPage }} of {{ totalPages }}</span>
+      <div class="card-footer">
+        <div class="sub-stat">
+          <span class="sub-label">Total History</span>
+          <span class="sub-value">Orders, services &amp; installs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-main">
+        <div class="card-info">
+          <span class="card-label">Loaded in View</span>
+          <span class="card-value">{{ customers.length }}</span>
+        </div>
+        <div class="card-icon card-icon--slate">
+          <lucide-angular name="list-filter" [size]="22"></lucide-angular>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="sub-stat">
+          <span class="sub-label">Current Page</span>
+          <span class="sub-value">Page {{ currentPage }} of {{ totalPages }}</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- PAST ORDER QUICK LOOKUP -->
-  <section class="order-lookup-card" aria-label="Past Order Quick Lookup">
+  <!-- PAST ORDER QUICK LOOKUP (Manager Card Structure) -->
+  <section class="order-lookup-card content-card" aria-label="Past Order Quick Lookup">
     <div class="lookup-card-info">
       <div class="lookup-badge">
-        <lucide-angular name="shopping-bag" [size]="18"></lucide-angular>
+        <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
         <span>Past Order Lookup</span>
       </div>
       <p class="lookup-description">
@@ -97,7 +145,7 @@
       </div>
       <button
         type="submit"
-        class="btn-lookup-submit"
+        class="btn-lookup-submit mgr-btn mgr-btn--primary"
         [disabled]="!orderSearchRef.trim() || orderLoading"
       >
         <lucide-angular name="eye" [size]="16"></lucide-angular>
@@ -107,9 +155,9 @@
   </section>
 
   <!-- CONTROLS: SEARCH & FILTER BAR -->
-  <section class="controls-panel" aria-label="Filters and Search">
+  <section class="controls-panel filter-bar" aria-label="Filters and Search">
     <div class="search-input-wrapper">
-      <lucide-angular name="search" [size]="18" class="search-icon"></lucide-angular>
+      <lucide-angular name="search" [size]="16" class="search-icon"></lucide-angular>
       <input
         type="text"
         placeholder="Search by name, email, phone, or location..."
@@ -128,11 +176,11 @@
       </button>
     </div>
 
-    <div class="filter-chips-row" role="radiogroup" aria-label="Filter by customer history">
+    <div class="filter-chips-row chip-group" role="radiogroup" aria-label="Filter by customer history">
       <button
         *ngFor="let opt of filterOptions"
         type="button"
-        class="filter-chip"
+        class="chip filter-chip"
         [class.active]="selectedStatus === opt.key"
         (click)="setStatusFilter(opt.key)"
         role="radio"
@@ -150,16 +198,10 @@
     </div>
   </section>
 
-  <!-- ERROR ALERT -->
-  <div class="alert-banner error" *ngIf="errorMessage" role="alert">
-    <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
-    <span>{{ errorMessage }}</span>
-  </div>
-
   <!-- CUSTOMERS TABLE CARD -->
   <section class="table-container-card">
     <!-- Loading State -->
-    <div class="state-container loading" *ngIf="isLoading">
+    <div class="state-container loading portal-state" *ngIf="isLoading">
       <div class="spinner"></div>
       <p>Loading customer profiles...</p>
     </div>
@@ -169,12 +211,12 @@
       <lucide-angular name="users" [size]="48" class="empty-icon"></lucide-angular>
       <h3>No customer records found</h3>
       <p>Try adjusting your search query or filter selection.</p>
-      <button class="btn-secondary" (click)="clearSearch(); setStatusFilter('all')">Reset Filters</button>
+      <button type="button" class="btn-secondary mgr-btn mgr-btn--secondary" (click)="clearSearch(); setStatusFilter('all')">Reset Filters</button>
     </div>
 
-    <!-- Data Table -->
-    <div class="table-responsive" *ngIf="!isLoading && customers.length > 0">
-      <table class="data-table" aria-label="Customers Table">
+    <!-- Data Table using standard alx-table-container and alx-table -->
+    <div class="alx-table-container table-responsive" *ngIf="!isLoading && customers.length > 0" role="region" aria-label="Customers Table" tabindex="0">
+      <table class="alx-table alx-table--wide data-table" aria-label="Customers Table">
         <thead>
           <tr>
             <th>Customer</th>
@@ -238,15 +280,15 @@
             </td>
 
             <!-- Action -->
-            <td class="text-right">
+            <td class="text-right actions-cell">
               <button
                 type="button"
-                class="btn-table-action"
+                class="btn-table-action mgr-btn mgr-btn--secondary mgr-btn--compact"
                 (click)="viewCustomerDetails(cust)"
                 title="View past instances"
                 aria-label="View past instances"
               >
-                <lucide-angular name="eye" [size]="15"></lucide-angular>
+                <lucide-angular name="eye" [size]="14"></lucide-angular>
                 <span>View Instances</span>
               </button>
             </td>
@@ -255,16 +297,16 @@
       </table>
     </div>
 
-    <!-- PAGINATION FOOTER -->
-    <footer class="pagination-footer" *ngIf="!isLoading && totalPages > 1">
+    <!-- PAGINATION FOOTER (Standard alx-pagination) -->
+    <nav class="alx-pagination pagination-footer" *ngIf="!isLoading && totalPages > 1" aria-label="Customers pagination">
       <span class="pagination-info">
         Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ (currentPage - 1) * pageSize + customers.length }} of {{ totalCount }}
       </span>
 
-      <div class="pagination-controls">
+      <div class="alx-pagination__controls pagination-controls">
         <button
           type="button"
-          class="page-btn"
+          class="page-btn mgr-btn mgr-btn--secondary mgr-btn--compact"
           [disabled]="currentPage === 1"
           (click)="goToPage(currentPage - 1)"
           aria-label="Previous page"
@@ -276,7 +318,7 @@
 
         <button
           type="button"
-          class="page-btn"
+          class="page-btn mgr-btn mgr-btn--secondary mgr-btn--compact"
           [disabled]="currentPage === totalPages"
           (click)="goToPage(currentPage + 1)"
           aria-label="Next page"
@@ -284,30 +326,30 @@
           Next
         </button>
       </div>
-    </footer>
+    </nav>
   </section>
 
   <!-- ============================================================= -->
   <!-- MODAL: CUSTOMER INSTANCES DETAILS                             -->
   <!-- ============================================================= -->
   <div
-    class="modal-backdrop"
+    class="modal-backdrop portal-dialog-backdrop"
     *ngIf="showDetailsModal"
     (click)="closeDetailsModal()"
     role="dialog"
     aria-modal="true"
     aria-labelledby="customer-modal-title"
   >
-    <div class="modal-dialog-box" (click)="$event.stopPropagation()">
+    <div class="modal-dialog-box portal-dialog customer-details-dialog" (click)="$event.stopPropagation()">
       <!-- MODAL HEADER -->
-      <header class="modal-header">
+      <header class="modal-header portal-dialog__header">
         <div class="modal-header-info">
           <h2 id="customer-modal-title" class="modal-title">Past Work Instances</h2>
           <p class="modal-subtitle">Summary of past interactions with AirLux</p>
         </div>
         <button
           type="button"
-          class="modal-close-icon-btn"
+          class="modal-close-icon-btn portal-dialog__close mgr-btn mgr-btn--close"
           (click)="closeDetailsModal()"
           aria-label="Close modal"
         >
@@ -316,14 +358,14 @@
       </header>
 
       <!-- MODAL BODY: LOADING -->
-      <div class="modal-body loading-state" *ngIf="isLoadingDetails">
+      <div class="modal-body loading-state portal-state" *ngIf="isLoadingDetails">
         <div class="spinner"></div>
         <p>Loading instance history...</p>
       </div>
 
       <!-- MODAL BODY: ERROR -->
-      <div class="modal-body error-state" *ngIf="!isLoadingDetails && detailError">
-        <lucide-angular name="circle-alert" [size]="28" class="error-icon"></lucide-angular>
+      <div class="modal-body error-state portal-state portal-state--error" *ngIf="!isLoadingDetails && detailError">
+        <lucide-angular name="circle-alert" [size]="24" class="error-icon"></lucide-angular>
         <p>{{ detailError }}</p>
       </div>
 
@@ -400,7 +442,7 @@
               <span class="badge" [ngClass]="getStatusClass(inst.status)">{{ inst.status }}</span>
               <button
                 type="button"
-                class="btn-instance-inspect"
+                class="btn-instance-inspect mgr-btn mgr-btn--secondary mgr-btn--compact"
                 (click)="viewInstanceOrder(inst)"
                 title="View order details popup"
               >
@@ -421,7 +463,7 @@
 
       <!-- MODAL FOOTER -->
       <footer class="modal-footer">
-        <button type="button" class="btn-primary" (click)="closeDetailsModal()">Close</button>
+        <button type="button" class="btn-primary mgr-btn mgr-btn--primary" (click)="closeDetailsModal()">Close</button>
       </footer>
     </div>
   </div>

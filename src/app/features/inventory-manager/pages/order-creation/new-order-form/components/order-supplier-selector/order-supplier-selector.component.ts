@@ -15,6 +15,8 @@ export class OrderSupplierSelectorComponent implements OnChanges {
   @Input() suppliers: Supplier[] = [];
   @Input() initialSupplier: string = '';
   @Output() supplierSelected = new EventEmitter<string>();
+  @Output() newSupplierRequested = new EventEmitter<string>();
+  @Output() registeringNewSupplier = new EventEmitter<boolean>();
 
   supplierSearchQuery = '';
   filteredSuppliers: Supplier[] = [];
@@ -25,8 +27,8 @@ export class OrderSupplierSelectorComponent implements OnChanges {
     if (changes['suppliers']) {
       this.filteredSuppliers = this.suppliers;
     }
-    if (changes['initialSupplier'] && this.initialSupplier) {
-      this.supplierSearchQuery = this.initialSupplier;
+    if (changes['initialSupplier']) {
+      this.supplierSearchQuery = this.initialSupplier || '';
     }
   }
 
@@ -39,13 +41,6 @@ export class OrderSupplierSelectorComponent implements OnChanges {
         s.name.toLowerCase().includes(q)
       );
     }
-
-    const exactMatch = this.suppliers.find(s => s.name.toLowerCase() === q);
-    if (exactMatch) {
-      this.supplierSelected.emit(exactMatch.name);
-    } else if (!this.isAddingNewSupplier) {
-      this.supplierSelected.emit('');
-    }
     this.showSupplierDropdown = true;
   }
 
@@ -55,29 +50,52 @@ export class OrderSupplierSelectorComponent implements OnChanges {
   }
 
   onSupplierInputBlur(): void {
-    setTimeout(() => { this.showSupplierDropdown = false; }, 300);
+    setTimeout(() => {
+      this.showSupplierDropdown = false;
+      if (this.isAddingNewSupplier) {
+        return;
+      }
+      const q = (this.supplierSearchQuery || '').toLowerCase().trim();
+      if (!q) {
+        this.supplierSelected.emit('');
+        return;
+      }
+      const exactMatch = this.suppliers.find(s => s.name.toLowerCase() === q);
+      if (exactMatch) {
+        this.supplierSearchQuery = exactMatch.name;
+        this.supplierSelected.emit(exactMatch.name);
+      } else {
+        this.supplierSearchQuery = this.initialSupplier || '';
+        this.supplierSelected.emit(this.supplierSearchQuery);
+      }
+    }, 300);
   }
 
   selectSupplier(supplier: Supplier | 'new'): void {
     if (supplier === 'new') {
       this.isAddingNewSupplier = true;
       this.showSupplierDropdown = false;
+      this.registeringNewSupplier.emit(true);
       return;
     }
     this.supplierSearchQuery = supplier.name;
     this.isAddingNewSupplier = false;
     this.showSupplierDropdown = false;
+    this.registeringNewSupplier.emit(false);
     this.supplierSelected.emit(supplier.name);
   }
 
   confirmNewSupplier(): void {
-    if (!this.supplierSearchQuery.trim()) return;
+    const trimmed = (this.supplierSearchQuery || '').trim();
+    if (!trimmed) return;
     this.isAddingNewSupplier = false;
-    this.supplierSelected.emit(this.supplierSearchQuery.trim());
+    this.registeringNewSupplier.emit(false);
+    this.newSupplierRequested.emit(trimmed);
   }
 
   cancelNewSupplier(): void {
     this.isAddingNewSupplier = false;
+    this.registeringNewSupplier.emit(false);
     this.supplierSearchQuery = this.initialSupplier || '';
     this.supplierSelected.emit(this.supplierSearchQuery);
   }

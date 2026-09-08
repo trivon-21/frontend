@@ -127,6 +127,24 @@ describe('ManagerDashboardComponent presentation contract', () => {
         route: '/manager/work-items',
         queryParams: { status: 'open' },
       },
+      {
+        id: 'shortage-1',
+        type: 'inventory',
+        title: 'Material shortage: MR-201',
+        description: 'Compressor filter shortage',
+        priority: 'high',
+        route: '/manager/orders',
+        queryParams: { type: 'purchase', status: 'pending' },
+      },
+    ],
+    workloadPreview: [
+      {
+        assigneeId: 'tech-1',
+        assigneeName: 'Alex Mercer',
+        assigneeType: 'technician',
+        active: 3,
+        slaRisk: 1,
+      },
     ],
   };
 
@@ -172,7 +190,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(summaryCards.every((card) => card.classList.contains('clickable'))).toBeTrue();
     expect(ticketCards.map((card) => card.getAttribute('href'))).toEqual([
       '/manager/work-items',
-      '/manager/work-items?assignment=unassigned',
+      '/manager/inventory',
       '/manager/work-items?sla=overdue',
     ]);
     expect(approvalPrimary.getAttribute('href')).toBe(
@@ -240,16 +258,21 @@ describe('ManagerDashboardComponent presentation contract', () => {
 
     // Verify ticket action item
     const actionItems = root.querySelectorAll<HTMLElement>('.action-item');
-    expect(actionItems.length).toBe(2);
+    expect(actionItems.length).toBe(3);
 
     const ticketBtn = actionItems[1].querySelector<HTMLAnchorElement>('a.action-btn-primary');
     expect(ticketBtn?.getAttribute('href')).toBe('/manager/work-items?status=open');
     expect(ticketBtn?.textContent).toContain('Open Ticket');
 
-    // Verify Recent Activity card is present
-    const activityCard = root.querySelector('.activity-card');
-    expect(activityCard).not.toBeNull();
-    expect(activityCard?.textContent).toContain('Recent Activity');
+    const shortageBtn = actionItems[2].querySelector<HTMLAnchorElement>('a.action-btn-primary');
+    expect(shortageBtn?.getAttribute('href')).toBe('/manager/orders?type=purchase&status=pending');
+    expect(shortageBtn?.textContent).toContain('Resolve Shortage');
+
+    // Verify Workforce Snapshot card is present
+    const workforceCard = root.querySelector('.workforce-card');
+    expect(workforceCard).not.toBeNull();
+    expect(workforceCard?.textContent).toContain('Workforce Snapshot');
+    expect(workforceCard?.textContent).toContain('Alex Mercer');
 
     fixture.destroy();
   });
@@ -259,7 +282,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     const component = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(component.filteredActions.length).toBe(2);
+    expect(component.filteredActions.length).toBe(3);
 
     const filterChips = Array.from(root.querySelectorAll<HTMLButtonElement>('.filter-chip'));
     const approvalsChip = filterChips.find((chip) => chip.textContent?.includes('Approvals'));
@@ -272,12 +295,22 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(component.filteredActions.length).toBe(1);
     expect(component.filteredActions[0].reference).toBe('PR-1049');
 
+    const inventoryChip = filterChips.find((chip) => chip.textContent?.includes('Inventory Shortages'));
+    expect(inventoryChip).toBeDefined();
+
+    inventoryChip?.click();
+    fixture.detectChanges();
+
+    expect(component.activeActionFilter).toBe('inventory');
+    expect(component.filteredActions.length).toBe(1);
+    expect(component.filteredActions[0].id).toBe('shortage-1');
+
     const allChip = filterChips.find((chip) => chip.textContent?.includes('All'));
     allChip?.click();
     fixture.detectChanges();
 
     expect(component.activeActionFilter).toBe('all');
-    expect(component.filteredActions.length).toBe(2);
+    expect(component.filteredActions.length).toBe(3);
 
     fixture.destroy();
   });
@@ -298,7 +331,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(jumpLinks[0].getAttribute('href')).toBe('/manager/analytics/service-operations');
     expect(jumpLinks[1].getAttribute('href')).toBe('/manager/analytics/financial-overview');
     expect(jumpLinks[2].getAttribute('href')).toBe('/manager/analytics/purchasing-approvals');
-    expect(jumpLinks[3].getAttribute('href')).toBe('/manager/analytics/inventory-exception-control');
+    expect(jumpLinks[3].getAttribute('href')).toBe('/manager/work-items');
 
     const fullAnalyticsBtn = root.querySelector<HTMLAnchorElement>('.insights-all-btn');
     expect(fullAnalyticsBtn?.getAttribute('href')).toBe('/manager/analytics/period-performance');

@@ -76,6 +76,14 @@ export interface RecentOrdersResponse {
   orders: RecentCustomerOrder[];
 }
 
+export interface WorkloadEntry {
+  assigneeId: string;
+  assigneeName: string;
+  assigneeType: string;
+  active: number;
+  slaRisk: number;
+}
+
 export interface ManagerDashboardData {
   managerName: string;
   currentDate: Date;
@@ -90,6 +98,7 @@ export interface ManagerDashboardData {
   recentActivity: ActivityItem[];
   pendingActions: PendingAction[];
   recentOrders?: RecentCustomerOrder[];
+  workloadPreview?: WorkloadEntry[];
 }
 
 @Injectable({ providedIn: 'root' })

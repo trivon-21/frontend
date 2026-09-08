@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="dashboard-actions mgr-action-group">
-      <a class="btn-inventory-nav mgr-btn mgr-btn--secondary" routerLink="/manager/inventory">
+      <a class="btn-inventory-nav mgr-btn mgr-btn--primary" routerLink="/manager/inventory">
         <lucide-angular name="package" [size]="16"></lucide-angular>
         View Inventory
       </a>
@@ -44,12 +44,30 @@
       <div class="card-footer"><div *ngFor="let sub of data.stats.openTickets.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
     </a>
 
-    <a class="summary-card clickable" routerLink="/manager/work-items" [queryParams]="{ assignment: 'unassigned' }">
+    <a class="summary-card clickable" routerLink="/manager/inventory">
       <div class="card-main">
-        <div class="card-info"><span class="card-label">Unassigned Tickets</span><span class="card-value">{{ data.stats.unassignedTickets.total }}</span></div>
-        <div class="card-icon"><lucide-angular name="user-round-x" [size]="22"></lucide-angular></div>
+        <div class="card-info">
+          <span class="card-label">Inventory Health</span>
+          <span class="card-value" [class.risk-text]="totalStockRiskCount > 0">{{ totalStockRiskCount }}</span>
+        </div>
+        <div class="card-icon inventory-icon">
+          <lucide-angular name="package" [size]="22"></lucide-angular>
+        </div>
       </div>
-      <div class="card-footer"><div *ngFor="let sub of data.stats.unassignedTickets.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
+      <div class="card-footer">
+        <div class="sub-stat">
+          <span class="sub-label">Low Stock</span>
+          <span class="sub-value" [class.risk-text]="lowStockCount > 0">{{ lowStockCount }}</span>
+        </div>
+        <div class="sub-stat">
+          <span class="sub-label">Out of Stock</span>
+          <span class="sub-value" [class.risk-text]="outOfStockCount > 0">{{ outOfStockCount }}</span>
+        </div>
+        <div class="sub-stat" *ngIf="reservedItemsCount > 0">
+          <span class="sub-label">Reserved Units</span>
+          <span class="sub-value">{{ reservedItemsCount }}</span>
+        </div>
+      </div>
     </a>
 
     <a class="summary-card clickable" routerLink="/manager/work-items" [queryParams]="{ sla: 'overdue' }">
@@ -204,32 +222,36 @@
         </div>
       </article>
 
-      <!-- 4. Critical Risk & Exceptions Pillar -->
+      <!-- 4. Team Workload Pillar -->
       <article class="insight-card">
         <div class="insight-card-top">
           <div class="insight-meta">
-            <span class="insight-pillar">Risk & Exceptions</span>
-            <span class="insight-highlight" [class.risk-text]="outOfStockCount > 0">
-              {{ outOfStockCount }} Out of Stock
+            <span class="insight-pillar">Team Workload</span>
+            <span class="insight-highlight">
+              {{ totalTechniciansActive > 0 ? (totalTechniciansActive + ' Active') : 'No Active Staff' }}
             </span>
           </div>
-          <div class="insight-icon-bubble alert" [class.critical]="outOfStockCount > 0 || (data.stats.slaRisk.total > 0)">
-            <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+          <div class="insight-icon-bubble workforce" [class.warning]="totalWorkloadSlaRisk > 0">
+            <lucide-angular name="users" [size]="18"></lucide-angular>
           </div>
         </div>
         <div class="insight-metrics-row">
           <div class="insight-metric">
-            <span class="metric-label">Low Stock</span>
-            <strong class="metric-value">{{ analyticsData?.inventoryRisk?.lowStockItems?.value ?? data.inventoryKpis.lowStockAlerts.value }}</strong>
+            <span class="metric-label">Assigned</span>
+            <strong class="metric-value">{{ totalWorkloadActiveTickets }}</strong>
           </div>
           <div class="insight-metric">
-            <span class="metric-label">Non-PO Receipts</span>
-            <strong class="metric-value">{{ nonPoExceptionsCount }}</strong>
+            <span class="metric-label">SLA At Risk</span>
+            <strong class="metric-value" [class.risk-text]="totalWorkloadSlaRisk > 0">{{ totalWorkloadSlaRisk }}</strong>
+          </div>
+          <div class="insight-metric">
+            <span class="metric-label">Unassigned</span>
+            <strong class="metric-value">{{ data.stats.unassignedTickets.total }}</strong>
           </div>
         </div>
         <div class="insight-card-footer">
-          <a routerLink="/manager/analytics/inventory-exception-control" class="insight-jump-link">
-            <span>View Exception Control</span>
+          <a routerLink="/manager/work-items" class="insight-jump-link">
+            <span>View Work Queue</span>
             <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
           </a>
         </div>
@@ -314,6 +336,16 @@
           <span>Work Items & SLA</span>
           <span class="filter-count-badge">{{ ticketActionsCount }}</span>
         </button>
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="activeActionFilter === 'inventory'"
+          (click)="setActionFilter('inventory')"
+          *ngIf="inventoryActionsCount > 0"
+        >
+          <span>Inventory Shortages</span>
+          <span class="filter-count-badge filter-count-badge--shortage">{{ inventoryActionsCount }}</span>
+        </button>
       </div>
 
       <!-- ACTIONS LIST -->
@@ -325,7 +357,10 @@
               <span *ngIf="isApprovalAction(action)" class="action-type-tag approval-tag" [class.non-po]="action.approvalType === 'non-po'">
                 {{ action.approvalType === 'non-po' ? 'NON-PO EXCEPTION' : 'PURCHASE REQUEST' }}
               </span>
-              <span *ngIf="!isApprovalAction(action)" class="action-type-tag">{{ action.type | uppercase }}</span>
+              <span *ngIf="action.type === 'inventory'" class="action-type-tag inventory-tag">
+                MATERIAL SHORTAGE
+              </span>
+              <span *ngIf="!isApprovalAction(action) && action.type !== 'inventory'" class="action-type-tag">{{ action.type | uppercase }}</span>
             </div>
             <div class="action-header-right" *ngIf="action.amount">
               <span class="action-amount-badge">{{ formatCurrency(action.amount) }}</span>
@@ -350,7 +385,7 @@
               [routerLink]="action.route"
               [queryParams]="action.queryParams"
             >
-              {{ isApprovalAction(action) ? 'Review Approval' : 'Open Ticket' }}
+              {{ isApprovalAction(action) ? 'Review Approval' : (action.type === 'inventory' ? 'Resolve Shortage' : 'Open Ticket') }}
             </a>
           </div>
         </div>
@@ -361,25 +396,72 @@
       </div>
     </div>
 
-    <!-- RECENT ACTIVITY (COMPACT / SIDE COLUMN) -->
-    <div class="content-card activity-card">
+    <!-- WORKFORCE SNAPSHOT (SIDE COLUMN) -->
+    <div class="content-card workforce-card">
       <div class="card-header">
         <div class="title-with-icon">
-          <lucide-angular name="activity" class="primary-icon" [size]="18"></lucide-angular>
-          <h2 class="card-title">Recent Activity</h2>
+          <lucide-angular name="users" class="primary-icon" [size]="18"></lucide-angular>
+          <h2 class="card-title">Workforce Snapshot</h2>
         </div>
-        <span class="count-badge count-badge--neutral">{{ data.recentActivity.length }} Events</span>
+        <span class="count-badge count-badge--neutral">{{ workloadList.length }} Assignees</span>
       </div>
-      <div class="timeline-container">
-        <a *ngFor="let activity of data.recentActivity" class="timeline-item" [routerLink]="activity.route" [queryParams]="activity.queryParams">
-          <div class="timeline-line"></div>
-          <div class="timeline-marker" [ngClass]="activity.type"><lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular></div>
-          <div class="timeline-content">
-            <div class="timeline-header"><p class="activity-title">{{ activity.title }}</p><span class="activity-time">{{ activity.timeAgo }}</span></div>
-            <p class="activity-desc">{{ activity.description }}</p>
+
+      <div class="workforce-container">
+        <div class="workforce-summary-bar" *ngIf="workloadList.length > 0">
+          <div class="workforce-summary-stat">
+            <span class="wf-stat-label">Total Assigned</span>
+            <strong class="wf-stat-val">{{ totalWorkloadActiveTickets }} tickets</strong>
           </div>
-        </a>
-        <div *ngIf="data.recentActivity.length === 0" class="empty-state">No recent operational activity.</div>
+          <div class="workforce-summary-stat" *ngIf="totalWorkloadSlaRisk > 0">
+            <span class="wf-stat-label">SLA Risk</span>
+            <strong class="wf-stat-val risk-text">{{ totalWorkloadSlaRisk }} tickets</strong>
+          </div>
+          <div class="workforce-summary-stat" *ngIf="data.stats.unassignedTickets.total > 0">
+            <span class="wf-stat-label">Unassigned</span>
+            <strong class="wf-stat-val">{{ data.stats.unassignedTickets.total }}</strong>
+          </div>
+        </div>
+
+        <div class="workforce-list">
+          <a
+            *ngFor="let worker of workloadList"
+            class="workforce-item"
+            routerLink="/manager/work-items"
+          >
+            <div class="workforce-avatar" [class.team]="worker.assigneeType === 'team'">
+              <lucide-angular [name]="worker.assigneeType === 'team' ? 'users' : 'user'" [size]="15"></lucide-angular>
+            </div>
+            <div class="workforce-details">
+              <div class="workforce-name-row">
+                <span class="workforce-name">{{ worker.assigneeName }}</span>
+                <span class="workforce-type-badge">{{ worker.assigneeType }}</span>
+              </div>
+              <div class="workforce-metrics-row">
+                <span class="workforce-metric">
+                  <strong>{{ worker.active }}</strong> active
+                </span>
+                <span class="workforce-dot">·</span>
+                <span class="workforce-metric" [class.risk-text]="worker.slaRisk > 0">
+                  <strong>{{ worker.slaRisk }}</strong> SLA risk
+                </span>
+              </div>
+            </div>
+            <div class="workforce-action-icon">
+              <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+            </div>
+          </a>
+
+          <div *ngIf="workloadList.length === 0" class="empty-state">
+            No active technicians or teams currently assigned.
+          </div>
+        </div>
+
+        <div class="workforce-footer" *ngIf="workloadList.length > 0">
+          <a routerLink="/manager/work-items" class="workforce-manage-link">
+            <span>Manage Work Queue</span>
+            <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+          </a>
+        </div>
       </div>
     </div>
   </div>

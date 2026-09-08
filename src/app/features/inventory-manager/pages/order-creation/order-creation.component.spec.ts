@@ -77,4 +77,61 @@ describe('OrderCreationComponent HTTP contract', () => {
     http.expectOne(`${baseUrl}/order-requests`).flush([]);
     http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
   });
+
+  it('normalizes legacy statuses and populates allOrders and drafts', () => {
+    component.loadData();
+    http.expectOne(`${baseUrl}/order-requests`).flush([
+      { _id: 'o-1', requestId: 'REQ-DRAFT', status: 'draft', supplierName: 'Sup A', items: [], totalEstimate: 50 },
+      { _id: 'o-2', requestId: 'REQ-LEGACY', status: 'APPROVED', supplierName: 'Sup B', items: [], totalEstimate: 150 },
+    ]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+
+    expect(component.allOrders.length).toBe(2);
+    expect(component.draftOrders.length).toBe(1);
+    expect(component.approvedOrders.length).toBe(1);
+    expect(component.approvedOrders[0].status).toBe('approved');
+  });
+
+  it('filters currentOrders across fields using searchQuery', () => {
+    component.loadData();
+    http.expectOne(`${baseUrl}/order-requests`).flush([
+      { _id: 'o-1', requestId: 'REQ-100', status: 'draft', supplierName: 'Alpha Tech', items: [], totalEstimate: 50 },
+      { _id: 'o-2', requestId: 'REQ-200', status: 'approved', supplierName: 'Beta Supplies', items: [], totalEstimate: 150 },
+    ]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+
+    component.setActiveTab('all');
+    expect(component.currentOrders.length).toBe(2);
+
+    component.searchQuery = 'Alpha';
+    expect(component.currentOrders.length).toBe(1);
+    expect(component.currentOrders[0].requestId).toBe('REQ-100');
+
+    component.searchQuery = 'Beta';
+    expect(component.currentOrders.length).toBe(1);
+    expect(component.currentOrders[0].requestId).toBe('REQ-200');
+
+    component.searchQuery = 'nonexistent';
+    expect(component.currentOrders.length).toBe(0);
+  });
+
+  it('submits drafts directly via submitDraft', () => {
+    const mockOrderService = jasmine.createSpyObj<OrderCreationService>('OrderCreationService', ['submitForManager']);
+    mockOrderService.submitForManager.and.returnValue(of({} as any));
+
+    const testComp = new OrderCreationComponent(
+      TestBed.inject(ApiService),
+      mockOrderService,
+      { navigate: jasmine.createSpy() } as unknown as Router,
+      { queryParams: of({}) } as ActivatedRoute,
+    );
+
+    const draftOrder: any = { _id: 'o-1', requestId: 'REQ-SUBMIT', status: 'draft', statusVersion: 1 };
+    testComp.submitDraft(draftOrder);
+
+    expect(mockOrderService.submitForManager).toHaveBeenCalledWith(draftOrder);
+    http.expectOne(`${baseUrl}/order-requests`).flush([]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+    expect(testComp.successMessage).toContain('REQ-SUBMIT');
+  });
 });

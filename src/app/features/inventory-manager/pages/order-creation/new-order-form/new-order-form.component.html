@@ -35,14 +35,18 @@
       <app-order-supplier-selector
         [suppliers]="suppliers"
         [initialSupplier]="selectedSupplier"
-        (supplierSelected)="onSupplierSelected($event)">
+        (supplierSelected)="onSupplierSelected($event)"
+        (newSupplierRequested)="onAddNewSupplier($event)"
+        (registeringNewSupplier)="onRegisteringNewSupplier($event)">
       </app-order-supplier-selector>
 
       <div class="step-divider"></div>
 
       <!-- Step 2: Item Search Dumb Component -->
       <app-order-item-search
-        [inventoryItems]="inventoryItems"
+        [inventoryItems]="availableInventoryItems"
+        (itemSelected)="onItemSelected($event)"
+        (itemCleared)="onItemCleared()"
         (itemAdded)="onItemAdded($event)">
       </app-order-item-search>
 
@@ -70,10 +74,10 @@
       <div class="form-footer-actions">
         <button type="button" class="btn-discard im-btn im-btn--ghost" (click)="goBack()">Discard Changes</button>
         <div class="action-group">
-          <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="saveDraft()" [disabled]="orderItems.length === 0 || isSubmitting">
+          <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="saveDraft()" [disabled]="isSubmitting">
             {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
           </button>
-          <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!canSubmit || isSubmitting" (click)="submitOrder()">
+          <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting" (click)="submitOrder()">
             <span *ngIf="!isSubmitting">Submit Order</span>
             <span *ngIf="isSubmitting">...</span>
           </button>
@@ -91,7 +95,7 @@
 
   <!-- Required Items Grid Dumb Component -->
   <app-order-suggested-grid
-    [suggestedItems]="suggestedItems"
+    [suggestedItems]="availableSuggestedItems"
     (suggestedItemAdded)="onItemAdded($event)">
   </app-order-suggested-grid>
 </div>

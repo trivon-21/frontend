@@ -64,6 +64,18 @@
   align-items: center;
 }
 
+.btn-inventory-nav {
+  border-color: var(--mgr-primary, #00843d) !important;
+  background-color: var(--mgr-primary, #00843d) !important;
+  color: #fff !important;
+}
+
+.btn-inventory-nav:hover {
+  border-color: var(--mgr-primary-hover, #006b32) !important;
+  background-color: var(--mgr-primary-hover, #006b32) !important;
+  color: #fff !important;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -16,6 +16,8 @@ import { supplierIdOf, supplierNameOf } from '../../../../../services/inventory-
 export class OrderItemSearchComponent implements OnChanges {
   @Input() inventoryItems: InventoryItem[] = [];
   @Output() itemAdded = new EventEmitter<OrderItem>();
+  @Output() itemSelected = new EventEmitter<InventoryItem>();
+  @Output() itemCleared = new EventEmitter<void>();
 
   filteredInventory: InventoryItem[] = [];
   itemSearchQuery = '';
@@ -26,7 +28,20 @@ export class OrderItemSearchComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['inventoryItems']) {
-      this.filteredInventory = this.inventoryItems;
+      const q = (this.itemSearchQuery || '').toLowerCase().trim();
+      if (!q) {
+        this.filteredInventory = this.inventoryItems;
+      } else {
+        this.filteredInventory = this.inventoryItems.filter(i => i && (
+          (i.name?.toLowerCase() || '').includes(q) ||
+          (i.sku?.toLowerCase() || '').includes(q) ||
+          (i.itemClass?.toLowerCase() || '').includes(q) ||
+          (i.subcategory?.toLowerCase() || '').includes(q) ||
+          (i.brand?.toLowerCase() || '').includes(q) ||
+          (i.manufacturerPartNumber?.toLowerCase() || '').includes(q) ||
+          (i.compatibleModels || []).some((model) => model.toLowerCase().includes(q))
+        ));
+      }
     }
   }
 
@@ -54,6 +69,7 @@ export class OrderItemSearchComponent implements OnChanges {
     this.currentQuantity = 1;
     this.currentPrice = item.unitCost;
     this.showItemDropdown = false;
+    this.itemSelected.emit(item);
   }
 
   clearSelection(): void {
@@ -61,6 +77,7 @@ export class OrderItemSearchComponent implements OnChanges {
     this.itemSearchQuery = '';
     this.currentQuantity = 1;
     this.currentPrice = 0;
+    this.itemCleared.emit();
   }
 
   onItemInputBlur(): void {
@@ -70,6 +87,10 @@ export class OrderItemSearchComponent implements OnChanges {
   onItemInputFocus(): void {
     this.showItemDropdown = true;
     this.filterItems();
+  }
+
+  itemSupplier(item: InventoryItem): string {
+    return supplierNameOf(item);
   }
 
   addLineItem(): void {

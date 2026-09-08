@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { forkJoin } from 'rxjs';
 import { isLoanOverdue } from '../../services/inventory-domain';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface ActiveLoan {
   _id?: string;
@@ -29,8 +31,6 @@ interface ReturnLog {
 }
 
 type ReturnCondition = 'good' | 'damaged' | 'incomplete';
-
-import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-asset-management',
@@ -63,6 +63,29 @@ export class AssetManagementDashboardComponent implements OnInit {
   activeReturnLoan: ActiveLoan | null = null;
   returnCondition: ReturnCondition = 'good';
   returnNotes = '';
+  modalError = '';
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.showReturnModal && !this.isReturningActiveLoan) {
+      this.closeReturnModal();
+    }
+  }
+
+  get isReturningActiveLoan(): boolean {
+    return !!this.activeReturnLoan?._id && this.returningIds.has(this.activeReturnLoan._id);
+  }
+
+  get isNotesRequired(): boolean {
+    return this.returnCondition !== 'good';
+  }
+
+  get isConfirmDisabled(): boolean {
+    if (!this.activeReturnLoan?._id) return true;
+    if (this.isReturningActiveLoan) return true;
+    if (this.isNotesRequired && !this.returnNotes.trim()) return true;
+    return false;
+  }
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
@@ -90,9 +113,17 @@ export class AssetManagementDashboardComponent implements OnInit {
     );
   }
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    @Optional() private route?: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
+    this.route?.queryParams.subscribe((params) => {
+      if (params['tab'] === 'logs') {
+        this.activeTab = 'logs';
+      }
+    });
     this.fetchData();
   }
 
@@ -194,18 +225,29 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.activeReturnLoan = loan;
     this.returnCondition = this.returnConditions[loan._id!] || 'good';
     this.returnNotes = '';
+    this.modalError = '';
     this.showReturnModal = true;
   }
 
   closeReturnModal(): void {
-    if (this.activeReturnLoan && this.returningIds.has(this.activeReturnLoan._id!)) return;
+    if (this.isReturningActiveLoan) return;
     this.showReturnModal = false;
     this.activeReturnLoan = null;
     this.returnNotes = '';
+    this.modalError = '';
+  }
+
+  onConditionChange(): void {
+    this.modalError = '';
   }
 
   confirmReturn(): void {
     if (!this.activeReturnLoan?._id) return;
+    if (this.isNotesRequired && !this.returnNotes.trim()) {
+      this.modalError = 'Please provide notes detailing the damage or missing parts before confirming.';
+      return;
+    }
+    this.modalError = '';
     this.markReturned(this.activeReturnLoan._id, this.returnCondition, this.returnNotes);
   }
 
@@ -226,7 +268,11 @@ export class AssetManagementDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.returningIds.delete(id);
-        this.validationMessage = err.error?.message || 'The tool could not be returned.';
+        const errMsg = err.error?.message || 'The tool could not be returned.';
+        if (this.showReturnModal) {
+          this.modalError = errMsg;
+        }
+        this.validationMessage = errMsg;
       },
     });
   }
