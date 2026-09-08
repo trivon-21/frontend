@@ -1,0 +1,11 @@
+.approval-card-primary { position: relative; display: flex; width: 100%; color: inherit; text-decoration: none; }
+.approval-card-primary::after { position: absolute; inset: 0; content: ''; }
+.approval-card-primary:focus-visible { outline: none; }
+.approval-card-primary:focus-visible::after { border-radius: var(--card-radius); box-shadow: inset 0 0 0 2px var(--primary-main); }
+.approval-links { position: relative; z-index: 1; margin-top: auto; }
+.clickable-sub-stat { padding: 3px 0; color: inherit; text-decoration: none; }
+.clickable-sub-stat:hover .sub-label { color: var(--primary-main); }
+.clickable-sub-stat:focus-visible { outline: 2px solid var(--primary-main); outline-offset: 3px; }
+.approval-detail { color: var(--text-primary); font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+.risk-text { color: var(--error); }

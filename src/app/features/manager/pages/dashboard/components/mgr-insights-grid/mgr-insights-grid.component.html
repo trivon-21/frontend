@@ -1,0 +1,154 @@
+<section class="analytics-insights-section" aria-labelledby="insights-heading">
+  <div class="insights-header">
+    <div class="insights-title-group">
+      <div class="insights-icon-box">
+        <lucide-angular name="bar-chart-3" [size]="20"></lucide-angular>
+      </div>
+      <div>
+        <h2 id="insights-heading" class="insights-title">Key Analytics & Insights</h2>
+        <p class="insights-subtitle">Live 7-day executive pulse across operations, finance, purchasing, and risk.</p>
+      </div>
+    </div>
+    <div class="insights-header-actions">
+      <span class="insights-period-chip">Last 7 Days</span>
+      <a routerLink="/manager/analytics/period-performance" class="insights-all-btn mgr-btn mgr-btn--secondary mgr-btn--compact">
+        Full Analytics
+        <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+      </a>
+    </div>
+  </div>
+
+  <div class="insights-grid">
+    <!-- 1. Service Operations Pillar -->
+    <article class="insight-card">
+      <div class="insight-card-top">
+        <div class="insight-meta">
+          <span class="insight-pillar">Service Operations</span>
+          <span class="insight-highlight">{{ totalTicketsResolved }} Resolved</span>
+        </div>
+        <div class="insight-icon-bubble service">
+          <lucide-angular name="circle-check-big" [size]="18"></lucide-angular>
+        </div>
+      </div>
+      <div class="insight-metrics-row">
+        <div class="insight-metric">
+          <span class="metric-label">Avg Resolution</span>
+          <strong class="metric-value">{{ averageResolutionHours | number:'1.0-1' }}h</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">Created</span>
+          <strong class="metric-value">{{ analyticsData?.performance?.ticketsCreated?.current ?? 0 }}</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">SLA Overdue</span>
+          <strong class="metric-value" [class.risk-text]="(data.stats.slaRisk.subStats[0]?.value || 0) > 0">
+            {{ data.stats.slaRisk.subStats[0]?.value || 0 }}
+          </strong>
+        </div>
+      </div>
+      <div class="insight-card-footer">
+        <a routerLink="/manager/analytics/service-operations" class="insight-jump-link">
+          <span>View Operations Flow</span>
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
+    </article>
+
+    <!-- 2. Financial Overview Pillar -->
+    <article class="insight-card">
+      <div class="insight-card-top">
+        <div class="insight-meta">
+          <span class="insight-pillar">Financial Overview</span>
+          <span class="insight-highlight">{{ formatCurrency(collectedRevenue) }}</span>
+        </div>
+        <div class="insight-icon-bubble finance">
+          <lucide-angular name="dollar-sign" [size]="18"></lucide-angular>
+        </div>
+      </div>
+      <div class="insight-metrics-row">
+        <div class="insight-metric">
+          <span class="metric-label">Operating Contrib.</span>
+          <strong class="metric-value">{{ formatCurrency(operatingContribution) }}</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">Commitments</span>
+          <strong class="metric-value">{{ formatCurrency(purchaseCommitments) }}</strong>
+        </div>
+      </div>
+      <div class="insight-card-footer">
+        <a routerLink="/manager/analytics/financial-overview" class="insight-jump-link">
+          <span>View Financial Details</span>
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
+    </article>
+
+    <!-- 3. Purchasing & Approvals Pillar -->
+    <article class="insight-card">
+      <div class="insight-card-top">
+        <div class="insight-meta">
+          <span class="insight-pillar">Purchasing & Approvals</span>
+          <span class="insight-highlight">{{ formatCurrency(data.stats.pendingApprovals.subStats[1]?.value || pendingApprovalValue) }}</span>
+        </div>
+        <div class="insight-icon-bubble purchasing">
+          <lucide-angular name="shopping-bag" [size]="18"></lucide-angular>
+        </div>
+      </div>
+      <div class="insight-metrics-row">
+        <div class="insight-metric">
+          <span class="metric-label">Pending Decisions</span>
+          <strong class="metric-value">{{ data.stats.pendingApprovals.total }} queue</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">Oldest Pending</span>
+          <strong class="metric-value">{{ oldestPendingAgeHours > 0 ? (oldestPendingAgeHours + 'h') : 'None' }}</strong>
+        </div>
+        <div class="insight-metric" *ngIf="managerApprovalTurnaround > 0">
+          <span class="metric-label">Avg Speed</span>
+          <strong class="metric-value">{{ managerApprovalTurnaround | number:'1.0-1' }}h</strong>
+        </div>
+      </div>
+      <div class="insight-card-footer">
+        <a routerLink="/manager/analytics/purchasing-approvals" class="insight-jump-link">
+          <span>View Approval Pipeline</span>
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
+    </article>
+
+    <!-- 4. Team Workload Pillar -->
+    <article class="insight-card">
+      <div class="insight-card-top">
+        <div class="insight-meta">
+          <span class="insight-pillar">Team Workload</span>
+          <span class="insight-highlight">
+            {{ totalTechniciansActive > 0 ? (totalTechniciansActive + ' Active') : 'No Active Staff' }}
+          </span>
+        </div>
+        <div class="insight-icon-bubble workforce" [class.warning]="totalWorkloadSlaRisk > 0">
+          <lucide-angular name="users" [size]="18"></lucide-angular>
+        </div>
+      </div>
+      <div class="insight-metrics-row">
+        <div class="insight-metric">
+          <span class="metric-label">Assigned</span>
+          <strong class="metric-value">{{ totalWorkloadActiveTickets }}</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">SLA At Risk</span>
+          <strong class="metric-value" [class.risk-text]="totalWorkloadSlaRisk > 0">{{ totalWorkloadSlaRisk }}</strong>
+        </div>
+        <div class="insight-metric">
+          <span class="metric-label">Unassigned</span>
+          <strong class="metric-value">{{ data.stats.unassignedTickets.total }}</strong>
+        </div>
+      </div>
+      <div class="insight-card-footer">
+        <a routerLink="/manager/work-items" class="insight-jump-link">
+          <span>View Work Queue</span>
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </a>
+      </div>
+    </article>
+  </div>
+</section>

@@ -63,25 +63,16 @@ export interface ProcurementWorkflowSummary {
     awaitingManager: { purchaseRequests: number; receiptAuthorizations: number };
     readyToReceive: { purchaseOrders: number; receiptAuthorizations: number };
   };
-  /** @deprecated Use readyToReceive. */
-  awaitingReceipt: number;
-  /** @deprecated Use awaitingReceiptReconciliation. */
-  awaitingFinance: number;
 }
 
 export interface LogisticsDashboardItem {
-  id: string;
   orderId: string;
   customer: string;
   status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
-  statusVersion: number;
-  type: string;
   courier?: string;
   trackId?: string;
-  itemCount: number;
   date?: string;
   lastMovedAt?: string | Date;
-  completedAt?: string | Date;
 }
 
 export interface InventoryListParams {
@@ -190,8 +181,6 @@ function emptyProcurementWorkflow(): ProcurementWorkflowSummary {
       awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
       readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
     },
-    awaitingReceipt: 0,
-    awaitingFinance: 0,
   };
 }
 
@@ -219,10 +208,8 @@ export function normalizeInventoryDashboard(
   const fallback = emptyDashboard(data?.status || 'Offline');
   const stats = data?.stats;
   const workflow = data?.procurementWorkflow;
-  const readyToReceive = workflow?.readyToReceive ?? workflow?.awaitingReceipt ?? 0;
-  const awaitingReceiptReconciliation = workflow?.awaitingReceiptReconciliation
-    ?? workflow?.awaitingFinance
-    ?? 0;
+  const readyToReceive = workflow?.readyToReceive ?? 0;
+  const awaitingReceiptReconciliation = workflow?.awaitingReceiptReconciliation ?? 0;
   return {
     ...fallback,
     ...data,
@@ -257,8 +244,6 @@ export function normalizeInventoryDashboard(
           receiptAuthorizations: workflow?.breakdown?.readyToReceive?.receiptAuthorizations ?? 0,
         },
       },
-      awaitingReceipt: readyToReceive,
-      awaitingFinance: awaitingReceiptReconciliation,
     },
     logistics: (data?.logistics || []).map((l) => ({ ...l })),
   };

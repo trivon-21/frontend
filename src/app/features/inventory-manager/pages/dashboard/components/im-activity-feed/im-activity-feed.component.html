@@ -1,0 +1,25 @@
+<div class="content-card activity-card">
+  <div class="card-header">
+    <h2 class="card-title">Recent Activity</h2>
+    <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
+  </div>
+  <div class="timeline-container">
+    <div *ngFor="let activity of activities" class="timeline-item">
+      <div class="timeline-line"></div>
+      <div class="timeline-marker" [ngClass]="activity.type">
+        <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <p class="activity-title">{{ activity.title }}</p>
+          <span class="activity-time">{{ activity.timeAgo }}</span>
+        </div>
+        <div class="activity-actions" *ngIf="activity.actionLabel">
+          <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
+            {{ activity.actionLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -32,8 +32,6 @@ describe('normalizeInventoryDashboard', () => {
           awaitingManager: { purchaseRequests: 2, receiptAuthorizations: 1 },
           readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
         },
-        awaitingReceipt: 4,
-        awaitingFinance: 1,
       },
     });
 
@@ -58,15 +56,11 @@ describe('normalizeInventoryDashboard', () => {
     const data = normalizeInventoryDashboard({
       logistics: [
         {
-          id: 'ORD-101',
           orderId: 'ORD-101',
           customer: 'Test Customer',
           status: 'to-pack',
-          statusVersion: 0,
-          type: 'standard',
           courier: 'DHL',
           trackId: 'DHL-1234',
-          itemCount: 3,
         },
       ],
     });
@@ -77,13 +71,14 @@ describe('normalizeInventoryDashboard', () => {
     expect(data.logistics[0].courier).toBe('DHL');
   });
 
-  it('maps legacy three-stage responses into safe compatibility defaults', () => {
+  it('defaults missing procurement workflow fields to zero rather than guessing', () => {
     const data = normalizeInventoryDashboard({
-      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 } as never,
+      procurementWorkflow: { awaitingManager: 1 } as never,
     });
 
-    expect(data.procurementWorkflow.readyToReceive).toBe(2);
-    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(3);
+    expect(data.procurementWorkflow.awaitingManager).toBe(1);
+    expect(data.procurementWorkflow.readyToReceive).toBe(0);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(0);
     expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(0);
     expect(data.procurementWorkflow.readyToIssue).toBe(0);
   });
@@ -123,8 +118,6 @@ describe('normalizeInventoryDashboard', () => {
           awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
           readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
         },
-        awaitingReceipt: 0,
-        awaitingFinance: 0,
       },
     });
 
@@ -189,8 +182,6 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
           awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 0 },
           readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
         },
-        awaitingReceipt: 4,
-        awaitingFinance: 5,
       },
     });
 

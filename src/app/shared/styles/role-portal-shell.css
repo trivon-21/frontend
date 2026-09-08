@@ -44,6 +44,31 @@
   --surface-overlay: rgba(0, 0, 0, 0.4);
   --text-inverse: #ffffff;
   --warning-light: #fef3c7;
+  --warning-dark: #92400e;
+  --warning-border: #fcd34d;
+
+  /* House constants shared by both dashboards — kills scattered raw hex/px
+     literals across inventory-manager-dashboard.component.css and
+     manager-dashboard.component.css. */
+  --heading-primary: #1b2f27;
+  --card-radius: 14px;
+  --control-radius: 10px;
+  --card-shadow: 0 4px 12px rgb(0 0 0 / 3%);
+  --pill-radius: 999px;
+  --layout-max-width: 1400px;
+
+  /* Canonical status-tone scale — one definition replacing the eight
+     independent badge/pill color systems previously hand-rolled per page. */
+  --tone-neutral-bg: var(--background-hover);
+  --tone-neutral-fg: var(--text-secondary);
+  --tone-success-bg: var(--success-light);
+  --tone-success-fg: var(--success);
+  --tone-warning-bg: var(--warning-light);
+  --tone-warning-fg: var(--warning-dark);
+  --tone-danger-bg: var(--error-light);
+  --tone-danger-fg: var(--error);
+  --tone-info-bg: var(--info-light);
+  --tone-info-fg: var(--info);
 }
 
 * {

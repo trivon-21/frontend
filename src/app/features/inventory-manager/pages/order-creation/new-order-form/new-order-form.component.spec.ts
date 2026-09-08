@@ -478,29 +478,32 @@ describe('NewOrderFormComponent concurrency state', () => {
       expect(component.autoSelectedSupplier).toBeFalse();
     });
 
-    it('filters availableInventoryItems to only items from selected supplier when supplier is selected first', () => {
+    it('filters availableInventoryItems to only items from selected supplier, plus unassigned items, when supplier is selected first', () => {
       const { component } = setupWithMocks();
       component.ngOnInit();
+      spyOn(window, 'confirm');
 
-      // Setup 2 inventory items: one for Daikin Lanka, one for Carrier Air
+      // 2 items with a supplier, 1 with none
       component.inventoryItems = [
         { _id: 'i-1', name: 'Daikin Filter', sku: 'DF-01', supplierId: 'sup-1', supplierName: 'Daikin Lanka' } as any,
         { _id: 'i-2', name: 'Carrier Motor', sku: 'CM-01', supplierId: 'sup-2', supplierName: 'Carrier Air' } as any,
+        { _id: 'i-3', name: 'Generic Sealant', sku: 'GS-01' } as any,
       ];
 
       // No supplier selected: all items available
       component.selectedSupplier = '';
-      expect(component.availableInventoryItems.length).toBe(2);
+      expect(component.availableInventoryItems.length).toBe(3);
 
-      // Select Daikin Lanka: only Daikin Filter available
+      // Select Daikin Lanka: Daikin Filter + the unassigned item
       component.onSupplierSelected('Daikin Lanka');
-      expect(component.availableInventoryItems.length).toBe(1);
-      expect(component.availableInventoryItems[0].name).toBe('Daikin Filter');
+      expect(component.availableInventoryItems.map(i => i.name).sort()).toEqual(['Daikin Filter', 'Generic Sealant']);
 
-      // Select Carrier Air: only Carrier Motor available
+      // Select Carrier Air: Carrier Motor + the unassigned item
       component.onSupplierSelected('Carrier Air');
-      expect(component.availableInventoryItems.length).toBe(1);
-      expect(component.availableInventoryItems[0].name).toBe('Carrier Motor');
+      expect(component.availableInventoryItems.map(i => i.name).sort()).toEqual(['Carrier Motor', 'Generic Sealant']);
+
+      // No cart items were ever staged, so no discard confirmation was needed
+      expect(window.confirm).not.toHaveBeenCalled();
     });
 
     it('displays all items when registering a new supplier or after a new supplier is added', () => {
@@ -510,15 +513,16 @@ describe('NewOrderFormComponent concurrency state', () => {
       component.inventoryItems = [
         { _id: 'i-1', name: 'Daikin Filter', sku: 'DF-01', supplierId: 'sup-1', supplierName: 'Daikin Lanka' } as any,
         { _id: 'i-2', name: 'Carrier Motor', sku: 'CM-01', supplierId: 'sup-2', supplierName: 'Carrier Air' } as any,
+        { _id: 'i-3', name: 'Generic Sealant', sku: 'GS-01' } as any,
       ];
 
-      // Existing supplier selected: 1 item
+      // Existing supplier selected: Daikin Filter + unassigned item
       component.onSupplierSelected('Daikin Lanka');
-      expect(component.availableInventoryItems.length).toBe(1);
+      expect(component.availableInventoryItems.length).toBe(2);
 
       // User starts registering a new supplier
       component.onRegisteringNewSupplier(true);
-      expect(component.availableInventoryItems.length).toBe(2);
+      expect(component.availableInventoryItems.length).toBe(3);
 
       // User adds the new supplier
       orderService.addSupplier.and.returnValue(of({
@@ -529,7 +533,151 @@ describe('NewOrderFormComponent concurrency state', () => {
 
       // Now the newly added supplier is selected, and ALL items are displayed
       expect(component.selectedSupplier).toBe('Universal Spare Parts Ltd');
-      expect(component.availableInventoryItems.length).toBe(2);
+      expect(component.availableInventoryItems.length).toBe(3);
+    });
+
+    it('includes unassigned suggested items under any selected supplier', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+
+      component.suggestedItems = [
+        { _id: 's-1', name: 'Daikin Coil', sku: 'DC-01', supplierId: 'sup-1', supplierName: 'Daikin Lanka' } as any,
+        { _id: 's-2', name: 'Bulk Sealant', sku: 'BS-01' } as any,
+      ];
+
+      component.selectedSupplier = 'Daikin Lanka';
+      expect(component.availableSuggestedItems.map(i => i.name).sort()).toEqual(['Bulk Sealant', 'Daikin Coil']);
+    });
+
+    it('restricts relevantSuppliers to the staged item supplier before any item is added', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+
+      const mockItem: any = {
+        _id: 'inv-item-1', name: 'Cooling Coil', sku: 'CC-01', supplierId: 'sup-1', supplierName: 'Daikin Lanka',
+      };
+      component.onItemSelected(mockItem);
+      expect(component.relevantSuppliers).toEqual([{ _id: 'sup-1', name: 'Daikin Lanka' }]);
+
+      component.onItemCleared();
+      expect(component.relevantSuppliers).toEqual([]);
+    });
+
+    it('leaves relevantSuppliers unrestricted when the staged item has no assigned supplier', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+
+      component.onItemSelected({ _id: 'i-3', name: 'Generic Sealant', sku: 'GS-01' } as any);
+      expect(component.relevantSuppliers).toEqual([]);
+    });
+
+    it('prompts to discard the cart when switching to a different supplier with items staged', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = 'Daikin Lanka';
+      component.orderItems = [{
+        inventoryId: 'inv-item-1', name: 'Cooling Coil', sku: 'CC-01',
+        quantity: 1, unitCost: 1500, estimatedTotal: 1500, supplierId: 'sup-1', supplierName: 'Daikin Lanka',
+      }];
+      const clearSelection = jasmine.createSpy('clearSelection');
+      component.itemSearchRef = { clearSelection } as any;
+      spyOn(window, 'confirm').and.returnValue(true);
+
+      component.onSupplierSelected('Carrier Air');
+
+      expect(window.confirm).toHaveBeenCalledOnceWith(
+        'Switching to Carrier Air will remove 1 item from this order. Continue?'
+      );
+      expect(component.orderItems).toEqual([]);
+      expect(component.selectedSupplier).toBe('Carrier Air');
+      expect(clearSelection).toHaveBeenCalled();
+    });
+
+    it('pluralizes the discard confirmation for more than one item', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = 'Daikin Lanka';
+      component.orderItems = [
+        { inventoryId: 'i-1', name: 'A', sku: 'A-1', quantity: 1, unitCost: 1, estimatedTotal: 1, supplierId: 'sup-1', supplierName: 'Daikin Lanka' },
+        { inventoryId: 'i-2', name: 'B', sku: 'B-1', quantity: 1, unitCost: 1, estimatedTotal: 1, supplierId: 'sup-1', supplierName: 'Daikin Lanka' },
+      ];
+      spyOn(window, 'confirm').and.returnValue(true);
+
+      component.onSupplierSelected('Carrier Air');
+
+      expect(window.confirm).toHaveBeenCalledOnceWith(
+        'Switching to Carrier Air will remove 2 items from this order. Continue?'
+      );
+    });
+
+    it('keeps the cart and reverts the supplier field when the discard confirmation is cancelled', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = 'Daikin Lanka';
+      const cartSnapshot = [{
+        inventoryId: 'inv-item-1', name: 'Cooling Coil', sku: 'CC-01',
+        quantity: 1, unitCost: 1500, estimatedTotal: 1500, supplierId: 'sup-1', supplierName: 'Daikin Lanka',
+      }];
+      component.orderItems = [...cartSnapshot];
+      spyOn(window, 'confirm').and.returnValue(false);
+      const revertBefore = component.supplierRevertSignal;
+
+      component.onSupplierSelected('Carrier Air');
+
+      expect(component.orderItems).toEqual(cartSnapshot);
+      expect(component.selectedSupplier).toBe('Daikin Lanka');
+      expect(component.supplierRevertSignal).toBe(revertBefore + 1);
+    });
+
+    it('does not prompt when re-selecting the currently selected supplier with a non-empty cart', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = 'Daikin Lanka';
+      component.orderItems = [{
+        inventoryId: 'inv-item-1', name: 'Cooling Coil', sku: 'CC-01',
+        quantity: 1, unitCost: 1500, estimatedTotal: 1500, supplierId: 'sup-1', supplierName: 'Daikin Lanka',
+      }];
+      spyOn(window, 'confirm');
+
+      component.onSupplierSelected('Daikin Lanka');
+
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(component.orderItems.length).toBe(1);
+    });
+
+    it('does not prompt when selecting a supplier with an empty cart', () => {
+      const { component } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = '';
+      component.orderItems = [];
+      spyOn(window, 'confirm');
+
+      component.onSupplierSelected('Daikin Lanka');
+
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(component.selectedSupplier).toBe('Daikin Lanka');
+    });
+
+    it('stamps the selected supplier onto an unassigned line item in buildPayload via submitOrder', () => {
+      const { component, orderService } = setupWithMocks();
+      component.ngOnInit();
+      component.selectedSupplier = 'Daikin Lanka';
+      component.orderItems = [{
+        inventoryId: 'i-3', name: 'Generic Sealant', sku: 'GS-01',
+        quantity: 1, unitCost: 300, estimatedTotal: 300,
+      }];
+
+      component.submitOrder();
+
+      expect(orderService.submitOrderRequest).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          supplierId: 'sup-1',
+          supplierName: 'Daikin Lanka',
+          items: [jasmine.objectContaining({ supplierId: 'sup-1' })],
+        }),
+        false,
+        null as any,
+      );
     });
   });
 });

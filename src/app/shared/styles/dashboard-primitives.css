@@ -1,0 +1,263 @@
+/**
+ * Dashboard Primitives
+ *
+ * Shared visual language for the Inventory-Manager and Manager dashboards.
+ * Scoped to `.role-portal-shell` (both portal layouts carry that class), so
+ * these rules reach both dashboards without crossing the `.mgr-*`/`.im-*`
+ * button-scoping boundary those two portals otherwise keep separate.
+ *
+ * Values come from `role-portal-shell.css`'s `:host` token block — see
+ * --card-radius, --control-radius, --card-shadow, --heading-primary,
+ * --pill-radius and the --tone-* status scale defined there.
+ */
+
+.role-portal-shell :is(.mgr-page, .analytics-page, .inventory-dashboard) {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+}
+
+/* ── Stat / KPI card ─────────────────────────────────────────────────── */
+
+.role-portal-shell .summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 16px);
+  padding: 20px;
+  background: var(--background-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.role-portal-shell .summary-card.clickable {
+  cursor: pointer;
+}
+
+.role-portal-shell .summary-card.clickable:hover {
+  box-shadow: var(--shadow-large, 0 8px 16px rgba(59, 90, 56, 0.2));
+  transform: translateY(-2px);
+}
+
+.role-portal-shell .summary-card:focus-visible {
+  outline: 2px solid var(--primary-main);
+  outline-offset: 2px;
+}
+
+.role-portal-shell .summary-card .card-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md, 12px);
+}
+
+.role-portal-shell .summary-card .card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.role-portal-shell .summary-card .card-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.role-portal-shell .summary-card .card-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--heading-primary);
+  line-height: 1.1;
+}
+
+.role-portal-shell .summary-card .card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-md, 12px);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+}
+
+.role-portal-shell .summary-card .card-footer {
+  display: flex;
+  gap: var(--spacing-md, 12px);
+  padding-top: 16px;
+  border-top: 1px solid var(--background-page);
+}
+
+.role-portal-shell .summary-card .sub-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.role-portal-shell .summary-card .sub-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-portal-shell .summary-card .sub-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--heading-primary);
+}
+
+.role-portal-shell .summary-card .sub-value.risk-text {
+  color: var(--error);
+}
+
+.role-portal-shell .summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-lg, 16px);
+  margin-bottom: var(--spacing-xl, 24px);
+}
+
+@media (max-width: 1100px) {
+  .role-portal-shell .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .role-portal-shell .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Content card / section header ──────────────────────────────────── */
+
+.role-portal-shell .content-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--background-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.role-portal-shell .content-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg, 16px);
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--background-page);
+  flex-wrap: wrap;
+}
+
+.role-portal-shell .title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 12px);
+  min-width: 0;
+}
+
+.role-portal-shell .primary-icon {
+  color: var(--primary-main);
+}
+
+.role-portal-shell .content-card .card-title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+
+.role-portal-shell .count-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: var(--spacing-xs, 4px) var(--spacing-md, 12px);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.role-portal-shell .count-badge--neutral {
+  background: var(--tone-neutral-bg);
+  color: var(--tone-neutral-fg);
+}
+
+.role-portal-shell .count-badge--approval {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+}
+
+.role-portal-shell .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: var(--pill-radius);
+  background: var(--tone-success-bg);
+  color: var(--tone-success-fg);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.role-portal-shell .status-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.role-portal-shell .status-badge .dot.syncing {
+  animation: role-portal-pulse 1.4s ease-in-out infinite;
+}
+
+.role-portal-shell .status-badge.offline {
+  background: var(--tone-danger-bg);
+  color: var(--tone-danger-fg);
+}
+
+.role-portal-shell .status-badge.stale {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+}
+
+@keyframes role-portal-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-portal-shell .status-badge .dot.syncing {
+    animation: none;
+  }
+
+  .role-portal-shell .summary-card.clickable:hover {
+    transform: none;
+  }
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+
+.role-portal-shell .empty-state {
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}

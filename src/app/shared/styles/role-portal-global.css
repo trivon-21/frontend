@@ -1,5 +1,6 @@
 @import './inventory-manager-controls.css';
 @import './manager-portal-ui.css';
+@import './dashboard-primitives.css';
 
 .role-portal-shell {
   --alx-table-cell-padding-block: 12px;
@@ -194,6 +195,13 @@
   background: var(--error-light);
 }
 
+.role-portal-shell .portal-state.warning,
+.role-portal-shell .portal-state--warning {
+  color: var(--warning-dark);
+  background: var(--warning-light);
+  border-color: var(--warning-border);
+}
+
 .role-portal-shell .portal-retry,
 .role-portal-shell .portal-retry-button {
   padding: 9px 18px;
@@ -331,6 +339,43 @@
   line-height: 1.2;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* Canonical status-tone modifiers — one scale for every badge/pill on
+   either dashboard, replacing per-page hand-rolled color pairs. */
+.role-portal-shell .pill--success,
+.role-portal-shell .status-pill--success,
+.role-portal-shell .alx-table-status--success {
+  background: var(--tone-success-bg);
+  color: var(--tone-success-fg);
+}
+
+.role-portal-shell .pill--warning,
+.role-portal-shell .status-pill--warning,
+.role-portal-shell .alx-table-status--warning {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+}
+
+.role-portal-shell .pill--danger,
+.role-portal-shell .status-pill--danger,
+.role-portal-shell .alx-table-status--danger {
+  background: var(--tone-danger-bg);
+  color: var(--tone-danger-fg);
+}
+
+.role-portal-shell .pill--info,
+.role-portal-shell .status-pill--info,
+.role-portal-shell .alx-table-status--info {
+  background: var(--tone-info-bg);
+  color: var(--tone-info-fg);
+}
+
+.role-portal-shell .pill--neutral,
+.role-portal-shell .status-pill--neutral,
+.role-portal-shell .alx-table-status--neutral {
+  background: var(--tone-neutral-bg);
+  color: var(--tone-neutral-fg);
 }
 
 .role-portal-shell lucide-angular,

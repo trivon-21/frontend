@@ -91,13 +91,13 @@ export interface ManagerDashboardData {
   stats: ManagerSummaryStats;
   inventoryKpis: {
     reservedItems: InventoryKpiItem;
-    lowStockAlerts: InventoryKpiItem;
-    pendingMaterialRequests: InventoryKpiItem;
+    belowReorderItems: InventoryKpiItem;
+    outOfStockItems: InventoryKpiItem;
+    stockRiskItems: InventoryKpiItem;
     blockedMaterialRequests: InventoryKpiItem;
   };
-  recentActivity: ActivityItem[];
   pendingActions: PendingAction[];
-  recentOrders?: RecentCustomerOrder[];
+  pendingActionsTotal?: number;
   workloadPreview?: WorkloadEntry[];
 }
 
@@ -110,14 +110,6 @@ export class ManagerDashboardService {
       map((data) => ({
         ...data,
         currentDate: new Date(data.currentDate),
-        recentActivity: (data.recentActivity || []).map((activity) => {
-          const timestamp = new Date(activity.timestamp);
-          return { ...activity, timestamp, timeAgo: this.getTimeAgo(timestamp) };
-        }),
-        recentOrders: (data.recentOrders || []).map((order) => {
-          const created = new Date(order.createdAt);
-          return { ...order, createdAt: created, timeAgo: this.getTimeAgo(created) };
-        }),
       })),
     );
   }

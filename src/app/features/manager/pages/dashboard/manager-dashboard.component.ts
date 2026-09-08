@@ -5,18 +5,28 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 import {
   ManagerDashboardData,
   ManagerDashboardService,
-  PendingAction,
-  WorkloadEntry,
 } from '../../services/manager-dashboard.service';
 import {
   AnalyticsData,
   AnalyticsService,
 } from '../../services/analytics.service';
+import { MgrSummaryCardsComponent } from './components/mgr-summary-cards/mgr-summary-cards.component';
+import { MgrInsightsGridComponent } from './components/mgr-insights-grid/mgr-insights-grid.component';
+import { MgrPendingActionsComponent } from './components/mgr-pending-actions/mgr-pending-actions.component';
+import { MgrWorkforceCardComponent } from './components/mgr-workforce-card/mgr-workforce-card.component';
 
 @Component({
   selector: 'app-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, PortalIconsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    PortalIconsModule,
+    MgrSummaryCardsComponent,
+    MgrInsightsGridComponent,
+    MgrPendingActionsComponent,
+    MgrWorkforceCardComponent,
+  ],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
@@ -33,20 +43,19 @@ export class ManagerDashboardComponent implements OnInit {
     },
     inventoryKpis: {
       reservedItems: { label: 'Reserved Items', value: 0, icon: 'clipboard-check' },
-      lowStockAlerts: { label: 'Low Stock Alerts', value: 0, icon: 'triangle-alert' },
-      pendingMaterialRequests: { label: 'Pending Material Requests', value: 0, icon: 'package' },
+      belowReorderItems: { label: 'Below Reorder', value: 0, icon: 'triangle-alert' },
+      outOfStockItems: { label: 'Out of Stock', value: 0, icon: 'triangle-alert' },
+      stockRiskItems: { label: 'Stock Risk', value: 0, icon: 'triangle-alert' },
       blockedMaterialRequests: { label: 'Blocked Material Requests', value: 0, icon: 'triangle-alert' },
     },
-    recentActivity: [],
     pendingActions: [],
+    pendingActionsTotal: 0,
     workloadPreview: [],
   };
   analyticsData: AnalyticsData | null = null;
   analyticsLoading = false;
   loading = true;
   errorMessage = '';
-
-  activeActionFilter: 'all' | 'approvals' | 'tickets' | 'inventory' = 'all';
 
   constructor(
     private dashboardService: ManagerDashboardService,
@@ -81,154 +90,5 @@ export class ManagerDashboardComponent implements OnInit {
         this.analyticsLoading = false;
       },
     });
-  }
-
-  setActionFilter(filter: 'all' | 'approvals' | 'tickets' | 'inventory'): void {
-    this.activeActionFilter = filter;
-  }
-
-  get filteredActions(): PendingAction[] {
-    const actions = this.data.pendingActions || [];
-    if (this.activeActionFilter === 'approvals') {
-      return actions.filter(
-        (a) => a.type === 'approval' || a.category === 'approval' || a.type === 'order' || a.type === 'authorization',
-      );
-    }
-    if (this.activeActionFilter === 'tickets') {
-      return actions.filter(
-        (a) => a.type === 'ticket' || a.type === 'sla' || a.type === 'escalation',
-      );
-    }
-    if (this.activeActionFilter === 'inventory') {
-      return actions.filter(
-        (a) => a.type === 'inventory' || a.category === 'inventory',
-      );
-    }
-    return actions;
-  }
-
-  get approvalActionsCount(): number {
-    return (this.data.pendingActions || []).filter(
-      (a) => a.type === 'approval' || a.category === 'approval' || a.type === 'order' || a.type === 'authorization',
-    ).length;
-  }
-
-  get ticketActionsCount(): number {
-    return (this.data.pendingActions || []).filter(
-      (a) => a.type === 'ticket' || a.type === 'sla' || a.type === 'escalation',
-    ).length;
-  }
-
-  get inventoryActionsCount(): number {
-    return (this.data.pendingActions || []).filter(
-      (a) => a.type === 'inventory' || a.category === 'inventory',
-    ).length;
-  }
-
-  isApprovalAction(action: PendingAction): boolean {
-    return action.type === 'approval' || action.category === 'approval' || action.type === 'order' || action.type === 'authorization';
-  }
-
-  formatCurrency(value: number | undefined | null): string {
-    return 'LKR ' + (Number(value) || 0).toLocaleString('en-US');
-  }
-
-  getActivityIcon(type: string): string {
-    if (type === 'escalation') return 'triangle-alert';
-    if (type === 'order' || type === 'approval') return 'shopping-bag';
-    if (type === 'authorization') return 'clipboard-check';
-    return 'clipboard-list';
-  }
-
-  getPriorityClass(priority: string): string {
-    return priority === 'high' ? 'critical' : priority === 'medium' ? 'warning' : 'normal';
-  }
-
-  get totalTicketsResolved(): number {
-    return this.analyticsData?.performance?.ticketsResolved?.current ?? 0;
-  }
-
-  get averageResolutionHours(): number {
-    return this.analyticsData?.performance?.averageResolutionHours?.current ?? 0;
-  }
-
-  get collectedRevenue(): number {
-    return this.analyticsData?.financial?.collectedRevenue?.current ?? 0;
-  }
-
-  get operatingContribution(): number {
-    return this.analyticsData?.financial?.operatingContribution?.current ?? 0;
-  }
-
-  get purchaseCommitments(): number {
-    return this.analyticsData?.financial?.purchaseCommitments?.value ?? 0;
-  }
-
-  get pendingApprovalValue(): number {
-    return this.analyticsData?.purchasing?.pendingApprovalValue?.value ?? 0;
-  }
-
-  get oldestPendingAgeHours(): number {
-    return this.analyticsData?.purchasing?.oldestPendingAgeHours ?? 0;
-  }
-
-  get managerApprovalTurnaround(): number {
-    return this.analyticsData?.purchasing?.averageManagerApprovalHours ?? 0;
-  }
-
-  get outOfStockCount(): number {
-    return this.analyticsData?.inventoryRisk?.outOfStockItems?.value ?? 0;
-  }
-
-  get lowStockCount(): number {
-    return (
-      this.data.inventoryKpis?.lowStockAlerts?.value ??
-      this.analyticsData?.inventoryRisk?.lowStockItems?.value ??
-      0
-    );
-  }
-
-  get totalStockRiskCount(): number {
-    return this.lowStockCount + this.outOfStockCount;
-  }
-
-  get reservedItemsCount(): number {
-    return (
-      this.data.inventoryKpis?.reservedItems?.value ??
-      this.analyticsData?.inventoryRisk?.reservedUnits?.value ??
-      0
-    );
-  }
-
-  get blockedRequestsCount(): number {
-    return this.data.inventoryKpis?.blockedMaterialRequests?.value ?? 0;
-  }
-
-  get workloadList(): WorkloadEntry[] {
-    return this.data.workloadPreview || [];
-  }
-
-  get totalTechniciansActive(): number {
-    return this.workloadList.length;
-  }
-
-  get topLoadedTechnician(): WorkloadEntry | null {
-    return this.workloadList.length > 0 ? this.workloadList[0] : null;
-  }
-
-  get totalWorkloadSlaRisk(): number {
-    return this.workloadList.reduce((sum, item) => sum + (item.slaRisk || 0), 0);
-  }
-
-  get totalWorkloadActiveTickets(): number {
-    return this.workloadList.reduce((sum, item) => sum + (item.active || 0), 0);
-  }
-
-  get nonPoExceptionsCount(): number {
-    return this.analyticsData?.exceptions?.nonPoCount ?? 0;
-  }
-
-  get nonPoExceptionsValue(): number {
-    return this.analyticsData?.exceptions?.nonPoValue ?? 0;
   }
 }

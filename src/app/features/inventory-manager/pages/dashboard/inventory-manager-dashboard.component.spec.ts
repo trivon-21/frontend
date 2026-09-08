@@ -30,32 +30,22 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
         awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 1 },
         readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
       },
-      awaitingReceipt: 4,
-      awaitingFinance: 1,
     },
     logistics: [
       {
-        id: 'ORD-1001',
         orderId: 'ORD-1001',
         customer: 'Colombo Air Care',
         status: 'to-pack',
-        statusVersion: 0,
-        type: 'standard',
         courier: 'Domestic Express',
         trackId: 'DOM-991',
-        itemCount: 2,
         date: '2026-08-24',
       },
       {
-        id: 'ORD-1002',
         orderId: 'ORD-1002',
         customer: 'Lanka Tech Solutions',
         status: 'ready',
-        statusVersion: 1,
-        type: 'express',
         courier: 'DHL Express',
         trackId: 'DHL-882',
-        itemCount: 1,
         date: '2026-08-24',
       },
     ],
@@ -198,8 +188,6 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
           awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
           readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
         },
-        awaitingReceipt: 0,
-        awaitingFinance: 0,
       },
       logistics: [],
     };
@@ -239,7 +227,7 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
     const emptyData = { ...dashboard, logistics: [] };
     const fixture = await create({ getDashboard: () => of(emptyData) });
     const root = fixture.nativeElement as HTMLElement;
-    const emptyState = root.querySelector<HTMLElement>('.empty-logistics-state')!;
+    const emptyState = root.querySelector<HTMLElement>('.empty-state')!;
     expect(emptyState).not.toBeNull();
     expect(emptyState.textContent).toContain('No dispatch orders recorded');
     fixture.destroy();

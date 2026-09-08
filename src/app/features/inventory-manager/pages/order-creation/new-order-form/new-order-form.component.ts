@@ -9,6 +9,7 @@ import { OrderItemSearchComponent } from './components/order-item-search/order-i
 import { OrderCartListComponent } from './components/order-cart-list/order-cart-list.component';
 import { OrderSuggestedGridComponent } from './components/order-suggested-grid/order-suggested-grid.component';
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
+import { itemMatchesSupplier, relevantSuppliersFor } from '../../../services/order-supplier-matching';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { HasPendingChanges } from '../../../../../core/guards/pending-changes.guard';
@@ -53,6 +54,14 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   orderId: string | null = null;
   statusVersion = 0;
   sourceMaterialRequestId = '';
+
+  // Supplier the currently staged (not-yet-added) item search selection belongs to,
+  // used to restrict the supplier dropdown before any line item has been added.
+  stagedItemSupplierName = '';
+  supplierRevertSignal = 0;
+
+  private relevantSuppliersCache: Supplier[] = [];
+  private relevantSuppliersSignature = '';
 
   @ViewChild(OrderItemSearchComponent) itemSearchRef?: OrderItemSearchComponent;
 
@@ -229,46 +238,40 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   }
 
   get availableInventoryItems(): InventoryItem[] {
-    if (!this.selectedSupplier) {
-      return this.inventoryItems;
-    }
-    if (this.isRegisteringNewSupplier || this.isCreatingSupplier || this.newlyRegisteredSupplierNames.has(this.selectedSupplier.toLowerCase().trim())) {
-      return this.inventoryItems;
-    }
-    const supplier = this.suppliers.find(
-      (s) => s.name.toLowerCase().trim() === this.selectedSupplier.toLowerCase().trim()
-    );
-    const targetSupplierId = supplier?._id;
-    const targetSupplierName = (supplier?.name || this.selectedSupplier).toLowerCase().trim();
-
-    return this.inventoryItems.filter((item) => {
-      const sId = supplierIdOf(item);
-      const sName = (supplierNameOf(item) || '').toLowerCase().trim();
-      if (targetSupplierId && sId === targetSupplierId) {
-        return true;
-      }
-      if (sName && sName === targetSupplierName) {
-        return true;
-      }
-      return false;
-    });
+    return this.filterForSelectedSupplier(this.inventoryItems);
   }
 
   get availableSuggestedItems(): InventoryItem[] {
-    if (!this.selectedSupplier || this.isRegisteringNewSupplier || this.isCreatingSupplier || this.newlyRegisteredSupplierNames.has(this.selectedSupplier.toLowerCase().trim())) {
-      return this.suggestedItems;
+    return this.filterForSelectedSupplier(this.suggestedItems);
+  }
+
+  // Suppliers currently constraining the order: the staged (not-yet-added) item's
+  // supplier plus every carted line's supplier. Empty means nothing constrains the
+  // order yet, so the supplier dropdown opens unrestricted. Cached by content so the
+  // array reference stays stable across change-detection cycles when the underlying
+  // set hasn't changed — otherwise a fresh array on every check would re-trigger the
+  // child selector's ngOnChanges and collapse "Change Supplier" back to restricted.
+  get relevantSuppliers(): Supplier[] {
+    const computed = relevantSuppliersFor(this.orderItems, this.stagedItemSupplierName, this.suppliers);
+    const signature = computed.map((s) => s._id).join('|');
+    if (signature !== this.relevantSuppliersSignature) {
+      this.relevantSuppliersSignature = signature;
+      this.relevantSuppliersCache = computed;
+    }
+    return this.relevantSuppliersCache;
+  }
+
+  private filterForSelectedSupplier(items: InventoryItem[]): InventoryItem[] {
+    if (!this.selectedSupplier) {
+      return items;
+    }
+    if (this.isRegisteringNewSupplier || this.isCreatingSupplier || this.newlyRegisteredSupplierNames.has(this.selectedSupplier.toLowerCase().trim())) {
+      return items;
     }
     const supplier = this.suppliers.find(
       (s) => s.name.toLowerCase().trim() === this.selectedSupplier.toLowerCase().trim()
     );
-    const targetSupplierId = supplier?._id;
-    const targetSupplierName = (supplier?.name || this.selectedSupplier).toLowerCase().trim();
-
-    return this.suggestedItems.filter((item) => {
-      const sId = supplierIdOf(item);
-      const sName = (supplierNameOf(item) || '').toLowerCase().trim();
-      return (targetSupplierId && sId === targetSupplierId) || (sName && sName === targetSupplierName);
-    });
+    return items.filter((item) => itemMatchesSupplier(item, this.selectedSupplier, supplier));
   }
 
   resolveItemSupplierName(item: InventoryItem): string {
@@ -289,26 +292,37 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   // Event Handlers from Dumb Components
   onSupplierSelected(supplierName: string): void {
     this.errorMessage = '';
-    this.autoSelectedSupplier = false;
     if (!supplierName) {
       this.selectedSupplier = '';
+      this.autoSelectedSupplier = false;
       return;
     }
     const supplier = this.suppliers.find(
       (candidate) => candidate.name.toLowerCase() === supplierName.toLowerCase().trim()
     );
-    if (supplier) {
-      const conflictingItem = this.orderItems.find(
-        (item) => item.supplierId && item.supplierId !== supplier._id
+    if (!supplier) {
+      this.selectedSupplier = '';
+      this.autoSelectedSupplier = false;
+      return;
+    }
+
+    const isSameSupplier = supplier.name.toLowerCase().trim() === (this.selectedSupplier || '').toLowerCase().trim();
+    if (!isSameSupplier && this.orderItems.length > 0) {
+      const count = this.orderItems.length;
+      const confirmed = window.confirm(
+        `Switching to ${supplier.name} will remove ${count} item${count === 1 ? '' : 's'} from this order. Continue?`
       );
-      if (conflictingItem) {
-        this.errorMessage = `${conflictingItem.name} is assigned to a different preferred supplier.`;
+      if (!confirmed) {
+        this.supplierRevertSignal++;
         return;
       }
-      this.selectedSupplier = supplier.name;
-    } else {
-      this.selectedSupplier = '';
+      this.orderItems = [];
+      this.itemSearchRef?.clearSelection();
+      this.stagedItemSupplierName = '';
     }
+
+    this.autoSelectedSupplier = false;
+    this.selectedSupplier = supplier.name;
 
     if (this.itemSearchRef?.selectedItem) {
       const itemSupplier = this.resolveItemSupplierName(this.itemSearchRef.selectedItem);
@@ -354,6 +368,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
 
   onItemSelected(item: InventoryItem): void {
     const supplierName = this.resolveItemSupplierName(item);
+    this.stagedItemSupplierName = supplierName;
     if (supplierName) {
       const conflictingItem = this.orderItems.find(
         (existing) => existing.supplierName && existing.supplierName.toLowerCase().trim() !== supplierName.toLowerCase().trim()
@@ -369,6 +384,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   }
 
   onItemCleared(): void {
+    this.stagedItemSupplierName = '';
     if (this.orderItems.length === 0 && this.autoSelectedSupplier) {
       this.selectedSupplier = '';
       this.autoSelectedSupplier = false;

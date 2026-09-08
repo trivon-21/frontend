@@ -34,7 +34,9 @@
       <!-- Step 1: Supplier Selector Dumb Component -->
       <app-order-supplier-selector
         [suppliers]="suppliers"
+        [relevantSuppliers]="relevantSuppliers"
         [initialSupplier]="selectedSupplier"
+        [revertSignal]="supplierRevertSignal"
         (supplierSelected)="onSupplierSelected($event)"
         (newSupplierRequested)="onAddNewSupplier($event)"
         (registeringNewSupplier)="onRegisteringNewSupplier($event)">

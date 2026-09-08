@@ -1,0 +1,142 @@
+<div class="content-card actions-card">
+  <div class="card-header">
+    <div class="title-with-icon">
+      <lucide-angular name="clipboard-check" class="primary-icon" [size]="18"></lucide-angular>
+      <h2 class="card-title">Pending Actions & Approvals</h2>
+    </div>
+    <div class="header-badges">
+      <span class="count-badge count-badge--approval" *ngIf="data.stats.pendingApprovals.total > 0">
+        {{ data.stats.pendingApprovals.total }} Approvals
+      </span>
+      <span class="count-badge count-badge--neutral" *ngIf="!hasMorePendingActions">
+        {{ data.pendingActions.length }} Total
+      </span>
+      <span class="count-badge count-badge--neutral" *ngIf="hasMorePendingActions"
+            title="Showing the {{ data.pendingActions.length }} highest-priority of {{ pendingActionsTotal }} total pending actions">
+        Showing {{ data.pendingActions.length }} of {{ pendingActionsTotal }}
+      </span>
+    </div>
+  </div>
+
+  <!-- APPROVALS QUICK SUMMARY BANNER -->
+  <div class="approvals-quick-banner" *ngIf="data.stats.pendingApprovals.total > 0">
+    <div class="banner-summary-pills">
+      <div class="summary-pill">
+        <lucide-angular name="shopping-bag" [size]="14" class="summary-pill-icon"></lucide-angular>
+        <span class="summary-pill-title">Purchase Orders:</span>
+        <span class="summary-pill-tag" [class.urgent]="(data.stats.pendingApprovals.subStats[0]?.value || 0) > 0">
+          {{ data.stats.pendingApprovals.subStats[0]?.value || 0 }} urgent
+        </span>
+        <span class="summary-pill-dot">·</span>
+        <span class="summary-pill-value">{{ formatCurrency(data.stats.pendingApprovals.subStats[1]?.value) }}</span>
+      </div>
+
+      <div class="summary-pill" *ngIf="data.stats.pendingApprovals.subStats[2]?.value">
+        <lucide-angular name="file-text" [size]="14" class="summary-pill-icon"></lucide-angular>
+        <span class="summary-pill-title">Non-PO:</span>
+        <span class="summary-pill-tag warning">
+          {{ data.stats.pendingApprovals.subStats[2]?.value || 0 }} pending
+        </span>
+      </div>
+    </div>
+
+    <a class="banner-queue-btn mgr-btn mgr-btn--ghost mgr-btn--compact" routerLink="/manager/orders" [queryParams]="{ type: 'purchase', status: 'pending-manager' }">
+      Review Queue
+      <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+    </a>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="action-filters-bar">
+    <button
+      type="button"
+      class="filter-chip mgr-btn mgr-btn--compact"
+      [class.active]="activeActionFilter === 'all'"
+      [attr.aria-pressed]="activeActionFilter === 'all'"
+      (click)="setActionFilter('all')"
+    >
+      <span>All</span>
+      <span class="filter-count-badge">{{ data.pendingActions.length }}</span>
+    </button>
+    <button
+      type="button"
+      class="filter-chip mgr-btn mgr-btn--compact"
+      [class.active]="activeActionFilter === 'approvals'"
+      [attr.aria-pressed]="activeActionFilter === 'approvals'"
+      (click)="setActionFilter('approvals')"
+      *ngIf="approvalActionsCount > 0"
+    >
+      <span>Approvals</span>
+      <span class="filter-count-badge filter-count-badge--approval">{{ approvalActionsCount }}</span>
+    </button>
+    <button
+      type="button"
+      class="filter-chip mgr-btn mgr-btn--compact"
+      [class.active]="activeActionFilter === 'tickets'"
+      [attr.aria-pressed]="activeActionFilter === 'tickets'"
+      (click)="setActionFilter('tickets')"
+      *ngIf="ticketActionsCount > 0"
+    >
+      <span>Work Items & SLA</span>
+      <span class="filter-count-badge">{{ ticketActionsCount }}</span>
+    </button>
+    <button
+      type="button"
+      class="filter-chip mgr-btn mgr-btn--compact"
+      [class.active]="activeActionFilter === 'inventory'"
+      [attr.aria-pressed]="activeActionFilter === 'inventory'"
+      (click)="setActionFilter('inventory')"
+      *ngIf="inventoryActionsCount > 0"
+    >
+      <span>Inventory Shortages</span>
+      <span class="filter-count-badge filter-count-badge--shortage">{{ inventoryActionsCount }}</span>
+    </button>
+  </div>
+
+  <!-- ACTIONS LIST -->
+  <div class="actions-list">
+    <div *ngFor="let action of filteredActions" class="action-item" [class.action-item--approval]="isApprovalAction(action)">
+      <div class="action-header">
+        <div class="action-header-left">
+          <span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span>
+          <span *ngIf="isApprovalAction(action)" class="action-type-tag approval-tag" [class.non-po]="action.approvalType === 'non-po'">
+            {{ action.approvalType === 'non-po' ? 'NON-PO EXCEPTION' : 'PURCHASE REQUEST' }}
+          </span>
+          <span *ngIf="action.type === 'inventory'" class="action-type-tag inventory-tag">
+            MATERIAL SHORTAGE
+          </span>
+          <span *ngIf="!isApprovalAction(action) && action.type !== 'inventory'" class="action-type-tag">{{ action.type | uppercase }}</span>
+        </div>
+        <div class="action-header-right" *ngIf="action.amount">
+          <span class="action-amount-badge">{{ formatCurrency(action.amount) }}</span>
+        </div>
+      </div>
+
+      <h3 class="action-title">{{ action.title }}</h3>
+      <p class="action-desc">{{ action.description }}</p>
+
+      <div class="action-footer">
+        <div class="action-footer-meta">
+          <span *ngIf="action.supplierName" class="meta-tag">
+            <lucide-angular name="package" [size]="12"></lucide-angular>
+            {{ action.supplierName }}
+          </span>
+          <span *ngIf="action.reasons && action.reasons.length > 0 && !action.supplierName" class="meta-tag">
+            {{ action.reasons[0] }}
+          </span>
+        </div>
+        <a
+          class="action-btn-primary mgr-btn mgr-btn--primary mgr-btn--compact"
+          [routerLink]="action.route"
+          [queryParams]="action.queryParams"
+        >
+          {{ isApprovalAction(action) ? 'Review Approval' : (action.type === 'inventory' ? 'Resolve Shortage' : 'Open Ticket') }}
+        </a>
+      </div>
+    </div>
+
+    <div *ngIf="filteredActions.length === 0" class="empty-state">
+      No pending {{ activeActionFilter === 'all' ? 'actions or approvals' : activeActionFilter }} requiring your attention.
+    </div>
+  </div>
+</div>

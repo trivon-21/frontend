@@ -1,0 +1,55 @@
+<section class="content-card workflow-card" aria-labelledby="purchasing-workflow-title">
+  <div class="card-header">
+    <div class="title-with-icon">
+      <lucide-angular name="clipboard-list" class="primary-icon" [size]="18"></lucide-angular>
+      <div>
+        <h2 class="card-title" id="purchasing-workflow-title">Purchasing Workflow</h2>
+        <p class="workflow-description">Track approvals, receiving, and finance review.</p>
+      </div>
+    </div>
+    <span class="workflow-link">Five-stage operational view</span>
+  </div>
+  <div class="workflow-stages">
+    <div class="workflow-stage">
+      <span class="workflow-stage-label">Awaiting Manager</span>
+      <strong>{{ workflow.awaitingManager }}</strong>
+      <span class="workflow-stage-hint">Pending operational review</span>
+      <div class="workflow-breakdown">
+        <a routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-manager' }">
+          Purchase requests {{ workflow.breakdown.awaitingManager.purchaseRequests }}
+        </a>
+        <a routerLink="/inventory-manager/procurement" [queryParams]="{ authorizationStatus: 'pending' }">
+          Non-PO {{ workflow.breakdown.awaitingManager.receiptAuthorizations }}
+        </a>
+      </div>
+    </div>
+    <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'pending-finance' }">
+      <span class="workflow-stage-label">Awaiting Finance Approval</span>
+      <strong>{{ workflow.awaitingFinanceApproval }}</strong>
+      <span class="workflow-stage-hint">Pre-order financial review</span>
+    </a>
+    <a class="workflow-stage" routerLink="/inventory-manager/order-creation" [queryParams]="{ status: 'approved' }">
+      <span class="workflow-stage-label">Ready to Issue</span>
+      <strong>{{ workflow.readyToIssue }}</strong>
+      <span class="workflow-stage-hint">Approved requests needing a PO</span>
+    </a>
+    <div class="workflow-stage">
+      <span class="workflow-stage-label">Ready to Receive</span>
+      <strong>{{ workflow.readyToReceive }}</strong>
+      <span class="workflow-stage-hint">Outstanding authorized stock</span>
+      <div class="workflow-breakdown">
+        <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'PO' }">
+          Purchase orders {{ workflow.breakdown.readyToReceive.purchaseOrders }}
+        </a>
+        <a routerLink="/inventory-manager/procurement" [queryParams]="{ mode: 'NON_PO', authorizationStatus: 'ready' }">
+          Non-PO {{ workflow.breakdown.readyToReceive.receiptAuthorizations }}
+        </a>
+      </div>
+    </div>
+    <a class="workflow-stage" routerLink="/inventory-manager/procurement" [queryParams]="{ grnFilter: 'FINANCE' }">
+      <span class="workflow-stage-label">Receipt Reconciliation</span>
+      <strong>{{ workflow.awaitingReceiptReconciliation }}</strong>
+      <span class="workflow-stage-hint">Non-PO receipts with Finance</span>
+    </a>
+  </div>
+</section>

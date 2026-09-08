@@ -24,7 +24,7 @@ describe('ManagerDashboardService', () => {
 
   afterEach(() => http.verify());
 
-  it('requests the dashboard contract and hydrates current and activity dates', () => {
+  it('requests the dashboard contract and hydrates the current date', () => {
     spyOn(Date, 'now').and.returnValue(Date.parse('2026-08-24T12:30:00.000Z'));
     const response = {
       managerName: 'Alex Manager',
@@ -38,21 +38,13 @@ describe('ManagerDashboardService', () => {
       },
       inventoryKpis: {
         reservedItems: { label: 'Reserved', value: 2, icon: 'package' },
-        lowStockAlerts: { label: 'Low stock', value: 1, icon: 'alert' },
-        pendingMaterialRequests: { label: 'Pending', value: 3, icon: 'clipboard' },
+        belowReorderItems: { label: 'Below Reorder', value: 1, icon: 'alert' },
+        outOfStockItems: { label: 'Out of Stock', value: 0, icon: 'alert' },
+        stockRiskItems: { label: 'Stock Risk', value: 1, icon: 'alert' },
         blockedMaterialRequests: { label: 'Blocked', value: 1, icon: 'alert' },
       },
-      recentActivity: [
-        {
-          id: 'activity-1',
-          type: 'ticket',
-          title: 'Ticket updated',
-          description: 'A fabricated ticket was updated.',
-          timestamp: '2026-08-24T12:00:00.000Z',
-          route: '/manager/work-items',
-        },
-      ],
       pendingActions: [],
+      pendingActionsTotal: 0,
     };
     let result: ManagerDashboardData | undefined;
 
@@ -64,7 +56,5 @@ describe('ManagerDashboardService', () => {
     request.flush(response);
 
     expect(result?.currentDate).toEqual(new Date('2026-08-24T00:00:00.000Z'));
-    expect(result?.recentActivity[0].timestamp).toEqual(new Date('2026-08-24T12:00:00.000Z'));
-    expect(result?.recentActivity[0].timeAgo).toBe('30m ago');
   });
 });

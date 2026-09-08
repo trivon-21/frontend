@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
 import { AnalyticsData, AnalyticsService } from '../../services/analytics.service';
 import { ManagerDashboardComponent } from './manager-dashboard.component';
+import { MgrPendingActionsComponent } from './components/mgr-pending-actions/mgr-pending-actions.component';
 
 describe('ManagerDashboardComponent presentation contract', () => {
   const analytics: Partial<AnalyticsData> = {
@@ -87,21 +89,12 @@ describe('ManagerDashboardComponent presentation contract', () => {
     },
     inventoryKpis: {
       reservedItems: { label: 'Reserved Items', value: 4, icon: 'clipboard-check' },
-      lowStockAlerts: { label: 'Low Stock Alerts', value: 2, icon: 'triangle-alert' },
-      pendingMaterialRequests: { label: 'Pending Material Requests', value: 5, icon: 'package' },
+      belowReorderItems: { label: 'Below Reorder', value: 2, icon: 'triangle-alert' },
+      outOfStockItems: { label: 'Out of Stock', value: 1, icon: 'triangle-alert' },
+      stockRiskItems: { label: 'Stock Risk', value: 3, icon: 'triangle-alert' },
       blockedMaterialRequests: { label: 'Blocked Material Requests', value: 1, icon: 'triangle-alert' },
     },
-    recentActivity: [
-      {
-        id: 'act-1',
-        type: 'ticket',
-        title: 'Resolved SVC-001',
-        description: 'Compressor repaired',
-        timestamp: new Date('2026-08-24T08:00:00.000Z'),
-        timeAgo: '1h ago',
-        route: '/manager/work-items',
-      },
-    ],
+    pendingActionsTotal: 1,
     pendingActions: [
       {
         id: 'order-1',
@@ -204,7 +197,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(approvalPrimary.contains(approvalLinks[0])).toBeFalse();
     expect(approvalPrimary.contains(approvalLinks[1])).toBeFalse();
     expect(root.querySelector('.live-time')).toBeNull();
-    const workQueue = root.querySelector<HTMLButtonElement>('.btn-new-order')!;
+    const workQueue = root.querySelector<HTMLAnchorElement>('a[href="/manager/work-items"]')!;
     expect(workQueue.textContent).toContain('Open Work Queue');
     expect(workQueue.classList).toContain('mgr-btn--primary');
     fixture.destroy();
@@ -279,10 +272,11 @@ describe('ManagerDashboardComponent presentation contract', () => {
 
   it('filters pending actions by category tab', async () => {
     const fixture = await create();
-    const component = fixture.componentInstance;
+    const pendingActions = fixture.debugElement.query(By.directive(MgrPendingActionsComponent))
+      .componentInstance as MgrPendingActionsComponent;
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(component.filteredActions.length).toBe(3);
+    expect(pendingActions.filteredActions.length).toBe(3);
 
     const filterChips = Array.from(root.querySelectorAll<HTMLButtonElement>('.filter-chip'));
     const approvalsChip = filterChips.find((chip) => chip.textContent?.includes('Approvals'));
@@ -291,9 +285,9 @@ describe('ManagerDashboardComponent presentation contract', () => {
     approvalsChip?.click();
     fixture.detectChanges();
 
-    expect(component.activeActionFilter).toBe('approvals');
-    expect(component.filteredActions.length).toBe(1);
-    expect(component.filteredActions[0].reference).toBe('PR-1049');
+    expect(pendingActions.activeActionFilter).toBe('approvals');
+    expect(pendingActions.filteredActions.length).toBe(1);
+    expect(pendingActions.filteredActions[0].reference).toBe('PR-1049');
 
     const inventoryChip = filterChips.find((chip) => chip.textContent?.includes('Inventory Shortages'));
     expect(inventoryChip).toBeDefined();
@@ -301,16 +295,16 @@ describe('ManagerDashboardComponent presentation contract', () => {
     inventoryChip?.click();
     fixture.detectChanges();
 
-    expect(component.activeActionFilter).toBe('inventory');
-    expect(component.filteredActions.length).toBe(1);
-    expect(component.filteredActions[0].id).toBe('shortage-1');
+    expect(pendingActions.activeActionFilter).toBe('inventory');
+    expect(pendingActions.filteredActions.length).toBe(1);
+    expect(pendingActions.filteredActions[0].id).toBe('shortage-1');
 
     const allChip = filterChips.find((chip) => chip.textContent?.includes('All'));
     allChip?.click();
     fixture.detectChanges();
 
-    expect(component.activeActionFilter).toBe('all');
-    expect(component.filteredActions.length).toBe(3);
+    expect(pendingActions.activeActionFilter).toBe('all');
+    expect(pendingActions.filteredActions.length).toBe(3);
 
     fixture.destroy();
   });
@@ -319,7 +313,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     const fixture = await create();
     const root = fixture.nativeElement as HTMLElement;
 
-    const viewInventoryBtn = root.querySelector<HTMLAnchorElement>('.btn-inventory-nav');
+    const viewInventoryBtn = root.querySelector<HTMLAnchorElement>('a[href="/manager/inventory"]');
     expect(viewInventoryBtn?.getAttribute('href')).toBe('/manager/inventory');
 
     const insightsSection = root.querySelector('.analytics-insights-section');

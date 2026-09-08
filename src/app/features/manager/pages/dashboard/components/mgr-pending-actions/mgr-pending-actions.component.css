@@ -1,0 +1,293 @@
+.header-badges { display: flex; align-items: center; gap: 8px; }
+
+/* ── Approvals Quick Summary Banner ── */
+.approvals-quick-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--background-page);
+  border-bottom: 1px solid var(--background-page);
+  flex-wrap: wrap;
+}
+
+.banner-summary-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--background-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm, 8px);
+  font-size: 12.5px;
+  color: var(--text-primary);
+}
+
+.summary-pill-icon {
+  color: var(--primary-main);
+  flex-shrink: 0;
+}
+
+.summary-pill-title {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.summary-pill-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tone-neutral-fg);
+  background: var(--tone-neutral-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.summary-pill-tag.urgent {
+  color: var(--tone-danger-fg);
+  background: var(--tone-danger-bg);
+}
+
+.summary-pill-tag.warning {
+  color: var(--tone-warning-fg);
+  background: var(--tone-warning-bg);
+}
+
+.summary-pill-dot {
+  color: var(--border-medium);
+}
+
+.summary-pill-value {
+  font-weight: 700;
+  color: var(--heading-primary);
+}
+
+/* ── Action Filters Bar ── */
+.action-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--background-page);
+  background: var(--background-card);
+  overflow-x: auto;
+}
+
+.filter-chip {
+  background: var(--tone-neutral-bg);
+  color: var(--tone-neutral-fg);
+  border-color: transparent;
+}
+
+.filter-chip:hover:not(.active) {
+  background: var(--background-hover);
+  color: var(--text-primary);
+}
+
+.filter-chip.active {
+  background: var(--primary-main);
+  border-color: var(--primary-main);
+  color: var(--text-inverse);
+}
+
+.filter-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--background-card);
+  color: var(--text-secondary);
+}
+
+.filter-chip.active .filter-count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--text-inverse);
+}
+
+.filter-count-badge--approval {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+}
+.filter-chip.active .filter-count-badge--approval {
+  background: var(--warning);
+  color: var(--text-inverse);
+}
+
+.filter-count-badge--shortage {
+  background: var(--tone-danger-bg);
+  color: var(--tone-danger-fg);
+}
+.filter-chip.active .filter-count-badge--shortage {
+  background: var(--error);
+  color: var(--text-inverse);
+}
+
+/* ── Pending Actions & Approvals List ── */
+.actions-list {
+  display: flex;
+  max-height: 560px;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md, 12px);
+  background: var(--background-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.action-item:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-light);
+  transform: translateY(-1px);
+}
+
+.action-item--approval {
+  border-left: 4px solid var(--primary-main);
+  background: var(--primary-lighter);
+}
+
+.action-item--approval:hover {
+  border-left-color: var(--primary-hover);
+  border-color: var(--primary-light);
+}
+
+.action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.action-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-amount-badge {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--heading-primary);
+  background: var(--primary-lighter);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-light);
+  white-space: nowrap;
+}
+
+.priority-badge {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.priority-badge.critical { background: var(--tone-danger-bg); color: var(--tone-danger-fg); }
+.priority-badge.warning { background: var(--tone-warning-bg); color: var(--tone-warning-fg); }
+.priority-badge.normal { background: var(--tone-info-bg); color: var(--tone-info-fg); }
+
+.action-type-tag {
+  color: var(--text-secondary);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.approval-tag {
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--tone-success-bg);
+  color: var(--tone-success-fg);
+  border: 1px solid var(--primary-light);
+}
+
+.approval-tag.non-po {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+  border-color: var(--warning-border);
+}
+
+.inventory-tag {
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--tone-danger-bg);
+  color: var(--tone-danger-fg);
+}
+
+.action-title {
+  margin: 0;
+  color: var(--heading-primary);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.action-desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.action-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-page);
+  flex-wrap: wrap;
+}
+
+.action-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-item:hover {
+    transform: none;
+  }
+}
