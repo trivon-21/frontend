@@ -119,8 +119,8 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
   onTypeFilterChange(value: string): void {
     const normalized = (value || 'all').trim().toLowerCase();
 
-    if (normalized === 'inspection' || normalized === 'installation' || normalized === 'service') {
-      this.selectedTypeFilter = normalized;
+    if (normalized === 'inspection' || normalized === 'installation' || normalized === 'service' || normalized === 'maintenance' || normalized === 'repair') {
+      this.selectedTypeFilter = normalized as any;
     } else {
       this.selectedTypeFilter = 'all';
     }
@@ -272,7 +272,7 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
       return 'Warranty Activated';
     }
 
-    if (serviceType === 'service') {
+    if (serviceType === 'service' || serviceType === 'repair' || serviceType === 'maintenance') {
       if (item.warrantyStatus === 'Warranty Claimed' || item.warrantyStatus === 'Warranty is Over') {
         return item.warrantyStatus;
       }
