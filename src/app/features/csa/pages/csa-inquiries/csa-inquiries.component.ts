@@ -20,8 +20,8 @@ export class CsaInquiriesComponent implements OnInit {
 
   // KPI Stats
   countTotal = 0;
+  countAwaiting = 0;
   countOngoing = 0;
-  countAddressed = 0;
   countClosed = 0;
 
   // Filters
@@ -81,8 +81,8 @@ export class CsaInquiriesComponent implements OnInit {
 
   calculateStats(): void {
     this.countTotal = this.totalInquiries;
-    this.countOngoing = this.inquiries.filter(i => i.status === 'Ongoing').length;
-    this.countAddressed = this.inquiries.filter(i => i.status === 'Addressed').length;
+    this.countAwaiting = this.inquiries.filter(i => i.status === 'Awaiting').length;
+    this.countOngoing = this.inquiries.filter(i => i.status === 'Ongoing' || i.status === 'Addressed').length;
     this.countClosed = this.inquiries.filter(i => i.status === 'Closed').length;
   }
 
@@ -104,19 +104,22 @@ export class CsaInquiriesComponent implements OnInit {
 
   sendReply(): void {
     if (!this.selectedInquiry || !this.replyText.trim()) return;
+    if (this.selectedInquiry.status === 'Closed') {
+      this.replyError = 'This inquiry is closed. Please reopen it to send a reply.';
+      return;
+    }
 
     this.isSendingReply = true;
     this.replyError = '';
 
     const replyMsg = this.replyText.trim();
     this.inquiryService.replyToInquiry(this.selectedInquiry._id, {
-      message: replyMsg,
-      newStatus: 'Addressed'
+      message: replyMsg
     }).subscribe({
       next: (res) => {
         this.isSendingReply = false;
         this.replyText = '';
-        this.showToast('Reply sent and customer notified!');
+        this.showToast('Reply sent and inquiry marked as Ongoing!');
 
         if (res && res.inquiry) {
           this.selectedInquiry = res.inquiry;
@@ -125,12 +128,59 @@ export class CsaInquiriesComponent implements OnInit {
             this.inquiries[idx] = res.inquiry;
           }
         }
+        this.calculateStats();
         this.scrollToBottom();
       },
       error: (err) => {
         this.isSendingReply = false;
         console.error('Failed to send reply:', err);
         this.replyError = err.error?.message || err.message || 'Failed to send reply.';
+      }
+    });
+  }
+
+  closeInquiry(): void {
+    if (!this.selectedInquiry) return;
+
+    this.inquiryService.updateInquiryStatus(this.selectedInquiry._id, 'Closed').subscribe({
+      next: (res) => {
+        this.replyText = '';
+        this.replyError = '';
+        this.showToast('Inquiry resolved and marked as Closed');
+        if (res && res.inquiry) {
+          this.selectedInquiry = res.inquiry;
+          const idx = this.inquiries.findIndex(i => i._id === res.inquiry._id);
+          if (idx !== -1) {
+            this.inquiries[idx] = res.inquiry;
+          }
+        }
+        this.calculateStats();
+      },
+      error: (err) => {
+        console.error('Failed to close inquiry:', err);
+        alert('Failed to close inquiry: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  reopenInquiry(): void {
+    if (!this.selectedInquiry) return;
+
+    this.inquiryService.updateInquiryStatus(this.selectedInquiry._id, 'Ongoing').subscribe({
+      next: (res) => {
+        this.showToast('Inquiry reopened and marked as Ongoing');
+        if (res && res.inquiry) {
+          this.selectedInquiry = res.inquiry;
+          const idx = this.inquiries.findIndex(i => i._id === res.inquiry._id);
+          if (idx !== -1) {
+            this.inquiries[idx] = res.inquiry;
+          }
+        }
+        this.calculateStats();
+      },
+      error: (err) => {
+        console.error('Failed to reopen inquiry:', err);
+        alert('Failed to reopen inquiry: ' + (err.error?.message || err.message));
       }
     });
   }

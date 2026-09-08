@@ -34,8 +34,14 @@ import { CsaHeaderComponent } from '../header/csa-header.component';
     }
     .csa-content {
       flex: 1;
-      overflow-y: auto;
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
       padding: 24px 32px 40px;
+    }
+    @media (max-width: 1200px) {
+      .csa-content {
+        padding: 20px 20px 32px;
+      }
     }
   `]
 })
