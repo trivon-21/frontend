@@ -88,6 +88,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
+  createRequestError: string | null = null;
   showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
@@ -458,6 +459,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.createRequestError = null;
     this.showCreateModal = true;
     this.loadNewStatusTicketIds();
     this.loadMaterialCatalog();
@@ -497,6 +499,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   private resetCreateForm(): void {
+    this.createRequestError = null;
     this.newRequest = {
       ticketId: '',
       productType: '',
@@ -558,7 +561,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   submitToFinance(): void {
     const validationError = this.validateMaterialSubmission();
     if (validationError) {
-      this.error = validationError;
+      this.createRequestError = validationError;
       return;
     }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
@@ -584,7 +587,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.error = null;
+    this.createRequestError = null;
 
     this.http
       .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance-custom`, {
@@ -603,7 +606,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error = response.error || response.message || 'Failed to submit material request.';
+            this.createRequestError = response.error || response.message || 'Failed to submit material request.';
             return;
           }
 
@@ -616,7 +619,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error submitting material request to finance:', err);
-          this.error = `Failed to submit to finance: ${err.message || 'Unknown error'}`;
+          this.createRequestError = err.error?.error || err.error?.message || `Failed to submit to finance: ${err.message || 'Unknown error'}`;
         }
       });
   }
@@ -624,7 +627,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   submitToIMDirectly(): void {
     const validationError = this.validateMaterialSubmission();
     if (validationError) {
-      this.error = validationError;
+      this.createRequestError = validationError;
       return;
     }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
@@ -649,7 +652,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.error = null;
+    this.createRequestError = null;
 
     const inventoryManagerData = {
       serviceRequestId: normalizedTicketId,
@@ -668,7 +671,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error = response.error || response.message || 'Failed to send material request to IM.';
+            this.createRequestError = response.error || response.message || 'Failed to send material request to IM.';
             return;
           }
 
@@ -680,7 +683,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error sending material request to IM:', err);
-          this.error = `Failed to send to IM: ${err.message || 'Unknown error'}`;
+          this.createRequestError = err.error?.error || err.error?.message || `Failed to send to IM: ${err.message || 'Unknown error'}`;
         }
       });
   }
