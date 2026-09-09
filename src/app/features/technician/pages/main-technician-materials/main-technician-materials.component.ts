@@ -88,6 +88,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
+  createRequestError: string | null = null;
   showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
@@ -458,6 +459,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.createRequestError = null;
     this.showCreateModal = true;
     this.loadNewStatusTicketIds();
     this.loadMaterialCatalog();
@@ -497,6 +499,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   private resetCreateForm(): void {
+    this.createRequestError = null;
     this.newRequest = {
       ticketId: '',
       productType: '',
@@ -531,7 +534,41 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.items.splice(index, 1);
   }
 
+  private validateMaterialSubmission(): string | null {
+    const ticketId = this.newRequest.ticketId.replace(/^#/, '');
+    if (!ticketId || !this.dropdownTickets.some((ticket) => ticket.id === this.newRequest.ticketId)) {
+      return 'Please select a valid service ticket.';
+    }
+    if (!Array.isArray(this.newRequest.items) || this.newRequest.items.length === 0) {
+      return 'Please add at least one material item.';
+    }
+    const itemIds = new Set<string>();
+    for (const item of this.newRequest.items) {
+      const quantity = Number(item.quantity);
+      if (!item.inventoryId || !this.materialCatalog.some((catalogItem) => catalogItem._id === item.inventoryId)) {
+        return 'Every material row must contain a catalog item.';
+      }
+      if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000) {
+        return 'Each material quantity must be a whole number between 1 and 10,000.';
+      }
+      if (itemIds.has(item.inventoryId)) return 'A material can only be added once; combine its quantity instead.';
+      itemIds.add(item.inventoryId);
+    }
+    if (this.newRequest.notes.trim().length > 2000) return 'Finance notes cannot exceed 2,000 characters.';
+    return null;
+  }
+
+  private optionalRequestValue(value: string): string {
+    const normalized = String(value || '').trim();
+    return normalized === '-' ? '' : normalized;
+  }
+
   submitToFinance(): void {
+    const validationError = this.validateMaterialSubmission();
+    if (validationError) {
+      this.createRequestError = validationError;
+      return;
+    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const selectedTicket = this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
     const materials = this.newRequest.items
@@ -555,16 +592,16 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.error = null;
+    this.createRequestError = null;
 
     this.http
       .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance-custom`, {
         newRequestId: normalizedTicketId,
         ticketId: normalizedTicketId,
-        customerName: this.newRequest.customerName,
-        customerEmail: this.newRequest.customerEmail,
-        customerContactNo: this.newRequest.customerContactNo,
-        customerAddress: this.newRequest.customerAddress,
+        fullName: this.optionalRequestValue(this.newRequest.customerName),
+        customerEmail: this.optionalRequestValue(this.newRequest.customerEmail),
+        customerphoneNumber: this.optionalRequestValue(this.newRequest.customerContactNo),
+        customerAddress: this.optionalRequestValue(this.newRequest.customerAddress),
         materials,
         financeNotes: this.newRequest.notes,
         isUnderWarranty: this.newRequest.isUnderWarranty,
@@ -574,7 +611,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error = response.error || response.message || 'Failed to submit material request.';
+            this.createRequestError = response.error || response.message || 'Failed to submit material request.';
             return;
           }
 
@@ -587,12 +624,18 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error submitting material request to finance:', err);
-          this.error = `Failed to submit to finance: ${err.message || 'Unknown error'}`;
+          const firstValidationError = err.error?.errors?.[0]?.msg;
+          this.createRequestError = firstValidationError || err.error?.error || err.error?.message || `Failed to submit to finance: ${err.message || 'Unknown error'}`;
         }
       });
   }
 
   submitToIMDirectly(): void {
+    const validationError = this.validateMaterialSubmission();
+    if (validationError) {
+      this.createRequestError = validationError;
+      return;
+    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const materials = this.newRequest.items
       .map((item) => {
@@ -615,7 +658,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.error = null;
+    this.createRequestError = null;
 
     const inventoryManagerData = {
       serviceRequestId: normalizedTicketId,
@@ -634,7 +677,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error = response.error || response.message || 'Failed to send material request to IM.';
+            this.createRequestError = response.error || response.message || 'Failed to send material request to IM.';
             return;
           }
 
@@ -646,7 +689,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error sending material request to IM:', err);
-          this.error = `Failed to send to IM: ${err.message || 'Unknown error'}`;
+          this.createRequestError = err.error?.error || err.error?.message || `Failed to send to IM: ${err.message || 'Unknown error'}`;
         }
       });
   }

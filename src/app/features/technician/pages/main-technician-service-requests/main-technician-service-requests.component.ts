@@ -148,7 +148,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
     if (normalizedStatus === 'completed') {
       return 2; // Completed at bottom
     }
-    return 1; // All other statuses in middle (Scheduled, etc.)
+    return 1; // All other active statuses appear in the middle.
   }
 
   /** Resets the search and status filters back to their defaults. */
@@ -188,7 +188,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
       location: populatedCustomerAddress || item.location || '-',
       date: displayDate.date,
       year: displayDate.year,
-      status: item.status || 'Unknown',
+      status: item.status === 'Scheduled' ? 'Assigned' : (item.status || 'Unknown'),
       assignedTeam: assignedTeamName
     };
   }

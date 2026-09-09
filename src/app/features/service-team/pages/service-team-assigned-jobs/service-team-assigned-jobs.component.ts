@@ -20,7 +20,6 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
 
   private readonly assignedStageStatuses = new Set([
     'assigned',
-    'scheduled',
     'pending',
     'finance approved',
     'sent to im',

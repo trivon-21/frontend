@@ -13,7 +13,7 @@ interface MaintenanceTicket {
   productType: string;
   location: string;
   date: string;
-  status: 'Completed' | 'In Progress' | 'Scheduled' | 'On Hold' | 'Assigned' | 'New' | 'Pending' | 'Finance Approved' | 'Finance Rejected' | 'Sent to IM' | 'Materials Ready';
+  status: 'Completed' | 'In Progress' | 'On Hold' | 'Assigned' | 'New' | 'Pending' | 'Finance Approved' | 'Finance Rejected' | 'Sent to IM' | 'Materials Ready';
   assignedTeam: string;
   isCustomerInitiated?: boolean;
 }
@@ -73,6 +73,7 @@ export class MainTechnicianMaintenanceComponent implements OnInit {
               location: item.location || (item.customerId ? item.customerId.address : 'N/A'),
               date: item.date || item.createdAt || item.preferredDate || new Date().toISOString(),
               productType: item.productType || item.acUnitModel || 'N/A',
+              status: item.status === 'Scheduled' ? 'Assigned' : item.status,
             }));
             this.applyFilters();
           } else {

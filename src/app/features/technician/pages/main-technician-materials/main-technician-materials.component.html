@@ -389,6 +389,7 @@
             <button *ngIf="newRequest.isUnderWarranty && newRequest.isFreeOfCharge" class="send-finance-btn" (click)="submitToIMDirectly()">Send to IM</button>
             <button *ngIf="!(newRequest.isUnderWarranty && newRequest.isFreeOfCharge)" class="send-finance-btn" (click)="submitToFinance()">Send to Finance</button>
           </div>
+          <p *ngIf="createRequestError" class="create-request-error" role="alert">{{ createRequestError }}</p>
         </div>
       </div>
     </div>

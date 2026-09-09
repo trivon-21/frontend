@@ -57,7 +57,7 @@
       </div>
       <div class="card-content">
         <span class="card-label">Product Type</span>
-        <span class="card-value-small" [title]="ticket.serviceType">{{ ticket.serviceType || '-' }}</span>
+        <span class="card-value-small" [title]="ticket.detailedProductType || ticket.serviceType">{{ ticket.detailedProductType || ticket.serviceType || '-' }}</span>
       </div>
     </div>
   </div>
@@ -222,7 +222,7 @@
     <!-- Notes Input Area -->
     <div class="notes-input-area">
       <span class="detail-label" style="font-size: 11px;">Submit Service Report Note</span>
-      <textarea #noteInput placeholder="Add any comments or report summary details..."></textarea>
+      <textarea #noteInput required minlength="3" maxlength="2000" placeholder="Add any comments or report summary details..."></textarea>
 
       <div class="submit-row">
         <button class="btn-secondary" (click)="cancelNote(noteInput)" style="padding: 10px 20px;">Cancel</button>
@@ -248,7 +248,7 @@
 
       <div *ngIf="showAdditionalService" class="additional-service-form">
         <span class="detail-label" style="font-size: 11px;">Additional Service Description</span>
-        <textarea #additionalServiceInput placeholder="Describe the additional service required..."></textarea>
+        <textarea #additionalServiceInput required maxlength="2000" placeholder="Describe the additional service required..."></textarea>
 
         <div class="submit-row">
           <button class="btn-primary" [disabled]="isSubmittingAdditionalService" (click)="submitAdditionalService(additionalServiceInput)" style="padding: 10px 24px;">

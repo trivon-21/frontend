@@ -10,7 +10,7 @@ interface ServiceHistoryItem {
   serviceType: string;
   productType: string;
   date: string;
-  status: 'Completed' | 'In Progress' | 'Scheduled' | 'On Hold';
+  status: 'Completed' | 'In Progress' | 'Assigned' | 'On Hold';
   assignedTeam: string;
   warrantyStatus: 'Warranty Period not started yet' | 'Warranty Activated' | 'Warranty Claimed' | 'Warranty Not Claimed' | 'Warranty is Over';
 }
