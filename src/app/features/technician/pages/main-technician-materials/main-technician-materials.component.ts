@@ -531,7 +531,36 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.items.splice(index, 1);
   }
 
+  private validateMaterialSubmission(): string | null {
+    const ticketId = this.newRequest.ticketId.replace(/^#/, '');
+    if (!ticketId || !this.dropdownTickets.some((ticket) => ticket.id === this.newRequest.ticketId)) {
+      return 'Please select a valid service ticket.';
+    }
+    if (!Array.isArray(this.newRequest.items) || this.newRequest.items.length === 0) {
+      return 'Please add at least one material item.';
+    }
+    const itemIds = new Set<string>();
+    for (const item of this.newRequest.items) {
+      const quantity = Number(item.quantity);
+      if (!item.inventoryId || !this.materialCatalog.some((catalogItem) => catalogItem._id === item.inventoryId)) {
+        return 'Every material row must contain a catalog item.';
+      }
+      if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000) {
+        return 'Each material quantity must be a whole number between 1 and 10,000.';
+      }
+      if (itemIds.has(item.inventoryId)) return 'A material can only be added once; combine its quantity instead.';
+      itemIds.add(item.inventoryId);
+    }
+    if (this.newRequest.notes.trim().length > 2000) return 'Finance notes cannot exceed 2,000 characters.';
+    return null;
+  }
+
   submitToFinance(): void {
+    const validationError = this.validateMaterialSubmission();
+    if (validationError) {
+      this.error = validationError;
+      return;
+    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const selectedTicket = this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
     const materials = this.newRequest.items
@@ -593,6 +622,11 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   submitToIMDirectly(): void {
+    const validationError = this.validateMaterialSubmission();
+    if (validationError) {
+      this.error = validationError;
+      return;
+    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const materials = this.newRequest.items
       .map((item) => {

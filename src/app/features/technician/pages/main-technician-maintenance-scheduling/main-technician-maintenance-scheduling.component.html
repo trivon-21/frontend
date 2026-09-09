@@ -242,7 +242,7 @@
               </td>
               <td class="date-input-cell">
                 <div class="date-picker-wrapper">
-                  <input type="date" [(ngModel)]="service.date" class="date-input" [id]="'date-service-' + i">
+                  <input type="date" [(ngModel)]="service.date" class="date-input" [id]="'date-service-' + i" required [min]="minimumServiceDate()" [max]="maximumServiceDate()">
                 </div>
               </td>
             </tr>
