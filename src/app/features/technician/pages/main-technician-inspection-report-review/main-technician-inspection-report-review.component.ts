@@ -82,8 +82,8 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
   closeRejectModal() { this.showRejectModal = false; }
 
   submitRejection(): void {
-    if (!this.rejectionReason.trim()) {
-      this.error = 'Please enter a rejection reason';
+    if (!this.rejectionReason.trim() || this.rejectionReason.trim().length > 2000) {
+      this.error = 'A rejection reason of up to 2,000 characters is required';
       return;
     }
 
@@ -108,6 +108,11 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
   completeReview() {
     if (!this.recommendedProduct.trim()) {
       this.error = 'Please add a recommended product before completing review.';
+      return;
+    }
+
+    if (this.recommendedProduct.trim().length > 200 || this.reviewNotes.trim().length > 2000) {
+      this.error = 'The recommended product must be at most 200 characters and review notes at most 2,000 characters.';
       return;
     }
 
