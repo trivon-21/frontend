@@ -20,55 +20,60 @@
     </button>
   </div>
 
-  <!-- SUMMARY CARDS -->
+  <!-- INTERACTIVE STATUS FILTER CARDS -->
   <div class="summary-cards">
-    <div class="summary-card">
+    <!-- ALL TICKETS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'ALL'" (click)="setStatusFilter('ALL')" title="Show all tickets">
       <div class="summary-icon blue">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countTotal }}</span>
-        <span class="summary-label">Total Tickets</span>
+        <span class="summary-label">All Tickets</span>
       </div>
     </div>
 
-    <div class="summary-card">
+    <!-- NEW & PENDING -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'New'" (click)="setStatusFilter('New')" title="Show new and pending tickets">
       <div class="summary-icon cyan">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countNew }}</span>
-        <span class="summary-label">New / Open</span>
+        <span class="summary-label">New & Pending</span>
       </div>
     </div>
 
-    <!-- PENDING CSA ACTION CARD — clickable shortcut to the approval queue -->
-    <div class="summary-card awaiting-approval-card" [class.highlight-alert]="countPendingCSA > 0" (click)="filterByPendingCSA()" [class.clickable-card]="countPendingCSA > 0" [title]="countPendingCSA > 0 ? 'Click to view items awaiting your approval' : ''">
+    <!-- ASSIGNED & ACTIVE -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'Assigned'" (click)="setStatusFilter('Assigned')" title="Show assigned and in-progress tickets">
       <div class="summary-icon amber">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
         </svg>
       </div>
       <div class="summary-info">
-        <span class="summary-count" [class.count-alert]="countPendingCSA > 0">{{ countPendingCSA }}</span>
-        <span class="summary-label">Awaiting Your Approval</span>
-        <span class="card-hint" *ngIf="countPendingCSA > 0">Click to review →</span>
+        <span class="summary-count">{{ countAssigned }}</span>
+        <span class="summary-label">Assigned & Active</span>
       </div>
     </div>
 
-    <div class="summary-card">
+    <!-- RESOLVED & COMPLETED -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'resolved'" (click)="setStatusFilter('resolved')" title="Show resolved and completed tickets">
       <div class="summary-icon green">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countResolved }}</span>
-        <span class="summary-label">Resolved / Dispatched</span>
+        <span class="summary-label">Resolved & Completed</span>
       </div>
     </div>
   </div>
@@ -77,10 +82,7 @@
   <div class="filter-tabs">
     <button [class.active]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')">All Tickets</button>
     <button [class.active]="selectedCategory === 'repair'" (click)="setCategoryFilter('repair')">Repairs</button>
-    <button [class.active]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')">
-      Maintenance
-      <span class="tab-badge" *ngIf="countPendingCSA > 0">{{ countPendingCSA }}</span>
-    </button>
+    <button [class.active]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')">Maintenance</button>
     <button [class.active]="selectedCategory === 'installation'" (click)="setCategoryFilter('installation')">Installation</button>
     <button [class.active]="selectedCategory === 'inspection'" (click)="setCategoryFilter('inspection')">Inspection</button>
   </div>
@@ -99,17 +101,6 @@
     </div>
 
     <div class="filters-row">
-      <div class="filter-group">
-        <label>Status:</label>
-        <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
-          <option value="ALL">All Statuses</option>
-          <option value="New">New</option>
-          <option value="Reviewed">Reviewed</option>
-          <option value="Assigned">Assigned</option>
-          <option value="resolved">Resolved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </div>
 
       <button class="btn-refresh" (click)="loadAllData()" [disabled]="isLoading">
         <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -131,35 +122,38 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Ticket & Subject</th>
-            <th>Customer</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th style="text-align: right;">Action</th>
+            <th class="col-ticket">Ticket & Subject</th>
+            <th class="col-customer">Customer</th>
+            <th class="col-category">Category</th>
+            <th class="col-status">Status</th>
+            <th class="col-date">Date</th>
+            <th class="col-action" style="text-align: right;">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let ticket of tickets" [class.csa-pending-row]="ticket.status === 'Sent to CSA'">
-            <td>
+            <td class="col-ticket">
               <div class="ticket-header-line">
                 <span class="ticket-id-tag">{{ getFormattedTicketId(ticket) }}</span>
               </div>
               <div class="ticket-subject">{{ ticket.subject || 'Service Request' }}</div>
               <div class="ticket-unit" *ngIf="ticket.acUnitModel">Unit: {{ ticket.acUnitModel }}</div>
             </td>
-            <td>
+            <td class="col-customer">
               <div class="customer-info-cell">
                 <div class="customer-name">{{ ticket.customerId ? ticket.customerId.fullName + ' ' + (ticket.customerId.lastName || '') : 'Unknown Customer' }}</div>
                 <div class="customer-phone">{{ ticket.customerId ? (ticket.customerId.phoneNumber || 'No phone') : '—' }}</div>
                 <div class="customer-address" *ngIf="ticket.customerId?.address">{{ ticket.customerId.address }}</div>
               </div>
             </td>
-            <td>
-              <span class="category-badge" [ngClass]="'cat-' + ticket.category">{{ ticket.category || 'Repair' | uppercase }}</span>
-              <span class="source-tag" *ngIf="ticket.isMaintenanceSchedule">TECH SCHEDULE</span>
+            <td class="col-category">
+              <div class="category-cell">
+                <span class="category-badge" [ngClass]="'cat-' + ticket.category">{{ ticket.category || 'Repair' | uppercase }}</span>
+                <span class="source-tag" *ngIf="ticket.isMaintenanceRecord">{{ ticket.requestType || 'MAINTENANCE' | uppercase }}</span>
+                <span class="source-tag" *ngIf="ticket.isMaintenanceSchedule">TECH SCHEDULE</span>
+              </div>
             </td>
-            <td>
+            <td class="col-status">
               <div class="status-cell">
                 <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
                   {{ ticket.status === 'Sent to CSA' ? 'Awaiting Approval' : ticket.status }}
@@ -170,15 +164,15 @@
                 </span>
               </div>
             </td>
-            <td>
+            <td class="col-date">
               <span class="date-text">{{ formatDate(ticket.createdAt) }}</span>
             </td>
-            <td style="text-align: right;">
+            <td class="col-action" style="text-align: right;">
               <button
                 class="btn-table-action"
                 [class.btn-review-approve]="ticket.status === 'Sent to CSA'"
                 (click)="viewDetails(ticket)">
-                {{ ticket.status === 'Sent to CSA' ? '⚡ Review & Approve' : 'View & Manage' }}
+                {{ ticket.status === 'Sent to CSA' ? 'Review' : 'View' }}
               </button>
             </td>
           </tr>
@@ -370,95 +364,57 @@
         </div>
 
         <!-- ────────────────────────────────────────── -->
-        <!-- TECHNICIAN MAINTENANCE SCHEDULE SECTION    -->
+        <!-- MAINTENANCE DETAILS SECTION (FROM /maintenance) -->
         <!-- ────────────────────────────────────────── -->
-        <div class="maintenance-schedule-review" *ngIf="selectedTicket.isMaintenanceSchedule && selectedTicket.maintenanceScheduleData">
-          <h4 class="section-subheading">Technician Planned Maintenance Services</h4>
-
-          <!-- Technician Notes Callout -->
-          <div class="tech-notes-box" *ngIf="selectedTicket.maintenanceScheduleData.csaNotes">
-            <strong>Notes from Technician:</strong>
-            <p>{{ selectedTicket.maintenanceScheduleData.csaNotes }}</p>
-          </div>
-
-          <!-- Services Grid / Table -->
-          <div class="services-list-container">
-            <div class="service-schedule-row" *ngFor="let srv of selectedTicket.maintenanceScheduleData.services; let i = index">
-              <div class="srv-num">{{ i + 1 }}</div>
-              <div class="srv-info">
-                <span class="srv-name">{{ srv.serviceName }}</span>
-                <span class="srv-date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  Scheduled: <strong>{{ formatDate(srv.date) }}</strong>
-                </span>
-              </div>
-              <div class="srv-badge">
-                <span class="warranty-tag" [class.in-warranty]="srv.underWarranty">
-                  {{ srv.underWarranty ? 'Under Warranty' : 'Paid Routine' }}
-                </span>
-              </div>
+        <div class="maintenance-schedule-review" *ngIf="selectedTicket.isMaintenanceRecord && selectedTicket.maintenanceRecordData">
+          <h4 class="section-subheading">Maintenance Details</h4>
+          
+          <div class="ticket-overview-card" style="margin-bottom: 16px;">
+            <div class="overview-item">
+              <span class="lbl">Maintenance Type:</span>
+              <strong>{{ selectedTicket.maintenanceRecordData.maintenanceType || (selectedTicket.maintenanceRecordData.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated') }}</strong>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Assigned Team:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.assignedTeam || 'Not Assigned' }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Service Date:</span>
+              <span>{{ formatDate(selectedTicket.maintenanceRecordData.date) }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Warranty Status:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.isUnderWarranty ? 'Under Warranty' : 'Paid / Out of Warranty' }}</span>
             </div>
           </div>
 
-          <!-- PENDING CSA DISPATCH ACTION BOX -->
-          <div class="dispatch-action-card" *ngIf="selectedTicket.status === 'Sent to CSA'">
-            <div class="dispatch-header">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span>The technician has completed schedule planning and requested CSA dispatch to the customer.</span>
-            </div>
-            <div class="form-group" style="margin-top: 10px;">
-              <label>Notes for Customer (optional):</label>
-              <textarea [(ngModel)]="customerNotes" rows="2" placeholder="e.g. Schedule verified with customer via telephone."></textarea>
-            </div>
-            <button class="btn-primary btn-dispatch" (click)="sendScheduleToCustomer()" [disabled]="isSendingToCustomer">
-              <span *ngIf="!isSendingToCustomer">Approve & Send Schedule to Customer</span>
-              <span *ngIf="isSendingToCustomer">Dispatching to Customer...</span>
-            </button>
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.description">
+            <span class="desc-title">Description:</span>
+            <p>{{ selectedTicket.maintenanceRecordData.description }}</p>
           </div>
 
-          <!-- ALREADY DISPATCHED NOTICE -->
-          <div class="dispatched-notice" *ngIf="selectedTicket.status === 'Sent to Customer'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span><strong>Dispatched to Customer:</strong> This maintenance schedule is active and was transmitted to the customer on {{ formatDate(selectedTicket.maintenanceScheduleData.sentToCustomerAt || selectedTicket.maintenanceScheduleData.updatedAt) }}.</span>
-            <p *ngIf="selectedTicket.maintenanceScheduleData?.customerNotes" class="customer-notes-echo">
-              CSA Note: {{ selectedTicket.maintenanceScheduleData.customerNotes }}
-            </p>
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.materialList && selectedTicket.maintenanceRecordData.materialList.length > 0" style="margin-top: 12px;">
+            <span class="desc-title">Materials / Equipment:</span>
+            <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 13px; color: #374151;">
+              <li *ngFor="let m of selectedTicket.maintenanceRecordData.materialList" style="margin-bottom: 4px;">
+                <strong>{{ m.item }}</strong> — Quantity: {{ m.quantity }}
+              </li>
+            </ul>
           </div>
         </div>
 
         <!-- ────────────────────────────────────────── -->
-        <!-- REGULAR SERVICE TICKET STATUS UPDATE       -->
+        <!-- REGULAR SERVICE TICKET SECTION             -->
         <!-- ────────────────────────────────────────── -->
-        <div class="standard-ticket-section" *ngIf="!selectedTicket.isMaintenanceSchedule">
+        <div class="standard-ticket-section" *ngIf="!selectedTicket.isMaintenanceRecord && !selectedTicket.isMaintenanceSchedule">
           <div class="desc-box">
             <span class="desc-title">Problem Description:</span>
             <p>{{ selectedTicket.description }}</p>
           </div>
 
-          <!-- STATUS UPDATE SECTION -->
-          <div class="status-manage-section">
-            <h4 class="section-subheading">Update Ticket Status</h4>
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label>Status:</label>
-                <select [(ngModel)]="statusUpdateForm.status">
-                  <option value="New">New</option>
-                  <option value="Reviewed">Reviewed</option>
-                  <option value="Assigned">Assigned</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-
-              <div class="form-group flex-2" *ngIf="statusUpdateForm.status === 'Rejected'">
-                <label>Rejection Reason:</label>
-                <input type="text" [(ngModel)]="statusUpdateForm.rejectionReason" placeholder="e.g. Out of service area" />
-              </div>
-            </div>
+          <div class="desc-box" *ngIf="selectedTicket.rejectionReason" style="margin-top: 12px; background: #fef2f2; border: 1px solid #fecaca;">
+            <span class="desc-title" style="color: #991b1b;">Rejection Reason:</span>
+            <p style="color: #b91c1c;">{{ selectedTicket.rejectionReason }}</p>
           </div>
         </div>
 
@@ -466,10 +422,6 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-ghost" (click)="closeDetailsModal()">Close</button>
-        <button *ngIf="!selectedTicket?.isMaintenanceSchedule" type="button" class="btn-primary" (click)="updateTicketStatus()" [disabled]="isUpdatingStatus">
-          <span *ngIf="!isUpdatingStatus">Save Status</span>
-          <span *ngIf="isUpdatingStatus">Saving...</span>
-        </button>
       </div>
     </div>
   </div>

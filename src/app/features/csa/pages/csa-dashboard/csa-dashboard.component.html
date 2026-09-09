@@ -52,7 +52,7 @@
       <div class="metric-arrow">→</div>
     </a>
 
-    <!-- CARD 3: PENDING INQUIRIES -->
+    <!-- CARD 3: AWAITING INQUIRIES -->
     <a routerLink="/csa/inquiries" class="metric-card">
       <div class="metric-icon-wrap">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -60,8 +60,8 @@
         </svg>
       </div>
       <div class="metric-content">
-        <span class="metric-value">{{ dashboardData?.metrics?.pendingInquiries || 0 }}</span>
-        <span class="metric-label">Ongoing Inquiries</span>
+        <span class="metric-value">{{ dashboardData?.metrics?.awaitingInquiries ?? dashboardData?.metrics?.pendingInquiries ?? 0 }}</span>
+        <span class="metric-label">Awaiting Inquiries</span>
       </div>
       <div class="metric-arrow">→</div>
     </a>
@@ -115,10 +115,10 @@
                   <span class="table-customer">{{ t.customerId ? t.customerId.fullName : 'Customer' }}</span>
                 </td>
                 <td>
-                  <span class="badge-tag">{{ t.category | uppercase }}</span>
+                  <span class="badge-tag" [ngClass]="'cat-' + (t.category || t.serviceType || 'repair').toLowerCase()">{{ (t.category || t.serviceType || 'repair') | uppercase }}</span>
                 </td>
                 <td>
-                  <span class="status-pill">{{ t.status }}</span>
+                  <span class="status-pill" [ngClass]="'stat-' + (t.status || '').toLowerCase().replace(' ', '-')">{{ t.status }}</span>
                 </td>
               </tr>
             </tbody>
@@ -146,7 +146,7 @@
         <div *ngFor="let inq of dashboardData?.recentInquiries" class="inquiry-feed-item">
           <div class="inq-feed-top">
             <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
-            <span class="inq-feed-status" [class.ongoing]="inq.status === 'Ongoing'">{{ inq.status }}</span>
+            <span class="inq-feed-status" [class.awaiting]="inq.status === 'Awaiting'" [class.ongoing]="inq.status === 'Ongoing'" [class.closed]="inq.status === 'Closed'">{{ inq.status }}</span>
           </div>
           <div class="inq-feed-msg">{{ inq.message }}</div>
           <div class="inq-feed-time">{{ formatDate(inq.createdAt) }} • Ref: {{ inq.inquiryRef }}</div>
