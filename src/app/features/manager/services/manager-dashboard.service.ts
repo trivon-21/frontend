@@ -3,7 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
+import { TtlCacheService } from '../../../core/services/ttl-cache.service';
 import { OrderLookupResponse } from './manager-customers.service';
+
+const DASHBOARD_CACHE_KEY = 'manager:dashboard';
+const DASHBOARD_CACHE_TTL_MS = 30 * 1000;
 
 export interface CardStat {
   total: number;
@@ -103,15 +107,27 @@ export interface ManagerDashboardData {
 
 @Injectable({ providedIn: 'root' })
 export class ManagerDashboardService {
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly cache: TtlCacheService,
+  ) {}
 
-  getDashboard(): Observable<ManagerDashboardData> {
-    return this.api.get<ManagerDashboardData>('/manager/dashboard').pipe(
+  /**
+   * Stale-while-revalidate: a re-entry within the TTL renders the cached
+   * numbers instantly (a stale hit emits the cached value immediately, then
+   * the fresh value when it lands) instead of flashing zeros while refetching.
+   * Pass `force: true` (e.g. from a Retry/Refresh action) to always hit the network.
+   */
+  getDashboard(options: { force?: boolean } = {}): Observable<ManagerDashboardData> {
+    const fetch = () => this.api.get<ManagerDashboardData>('/manager/dashboard').pipe(
       map((data) => ({
         ...data,
         currentDate: new Date(data.currentDate),
       })),
     );
+    return options.force
+      ? this.cache.force(DASHBOARD_CACHE_KEY, DASHBOARD_CACHE_TTL_MS, fetch)
+      : this.cache.observe(DASHBOARD_CACHE_KEY, DASHBOARD_CACHE_TTL_MS, fetch);
   }
 
   getRecentOrders(limit = 50): Observable<RecentOrdersResponse> {

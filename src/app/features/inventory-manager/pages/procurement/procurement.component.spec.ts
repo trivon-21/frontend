@@ -14,7 +14,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     newItemSnapshot: {
       name: 'Fabricated filter', sku: 'TEST-FILTER-1', brand: 'Fixture',
       itemClass: 'Consumables', subcategory: 'Disposable Filter', type: 'Single',
-      unit: 'units', location: 'Central Warehouse', binLocation: 'Consumables Storage', isSerialized: false,
+      unit: 'units', location: 'A', binLocation: 'A102', isSerialized: false,
       reorderLevel: 1, maxStockLevel: 5, unitCost: 100,
     },
     supplierId: 'supplier-1',
@@ -32,20 +32,23 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     workflowStages: ['ready-to-receive'],
   };
 
-  function create(params: Record<string, string> = {}) {
+  function create(params: Record<string, string> = {}, summaryOverrides: Record<string, unknown> = {}) {
     const service = jasmine.createSpyObj<InventoryManagerDashboardService>(
       'InventoryManagerDashboardService',
-      ['getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getReceiptDiscrepancies', 'getLocations', 'receiveInventory'],
+      ['getProcurementSummary', 'getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getReceiptDiscrepancies', 'getLocations', 'receiveInventory'],
     );
-    service.getProcurements.and.returnValue(of([]));
-    service.getInventory.and.returnValue(of([]));
-    service.getOrderRequests.and.returnValue(of([]));
-    service.getReceiptAuthorizations.and.returnValue(of([newItemAuthorization]));
-    service.getReceiptDiscrepancies.and.returnValue(of([]));
-    service.getLocations.and.returnValue(of([
-      { warehouse: 'Central Warehouse', placementAreas: ['Consumables Storage', 'Small Parts Racking'] },
-      { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
-    ]));
+    service.getProcurementSummary.and.returnValue(of({
+      procurements: [],
+      inventoryItems: [],
+      orderRequests: [],
+      authorizations: [newItemAuthorization],
+      discrepancies: [],
+      locations: [
+        { warehouse: 'A', racks: [{ rackTag: 'R1', bins: ['A101', 'A102'] }, { rackTag: 'R2', bins: ['A201', 'A202'] }] },
+        { warehouse: 'C', racks: [{ rackTag: 'R1', bins: ['C101', 'C102'] }] },
+      ],
+      ...summaryOverrides,
+    } as any));
     service.receiveInventory.and.returnValue(of({
       item: { ...newItemAuthorization.newItemSnapshot, available: 2, reserved: 0, status: 'normal', category: 'Consumables' } as never,
       procurement: {
@@ -61,6 +64,35 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     return { component, service };
   }
 
+  it('finishes loading when a ready-to-receive PO is present and no line is selected yet', () => {
+    const { component } = create({}, {
+      inventoryItems: [{ _id: 'item-1', name: 'Copper Piping', sku: 'PIPE-CU-025', unit: 'meters', isSerialized: false }],
+      orderRequests: [{
+        _id: 'order-1',
+        requestId: 'REQ-1',
+        status: 'ordered',
+        workflowStages: ['ready-to-receive'],
+        items: [{ lineId: 'line-1', inventoryId: 'item-1', name: 'Copper Piping', quantity: 10, receivedQuantity: 0 }],
+      }],
+    });
+
+    expect(component.loading).toBeFalse();
+    expect(component.loadError).toBe('');
+    expect(component.purchaseOrders.length).toBe(1);
+  });
+
+  it('loads the page from the bundled summary rather than fanning out per-entity requests', () => {
+    const { service } = create();
+
+    expect(service.getProcurementSummary).toHaveBeenCalledTimes(1);
+    expect(service.getProcurements).not.toHaveBeenCalled();
+    expect(service.getInventory).not.toHaveBeenCalled();
+    expect(service.getOrderRequests).not.toHaveBeenCalled();
+    expect(service.getReceiptAuthorizations).not.toHaveBeenCalled();
+    expect(service.getReceiptDiscrepancies).not.toHaveBeenCalled();
+    expect(service.getLocations).not.toHaveBeenCalled();
+  });
+
   it('honors dashboard workflow query parameters', () => {
     const { component } = create({ mode: 'NON_PO', authorizationStatus: 'ready', grnFilter: 'FINANCE' });
 
@@ -75,7 +107,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.patchValue({
       source: { sourceDocumentNumber: 'DELIVERY-1', receivedDate: '2026-09-02', condition: 'Good' },
-      stock: { quantity: 2, location: 'Central Warehouse', binLocation: 'Consumables Storage' },
+      stock: { quantity: 2, location: 'A', rackTag: 'R1', binLocation: 'A102' },
     });
     component.currentStep = 3;
 
@@ -97,7 +129,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
       source: { sourceDocumentNumber: 'DELIVERY-2', receivedDate: '2026-09-02', condition: 'Incomplete' },
       stock: {
         quantity: 3, acceptedQuantity: 1, damagedQuantity: 0, missingQuantity: 2,
-        location: 'Central Warehouse', binLocation: 'Consumables Storage',
+        location: 'A', rackTag: 'R1', binLocation: 'A102',
       },
     });
     component.currentStep = 3;
@@ -127,7 +159,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
       source: { sourceDocumentNumber: 'DELIVERY-3', receivedDate: '2026-09-02', condition: 'Incomplete' },
       stock: {
         quantity: 2, acceptedQuantity: 1, damagedQuantity: 0, missingQuantity: 0,
-        location: 'Central Warehouse', binLocation: 'Consumables Storage',
+        location: 'A', rackTag: 'R1', binLocation: 'A102',
       },
     });
     component.currentStep = 3;
@@ -136,15 +168,26 @@ describe('ProcurementDashboardComponent workflow queues', () => {
     expect(component.canGoNext()).toBeFalse();
   });
 
-  it('rejects a placement area from a different warehouse in the receipt form', () => {
+  it('rejects a rack from a different warehouse in the receipt form', () => {
     const { component } = create({ mode: 'NON_PO' });
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.get('stock')?.patchValue({
-      location: 'Service Warehouse',
-      binLocation: 'Consumables Storage',
+      location: 'C',
+      rackTag: 'R1',
+      binLocation: 'A102',
     });
 
     expect(component.receiptForm.get('stock')?.hasError('storageLocation')).toBeTrue();
+  });
+
+  it('narrows bins to the selected rack and clears a bin from another rack', () => {
+    const { component } = create({ mode: 'NON_PO' });
+    component.selectAuthorization(newItemAuthorization);
+    component.receiptForm.get('stock')?.patchValue({ location: 'A', rackTag: 'R2', binLocation: 'A102' });
+    component.onRackChange();
+
+    expect(component.availableBins).toEqual(['A201', 'A202']);
+    expect(component.receiptForm.get('stock.binLocation')?.value).toBe('');
   });
 
   it('initializes receivedDate with business date string', () => {

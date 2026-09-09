@@ -14,8 +14,10 @@ import {
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   deriveStockStatus,
+  formatStorageLocation,
   StockStatus,
   supplierNameOf,
+  warehouseLabelFor,
 } from '../../services/inventory-domain';
 export { deriveStockStatus } from '../../services/inventory-domain';
 
@@ -128,13 +130,17 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     this.searchSubject.next(value);
   }
 
-  loadInventory(): void {
+  loadInventory(options: { force?: boolean } = {}): void {
     this.loading = true;
     this.error = null;
-    forkJoin({
-      items: this.inventoryService.getInventory(),
-      locations: this.inventoryService.getLocations(),
-    }).subscribe({
+    let stream$ = forkJoin({
+      items: this.inventoryService.getInventory(options),
+      locations: this.inventoryService.getLocations(options),
+    });
+    if (this.destroyRef) {
+      stream$ = stream$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    stream$.subscribe({
       next: ({ items, locations }) => {
         this.allInventoryItems = items;
         this.locationOptions = locations.map((location) => location.warehouse);
@@ -151,7 +157,11 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   loadInventoryPaged(params: InventoryListParams): void {
     this.loading = true;
     this.error = null;
-    this.inventoryService.getInventoryPaged(params).subscribe({
+    let paged$ = this.inventoryService.getInventoryPaged(params);
+    if (this.destroyRef) {
+      paged$ = paged$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    paged$.subscribe({
       next: (result) => {
         this.inventoryItems = result.items;
         this.totalItems = result.total;
@@ -358,8 +368,12 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     }[deriveStockStatus(item)];
   }
 
-  getDisplayLocation(item: InventoryItem): string {
-    return item.binLocation ? `${item.location} · ${item.binLocation}` : item.location;
+  getStorageAddress(item: InventoryItem): string {
+    return formatStorageLocation(item.location, item.binLocation || '') || '—';
+  }
+
+  warehouseLabel(warehouse: string): string {
+    return warehouseLabelFor(warehouse) || warehouse;
   }
 
   getSupplierName(item: InventoryItem): string {

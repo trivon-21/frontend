@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
+import { TtlCacheService } from '../../../core/services/ttl-cache.service';
 import {
   CreateInventoryCatalogItemInput,
   InventoryItem,
@@ -249,24 +250,76 @@ export function normalizeInventoryDashboard(
   };
 }
 
+const INVENTORY_CACHE_PREFIX = 'inventory:';
+const DEFAULT_TTL_MS = 30 * 1000;
+
+// Mirrors INVENTORY_CACHE_PREFIXES in the backend's inventory-manager.cache.js.
+// Every key stays under INVENTORY_CACHE_PREFIX so a broad invalidate still
+// clears all of them.
+const CACHE_PREFIXES = {
+  PROCUREMENT: 'inventory:procurement:',
+  DISPATCH: 'inventory:dispatch:',
+  CATALOG: 'inventory:catalog:',
+  RETURNS: 'inventory:returns:',
+  QUARANTINE: 'inventory:quarantine:',
+  DASHBOARD: 'inventory:dashboard',
+  ACTIVITY: 'inventory:activity',
+} as const;
+
+export interface ProcurementSummary {
+  procurements: any[];
+  inventoryItems: InventoryItem[];
+  orderRequests: PurchaseRequest[];
+  authorizations: ReceiptAuthorization[];
+  discrepancies: ReceiptDiscrepancy[];
+  locations: InventoryLocationOption[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class InventoryManagerDashboardService {
   private apiUrl = `${environment.apiUrl}/inventory`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cache: TtlCacheService,
+  ) {}
 
-  getDashboard(): Observable<InventoryDashboardData> {
-    return this.http.get<InventoryDashboardData>(`${this.apiUrl}/dashboard`).pipe(
-      map(data => {
-        const normalized = normalizeInventoryDashboard(data);
-        normalized.recentActivity = normalized.recentActivity.map(activity => ({
-          ...activity,
-          timeAgo: this.getTimeAgo(activity.timestamp),
-        }));
-        return normalized;
-      }),
+  private requestCached<T>(
+    key: string,
+    factory: () => Observable<T>,
+    options: { force?: boolean } = {},
+    ttlMs: number = DEFAULT_TTL_MS,
+  ): Observable<T> {
+    return options.force
+      ? this.cache.force(key, ttlMs, factory)
+      : this.cache.observe(key, ttlMs, factory);
+  }
+
+  invalidateCache(prefix = INVENTORY_CACHE_PREFIX): void {
+    this.cache.invalidate(prefix);
+  }
+
+  /** Clears only the named scopes — for writes that cannot change stock figures. */
+  private invalidateScopes(...prefixes: string[]): void {
+    for (const prefix of prefixes) this.cache.invalidate(prefix);
+  }
+
+  getDashboard(options: { force?: boolean } = {}): Observable<InventoryDashboardData> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}dashboard`,
+      () => this.http.get<InventoryDashboardData>(`${this.apiUrl}/dashboard`).pipe(
+        map(data => {
+          const normalized = normalizeInventoryDashboard(data);
+          normalized.recentActivity = normalized.recentActivity.map(activity => ({
+            ...activity,
+            timeAgo: this.getTimeAgo(activity.timestamp),
+          }));
+          return normalized;
+        }),
+      ),
+      options,
     );
   }
 
@@ -281,8 +334,12 @@ export class InventoryManagerDashboardService {
     return `${days}d ago`;
   }
 
-  getInventory(): Observable<InventoryItem[]> {
-    return this.http.get<InventoryItem[]>(`${this.apiUrl}/list`);
+  getInventory(options: { force?: boolean } = {}): Observable<InventoryItem[]> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}catalog:list`,
+      () => this.http.get<InventoryItem[]>(`${this.apiUrl}/list`),
+      options,
+    );
   }
 
   /**
@@ -302,114 +359,209 @@ export class InventoryManagerDashboardService {
     return this.http.get<InventoryPagedResult>(`${this.apiUrl}/list`, { params: httpParams });
   }
 
-  getItem(id: string): Observable<InventoryItem> {
-    return this.http.get<InventoryItem>(`${this.apiUrl}/item/${id}`);
+  getItem(id: string, options: { force?: boolean } = {}): Observable<InventoryItem> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}item:${id}`,
+      () => this.http.get<InventoryItem>(`${this.apiUrl}/item/${id}`),
+      options,
+    );
   }
 
   updateItem(id: string, data: UpdateInventoryMasterDataInput): Observable<InventoryItem> {
-    return this.http.patch<InventoryItem>(`${this.apiUrl}/item/${id}`, data);
+    return this.http.patch<InventoryItem>(`${this.apiUrl}/item/${id}`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
   addItem(data: CreateInventoryCatalogItemInput): Observable<InventoryItem> {
-    return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data);
+    return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
   receiveInventory(data: ReceiveInventoryInput): Observable<ReceiveInventoryResult> {
-    return this.http.post<ReceiveInventoryResult>(`${this.apiUrl}/receipts`, data);
+    return this.http.post<ReceiveInventoryResult>(`${this.apiUrl}/receipts`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
-  getSuppliers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/suppliers`);
+  getSuppliers(options: { force?: boolean } = {}): Observable<any[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.CATALOG}suppliers`,
+      () => this.http.get<any[]>(`${this.apiUrl}/suppliers`),
+      options,
+    );
   }
 
   addSupplier(name: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/suppliers`, { name });
+    return this.http.post<any>(`${this.apiUrl}/suppliers`, { name }).pipe(
+      tap(() => this.invalidateScopes(CACHE_PREFIXES.CATALOG, CACHE_PREFIXES.PROCUREMENT)),
+    );
   }
 
-  getProcurements(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/procurements`);
+  /** One request for the whole procurement page, replacing six parallel fetches. */
+  getProcurementSummary(options: { force?: boolean } = {}): Observable<ProcurementSummary> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.PROCUREMENT}summary`,
+      () => this.http.get<ProcurementSummary>(`${this.apiUrl}/procurement/summary`),
+      options,
+    );
   }
 
-  getReceiptDiscrepancies(status = 'all'): Observable<ReceiptDiscrepancy[]> {
-    return this.http.get<ReceiptDiscrepancy[]>(`${this.apiUrl}/receipt-discrepancies`, {
-      params: status === 'all' ? {} : { status },
-    });
+  getProcurements(options: { force?: boolean } = {}): Observable<any[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.PROCUREMENT}procurements`,
+      () => this.http.get<any[]>(`${this.apiUrl}/procurements`),
+      options,
+    );
   }
 
-  getOrderRequests(): Observable<PurchaseRequest[]> {
-    return this.http.get<PurchaseRequest[]>(`${this.apiUrl}/order-requests`);
+  getReceiptDiscrepancies(status = 'all', options: { force?: boolean } = {}): Observable<ReceiptDiscrepancy[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.PROCUREMENT}receipt-discrepancies:${status}`,
+      () => this.http.get<ReceiptDiscrepancy[]>(`${this.apiUrl}/receipt-discrepancies`, {
+        params: status === 'all' ? {} : { status },
+      }),
+      options,
+    );
   }
 
-  getReceiptAuthorizations(status?: string): Observable<ReceiptAuthorization[]> {
+  getOrderRequests(options: { force?: boolean } = {}): Observable<PurchaseRequest[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.PROCUREMENT}order-requests`,
+      () => this.http.get<PurchaseRequest[]>(`${this.apiUrl}/order-requests`),
+      options,
+    );
+  }
+
+  getReceiptAuthorizations(status?: string, options: { force?: boolean } = {}): Observable<ReceiptAuthorization[]> {
     const params: Record<string, string> = {};
     if (status) params['status'] = status;
-    return this.http.get<ReceiptAuthorization[]>(`${this.apiUrl}/receipt-authorizations`, { params });
+    return this.requestCached(
+      `${CACHE_PREFIXES.PROCUREMENT}receipt-authorizations:${status || 'all'}`,
+      () => this.http.get<ReceiptAuthorization[]>(`${this.apiUrl}/receipt-authorizations`, { params }),
+      options,
+    );
   }
 
   createReceiptAuthorization(data: Record<string, unknown>): Observable<ReceiptAuthorization> {
-    return this.http.post<ReceiptAuthorization>(`${this.apiUrl}/receipt-authorizations`, data);
+    return this.http.post<ReceiptAuthorization>(`${this.apiUrl}/receipt-authorizations`, data).pipe(
+      tap(() => this.invalidateScopes(
+        CACHE_PREFIXES.PROCUREMENT,
+        CACHE_PREFIXES.DASHBOARD,
+        CACHE_PREFIXES.ACTIVITY,
+      )),
+    );
   }
 
-  getActivityLog(): Observable<ActivityItem[]> {
-    return this.http.get<ActivityItem[]>(`${this.apiUrl}/activity`).pipe(
-      map(activities => activities.map(activity => ({
-        ...activity,
-        timestamp: new Date(activity.timestamp),
-        timeAgo: this.getTimeAgo(new Date(activity.timestamp))
-      }))),
+  getActivityLog(options: { force?: boolean } = {}): Observable<ActivityItem[]> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}activity`,
+      () => this.http.get<ActivityItem[]>(`${this.apiUrl}/activity`).pipe(
+        map(activities => activities.map(activity => ({
+          ...activity,
+          timestamp: new Date(activity.timestamp),
+          timeAgo: this.getTimeAgo(new Date(activity.timestamp))
+        }))),
+      ),
+      options,
     );
   }
 
   // ── Returns & RMA Methods ──
 
-  getReturnsSummary(): Observable<ReturnsSummary> {
-    return this.http.get<ReturnsSummary>(`${this.apiUrl}/returns-summary`);
+  getReturnsSummary(options: { force?: boolean } = {}): Observable<ReturnsSummary> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.RETURNS}summary`,
+      () => this.http.get<ReturnsSummary>(`${this.apiUrl}/returns-summary`),
+      options,
+    );
   }
 
-  getLeftoverReturns(): Observable<LeftoverReturnItem[]> {
-    return this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`);
+  getLeftoverReturns(options: { force?: boolean } = {}): Observable<LeftoverReturnItem[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.RETURNS}leftover-returns`,
+      () => this.http.get<LeftoverReturnItem[]>(`${this.apiUrl}/leftover-returns`),
+      options,
+    );
   }
 
-  getLocations(): Observable<InventoryLocationOption[]> {
-    return this.http.get<InventoryLocationOption[]>(`${this.apiUrl}/locations`);
+  getLocations(options: { force?: boolean } = {}): Observable<InventoryLocationOption[]> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}locations`,
+      () => this.http.get<InventoryLocationOption[]>(`${this.apiUrl}/locations`),
+      options,
+    );
   }
 
-  getHandedOverMaterialRequests(): Observable<HandedOverMaterialRequest[]> {
-    return this.http.get<HandedOverMaterialRequest[]>(`${this.apiUrl}/material-requests`).pipe(
-      map(requests => requests.filter(request => request.status === 'completed')),
+  getHandedOverMaterialRequests(options: { force?: boolean } = {}): Observable<HandedOverMaterialRequest[]> {
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}material-requests:completed`,
+      () => this.http.get<HandedOverMaterialRequest[]>(`${this.apiUrl}/material-requests`).pipe(
+        map(requests => requests.filter(request => request.status === 'completed')),
+      ),
+      options,
     );
   }
 
   createLeftoverReturn(data: any): Observable<LeftoverReturnItem> {
-    return this.http.post<LeftoverReturnItem>(`${this.apiUrl}/leftover-returns`, data);
+    return this.http.post<LeftoverReturnItem>(`${this.apiUrl}/leftover-returns`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
-  getRmaCases(): Observable<RmaCaseItem[]> {
-    return this.http.get<RmaCaseItem[]>(`${this.apiUrl}/rma-cases`);
+  getRmaCases(options: { force?: boolean } = {}): Observable<RmaCaseItem[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.RETURNS}rma-cases`,
+      () => this.http.get<RmaCaseItem[]>(`${this.apiUrl}/rma-cases`),
+      options,
+    );
   }
 
   createRmaCase(data: any): Observable<RmaCaseItem> {
-    return this.http.post<RmaCaseItem>(`${this.apiUrl}/rma-cases`, data);
+    return this.http.post<RmaCaseItem>(`${this.apiUrl}/rma-cases`, data).pipe(
+      tap(() => this.invalidateScopes(
+        CACHE_PREFIXES.RETURNS,
+        CACHE_PREFIXES.DASHBOARD,
+        CACHE_PREFIXES.ACTIVITY,
+      )),
+    );
   }
 
   updateRmaCase(rmaId: string, data: any): Observable<RmaCaseItem> {
-    return this.http.patch<RmaCaseItem>(`${this.apiUrl}/rma-cases/${rmaId}`, data);
+    return this.http.patch<RmaCaseItem>(`${this.apiUrl}/rma-cases/${rmaId}`, data).pipe(
+      tap(() => this.invalidateScopes(
+        CACHE_PREFIXES.RETURNS,
+        CACHE_PREFIXES.DASHBOARD,
+        CACHE_PREFIXES.ACTIVITY,
+      )),
+    );
   }
 
   receiveRmaReplacement(rmaId: string, data: { serialNumber: string; notes?: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/rma-cases/${rmaId}/replacement`, data);
+    return this.http.post<any>(`${this.apiUrl}/rma-cases/${rmaId}/replacement`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
-  getQuarantineItems(): Observable<QuarantineItemData[]> {
-    return this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`);
+  getQuarantineItems(options: { force?: boolean } = {}): Observable<QuarantineItemData[]> {
+    return this.requestCached(
+      `${CACHE_PREFIXES.QUARANTINE}items`,
+      () => this.http.get<QuarantineItemData[]>(`${this.apiUrl}/quarantine`),
+      options,
+    );
   }
 
   createQuarantineItem(data: any): Observable<QuarantineItemData> {
-    return this.http.post<QuarantineItemData>(`${this.apiUrl}/quarantine`, data);
+    return this.http.post<QuarantineItemData>(`${this.apiUrl}/quarantine`, data).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 
   disposeQuarantineItem(quarantineId: string): Observable<QuarantineItemData> {
-    return this.http.patch<QuarantineItemData>(`${this.apiUrl}/quarantine/${quarantineId}/dispose`, {});
+    return this.http.patch<QuarantineItemData>(`${this.apiUrl}/quarantine/${quarantineId}/dispose`, {}).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
   }
 }
 

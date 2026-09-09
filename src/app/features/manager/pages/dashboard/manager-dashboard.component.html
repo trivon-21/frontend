@@ -10,7 +10,7 @@
   <div class="portal-state portal-state--error" *ngIf="errorMessage" role="alert">
     <lucide-angular name="triangle-alert" [size]="22"></lucide-angular>
     <div><strong>Dashboard unavailable</strong><p>{{ errorMessage }}</p></div>
-    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadData({ force: true })" [disabled]="loading">Retry</button>
   </div>
 
   <div class="welcome-banner">
@@ -18,13 +18,17 @@
       <div class="title-row">
         <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
         <span class="status-badge" [class.offline]="data.status === 'Offline'">
-          <span class="dot" [class.syncing]="loading"></span>
+          <span class="dot" [class.syncing]="loading || refreshing"></span>
           {{ loading ? 'Syncing...' : data.status }}
         </span>
       </div>
     </div>
     <div class="dashboard-actions mgr-action-group">
-      <a class="mgr-btn mgr-btn--secondary" routerLink="/manager/inventory">
+      <a class="mgr-btn mgr-btn--primary" routerLink="/manager/analytics/period-performance">
+        <lucide-angular name="bar-chart-3" [size]="16"></lucide-angular>
+        Full Analytics
+      </a>
+      <a class="mgr-btn mgr-btn--primary" routerLink="/manager/inventory">
         <lucide-angular name="package" [size]="16"></lucide-angular>
         View Inventory
       </a>
@@ -36,8 +40,6 @@
   </div>
 
   <app-mgr-summary-cards [data]="data"></app-mgr-summary-cards>
-
-  <app-mgr-insights-grid [data]="data" [analyticsData]="analyticsData"></app-mgr-insights-grid>
 
   <div class="dashboard-main-grid">
     <app-mgr-pending-actions [data]="data"></app-mgr-pending-actions>

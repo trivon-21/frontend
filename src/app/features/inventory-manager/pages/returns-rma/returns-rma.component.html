@@ -25,12 +25,14 @@
   <!-- Summary Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-icon stat-icon-blue">
-        <lucide-angular name="rotate-ccw" [size]="20"></lucide-angular>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value">{{ summary.leftoverReturns.total }}</span>
-        <span class="stat-label">Total Returns</span>
+      <div class="stat-main">
+        <div class="stat-icon stat-icon-blue">
+          <lucide-angular name="rotate-ccw" [size]="20"></lucide-angular>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Returns</span>
+          <span class="stat-value">{{ summary.leftoverReturns.total }}</span>
+        </div>
       </div>
       <div class="stat-footer">
         <span>{{ summary.leftoverReturns.restoredToStock }} restored</span>
@@ -38,24 +40,28 @@
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon stat-icon-amber">
-        <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value">{{ summary.rmaCases.active }}</span>
-        <span class="stat-label">Active RMA Cases</span>
+      <div class="stat-main">
+        <div class="stat-icon stat-icon-amber">
+          <lucide-angular name="triangle-alert" [size]="20"></lucide-angular>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Active RMA Cases</span>
+          <span class="stat-value">{{ summary.rmaCases.active }}</span>
+        </div>
       </div>
       <div class="stat-footer">
         <span>{{ summary.rmaCases.total }} total cases</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon stat-icon-red">
-        <lucide-angular name="circle-alert" [size]="20"></lucide-angular>
-      </div>
-      <div class="stat-info">
-        <span class="stat-value">{{ summary.quarantine.active }}</span>
-        <span class="stat-label">Quarantined Items</span>
+      <div class="stat-main">
+        <div class="stat-icon stat-icon-red">
+          <lucide-angular name="circle-alert" [size]="20"></lucide-angular>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Quarantined Items</span>
+          <span class="stat-value">{{ summary.quarantine.active }}</span>
+        </div>
       </div>
       <div class="stat-footer">
         <span>{{ summary.quarantine.disposed }} disposed</span>

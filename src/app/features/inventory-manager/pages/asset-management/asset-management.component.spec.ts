@@ -54,6 +54,7 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     component.selectedToolId = 'tool-1';
     component.selectedAssetTag = 'TAG-1';
     component.dueDate = '2026-08-30';
+    component.dueTime = '17:00';
 
     component.checkOut();
     const request = http.expectOne(`${baseUrl}/asset-loans`);
@@ -64,7 +65,7 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
       assetTag: 'TAG-1',
       technicianId: 'technician-1',
       technicianName: 'Fixture Technician',
-      dueDate: '2026-08-30',
+      dueDate: '2026-08-30T17:00:00',
     });
     request.flush({ message: 'Fixture rejection' }, { status: 409, statusText: 'Conflict' });
   });

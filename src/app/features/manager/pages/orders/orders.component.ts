@@ -12,6 +12,7 @@ import {
   ReceiptAuthorization,
 } from '../../services/orders.service';
 import { purchaseStatusLabel } from '../../../inventory-manager/services/purchase-workflow';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface FilterChip {
   key: string;
@@ -28,7 +29,7 @@ interface DecisionTarget {
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PortalIconsModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
 })

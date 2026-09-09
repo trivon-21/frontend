@@ -1,8 +1,10 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../../../core/services/api.service';
+import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
 import { InventoryItem, supplierNameOf } from '../../services/inventory-domain';
 import { PurchaseRequest, PurchaseStatus, purchaseStatusLabel, canonicalPurchaseStatus } from '../../services/purchase-workflow';
 import { OrderCreationService } from '../../services/order-creation.service';
@@ -39,6 +41,7 @@ export class OrderCreationComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
   loading = true;
+  refreshing = false;
   loadError = '';
   issuing = false;
   submittingDraftId = '';
@@ -52,14 +55,20 @@ export class OrderCreationComponent implements OnInit {
     private apiService: ApiService,
     private orderService: OrderCreationService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    @Optional() private ttlCache?: TtlCacheService,
+    @Optional() private destroyRef?: DestroyRef
   ) {}
 
   ngOnInit(): void {
     this.loadData();
 
     // Check for success message from new order page
-    this.route.queryParams.subscribe(params => {
+    let query$ = this.route.queryParams;
+    if (this.destroyRef) {
+      query$ = query$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    query$.subscribe(params => {
       if (params['success']) {
         this.successMessage = params['success'];
         setTimeout(() => this.successMessage = '', 5000);
@@ -76,21 +85,49 @@ export class OrderCreationComponent implements OnInit {
     });
   }
 
-  loadData(): void {
-    this.loading = true;
+  loadData(options: { force?: boolean } = {}): void {
+    const hasData = this.allOrders.length > 0 || this.suggestedItems.length > 0;
+    if (!hasData) {
+      this.loading = true;
+    } else {
+      this.refreshing = true;
+    }
     this.loadError = '';
-    forkJoin({
-      orders: this.apiService.get<PurchaseRequest[]>('/inventory/order-requests'),
-      suggestedItems: this.apiService.get<InventoryItem[]>('/inventory/suggested-orders'),
-    }).subscribe({
+
+    const fetchOrders = () => this.apiService.get<PurchaseRequest[]>('/inventory/order-requests');
+    const fetchSuggestions = () => this.apiService.get<InventoryItem[]>('/inventory/suggested-orders');
+
+    const orders$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:order-requests', 30000, fetchOrders)
+          : this.ttlCache.observe('inventory:order-requests', 30000, fetchOrders))
+      : fetchOrders();
+
+    const suggested$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:suggested-orders', 30000, fetchSuggestions)
+          : this.ttlCache.observe('inventory:suggested-orders', 30000, fetchSuggestions))
+      : fetchSuggestions();
+
+    let stream$ = forkJoin({
+      orders: orders$,
+      suggestedItems: suggested$,
+    });
+    if (this.destroyRef) {
+      stream$ = stream$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+
+    stream$.subscribe({
       next: ({ orders, suggestedItems }) => {
         this.applyOrders(orders);
         this.suggestedItems = suggestedItems;
         this.loading = false;
+        this.refreshing = false;
       },
       error: () => {
         this.loadError = 'Orders and reorder suggestions could not be loaded. No partial data has been shown.';
         this.loading = false;
+        this.refreshing = false;
       },
     });
   }
@@ -117,7 +154,7 @@ export class OrderCreationComponent implements OnInit {
     let list: PurchaseRequest[];
     switch (this.activeTab) {
       case 'all':
-        list = this.allOrders;
+        list = this.allOrders.filter(o => o.status !== 'draft');
         break;
       case 'draft':
         list = this.draftOrders;
@@ -177,12 +214,18 @@ export class OrderCreationComponent implements OnInit {
     this.submittingDraftId = order.requestId;
     this.errorMessage = '';
 
-    this.orderService.submitForManager(order).subscribe({
+    let submit$ = this.orderService.submitForManager(order);
+    if (this.destroyRef) {
+      submit$ = submit$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+
+    submit$.subscribe({
       next: () => {
         this.submittingDraftId = '';
+        this.ttlCache?.invalidate('inventory:');
         this.successMessage = `Order ${order.requestId} submitted for manager review!`;
         setTimeout(() => this.successMessage = '', 5000);
-        this.loadData();
+        this.loadData({ force: true });
         if (this.selectedOrder?.requestId === order.requestId) {
           this.closeDetail();
         }
@@ -210,10 +253,15 @@ export class OrderCreationComponent implements OnInit {
     if (this.issuing) return;
     this.issuing = true;
     this.errorMessage = '';
-    this.orderService.issuePurchaseOrder(order).subscribe({
+    let issue$ = this.orderService.issuePurchaseOrder(order);
+    if (this.destroyRef) {
+      issue$ = issue$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    issue$.subscribe({
       next: () => {
         this.issuing = false;
-        this.loadData();
+        this.ttlCache?.invalidate('inventory:');
+        this.loadData({ force: true });
         this.selectedOrder = null;
         this.showDetailModal = false;
       },

@@ -22,6 +22,7 @@
 .role-portal-shell .summary-card {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--spacing-lg, 16px);
   padding: 20px;
   background: var(--background-card);
@@ -38,7 +39,7 @@
 }
 
 .role-portal-shell .summary-card.clickable:hover {
-  box-shadow: var(--shadow-large, 0 8px 16px rgba(59, 90, 56, 0.2));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
@@ -49,9 +50,9 @@
 
 .role-portal-shell .summary-card .card-main {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--spacing-md, 12px);
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
 }
 
 .role-portal-shell .summary-card .card-info {
@@ -72,6 +73,7 @@
   font-weight: 700;
   color: var(--heading-primary);
   line-height: 1.1;
+  padding-left: 10px;
 }
 
 .role-portal-shell .summary-card .card-icon {
@@ -79,12 +81,20 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--border-radius-md, 12px);
   background: var(--primary-lighter);
   color: var(--primary-main);
 }
+
+/* Per-metric icon tints — same palette super-admin/main-technician use on
+   their dashboard stat cards, so a mixed-color card row isn't unique to
+   those two portals. */
+.role-portal-shell .summary-card .card-icon.tint-blue { background: #e8f0ff; color: #3b5bdb; }
+.role-portal-shell .summary-card .card-icon.tint-red { background: #fde8e8; color: #d64040; }
+.role-portal-shell .summary-card .card-icon.tint-amber { background: #fff3dc; color: #b45309; }
+.role-portal-shell .summary-card .card-icon.tint-green { background: var(--primary-lighter); color: var(--primary-main); }
 
 .role-portal-shell .summary-card .card-footer {
   display: flex;

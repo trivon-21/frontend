@@ -1,3 +1,9 @@
+.inventory-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl, 24px);
+}
+
 .offline-banner {
   display: flex;
   align-items: center;

@@ -61,7 +61,7 @@
         <span>Warehouse</span>
         <select [(ngModel)]="selectedLocation" (change)="applyFilters()">
           <option>All Locations</option>
-          <option *ngFor="let location of locationOptions" [value]="location">{{ location }}</option>
+          <option *ngFor="let location of locationOptions" [value]="location">{{ warehouseLabel(location) }}</option>
         </select>
       </label>
     </div>
@@ -202,7 +202,7 @@
   </div>
 
   <div class="state-card" *ngIf="loading">Loading inventory…</div>
-  <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadInventory()">Retry</button></div>
+  <div class="state-card error-state" *ngIf="error" role="alert">{{ error }} <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadInventory({ force: true })">Retry</button></div>
 
   <div class="table-container alx-table-container" *ngIf="!loading && !error" role="region" aria-label="Inventory items" tabindex="0">
     <table class="alx-table alx-table--wide">
@@ -215,7 +215,7 @@
           <th>Available</th>
           <th>Reserved</th>
           <th>Stock Status</th>
-          <th>Location</th>
+          <th>Warehouse</th>
           <th class="actions-cell">Actions</th>
         </tr>
       </thead>
@@ -234,11 +234,9 @@
           <td class="sku-cell">{{ item.sku }}</td>
           <td (click)="openDetailModal(item); $event.stopPropagation()">
             <span class="product-name">{{ item.name }}</span>
-            <small *ngIf="item.manufacturerPartNumber">{{ item.manufacturerPartNumber }}</small>
           </td>
           <td>
             <strong>{{ item.itemClass || 'Unclassified' }}</strong>
-            <small>{{ item.subcategory || 'Unclassified' }}</small>
           </td>
           <td>{{ item.brand || '—' }}</td>
           <td class="num-cell">{{ item.available }} {{ item.unit }}</td>
@@ -248,7 +246,7 @@
               {{ getStockStatusLabel(item) }}
             </span>
           </td>
-          <td>{{ getDisplayLocation(item) }}</td>
+          <td>{{ getStorageAddress(item) }}</td>
           <td class="actions-cell">
             <button
               class="btn-small im-btn im-btn--secondary im-btn--compact"
@@ -333,11 +331,10 @@
   </ng-container>
 
   <div class="modal-overlay" *ngIf="showDetailModal && selectedItem" (click)="closeDetailModal()">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="inventory-detail-title" (click)="$event.stopPropagation()">
+    <div class="modal-content detail-modal" role="dialog" aria-modal="true" aria-labelledby="inventory-detail-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="header-title-group">
           <h2 id="inventory-detail-title">Product Details</h2>
-          <span class="sku-badge">{{ selectedItem.sku }}</span>
         </div>
         <button class="btn-close im-btn im-btn--close" type="button" aria-label="Close product details" (click)="closeDetailModal()">
           <lucide-angular name="x" [size]="20"></lucide-angular>
@@ -347,8 +344,10 @@
       <div class="modal-body detail-view">
         <div class="detail-grid">
           <div class="detail-item"><span class="label">Product</span><span class="value">{{ selectedItem.name }}</span></div>
-          <div class="detail-item full-width" *ngIf="selectedItem.description"><span class="label">Description</span><span class="value">{{ selectedItem.description }}</span></div>
+          <div class="detail-item"><span class="label">SKU</span><span class="value">{{ selectedItem.sku }}</span></div>
           <div class="detail-item"><span class="label">OEM Part / Model</span><span class="value">{{ selectedItem.manufacturerPartNumber || '—' }}</span></div>
+          <div class="detail-item"><span class="label">Unit Price</span><span class="value">LKR {{ selectedItem.unitCost | number:'1.2-2' }}</span></div>
+          <div class="detail-item full-width" *ngIf="selectedItem.description"><span class="label">Description</span><span class="value">{{ selectedItem.description }}</span></div>
           <div class="detail-item"><span class="label">Class</span><span class="value">{{ selectedItem.itemClass || 'Unclassified' }}</span></div>
           <div class="detail-item"><span class="label">Subcategory</span><span class="value">{{ selectedItem.subcategory || 'Unclassified' }}</span></div>
           <div class="detail-item"><span class="label">Brand</span><span class="value">{{ selectedItem.brand }}</span></div>
@@ -357,16 +356,19 @@
           <div class="detail-item"><span class="label">Refrigerant</span><span class="value">{{ selectedItem.refrigerants?.join(', ') || 'Not Applicable' }}</span></div>
           <div class="detail-item"><span class="label">Capacity</span><span class="value">{{ selectedItem.capacityBtu ? (selectedItem.capacityBtu + ' BTU/h') : '—' }}</span></div>
           <div class="detail-item"><span class="label">Power</span><span class="value">{{ selectedItem.voltage || '—' }} · {{ selectedItem.phase || 'Not Applicable' }}</span></div>
-          <div class="detail-item"><span class="label">Location</span><span class="value">{{ getDisplayLocation(selectedItem) }}</span></div>
+          <div class="detail-item"><span class="label">Storage Location</span><span class="value">{{ getStorageAddress(selectedItem) }}</span></div>
           <div class="detail-item"><span class="label">Preferred Supplier</span><span class="value">{{ getSupplierName(selectedItem) || 'Not assigned' }}</span></div>
           <div class="detail-item"><span class="label">Stock Status</span><span class="value">{{ getStockStatusLabel(selectedItem) }}</span></div>
           <div class="detail-item"><span class="label">Available</span><span class="value">{{ selectedItem.available }} {{ selectedItem.unit }}</span></div>
           <div class="detail-item"><span class="label">Reserved</span><span class="value">{{ selectedItem.reserved }} {{ selectedItem.unit }}</span></div>
-          <div class="detail-item"><span class="label">Unit Cost</span><span class="value">LKR {{ selectedItem.unitCost | number:'1.2-2' }}</span></div>
           <div class="detail-item"><span class="label">Reorder / Maximum</span><span class="value">{{ selectedItem.reorderLevel }} / {{ selectedItem.maxStockLevel }} {{ selectedItem.unit }}</span></div>
           <div class="detail-item"><span class="label">Tracking</span><span class="value">{{ selectedItem.isSerialized ? 'Serialized' : 'Non-serialized' }}</span></div>
-          <div class="detail-item" *ngIf="selectedItem.isSerialized"><span class="label">Asset Tags</span><span class="value">{{ selectedItem.serialNumbers?.length || 0 }}</span></div>
-          <div class="detail-item" *ngIf="selectedItem.specsUrl"><span class="label">Specifications</span><a class="value" [href]="selectedItem.specsUrl" target="_blank" rel="noopener">Open manufacturer specifications</a></div>
+          <div class="detail-item"><span class="label">Asset Tags</span><span class="value">{{ selectedItem.isSerialized ? (selectedItem.serialNumbers?.length || 0) : 'Not tracked' }}</span></div>
+          <div class="detail-item full-width">
+            <span class="label">Specifications URL</span>
+            <a class="value" *ngIf="selectedItem.specsUrl; else noSpecsUrl" [href]="selectedItem.specsUrl" target="_blank" rel="noopener">{{ selectedItem.specsUrl }}</a>
+            <ng-template #noSpecsUrl><span class="value">Not provided</span></ng-template>
+          </div>
         </div>
       </div>
 

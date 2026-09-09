@@ -1,44 +1,28 @@
 <div class="summary-grid">
   <a class="summary-card clickable" routerLink="/manager/work-items">
     <div class="card-main">
+      <div class="card-icon tint-blue"><lucide-angular name="clipboard-list" [size]="22"></lucide-angular></div>
       <div class="card-info"><span class="card-label">Open Tickets</span><span class="card-value">{{ data.stats.openTickets.total }}</span></div>
-      <div class="card-icon"><lucide-angular name="clipboard-list" [size]="22"></lucide-angular></div>
     </div>
-    <div class="card-footer"><div *ngFor="let sub of data.stats.openTickets.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
   </a>
 
   <a class="summary-card clickable" routerLink="/manager/inventory">
     <div class="card-main">
+      <div class="card-icon tint-green">
+        <lucide-angular name="package" [size]="22"></lucide-angular>
+      </div>
       <div class="card-info">
         <span class="card-label">Inventory Health</span>
         <span class="card-value" [class.risk-text]="totalStockRiskCount > 0">{{ totalStockRiskCount }}</span>
-      </div>
-      <div class="card-icon inventory-icon">
-        <lucide-angular name="package" [size]="22"></lucide-angular>
-      </div>
-    </div>
-    <div class="card-footer">
-      <div class="sub-stat">
-        <span class="sub-label">Low Stock</span>
-        <span class="sub-value" [class.risk-text]="lowStockCount > 0">{{ lowStockCount }}</span>
-      </div>
-      <div class="sub-stat">
-        <span class="sub-label">Out of Stock</span>
-        <span class="sub-value" [class.risk-text]="outOfStockCount > 0">{{ outOfStockCount }}</span>
-      </div>
-      <div class="sub-stat" *ngIf="reservedItemsCount > 0">
-        <span class="sub-label">Reserved Units</span>
-        <span class="sub-value">{{ reservedItemsCount }}</span>
       </div>
     </div>
   </a>
 
   <a class="summary-card clickable" routerLink="/manager/work-items" [queryParams]="{ sla: 'overdue' }">
     <div class="card-main">
+      <div class="card-icon tint-red"><lucide-angular name="timer-off" [size]="22"></lucide-angular></div>
       <div class="card-info"><span class="card-label">SLA Risk</span><span class="card-value">{{ data.stats.slaRisk.total }}</span></div>
-      <div class="card-icon"><lucide-angular name="timer-off" [size]="22"></lucide-angular></div>
     </div>
-    <div class="card-footer"><div *ngFor="let sub of data.stats.slaRisk.subStats" class="sub-stat"><span class="sub-label">{{ sub.label }}</span><span class="sub-value">{{ sub.value }}</span></div></div>
   </a>
 
   <article class="summary-card clickable approval-card">
@@ -49,18 +33,16 @@
       aria-label="Open pending purchase approvals"
     >
       <div class="card-main">
+        <div class="card-icon tint-amber"><lucide-angular name="shopping-bag" [size]="22"></lucide-angular></div>
         <div class="card-info"><span class="card-label">Pending Approvals</span><span class="card-value">{{ data.stats.pendingApprovals.total }}</span></div>
-        <div class="card-icon"><lucide-angular name="shopping-bag" [size]="22"></lucide-angular></div>
       </div>
     </a>
-    <nav class="card-footer approval-links" aria-label="Approval queues">
+    <nav class="approval-links sr-only" aria-label="Approval queues">
       <a class="sub-stat clickable-sub-stat" routerLink="/manager/orders" [queryParams]="{ type: 'purchase', status: 'pending-manager' }">
         <span class="sub-label">Purchase</span>
-        <span class="approval-detail">{{ data.stats.pendingApprovals.subStats[0]?.value || 0 }} urgent · {{ (data.stats.pendingApprovals.subStats[1]?.value || 0) | currency:'LKR':'symbol':'1.0-0' }}</span>
       </a>
       <a class="sub-stat clickable-sub-stat" routerLink="/manager/orders" [queryParams]="{ type: 'non-po', status: 'pending' }">
         <span class="sub-label">Non-PO</span>
-        <span class="sub-value">{{ data.stats.pendingApprovals.subStats[2]?.value || 0 }}</span>
       </a>
     </nav>
   </article>

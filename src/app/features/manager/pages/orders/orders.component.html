@@ -14,20 +14,32 @@
   <!-- Summary tiles -->
   <div class="summary-row">
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.pending }}</span>
-      <span class="tile-label">Pending Approval</span>
+      <div class="tile-icon"><lucide-angular name="timer" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Pending Approval</span>
+        <span class="tile-value">{{ summary.pending }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ formatCurrency(summary.pendingValue) }}</span>
-      <span class="tile-label">Pending Value</span>
+      <div class="tile-icon"><lucide-angular name="dollar-sign" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Pending Value</span>
+        <span class="tile-value">{{ formatCurrency(summary.pendingValue) }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.approved }}</span>
-      <span class="tile-label">Approved</span>
+      <div class="tile-icon"><lucide-angular name="circle-check-big" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Approved</span>
+        <span class="tile-value">{{ summary.approved }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.rejected }}</span>
-      <span class="tile-label">Rejected</span>
+      <div class="tile-icon"><lucide-angular name="x" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Rejected</span>
+        <span class="tile-value">{{ summary.rejected }}</span>
+      </div>
     </div>
   </div>
 

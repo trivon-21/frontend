@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -104,7 +105,10 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   replacementSerialNumber = '';
   replacementNotes = '';
 
-  constructor(private dashboardService: InventoryManagerDashboardService) {}
+  constructor(
+    private dashboardService: InventoryManagerDashboardService,
+    @Optional() private destroyRef?: DestroyRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadAllData();
@@ -112,18 +116,23 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   // ── Data Loading ──
 
-  loadAllData(): void {
-    this.loading = true;
+  loadAllData(options: { force?: boolean } = {}): void {
+    if (!this.leftoverReturns.length && !this.rmaCases.length && !this.quarantineItems.length) {
+      this.loading = true;
+    }
     this.error = null;
 
-    forkJoin({
-      summary: this.dashboardService.getReturnsSummary(),
-      leftoverReturns: this.dashboardService.getLeftoverReturns(),
-      rmaCases: this.dashboardService.getRmaCases(),
-      quarantineItems: this.dashboardService.getQuarantineItems(),
-      inventoryItems: this.dashboardService.getInventory(),
-      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(),
-    }).subscribe({
+    const joined$ = forkJoin({
+      summary: this.dashboardService.getReturnsSummary(options),
+      leftoverReturns: this.dashboardService.getLeftoverReturns(options),
+      rmaCases: this.dashboardService.getRmaCases(options),
+      quarantineItems: this.dashboardService.getQuarantineItems(options),
+      inventoryItems: this.dashboardService.getInventory(options),
+      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(options),
+    });
+
+    const sub$ = this.destroyRef ? joined$.pipe(takeUntilDestroyed(this.destroyRef)) : joined$;
+    sub$.subscribe({
       next: (data) => {
         this.summary = data.summary;
         this.leftoverReturns = data.leftoverReturns;
@@ -141,7 +150,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   refreshData(): void {
-    this.loadAllData();
+    this.loadAllData({ force: true });
   }
 
   // ── Leftover Return Form ──

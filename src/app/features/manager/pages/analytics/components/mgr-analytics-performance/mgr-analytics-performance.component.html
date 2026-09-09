@@ -1,0 +1,50 @@
+<section aria-labelledby="performance-heading">
+  <div class="section-heading">
+    <div><h2 id="performance-heading">Performance Summary</h2><p>Compared with the immediately preceding equivalent period.</p></div>
+    <span class="scope-badge period">{{ activePeriod }}</span>
+  </div>
+  <div class="kpi-row">
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-icon"><lucide-angular name="ticket-plus" [size]="18"></lucide-angular></span>
+        <div class="kpi-text"><span class="kpi-label">Tickets Created</span><strong class="kpi-value">{{ report.performance.ticketsCreated.current }}</strong></div>
+      </div>
+      <span class="kpi-delta" [ngClass]="deltaClass(report.performance.ticketsCreated)">{{ deltaText(report.performance.ticketsCreated) }}</span>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-icon"><lucide-angular name="circle-check-big" [size]="18"></lucide-angular></span>
+        <div class="kpi-text"><span class="kpi-label">Tickets Resolved</span><strong class="kpi-value">{{ report.performance.ticketsResolved.current }}</strong></div>
+      </div>
+      <span class="kpi-delta" [ngClass]="deltaClass(report.performance.ticketsResolved)">{{ deltaText(report.performance.ticketsResolved) }}</span>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-icon"><lucide-angular name="timer" [size]="18"></lucide-angular></span>
+        <div class="kpi-text"><span class="kpi-label">Average Resolution</span><strong class="kpi-value">{{ report.performance.averageResolutionHours.current | number:'1.0-1' }}h</strong></div>
+      </div>
+      <span class="kpi-delta" [ngClass]="deltaClass(report.performance.averageResolutionHours)">{{ deltaText(report.performance.averageResolutionHours) }}</span>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-icon"><lucide-angular name="shopping-bag" [size]="18"></lucide-angular></span>
+        <div class="kpi-text"><span class="kpi-label">Purchase Request Value</span><strong class="kpi-value">LKR {{ report.performance.purchaseRequestValue.current | number:'1.0-0' }}</strong></div>
+      </div>
+      <span class="kpi-detail">{{ report.performance.purchaseRequestCount.current }} submitted</span>
+      <span class="kpi-delta" [ngClass]="deltaClass(report.performance.purchaseRequestValue)">{{ deltaText(report.performance.purchaseRequestValue) }}</span>
+    </article>
+  </div>
+</section>
+
+<section class="position-panel" aria-labelledby="position-heading">
+  <div class="section-heading compact">
+    <div><h2 id="position-heading">Current Position</h2><p>Live operational conditions; these values are not historical comparisons.</p></div>
+    <span class="scope-badge current">Current</span>
+  </div>
+  <div class="position-grid">
+    <a routerLink="/manager/work-items" class="position-item"><span>Open backlog</span><strong>{{ report.currentPosition.openTickets.value }}</strong></a>
+    <a routerLink="/manager/work-items" [queryParams]="{ assignment: 'unassigned' }" class="position-item"><span>Unassigned</span><strong>{{ report.currentPosition.unassignedTickets.value }}</strong></a>
+    <a routerLink="/manager/work-items" [queryParams]="{ status: 'escalated' }" class="position-item risk"><span>SLA / escalation risk</span><strong>{{ report.currentPosition.slaRiskTickets.value }}</strong></a>
+    <a routerLink="/manager/orders" [queryParams]="{ status: 'pending-manager' }" class="position-item"><span>Pending approval value</span><strong>LKR {{ report.currentPosition.pendingApprovalValue.value | number:'1.0-0' }}</strong></a>
+  </div>
+</section>

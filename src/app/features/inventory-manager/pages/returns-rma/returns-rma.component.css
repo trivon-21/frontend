@@ -107,13 +107,20 @@
   transform: translateY(-2px);
 }
 
+.stat-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .stat-icon-blue {

@@ -40,72 +40,48 @@
   <section class="summary-grid summary-cards-grid" aria-label="Customer Engagement Summary">
     <div class="summary-card">
       <div class="card-main">
+        <div class="card-icon card-icon--primary">
+          <lucide-angular name="users" [size]="22"></lucide-angular>
+        </div>
         <div class="card-info">
           <span class="card-label">Total Customers</span>
           <span class="card-value">{{ summary.totalCustomers | number }}</span>
         </div>
-        <div class="card-icon card-icon--primary">
-          <lucide-angular name="users" [size]="22"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="sub-stat">
-          <span class="sub-label">Active Accounts</span>
-          <span class="sub-value">{{ summary.activeCustomers }}</span>
-        </div>
       </div>
     </div>
 
     <div class="summary-card">
       <div class="card-main">
+        <div class="card-icon card-icon--emerald">
+          <lucide-angular name="clipboard-check" [size]="22"></lucide-angular>
+        </div>
         <div class="card-info">
           <span class="card-label">Clients with Prior Work</span>
           <span class="card-value">{{ summary.customersWithHistory | number }}</span>
         </div>
-        <div class="card-icon card-icon--emerald">
-          <lucide-angular name="clipboard-check" [size]="22"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="sub-stat">
-          <span class="sub-label">Prior History</span>
-          <span class="sub-value">Worked with AirLux</span>
-        </div>
       </div>
     </div>
 
     <div class="summary-card">
       <div class="card-main">
+        <div class="card-icon card-icon--pine">
+          <lucide-angular name="history" [size]="22"></lucide-angular>
+        </div>
         <div class="card-info">
           <span class="card-label">Total Recorded Instances</span>
           <span class="card-value">{{ summary.totalInstances | number }}</span>
         </div>
-        <div class="card-icon card-icon--pine">
-          <lucide-angular name="history" [size]="22"></lucide-angular>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="sub-stat">
-          <span class="sub-label">Total History</span>
-          <span class="sub-value">Orders, services &amp; installs</span>
-        </div>
       </div>
     </div>
 
     <div class="summary-card">
       <div class="card-main">
-        <div class="card-info">
-          <span class="card-label">Loaded in View</span>
-          <span class="card-value">{{ customers.length }}</span>
-        </div>
         <div class="card-icon card-icon--slate">
           <lucide-angular name="list-filter" [size]="22"></lucide-angular>
         </div>
-      </div>
-      <div class="card-footer">
-        <div class="sub-stat">
-          <span class="sub-label">Current Page</span>
-          <span class="sub-value">Page {{ currentPage }} of {{ totalPages }}</span>
+        <div class="card-info">
+          <span class="card-label">Loaded in View</span>
+          <span class="card-value">{{ customers.length }}</span>
         </div>
       </div>
     </div>

@@ -1,25 +1,52 @@
 /* Right Panel - Added Items */
 .layout-right {
-  height: auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  margin: 14px 14px 14px 0;
+  background: var(--background-page);
+  border-radius: 14px;
   overflow: hidden;
 }
 
 .right-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--background-hover);
+  padding: 20px 56px 20px 20px;
+  flex: 0 0 auto;
 }
 
 .right-header h3 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
 .added-items-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 460px;
   overflow-y: auto;
   padding: 0;
+}
+
+/* The shared table utilities paint an opaque card surface; keep it flat on the
+   tinted summary panel while leaving header cells opaque for scrolling rows. */
+.layout-right .line-items-container,
+.layout-right .line-items-table {
+  background: transparent;
+  border: none;
+}
+
+/* The shared narrow preset reserves 480px, which overflows this panel and clips
+   the total column, so let the line items fit the width they are given. */
+.layout-right .line-items-table {
+  --alx-table-min-width: 0;
+  --alx-table-cell-padding-inline: 12px;
+}
+
+.layout-right .line-items-table th {
+  background: var(--background-page);
 }
 
 .empty-items-state {
@@ -34,7 +61,7 @@
 .empty-icon {
   width: 48px;
   height: 48px;
-  background: var(--background-page);
+  background: var(--background-card);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -70,7 +97,7 @@
 .qty-editor {
   display: flex;
   align-items: center;
-  background: var(--background-page);
+  background: var(--background-card);
   border-radius: 8px;
   padding: var(--spacing-xs);
 }
@@ -79,7 +106,7 @@
   width: 26px;
   height: 26px;
   border: none;
-  background: var(--background-card);
+  background: var(--background-page);
   border-radius: 6px;
   cursor: pointer;
   font-weight: 700;
@@ -102,6 +129,7 @@
   font-weight: 700;
   color: var(--text-primary);
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .btn-delete-row {
@@ -119,9 +147,10 @@
 
 /* Summary Footer */
 .summary-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
   padding: 20px;
   border-top: 1px solid var(--background-hover);
-  background: var(--background-page);
 }
 
 .summary-row {
@@ -159,3 +188,9 @@
   color: var(--primary-main);
 }
 button:focus-visible, input:focus-visible { outline: 3px solid rgb(0 132 61 / 22%); outline-offset: 2px; }
+
+@media (max-width: 1100px) {
+  .layout-right {
+    margin: 0 14px 14px;
+  }
+}

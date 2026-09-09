@@ -60,13 +60,3 @@
     grid-template-columns: 1fr;
   }
 }
-
-.side-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.side-column .content-card {
-  flex: 1;
-}

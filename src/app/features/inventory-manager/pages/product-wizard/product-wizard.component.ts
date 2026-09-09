@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -22,12 +23,16 @@ import {
   InventoryItemForm,
   InventoryLocationOption,
   InventoryPhase,
+  InventoryRack,
   InventorySystemType,
   UpdateInventoryMasterDataInput,
   deriveStockStatus,
+  formatStorageLocation,
   isValidSubcategory,
   normalizeInventoryList,
+  rackTagFor,
   supplierIdOf,
+  warehouseLabelFor,
 } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
@@ -72,6 +77,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly inventoryService: InventoryManagerDashboardService,
+    @Optional() private readonly destroyRef?: DestroyRef,
   ) {
     this.form = this.fb.group(
       {
@@ -88,6 +94,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
         maxStockLevel: [100, [Validators.required, Validators.min(0)]],
         unitCost: [0, [Validators.required, Validators.min(0)]],
         location: ['', Validators.required],
+        rackTag: ['', Validators.required],
         binLocation: ['', Validators.required],
         supplierId: [''],
         isSerialized: [false],
@@ -112,14 +119,22 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   loadSuppliers(): void {
-    this.inventoryService.getSuppliers().subscribe({
+    let supp$ = this.inventoryService.getSuppliers();
+    if (this.destroyRef) {
+      supp$ = supp$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    supp$.subscribe({
       next: (suppliers) => (this.suppliers = suppliers),
       error: () => this.errorMessage = 'Suppliers could not be loaded. Retry before saving a supplier-linked product.',
     });
   }
 
   loadLocations(): void {
-    this.inventoryService.getLocations().subscribe({
+    let loc$ = this.inventoryService.getLocations();
+    if (this.destroyRef) {
+      loc$ = loc$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    loc$.subscribe({
       next: (locations) => {
         this.locations = locations;
         this.form.updateValueAndValidity();
@@ -136,9 +151,18 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     return INVENTORY_SUBCATEGORIES[this.form.controls['itemClass'].value as InventoryItemClass] || ['Unclassified'];
   }
 
-  get availablePlacementAreas(): string[] {
+  get availableRacks(): InventoryRack[] {
     const warehouse = this.form.controls['location'].value;
-    return this.locations.find((location) => location.warehouse === warehouse)?.placementAreas || [];
+    return this.locations.find((location) => location.warehouse === warehouse)?.racks || [];
+  }
+
+  get availableBins(): string[] {
+    const rackTag = this.form.controls['rackTag'].value;
+    return this.availableRacks.find((rack) => rack.rackTag === rackTag)?.bins || [];
+  }
+
+  warehouseLabel(location: InventoryLocationOption): string {
+    return location.warehouseLabel || warehouseLabelFor(location.warehouse);
   }
 
   get compatibleModels(): string[] {
@@ -168,8 +192,14 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   onWarehouseChange(): void {
-    const placementArea = this.form.controls['binLocation'];
-    if (!this.availablePlacementAreas.includes(placementArea.value)) placementArea.setValue('');
+    const rackControl = this.form.controls['rackTag'];
+    if (!this.availableRacks.some((rack) => rack.rackTag === rackControl.value)) rackControl.setValue('');
+    this.onRackChange();
+  }
+
+  onRackChange(): void {
+    const binControl = this.form.controls['binLocation'];
+    if (!this.availableBins.includes(binControl.value)) binControl.setValue('');
     this.form.updateValueAndValidity();
   }
 
@@ -217,7 +247,11 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
       ? this.inventoryService.updateItem(this.itemId, payload)
       : this.inventoryService.addItem({ ...payload, sku: this.form.getRawValue().sku.trim() });
 
-    request.subscribe({
+    let req$ = request;
+    if (this.destroyRef) {
+      req$ = req$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    req$.subscribe({
       next: (item) => {
         this.item = item;
         this.createdNewProduct = creating;
@@ -260,7 +294,11 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
 
   private loadItem(id: string): void {
     this.loading = true;
-    this.inventoryService.getItem(id).subscribe({
+    let item$ = this.inventoryService.getItem(id);
+    if (this.destroyRef) {
+      item$ = item$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    item$.subscribe({
       next: (item) => {
         this.item = item;
         this.form.patchValue({
@@ -277,6 +315,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
           maxStockLevel: item.maxStockLevel,
           unitCost: item.unitCost,
           location: item.location,
+          rackTag: rackTagFor(item.location, item.binLocation || ''),
           binLocation: item.binLocation || '',
           supplierId: supplierIdOf(item),
           isSerialized: item.isSerialized,
@@ -336,6 +375,31 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     control.markAsDirty();
   }
 
+  get storageLocationLabel(): string {
+    const warehouse = this.form.controls['location'].value;
+    const binCode = this.form.controls['binLocation'].value;
+    return binCode ? formatStorageLocation(warehouse, binCode) : '';
+  }
+
+  // Compatibility metadata is entirely optional, so a valid step 3 is not a
+  // finished one - only mark it complete once the technician filled something in.
+  isStepComplete(step: number): boolean {
+    if (!this.isStepValid(step)) return false;
+    return step === this.totalSteps ? this.hasCompatibilityData : true;
+  }
+
+  get hasCompatibilityData(): boolean {
+    const value = this.form.getRawValue();
+    const capacity = value.capacityBtu;
+    return this.compatibleModels.length > 0
+      || this.refrigerants.length > 0
+      || (!!value.systemType && value.systemType !== 'Not Applicable')
+      || (!!value.phase && value.phase !== 'Not Applicable')
+      || (capacity !== null && capacity !== undefined && String(capacity).trim() !== '')
+      || String(value.voltage || '').trim() !== ''
+      || String(value.specsUrl || '').trim() !== '';
+  }
+
   isStepValid(step: number): boolean {
     return this.stepFields(step).every((name) => this.form.controls[name].valid)
       && !(step === 1 && this.form.hasError('classification'))
@@ -350,7 +414,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
 
   private stepFields(step: number): string[] {
     if (step === 1) return ['name', 'description', 'sku', 'itemClass', 'subcategory', 'brand', 'manufacturerPartNumber', 'type'];
-    if (step === 2) return ['unit', 'reorderLevel', 'maxStockLevel', 'unitCost', 'location', 'binLocation', 'supplierId', 'isSerialized'];
+    if (step === 2) return ['unit', 'reorderLevel', 'maxStockLevel', 'unitCost', 'location', 'rackTag', 'binLocation', 'supplierId', 'isSerialized'];
     return ['compatibleModels', 'systemType', 'refrigerants', 'capacityBtu', 'voltage', 'phase', 'specsUrl'];
   }
 
@@ -379,8 +443,11 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
 
   private storageLocationValidator = (group: AbstractControl): ValidationErrors | null => {
     const warehouse = group.get('location')?.value;
-    const placementArea = group.get('binLocation')?.value;
-    const location = this.locations.find((entry) => entry.warehouse === warehouse);
-    return location?.placementAreas.includes(placementArea) ? null : { storageLocation: true };
+    const rackTag = group.get('rackTag')?.value;
+    const binCode = group.get('binLocation')?.value;
+    const rack = this.locations
+      .find((entry) => entry.warehouse === warehouse)
+      ?.racks.find((entry) => entry.rackTag === rackTag);
+    return rack?.bins.includes(binCode) ? null : { storageLocation: true };
   };
 }

@@ -1,75 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ManagerDashboardData, ManagerDashboardService } from '../../services/manager-dashboard.service';
-import { AnalyticsData, AnalyticsService } from '../../services/analytics.service';
 import { ManagerDashboardComponent } from './manager-dashboard.component';
-import { MgrPendingActionsComponent } from './components/mgr-pending-actions/mgr-pending-actions.component';
 
 describe('ManagerDashboardComponent presentation contract', () => {
-  const analytics: Partial<AnalyticsData> = {
-    period: '7d',
-    status: 'Operational',
-    generatedAt: new Date('2026-08-24T09:30:00.000Z'),
-    performance: {
-      ticketsCreated: { current: 10, previous: 8, deltaPercent: 25, deltaKind: 'percent', semantic: 'neutral' },
-      ticketsResolved: { current: 7, previous: 5, deltaPercent: 40, deltaKind: 'percent', semantic: 'higher-is-better' },
-      averageResolutionHours: { current: 4.5, previous: 6.0, deltaPercent: -25, deltaKind: 'percent', semantic: 'lower-is-better' },
-      purchaseRequestCount: { current: 4, previous: 2, deltaPercent: 100, deltaKind: 'percent', semantic: 'neutral' },
-      purchaseRequestValue: { current: 95000, previous: 50000, deltaPercent: 90, deltaKind: 'percent', semantic: 'neutral' },
-      managerDecisions: { current: 3, previous: 2, deltaPercent: 50, deltaKind: 'percent', semantic: 'neutral' },
-      financeDecisions: { current: 2, previous: 1, deltaPercent: 100, deltaKind: 'percent', semantic: 'neutral' },
-    },
-    financial: {
-      collectedRevenue: { current: 450000, previous: 400000, deltaPercent: 12.5, deltaKind: 'percent', semantic: 'higher-is-better' },
-      procurementSpend: { current: 120000, previous: 100000, deltaPercent: 20, deltaKind: 'percent', semantic: 'neutral' },
-      operatingContribution: { current: 330000, previous: 300000, deltaPercent: 10, deltaKind: 'percent', semantic: 'higher-is-better' },
-      outstandingReceivables: { count: 4, value: 80000, scope: 'current-snapshot', asOf: new Date() },
-      pendingPaymentReview: { count: 1, value: 20000, scope: 'current-snapshot', asOf: new Date() },
-      purchaseCommitments: { value: 65000, scope: 'current-snapshot', asOf: new Date() },
-      unreconciledNonPo: { count: 0, value: 0, scope: 'current-snapshot', asOf: new Date() },
-      revenueBySource: [],
-      spendByMode: [],
-      trend: { labels: ['Day 1'], collectedRevenue: [450000], procurementSpend: [120000] },
-      basis: 'cash-collected-vs-goods-received',
-    },
-    purchasing: {
-      currentPipeline: [{ status: 'pending-manager', count: 3, value: 85000 }],
-      periodDecisions: [],
-      averageManagerApprovalHours: 2.1,
-      averageFinanceApprovalHours: 3.5,
-      poProgress: { orderedQuantity: 10, receivedQuantity: 8, orderedValue: 100000, receivedValue: 80000 },
-      pendingApprovalValue: { value: 85000, scope: 'current-snapshot', asOf: new Date() },
-      oldestPendingAgeHours: 12,
-    },
-    inventoryRisk: {
-      lowStockItems: { value: 2, scope: 'current-snapshot', asOf: new Date() },
-      outOfStockItems: { value: 1, scope: 'current-snapshot', asOf: new Date() },
-      reservedUnits: { value: 4, scope: 'current-snapshot', asOf: new Date() },
-      pendingMaterialRequests: { value: 3, scope: 'current-snapshot', asOf: new Date() },
-      approvedAwaitingReceipt: { value: 2, scope: 'current-snapshot', asOf: new Date() },
-      topRisks: [],
-    },
-    exceptions: {
-      nonPoCount: 2,
-      nonPoValue: 15000,
-      emergencyCount: 1,
-      emergencyValue: 8000,
-      nonPoPercentage: 8,
-      averageAuthorizationHours: 1.5,
-      awaitingFinance: { value: 1, scope: 'current-snapshot', asOf: new Date() },
-      awaitingReceipt: { value: 1, scope: 'current-snapshot', asOf: new Date() },
-      byReason: [],
-      bySupplier: [],
-      repeatedSkus: [],
-      authorizedValue: 15000,
-      receivedAuthorizedValue: 10000,
-      slaProtectedJobs: 1,
-    },
-    dataCoverage: [],
-  };
-
   const dashboard: ManagerDashboardData = {
     managerName: 'Morgan Reed',
     currentDate: new Date('2026-08-24T09:30:00.000Z'),
@@ -148,15 +83,11 @@ describe('ManagerDashboardComponent presentation contract', () => {
       getDashboard: () => of(dashboard),
       ...dashboardServiceOverrides,
     };
-    const mockAnalyticsService: Partial<AnalyticsService> = {
-      getAnalytics: () => of(analytics as AnalyticsData),
-    };
 
     await TestBed.configureTestingModule({
       imports: [ManagerDashboardComponent],
       providers: [
         { provide: ManagerDashboardService, useValue: service },
-        { provide: AnalyticsService, useValue: mockAnalyticsService },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -200,6 +131,12 @@ describe('ManagerDashboardComponent presentation contract', () => {
     const workQueue = root.querySelector<HTMLAnchorElement>('a[href="/manager/work-items"]')!;
     expect(workQueue.textContent).toContain('Open Work Queue');
     expect(workQueue.classList).toContain('mgr-btn--primary');
+
+    const fullAnalyticsLink = root.querySelector<HTMLAnchorElement>(
+      'a[href="/manager/analytics/period-performance"]',
+    );
+    expect(fullAnalyticsLink?.textContent).toContain('Full Analytics');
+
     fixture.destroy();
   });
 
@@ -224,18 +161,24 @@ describe('ManagerDashboardComponent presentation contract', () => {
     fixture.destroy();
   });
 
-  it('renders approvals and operational actions in pending actions section with amount and links', async () => {
+  it('renders approvals and operational actions in the pending actions panel with a view-all link', async () => {
     const fixture = await create();
     const root = fixture.nativeElement as HTMLElement;
 
-    // Ensure recent customer orders card is NOT present
+    // Ensure sections dropped from the simplified layout are NOT present
     expect(root.querySelector('.orders-card')).toBeNull();
     expect(root.querySelector('.recent-order-item')).toBeNull();
+    expect(root.querySelector('.analytics-insights-section')).toBeNull();
+    expect(root.querySelector('.filter-chip')).toBeNull();
+    expect(root.querySelector('.approvals-quick-banner')).toBeNull();
 
     // Verify Pending Actions card and items
     const actionsCard = root.querySelector('.actions-card');
     expect(actionsCard).not.toBeNull();
     expect(actionsCard?.textContent).toContain('Pending Actions & Approvals');
+
+    const viewAllLink = actionsCard?.querySelector<HTMLAnchorElement>('.card-link');
+    expect(viewAllLink?.getAttribute('href')).toBe('/manager/work-items');
 
     // Verify approval action item
     const approvalItem = root.querySelector<HTMLElement>('.action-item--approval');
@@ -269,68 +212,4 @@ describe('ManagerDashboardComponent presentation contract', () => {
 
     fixture.destroy();
   });
-
-  it('filters pending actions by category tab', async () => {
-    const fixture = await create();
-    const pendingActions = fixture.debugElement.query(By.directive(MgrPendingActionsComponent))
-      .componentInstance as MgrPendingActionsComponent;
-    const root = fixture.nativeElement as HTMLElement;
-
-    expect(pendingActions.filteredActions.length).toBe(3);
-
-    const filterChips = Array.from(root.querySelectorAll<HTMLButtonElement>('.filter-chip'));
-    const approvalsChip = filterChips.find((chip) => chip.textContent?.includes('Approvals'));
-    expect(approvalsChip).toBeDefined();
-
-    approvalsChip?.click();
-    fixture.detectChanges();
-
-    expect(pendingActions.activeActionFilter).toBe('approvals');
-    expect(pendingActions.filteredActions.length).toBe(1);
-    expect(pendingActions.filteredActions[0].reference).toBe('PR-1049');
-
-    const inventoryChip = filterChips.find((chip) => chip.textContent?.includes('Inventory Shortages'));
-    expect(inventoryChip).toBeDefined();
-
-    inventoryChip?.click();
-    fixture.detectChanges();
-
-    expect(pendingActions.activeActionFilter).toBe('inventory');
-    expect(pendingActions.filteredActions.length).toBe(1);
-    expect(pendingActions.filteredActions[0].id).toBe('shortage-1');
-
-    const allChip = filterChips.find((chip) => chip.textContent?.includes('All'));
-    allChip?.click();
-    fixture.detectChanges();
-
-    expect(pendingActions.activeActionFilter).toBe('all');
-    expect(pendingActions.filteredActions.length).toBe(3);
-
-    fixture.destroy();
-  });
-
-  it('renders Key Analytics & Insights section with fast jump links to all 4 pillars and view inventory button', async () => {
-    const fixture = await create();
-    const root = fixture.nativeElement as HTMLElement;
-
-    const viewInventoryBtn = root.querySelector<HTMLAnchorElement>('a[href="/manager/inventory"]');
-    expect(viewInventoryBtn?.getAttribute('href')).toBe('/manager/inventory');
-
-    const insightsSection = root.querySelector('.analytics-insights-section');
-    expect(insightsSection).not.toBeNull();
-    expect(insightsSection?.textContent).toContain('Key Analytics & Insights');
-
-    const jumpLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>('.insight-card .insight-jump-link'));
-    expect(jumpLinks.length).toBe(4);
-    expect(jumpLinks[0].getAttribute('href')).toBe('/manager/analytics/service-operations');
-    expect(jumpLinks[1].getAttribute('href')).toBe('/manager/analytics/financial-overview');
-    expect(jumpLinks[2].getAttribute('href')).toBe('/manager/analytics/purchasing-approvals');
-    expect(jumpLinks[3].getAttribute('href')).toBe('/manager/work-items');
-
-    const fullAnalyticsBtn = root.querySelector<HTMLAnchorElement>('.insights-all-btn');
-    expect(fullAnalyticsBtn?.getAttribute('href')).toBe('/manager/analytics/period-performance');
-
-    fixture.destroy();
-  });
 });
-

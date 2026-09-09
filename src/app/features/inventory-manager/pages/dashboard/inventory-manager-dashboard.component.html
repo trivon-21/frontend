@@ -1,7 +1,7 @@
 <div class="inventory-dashboard">
   <div class="portal-state portal-state--error" *ngIf="error" role="alert">
     <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData({ force: true })" [disabled]="loading || refreshing">Retry</button>
   </div>
 
   <div class="portal-state portal-state--warning stale-banner" *ngIf="isStale" role="status">
@@ -19,8 +19,8 @@
         <div class="title-row">
           <h1 class="welcome-title">Welcome back, {{ data.managerName }}!</h1>
           <span class="status-badge" [class.offline]="data.status === 'Offline'" [class.stale]="isStale">
-            <span class="dot" [class.syncing]="loading"></span>
-            {{ loading ? 'Syncing...' : (isStale ? 'Stale' : data.status) }}
+            <span class="dot" [class.syncing]="loading || refreshing"></span>
+            {{ (loading || refreshing) ? 'Syncing...' : (isStale ? 'Stale' : data.status) }}
           </span>
         </div>
       </div>
@@ -34,16 +34,11 @@
 
     <app-im-summary-cards [stats]="data.stats"></app-im-summary-cards>
 
-    <app-im-workflow-panel [workflow]="data.procurementWorkflow"></app-im-workflow-panel>
-
     <!-- Main Grid Content -->
     <div class="dashboard-main-grid">
-      <app-im-activity-feed [activities]="data.recentActivity"></app-im-activity-feed>
+      <app-im-reorder-table [items]="data.reorderList"></app-im-reorder-table>
 
-      <div class="side-column">
-        <app-im-reorder-table [items]="data.reorderList"></app-im-reorder-table>
-        <app-im-logistics-table [orders]="data.logistics"></app-im-logistics-table>
-      </div>
+      <app-im-activity-feed [activities]="data.recentActivity" [limit]="6"></app-im-activity-feed>
     </div>
   </ng-container>
 </div>

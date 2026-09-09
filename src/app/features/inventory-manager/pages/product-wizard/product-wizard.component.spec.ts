@@ -21,8 +21,8 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
     itemClass: 'Spare Parts',
     subcategory: 'Compressor',
     brand: 'Copeland',
-    location: 'Central Warehouse',
-    binLocation: 'Small Parts Racking',
+    location: 'A',
+    binLocation: 'A101',
     unit: 'units',
     unitCost: 100,
     isSerialized: false,
@@ -43,8 +43,8 @@ function createComponent(id: string | null = null): {
   );
   service.getSuppliers.and.returnValue(of([]));
   service.getLocations.and.returnValue(of([
-    { warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking', 'Consumables Storage'] },
-    { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
+    { warehouse: 'A', racks: [{ rackTag: 'R1', bins: ['A101', 'A102'] }, { rackTag: 'R2', bins: ['A201', 'A202'] }] },
+    { warehouse: 'C', racks: [{ rackTag: 'R1', bins: ['C101', 'C102'] }] },
   ]));
   service.getItem.and.returnValue(of(item));
   service.updateItem.and.callFake((_itemId, update) => of({ ...item, ...update }));
@@ -114,14 +114,42 @@ describe('ProductWizardComponent', () => {
     expect(component.form.controls['name'].touched).toBeTrue();
   });
 
-  it('clears a placement area that does not belong to the selected warehouse', () => {
+  it('clears the rack and bin that do not belong to the selected warehouse', () => {
     const { component } = createComponent('507f1f77bcf86cd799439011');
 
-    component.form.patchValue({ location: 'Service Warehouse', binLocation: 'Small Parts Racking' });
+    component.form.patchValue({ location: 'C', rackTag: 'R2', binLocation: 'A201' });
     component.onWarehouseChange();
 
+    expect(component.form.controls['rackTag'].value).toBe('');
     expect(component.form.controls['binLocation'].value).toBe('');
     expect(component.form.hasError('storageLocation')).toBeTrue();
+  });
+
+  it('keeps only the bins of the selected rack and describes the full storage address', () => {
+    const { component } = createComponent('507f1f77bcf86cd799439011');
+
+    component.form.patchValue({ location: 'A', rackTag: 'R2', binLocation: 'A101' });
+    component.onRackChange();
+
+    expect(component.availableBins).toEqual(['A201', 'A202']);
+    expect(component.form.controls['binLocation'].value).toBe('');
+
+    component.form.patchValue({ binLocation: 'A201' });
+
+    expect(component.storageLocationLabel).toBe('Warehouse A, R2, A201');
+    expect(component.form.hasError('storageLocation')).toBeFalse();
+  });
+
+  it('marks the compatibility step complete only once compatibility data is entered', () => {
+    const { component } = createComponent();
+    component.goToStep(3);
+
+    // Standing on the step must not mark it done - only entered data does.
+    expect(component.isStepComplete(3)).toBeFalse();
+
+    component.form.patchValue({ systemType: 'Split' });
+
+    expect(component.isStepComplete(3)).toBeTrue();
   });
 
   describe('unsaved changes protection', () => {

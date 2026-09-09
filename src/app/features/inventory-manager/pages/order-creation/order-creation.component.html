@@ -27,7 +27,7 @@
     <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading orders…</div>
     <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
       <div><strong>Orders unavailable</strong><p>{{ loadError }}</p></div>
-      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()">Retry</button>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData({ force: true })">Retry</button>
     </div>
   </div>
 
@@ -109,9 +109,6 @@
     <div class="tabs-nav" role="tablist" aria-label="Order status">
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'all'" [class.active]="activeTab === 'all'" (click)="setActiveTab('all')">
         All Orders <span class="tab-count" *ngIf="allOrders.length > 0">{{ allOrders.length }}</span>
-      </button>
-      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'draft'" [class.active]="activeTab === 'draft'" (click)="setActiveTab('draft')">
-        Drafts <span class="tab-count" *ngIf="draftOrders.length > 0">{{ draftOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending-manager'" [class.active]="activeTab === 'pending-manager'" (click)="setActiveTab('pending-manager')">
         Awaiting Manager <span class="tab-count" *ngIf="pendingManagerOrders.length > 0">{{ pendingManagerOrders.length }}</span>

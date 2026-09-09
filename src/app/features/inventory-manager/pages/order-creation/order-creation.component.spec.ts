@@ -134,4 +134,43 @@ describe('OrderCreationComponent HTTP contract', () => {
     http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
     expect(testComp.successMessage).toContain('REQ-SUBMIT');
   });
+
+  it('leverages TtlCacheService and invalidates cache on submitDraft and issuePurchaseOrder', () => {
+    const mockTtlCache = {
+      observe: jasmine.createSpy('observe').and.callFake((key: string, ttl: number, factory: () => any) => factory()),
+      force: jasmine.createSpy('force').and.callFake((key: string, ttl: number, factory: () => any) => factory()),
+      invalidate: jasmine.createSpy('invalidate'),
+    };
+    const mockOrderService = jasmine.createSpyObj<OrderCreationService>('OrderCreationService', ['submitForManager', 'issuePurchaseOrder']);
+    mockOrderService.submitForManager.and.returnValue(of({} as any));
+    mockOrderService.issuePurchaseOrder.and.returnValue(of({} as any));
+
+    const cachedComp = new OrderCreationComponent(
+      TestBed.inject(ApiService),
+      mockOrderService,
+      { navigate: jasmine.createSpy() } as unknown as Router,
+      { queryParams: of({}) } as ActivatedRoute,
+      mockTtlCache as any
+    );
+
+    cachedComp.loadData();
+    expect(mockTtlCache.observe).toHaveBeenCalledWith('inventory:order-requests', 30000, jasmine.any(Function));
+    expect(mockTtlCache.observe).toHaveBeenCalledWith('inventory:suggested-orders', 30000, jasmine.any(Function));
+    http.expectOne(`${baseUrl}/order-requests`).flush([]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+
+    const draftOrder: any = { _id: 'o-1', requestId: 'REQ-1', status: 'draft', statusVersion: 1 };
+    cachedComp.submitDraft(draftOrder);
+    expect(mockTtlCache.invalidate).toHaveBeenCalledWith('inventory:');
+    expect(mockTtlCache.force).toHaveBeenCalledWith('inventory:order-requests', 30000, jasmine.any(Function));
+    expect(mockTtlCache.force).toHaveBeenCalledWith('inventory:suggested-orders', 30000, jasmine.any(Function));
+    http.expectOne(`${baseUrl}/order-requests`).flush([]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+
+    const approvedOrder: any = { _id: 'o-2', requestId: 'REQ-2', status: 'approved', statusVersion: 1 };
+    cachedComp.issuePurchaseOrder(approvedOrder);
+    expect(mockTtlCache.invalidate).toHaveBeenCalledWith('inventory:');
+    http.expectOne(`${baseUrl}/order-requests`).flush([]);
+    http.expectOne(`${baseUrl}/suggested-orders`).flush([]);
+  });
 });

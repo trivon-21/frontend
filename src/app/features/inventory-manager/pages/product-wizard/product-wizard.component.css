@@ -1,8 +1,7 @@
 /* stylelint-disable declaration-property-value-allowed-list, declaration-block-single-line-max-declarations -- This legacy component keeps compact local layout rules while using the shared AirLux theme tokens. */
 :host { display: block; }
-.wizard-container { max-width: 1100px; margin: 0 auto; padding-bottom: 40px; color: var(--text-primary); }
+.wizard-container { display: flex; flex-direction: column; gap: var(--spacing-xl, 24px); max-width: 1100px; margin: 0 auto; padding-bottom: 40px; color: var(--text-primary); }
 .wizard-header, .wizard-footer, .success-panel { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xl); }
-.wizard-header { margin-bottom: var(--spacing-xl); }
 .wizard-header h1 { margin: 7px 0 4px; color: #1b2f27; font-size: 26px; font-weight: 700; }
 .wizard-header p, .section-heading p, .stock-summary p, .serial-panel p, .review-panel p { margin: 0; color: var(--text-secondary); }
 .back-link { color: var(--primary-main); text-decoration: none; font-size: 14px; }
@@ -12,7 +11,9 @@
 .stepper button { display: flex; align-items: center; gap: var(--spacing-sm); border: 1px solid var(--border-light); background: var(--background-card); padding: 12px 14px; border-radius: 10px; color: var(--text-secondary); text-align: left; }
 .stepper button span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: var(--border-radius-full); background: var(--background-hover); }
 .stepper button.active { border-color: var(--primary-main); color: var(--primary-main); }
-.stepper button.active span, .stepper button.complete span { background: var(--primary-main); color: var(--text-inverse); }
+/* A green step marker means that step carries data - being the current step is
+   shown by the border alone, so an untouched Compatibility step stays neutral. */
+.stepper button.complete span { background: var(--primary-main); color: var(--text-inverse); }
 .form-card { background: var(--background-card); border: 1px solid var(--border-light); border-radius: 14px; box-shadow: 0 4px 12px rgb(0 0 0 / 3%); padding: 24px; }
 .section-heading { border-bottom: 1px solid var(--border-light); padding-bottom: var(--spacing-lg); margin-bottom: 20px; }
 .section-heading h2 { margin: 0 0 5px; color: #1b2f27; font-size: 18px; }
@@ -24,6 +25,8 @@
 .field input.locked, .field input:disabled, .checkbox-card.locked { background: var(--background-disabled); color: var(--text-secondary); }
 .span-2 { grid-column: span 2; }
 .hint { color: var(--text-secondary); font-weight: 400; }
+.storage-preview { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--background-page); color: var(--text-secondary); font-size: 13px; }
+.storage-preview strong { color: var(--text-primary); }
 .error { color: var(--error); font-weight: 500; }
 .stock-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); padding: 16px; background: var(--background-page); border-radius: 10px; margin-bottom: 20px; }
 .stock-summary div { display: flex; flex-direction: column; gap: 3px; }

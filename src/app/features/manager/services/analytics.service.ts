@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { TtlCacheService } from '../../../core/services/ttl-cache.service';
+
+const ANALYTICS_CACHE_TTL_MS = 30 * 1000;
 
 export type AnalyticsPeriod = '7d' | '30d' | '12m';
 export type MetricSemantic = 'neutral' | 'higher-is-better' | 'lower-is-better';
@@ -128,9 +131,25 @@ export interface AnalyticsData {
 export class AnalyticsService {
   private readonly apiUrl = `${environment.apiUrl}/manager`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly cache: TtlCacheService,
+  ) {}
 
-  getAnalytics(period: AnalyticsPeriod): Observable<AnalyticsData> {
+  /**
+   * Cached per period — this also collapses the five Analytics sub-tab
+   * routes (all mounted on the same component) down to one request per
+   * period instead of one per tab. Pass `force: true` to bypass the cache.
+   */
+  getAnalytics(period: AnalyticsPeriod, options: { force?: boolean } = {}): Observable<AnalyticsData> {
+    const fetch = () => this.fetchAnalytics(period);
+    const key = `manager:analytics:${period}`;
+    return options.force
+      ? this.cache.force(key, ANALYTICS_CACHE_TTL_MS, fetch)
+      : this.cache.observe(key, ANALYTICS_CACHE_TTL_MS, fetch);
+  }
+
+  private fetchAnalytics(period: AnalyticsPeriod): Observable<AnalyticsData> {
     return this.http.get<AnalyticsData>(`${this.apiUrl}/analytics`, { params: { period } }).pipe(
       map((data) => ({
         ...data,

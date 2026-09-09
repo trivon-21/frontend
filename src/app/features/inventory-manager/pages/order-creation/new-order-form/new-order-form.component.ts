@@ -1,13 +1,13 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { OrderCreationService, OrderItem, InventoryItem, Supplier } from '../../../services/order-creation.service';
 import { OrderSupplierSelectorComponent } from './components/order-supplier-selector/order-supplier-selector.component';
 import { OrderItemSearchComponent } from './components/order-item-search/order-item-search.component';
 import { OrderCartListComponent } from './components/order-cart-list/order-cart-list.component';
-import { OrderSuggestedGridComponent } from './components/order-suggested-grid/order-suggested-grid.component';
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
 import { itemMatchesSupplier, relevantSuppliersFor } from '../../../services/order-supplier-matching';
 import { switchMap } from 'rxjs/operators';
@@ -24,8 +24,7 @@ import { HasPendingChanges } from '../../../../../core/guards/pending-changes.gu
     PortalIconsModule,
     OrderSupplierSelectorComponent,
     OrderItemSearchComponent,
-    OrderCartListComponent,
-    OrderSuggestedGridComponent
+    OrderCartListComponent
   ],
   templateUrl: './new-order-form.component.html',
   styleUrls: ['./new-order-form.component.css']
@@ -39,6 +38,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   orderItems: OrderItem[] = [];
   selectedSupplier = '';
   orderNotes = '';
+  showAdditionalDetails = false;
 
   isSubmitting = false;
   isCreatingSupplier = false;
@@ -71,7 +71,8 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   constructor(
     private orderCreationService: OrderCreationService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    @Optional() private destroyRef?: DestroyRef
   ) {}
 
   takeSnapshot(): string {
@@ -161,7 +162,11 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
       this.selectPreferredSupplier(item);
     }
 
-    this.route.params.subscribe(params => {
+    let params$ = this.route.params;
+    if (this.destroyRef) {
+      params$ = params$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    params$.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
         this.orderId = params['id'];
@@ -173,11 +178,15 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   loadData(): void {
     this.loading = true;
     this.loadError = '';
-    forkJoin({
+    let stream$ = forkJoin({
       inventoryItems: this.orderCreationService.getInventory(),
       suppliers: this.orderCreationService.getSuppliers(),
       suggestedItems: this.orderCreationService.getSuggestedItems(),
-    }).subscribe({
+    });
+    if (this.destroyRef) {
+      stream$ = stream$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    stream$.subscribe({
       next: ({ inventoryItems, suppliers, suggestedItems }) => {
         this.inventoryItems = inventoryItems;
         this.suppliers = suppliers;
@@ -218,13 +227,18 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   }
 
   loadOrder(id: string): void {
-    this.orderCreationService.getOrderRequests().subscribe({
+    let req$ = this.orderCreationService.getOrderRequests();
+    if (this.destroyRef) {
+      req$ = req$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    req$.subscribe({
       next: (requests) => {
         const order = requests.find((request) => request.requestId === id);
         if (order) {
           this.statusVersion = order.statusVersion;
           this.selectedSupplier = order.supplierName;
           this.orderNotes = order.notes || '';
+          this.showAdditionalDetails = !!this.orderNotes;
           this.orderItems = order.items.map((i: any) => ({
             ...i,
             inventoryId: typeof i.inventoryId === 'object' && i.inventoryId !== null ? (i.inventoryId._id || i.inventoryId.id || '') : (i.inventoryId || i.id || ''),
@@ -347,7 +361,11 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     this.isCreatingSupplier = true;
     this.isRegisteringNewSupplier = false;
     this.errorMessage = '';
-    this.orderCreationService.addSupplier(trimmed).subscribe({
+    let add$ = this.orderCreationService.addSupplier(trimmed);
+    if (this.destroyRef) {
+      add$ = add$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    add$.subscribe({
       next: (created) => {
         this.suppliers = [...this.suppliers, created];
         this.selectedSupplier = created.name;
@@ -455,9 +473,13 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
 
     const payload = this.buildPayload();
 
-    this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).pipe(
+    let submit$ = this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).pipe(
       switchMap((saved) => this.orderCreationService.submitForManager(saved)),
-    ).subscribe({
+    );
+    if (this.destroyRef) {
+      submit$ = submit$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    submit$.subscribe({
       next: (data) => {
         this.isSubmitting = false;
         this.submittedSuccessfully = true;
@@ -496,7 +518,11 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     this.isSubmitting = true;
     const payload = this.buildPayload();
 
-    this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!).subscribe({
+    let draft$ = this.orderCreationService.submitOrderRequest(payload, this.isEditMode, this.orderId!);
+    if (this.destroyRef) {
+      draft$ = draft$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    draft$.subscribe({
       next: (data) => {
         this.isSubmitting = false;
         this.statusVersion = data.statusVersion;

@@ -50,8 +50,14 @@
         </select>
       </div>
       <div class="input-group">
-        <label for="loan-due-date">Expected Return</label>
-        <input id="loan-due-date" type="date" class="form-input" [(ngModel)]="dueDate" />
+        <label id="loan-due-label">Expected Return</label>
+        <app-datetime-picker
+          aria-labelledby="loan-due-label"
+          [date]="dueDate"
+          [time]="dueTime"
+          (dateChange)="dueDate = $event"
+          (timeChange)="dueTime = $event"
+        ></app-datetime-picker>
       </div>
       <button
         type="button"
@@ -155,7 +161,7 @@
               <td class="asset-tag sku-cell">{{ loan.assetTag }}</td>
               <td class="held-by">{{ loan.technicianName }}</td>
               <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
-              <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
+              <td class="date-cell">{{ loan.dueDate | date: 'medium' }}</td>
               <td>
                 <span class="status-pill alx-table-status" [class.overdue]="loan.status === 'Overdue'">
                   {{ loan.status }}
