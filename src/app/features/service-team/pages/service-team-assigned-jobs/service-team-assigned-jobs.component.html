@@ -68,6 +68,12 @@
               {{ task.serviceType }}
             </span>
           </div>
+          <div class="detail-item">
+            <label class="detail-label">Product Type</label>
+            <span class="detail-value">
+              {{ task.detailedProductType || task.serviceType || '-' }}
+            </span>
+          </div>
         </div>
       </div>
 

@@ -12,7 +12,7 @@ interface ServiceHistoryItem {
   serviceType: string;
   productType: string;
   date: string | null;
-  status: 'Assigned' | 'Completed' | 'In Progress' | 'Scheduled' | 'On Hold';
+  status: 'Assigned' | 'Completed' | 'In Progress' | 'On Hold';
   assignedTeam: string;
   warrantyStatus: string;
 }

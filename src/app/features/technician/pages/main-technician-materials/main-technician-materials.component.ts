@@ -558,6 +558,11 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     return null;
   }
 
+  private optionalRequestValue(value: string): string {
+    const normalized = String(value || '').trim();
+    return normalized === '-' ? '' : normalized;
+  }
+
   submitToFinance(): void {
     const validationError = this.validateMaterialSubmission();
     if (validationError) {
@@ -593,10 +598,10 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance-custom`, {
         newRequestId: normalizedTicketId,
         ticketId: normalizedTicketId,
-        customerName: this.newRequest.customerName,
-        customerEmail: this.newRequest.customerEmail,
-        customerContactNo: this.newRequest.customerContactNo,
-        customerAddress: this.newRequest.customerAddress,
+        fullName: this.optionalRequestValue(this.newRequest.customerName),
+        customerEmail: this.optionalRequestValue(this.newRequest.customerEmail),
+        customerphoneNumber: this.optionalRequestValue(this.newRequest.customerContactNo),
+        customerAddress: this.optionalRequestValue(this.newRequest.customerAddress),
         materials,
         financeNotes: this.newRequest.notes,
         isUnderWarranty: this.newRequest.isUnderWarranty,
@@ -619,7 +624,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error submitting material request to finance:', err);
-          this.createRequestError = err.error?.error || err.error?.message || `Failed to submit to finance: ${err.message || 'Unknown error'}`;
+          const firstValidationError = err.error?.errors?.[0]?.msg;
+          this.createRequestError = firstValidationError || err.error?.error || err.error?.message || `Failed to submit to finance: ${err.message || 'Unknown error'}`;
         }
       });
   }
