@@ -35,6 +35,14 @@
   border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 .modal-header-left { display: flex; align-items: center; gap: 10px; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.history-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; background: #f0f7f3; color: var(--primary-main);
+  border-radius: 8px; padding: 7px 10px; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+}
+.history-btn:hover { background: #e2f0e9; }
 .modal-title {
   font-family: 'Inter', sans-serif;
   font-size: 17px; font-weight: 700; color: #1b2f27; margin: 0;

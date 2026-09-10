@@ -119,6 +119,11 @@ export class CustomerDashboardHomeComponent implements OnInit {
     this.filterMode = null;
   }
 
+  openServiceRequestHistory(): void {
+    this.showRequestService = false;
+    this.showServiceRequestsList = true;
+  }
+
   get orders(): DashboardOrder[] {
     return this.data?.orders ?? [];
   }
