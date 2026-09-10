@@ -36,9 +36,9 @@
 
     <!-- Main Grid Content -->
     <div class="dashboard-main-grid">
-      <app-im-reorder-table [items]="data.reorderList"></app-im-reorder-table>
-
       <app-im-activity-feed [activities]="data.recentActivity" [limit]="6"></app-im-activity-feed>
+
+      <app-im-reorder-table [items]="data.reorderList"></app-im-reorder-table>
     </div>
   </ng-container>
 </div>
