@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -139,6 +139,52 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     private destroyRef: DestroyRef,
     private globalSearchService: GlobalSearchService
   ) {}
+
+  activeDropdownIndex: number | null = null;
+  materialSearchQuery: string = '';
+
+  toggleDropdown(index: number) {
+    if (this.activeDropdownIndex === index) {
+      this.activeDropdownIndex = null;
+    } else {
+      this.activeDropdownIndex = index;
+      this.materialSearchQuery = '';
+    }
+  }
+
+  onSearchMaterial(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.materialSearchQuery = input.value.toLowerCase();
+  }
+
+  getFilteredCatalog() {
+    if (!this.materialSearchQuery) {
+      return this.materialCatalog;
+    }
+    return this.materialCatalog.filter(material => 
+      material.name.toLowerCase().includes(this.materialSearchQuery) || 
+      material.sku.toLowerCase().includes(this.materialSearchQuery)
+    );
+  }
+
+  selectMaterial(item: any, materialId: string) {
+    item.inventoryId = materialId;
+    this.activeDropdownIndex = null;
+    this.onMaterialSelection(item);
+  }
+
+  getMaterialName(inventoryId: string): string {
+    const material = this.materialCatalog.find(m => m._id === inventoryId);
+    return material ? `${material.name} (${material.sku})` : '';
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-dropdown-container')) {
+      this.activeDropdownIndex = null;
+    }
+  }
 
   ngOnInit(): void {
     this.globalSearchService.searchQuery$
