@@ -2,7 +2,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
-import { TtlCacheService } from '../../../core/services/ttl-cache.service';
 import {
   InventoryManagerDashboardService,
   ReceiveInventoryInput,
@@ -33,6 +32,8 @@ describe('normalizeInventoryDashboard', () => {
           awaitingManager: { purchaseRequests: 2, receiptAuthorizations: 1 },
           readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
         },
+        awaitingReceipt: 4,
+        awaitingFinance: 1,
       },
     });
 
@@ -57,11 +58,15 @@ describe('normalizeInventoryDashboard', () => {
     const data = normalizeInventoryDashboard({
       logistics: [
         {
+          id: 'ORD-101',
           orderId: 'ORD-101',
           customer: 'Test Customer',
           status: 'to-pack',
+          statusVersion: 0,
+          type: 'standard',
           courier: 'DHL',
           trackId: 'DHL-1234',
+          itemCount: 3,
         },
       ],
     });
@@ -72,14 +77,13 @@ describe('normalizeInventoryDashboard', () => {
     expect(data.logistics[0].courier).toBe('DHL');
   });
 
-  it('defaults missing procurement workflow fields to zero rather than guessing', () => {
+  it('maps legacy three-stage responses into safe compatibility defaults', () => {
     const data = normalizeInventoryDashboard({
-      procurementWorkflow: { awaitingManager: 1 } as never,
+      procurementWorkflow: { awaitingManager: 1, awaitingReceipt: 2, awaitingFinance: 3 } as never,
     });
 
-    expect(data.procurementWorkflow.awaitingManager).toBe(1);
-    expect(data.procurementWorkflow.readyToReceive).toBe(0);
-    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(0);
+    expect(data.procurementWorkflow.readyToReceive).toBe(2);
+    expect(data.procurementWorkflow.awaitingReceiptReconciliation).toBe(3);
     expect(data.procurementWorkflow.awaitingFinanceApproval).toBe(0);
     expect(data.procurementWorkflow.readyToIssue).toBe(0);
   });
@@ -119,6 +123,8 @@ describe('normalizeInventoryDashboard', () => {
           awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
           readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
         },
+        awaitingReceipt: 0,
+        awaitingFinance: 0,
       },
     });
 
@@ -133,8 +139,6 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
   let http: HttpTestingController;
   const baseUrl = `${environment.apiUrl}/inventory`;
 
-  let cache: TtlCacheService;
-
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -145,12 +149,9 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
     });
     service = TestBed.inject(InventoryManagerDashboardService);
     http = TestBed.inject(HttpTestingController);
-    cache = TestBed.inject(TtlCacheService);
-    cache.clearAll();
   });
 
   afterEach(() => {
-    cache.clearAll();
     http.verify();
     jasmine.clock().uninstall();
   });
@@ -188,6 +189,8 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
           awaitingManager: { purchaseRequests: 1, receiptAuthorizations: 0 },
           readyToReceive: { purchaseOrders: 3, receiptAuthorizations: 1 },
         },
+        awaitingReceipt: 4,
+        awaitingFinance: 5,
       },
     });
 
@@ -340,100 +343,5 @@ describe('InventoryManagerDashboardService HTTP contract', () => {
       expect(request.request.body).withContext(path).toEqual(body);
       request.flush({});
     }
-  });
-
-  it('serves a second getDashboard within TTL from cache, issuing no second HTTP request', () => {
-    const mockData = {
-      managerName: 'Cached Manager',
-      currentDate: '2026-08-24T00:00:00.000Z',
-      status: 'Live',
-      stats: {
-        materialReservations: { total: 0, subStats: [] },
-        dispatchQueue: { total: 0, subStats: [] },
-        assetHealth: { total: 0, subStats: [] },
-        stockAlerts: { total: 0, subStats: [] },
-      },
-      recentActivity: [],
-      reorderList: [],
-      procurementWorkflow: {
-        awaitingManager: 0,
-        awaitingFinanceApproval: 0,
-        readyToIssue: 0,
-        readyToReceive: 0,
-        awaitingReceiptReconciliation: 0,
-        breakdown: {
-          awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
-          readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
-        },
-      },
-      logistics: [],
-    };
-
-    service.getDashboard().subscribe();
-    http.expectOne(`${baseUrl}/dashboard`).flush(mockData);
-
-    let secondResult: ReturnType<typeof normalizeInventoryDashboard> | undefined;
-    service.getDashboard().subscribe((data) => (secondResult = data));
-    http.expectNone(`${baseUrl}/dashboard`);
-
-    expect(secondResult?.managerName).toBe('Cached Manager');
-  });
-
-  it('force: true always bypasses cache and issues fresh HTTP request', () => {
-    const mockData = {
-      managerName: 'Cached Manager',
-      currentDate: '2026-08-24T00:00:00.000Z',
-      status: 'Live',
-      stats: {
-        materialReservations: { total: 0, subStats: [] },
-        dispatchQueue: { total: 0, subStats: [] },
-        assetHealth: { total: 0, subStats: [] },
-        stockAlerts: { total: 0, subStats: [] },
-      },
-      recentActivity: [],
-      reorderList: [],
-      procurementWorkflow: {
-        awaitingManager: 0,
-        awaitingFinanceApproval: 0,
-        readyToIssue: 0,
-        readyToReceive: 0,
-        awaitingReceiptReconciliation: 0,
-        breakdown: {
-          awaitingManager: { purchaseRequests: 0, receiptAuthorizations: 0 },
-          readyToReceive: { purchaseOrders: 0, receiptAuthorizations: 0 },
-        },
-      },
-      logistics: [],
-    };
-
-    service.getDashboard().subscribe();
-    http.expectOne(`${baseUrl}/dashboard`).flush(mockData);
-
-    let freshResult: ReturnType<typeof normalizeInventoryDashboard> | undefined;
-    service.getDashboard({ force: true }).subscribe((data) => (freshResult = data));
-    const request = http.expectOne(`${baseUrl}/dashboard`);
-    expect(request.request.method).toBe('GET');
-    request.flush({ ...mockData, managerName: 'Fresh Manager' });
-
-    expect(freshResult?.managerName).toBe('Fresh Manager');
-  });
-
-  it('write mutations invalidate the cache so subsequent reads trigger network requests', () => {
-    service.getInventory().subscribe();
-    http.expectOne(`${baseUrl}/list`).flush([]);
-
-    // Should be cached now
-    service.getInventory().subscribe();
-    http.expectNone(`${baseUrl}/list`);
-
-    // Perform mutation
-    service.addItem({ sku: 'NEW-1', name: 'New Item' } as never).subscribe();
-    http.expectOne(`${baseUrl}/item`).flush({ _id: '1', sku: 'NEW-1', name: 'New Item' });
-
-    // Cache should be invalidated, triggering fresh HTTP request
-    let reloaded = false;
-    service.getInventory().subscribe(() => { reloaded = true; });
-    http.expectOne(`${baseUrl}/list`).flush([]);
-    expect(reloaded).toBeTrue();
   });
 });

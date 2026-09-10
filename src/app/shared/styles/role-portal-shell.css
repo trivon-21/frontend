@@ -44,49 +44,6 @@
   --surface-overlay: rgba(0, 0, 0, 0.4);
   --text-inverse: #ffffff;
   --warning-light: #fef3c7;
-  --warning-dark: #92400e;
-  --warning-border: #fcd34d;
-
-  /* House constants shared by both dashboards — kills scattered raw hex/px
-     literals across inventory-manager-dashboard.component.css and
-     manager-dashboard.component.css. */
-  --heading-primary: #1b2f27;
-  --card-radius: 14px;
-  --control-radius: 10px;
-  --card-shadow: 0 4px 12px rgb(0 0 0 / 3%);
-  --pill-radius: 999px;
-  --layout-max-width: 1400px;
-
-  /* Shared button-control scale — one definition for .im-btn and .mgr-btn,
-     replacing the two hand-rolled --im-button- and --mgr- palettes. */
-  --control-height: 40px;
-  --control-compact-height: 32px;
-  --control-padding: 0 20px;
-  --control-compact-padding: 0 12px;
-  --control-gap: 8px;
-  --control-font-size: 13.5px;
-  --control-compact-font-size: 12px;
-  --control-border: rgba(0, 0, 0, 0.1);
-  --control-border-hover: rgba(0, 0, 0, 0.2);
-  --control-focus-ring: rgba(0, 132, 61, 0.24);
-  --control-disabled-opacity: 0.55;
-  --surface-ghost: #f5f5f3;
-  --surface-ghost-hover: #ebebea;
-  --control-muted: #8a9e96;
-  --danger-hover: #a30c0c;
-
-  /* Canonical status-tone scale — one definition replacing the eight
-     independent badge/pill color systems previously hand-rolled per page. */
-  --tone-neutral-bg: var(--background-hover);
-  --tone-neutral-fg: var(--text-secondary);
-  --tone-success-bg: var(--success-light);
-  --tone-success-fg: var(--success);
-  --tone-warning-bg: var(--warning-light);
-  --tone-warning-fg: var(--warning-dark);
-  --tone-danger-bg: var(--error-light);
-  --tone-danger-fg: var(--error);
-  --tone-info-bg: var(--info-light);
-  --tone-info-fg: var(--info);
 }
 
 * {
@@ -98,41 +55,34 @@
   inset: 0;
   display: flex;
   overflow: hidden;
-  background: #f3f4f2;
+  background: var(--background-page);
   color: var(--text-primary);
   font-family: var(--body-font-family);
 }
 
-/* ── Sidebar ──
-   Matches the super-admin / main-technician sidebar (width, type scale,
-   flat active-state highlight) so the portal chrome is consistent
-   company-wide rather than styled per role. */
+/* ── Sidebar ── */
 .sidebar {
-  width: 210px;
+  width: 280px;
   flex-shrink: 0;
   background: var(--background-card);
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  padding: 28px 0 24px;
+  padding: var(--spacing-xxl) 0;
   z-index: 10;
 }
 
 .sidebar-brand {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--primary-main);
-  padding: 0 24px 32px;
-  letter-spacing: -0.5px;
+  font-size: var(--h1-font-size);
+  font-weight: var(--h1-font-weight);
+  color: var(--primary-active);
+  padding: var(--spacing-lg) var(--spacing-xxl) var(--spacing-huge);
+  letter-spacing: var(--h1-letter-spacing);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 0;
-}
-
-.sidebar-brand:hover {
-  color: var(--primary-hover);
 }
 
 .brand-icon {
@@ -142,36 +92,39 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 12px var(--spacing-xxl);
+  gap: 6px;
+  padding: 0 var(--spacing-lg) var(--spacing-xxl);
   overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: #566463;
-  font-size: 14px;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  color: var(--text-primary);
+  font-size: 17px;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.13s, color 0.13s;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
 }
 
 .nav-item:hover {
-  background: var(--primary-lighter);
-  color: var(--primary-main);
+  background: var(--background-hover);
+  color: var(--text-primary);
 }
 
 .nav-item.active {
-  background: var(--primary-lighter);
-  color: var(--primary-main);
+  background: var(--background-selected);
+  color: var(--primary-active);
   font-weight: 600;
+  border: none;
+  box-shadow: 1.5px 1.5px 0 var(--primary-active);
 }
 
 .nav-item lucide-angular {
@@ -201,10 +154,11 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 14px 32px;
+  padding: 0 var(--spacing-xxxl);
   background: var(--background-card);
   border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
+  height: 80px;
 }
 
 /* Search removed */
@@ -236,24 +190,24 @@
 }
 
 .user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: var(--primary-main);
-  color: var(--text-inverse);
-  font-size: 13px;
-  font-weight: 700;
+  background: var(--background-hover);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: none;
-  letter-spacing: 0.5px;
-  transition: opacity 0.15s;
+  border: 2px solid var(--border-light);
+  transition: all 0.2s;
+  box-shadow: var(--shadow-minimal);
 }
 
 .user-avatar:hover {
-  opacity: 0.9;
+  border-color: var(--primary-main);
 }
 
 
@@ -306,14 +260,13 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--primary-main);
-  color: var(--text-inverse);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
   font-size: 16px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .user-name {
@@ -360,6 +313,6 @@
 .dashboard-content {
   flex: 1;
   overflow-y: auto;
-  padding: 32px;
-  background: #f3f4f2;
+  padding: var(--spacing-xl);
+  background: var(--background-page);
 }

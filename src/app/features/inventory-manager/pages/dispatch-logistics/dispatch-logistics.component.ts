@@ -1,12 +1,7 @@
-import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
-import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
-import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
-import { ConfirmService } from '../../../../services/confirm.service';
-import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface DispatchItem {
   name: string;
@@ -30,6 +25,8 @@ interface DispatchOrder {
   completedAt?: string;
   lastMovedAt?: string;
 }
+
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-dispatch-logistics',
@@ -68,51 +65,38 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
   ordersInTransit: DispatchOrder[] = [];
   ordersCompleted: DispatchOrder[] = [];
 
-  constructor(
-    private apiService: ApiService,
-    private confirmService: ConfirmService,
-    @Optional() private ttlCache?: TtlCacheService,
-    @Optional() private destroyRef?: DestroyRef,
-  ) {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     this.fetchOrders();
   }
 
-  fetchOrders(options: { force?: boolean } = {}) {
-    if (!this.ordersToPack.length && !this.ordersReady.length && !this.ordersInTransit.length && !this.ordersCompleted.length) {
-      this.loading = true;
-    }
+  fetchOrders() {
+    this.loading = true;
     this.loadError = '';
-    const fetch = () => this.apiService.get<any[]>('/inventory/orders');
-    const request$ = this.ttlCache
-      ? (options.force ? this.ttlCache.force('inventory:orders', 30_000, fetch) : this.ttlCache.observe('inventory:orders', 30_000, fetch))
-      : fetch();
-
-    const sub$ = this.destroyRef ? request$.pipe(takeUntilDestroyed(this.destroyRef)) : request$;
-    sub$.subscribe({
+    this.apiService.get<any[]>('/inventory/orders').subscribe({
       next: (data: any[]) => {
-        // Map backend model to frontend model
-        const orders: DispatchOrder[] = data.map((o: any) => ({
-          id: o.orderId,
-          customer: o.customer,
-          status: o.status,
-          statusVersion: o.statusVersion ?? 0,
-          type: o.type,
-          items: o.items,
-          time: o.date,
-          courier: o.courier,
-          trackId: o.trackId,
-          completedAt: o.completedAt,
-          lastMovedAt: o.lastMovedAt,
-        }));
+      // Map backend model to frontend model
+      const orders: DispatchOrder[] = data.map((o: any) => ({
+        id: o.orderId,
+        customer: o.customer,
+        status: o.status,
+        statusVersion: o.statusVersion ?? 0,
+        type: o.type,
+        items: o.items,
+        time: o.date,
+        courier: o.courier,
+        trackId: o.trackId,
+        completedAt: o.completedAt,
+        lastMovedAt: o.lastMovedAt,
+      }));
 
-        this.ordersToPack = orders.filter((o: DispatchOrder) => o.status === 'to-pack');
-        this.ordersReady = orders.filter((o: DispatchOrder) => o.status === 'ready');
-        this.ordersInTransit = orders.filter((o: DispatchOrder) => o.status === 'in-transit');
-        this.ordersCompleted = orders.filter((o: DispatchOrder) => o.status === 'completed');
+      this.ordersToPack = orders.filter((o: DispatchOrder) => o.status === 'to-pack');
+      this.ordersReady = orders.filter((o: DispatchOrder) => o.status === 'ready');
+      this.ordersInTransit = orders.filter((o: DispatchOrder) => o.status === 'in-transit');
+      this.ordersCompleted = orders.filter((o: DispatchOrder) => o.status === 'completed');
 
-        this.selectFirstOrder();
+      this.selectFirstOrder();
         this.loading = false;
       },
       error: () => {
@@ -213,8 +197,8 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
 
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('ready');
-        this.fetchOrders({ force: true });
-        this.resetModalState();
+        this.fetchOrders();
+        this.closeModals();
       });
     }
   }
@@ -272,7 +256,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         order.courier = this.editCourier;
         order.trackId = this.editTrackId;
         this.isEditMode = false;
-        this.fetchOrders({ force: true });
+        this.fetchOrders();
       });
     }
   }
@@ -287,8 +271,8 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       };
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('in-transit');
-        this.fetchOrders({ force: true });
-        this.resetModalState();
+        this.fetchOrders();
+        this.closeModals();
       });
     }
   }
@@ -303,8 +287,8 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       };
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('completed');
-        this.fetchOrders({ force: true });
-        this.resetModalState();
+        this.fetchOrders();
+        this.closeModals();
       });
     }
   }
@@ -341,8 +325,8 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
 
     this.runOrderUpdate(order, updateData, () => {
       this.setActiveTab(targetTab);
-      this.fetchOrders({ force: true });
-      this.resetModalState();
+      this.fetchOrders();
+      this.closeModals();
     });
   }
 
@@ -355,43 +339,16 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     const order = this.selectedOrder;
     if (order) {
       this.runOrderUpdate(order, { items: order.items, statusVersion: order.statusVersion }, () => {
-        this.fetchOrders({ force: true });
-        this.resetModalState();
+        this.fetchOrders();
+        this.closeModals();
       });
     }
   }
 
-  get isDialogDirty(): boolean {
-    if (this.showAssignModal) {
-      return !!(this.courierService.trim() || this.trackingId.trim());
-    }
-    if (this.showPackModal) {
-      if (this.isEditMode) {
-        const order = this.selectedOrder;
-        return this.editCourier !== (order?.courier || '') || this.editTrackId !== (order?.trackId || '');
-      }
-      const original = [...this.ordersToPack, ...this.ordersReady, ...this.ordersInTransit, ...this.ordersCompleted]
-        .find((order) => order.id === this.selectedOrderId);
-      return !!this.dialogOrder && !!original
-        && this.dialogOrder.items.some((item, i) => item.confirmed !== original.items[i]?.confirmed);
-    }
-    return false;
-  }
-
-  async closeModals(): Promise<void> {
+  closeModals() {
     if (this.saving) return;
-    if (this.isDialogDirty && !(await confirmDiscard(this.confirmService, 'dispatch changes'))) {
-      return;
-    }
-    this.resetModalState();
-  }
-
-  /** Resets the modal without confirming — used after a successful save, where
-   *  there is nothing left to discard. */
-  private resetModalState(): void {
     this.showPackModal = false;
     this.showAssignModal = false;
-    this.isEditMode = false;
     this.dialogOrder = null;
     const trigger = this.dialogTrigger;
     this.dialogTrigger = null;
@@ -421,7 +378,6 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         order.lastMovedAt = updated.lastMovedAt ?? order.lastMovedAt;
         order.completedAt = updated.completedAt ?? order.completedAt;
         this.saving = false;
-        this.ttlCache?.invalidate('inventory:');
         onSuccess();
       },
       error: (error) => {

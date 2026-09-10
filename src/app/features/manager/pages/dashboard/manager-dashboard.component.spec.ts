@@ -17,77 +17,28 @@ describe('ManagerDashboardComponent presentation contract', () => {
         total: 3,
         subStats: [
           { label: 'Urgent', value: 1 },
-          { label: 'Value', value: 85000 },
+          { label: 'Value', value: 2500 },
           { label: 'Non-PO', value: 1 },
         ],
       },
     },
     inventoryKpis: {
       reservedItems: { label: 'Reserved Items', value: 4, icon: 'clipboard-check' },
-      belowReorderItems: { label: 'Below Reorder', value: 2, icon: 'triangle-alert' },
-      outOfStockItems: { label: 'Out of Stock', value: 1, icon: 'triangle-alert' },
-      stockRiskItems: { label: 'Stock Risk', value: 3, icon: 'triangle-alert' },
+      lowStockAlerts: { label: 'Low Stock Alerts', value: 2, icon: 'triangle-alert' },
+      pendingMaterialRequests: { label: 'Pending Material Requests', value: 5, icon: 'package' },
       blockedMaterialRequests: { label: 'Blocked Material Requests', value: 1, icon: 'triangle-alert' },
     },
-    pendingActionsTotal: 1,
-    pendingActions: [
-      {
-        id: 'order-1',
-        type: 'approval',
-        approvalType: 'purchase',
-        category: 'approval',
-        title: 'Review Purchase Request: PR-1049',
-        description: 'Global HVAC Supplies · 3 line items',
-        priority: 'high',
-        amount: 85000,
-        supplierName: 'Global HVAC Supplies',
-        itemsCount: 3,
-        reference: 'PR-1049',
-        route: '/manager/orders',
-        queryParams: { type: 'purchase', status: 'pending-manager' },
-      },
-      {
-        id: 'ticket-1',
-        type: 'ticket',
-        title: 'SLA overdue: SVC-209',
-        description: 'Compressor rattling on VRF unit',
-        priority: 'high',
-        route: '/manager/work-items',
-        queryParams: { status: 'open' },
-      },
-      {
-        id: 'shortage-1',
-        type: 'inventory',
-        title: 'Material shortage: MR-201',
-        description: 'Compressor filter shortage',
-        priority: 'high',
-        route: '/manager/orders',
-        queryParams: { type: 'purchase', status: 'pending' },
-      },
-    ],
-    workloadPreview: [
-      {
-        assigneeId: 'tech-1',
-        assigneeName: 'Alex Mercer',
-        assigneeType: 'technician',
-        active: 3,
-        slaRisk: 1,
-      },
-    ],
+    recentActivity: [],
+    pendingActions: [],
   };
 
   async function create(
-    dashboardServiceOverrides: Partial<ManagerDashboardService> = {},
+    dashboardService: Pick<ManagerDashboardService, 'getDashboard'>,
   ): Promise<ComponentFixture<ManagerDashboardComponent>> {
-    const service: Partial<ManagerDashboardService> = {
-      getDashboard: () => of(dashboard),
-      ...dashboardServiceOverrides,
-    };
-
     await TestBed.configureTestingModule({
       imports: [ManagerDashboardComponent],
       providers: [
-        { provide: ManagerDashboardService, useValue: service },
+        { provide: ManagerDashboardService, useValue: dashboardService },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -114,7 +65,7 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(summaryCards.every((card) => card.classList.contains('clickable'))).toBeTrue();
     expect(ticketCards.map((card) => card.getAttribute('href'))).toEqual([
       '/manager/work-items',
-      '/manager/inventory',
+      '/manager/work-items?assignment=unassigned',
       '/manager/work-items?sla=overdue',
     ]);
     expect(approvalPrimary.getAttribute('href')).toBe(
@@ -128,15 +79,9 @@ describe('ManagerDashboardComponent presentation contract', () => {
     expect(approvalPrimary.contains(approvalLinks[0])).toBeFalse();
     expect(approvalPrimary.contains(approvalLinks[1])).toBeFalse();
     expect(root.querySelector('.live-time')).toBeNull();
-    const workQueue = root.querySelector<HTMLAnchorElement>('a[href="/manager/work-items"]')!;
+    const workQueue = root.querySelector<HTMLButtonElement>('.btn-new-order')!;
     expect(workQueue.textContent).toContain('Open Work Queue');
     expect(workQueue.classList).toContain('mgr-btn--primary');
-
-    const fullAnalyticsLink = root.querySelector<HTMLAnchorElement>(
-      'a[href="/manager/analytics/period-performance"]',
-    );
-    expect(fullAnalyticsLink?.textContent).toContain('Full Analytics');
-
     fixture.destroy();
   });
 
@@ -158,58 +103,6 @@ describe('ManagerDashboardComponent presentation contract', () => {
 
     expect(getDashboard).toHaveBeenCalledTimes(2);
     expect(root.querySelector('.welcome-title')?.textContent).toContain('Morgan Reed');
-    fixture.destroy();
-  });
-
-  it('renders approvals and operational actions in the pending actions panel with a view-all link', async () => {
-    const fixture = await create();
-    const root = fixture.nativeElement as HTMLElement;
-
-    // Ensure sections dropped from the simplified layout are NOT present
-    expect(root.querySelector('.orders-card')).toBeNull();
-    expect(root.querySelector('.recent-order-item')).toBeNull();
-    expect(root.querySelector('.analytics-insights-section')).toBeNull();
-    expect(root.querySelector('.filter-chip')).toBeNull();
-    expect(root.querySelector('.approvals-quick-banner')).toBeNull();
-
-    // Verify Pending Actions card and items
-    const actionsCard = root.querySelector('.actions-card');
-    expect(actionsCard).not.toBeNull();
-    expect(actionsCard?.textContent).toContain('Pending Actions & Approvals');
-
-    const viewAllLink = actionsCard?.querySelector<HTMLAnchorElement>('.card-link');
-    expect(viewAllLink?.getAttribute('href')).toBe('/manager/work-items');
-
-    // Verify approval action item
-    const approvalItem = root.querySelector<HTMLElement>('.action-item--approval');
-    expect(approvalItem).not.toBeNull();
-    expect(approvalItem?.textContent).toContain('PR-1049');
-    expect(approvalItem?.textContent).toContain('Global HVAC Supplies');
-    expect(approvalItem?.textContent).toContain('LKR 85,000');
-    expect(approvalItem?.textContent).toContain('PURCHASE REQUEST');
-
-    const approvalBtn = approvalItem?.querySelector<HTMLAnchorElement>('a.action-btn-primary');
-    expect(approvalBtn?.getAttribute('href')).toBe('/manager/orders?type=purchase&status=pending-manager');
-    expect(approvalBtn?.textContent).toContain('Review Approval');
-
-    // Verify ticket action item
-    const actionItems = root.querySelectorAll<HTMLElement>('.action-item');
-    expect(actionItems.length).toBe(3);
-
-    const ticketBtn = actionItems[1].querySelector<HTMLAnchorElement>('a.action-btn-primary');
-    expect(ticketBtn?.getAttribute('href')).toBe('/manager/work-items?status=open');
-    expect(ticketBtn?.textContent).toContain('Open Ticket');
-
-    const shortageBtn = actionItems[2].querySelector<HTMLAnchorElement>('a.action-btn-primary');
-    expect(shortageBtn?.getAttribute('href')).toBe('/manager/orders?type=purchase&status=pending');
-    expect(shortageBtn?.textContent).toContain('Resolve Shortage');
-
-    // Verify Workforce Snapshot card is present
-    const workforceCard = root.querySelector('.workforce-card');
-    expect(workforceCard).not.toBeNull();
-    expect(workforceCard?.textContent).toContain('Workforce Snapshot');
-    expect(workforceCard?.textContent).toContain('Alex Mercer');
-
     fixture.destroy();
   });
 });

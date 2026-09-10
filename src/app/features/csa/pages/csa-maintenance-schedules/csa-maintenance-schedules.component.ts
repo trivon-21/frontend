@@ -8,7 +8,6 @@ import { environment } from '../../../../../environments/environment';
 interface ServiceItem {
   serviceName: string;
   date: string | null;
-  underWarranty?: boolean;
 }
 
 interface MaintenanceSchedule {
@@ -20,13 +19,12 @@ interface MaintenanceSchedule {
   installationDate: string;
   location: string;
   productType?: string;
-  status: 'Sent to CSA' | 'Sent to Customer';
+  status: 'New' | 'Draft Saved' | 'Sent to CSA' | 'Sent to Customer';
   services: ServiceItem[];
   sentToCsaAt?: string;
   sentToCustomerAt?: string;
   csaNotes?: string;
   customerNotes?: string;
-  updatedAt?: string;
 }
 
 @Component({
@@ -38,7 +36,6 @@ interface MaintenanceSchedule {
 })
 export class CsaMaintenanceSchedulesComponent implements OnInit {
   searchQuery = '';
-  statusFilter: 'All' | 'Sent to CSA' | 'Sent to Customer' = 'All';
   schedules: MaintenanceSchedule[] = [];
   filteredSchedules: MaintenanceSchedule[] = [];
   selectedSchedule: MaintenanceSchedule | null = null;
@@ -48,15 +45,13 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
   error: string | null = null;
   successMessage: string | null = null;
 
-  // Modal controls
-  showDetailModal = false;
-  showConfirmDialog = false;
-  customerNotes = '';
-
   // Counts
-  countAll = 0;
   countSentToCSA = 0;
   countSentToCustomer = 0;
+
+  // Confirmation dialog
+  showConfirmDialog = false;
+  customerNotes = '';
 
   private readonly apiUrl = `${environment.apiBaseUrl}/maintenance/schedules`;
 
@@ -73,24 +68,30 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
+    // Fetch all schedules — filter to only 'Sent to CSA' and 'Sent to Customer' on front-end
     this.http
-      .get<{ success: boolean; data: any[] }>(this.apiUrl)
+      .get<{ success: boolean; data: MaintenanceSchedule[] }>(this.apiUrl)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.schedules = response.data.filter((s: any) =>
+            // CSA sees only schedules that are relevant to them
+            this.schedules = response.data.filter(s =>
               s.status === 'Sent to CSA' || s.status === 'Sent to Customer'
             );
             this.calculateCounts();
             this.applyFilters();
 
-            // Refresh selectedSchedule if modal is open
-            if (this.selectedSchedule && this.showDetailModal) {
+            // Preserve selection
+            if (this.selectedSchedule) {
               const found = this.schedules.find(s => s._id === this.selectedSchedule!._id);
               if (found) {
-                this.selectedSchedule = JSON.parse(JSON.stringify(found));
+                this.selectSchedule(found);
+              } else {
+                this.selectedSchedule = this.filteredSchedules.length > 0 ? { ...this.filteredSchedules[0] } : null;
               }
+            } else if (this.filteredSchedules.length > 0) {
+              this.selectSchedule(this.filteredSchedules[0]);
             }
           } else {
             this.error = 'Failed to load schedules';
@@ -105,37 +106,22 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
   }
 
   calculateCounts(): void {
-    this.countAll = this.schedules.length;
     this.countSentToCSA = this.schedules.filter(s => s.status === 'Sent to CSA').length;
     this.countSentToCustomer = this.schedules.filter(s => s.status === 'Sent to Customer').length;
   }
 
-  setStatusFilter(filter: 'All' | 'Sent to CSA' | 'Sent to Customer'): void {
-    this.statusFilter = filter;
-    this.applyFilters();
-  }
-
   applyFilters(): void {
     const q = this.searchQuery.toLowerCase().trim();
-    this.filteredSchedules = this.schedules.filter(s => {
-      // Status filter
-      if (this.statusFilter !== 'All' && s.status !== this.statusFilter) {
-        return false;
-      }
+    this.filteredSchedules = this.schedules.filter(s =>
+      !q ||
+      s.ticketId.toLowerCase().includes(q) ||
+      s.customerName.toLowerCase().includes(q) ||
+      (s.location || '').toLowerCase().includes(q)
+    );
 
-      // Search query
-      if (q) {
-        const matchesTicket = s.ticketId.toLowerCase().includes(q);
-        const matchesCustomer = s.customerName.toLowerCase().includes(q);
-        const matchesLocation = (s.location || '').toLowerCase().includes(q);
-        const matchesProduct = (s.productType || '').toLowerCase().includes(q);
-        if (!matchesTicket && !matchesCustomer && !matchesLocation && !matchesProduct) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    if (this.selectedSchedule && !this.filteredSchedules.some(s => s._id === this.selectedSchedule!._id)) {
+      this.selectedSchedule = this.filteredSchedules.length > 0 ? { ...this.filteredSchedules[0] } : null;
+    }
   }
 
   onSearchInput(event: Event): void {
@@ -143,20 +129,10 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
     this.applyFilters();
   }
 
-  clearSearch(): void {
-    this.searchQuery = '';
-    this.applyFilters();
-  }
-
-  openDetailModal(schedule: MaintenanceSchedule): void {
+  selectSchedule(schedule: MaintenanceSchedule): void {
     this.selectedSchedule = JSON.parse(JSON.stringify(schedule));
-    this.showDetailModal = true;
-    this.showConfirmDialog = false;
-    this.customerNotes = '';
-  }
-
-  closeDetailModal(): void {
-    this.showDetailModal = false;
+    this.error = null;
+    this.successMessage = null;
     this.showConfirmDialog = false;
     this.customerNotes = '';
   }
@@ -166,11 +142,6 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  getDisplayStatus(status: string): string {
-    if (status === 'Sent to CSA') return 'Received';
-    return status;
   }
 
   getStatusClass(status: string): string {
@@ -209,8 +180,7 @@ export class CsaMaintenanceSchedulesComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.successMessage = `Schedule ${this.selectedSchedule!.ticketId} has been successfully sent to the customer.`;
-            this.closeDetailModal();
+            this.successMessage = `Schedule ${this.selectedSchedule!.ticketId} has been sent to the customer.`;
             this.loadSchedules();
           } else {
             this.error = 'Failed to send schedule to customer.';

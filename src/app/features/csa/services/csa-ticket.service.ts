@@ -3,38 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-export interface ServiceItem {
-  serviceName: string;
-  date: string | null;
-  underWarranty?: boolean;
-}
-
-export interface MaintenanceSchedule {
-  _id: string;
-  ticketId: string;
-  customerName: string;
-  customerEmail?: string;
-  customerPhone?: string;
-  installationDate: string;
-  location: string;
-  productType?: string;
-  status: 'New' | 'Draft Saved' | 'Sent to CSA' | 'Sent to Customer';
-  services: ServiceItem[];
-  sentToCsaAt?: string;
-  sentToCustomerAt?: string;
-  csaNotes?: string;
-  customerNotes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 export interface ServiceTicket {
   _id: string;
-  ticketId?: string; // e.g. MS-1001 for maintenance schedule
-  isMaintenanceSchedule?: boolean;
-  maintenanceScheduleData?: MaintenanceSchedule;
-  isMaintenanceRecord?: boolean;
-  maintenanceRecordData?: any;
   customerId: {
     _id: string;
     fullName: string;
@@ -48,7 +18,7 @@ export interface ServiceTicket {
   subject: string;
   description: string;
   priority: 'high' | 'medium' | 'low';
-  status: 'New' | 'Reviewed' | 'Assigned' | 'open' | 'in-progress' | 'resolved' | 'escalated' | 'Rejected' | 'Sent to CSA' | 'Sent to Customer' | 'Draft Saved' | 'Finance Approved' | 'Finance Rejected' | 'Sent to IM' | 'Materials Ready' | 'Completed' | 'On Hold' | 'Scheduled' | 'Pending' | string;
+  status: 'New' | 'Reviewed' | 'Assigned' | 'open' | 'in-progress' | 'resolved' | 'escalated' | 'Rejected';
   acUnitModel?: string;
   acUnitSerial?: string;
   preferredDate?: string;
@@ -77,8 +47,6 @@ export interface TicketListResponse {
 })
 export class CsaTicketService {
   private apiUrl = `${environment.apiUrl}/csa/service-tickets`;
-  private maintenanceApiUrl = `${environment.apiBaseUrl}/maintenance`;
-  private schedulesApiUrl = `${environment.apiBaseUrl}/maintenance/schedules`;
 
   constructor(private http: HttpClient) {}
 
@@ -105,41 +73,6 @@ export class CsaTicketService {
     }
 
     return this.http.get<TicketListResponse>(this.apiUrl, { params });
-  }
-
-  getMaintenanceTickets(status?: string, search?: string): Observable<{ success: boolean; data: any[]; count: number }> {
-    let params = new HttpParams();
-    if (status && status !== 'All') {
-      params = params.set('status', status);
-    }
-    if (search && search.trim()) {
-      params = params.set('search', search.trim());
-    }
-    return this.http.get<{ success: boolean; data: any[]; count: number }>(
-      this.maintenanceApiUrl,
-      { params }
-    );
-  }
-
-  getMaintenanceSchedules(status?: string, search?: string): Observable<{ success: boolean; data: MaintenanceSchedule[]; count: number }> {
-    let params = new HttpParams();
-    if (status && status !== 'All') {
-      params = params.set('status', status);
-    }
-    if (search && search.trim()) {
-      params = params.set('search', search.trim());
-    }
-    return this.http.get<{ success: boolean; data: MaintenanceSchedule[]; count: number }>(
-      this.schedulesApiUrl,
-      { params }
-    );
-  }
-
-  sendMaintenanceScheduleToCustomer(scheduleId: string, customerNotes?: string): Observable<{ success: boolean; message: string; data: any }> {
-    return this.http.post<{ success: boolean; message: string; data: any }>(
-      `${this.schedulesApiUrl}/${scheduleId}/send-to-customer`,
-      { customerNotes: customerNotes || '' }
-    );
   }
 
   createTicket(ticketData: any): Observable<any> {

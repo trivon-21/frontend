@@ -50,14 +50,8 @@
         </select>
       </div>
       <div class="input-group">
-        <label id="loan-due-label">Expected Return</label>
-        <app-datetime-picker
-          aria-labelledby="loan-due-label"
-          [date]="dueDate"
-          [time]="dueTime"
-          (dateChange)="dueDate = $event"
-          (timeChange)="dueTime = $event"
-        ></app-datetime-picker>
+        <label for="loan-due-date">Expected Return</label>
+        <input id="loan-due-date" type="date" class="form-input" [(ngModel)]="dueDate" />
       </div>
       <button
         type="button"
@@ -161,7 +155,7 @@
               <td class="asset-tag sku-cell">{{ loan.assetTag }}</td>
               <td class="held-by">{{ loan.technicianName }}</td>
               <td class="date-cell">{{ loan.checkedOutAt | date: 'medium' }}</td>
-              <td class="date-cell">{{ loan.dueDate | date: 'medium' }}</td>
+              <td class="date-cell">{{ loan.dueDate | date: 'mediumDate' }}</td>
               <td>
                 <span class="status-pill alx-table-status" [class.overdue]="loan.status === 'Overdue'">
                   {{ loan.status }}
@@ -252,54 +246,21 @@
 
   <!-- Return Confirmation Modal (US7.1) -->
   <div class="modal-overlay" *ngIf="showReturnModal && activeReturnLoan" (click)="closeReturnModal()">
-    <div
-      class="modal-card"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="return-modal-title"
-    >
+    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="return-modal-title">
       <div class="modal-header">
         <h3 id="return-modal-title">Confirm Tool Return</h3>
-        <button
-          type="button"
-          class="btn-close"
-          (click)="closeReturnModal()"
-          [disabled]="isReturningActiveLoan"
-          aria-label="Close dialog"
-        >
-          <lucide-angular name="x" [size]="18"></lucide-angular>
-        </button>
+        <button type="button" class="btn-close" (click)="closeReturnModal()" aria-label="Close dialog">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="modal-error-banner" role="alert" *ngIf="modalError">
-          <lucide-angular name="triangle-alert" [size]="16" class="inline-icon"></lucide-angular>
-          <span>{{ modalError }}</span>
-        </div>
-
         <div class="loan-summary">
-          <div class="loan-summary-row">
-            <span class="summary-label">Tool</span>
-            <span class="summary-value font-semibold">{{ activeReturnLoan.toolName }}</span>
-          </div>
-          <div class="loan-summary-row">
-            <span class="summary-label">Asset Tag</span>
-            <span class="summary-value sku-cell">{{ activeReturnLoan.assetTag }}</span>
-          </div>
-          <div class="loan-summary-row">
-            <span class="summary-label">Held By</span>
-            <span class="summary-value">{{ activeReturnLoan.technicianName }}</span>
-          </div>
+          <p><strong>Tool:</strong> {{ activeReturnLoan.toolName }}</p>
+          <p><strong>Asset Tag:</strong> <span class="sku-cell">{{ activeReturnLoan.assetTag }}</span></p>
+          <p><strong>Held By:</strong> {{ activeReturnLoan.technicianName }}</p>
         </div>
 
         <div class="form-group">
           <label for="modal-return-condition">Return Condition <span class="required">*</span></label>
-          <select
-            id="modal-return-condition"
-            class="form-select"
-            [(ngModel)]="returnCondition"
-            (change)="onConditionChange()"
-          >
+          <select id="modal-return-condition" class="form-select" [(ngModel)]="returnCondition">
             <option value="good">Good (Normal Condition)</option>
             <option value="damaged">Damaged (Requires RMA / Quarantine)</option>
             <option value="incomplete">Incomplete (Inspection Hold)</option>
@@ -307,11 +268,6 @@
         </div>
 
         <div class="disposition-alert" [ngClass]="returnCondition">
-          <lucide-angular
-            [name]="returnCondition === 'good' ? 'circle-check-big' : 'triangle-alert'"
-            [size]="18"
-            class="inline-icon alert-icon"
-          ></lucide-angular>
           <div *ngIf="returnCondition === 'good'" class="disposition-text">
             <strong>Resulting Disposition:</strong> Tool will be returned to service and immediately available for checkout.
           </div>
@@ -324,45 +280,25 @@
         </div>
 
         <div class="form-group">
-          <div class="label-with-hint">
-            <label for="modal-return-notes">
-              Notes / Observations
-              <span class="required" *ngIf="isNotesRequired">*</span>
-            </label>
-            <span class="field-hint" *ngIf="isNotesRequired">Required for damaged or incomplete tools</span>
-          </div>
+          <label for="modal-return-notes">Notes / Observations</label>
           <textarea
             id="modal-return-notes"
             class="form-textarea"
             [(ngModel)]="returnNotes"
-            (input)="modalError = ''"
             rows="3"
             placeholder="Add details regarding item condition, damage description, or missing parts..."
           ></textarea>
         </div>
       </div>
       <div class="modal-actions">
-        <button
-          type="button"
-          class="im-btn im-btn--secondary"
-          (click)="closeReturnModal()"
-          [disabled]="isReturningActiveLoan"
-        >
-          Cancel
-        </button>
+        <button type="button" class="im-btn im-btn--secondary" (click)="closeReturnModal()">Cancel</button>
         <button
           type="button"
           class="im-btn im-btn--primary"
-          [disabled]="isConfirmDisabled"
+          [disabled]="returningIds.has(activeReturnLoan._id!)"
           (click)="confirmReturn()"
         >
-          <lucide-angular
-            *ngIf="isReturningActiveLoan"
-            name="rotate-ccw"
-            [size]="15"
-            class="inline-icon spin"
-          ></lucide-angular>
-          {{ isReturningActiveLoan ? 'Confirming…' : 'Confirm Return' }}
+          Confirm Return
         </button>
       </div>
     </div>

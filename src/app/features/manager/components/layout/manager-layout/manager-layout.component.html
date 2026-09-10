@@ -23,14 +23,6 @@
         <lucide-angular name="clipboard-list" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Operations</span>
       </a>
-      <a routerLink="/manager/inventory" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
-        <lucide-angular name="package" [size]="18" strokeWidth="1.8"></lucide-angular>
-        <span>Inventory</span>
-      </a>
-      <a routerLink="/manager/customers" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
-        <lucide-angular name="users" [size]="18" strokeWidth="1.8"></lucide-angular>
-        <span>Customers</span>
-      </a>
       <div class="analytics-nav-group">
         <div class="analytics-nav-row">
           <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item analytics-link">
@@ -42,11 +34,11 @@
           </button>
         </div>
         <div id="manager-analytics-submenu" class="analytics-submenu" *ngIf="analyticsExpanded">
-          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page">Performance Summary</a>
+          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page">Period Performance</a>
           <a routerLink="/manager/analytics/service-operations" routerLinkActive="active" ariaCurrentWhenActive="page">Service Operations</a>
           <a routerLink="/manager/analytics/financial-overview" routerLinkActive="active" ariaCurrentWhenActive="page">Financial Overview</a>
-          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active" ariaCurrentWhenActive="page">Purchasing & Approvals</a>
-          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active" ariaCurrentWhenActive="page">Inventory & Exceptions</a>
+          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active" ariaCurrentWhenActive="page">Purchasing and Approvals</a>
+          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active" ariaCurrentWhenActive="page">Inventory and Exception Control</a>
         </div>
       </div>
     </nav>

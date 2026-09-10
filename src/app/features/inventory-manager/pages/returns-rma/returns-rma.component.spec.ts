@@ -4,7 +4,6 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { InventoryManagerDashboardService, RmaCaseItem } from '../../services/inventory-manager-dashboard.service';
-import { ConfirmService } from '../../../../services/confirm.service';
 import { ReturnsRmaDashboardComponent } from './returns-rma.component';
 
 describe('ReturnsRmaDashboardComponent', () => {
@@ -22,7 +21,7 @@ describe('ReturnsRmaDashboardComponent', () => {
       ],
     });
     dashboardService = TestBed.inject(InventoryManagerDashboardService);
-    component = new ReturnsRmaDashboardComponent(dashboardService, TestBed.inject(ConfirmService));
+    component = new ReturnsRmaDashboardComponent(dashboardService);
     http = TestBed.inject(HttpTestingController);
   });
 

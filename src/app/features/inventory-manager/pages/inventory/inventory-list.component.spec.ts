@@ -28,8 +28,8 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
     capacityBtu: 24000,
     voltage: '230 V',
     phase: 'Single Phase',
-    location: 'A',
-    binLocation: 'A101',
+    location: 'Central Warehouse',
+    binLocation: 'Small Parts Racking',
     unit: 'units',
     unitCost: 185000,
     isSerialized: true,
@@ -43,9 +43,9 @@ function createComponent(items: InventoryItem[], params: Record<string, string> 
   const service = {
     getInventory: () => of(items),
     getLocations: () => of([
-      { warehouse: 'A', racks: [{ rackTag: 'R1', bins: ['A101', 'A102'] }] },
-      { warehouse: 'B', racks: [{ rackTag: 'R1', bins: ['B101', 'B102'] }] },
-      { warehouse: 'C', racks: [{ rackTag: 'R1', bins: ['C101', 'C102'] }] },
+      { warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking'] },
+      { warehouse: 'Equipment Warehouse', placementAreas: ['Indoor Unit Storage'] },
+      { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
     ]),
   } as InventoryManagerDashboardService;
   const route = {
@@ -85,8 +85,8 @@ describe('InventoryListComponent filtering', () => {
       itemClass: 'Tools and Test Equipment',
       subcategory: 'Vacuum Pump',
       brand: 'Fieldpiece',
-      location: 'C',
-      binLocation: 'C101',
+      location: 'Service Warehouse',
+      binLocation: 'Tool Crib',
       available: 7,
       reorderLevel: 2,
     });
@@ -94,7 +94,7 @@ describe('InventoryListComponent filtering', () => {
     component.selectedItemClass = 'Spare Parts';
     component.selectedBrand = 'Copeland';
     component.selectedStockStatus = 'low-stock';
-    component.selectedLocation = 'A';
+    component.selectedLocation = 'Central Warehouse';
 
     component.applyFilters();
 
@@ -124,7 +124,7 @@ describe('InventoryListComponent filtering', () => {
 
     expect(component.brandOptions).toEqual(['Copeland']);
     expect(component.itemClassOptions).toEqual(['Spare Parts', 'Unclassified']);
-    expect(component.locationOptions).toEqual(['A', 'B', 'C']);
+    expect(component.locationOptions).toEqual(['Central Warehouse', 'Equipment Warehouse', 'Service Warehouse']);
     component.selectedItemClass = 'Unclassified';
     component.applyFilters();
     expect(component.filteredItems).toEqual([legacy]);
@@ -169,7 +169,7 @@ describe('InventoryListComponent filtering', () => {
     const items = [inventoryItem({ _id: 'item-1', sku: 'AC-COMP-001' })];
     const service = {
       getInventory: jasmine.createSpy('getInventory').and.returnValue(of(items)),
-      getLocations: () => of([{ warehouse: 'A', racks: [{ rackTag: 'R1', bins: ['A101', 'A102'] }] }]),
+      getLocations: () => of([{ warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking'] }]),
     } as unknown as InventoryManagerDashboardService;
 
     const queryParams$ = new Subject<Record<string, string>>();
@@ -229,46 +229,5 @@ describe('InventoryListComponent filtering', () => {
     expect(applyFiltersSpy).not.toHaveBeenCalled();
     expect(component.searchQuery).toBe('');
   });
-
-  it('applies query parameters for stockStatus and location on initialization', () => {
-    const matching = inventoryItem({ _id: 'item-1', available: 2, reorderLevel: 5, location: 'A' });
-    const other = inventoryItem({ _id: 'item-2', available: 10, reorderLevel: 5, location: 'B' });
-    const component = createComponent([matching, other], { stockStatus: 'low-stock', location: 'A' });
-
-    expect(component.selectedStockStatus).toBe('low-stock');
-    expect(component.selectedLocation).toBe('A');
-    expect(component.filteredItems.length).toBe(1);
-    expect(component.filteredItems[0]._id).toBe('item-1');
-  });
-
-  it('initializes readOnly from route snapshot data and suppresses save confirmation', () => {
-    const items = [inventoryItem({ _id: 'item-1' })];
-    const service = {
-      getInventory: () => of(items),
-      getLocations: () => of([]),
-    } as unknown as InventoryManagerDashboardService;
-    const route = {
-      queryParams: of({ editSaved: '1', selected: 'item-1' }),
-      snapshot: {
-        queryParams: { editSaved: '1', selected: 'item-1' },
-        data: { readOnly: true },
-      },
-    } as unknown as ActivatedRoute;
-    const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
-
-    const component = new InventoryListComponent(service, route, router);
-    expect(component.readOnly).toBeFalse();
-    component.ngOnInit();
-    expect(component.readOnly).toBeTrue();
-    // Save confirmation should NOT be triggered in readOnly mode
-    expect(component.showSaveConfirmation).toBeFalse();
-    component.ngOnDestroy();
-  });
-
-  it('describes storage as a single warehouse, rack and bin address', () => {
-    const component = createComponent([inventoryItem()]);
-
-    expect(component.getStorageAddress(inventoryItem())).toBe('Warehouse A, R1, A101');
-    expect(component.getStorageAddress(inventoryItem({ location: 'A', binLocation: '' }))).toBe('Warehouse A');
-  });
 });
+

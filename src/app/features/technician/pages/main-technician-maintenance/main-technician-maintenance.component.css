@@ -146,12 +146,6 @@
 .status-text.scheduled { color: #3b82f6; }
 .status-text.on-hold { color: #ef4444; }
 .status-text.assigned { color: #4b5563; }
-.status-text.new { color: #6366f1; }
-.status-text.pending { color: #f59e0b; }
-.status-text.finance-approved { color: #10b981; }
-.status-text.finance-rejected { color: #ef4444; }
-.status-text.sent-to-im { color: #8b5cf6; }
-.status-text.materials-ready { color: #14b8a6; }
 
 .type-badge {
   display: inline-block;

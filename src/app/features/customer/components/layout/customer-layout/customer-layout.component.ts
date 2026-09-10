@@ -8,6 +8,8 @@ import { ClickOutsideDirective } from '../../../../../directives/click-outside.d
 import { SystemInfoService, SystemInfo } from '../../../../../core/services/system-info.service';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { roleHomeUrl } from '../../../../../core/routing/role-home';
+import { CustomerProfileService } from '../../../services/customer-profile.service';
+import { AuthUser } from '../../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -26,13 +28,16 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
   systemInfo: SystemInfo | null = null;
   private clockInterval: any;
   private countdownInterval: any;
+  showProfileCompletionModal = false;
+  missingProfileFields: string[] = [];
 
   constructor(
     public authService: AuthService,
     private notificationService: NotificationService,
     private maintenanceService: MaintenanceService,
     private router: Router,
-    private systemInfoService: SystemInfoService
+    private systemInfoService: SystemInfoService,
+    private profileService: CustomerProfileService
   ) { }
 
   ngOnInit(): void {
@@ -41,6 +46,10 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
       const targetUrl = roleHomeUrl(user.role, user);
       this.router.navigateByUrl(targetUrl);
       return;
+    }
+
+    if (user?.role === 'CUSTOMER') {
+      this.loadProfileCompletionStatus();
     }
 
     this.systemInfoService.systemInfo$.subscribe((info) => {
@@ -75,6 +84,34 @@ export class CustomerLayoutComponent implements OnInit, OnDestroy {
     this.clockInterval = setInterval(() => {
       this.currentTime = new Date();
     }, 1000);
+  }
+
+  private loadProfileCompletionStatus(): void {
+    this.profileService.getProfile().subscribe({
+      next: (profile) => {
+        this.missingProfileFields = this.getMissingProfileFields(profile);
+        this.showProfileCompletionModal = this.missingProfileFields.length > 0;
+      }
+    });
+  }
+
+  private getMissingProfileFields(profile: AuthUser): string[] {
+    const fields: Array<[keyof AuthUser, string]> = [
+      ['fullName', 'Full Name'],
+      ['lastName', 'Last Name'],
+      ['gender', 'Gender'],
+      ['address', 'Address'],
+      ['phoneNumber', 'Contact Number']
+    ];
+
+    return fields
+      .filter(([field]) => !String(profile[field] || '').trim())
+      .map(([, label]) => label);
+  }
+
+  goToCompleteProfile(): void {
+    this.showProfileCompletionModal = false;
+    this.router.navigate(['/dashboard/profile']);
   }
 
   ngOnDestroy(): void {

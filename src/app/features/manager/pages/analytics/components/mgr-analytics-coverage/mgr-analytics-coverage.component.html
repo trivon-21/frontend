@@ -1,4 +1,0 @@
-<section class="coverage-panel" aria-labelledby="coverage-heading">
-  <div class="section-heading compact"><div><h2 id="coverage-heading">Data Coverage</h2><p>Known limits are shown explicitly instead of being reported as zero performance.</p></div></div>
-  <ul><li *ngFor="let item of report.dataCoverage"><span class="coverage-badge" [class.partial]="item.status === 'partial'">{{ label(item.status) }}</span><span>{{ item.message }}</span></li></ul>
-</section>

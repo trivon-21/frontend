@@ -359,6 +359,7 @@
 
           <tr>
             <th>TICKET ID</th>
+            <th>REPAIR TYPE</th>
             <th>CUSTOMER</th>
             <th>MATERIALS</th>
             <th>LOCATION</th>
@@ -380,6 +381,21 @@
               <span class="ticket-id">
                 {{ invoice.ticketRef || invoice.ticketId }}
               </span>
+            </td>
+
+
+            <!-- REPAIR TYPE -->
+
+            <td>
+
+              <span class="repair-type-badge">
+                {{
+                  invoice.repairType === 'major'
+                    ? 'Major Repair'
+                    : 'Minor Repair'
+                }}
+              </span>
+
             </td>
 
 
@@ -509,6 +525,15 @@
           </p>
 
           <p>
+            <strong>Repair Type:</strong>
+            {{
+              selectedRepairInvoice?.repairType === 'major'
+                ? 'Major'
+                : 'Minor'
+            }}
+          </p>
+
+          <p>
             <strong>Customer:</strong>
             {{ selectedRepairInvoice?.customerName }}
           </p>
@@ -528,7 +553,10 @@
             {{ selectedRepairInvoice?.materialsCount }}
           </p>
 
-  
+          <p>
+            <strong>Notes:</strong>
+            {{ selectedRepairInvoice?.notes || '—' }}
+          </p>
 
           <p>
             <strong>Updated:</strong>
@@ -539,7 +567,7 @@
 
           <p>
             <em>
-              Fixed repair charge +
+              Fixed {{ selectedRepairInvoice?.repairType }} repair charge +
               materials will be calculated automatically.
             </em>
           </p>

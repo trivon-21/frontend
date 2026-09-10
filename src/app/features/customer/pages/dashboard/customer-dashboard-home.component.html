@@ -266,6 +266,7 @@
 <app-request-service-modal
   *ngIf="showRequestService"
   (closed)="showRequestService = false"
+  (viewHistory)="openServiceRequestHistory()"
 ></app-request-service-modal>
 
 <app-inquiry-modal

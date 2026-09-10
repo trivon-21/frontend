@@ -1,21 +1,21 @@
 <div class="page-wrapper details-page-container">
   <!-- Back Button -->
   <button *ngIf="id" [routerLink]="[baseRoute + '/service-details', id]" class="btn-secondary back-btn">
-    <lucide-angular name="arrow-left" [size]="18"></lucide-angular>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
     Back to Details
   </button>
 
   <!-- Header Row -->
-  <header class="page-header">
+  <header class="page-header" style="margin-bottom: 24px;">
     <h1 class="page-title">Service History</h1>
   </header>
 
   <!-- 4 Info Cards -->
-  <div class="summary-cards">
+  <div class="summary-cards" style="margin-bottom: 24px;">
     <!-- Customer -->
     <div class="card">
       <div class="card-icon">
-        <lucide-angular name="user" [size]="20"></lucide-angular>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <div class="card-content">
         <span class="card-label">Customer</span>
@@ -26,7 +26,7 @@
     <!-- Location -->
     <div class="card">
       <div class="card-icon">
-        <lucide-angular name="map-pin" [size]="20"></lucide-angular>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
       </div>
       <div class="card-content">
         <span class="card-label">Location</span>
@@ -37,7 +37,7 @@
     <!-- Installation Date -->
     <div class="card">
       <div class="card-icon">
-        <lucide-angular name="calendar" [size]="20"></lucide-angular>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </div>
       <div class="card-content">
         <span class="card-label">Installation Date</span>
@@ -50,7 +50,7 @@
     <!-- Product Type -->
     <div class="card">
       <div class="card-icon">
-        <lucide-angular name="box" [size]="20"></lucide-angular>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       </div>
       <div class="card-content">
         <span class="card-label">Product Type</span>
@@ -60,9 +60,8 @@
   </div>
 
   <!-- History Records Table Panel -->
-  <div class="table-card card-panel">
-    <!-- Desktop table -->
-    <div class="table-wrapper desktop-table-wrap">
+  <div class="table-card card-panel" style="padding: 0; overflow: hidden; margin-bottom: 40px;">
+    <div class="table-wrapper" style="margin-top: 0; border: none; border-radius: 0;">
       <table>
         <thead>
           <tr>
@@ -77,12 +76,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of historyItems">
-            <td class="ticket-id">{{ item.ticketId }}</td>
+            <td class="ticket-id" style="font-weight: 700; color: var(--primary-main);">{{ item.ticketId }}</td>
             <td>{{ item.serviceType }}</td>
             <td>{{ item.productType }}</td>
             <td class="date-cell">
               <strong>{{ getDateWithoutYear(item) }}</strong><br>
-              <span class="year">{{ getDateYear(item) }}</span>
+              <span class="year" style="font-size: 11px; color: #8a9e96; font-weight: 500;">{{ getDateYear(item) }}</span>
             </td>
             <td>
               <span class="status-badge" [ngClass]="item.status.toLowerCase().replace(' ', '-')">
@@ -91,53 +90,16 @@
             </td>
             <td>{{ item.assignedTeam }}</td>
             <td>
-              <span class="warranty-badge" [ngClass]="getWarrantyClass(getDisplayWarrantyStatus(item))">
+              <span class="warranty-badge" [ngClass]="getWarrantyClass(getDisplayWarrantyStatus(item))" style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
                 {{ getDisplayWarrantyStatus(item) }}
               </span>
             </td>
           </tr>
           <tr *ngIf="historyItems.length === 0">
-            <td colspan="7" class="empty-cell">No service history records found.</td>
+            <td colspan="7" style="text-align: center; color: #8a9e96; padding: 24px;">No service history records found.</td>
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Mobile card list -->
-    <div class="mobile-history-list">
-      <div class="history-card" *ngFor="let item of historyItems">
-        <div class="history-card-header">
-          <span class="history-ticket-id">{{ item.ticketId }}</span>
-          <span class="status-badge" [ngClass]="item.status.toLowerCase().replace(' ', '-')">{{ item.status }}</span>
-        </div>
-        <div class="history-card-body">
-          <div class="history-field">
-            <span class="history-field-label">Service Type</span>
-            <span class="history-field-value">{{ item.serviceType }}</span>
-          </div>
-          <div class="history-field">
-            <span class="history-field-label">Product Type</span>
-            <span class="history-field-value">{{ item.productType }}</span>
-          </div>
-          <div class="history-field">
-            <span class="history-field-label">Date</span>
-            <span class="history-field-value">{{ getDateWithoutYear(item) }} {{ getDateYear(item) }}</span>
-          </div>
-          <div class="history-field">
-            <span class="history-field-label">Assigned Team</span>
-            <span class="history-field-value">{{ item.assignedTeam }}</span>
-          </div>
-          <div class="history-field">
-            <span class="history-field-label">Warranty</span>
-            <span class="warranty-badge" [ngClass]="getWarrantyClass(getDisplayWarrantyStatus(item))">
-              {{ getDisplayWarrantyStatus(item) }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="empty-mobile" *ngIf="historyItems.length === 0">
-        <p>No service history records found.</p>
-      </div>
     </div>
   </div>
 </div>

@@ -14,6 +14,7 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
 })
 export class RequestServiceModalComponent implements OnInit {
   @Output() closed = new EventEmitter<void>();
+  @Output() viewHistory = new EventEmitter<void>();
 
   // 1 = AC Unit, 2 = Service Details, 3 = Payment (Maintenance only), 4 = Summary (or 3 for Repair)
   step = 1;
@@ -108,6 +109,8 @@ export class RequestServiceModalComponent implements OnInit {
   }
 
   close() { this.closed.emit(); }
+
+  openHistory() { this.viewHistory.emit(); }
 
   onOverlayClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) this.close();

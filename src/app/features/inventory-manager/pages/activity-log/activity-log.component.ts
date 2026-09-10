@@ -1,5 +1,4 @@
-import { Component, DestroyRef, OnInit, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -20,22 +19,17 @@ export class ActivityLogComponent implements OnInit {
 
   constructor(
     private dashboardService: InventoryManagerDashboardService,
-    private iconMappingService: IconMappingService,
-    @Optional() private destroyRef?: DestroyRef,
+    private iconMappingService: IconMappingService
   ) {}
 
   ngOnInit(): void {
     this.load();
   }
 
-  load(options: { force?: boolean } = {}): void {
-    if (!this.activities.length) {
-      this.loading = true;
-    }
+  load(): void {
+    this.loading = true;
     this.errorMessage = '';
-    const req$ = this.dashboardService.getActivityLog(options);
-    const sub$ = this.destroyRef ? req$.pipe(takeUntilDestroyed(this.destroyRef)) : req$;
-    sub$.subscribe({
+    this.dashboardService.getActivityLog().subscribe({
       next: (data) => {
         this.activities = data;
         this.loading = false;

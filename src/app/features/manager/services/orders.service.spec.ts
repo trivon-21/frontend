@@ -3,7 +3,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { ApiService } from '../../../core/services/api.service';
-import { TtlCacheService } from '../../../core/services/ttl-cache.service';
 import { OrdersService, PurchaseRequest, ReceiptAuthorization } from './orders.service';
 
 describe('OrdersService', () => {
@@ -58,22 +57,6 @@ describe('OrdersService', () => {
       statusVersion: 4,
     });
     request.flush(order);
-  });
-
-  it('invalidates both the manager and inventory caches after a purchase decision', () => {
-    const cache = TestBed.inject(TtlCacheService);
-    const invalidated: string[] = [];
-    spyOn(cache, 'invalidate').and.callFake((prefix: string) => {
-      invalidated.push(prefix);
-    });
-
-    service.decide(order, 'approved', 'Operational need verified.').subscribe();
-    const request = http.expectOne(`${environment.apiUrl}/manager/orders/order-1`);
-    request.flush(order);
-
-    // Approval moves the request to 'pending-finance', so the inventory
-    // manager's cached order list is stale too.
-    expect(invalidated).toEqual(['manager:', 'inventory:']);
   });
 
   it('omits the default receipt status and serializes a non-default status', () => {

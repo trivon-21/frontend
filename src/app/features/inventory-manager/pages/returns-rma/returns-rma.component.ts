@@ -1,5 +1,4 @@
-import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -13,8 +12,6 @@ import {
   QuarantineItemData,
   HandedOverMaterialRequest,
 } from '../../services/inventory-manager-dashboard.service';
-import { ConfirmService } from '../../../../services/confirm.service';
-import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 @Component({
   selector: 'app-returns-rma-dashboard',
@@ -107,11 +104,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   replacementSerialNumber = '';
   replacementNotes = '';
 
-  constructor(
-    private dashboardService: InventoryManagerDashboardService,
-    private confirmService: ConfirmService,
-    @Optional() private destroyRef?: DestroyRef,
-  ) {}
+  constructor(private dashboardService: InventoryManagerDashboardService) {}
 
   ngOnInit(): void {
     this.loadAllData();
@@ -119,23 +112,18 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   // ── Data Loading ──
 
-  loadAllData(options: { force?: boolean } = {}): void {
-    if (!this.leftoverReturns.length && !this.rmaCases.length && !this.quarantineItems.length) {
-      this.loading = true;
-    }
+  loadAllData(): void {
+    this.loading = true;
     this.error = null;
 
-    const joined$ = forkJoin({
-      summary: this.dashboardService.getReturnsSummary(options),
-      leftoverReturns: this.dashboardService.getLeftoverReturns(options),
-      rmaCases: this.dashboardService.getRmaCases(options),
-      quarantineItems: this.dashboardService.getQuarantineItems(options),
-      inventoryItems: this.dashboardService.getInventory(options),
-      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(options),
-    });
-
-    const sub$ = this.destroyRef ? joined$.pipe(takeUntilDestroyed(this.destroyRef)) : joined$;
-    sub$.subscribe({
+    forkJoin({
+      summary: this.dashboardService.getReturnsSummary(),
+      leftoverReturns: this.dashboardService.getLeftoverReturns(),
+      rmaCases: this.dashboardService.getRmaCases(),
+      quarantineItems: this.dashboardService.getQuarantineItems(),
+      inventoryItems: this.dashboardService.getInventory(),
+      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(),
+    }).subscribe({
       next: (data) => {
         this.summary = data.summary;
         this.leftoverReturns = data.leftoverReturns;
@@ -153,7 +141,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   refreshData(): void {
-    this.loadAllData({ force: true });
+    this.loadAllData();
   }
 
   // ── Leftover Return Form ──
@@ -289,24 +277,8 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.rmaForm.type = item.type;
   }
 
-  get isRmaFormDirty(): boolean {
-    return !!(
-      this.rmaForm.serialNumber.trim() ||
-      this.rmaForm.faultDescription.trim()
-    );
-  }
-
-  async closeRmaModal(): Promise<void> {
+  closeRmaModal(): void {
     if (this.submitting) return;
-    if (this.isRmaFormDirty && !(await confirmDiscard(this.confirmService, 'RMA case details'))) {
-      return;
-    }
-    this.resetRmaModalState();
-  }
-
-  /** Resets the RMA modal without confirming — used after a successful submit,
-   *  where there is nothing left to discard. */
-  private resetRmaModalState(): void {
     this.showRmaModal = false;
     const trigger = this.dialogTrigger;
     this.dialogTrigger = null;
@@ -314,15 +286,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.showRmaModal) {
-      this.closeRmaModal();
-    } else if (this.showInternalRepairModal) {
-      this.closeInternalRepairModal();
-    } else if (this.showReplacementModal) {
-      this.closeReplacementModal();
-    }
-  }
+  onEscape(): void { this.closeRmaModal(); }
 
   get isRmaFormValid(): boolean {
     return (
@@ -339,7 +303,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.successMessage = 'RMA case created successfully.';
-        this.resetRmaModalState();
+        this.closeRmaModal();
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
@@ -400,17 +364,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.showInternalRepairModal = true;
   }
 
-  async closeInternalRepairModal(): Promise<void> {
-    if (this.submitting) return;
-    if (this.internalRepairNote.trim() && !(await confirmDiscard(this.confirmService, 'repair note'))) {
-      return;
-    }
-    this.resetInternalRepairModalState();
-  }
-
-  /** Resets the internal-repair modal without confirming — used after a
-   *  successful submit, where there is nothing left to discard. */
-  private resetInternalRepairModalState(): void {
+  closeInternalRepairModal(): void {
     this.showInternalRepairModal = false;
     this.internalRepairRma = null;
     this.internalRepairNote = '';
@@ -428,7 +382,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        this.resetInternalRepairModalState();
+        this.closeInternalRepairModal();
         this.refreshData();
         this.successMessage = `RMA ${rma.rmaId} resolved via internal repair and returned to service.`;
         setTimeout(() => (this.successMessage = null), 5000);
@@ -448,18 +402,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.showReplacementModal = true;
   }
 
-  async closeReplacementModal(): Promise<void> {
-    if (this.submitting) return;
-    const isDirty = !!(this.replacementSerialNumber.trim() || this.replacementNotes.trim());
-    if (isDirty && !(await confirmDiscard(this.confirmService, 'replacement receipt details'))) {
-      return;
-    }
-    this.resetReplacementModalState();
-  }
-
-  /** Resets the replacement modal without confirming — used after a successful
-   *  submit, where there is nothing left to discard. */
-  private resetReplacementModalState(): void {
+  closeReplacementModal(): void {
     this.showReplacementModal = false;
     this.replacementRma = null;
     this.replacementSerialNumber = '';
@@ -476,10 +419,9 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        const serial = this.replacementSerialNumber.trim();
-        this.resetReplacementModalState();
+        this.closeReplacementModal();
         this.refreshData();
-        this.successMessage = `Replacement serial ${serial} received for RMA ${rma.rmaId}.`;
+        this.successMessage = `Replacement serial ${this.replacementSerialNumber.trim()} received for RMA ${rma.rmaId}.`;
         setTimeout(() => (this.successMessage = null), 5000);
       },
       error: (err) => {

@@ -1,7 +1,5 @@
-import { Component, DestroyRef, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Component } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -29,34 +27,10 @@ import { HeaderClockComponent } from '../../../../../shared/components/header-cl
 export class InventoryManagerLayoutComponent {
   showUserMenu = false;
 
-  // The product wizard has no nav item of its own, so creating or editing a
-  // product must keep the Inventory item highlighted.
-  private static readonly INVENTORY_SECTION = [
-    '/inventory-manager/inventory',
-    '/inventory-manager/product-wizard',
-  ];
-
-  private currentUrl: string;
-
   constructor(
     public authService: AuthService,
     private router: Router,
-    @Optional() destroyRef?: DestroyRef,
-  ) {
-    this.currentUrl = this.router.url;
-    let navigation$ = this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd));
-    if (destroyRef) {
-      navigation$ = navigation$.pipe(takeUntilDestroyed(destroyRef));
-    }
-    navigation$.subscribe((event) => (this.currentUrl = event.urlAfterRedirects));
-  }
-
-  get isInventorySectionActive(): boolean {
-    const path = this.currentUrl.split('?')[0].split('#')[0];
-    return InventoryManagerLayoutComponent.INVENTORY_SECTION.some(
-      (route) => path === route || path.startsWith(`${route}/`),
-    );
-  }
+  ) {}
 
   get userInitials(): string {
     const user = this.authService.getCurrentUser();

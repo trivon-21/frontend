@@ -10,7 +10,7 @@ interface ServiceHistoryItem {
   serviceType: string;
   productType: string;
   date: string;
-  status: 'Completed' | 'In Progress' | 'Assigned' | 'On Hold';
+  status: 'Completed' | 'In Progress' | 'Scheduled' | 'On Hold';
   assignedTeam: string;
   warrantyStatus: 'Warranty Period not started yet' | 'Warranty Activated' | 'Warranty Claimed' | 'Warranty Not Claimed' | 'Warranty is Over';
 }
@@ -48,9 +48,9 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
   };
   isLoading = false;
   error: string | null = null;
-  source: 'service' | 'installation' | 'inspection' | 'maintenance' = 'service';
+  source: 'service' | 'installation' | 'inspection' = 'service';
   searchQuery = '';
-  selectedTypeFilter: 'all' | 'inspection' | 'installation' | 'service' | 'maintenance' = 'all';
+  selectedTypeFilter: 'all' | 'inspection' | 'installation' | 'service' = 'all';
   private readonly apiUrl = `${environment.apiBaseUrl}/service-requests`;
 
   constructor(
@@ -60,8 +60,8 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     const sourceParam = this.route.snapshot.paramMap.get('source');
-    if (sourceParam === 'service' || sourceParam === 'installation' || sourceParam === 'inspection' || sourceParam === 'maintenance') {
-      this.source = sourceParam as 'service' | 'installation' | 'inspection' | 'maintenance';
+    if (sourceParam === 'service' || sourceParam === 'installation' || sourceParam === 'inspection') {
+      this.source = sourceParam;
     }
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -119,8 +119,8 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
   onTypeFilterChange(value: string): void {
     const normalized = (value || 'all').trim().toLowerCase();
 
-    if (normalized === 'inspection' || normalized === 'installation' || normalized === 'service' || normalized === 'maintenance' || normalized === 'repair') {
-      this.selectedTypeFilter = normalized as any;
+    if (normalized === 'inspection' || normalized === 'installation' || normalized === 'service') {
+      this.selectedTypeFilter = normalized;
     } else {
       this.selectedTypeFilter = 'all';
     }
@@ -272,7 +272,7 @@ export class MainTechnicianServiceHistoryComponent implements OnInit {
       return 'Warranty Activated';
     }
 
-    if (serviceType === 'service' || serviceType === 'repair' || serviceType === 'maintenance') {
+    if (serviceType === 'service') {
       if (item.warrantyStatus === 'Warranty Claimed' || item.warrantyStatus === 'Warranty is Over') {
         return item.warrantyStatus;
       }

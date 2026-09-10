@@ -35,7 +35,7 @@
   <div class="portal-state" *ngIf="loading">Loading procurement workflow…</div>
   <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
     <div><strong>Procurement unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadAllData({ force: true })">Retry</button>
+    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadAllData()">Retry</button>
   </div>
 
   <!-- Goods Received Note (GRN) Card -->
@@ -83,11 +83,11 @@
           <div class="segmented-control">
             <button type="button" class="segment-btn" [class.active]="receiptMode === 'PO'" [attr.aria-pressed]="receiptMode === 'PO'" (click)="setReceiptMode('PO')">
               <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
-              <span>Normal Issued Purchase Order (PO)</span>
+              <span>Normal — Issued Purchase Order (PO)</span>
             </button>
             <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" [attr.aria-pressed]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
               <lucide-angular name="shield-check" [size]="16"></lucide-angular>
-              <span>Emergency Approved Authorization (Non-PO)</span>
+              <span>Emergency — Approved Authorization (Non-PO)</span>
             </button>
           </div>
         </div>
@@ -236,30 +236,20 @@
               <lucide-angular name="box" [size]="16" class="input-icon"></lucide-angular>
               <select class="form-select" formControlName="location" (change)="onWarehouseChange()">
                 <option value="" disabled>Select a warehouse</option>
-                <option *ngFor="let location of locations" [value]="location.warehouse">{{ warehouseLabel(location) }}</option>
+                <option *ngFor="let location of locations" [value]="location.warehouse">{{ location.warehouse }}</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label class="field-label">RACK *</label>
+            <label class="field-label">PLACEMENT AREA *</label>
             <div class="input-icon-wrap">
               <lucide-angular name="layout-grid" [size]="16" class="input-icon"></lucide-angular>
-              <select class="form-select" formControlName="rackTag" (change)="onRackChange()" [attr.disabled]="!receiptForm.get('stock.location')?.value ? true : null">
-                <option value="" disabled>Select a rack</option>
-                <option *ngFor="let rack of availableRacks" [value]="rack.rackTag">{{ rack.rackTag }}</option>
+              <select class="form-select" formControlName="binLocation" [attr.disabled]="!receiptForm.get('stock.location')?.value ? true : null">
+                <option value="" disabled>Select a placement area</option>
+                <option *ngFor="let area of availablePlacementAreas" [value]="area">{{ area }}</option>
               </select>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="field-label">BIN LOCATION *</label>
-            <div class="input-icon-wrap">
-              <lucide-angular name="box" [size]="16" class="input-icon"></lucide-angular>
-              <select class="form-select" formControlName="binLocation" [attr.disabled]="!receiptForm.get('stock.rackTag')?.value ? true : null">
-                <option value="" disabled>Select a bin</option>
-                <option *ngFor="let bin of availableBins" [value]="bin">{{ bin }}</option>
-              </select>
-            </div>
-            <small class="field-help" *ngIf="receiptForm.get('stock')?.hasError('storageLocation')">Choose a warehouse, rack and bin for this stock.</small>
+            <small class="field-help" *ngIf="receiptForm.get('stock')?.hasError('storageLocation')">Choose an area in the selected warehouse.</small>
           </div>
           <div class="form-group full-span serials-section" *ngIf="selectedItem?.isSerialized && acceptedQuantity > 0">
             <div class="serials-header">
