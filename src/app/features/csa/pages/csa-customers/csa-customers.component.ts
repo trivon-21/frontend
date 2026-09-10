@@ -1,8 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { CsaCustomerService, CustomerProfile } from '../../services/csa-customer.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+
+const atLeastOneContactValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const phone = control.get('phoneNumber')?.value;
+  const email = control.get('email')?.value;
+  const hasPhone = phone && String(phone).trim().length > 0;
+  const hasEmail = email && String(email).trim().length > 0;
+  return (hasPhone || hasEmail) ? null : { requireContact: true };
+};
 
 @Component({
   selector: 'app-csa-customers',
@@ -36,14 +44,24 @@ export class CsaCustomersComponent implements OnInit {
   ) {
     this.customerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]],
-      lastName: ['', [Validators.pattern(/^[a-zA-Z\s]*$/)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^0\d{9}$/)]],
+      lastName: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]],
+      phoneNumber: ['', [Validators.pattern(/^0\d{9}$/)]],
       email: ['', [Validators.email]],
       address: ['', [Validators.required]],
       city: ['', [Validators.required]],
       gender: [''],
       initialPassword: ['']
+    }, {
+      validators: [atLeastOneContactValidator]
     });
+  }
+
+  hasContactError(): boolean {
+    const phoneCtrl = this.customerForm.get('phoneNumber');
+    const emailCtrl = this.customerForm.get('email');
+    const isTouched = !!(phoneCtrl?.touched || emailCtrl?.touched);
+    const hasContact = !this.customerForm.errors?.['requireContact'];
+    return isTouched && !hasContact;
   }
 
   ngOnInit(): void {
@@ -97,7 +115,11 @@ export class CsaCustomersComponent implements OnInit {
       next: (res) => {
         this.isSubmitting = false;
         this.showCreateModal = false;
-        this.showToast(`Customer "${res.customer?.fullName}" created successfully!`);
+        const fullName = `${res.customer?.fullName || ''} ${res.customer?.lastName || ''}`.trim();
+        const toastMsg = res.emailSent
+          ? `Customer "${fullName}" created! Login credentials have been emailed to ${res.customer?.email}.`
+          : `Customer "${fullName}" created successfully!`;
+        this.showToast(toastMsg);
         this.loadCustomers();
       },
       error: (err) => {
