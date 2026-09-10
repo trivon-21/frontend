@@ -14,6 +14,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { SystemInfoService } from './core/services/system-info.service';
+import { ThemeProvider } from './core/styling/theme.provider';
 
 // NOTE: provideBrowserGlobalErrorListeners doesn't exist in angular/core standard APIs unless it was locally patched,
 // but since both sides imported it, I must include it.
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAppInitializer(() => {
       inject(SystemInfoService);
+      inject(ThemeProvider).loadTheme();
     }),
     provideRouter(
       routes,

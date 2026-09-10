@@ -390,7 +390,7 @@
 
   <!-- Internal Repair Resolution Modal (US7.4) -->
   <div class="modal-overlay" *ngIf="showInternalRepairModal && internalRepairRma" (click)="closeInternalRepairModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="internal-repair-title">
+    <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="internal-repair-title">
       <div class="modal-header">
         <h3 id="internal-repair-title">Resolve RMA via Internal Repair</h3>
         <button type="button" class="btn-close" (click)="closeInternalRepairModal()" aria-label="Close dialog">&times;</button>
@@ -431,7 +431,7 @@
 
   <!-- Supplier Replacement Receipt Modal (US7.3) -->
   <div class="modal-overlay" *ngIf="showReplacementModal && replacementRma" (click)="closeReplacementModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="replacement-modal-title">
+    <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="replacement-modal-title">
       <div class="modal-header">
         <h3 id="replacement-modal-title">Receive Supplier Replacement</h3>
         <button type="button" class="btn-close" (click)="closeReplacementModal()" aria-label="Close dialog">&times;</button>

@@ -1,10 +1,21 @@
+/* The component host is the actual grid item that gets stretched by
+   .split-layout; it needs to be a flex container itself so that stretch
+   height reaches .layout-right below (a plain child div's height:auto
+   does not inherit a parent's grid-stretched height on its own). */
+:host {
+  display: flex;
+  min-height: 0;
+}
+
 /* Right Panel - Added Items */
 .layout-right {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
-  /* Height comes from grid stretch, which subtracts these margins for us;
-     an explicit 100% would overflow the fixed-height card by the margins. */
+  /* Flex stretch (the host's default align-items) fills the host's height
+     and subtracts these margins for us; an explicit height:100% here would
+     double-count them and overflow the fixed-height card. */
   min-height: 0;
   margin: 14px 14px 14px 0;
   padding: 20px;
