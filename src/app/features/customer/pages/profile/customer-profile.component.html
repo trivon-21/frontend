@@ -83,18 +83,18 @@
     <form [formGroup]="profileForm" class="profile-form">
       <div class="form-grid two-col">
         <div class="form-field">
-          <label class="form-label">Full Name</label>
+          <label class="form-label">Full Name <span class="required-mark">*</span></label>
           <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" />
         </div>
         <div class="form-field">
-          <label class="form-label">Last Name</label>
+          <label class="form-label">Last Name <span class="required-mark">*</span></label>
           <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" />
         </div>
       </div>
 
       <div class="form-grid two-col">
         <div class="form-field">
-          <label class="form-label">Gender</label>
+          <label class="form-label">Gender <span class="required-mark">*</span></label>
           <div class="select-wrap">
             <select formControlName="gender" class="form-input form-select">
               <option value="">Select Gender</option>
@@ -106,14 +106,14 @@
           </div>
         </div>
         <div class="form-field">
-          <label class="form-label">Address</label>
+          <label class="form-label">Address <span class="required-mark">*</span></label>
           <input formControlName="address" type="text" class="form-input" placeholder="Your Address" />
         </div>
       </div>
 
       <div class="form-grid one-col">
         <div class="form-field">
-          <label class="form-label">Contact Number</label>
+          <label class="form-label">Contact Number <span class="required-mark">*</span></label>
           <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" />
         </div>
       </div>
@@ -281,4 +281,20 @@
     </div>
 
   </ng-container>
+
+  <div class="profile-completion-overlay" *ngIf="showProfileCompletionModal">
+    <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
+      <div class="profile-completion-icon">
+        <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
+      </div>
+      <h2 id="profile-completion-title">Complete your profile</h2>
+      <p>Please add the following details before continuing:</p>
+      <ul>
+        <li *ngFor="let field of missingProfileFields">{{ field }}</li>
+      </ul>
+      <button type="button" class="btn-add-profile-fields" (click)="startEditing()">
+        Add fields
+      </button>
+    </section>
+  </div>
 </div>
