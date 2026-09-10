@@ -13,7 +13,7 @@ interface InspectionTicket {
   productType: string;
   location: string;
   date: string;
-  status: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold' | 'Finance Approved';
+  status: 'Assigned' | 'In Progress' | 'Completed' | 'On Hold' | 'Finance Approved';
 }
 
 type RawInspection = {
@@ -26,7 +26,7 @@ type RawInspection = {
   location?: string;
   date?: string;
   serviceDate?: string;
-  status?: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold' | 'Finance Approved';
+  status?: 'Assigned' | 'In Progress' | 'Completed' | 'On Hold' | 'Finance Approved';
   assignedTeam?: string | { teamName?: string };
 };
 
@@ -88,7 +88,7 @@ export class MainTechnicianInspectionsComponent implements OnInit {
       productType: item.productType || 'N/A',
       location: populatedCustomerAddress || item.location || '-',
       date: this.formatDisplayDate(item.date || item.serviceDate || ''),
-      status: (item.status as InspectionTicket['status']) || 'Scheduled'
+      status: String(item.status || '') === 'Scheduled' ? 'Assigned' : ((item.status as InspectionTicket['status']) || 'Assigned')
     };
   }
 

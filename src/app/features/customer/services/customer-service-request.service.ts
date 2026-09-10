@@ -11,15 +11,18 @@ export interface ServiceRequest {
   acUnitSerial: string;
   acWarrantyStatus: 'Active' | 'Expired' | 'Unknown';
   acAmcStatus: 'Active' | 'Not Active';
-  serviceType: 'Repair' | 'General Service' | 'Gas Refill' | 'Installation Issue' | 'AMC Service' | 'Other';
-  serviceTypeOther: string;
+  serviceType: 'Repair' | 'Maintenance' | string;
+  serviceTypeOther?: string;
   problemDescription: string;
   problemImageUrl: string;
   preferredDate: string | null;
   preferredTimeSlot: string;
   estimatedCharges: number;
   paymentRequired: boolean;
-  status: 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Cancelled';
+  paymentSlipUrl?: string;
+  paymentAmount?: number;
+  paymentStatus?: 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'NOT_REQUIRED' | string;
+  status: 'Pending' | 'Finance Approved' | 'Finance Rejected' | 'Assigned' | 'In Progress' | 'Completed' | 'Cancelled';
   createdAt: string;
 }
 
@@ -36,6 +39,15 @@ export interface CreateServiceRequestPayload {
   preferredTimeSlot?: string;
   estimatedCharges?: number;
   paymentRequired?: boolean;
+  paymentSlipUrl?: string;
+  paymentAmount?: number;
+}
+
+export interface ServiceChargesResponse {
+  success: boolean;
+  maintenanceFee: number;
+  repairFee: number;
+  charges: any[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +58,10 @@ export class CustomerServiceRequestService {
     private http: HttpClient,
     private notificationService: NotificationService
   ) {}
+
+  getCharges(): Observable<ServiceChargesResponse> {
+    return this.http.get<ServiceChargesResponse>(`${this.apiUrl}/charges`);
+  }
 
   getServiceRequests(): Observable<ServiceRequest[]> {
     // Interceptor automatically adds Bearer token

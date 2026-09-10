@@ -6,74 +6,81 @@
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
     </svg>
     <span>{{ successToast }}</span>
-    <button class="toast-close" (click)="successToast = ''">✕</button>
+    <button class="toast-close" (click)="successToast = ''"><lucide-angular name="x" [size]="16"></lucide-angular></button>
   </div>
 
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Service Tickets</h1>
-      <p class="page-subtitle">Create, view, and track customer repair, maintenance, and installation requests</p>
+      <h1 class="page-title">Service Tickets & Maintenance</h1>
+      <p class="page-subtitle">Track customer repair requests, technician maintenance schedules, and warranty service dispatches</p>
     </div>
     <button class="btn-primary" (click)="openCreateModal()">
       Create Service Ticket
     </button>
   </div>
 
-  <!-- SUMMARY CARDS -->
+  <!-- INTERACTIVE STATUS FILTER CARDS -->
   <div class="summary-cards">
-    <div class="summary-card">
+    <!-- ALL TICKETS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'ALL'" (click)="setStatusFilter('ALL')" title="Show all tickets">
       <div class="summary-icon blue">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countTotal }}</span>
-        <span class="summary-label">Total Tickets</span>
+        <span class="summary-label">All Tickets</span>
       </div>
     </div>
 
-    <div class="summary-card">
+    <!-- NEW & PENDING -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'New'" (click)="setStatusFilter('New')" title="Show new and pending tickets">
       <div class="summary-icon cyan">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countNew }}</span>
-        <span class="summary-label">New / Open</span>
+        <span class="summary-label">New & Pending</span>
       </div>
     </div>
 
-    <div class="summary-card">
-      <div class="summary-icon red">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    <!-- ASSIGNED & ACTIVE -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'Assigned'" (click)="setStatusFilter('Assigned')" title="Show assigned and in-progress tickets">
+      <div class="summary-icon amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
         </svg>
       </div>
       <div class="summary-info">
-        <span class="summary-count">{{ countHighPriority }}</span>
-        <span class="summary-label">High Priority</span>
+        <span class="summary-count">{{ countAssigned }}</span>
+        <span class="summary-label">Assigned & Active</span>
       </div>
     </div>
 
-    <div class="summary-card">
+    <!-- RESOLVED & COMPLETED -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'resolved'" (click)="setStatusFilter('resolved')" title="Show resolved and completed tickets">
       <div class="summary-icon green">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
       </div>
       <div class="summary-info">
         <span class="summary-count">{{ countResolved }}</span>
-        <span class="summary-label">Resolved</span>
+        <span class="summary-label">Resolved & Completed</span>
       </div>
     </div>
   </div>
 
   <!-- FILTER TABS & SEARCH -->
   <div class="filter-tabs">
-    <button [class.active]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')">All Categories</button>
+    <button [class.active]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')">All Tickets</button>
     <button [class.active]="selectedCategory === 'repair'" (click)="setCategoryFilter('repair')">Repairs</button>
     <button [class.active]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')">Maintenance</button>
     <button [class.active]="selectedCategory === 'installation'" (click)="setCategoryFilter('installation')">Installation</button>
@@ -87,36 +94,15 @@
       </svg>
       <input 
         type="text" 
-        placeholder="Search tickets by subject, description, or AC model..." 
+        placeholder="Search tickets by ID, subject, customer name, phone, or location..." 
         [(ngModel)]="searchQuery" 
         (ngModelChange)="applyFilters()"
       />
     </div>
 
     <div class="filters-row">
-      <div class="filter-group">
-        <label>Status:</label>
-        <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
-          <option value="ALL">All Statuses</option>
-          <option value="New">New</option>
-          <option value="Reviewed">Reviewed</option>
-          <option value="Assigned">Assigned</option>
-          <option value="resolved">Resolved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </div>
 
-      <div class="filter-group">
-        <label>Priority:</label>
-        <select [(ngModel)]="selectedPriority" (change)="applyFilters()">
-          <option value="ALL">All Priorities</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-      </div>
-
-      <button class="btn-refresh" (click)="loadTickets()" [disabled]="isLoading">
+      <button class="btn-refresh" (click)="loadAllData()" [disabled]="isLoading">
         <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
         </svg>
@@ -136,46 +122,57 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Subject / Ticket</th>
-            <th>Customer</th>
-            <th>Category</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Date Created</th>
-            <th style="text-align: right;">Action</th>
+            <th class="col-ticket">Ticket & Subject</th>
+            <th class="col-customer">Customer</th>
+            <th class="col-category">Category</th>
+            <th class="col-status">Status</th>
+            <th class="col-date">Date</th>
+            <th class="col-action" style="text-align: right;">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let ticket of tickets">
-            <td>
+          <tr *ngFor="let ticket of tickets" [class.csa-pending-row]="ticket.status === 'Sent to CSA'">
+            <td class="col-ticket">
+              <div class="ticket-header-line">
+                <span class="ticket-id-tag">{{ getFormattedTicketId(ticket) }}</span>
+              </div>
               <div class="ticket-subject">{{ ticket.subject || 'Service Request' }}</div>
               <div class="ticket-unit" *ngIf="ticket.acUnitModel">Unit: {{ ticket.acUnitModel }}</div>
             </td>
-            <td>
+            <td class="col-customer">
               <div class="customer-info-cell">
                 <div class="customer-name">{{ ticket.customerId ? ticket.customerId.fullName + ' ' + (ticket.customerId.lastName || '') : 'Unknown Customer' }}</div>
                 <div class="customer-phone">{{ ticket.customerId ? (ticket.customerId.phoneNumber || 'No phone') : '—' }}</div>
+                <div class="customer-address" *ngIf="ticket.customerId?.address">{{ ticket.customerId.address }}</div>
               </div>
             </td>
-            <td>
-              <span class="category-badge">{{ ticket.category || 'Repair' | uppercase }}</span>
+            <td class="col-category">
+              <div class="category-cell">
+                <span class="category-badge" [ngClass]="'cat-' + ticket.category">{{ ticket.category || 'Repair' | uppercase }}</span>
+                <span class="source-tag" *ngIf="ticket.isMaintenanceRecord">{{ ticket.requestType || 'MAINTENANCE' | uppercase }}</span>
+                <span class="source-tag" *ngIf="ticket.isMaintenanceSchedule">TECH SCHEDULE</span>
+              </div>
             </td>
-            <td>
-              <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
-                {{ ticket.priority || 'medium' | uppercase }}
-              </span>
+            <td class="col-status">
+              <div class="status-cell">
+                <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+                  {{ ticket.status === 'Sent to CSA' ? 'Awaiting Approval' : ticket.status }}
+                </span>
+                <span class="action-required-badge" *ngIf="ticket.status === 'Sent to CSA'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                  ACTION REQUIRED
+                </span>
+              </div>
             </td>
-            <td>
-              <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
-                {{ ticket.status }}
-              </span>
-            </td>
-            <td>
+            <td class="col-date">
               <span class="date-text">{{ formatDate(ticket.createdAt) }}</span>
             </td>
-            <td style="text-align: right;">
-              <button class="btn-table-action" (click)="viewDetails(ticket)">
-                View & Manage
+            <td class="col-action" style="text-align: right;">
+              <button
+                class="btn-table-action"
+                [class.btn-review-approve]="ticket.status === 'Sent to CSA'"
+                (click)="viewDetails(ticket)">
+                {{ ticket.status === 'Sent to CSA' ? 'Review' : 'View' }}
               </button>
             </td>
           </tr>
@@ -186,7 +183,7 @@
     <!-- LOADING STATE -->
     <div class="empty-state" *ngIf="isLoading">
       <div class="spinner"></div>
-      <p>Loading service tickets...</p>
+      <p>Loading tickets and maintenance schedules...</p>
     </div>
 
     <!-- EMPTY STATE -->
@@ -196,11 +193,11 @@
           <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
         </svg>
       </div>
-      <h3>No Service Tickets Found</h3>
-      <p *ngIf="searchQuery || selectedCategory !== 'ALL' || selectedStatus !== 'ALL' || selectedPriority !== 'ALL'">
-        No tickets matching your filter criteria.
+      <h3>No Tickets Found</h3>
+      <p *ngIf="searchQuery || selectedCategory !== 'ALL' || selectedStatus !== 'ALL'">
+        No tickets matching your current search or filter criteria.
       </p>
-      <p *ngIf="!searchQuery && selectedCategory === 'ALL' && selectedStatus === 'ALL' && selectedPriority === 'ALL'">
+      <p *ngIf="!searchQuery && selectedCategory === 'ALL' && selectedStatus === 'ALL'">
         No service tickets created yet. Use the Create Service Ticket button above to log a new ticket.
       </p>
     </div>
@@ -216,7 +213,7 @@
           <h2 class="modal-title">Create Service Ticket</h2>
           <p class="modal-subtitle">Log a service, repair, or maintenance request for a customer</p>
         </div>
-        <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeCreateModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <form [formGroup]="ticketForm" (ngSubmit)="submitCreateTicket()">
@@ -251,39 +248,23 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group flex-2">
-              <label>Ticket Subject <span class="req">*</span></label>
-              <input type="text" formControlName="subject" placeholder="e.g. AC Not Cooling / Water Leakage" />
-              <span class="field-error" *ngIf="ticketForm.get('subject')?.touched && ticketForm.get('subject')?.invalid">
-                Subject is required (min 3 characters).
-              </span>
-            </div>
-
-            <div class="form-group flex-1">
-              <label>Priority</label>
-              <select formControlName="priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High (Urgent)</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Subject / Summary <span class="req">*</span></label>
+            <input type="text" formControlName="subject" placeholder="e.g. AC unit leaking water in living room" />
+            <span class="field-error" *ngIf="ticketForm.get('subject')?.touched && ticketForm.get('subject')?.invalid">
+              Subject is required.
+            </span>
           </div>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group flex-1">
               <label>AC Unit Model</label>
-              <select formControlName="acUnitModel">
-                <option value="">-- Select AC Unit Model --</option>
-                <option *ngFor="let prod of products" [value]="prod.name">
-                  {{ prod.name }} ({{ prod.brand }}{{ prod.capacity ? ' - ' + prod.capacity + ' BTU' : '' }})
-                </option>
-              </select>
+              <input type="text" formControlName="acUnitModel" placeholder="e.g. AirLux Inverter 12,000 BTU" />
             </div>
 
-            <div class="form-group">
-              <label>Serial Number (Optional)</label>
-              <input type="text" formControlName="acUnitSerial" placeholder="e.g. SN-ALX-98231" />
+            <div class="form-group flex-1">
+              <label>Unit Serial Number</label>
+              <input type="text" formControlName="acUnitSerial" placeholder="e.g. SN-ALX-98234" />
             </div>
           </div>
 
@@ -325,19 +306,35 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: TICKET DETAILS & STATUS MANAGEMENT  -->
+  <!-- MODAL: TICKET DETAILS & MAINTENANCE MANAGE -->
   <!-- ========================================== -->
   <div class="modal-backdrop" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title">Service Ticket #{{ selectedTicket?._id?.substring(18) | uppercase }}</h2>
+          <h2 class="modal-title">
+            {{ getFormattedTicketId(selectedTicket) }}
+          </h2>
           <p class="modal-subtitle">{{ selectedTicket?.subject }}</p>
         </div>
-        <button class="modal-close-btn" (click)="closeDetailsModal()">✕</button>
+        <button class="modal-close-btn" (click)="closeDetailsModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
       </div>
 
       <div class="modal-body" *ngIf="selectedTicket">
+
+        <!-- ⚡ ACTION REQUIRED BANNER — only shown when technician has submitted for CSA approval -->
+        <div class="action-required-banner" *ngIf="selectedTicket.status === 'Sent to CSA'">
+          <div class="banner-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="banner-text">
+            <strong>Action Required — Awaiting Your Approval</strong>
+            <span>The technician has finalised this maintenance schedule and submitted it for your review. Please review the services below, then approve and dispatch to the customer.</span>
+          </div>
+        </div>
+
         <!-- TICKET OVERVIEW -->
         <div class="ticket-overview-card">
           <div class="overview-item">
@@ -349,43 +346,75 @@
             <span>Phone: {{ selectedTicket.customerId ? (selectedTicket.customerId.phoneNumber || 'No phone') : 'No phone' }} | Email: {{ selectedTicket.customerId ? (selectedTicket.customerId.email || 'No email') : 'No email' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">Address:</span>
-            <span>Address: {{ selectedTicket.customerId ? (selectedTicket.customerId.address || 'No address') : 'No address' }}</span>
+            <span class="lbl">Address / Location:</span>
+            <span>{{ selectedTicket.customerId ? (selectedTicket.customerId.address || 'No address') : 'No address' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">AC Model / Serial:</span>
+            <span class="lbl">Product / AC Model:</span>
             <span>{{ selectedTicket.acUnitModel || 'Not specified' }} {{ selectedTicket.acUnitSerial ? '(' + selectedTicket.acUnitSerial + ')' : '' }}</span>
           </div>
           <div class="overview-item">
-            <span class="lbl">Preferred Appointment:</span>
-            <span>{{ formatDate(selectedTicket.preferredDate) }} - {{ selectedTicket.preferredTimeSlot || 'Flexible' }}</span>
+            <span class="lbl">Installation / Service Date:</span>
+            <span>{{ formatDate(selectedTicket.preferredDate) }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Current Status:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedTicket.status)">{{ selectedTicket.status }}</span>
           </div>
         </div>
 
-        <div class="desc-box">
-          <span class="desc-title">Problem Description:</span>
-          <p>{{ selectedTicket.description }}</p>
+        <!-- ────────────────────────────────────────── -->
+        <!-- MAINTENANCE DETAILS SECTION (FROM /maintenance) -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="maintenance-schedule-review" *ngIf="selectedTicket.isMaintenanceRecord && selectedTicket.maintenanceRecordData">
+          <h4 class="section-subheading">Maintenance Details</h4>
+          
+          <div class="ticket-overview-card" style="margin-bottom: 16px;">
+            <div class="overview-item">
+              <span class="lbl">Maintenance Type:</span>
+              <strong>{{ selectedTicket.maintenanceRecordData.maintenanceType || (selectedTicket.maintenanceRecordData.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated') }}</strong>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Assigned Team:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.assignedTeam || 'Not Assigned' }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Service Date:</span>
+              <span>{{ formatDate(selectedTicket.maintenanceRecordData.date) }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Warranty Status:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.isUnderWarranty ? 'Under Warranty' : 'Paid / Out of Warranty' }}</span>
+            </div>
+          </div>
+
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.description">
+            <span class="desc-title">Description:</span>
+            <p>{{ selectedTicket.maintenanceRecordData.description }}</p>
+          </div>
+
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.materialList && selectedTicket.maintenanceRecordData.materialList.length > 0" style="margin-top: 12px;">
+            <span class="desc-title">Materials / Equipment:</span>
+            <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 13px; color: #374151;">
+              <li *ngFor="let m of selectedTicket.maintenanceRecordData.materialList" style="margin-bottom: 4px;">
+                <strong>{{ m.item }}</strong> — Quantity: {{ m.quantity }}
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <!-- STATUS UPDATE SECTION -->
-        <div class="status-manage-section">
-          <h4 class="section-subheading">Update Ticket Status</h4>
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>Status:</label>
-              <select [(ngModel)]="statusUpdateForm.status">
-                <option value="New">New</option>
-                <option value="Reviewed">Reviewed</option>
-                <option value="Assigned">Assigned to Technician</option>
-                <option value="resolved">Resolved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
+        <!-- ────────────────────────────────────────── -->
+        <!-- REGULAR SERVICE TICKET SECTION             -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="standard-ticket-section" *ngIf="!selectedTicket.isMaintenanceRecord && !selectedTicket.isMaintenanceSchedule">
+          <div class="desc-box">
+            <span class="desc-title">Problem Description:</span>
+            <p>{{ selectedTicket.description }}</p>
+          </div>
 
-            <div class="form-group flex-2" *ngIf="statusUpdateForm.status === 'Rejected'">
-              <label>Rejection Reason:</label>
-              <input type="text" [(ngModel)]="statusUpdateForm.rejectionReason" placeholder="e.g. Out of service area" />
-            </div>
+          <div class="desc-box" *ngIf="selectedTicket.rejectionReason" style="margin-top: 12px; background: #fef2f2; border: 1px solid #fecaca;">
+            <span class="desc-title" style="color: #991b1b;">Rejection Reason:</span>
+            <p style="color: #b91c1c;">{{ selectedTicket.rejectionReason }}</p>
           </div>
         </div>
 
@@ -393,10 +422,6 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-ghost" (click)="closeDetailsModal()">Close</button>
-        <button type="button" class="btn-primary" (click)="updateTicketStatus()" [disabled]="isUpdatingStatus">
-          <span *ngIf="!isUpdatingStatus">Save Status</span>
-          <span *ngIf="isUpdatingStatus">Saving...</span>
-        </button>
       </div>
     </div>
   </div>

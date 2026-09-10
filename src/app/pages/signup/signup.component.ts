@@ -16,6 +16,7 @@ import { FirebasePhoneAuthService, PhoneVerificationSession } from '../../core/s
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -37,7 +38,7 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
 })

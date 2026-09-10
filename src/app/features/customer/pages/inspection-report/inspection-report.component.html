@@ -93,22 +93,16 @@
             Sections 3–8 will repeat for each room on the next page.
           </p>
           <button class="add-room-btn" (click)="addRoom()">
-            <span class="plus-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="16"></line>
-                <line x1="8" y1="12" x2="16" y2="12"></line>
-              </svg></span> Add Room
+            <span class="plus-icon">
+              <lucide-angular name="plus" [size]="18"></lucide-angular>
+            </span> Add Room
           </button>
           <div class="room-chips">
             <div class="room-chip" *ngFor="let room of rooms; let i = index">
               <span>Room {{ i+1 }}{{ room.name ? ': '+room.name : '' }}</span>
-              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove"> <svg
-                  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg></button>
+              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove" style="display: inline-flex; align-items: center;">
+                <lucide-angular name="x" [size]="14"></lucide-angular>
+              </button>
             </div>
           </div>
         </div>
@@ -383,12 +377,9 @@
             <div class="photo-entry" *ngFor="let entry of photoEntries; let i = index">
               <div class="photo-entry-img">
                 <img [src]="entry.dataUrl" class="photo-preview" />
-                <button class="remove-photo-btn" (click)="removePhoto(i)"> <svg xmlns="http://www.w3.org/2000/svg"
-                    width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg></button>
+                <button class="remove-photo-btn" (click)="removePhoto(i)" style="display: flex; align-items: center; justify-content: center;">
+                  <lucide-angular name="x" [size]="16"></lucide-angular>
+                </button>
               </div>
               <span class="photo-entry-name">{{ entry.name }}</span>
             </div>

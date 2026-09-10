@@ -286,7 +286,7 @@
 
         <!-- Rejection / Approval Info -->
         <div class="status-footer-alert rejected" *ngIf="selectedOrder.status === 'rejected'">
-          <div class="alert-icon">!</div>
+          <div class="alert-icon"><lucide-angular name="circle-alert" [size]="18"></lucide-angular></div>
           <div class="alert-content">
             <strong>Rejection Reason:</strong>
             <p>{{ selectedOrder.rejectionReason }}</p>
@@ -295,7 +295,7 @@
         </div>
 
         <div class="status-footer-alert approved" *ngIf="selectedOrder.status === 'approved'">
-          <div class="alert-icon">✓</div>
+          <div class="alert-icon"><lucide-angular name="check" [size]="18"></lucide-angular></div>
           <div class="alert-content">
             <strong>Order Approved</strong>
             <p>Approved by <strong>{{ selectedOrder.approvedBy }}</strong> on {{ formatDate(selectedOrder.approvedAt) }}</p>

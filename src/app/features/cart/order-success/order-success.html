@@ -105,7 +105,11 @@
       <span class="status-text">Status: {{ isBuyAndInstall ? 'Awaiting Payment Verification' : 'Under Review (Finance)' }}</span>
     </div>
 
-    <div class="success-actions">
+    <div class="success-actions" *ngIf="isBuyAndInstall">
+      <button class="primary-btn" (click)="goToInspectionPayment()">Next</button>
+    </div>
+
+    <div class="success-actions" *ngIf="!isBuyAndInstall">
       <button class="primary-btn" (click)="router.navigate(['/catalog'])">Back to Catalog</button>
       <button class="secondary-btn" (click)="router.navigate(['/cart'])">View Cart</button>
     </div>

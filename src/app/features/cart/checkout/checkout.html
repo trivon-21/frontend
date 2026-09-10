@@ -66,13 +66,34 @@
 <!-- HERO BANNER -->
 <section class="pd-hero-banner">
   <div class="pd-hero-content">
-    <h1>Order<br>Checkout</h1>
-    <p>Complete your shipping and payment details to place your order</p>
+    <h1>{{ isReuploadMode ? 'Payment Slip' : 'Order' }}<br>{{ isReuploadMode ? 'Re-upload' : 'Checkout' }}</h1>
+    <p>{{ isReuploadMode ? 'Your previous payment slip was rejected. Please review the details and upload a valid payment receipt.' : 'Complete your shipping and payment details to place your order' }}</p>
   </div>
 </section>
 
 <!-- CHECKOUT MAIN CONTENT -->
 <div class="checkout-main">
+
+  <!-- REJECTION NOTICE BANNER (Only in Re-upload Mode) -->
+  <div class="rejection-alert-card" *ngIf="isReuploadMode">
+    <div class="rejection-alert-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+    <div class="rejection-alert-body">
+      <div class="rejection-badge">Action Required • Payment Rejected</div>
+      <h3 class="rejection-title">Payment Slip Resubmission Required</h3>
+      <p class="rejection-desc" *ngIf="rejectionReason">
+        <strong>Reason from Finance:</strong> {{ rejectionReason }}
+      </p>
+      <p class="rejection-desc" *ngIf="!rejectionReason">
+        The previously submitted payment slip could not be verified by the finance team. Please ensure bank details, amount, reference number, and date are clearly readable.
+      </p>
+    </div>
+  </div>
 
   <!-- ORDER SUMMARY CARD -->
   <div class="order-summary-card">
@@ -87,15 +108,22 @@
           <polyline points="10 9 9 9 8 9" />
         </svg>
       </span>
-      <h2 class="order-summary-title">{{ isBuyOnly ? 'Buy only order summary' : 'Buy & Install Order Summary' }}</h2>
+      <h2 class="order-summary-title">{{ isReuploadMode ? 'Order Reference Summary' : (isBuyOnly ? 'Buy only order summary' : 'Buy & Install Order Summary') }}</h2>
     </div>
 
     <div class="order-summary-rows">
       <div class="order-row">
         <span class="order-row-label">Order Reference:</span>
         <span class="order-row-value">
-          <span *ngIf="isInitializing">Generating...</span>
-          <span *ngIf="!isInitializing">{{ generatedOrderId || 'pending' }}</span>
+          <span *ngIf="isInitializing || isLoadingOrder">Loading...</span>
+          <span *ngIf="!isInitializing && !isLoadingOrder">{{ generatedOrderId || 'pending' }}</span>
+        </span>
+      </div>
+
+      <div class="order-row" *ngIf="isReuploadMode">
+        <span class="order-row-label">Payment Status:</span>
+        <span class="order-row-value">
+          <span class="status-pill-rejected">Rejected</span>
         </span>
       </div>
       
@@ -154,10 +182,25 @@
     <div class="checkout-left">
 
       <!-- DELIVERY DETAILS -->
-      <div class="checkout-section-title">
-        Shipping details
+      <div class="checkout-section-title shipping-title-row">
+        <span>Shipping details</span>
+        <span class="locked-badge" *ngIf="isReuploadMode">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Locked for Resubmission
+        </span>
       </div>
-      <form [formGroup]="shippingForm" class="delivery-form">
+
+      <div class="locked-shipping-notice" *ngIf="isReuploadMode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+        <span>Delivery details are saved from your original order. Only payment slip resubmission is required.</span>
+      </div>
+      <form [formGroup]="shippingForm" class="delivery-form" [class.form-locked]="isReuploadMode">
         <div class="form-row-two">
           <div class="form-group">
             <label class="form-label">First Name</label>
@@ -273,9 +316,13 @@
 
     <!-- RIGHT COLUMN -->
     <div class="checkout-right">
-      <div class="status-badge" *ngIf="isBuyOnly">Status: Pending payment and shipping</div>
+      <div class="status-badge" [class.status-badge-rejected]="isReuploadMode" *ngIf="isBuyOnly">
+        {{ isReuploadMode ? 'Status: Payment Rejected (Resubmission Required)' : 'Status: Pending payment and shipping' }}
+      </div>
 
-      <div class="upload-label" *ngIf="isBuyOnly">Upload Slip:</div>
+      <div class="upload-label" *ngIf="isBuyOnly">
+        {{ isReuploadMode ? 'Upload New Payment Slip:' : 'Upload Slip:' }}
+      </div>
       
       <!-- DROPZONE (Hidden if file exists) -->
       <div class="upload-dropzone" (click)="fileInput.click()" *ngIf="isBuyOnly && !selectedFile">
@@ -288,7 +335,7 @@
               <circle cx="30" cy="12" r="2" fill="#10A760"/>
             </svg>
           </span>
-          <div class="upload-text">Click to upload slip</div>
+          <div class="upload-text">{{ isReuploadMode ? 'Click to select new slip' : 'Click to upload slip' }}</div>
           <div class="upload-subtext">(PDF, PNG or JPG, MAX 5MB)</div>
           <div class="upload-subtext" style="font-size: 11px; color: #64748b; margin-top: 4px;">(Bank transfer receipt or deposit slip)</div>
         </div>
@@ -314,6 +361,16 @@
         <button class="remove-file-btn" (click)="removeFile()">Remove</button>
       </div>
 
+      <!-- REUPLOAD LOAD ERROR BANNER -->
+      <div class="summary-error-banner" *ngIf="reuploadError" style="margin-bottom: 12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ reuploadError }}</span>
+      </div>
+
       <!-- SUMMARY ERROR BANNER (Right side - for Buy Only) -->
       <div class="summary-error-banner" *ngIf="isBuyOnly && showSummaryError && (shippingForm.invalid || !selectedFile || uploadError)" id="sidebar-error">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
@@ -326,9 +383,11 @@
  
       <button class="confirm-btn" (click)="placeOrder()" [disabled]="isInitializing || isSubmittingPayment" *ngIf="isBuyOnly">
         <span *ngIf="isInitializing">Initializing Order...</span>
-        <span *ngIf="isSubmittingPayment">Verifying Slip & Placing Order...</span>
+        <span *ngIf="isSubmittingPayment">
+          {{ isReuploadMode ? 'Verifying Slip & Resubmitting...' : 'Verifying Slip & Placing Order...' }}
+        </span>
         <span *ngIf="!isInitializing && !isSubmittingPayment">
-          {{ isOrderInitialized ? 'Upload Slip & Complete' : 'Confirm & Get Reference' }} &nbsp;→
+          {{ isReuploadMode ? 'Re-upload Slip & Submit for Review' : (isOrderInitialized ? 'Upload Slip & Complete' : 'Confirm & Get Reference') }} &nbsp;→
         </span>
       </button>
     </div>

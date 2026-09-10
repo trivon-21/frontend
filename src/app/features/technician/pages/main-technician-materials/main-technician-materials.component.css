@@ -253,13 +253,20 @@
     }
 
     .item-row {
-      background-color: #f1f5f9;
-      padding: 24px;
-      border-radius: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      border-radius: 14px;
       display: grid;
       grid-template-columns: 1fr 140px 40px;
-      gap: 20px;
+      gap: 16px;
       align-items: end;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .item-row:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
     .input-group {
@@ -628,4 +635,242 @@
 
     .send-im-btn:hover:not(:disabled) { background-color: #15803d; }
     .send-im-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
-  
+
+    /* ── Item row ───────────────────────────────────────────────────── */
+    @keyframes slideInRow {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Custom Catalog Dropdown ────────────────────────────────────── */
+    .catalog-dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Trigger button */
+    .catalog-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      text-align: left;
+      font-family: inherit;
+      min-height: 44px;
+    }
+
+    .catalog-trigger:hover {
+      border-color: #94a3b8;
+    }
+
+    .catalog-dropdown.open .catalog-trigger {
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+    }
+
+    .catalog-placeholder {
+      font-size: 14px;
+      color: #94a3b8;
+      flex: 1;
+    }
+
+    .selected-item-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .selected-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .selected-sku {
+      font-size: 11px;
+      color: #64748b;
+      font-family: 'Courier New', monospace;
+    }
+
+    .chevron-icon {
+      flex-shrink: 0;
+      color: #64748b;
+      transition: transform 0.2s ease;
+    }
+
+    .chevron-icon.rotated {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown panel */
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-6px) scaleY(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scaleY(1); }
+    }
+
+    .catalog-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
+      z-index: 999;
+      overflow: hidden;
+      animation: dropIn 0.18s ease forwards;
+      transform-origin: top center;
+    }
+
+    /* Search bar inside panel */
+    .catalog-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .catalog-search {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: #1e293b;
+      outline: none;
+      padding: 0;
+    }
+
+    .catalog-search::placeholder {
+      color: #94a3b8;
+    }
+
+    /* Options list */
+    .catalog-options {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #e2e8f0 transparent;
+    }
+
+    .catalog-options::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .catalog-options::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .catalog-options::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 99px;
+    }
+
+    /* Individual option */
+    .catalog-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.12s ease;
+    }
+
+    .catalog-option:hover {
+      background-color: #f0fdf4;
+    }
+
+    .catalog-option.selected {
+      background-color: #dcfce7;
+    }
+
+    .catalog-option.selected .option-name {
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .option-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .option-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .option-sku {
+      font-size: 11px;
+      color: #94a3b8;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    /* Stock badge */
+    .option-stock {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: #f0fdf4;
+      color: #16a34a;
+      white-space: nowrap;
+    }
+
+    .option-stock.low {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    /* Empty state */
+    .catalog-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 16px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .create-request-error {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 12px 0 0;
+      padding: 11px 14px;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+

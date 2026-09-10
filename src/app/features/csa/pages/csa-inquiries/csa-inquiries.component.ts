@@ -1,12 +1,14 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { CsaInquiryService, CustomerInquiry } from '../../services/csa-inquiry.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-csa-inquiries',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './csa-inquiries.component.html',
   styleUrl: './csa-inquiries.component.css'
 })
@@ -16,11 +18,12 @@ export class CsaInquiriesComponent implements OnInit {
   inquiries: CustomerInquiry[] = [];
   selectedInquiry: CustomerInquiry | null = null;
   totalInquiries = 0;
+  private pendingSelectId: string | null = null;
 
   // KPI Stats
   countTotal = 0;
+  countAwaiting = 0;
   countOngoing = 0;
-  countAddressed = 0;
   countClosed = 0;
 
   // Filters
@@ -36,10 +39,52 @@ export class CsaInquiriesComponent implements OnInit {
   isSendingReply = false;
   replyError = '';
 
-  constructor(private inquiryService: CsaInquiryService) {}
+  constructor(
+    private inquiryService: CsaInquiryService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const selectId = params['selectId'];
+      if (selectId) {
+        this.pendingSelectId = selectId;
+        if (this.inquiries.length > 0) {
+          this.applyPendingSelection();
+        }
+      }
+    });
+    this.loadStats();
     this.loadInquiries();
+  }
+
+  loadStats(): void {
+    this.inquiryService.getInquiries({ status: 'ALL', limit: 100 }).subscribe({
+      next: (res) => {
+        if (res && res.success && res.inquiries) {
+          const all = res.inquiries;
+          this.countTotal = res.total || all.length;
+          this.countAwaiting = all.filter(i => i.status === 'Awaiting').length;
+          this.countOngoing = all.filter(i => i.status === 'Ongoing' || i.status === 'Addressed').length;
+          this.countClosed = all.filter(i => i.status === 'Closed').length;
+        }
+      }
+    });
+  }
+
+  private applyPendingSelection(): void {
+    if (!this.pendingSelectId) return;
+    const matched = this.inquiries.find(i => i._id === this.pendingSelectId || i.inquiryRef === this.pendingSelectId);
+    if (matched) {
+      this.selectedInquiry = matched;
+      this.pendingSelectId = null;
+      this.replyText = '';
+      this.replyError = '';
+      this.scrollToBottom();
+    } else if (this.selectedStatus !== 'ALL') {
+      this.selectedStatus = 'ALL';
+      this.loadInquiries(false);
+    }
   }
 
   loadInquiries(keepSelected = true): void {
@@ -54,11 +99,15 @@ export class CsaInquiriesComponent implements OnInit {
         this.isLoading = false;
         if (res && res.success) {
           this.inquiries = res.inquiries || [];
-          this.totalInquiries = res.total || this.inquiries.length;
-          this.calculateStats();
+          if (this.selectedStatus === 'ALL' && !this.searchQuery) {
+            this.totalInquiries = res.total || this.inquiries.length;
+            this.calculateStats(this.inquiries);
+          }
 
           if (this.inquiries.length > 0) {
-            if (keepSelected && this.selectedInquiry) {
+            if (this.pendingSelectId) {
+              this.applyPendingSelection();
+            } else if (keepSelected && this.selectedInquiry) {
               const matched = this.inquiries.find(i => i._id === this.selectedInquiry!._id);
               this.selectedInquiry = matched || this.inquiries[0];
             } else {
@@ -78,11 +127,14 @@ export class CsaInquiriesComponent implements OnInit {
     });
   }
 
-  calculateStats(): void {
-    this.countTotal = this.totalInquiries;
-    this.countOngoing = this.inquiries.filter(i => i.status === 'Ongoing').length;
-    this.countAddressed = this.inquiries.filter(i => i.status === 'Addressed').length;
-    this.countClosed = this.inquiries.filter(i => i.status === 'Closed').length;
+  calculateStats(allInquiries?: CustomerInquiry[]): void {
+    const list = allInquiries || (this.selectedStatus === 'ALL' && !this.searchQuery ? this.inquiries : null);
+    if (list) {
+      this.countTotal = this.totalInquiries || list.length;
+      this.countAwaiting = list.filter(i => i.status === 'Awaiting').length;
+      this.countOngoing = list.filter(i => i.status === 'Ongoing' || i.status === 'Addressed').length;
+      this.countClosed = list.filter(i => i.status === 'Closed').length;
+    }
   }
 
   selectInquiry(inquiry: CustomerInquiry): void {
@@ -103,19 +155,22 @@ export class CsaInquiriesComponent implements OnInit {
 
   sendReply(): void {
     if (!this.selectedInquiry || !this.replyText.trim()) return;
+    if (this.selectedInquiry.status === 'Closed') {
+      this.replyError = 'This inquiry is closed. Please reopen it to send a reply.';
+      return;
+    }
 
     this.isSendingReply = true;
     this.replyError = '';
 
     const replyMsg = this.replyText.trim();
     this.inquiryService.replyToInquiry(this.selectedInquiry._id, {
-      message: replyMsg,
-      newStatus: 'Addressed'
+      message: replyMsg
     }).subscribe({
       next: (res) => {
         this.isSendingReply = false;
         this.replyText = '';
-        this.showToast('Reply sent and customer notified!');
+        this.showToast('Reply sent and inquiry marked as Ongoing!');
 
         if (res && res.inquiry) {
           this.selectedInquiry = res.inquiry;
@@ -124,12 +179,59 @@ export class CsaInquiriesComponent implements OnInit {
             this.inquiries[idx] = res.inquiry;
           }
         }
+        this.calculateStats();
         this.scrollToBottom();
       },
       error: (err) => {
         this.isSendingReply = false;
         console.error('Failed to send reply:', err);
         this.replyError = err.error?.message || err.message || 'Failed to send reply.';
+      }
+    });
+  }
+
+  closeInquiry(): void {
+    if (!this.selectedInquiry) return;
+
+    this.inquiryService.updateInquiryStatus(this.selectedInquiry._id, 'Closed').subscribe({
+      next: (res) => {
+        this.replyText = '';
+        this.replyError = '';
+        this.showToast('Inquiry resolved and marked as Closed');
+        if (res && res.inquiry) {
+          this.selectedInquiry = res.inquiry;
+          const idx = this.inquiries.findIndex(i => i._id === res.inquiry._id);
+          if (idx !== -1) {
+            this.inquiries[idx] = res.inquiry;
+          }
+        }
+        this.calculateStats();
+      },
+      error: (err) => {
+        console.error('Failed to close inquiry:', err);
+        alert('Failed to close inquiry: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  reopenInquiry(): void {
+    if (!this.selectedInquiry) return;
+
+    this.inquiryService.updateInquiryStatus(this.selectedInquiry._id, 'Ongoing').subscribe({
+      next: (res) => {
+        this.showToast('Inquiry reopened and marked as Ongoing');
+        if (res && res.inquiry) {
+          this.selectedInquiry = res.inquiry;
+          const idx = this.inquiries.findIndex(i => i._id === res.inquiry._id);
+          if (idx !== -1) {
+            this.inquiries[idx] = res.inquiry;
+          }
+        }
+        this.calculateStats();
+      },
+      error: (err) => {
+        console.error('Failed to reopen inquiry:', err);
+        alert('Failed to reopen inquiry: ' + (err.error?.message || err.message));
       }
     });
   }

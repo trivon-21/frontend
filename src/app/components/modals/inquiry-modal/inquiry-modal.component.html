@@ -4,9 +4,7 @@
     <!-- Header -->
     <div class="modal-header">
       <div class="modal-header-left">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f5b45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
+        <lucide-angular name="message-circle" [size]="20" style="color: #1f5b45;"></lucide-angular>
         <h2 class="modal-title">
           <span *ngIf="!selectedInquiry">Inquiry</span>
           <span *ngIf="selectedInquiry">{{ selectedInquiry.inquiryRef }}</span>
@@ -17,10 +15,8 @@
           <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'new'}" (click)="setTab('new')">New</button>
           <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'list'}" (click)="setTab('list')">My Inquiries</button>
         </div>
-        <button class="modal-close" (click)="close()" aria-label="Close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+        <button class="modal-close" (click)="close()" aria-label="Close" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
         </button>
       </div>
     </div>
@@ -30,10 +26,8 @@
 
       <!-- Success state -->
       <div *ngIf="submitted && submittedInquiry" class="success-screen">
-        <div class="success-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+        <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="check" [size]="32" style="color: white;"></lucide-angular>
         </div>
         <h3 class="success-title">Inquiry Submitted!</h3>
         <p class="success-msg">We've received your inquiry and will respond shortly.</p>
@@ -126,10 +120,8 @@
 
     <!-- ── Inquiry Detail + Thread ── -->
     <div *ngIf="selectedInquiry" class="detail-body">
-      <button class="back-btn" (click)="backToList()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
+      <button class="back-btn" (click)="backToList()" style="display: inline-flex; align-items: center; gap: 4px;">
+        <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
         Back to Inquiries
       </button>
 

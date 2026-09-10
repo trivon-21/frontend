@@ -7,12 +7,13 @@ import { environment } from '../../../../environments/environment';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 import { FooterComponent } from '../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-catalog',
   templateUrl: './catalog.html',
   styleUrl: './catalog.css',
-  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
+  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent, PortalIconsModule],
 })
 export class Catalog implements OnInit {
   products: any[] = [];
@@ -243,8 +244,8 @@ export class Catalog implements OnInit {
     return product.inStock === true;
   }
 
-  getStars(rating: number): string {
-    const full = Math.round(rating);
-    return '★'.repeat(full) + '☆'.repeat(5 - full);
+  getStars(rating: number): boolean[] {
+    const full = Math.round(Number(rating) || 0);
+    return Array.from({ length: 5 }, (_, i) => i < full);
   }
 }

@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
 import { NavbarComponent } from '../../../../components/navbar/navbar.component';
 import { FooterComponent } from '../../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface CalendarDay {
   date: string;
@@ -20,7 +21,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-inspection-scheduling',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './inspection-scheduling.component.html',
   styleUrls: ['./inspection-scheduling.component.css']
 })
@@ -123,11 +124,11 @@ export class InspectionSchedulingComponent implements OnInit {
       return;
     }
     if (day.status === 'holiday') {
-      this.showPopupMessage("🎉 This is a public holiday! Please choose another date.");
+      this.showPopupMessage("This is a public holiday. Please choose another date.");
       return;
     }
     if (day.status === 'fully_booked') {
-      this.showPopupMessage("😊 All inspection slots for this day are fully booked! Please choose another date.");
+      this.showPopupMessage("All inspection slots for this day are fully booked. Please choose another date.");
       return;
     }
     this.calendarDays.forEach(d => d.isSelected = false);

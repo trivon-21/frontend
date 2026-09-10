@@ -48,10 +48,12 @@
           <td>{{ inspection.customerName }}</td>
           <td>{{ formatDate(inspection.inspectionDate) }}</td>
           <td>
-            <button *ngIf="!inspection.submitted" class="action-btn view-report" (click)="viewReport(inspection)">
-              View Report
-            </button>
-            <span *ngIf="inspection.submitted" class="action-btn submitted">Submitted</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="action-btn view-report" (click)="viewReport(inspection)">
+                View Report
+              </button>
+              <span *ngIf="inspection.submitted" class="action-btn submitted">Submitted</span>
+            </div>
           </td>
         </tr>
         <tr *ngIf="filteredInspections.length === 0">
@@ -76,10 +78,12 @@
     <div class="modal report-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Inspection Report</h3>
-        <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-<line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
+        <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18"
+            height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg></button>
       </div>
 
       <div class="modal-body report-body" *ngIf="reportData">
@@ -362,8 +366,10 @@
 
       <div class="modal-footer">
         <button class="btn-cancel" (click)="closeModal()">Close</button>
-        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-edit" (click)="startEditing()">✏
-          Edit</button>
+        <button *ngIf="!isEditing && !selectedInspection?.submitted" class="btn-edit" (click)="startEditing()">
+          <lucide-angular name="edit" [size]="15"
+            style="display:inline-block; vertical-align:middle; margin-right:4px;"></lucide-angular>Edit
+        </button>
         <button *ngIf="isEditing" class="btn-save" (click)="saveEdit()" [disabled]="isLoading">
           {{ isLoading ? 'Saving...' : 'Save Changes' }}
         </button>

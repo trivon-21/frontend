@@ -5,11 +5,12 @@ import { FooterComponent } from '../../components/footer/footer.component';
 import { InquiryModalComponent } from '../../components/modals/inquiry-modal/inquiry-modal.component';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterLink, NavbarComponent, FooterComponent, InquiryModalComponent, CommonModule],
+  imports: [RouterLink, NavbarComponent, FooterComponent, InquiryModalComponent, CommonModule, PortalIconsModule],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css',
 })

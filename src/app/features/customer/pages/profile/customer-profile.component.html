@@ -4,9 +4,7 @@
   <div class="page-header">
     <h1 class="page-title">My Profile</h1>
     <div class="page-search-wrap">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="page-search-icon">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
+      <lucide-angular name="search" [size]="15" class="page-search-icon"></lucide-angular>
       <input class="page-search" type="text" placeholder="Search here" />
     </div>
   </div>
@@ -86,11 +84,19 @@
       <div class="form-grid two-col">
         <div class="form-field">
           <label class="form-label">Full Name</label>
-          <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" />
+          <input formControlName="fullName" type="text" class="form-input" placeholder="Your First Name" [class.input-error]="isInvalid('fullName')" />
+          <div class="error-msg" *ngIf="isInvalid('fullName')">
+            <span *ngIf="hasError('fullName', 'required')">First name is required</span>
+            <span *ngIf="hasError('fullName', 'pattern')">Only letters allowed</span>
+          </div>
         </div>
         <div class="form-field">
           <label class="form-label">Last Name</label>
-          <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" />
+          <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" [class.input-error]="isInvalid('lastName')" />
+          <div class="error-msg" *ngIf="isInvalid('lastName')">
+            <span *ngIf="hasError('lastName', 'required')">Last name is required</span>
+            <span *ngIf="hasError('lastName', 'pattern')">Only letters allowed</span>
+          </div>
         </div>
       </div>
 
@@ -98,27 +104,36 @@
         <div class="form-field">
           <label class="form-label">Gender</label>
           <div class="select-wrap">
-            <select formControlName="gender" class="form-input form-select">
+            <select formControlName="gender" class="form-input form-select" [class.input-error]="isInvalid('gender')">
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
             </select>
-            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+            <lucide-angular name="chevron-down" [size]="14" class="select-arrow"></lucide-angular>
+          </div>
+          <div class="error-msg" *ngIf="isInvalid('gender')">
+            <span *ngIf="hasError('gender', 'required')">Please select a gender</span>
           </div>
         </div>
         <div class="form-field">
           <label class="form-label">Address</label>
-          <input formControlName="address" type="text" class="form-input" placeholder="Your Address" />
+          <input formControlName="address" type="text" class="form-input" placeholder="Your Address" [class.input-error]="isInvalid('address')" />
+          <div class="error-msg" *ngIf="isInvalid('address')">
+            <span *ngIf="hasError('address', 'required')">Address is required</span>
+            <span *ngIf="hasError('address', 'minlength')">Address must be at least 5 characters</span>
+          </div>
         </div>
       </div>
 
       <div class="form-grid one-col">
         <div class="form-field">
           <label class="form-label">Contact Number</label>
-          <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" />
+          <input formControlName="phoneNumber" type="text" class="form-input" placeholder="Your Contact Number" [class.input-error]="isInvalid('phoneNumber')" />
+          <div class="error-msg" *ngIf="isInvalid('phoneNumber')">
+            <span *ngIf="hasError('phoneNumber', 'required')">Contact number is required</span>
+            <span *ngIf="hasError('phoneNumber', 'pattern')">Must be 10 digits starting with 0 or +94 format</span>
+          </div>
         </div>
       </div>
     </form>
@@ -130,10 +145,7 @@
       <!-- Primary email -->
       <div class="email-item" *ngIf="profile.email">
         <div class="email-icon-wrap">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
+          <lucide-angular name="mail" [size]="16"></lucide-angular>
         </div>
         <div class="email-info">
           <div class="email-address-row">
@@ -182,10 +194,7 @@
       <ng-container *ngFor="let ae of profile.additionalEmails">
         <div class="email-item">
           <div class="email-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
+            <lucide-angular name="mail" [size]="16"></lucide-angular>
           </div>
           <div class="email-info">
             <div class="email-address-row">
@@ -200,10 +209,8 @@
             class="btn-verify-email"
             (click)="startAdditionalEmailVerification(ae._id)"
           >Verify</button>
-          <button class="email-remove-btn" (click)="removeEmail(ae._id)" aria-label="Remove email">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+          <button class="email-remove-btn" (click)="removeEmail(ae._id)" aria-label="Remove email" style="display: flex; align-items: center; justify-content: center;">
+            <lucide-angular name="x" [size]="14"></lucide-angular>
           </button>
         </div>
 
@@ -285,9 +292,7 @@
           </button>
         </ng-container>
         <button class="btn-change-password" (click)="sendPasswordResetLink()" [disabled]="sendingResetLink || resetLinkSent">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <lucide-angular name="shield" [size]="14" style="margin-right:6px; vertical-align: -1px;"></lucide-angular>
           {{ sendingResetLink ? 'Sending...' : resetLinkSent ? 'Link Sent!' : 'Change Password' }}
         </button>
         <button class="btn-delete-account" (click)="deleteAccount()">Delete Account</button>
