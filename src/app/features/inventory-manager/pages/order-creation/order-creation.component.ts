@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,17 +11,19 @@ import { OrderCreationService } from '../../services/order-creation.service';
 import { forkJoin } from 'rxjs';
 
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { NewOrderFormComponent, NewOrderPrefill } from './new-order-form/new-order-form.component';
+import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
 
 export type OrderTab = 'all' | 'draft' | 'pending-manager' | 'pending-finance' | 'approved' | 'receiving' | 'received' | 'rejected';
 
 @Component({
   selector: 'app-order-creation',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule, NewOrderFormComponent],
   templateUrl: './order-creation.component.html',
   styleUrls: ['./order-creation.component.css']
 })
-export class OrderCreationComponent implements OnInit {
+export class OrderCreationComponent implements OnInit, HasPendingChanges {
   // Tab state
   activeTab: OrderTab = 'all';
   searchQuery = '';
@@ -51,6 +53,13 @@ export class OrderCreationComponent implements OnInit {
   showDetailModal = false;
   selectedOrder: PurchaseRequest | null = null;
 
+  // Order form modal
+  showFormModal = false;
+  formOrderId: string | null = null;
+  formPrefill: NewOrderPrefill | null = null;
+
+  @ViewChild(NewOrderFormComponent) orderForm?: NewOrderFormComponent;
+
   constructor(
     private apiService: ApiService,
     private orderService: OrderCreationService,
@@ -63,12 +72,27 @@ export class OrderCreationComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
 
+    // Other pages hand off order seeds through navigation state.
+    const navState = history.state || {};
+    if (navState.suggestedItem || Array.isArray(navState.shortageItems)) {
+      this.openOrderForm({
+        prefill: {
+          suggestedItem: navState.suggestedItem,
+          shortageItems: navState.shortageItems,
+          sourceMaterialRequestId: navState.sourceMaterialRequestId,
+        },
+      });
+    }
+
     // Check for success message from new order page
     let query$ = this.route.queryParams;
     if (this.destroyRef) {
       query$ = query$.pipe(takeUntilDestroyed(this.destroyRef));
     }
     query$.subscribe(params => {
+      if (params['itemId'] && !this.showFormModal) {
+        this.openOrderForm({ prefill: { itemId: params['itemId'] } });
+      }
       if (params['success']) {
         this.successMessage = params['success'];
         setTimeout(() => this.successMessage = '', 5000);
@@ -133,9 +157,7 @@ export class OrderCreationComponent implements OnInit {
   }
 
   addSuggestedItem(item: InventoryItem): void {
-    this.router.navigate(['/inventory-manager/order-creation/new'], {
-      state: { suggestedItem: item }
-    });
+    this.openOrderForm({ prefill: { suggestedItem: item } });
   }
 
   supplierName(item: InventoryItem): string {
@@ -143,7 +165,60 @@ export class OrderCreationComponent implements OnInit {
   }
 
   createNewOrder(): void {
-    this.router.navigate(['/inventory-manager/order-creation/new']);
+    this.openOrderForm();
+  }
+
+  // ── Order Form Modal ──
+
+  private openOrderForm(options: { orderId?: string; prefill?: NewOrderPrefill } = {}): void {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    this.showDetailModal = false;
+    this.selectedOrder = null;
+    this.formOrderId = options.orderId ?? null;
+    this.formPrefill = options.prefill ?? null;
+    this.showFormModal = true;
+  }
+
+  /** Routes the close through the form so unsaved work is confirmed first. */
+  requestOrderFormClose(): void {
+    if (this.orderForm) {
+      this.orderForm.goBack();
+    } else {
+      this.onOrderFormClosed();
+    }
+  }
+
+  onOrderFormClosed(): void {
+    this.showFormModal = false;
+    this.formOrderId = null;
+    this.formPrefill = null;
+    // The form can save a draft without submitting, so always re-read on close.
+    this.ttlCache?.invalidate('inventory:');
+    this.loadData({ force: true });
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  onOrderFormSaved(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => this.successMessage = '', 5000);
+    this.onOrderFormClosed();
+  }
+
+  onFormBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.requestOrderFormClose();
+    }
+  }
+
+  /** Delegates to the open order-form modal so a router navigation (sidebar link,
+   *  browser back) is confirmed the same way an explicit modal close is. */
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.showFormModal || !this.orderForm) {
+      return true;
+    }
+    return this.orderForm.canDeactivate();
   }
 
   setActiveTab(tab: OrderTab): void {
@@ -203,7 +278,7 @@ export class OrderCreationComponent implements OnInit {
   }
 
   editDraft(order: PurchaseRequest): void {
-    this.router.navigate(['/inventory-manager/order-creation/edit', order.requestId]);
+    this.openOrderForm({ orderId: order.requestId });
   }
 
   submitDraft(order: PurchaseRequest, event?: MouseEvent): void {
@@ -247,7 +322,13 @@ export class OrderCreationComponent implements OnInit {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void { this.closeDetail(); }
+  onEscape(): void {
+    if (this.showFormModal) {
+      this.requestOrderFormClose();
+      return;
+    }
+    this.closeDetail();
+  }
 
   issuePurchaseOrder(order: PurchaseRequest): void {
     if (this.issuing) return;

@@ -9,6 +9,8 @@ import { forkJoin } from 'rxjs';
 import { isLoanOverdue } from '../../services/inventory-domain';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import { DatetimePickerComponent } from '../../components/datetime-picker/datetime-picker.component';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface ActiveLoan {
   _id?: string;
@@ -119,6 +121,7 @@ export class AssetManagementDashboardComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private confirmService: ConfirmService,
     @Optional() private route?: ActivatedRoute,
     @Optional() private ttlCache?: TtlCacheService,
     @Optional() private destroyRef?: DestroyRef,
@@ -280,8 +283,21 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.showReturnModal = true;
   }
 
-  closeReturnModal(): void {
+  get isReturnModalDirty(): boolean {
+    return this.returnCondition !== 'good' || !!this.returnNotes.trim();
+  }
+
+  async closeReturnModal(): Promise<void> {
     if (this.isReturningActiveLoan) return;
+    if (this.isReturnModalDirty && !(await confirmDiscard(this.confirmService, 'return details'))) {
+      return;
+    }
+    this.resetReturnModalState();
+  }
+
+  /** Resets the modal without confirming — used after a successful submit, where
+   *  there is nothing left to discard. */
+  private resetReturnModalState(): void {
     this.showReturnModal = false;
     this.activeReturnLoan = null;
     this.returnNotes = '';
@@ -312,7 +328,7 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.apiService.post(`/inventory/asset-loans/return/${id}`, payload).subscribe({
       next: () => {
         this.returningIds.delete(id);
-        this.closeReturnModal();
+        this.resetReturnModalState();
         this.ttlCache?.invalidate('inventory:');
         this.fetchLoans({ force: true });
         this.fetchReturnLogs({ force: true });

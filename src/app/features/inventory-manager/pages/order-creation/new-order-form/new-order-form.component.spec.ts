@@ -2,6 +2,11 @@ import { of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NewOrderFormComponent } from './new-order-form.component';
 import { OrderCreationService } from '../../../services/order-creation.service';
+import { ConfirmService } from '../../../../../services/confirm.service';
+
+function createConfirmServiceSpy(): jasmine.SpyObj<ConfirmService> {
+  return jasmine.createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
+}
 
 describe('NewOrderFormComponent concurrency state', () => {
   it('keeps the returned statusVersion after every draft save', () => {
@@ -23,6 +28,7 @@ describe('NewOrderFormComponent concurrency state', () => {
       orderService,
       jasmine.createSpyObj<Router>('Router', ['navigate']),
       { params: of({}) } as ActivatedRoute,
+      createConfirmServiceSpy(),
     );
     component.isEditMode = true;
     component.orderId = 'REQ-001';
@@ -92,38 +98,38 @@ describe('NewOrderFormComponent concurrency state', () => {
 
       const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
       const route = { params: of(editMode ? { id: 'REQ-001' } : {}) } as ActivatedRoute;
-      const component = new NewOrderFormComponent(orderService, router, route);
+      const confirmService = createConfirmServiceSpy();
+      const component = new NewOrderFormComponent(orderService, router, route, confirmService);
       component.ngOnInit();
-      return { component, orderService, router };
+      return { component, orderService, router, confirmService };
     }
 
     it('allows pristine navigation without prompt', () => {
-      const { component } = setup();
-      spyOn(window, 'confirm');
+      const { component, confirmService } = setup();
 
       expect(component.isDirty).toBeFalse();
       expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
-    it('prompts user and aborts navigation when dirty and cancelled', () => {
-      const { component } = setup();
+    it('prompts user and aborts navigation when dirty and cancelled', async () => {
+      const { component, confirmService } = setup();
       component.orderNotes = 'New notes entered by user';
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmService.confirm.and.resolveTo(false);
 
       expect(component.isDirty).toBeTrue();
-      expect(component.canDeactivate()).toBeFalse();
-      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved order changes?');
+      await expectAsync(component.canDeactivate()).toBeResolvedTo(false);
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({ variant: 'danger' }));
     });
 
-    it('prompts user and permits navigation when dirty and confirmed (discard)', () => {
-      const { component } = setup();
+    it('prompts user and permits navigation when dirty and confirmed (discard)', async () => {
+      const { component, confirmService } = setup();
       component.orderNotes = 'New notes entered by user';
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmService.confirm.and.resolveTo(true);
 
       expect(component.isDirty).toBeTrue();
-      expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved order changes?');
+      await expectAsync(component.canDeactivate()).toBeResolvedTo(true);
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({ variant: 'danger' }));
     });
 
     it('marks dirty when items are added or updated', () => {
@@ -143,7 +149,7 @@ describe('NewOrderFormComponent concurrency state', () => {
     });
 
     it('resets dirty state after saving draft so subsequent navigation is clean', () => {
-      const { component } = setup();
+      const { component, confirmService } = setup();
       component.selectedSupplier = 'Acme Corp';
       component.suppliers = [{ _id: 'sup-1', name: 'Acme Corp' }];
       component.orderItems = [{
@@ -156,16 +162,15 @@ describe('NewOrderFormComponent concurrency state', () => {
       }];
       expect(component.isDirty).toBeTrue();
 
-      spyOn(window, 'confirm');
       component.saveDraft();
 
       expect(component.isDirty).toBeFalse();
       expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
     it('resets dirty state after submitting order so subsequent navigation is clean', () => {
-      const { component } = setup();
+      const { component, confirmService } = setup();
       component.selectedSupplier = 'Acme Corp';
       component.suppliers = [{ _id: 'sup-1', name: 'Acme Corp' }];
       component.orderItems = [{
@@ -178,12 +183,11 @@ describe('NewOrderFormComponent concurrency state', () => {
       }];
       expect(component.isDirty).toBeTrue();
 
-      spyOn(window, 'confirm');
       component.submitOrder();
 
       expect(component.isDirty).toBeFalse();
       expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
     it('prevents browser beforeunload when dirty and allows when pristine or saved', () => {
@@ -270,8 +274,9 @@ describe('NewOrderFormComponent concurrency state', () => {
         params: of({}),
         snapshot: { queryParams },
       } as unknown as ActivatedRoute;
-      const component = new NewOrderFormComponent(orderService, router, route);
-      return { component, orderService, router };
+      const confirmService = createConfirmServiceSpy();
+      const component = new NewOrderFormComponent(orderService, router, route, confirmService);
+      return { component, orderService, router, confirmService };
     }
 
     it('shows error when attempting to submit with no supplier', () => {
@@ -478,10 +483,9 @@ describe('NewOrderFormComponent concurrency state', () => {
       expect(component.autoSelectedSupplier).toBeFalse();
     });
 
-    it('filters availableInventoryItems to only items from selected supplier, plus unassigned items, when supplier is selected first', () => {
-      const { component } = setupWithMocks();
+    it('filters availableInventoryItems to only items from selected supplier, plus unassigned items, when supplier is selected first', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
-      spyOn(window, 'confirm');
 
       // 2 items with a supplier, 1 with none
       component.inventoryItems = [
@@ -495,15 +499,15 @@ describe('NewOrderFormComponent concurrency state', () => {
       expect(component.availableInventoryItems.length).toBe(3);
 
       // Select Daikin Lanka: Daikin Filter + the unassigned item
-      component.onSupplierSelected('Daikin Lanka');
+      await component.onSupplierSelected('Daikin Lanka');
       expect(component.availableInventoryItems.map(i => i.name).sort()).toEqual(['Daikin Filter', 'Generic Sealant']);
 
       // Select Carrier Air: Carrier Motor + the unassigned item
-      component.onSupplierSelected('Carrier Air');
+      await component.onSupplierSelected('Carrier Air');
       expect(component.availableInventoryItems.map(i => i.name).sort()).toEqual(['Carrier Motor', 'Generic Sealant']);
 
       // No cart items were ever staged, so no discard confirmation was needed
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
     it('displays all items when registering a new supplier or after a new supplier is added', () => {
@@ -571,8 +575,8 @@ describe('NewOrderFormComponent concurrency state', () => {
       expect(component.relevantSuppliers).toEqual([]);
     });
 
-    it('prompts to discard the cart when switching to a different supplier with items staged', () => {
-      const { component } = setupWithMocks();
+    it('prompts to discard the cart when switching to a different supplier with items staged', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
       component.selectedSupplier = 'Daikin Lanka';
       component.orderItems = [{
@@ -581,37 +585,39 @@ describe('NewOrderFormComponent concurrency state', () => {
       }];
       const clearSelection = jasmine.createSpy('clearSelection');
       component.itemSearchRef = { clearSelection } as any;
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmService.confirm.and.resolveTo(true);
 
-      component.onSupplierSelected('Carrier Air');
+      await component.onSupplierSelected('Carrier Air');
 
-      expect(window.confirm).toHaveBeenCalledOnceWith(
-        'Switching to Carrier Air will remove 1 item from this order. Continue?'
-      );
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+        message: 'Switching to Carrier Air will remove 1 item from this order.',
+        variant: 'danger',
+      }));
       expect(component.orderItems).toEqual([]);
       expect(component.selectedSupplier).toBe('Carrier Air');
       expect(clearSelection).toHaveBeenCalled();
     });
 
-    it('pluralizes the discard confirmation for more than one item', () => {
-      const { component } = setupWithMocks();
+    it('pluralizes the discard confirmation for more than one item', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
       component.selectedSupplier = 'Daikin Lanka';
       component.orderItems = [
         { inventoryId: 'i-1', name: 'A', sku: 'A-1', quantity: 1, unitCost: 1, estimatedTotal: 1, supplierId: 'sup-1', supplierName: 'Daikin Lanka' },
         { inventoryId: 'i-2', name: 'B', sku: 'B-1', quantity: 1, unitCost: 1, estimatedTotal: 1, supplierId: 'sup-1', supplierName: 'Daikin Lanka' },
       ];
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmService.confirm.and.resolveTo(true);
 
-      component.onSupplierSelected('Carrier Air');
+      await component.onSupplierSelected('Carrier Air');
 
-      expect(window.confirm).toHaveBeenCalledOnceWith(
-        'Switching to Carrier Air will remove 2 items from this order. Continue?'
-      );
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+        message: 'Switching to Carrier Air will remove 2 items from this order.',
+        variant: 'danger',
+      }));
     });
 
-    it('keeps the cart and reverts the supplier field when the discard confirmation is cancelled', () => {
-      const { component } = setupWithMocks();
+    it('keeps the cart and reverts the supplier field when the discard confirmation is cancelled', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
       component.selectedSupplier = 'Daikin Lanka';
       const cartSnapshot = [{
@@ -619,42 +625,40 @@ describe('NewOrderFormComponent concurrency state', () => {
         quantity: 1, unitCost: 1500, estimatedTotal: 1500, supplierId: 'sup-1', supplierName: 'Daikin Lanka',
       }];
       component.orderItems = [...cartSnapshot];
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmService.confirm.and.resolveTo(false);
       const revertBefore = component.supplierRevertSignal;
 
-      component.onSupplierSelected('Carrier Air');
+      await component.onSupplierSelected('Carrier Air');
 
       expect(component.orderItems).toEqual(cartSnapshot);
       expect(component.selectedSupplier).toBe('Daikin Lanka');
       expect(component.supplierRevertSignal).toBe(revertBefore + 1);
     });
 
-    it('does not prompt when re-selecting the currently selected supplier with a non-empty cart', () => {
-      const { component } = setupWithMocks();
+    it('does not prompt when re-selecting the currently selected supplier with a non-empty cart', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
       component.selectedSupplier = 'Daikin Lanka';
       component.orderItems = [{
         inventoryId: 'inv-item-1', name: 'Cooling Coil', sku: 'CC-01',
         quantity: 1, unitCost: 1500, estimatedTotal: 1500, supplierId: 'sup-1', supplierName: 'Daikin Lanka',
       }];
-      spyOn(window, 'confirm');
 
-      component.onSupplierSelected('Daikin Lanka');
+      await component.onSupplierSelected('Daikin Lanka');
 
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
       expect(component.orderItems.length).toBe(1);
     });
 
-    it('does not prompt when selecting a supplier with an empty cart', () => {
-      const { component } = setupWithMocks();
+    it('does not prompt when selecting a supplier with an empty cart', async () => {
+      const { component, confirmService } = setupWithMocks();
       component.ngOnInit();
       component.selectedSupplier = '';
       component.orderItems = [];
-      spyOn(window, 'confirm');
 
-      component.onSupplierSelected('Daikin Lanka');
+      await component.onSupplierSelected('Daikin Lanka');
 
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
       expect(component.selectedSupplier).toBe('Daikin Lanka');
     });
 

@@ -34,12 +34,12 @@
         <div id="supplier-dropdown-list" class="dropdown-list glass-panel animate-fade" role="listbox" *ngIf="showSupplierDropdown">
           <div
             class="dropdown-item add-new"
-            [class.change-supplier]="isRestricted"
+            [class.change-supplier]="isChangeAction"
             role="button"
             tabindex="-1"
             [attr.aria-label]="pinnedActionLabel"
             (mousedown)="onPinnedAction()">
-            <lucide-angular [name]="isRestricted ? 'arrow-right-left' : 'plus'" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+            <lucide-angular [name]="isChangeAction ? 'arrow-right-left' : 'plus'" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
             {{ pinnedActionLabel }}
           </div>
           <div class="dropdown-item" role="option" *ngFor="let s of filteredSuppliers" (mousedown)="selectSupplier(s)">

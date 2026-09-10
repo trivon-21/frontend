@@ -6,10 +6,6 @@
   </div>
 
   <div class="order-card" *ngIf="!loading && !loadError">
-    <button type="button" class="btn-close-card im-btn im-btn--close" aria-label="Close and return to order requests" (click)="goBack()">
-      <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
-    </button>
-
     <div class="split-layout">
       <!-- Left Column: Form Inputs -->
       <div class="layout-left">
@@ -42,26 +38,23 @@
         <!-- Step 2: Item Search Dumb Component -->
         <app-order-item-search
           [inventoryItems]="availableInventoryItems"
-          (itemSelected)="onItemSelected($event)"
+          [allInventoryItems]="inventoryItems"
+          [selectedSupplierId]="selectedSupplierId"
+          [selectedSupplierName]="selectedSupplier"
+          (itemSelected)="onItemSelected($event.item, $event.reassign)"
           (itemCleared)="onItemCleared()"
-          (itemAdded)="onItemAdded($event)">
+          (itemAdded)="onItemAdded($event)"
+          (productSupplierChanged)="onProductSupplierChanged($event)">
         </app-order-item-search>
 
-        <div class="step-divider"></div>
-
-        <!-- Step 3: Additional Details -->
-        <div class="form-step">
-          <div class="step-header">
-            <span class="step-badge">3</span>
-            <h3>Additional Details</h3>
-          </div>
-          <div class="step-content">
+        <div class="form-footer">
+          <div class="additional-details">
             <button
               type="button"
               class="btn-add-details"
               *ngIf="!showAdditionalDetails"
               (click)="showAdditionalDetails = true">
-              <lucide-angular name="plus" [size]="16" strokeWidth="2.5"></lucide-angular>
+              <lucide-angular name="plus" [size]="15" strokeWidth="2.5"></lucide-angular>
               <span>Add additional details</span>
             </button>
             <div class="form-group" *ngIf="showAdditionalDetails">
@@ -71,21 +64,21 @@
                 [(ngModel)]="orderNotes"
                 class="form-textarea"
                 placeholder="Add any additional context for the approver..."
-                rows="4"></textarea>
+                rows="3"></textarea>
             </div>
           </div>
-        </div>
 
-        <div class="form-footer-actions">
-          <button type="button" class="btn-discard im-btn im-btn--ghost" (click)="goBack()">Discard Changes</button>
-          <div class="action-group">
-            <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="saveDraft()" [disabled]="isSubmitting">
-              {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
-            </button>
-            <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting" (click)="submitOrder()">
-              <span *ngIf="!isSubmitting">Submit Order</span>
-              <span *ngIf="isSubmitting">...</span>
-            </button>
+          <div class="form-footer-actions">
+            <button type="button" class="btn-discard im-btn im-btn--ghost" (click)="goBack()">Discard Changes</button>
+            <div class="action-group">
+              <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="saveDraft()" [disabled]="isSubmitting">
+                {{ isEditMode ? 'Update Draft' : 'Save Draft' }}
+              </button>
+              <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting" (click)="submitOrder()">
+                <span *ngIf="!isSubmitting">Submit Order</span>
+                <span *ngIf="isSubmitting">...</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -93,8 +86,10 @@
       <!-- Right Column: Added Items List Dumb Component -->
       <app-order-cart-list
         [orderItems]="orderItems"
+        [supplierName]="selectedSupplier"
         (itemUpdated)="onItemUpdated($event)"
-        (itemRemoved)="onItemRemoved($event)">
+        (itemRemoved)="onItemRemoved($event)"
+        (closeClicked)="goBack()">
       </app-order-cart-list>
     </div>
   </div>

@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface DispatchItem {
   name: string;
@@ -68,6 +70,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private confirmService: ConfirmService,
     @Optional() private ttlCache?: TtlCacheService,
     @Optional() private destroyRef?: DestroyRef,
   ) {}
@@ -211,7 +214,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('ready');
         this.fetchOrders({ force: true });
-        this.closeModals();
+        this.resetModalState();
       });
     }
   }
@@ -285,7 +288,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('in-transit');
         this.fetchOrders({ force: true });
-        this.closeModals();
+        this.resetModalState();
       });
     }
   }
@@ -301,7 +304,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
       this.runOrderUpdate(order, updateData, () => {
         this.setActiveTab('completed');
         this.fetchOrders({ force: true });
-        this.closeModals();
+        this.resetModalState();
       });
     }
   }
@@ -339,7 +342,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     this.runOrderUpdate(order, updateData, () => {
       this.setActiveTab(targetTab);
       this.fetchOrders({ force: true });
-      this.closeModals();
+      this.resetModalState();
     });
   }
 
@@ -353,15 +356,42 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     if (order) {
       this.runOrderUpdate(order, { items: order.items, statusVersion: order.statusVersion }, () => {
         this.fetchOrders({ force: true });
-        this.closeModals();
+        this.resetModalState();
       });
     }
   }
 
-  closeModals() {
+  get isDialogDirty(): boolean {
+    if (this.showAssignModal) {
+      return !!(this.courierService.trim() || this.trackingId.trim());
+    }
+    if (this.showPackModal) {
+      if (this.isEditMode) {
+        const order = this.selectedOrder;
+        return this.editCourier !== (order?.courier || '') || this.editTrackId !== (order?.trackId || '');
+      }
+      const original = [...this.ordersToPack, ...this.ordersReady, ...this.ordersInTransit, ...this.ordersCompleted]
+        .find((order) => order.id === this.selectedOrderId);
+      return !!this.dialogOrder && !!original
+        && this.dialogOrder.items.some((item, i) => item.confirmed !== original.items[i]?.confirmed);
+    }
+    return false;
+  }
+
+  async closeModals(): Promise<void> {
     if (this.saving) return;
+    if (this.isDialogDirty && !(await confirmDiscard(this.confirmService, 'dispatch changes'))) {
+      return;
+    }
+    this.resetModalState();
+  }
+
+  /** Resets the modal without confirming — used after a successful save, where
+   *  there is nothing left to discard. */
+  private resetModalState(): void {
     this.showPackModal = false;
     this.showAssignModal = false;
+    this.isEditMode = false;
     this.dialogOrder = null;
     const trigger = this.dialogTrigger;
     this.dialogTrigger = null;

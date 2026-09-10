@@ -1,5 +1,5 @@
 
-import { Component, DestroyRef, OnInit, Optional } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,6 +14,9 @@ import {
 } from '../../services/inventory-manager-dashboard.service';
 import { NonPoReason, PurchaseLine, PurchaseRequest, ReceiptAuthorization, ReceiptMode, outstanding } from '../../services/purchase-workflow';
 import { InventoryRack, rackTagFor, toBusinessDateString, warehouseLabelFor } from '../../services/inventory-domain';
+import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface RecentProcurement {
   _id?: string;
@@ -51,7 +54,7 @@ type AuthItem = InventoryItem | string | undefined | null;
   templateUrl: './procurement.component.html',
   styleUrls: ['./procurement.component.css'],
 })
-export class ProcurementDashboardComponent implements OnInit {
+export class ProcurementDashboardComponent implements OnInit, HasPendingChanges {
   currentStep = 1;
   receiptMode: 'PO' | 'NON_PO' = 'PO';
   receiptForm!: FormGroup;
@@ -81,6 +84,7 @@ export class ProcurementDashboardComponent implements OnInit {
   selectedReplacement: ReceiptDiscrepancy | null = null;
   private readonly preselectedInventoryId: string | null;
   private pendingReceiptEventId = '';
+  private justSubmitted = false;
 
   readonly nonPoReasonLabels: Record<string, string> = {
     EMERGENCY_REPAIR: 'Emergency repair',
@@ -93,6 +97,7 @@ export class ProcurementDashboardComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly inventoryService: InventoryManagerDashboardService,
+    private readonly confirmService: ConfirmService,
     route: ActivatedRoute,
     @Optional() private readonly destroyRef?: DestroyRef,
   ) {
@@ -282,6 +287,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   setReceiptMode(mode: 'PO' | 'NON_PO'): void {
+    this.justSubmitted = false;
     this.receiptMode = mode;
     this.selectedPurchaseOrder = null;
     this.selectedPurchaseLine = null;
@@ -292,6 +298,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   selectPurchaseOrder(orderId: string): void {
+    this.justSubmitted = false;
     this.selectedReplacement = null;
     this.selectedPurchaseOrder = this.purchaseOrders.find((order) => order._id === orderId) || null;
     this.selectedPurchaseLine = null;
@@ -321,6 +328,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   selectAuthorization(authorization: ReceiptAuthorization): void {
+    this.justSubmitted = false;
     this.selectedReplacement = null;
     if (!['approved', 'partially-received'].includes(authorization.status)) return;
     const inventoryId = this.inventoryIdOf(authorization.inventoryId);
@@ -501,6 +509,23 @@ export class ProcurementDashboardComponent implements OnInit {
     return rack?.bins.includes(binLocation) ? null : { storageLocation: true };
   };
 
+  get isDirty(): boolean {
+    if (this.justSubmitted) return false;
+    return this.currentStep > 1 || this.receiptForm.dirty;
+  }
+
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.isDirty) {
+      return true;
+    }
+    return confirmDiscard(this.confirmService, 'receipt entry');
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty) event.preventDefault();
+  }
+
   canGoNext(): boolean {
     if (this.currentStep === 1) {
       return !!this.selectedItem && (this.receiptMode === 'PO' ? !!this.selectedPurchaseLine : !!this.selectedAuthorization);
@@ -574,6 +599,7 @@ export class ProcurementDashboardComponent implements OnInit {
         next: ({ item, procurement }) => {
           this.isSubmitting = false;
           this.successMessage = `GRN posted for ${item.name}: ${procurement.acceptedQuantity} accepted, ${procurement.damagedQuantity} damaged, ${procurement.missingQuantity} missing.`;
+          this.justSubmitted = true;
           this.resetForm();
           this.loadAllData();
         },
@@ -605,6 +631,7 @@ export class ProcurementDashboardComponent implements OnInit {
   startReplacement(discrepancy: ReceiptDiscrepancy): void {
     const quantity = discrepancy.outstandingQuantity;
     if (quantity < 1) return;
+    this.justSubmitted = false;
 
     if (discrepancy.receiptMode === 'PO') {
       const orderId = this.relationId(discrepancy.orderRequestId);

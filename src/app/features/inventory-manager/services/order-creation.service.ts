@@ -95,6 +95,13 @@ export class OrderCreationService {
     );
   }
 
+  /** Reassigns a catalog product's default supplier — used when a product is pulled onto a different order's supplier. */
+  updateItemSupplier(inventoryId: string, supplierId: string): Observable<InventoryItem> {
+    return this.apiService.patch<InventoryItem>(`/inventory/item/${inventoryId}`, { supplierId }).pipe(
+      tap(() => this.invalidateScopes(CACHE_PREFIXES.CATALOG, CACHE_PREFIXES.PROCUREMENT)),
+    );
+  }
+
   getSuggestedItems(options: { force?: boolean } = {}): Observable<InventoryItem[]> {
     return this.requestCached(
       `${CACHE_PREFIXES.CATALOG}suggested-orders`,

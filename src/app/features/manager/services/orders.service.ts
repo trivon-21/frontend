@@ -11,6 +11,7 @@ export type { PurchaseRequest, ReceiptAuthorization };
 
 export interface OrderSummary {
   pending: number;
+  awaitingFinance: number;
   approved: number;
   rejected: number;
   pendingValue: number;
@@ -38,7 +39,12 @@ export class OrdersService {
   decide(order: PurchaseRequest, decision: 'approved' | 'rejected', comment: string): Observable<PurchaseRequest> {
     return this.api.patch<PurchaseRequest>(`/manager/orders/${order._id}`, {
       decision, comment, statusVersion: order.statusVersion,
-    }).pipe(tap(() => this.cache.invalidate('manager:')));
+    }).pipe(tap(() => {
+      this.cache.invalidate('manager:');
+      // The decision moves the request into 'pending-finance', which the
+      // inventory manager's order list renders from its own cached scope.
+      this.cache.invalidate('inventory:');
+    }));
   }
 
   getReceiptAuthorizations(status = 'all'): Observable<ReceiptAuthorization[]> {

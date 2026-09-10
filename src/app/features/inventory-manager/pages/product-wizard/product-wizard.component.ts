@@ -36,6 +36,8 @@ import {
 } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface SupplierOption {
   _id: string;
@@ -77,6 +79,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly inventoryService: InventoryManagerDashboardService,
+    private readonly confirmService: ConfirmService,
     @Optional() private readonly destroyRef?: DestroyRef,
   ) {
     this.form = this.fb.group(
@@ -278,8 +281,11 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     if (id) this.router.navigate(['/inventory-manager/procurement'], { queryParams: { inventoryId: id } });
   }
 
-  canDeactivate(): boolean {
-    return !this.form.dirty || !!this.savedItem || window.confirm('Discard your unsaved product changes?');
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.form.dirty || this.savedItem) {
+      return true;
+    }
+    return confirmDiscard(this.confirmService, 'product changes');
   }
 
   @HostListener('window:beforeunload', ['$event'])

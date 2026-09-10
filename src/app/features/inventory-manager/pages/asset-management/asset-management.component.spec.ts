@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../../environments/environment';
 import { ApiService } from '../../../../core/services/api.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 import { AssetManagementDashboardComponent } from './asset-management.component';
 
 describe('AssetManagementDashboardComponent HTTP contract', () => {
@@ -14,7 +15,7 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
     TestBed.configureTestingModule({
       providers: [ApiService, provideHttpClient(), provideHttpClientTesting()],
     });
-    component = new AssetManagementDashboardComponent(TestBed.inject(ApiService));
+    component = new AssetManagementDashboardComponent(TestBed.inject(ApiService), TestBed.inject(ConfirmService));
     http = TestBed.inject(HttpTestingController);
     jasmine.clock().install();
     jasmine.clock().mockDate(new Date('2026-08-24T10:30:00.000Z'));

@@ -567,6 +567,13 @@ input:focus-visible {
   background: rgb(15 23 42 / 48%);
 }
 
+.order-form-modal {
+  width: min(1120px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border-radius: 18px;
+}
+
 .modal-content {
   display: flex;
   width: min(920px, 100%);

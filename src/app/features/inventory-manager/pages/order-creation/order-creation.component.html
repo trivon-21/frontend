@@ -187,6 +187,19 @@
     </div>
   </div>
 
+  <!-- Order Form Modal -->
+  <div class="modal-overlay" *ngIf="showFormModal" (click)="onFormBackdrop($event)">
+    <div class="order-form-modal" role="dialog" aria-modal="true" aria-label="Purchase order request form" (click)="$event.stopPropagation()">
+      <app-new-order-form
+        [embedded]="true"
+        [embeddedOrderId]="formOrderId"
+        [prefill]="formPrefill"
+        (closed)="onOrderFormClosed()"
+        (saved)="onOrderFormSaved($event)">
+      </app-new-order-form>
+    </div>
+  </div>
+
   <!-- Detail Modal -->
   <div class="modal-overlay" *ngIf="showDetailModal && selectedOrder" (click)="closeDetail()">
     <div class="modal-content detail-modal" role="dialog" aria-modal="true" aria-labelledby="order-detail-title" (click)="$event.stopPropagation()">

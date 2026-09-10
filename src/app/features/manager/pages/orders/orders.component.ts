@@ -13,6 +13,8 @@ import {
 } from '../../services/orders.service';
 import { purchaseStatusLabel } from '../../../inventory-manager/services/purchase-workflow';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface FilterChip {
   key: string;
@@ -36,7 +38,7 @@ interface DecisionTarget {
 export class OrdersComponent implements OnInit {
   @ViewChild('decisionCommentInput') decisionCommentInput?: ElementRef<HTMLTextAreaElement>;
   orders: PurchaseRequest[] = [];
-  summary: OrderSummary = { pending: 0, approved: 0, rejected: 0, pendingValue: 0 };
+  summary: OrderSummary = { pending: 0, awaitingFinance: 0, approved: 0, rejected: 0, pendingValue: 0 };
   status = 'Syncing…';
   loading = false;
   updatingId: string | null = null;
@@ -52,6 +54,7 @@ export class OrdersComponent implements OnInit {
   decisionError = '';
   decisionPending = false;
   private decisionTrigger: HTMLElement | null = null;
+  private decisionInitialComment = '';
 
   filters: FilterChip[] = [
     { key: 'all', label: 'All' },
@@ -62,7 +65,12 @@ export class OrdersComponent implements OnInit {
   ];
   activeFilter = 'all';
 
-  constructor(private ordersService: OrdersService, private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private ordersService: OrdersService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private confirmService: ConfirmService,
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
@@ -169,6 +177,7 @@ export class OrdersComponent implements OnInit {
     this.decisionTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.decisionTarget = { kind, record, decision, reference };
     this.decisionComment = initialComment;
+    this.decisionInitialComment = initialComment;
     this.decisionError = '';
     setTimeout(() => this.decisionCommentInput?.nativeElement.focus());
   }
@@ -193,7 +202,7 @@ export class OrdersComponent implements OnInit {
         this.decisionPending = false;
         this.updatingId = null;
         const kind = target.kind;
-        this.closeDecision();
+        this.resetDecisionState();
         if (kind === 'purchase') this.load(); else this.loadAuthorizations();
       },
       error: (error: HttpErrorResponse) => {
@@ -206,9 +215,24 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  closeDecision(): void {
+  get isDecisionDirty(): boolean {
+    return this.decisionComment.trim() !== this.decisionInitialComment.trim();
+  }
+
+  async closeDecision(): Promise<void> {
     if (this.decisionPending) return;
+    if (this.isDecisionDirty && !(await confirmDiscard(this.confirmService, 'review comment'))) {
+      return;
+    }
+    this.resetDecisionState();
+  }
+
+  /** Resets the decision dialog without confirming — used after a successful
+   *  submit, where there is nothing left to discard. */
+  private resetDecisionState(): void {
     this.decisionTarget = null;
+    this.decisionComment = '';
+    this.decisionInitialComment = '';
     this.decisionError = '';
     const trigger = this.decisionTrigger;
     this.decisionTrigger = null;

@@ -327,7 +327,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         supplierId: item.supplierId,
         supplierName: item.supplierName,
       }));
-    this.router?.navigate(['/inventory-manager/order-creation/new'], {
+    this.router?.navigate(['/inventory-manager/order-creation'], {
       state: { shortageItems, sourceMaterialRequestId: req.sourceMaterialRequestId },
     });
   }

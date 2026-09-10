@@ -18,12 +18,12 @@
       <tbody>
         <tr *ngFor="let item of items"
             class="clickable-row"
-            [routerLink]="['/inventory-manager/order-creation/new']"
+            [routerLink]="['/inventory-manager/order-creation']"
             [queryParams]="{ itemId: item.id }">
           <td class="item-name-cell">
             <div class="item-cell-wrapper">
               <div class="status-dot" [ngClass]="item.status"></div>
-              <a class="item-name reorder-link" [routerLink]="['/inventory-manager/order-creation/new']" [queryParams]="{ itemId: item.id }">{{ item.name }}</a>
+              <a class="item-name reorder-link" [routerLink]="['/inventory-manager/order-creation']" [queryParams]="{ itemId: item.id }">{{ item.name }}</a>
             </div>
           </td>
           <td class="item-avail text-right" [class.critical]="item.available === 0">

@@ -81,21 +81,21 @@
 }
 
 .badge-cat-order {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: var(--info-light, #eff6ff);
+  color: var(--info, #1d61ff);
+  border: 1px solid rgba(29, 97, 255, 0.2);
 }
 
 .badge-cat-installation {
-  background: #faf5ff;
-  color: #7e22ce;
-  border: 1px solid #e9d5ff;
+  background: var(--secondary-light, #d1d5db);
+  color: var(--secondary-main, #2d3139);
+  border: 1px solid rgba(45, 49, 57, 0.16);
 }
 
 .badge-cat-service {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  background: var(--primary-lighter, #e8fdf0);
+  color: var(--primary-main, #00843d);
+  border: 1px solid rgba(0, 132, 61, 0.16);
 }
 
 .order-ref-title {
@@ -124,18 +124,18 @@
 }
 
 .status-badge--success {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--success-light, #e8fdf0);
+  color: var(--success, #00843d);
 }
 
 .status-badge--warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.14);
+  color: var(--warning, #f59e0b);
 }
 
 .status-badge--danger {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--error-light, #fef2f2);
+  color: var(--error, #c20e0e);
 }
 
 .status-badge--neutral {
@@ -185,7 +185,7 @@
   width: 36px;
   height: 36px;
   border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border-top-color: var(--primary-main, #00843d);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -232,7 +232,7 @@
 }
 
 .section-title lucide-angular {
-  color: #2563eb;
+  color: var(--primary-main, #00843d);
 }
 
 .info-grid {
@@ -277,7 +277,7 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: #2563eb;
+  color: var(--primary-main, #00843d);
   text-decoration: underline;
   margin-top: 0.2rem;
 }
@@ -377,7 +377,7 @@
 }
 
 .total-amount {
-  color: #16a34a;
+  color: var(--primary-main, #00843d);
 }
 
 .problem-desc-box {

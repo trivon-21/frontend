@@ -37,8 +37,16 @@ export class OrderSupplierSelectorComponent implements OnChanges {
     return this.isRestricted ? this.relevantSuppliers : this.suppliers;
   }
 
+  /**
+   * Offer "Change Supplier" whenever one is already committed — an order is
+   * single-supplier, so re-opening the field means switching, not adding.
+   */
+  get isChangeAction(): boolean {
+    return (this.isRestricted || !!(this.initialSupplier || '').trim()) && !this.showAllSuppliers;
+  }
+
   get pinnedActionLabel(): string {
-    return this.isRestricted ? 'Change Supplier' : 'Add New Supplier';
+    return this.isChangeAction ? 'Change Supplier' : 'Add New Supplier';
   }
 
   get hasSupplierSelection(): boolean {
@@ -118,7 +126,7 @@ export class OrderSupplierSelectorComponent implements OnChanges {
   }
 
   onPinnedAction(): void {
-    if (this.isRestricted) {
+    if (this.isChangeAction) {
       this.showAllSuppliers = true;
       this.supplierSearchQuery = '';
       this.suppressNextBlur = true;

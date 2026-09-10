@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostListener, OnInit, Optional, ViewChild } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, HostListener, Input, OnInit, Optional, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -6,13 +6,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { OrderCreationService, OrderItem, InventoryItem, Supplier } from '../../../services/order-creation.service';
 import { OrderSupplierSelectorComponent } from './components/order-supplier-selector/order-supplier-selector.component';
-import { OrderItemSearchComponent } from './components/order-item-search/order-item-search.component';
+import { OrderItemSearchComponent, ProductSupplierChange } from './components/order-item-search/order-item-search.component';
 import { OrderCartListComponent } from './components/order-cart-list/order-cart-list.component';
 import { supplierIdOf, supplierNameOf } from '../../../services/inventory-domain';
 import { itemMatchesSupplier, relevantSuppliersFor } from '../../../services/order-supplier-matching';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { HasPendingChanges } from '../../../../../core/guards/pending-changes.guard';
+import { ConfirmService } from '../../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../../core/services/unsaved-changes';
+
+/** Seed data the host passes in place of router navigation state. */
+export interface NewOrderPrefill {
+  suggestedItem?: InventoryItem;
+  shortageItems?: InventoryItem[];
+  sourceMaterialRequestId?: string;
+  itemId?: string;
+}
 
 @Component({
   selector: 'app-new-order-form',
@@ -30,6 +40,13 @@ import { HasPendingChanges } from '../../../../../core/guards/pending-changes.gu
   styleUrls: ['./new-order-form.component.css']
 })
 export class NewOrderFormComponent implements OnInit, HasPendingChanges {
+  /** Set when the form is hosted in the order-creation modal instead of its own route. */
+  @Input() embedded = false;
+  @Input() embeddedOrderId: string | null = null;
+  @Input() prefill: NewOrderPrefill | null = null;
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<string>();
+
   inventoryItems: InventoryItem[] = [];
   suppliers: Supplier[] = [];
   suggestedItems: InventoryItem[] = [];
@@ -72,6 +89,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     private orderCreationService: OrderCreationService,
     private router: Router,
     private route: ActivatedRoute,
+    private confirmService: ConfirmService,
     @Optional() private destroyRef?: DestroyRef
   ) {}
 
@@ -84,7 +102,19 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         quantity: i.quantity,
         unitCost: i.unitCost,
       })),
+      staged: this.stagedItemSnapshot,
     });
+  }
+
+  /** The not-yet-added line item search state, so a half-picked item still counts as dirty. */
+  private get stagedItemSnapshot(): { inventoryId: string; quantity: number; price: number } | null {
+    const item = this.itemSearchRef?.selectedItem;
+    if (!item) return null;
+    return {
+      inventoryId: item._id || item.id || '',
+      quantity: this.itemSearchRef?.currentQuantity ?? 0,
+      price: this.itemSearchRef?.currentPrice ?? 0,
+    };
   }
 
   get isDirty(): boolean {
@@ -92,16 +122,16 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
       return false;
     }
     if (!this.initialSnapshot) {
-      return this.orderItems.length > 0 || !!this.selectedSupplier || !!this.orderNotes.trim();
+      return this.orderItems.length > 0 || !!this.selectedSupplier || !!this.orderNotes.trim() || !!this.stagedItemSnapshot;
     }
     return this.takeSnapshot() !== this.initialSnapshot;
   }
 
-  canDeactivate(): boolean {
+  canDeactivate(): boolean | Promise<boolean> {
     if (!this.isDirty) {
       return true;
     }
-    return window.confirm('Discard your unsaved order changes?');
+    return confirmDiscard(this.confirmService, 'order changes');
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -114,8 +144,8 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   ngOnInit(): void {
     this.loadData();
 
-    // Check for suggested item passed via router state
-    const navState = history.state;
+    // Seed data arrives as an input when embedded, as router state when routed.
+    const navState: NewOrderPrefill = (this.embedded ? this.prefill : history.state) || {};
     this.sourceMaterialRequestId = navState?.sourceMaterialRequestId || '';
     if (Array.isArray(navState?.shortageItems)) {
       const firstSupplier = navState.shortageItems.find((item: any) => item.supplierId)?.supplierId;
@@ -124,7 +154,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         : navState.shortageItems;
       for (const item of compatibleItems) {
         this.orderItems.push({
-          inventoryId: item._id,
+          inventoryId: item._id || '',
           name: item.name,
           sku: item.sku,
           quantity: item.suggestedQuantity || 1,
@@ -134,8 +164,8 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
           subcategory: item.subcategory || 'Unclassified',
           unit: item.unit || 'units',
           manufacturerPartNumber: item.manufacturerPartNumber || '',
-          supplierId: item.supplierId,
-          supplierName: item.supplierName,
+          supplierId: supplierIdOf(item),
+          supplierName: supplierNameOf(item),
         });
       }
       if (compatibleItems.length) this.selectPreferredSupplier(compatibleItems[0]);
@@ -146,7 +176,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     if (navState?.suggestedItem) {
       const item = navState.suggestedItem;
       this.orderItems.push({
-        inventoryId: item._id,
+        inventoryId: item._id || '',
         name: item.name,
         sku: item.sku,
         quantity: item.suggestedQuantity || 1,
@@ -160,6 +190,15 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         supplierName: supplierNameOf(item),
       });
       this.selectPreferredSupplier(item);
+    }
+
+    if (this.embedded) {
+      if (this.embeddedOrderId) {
+        this.isEditMode = true;
+        this.orderId = this.embeddedOrderId;
+        this.loadOrder(this.embeddedOrderId);
+      }
+      return;
     }
 
     let params$ = this.route.params;
@@ -193,7 +232,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         this.suggestedItems = suggestedItems;
         this.loading = false;
 
-        const itemId = this.route.snapshot?.queryParams?.['itemId'];
+        const itemId = this.embedded ? this.prefill?.itemId : this.route.snapshot?.queryParams?.['itemId'];
         if (itemId && !this.isEditMode && this.orderItems.length === 0) {
           const item = this.inventoryItems.find((inv) => inv._id === itemId || inv.id === itemId);
           if (item) {
@@ -304,7 +343,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
   }
 
   // Event Handlers from Dumb Components
-  onSupplierSelected(supplierName: string): void {
+  async onSupplierSelected(supplierName: string): Promise<void> {
     this.errorMessage = '';
     if (!supplierName) {
       this.selectedSupplier = '';
@@ -323,9 +362,13 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     const isSameSupplier = supplier.name.toLowerCase().trim() === (this.selectedSupplier || '').toLowerCase().trim();
     if (!isSameSupplier && this.orderItems.length > 0) {
       const count = this.orderItems.length;
-      const confirmed = window.confirm(
-        `Switching to ${supplier.name} will remove ${count} item${count === 1 ? '' : 's'} from this order. Continue?`
-      );
+      const confirmed = await this.confirmService.confirm({
+        title: 'Switch supplier?',
+        message: `Switching to ${supplier.name} will remove ${count} item${count === 1 ? '' : 's'} from this order.`,
+        confirmText: 'Switch supplier',
+        cancelText: 'Keep current items',
+        variant: 'danger'
+      });
       if (!confirmed) {
         this.supplierRevertSignal++;
         return;
@@ -384,7 +427,21 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     this.isRegisteringNewSupplier = isRegistering;
   }
 
-  onItemSelected(item: InventoryItem): void {
+  get selectedSupplierId(): string {
+    const supplier = this.suppliers.find(
+      (candidate) => candidate.name.toLowerCase().trim() === (this.selectedSupplier || '').toLowerCase().trim()
+    );
+    return supplier?._id || '';
+  }
+
+  onItemSelected(item: InventoryItem, reassignToSelectedSupplier = false): void {
+    // The item is being pulled onto this order's supplier, so its own supplier
+    // neither constrains the dropdown nor conflicts with the existing lines.
+    if (reassignToSelectedSupplier) {
+      this.stagedItemSupplierName = '';
+      this.errorMessage = '';
+      return;
+    }
     const supplierName = this.resolveItemSupplierName(item);
     this.stagedItemSupplierName = supplierName;
     if (supplierName) {
@@ -408,6 +465,30 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
       this.autoSelectedSupplier = false;
       this.errorMessage = '';
     }
+  }
+
+  /**
+   * Persists a cross-supplier product's move to this order's supplier so the
+   * catalog's default supplier stays in sync with what was actually ordered.
+   * Fire-and-forget: a failure here shouldn't block the order itself, since
+   * the line item already carries the correct supplier either way.
+   */
+  onProductSupplierChanged(change: ProductSupplierChange): void {
+    if (!change.inventoryId || !change.supplierId) return;
+    const local = this.inventoryItems.find((item) => (item._id || item.id) === change.inventoryId);
+    if (local) {
+      local.supplierId = change.supplierId;
+      local.supplierName = change.supplierName;
+    }
+    let update$ = this.orderCreationService.updateItemSupplier(change.inventoryId, change.supplierId);
+    if (this.destroyRef) {
+      update$ = update$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    update$.subscribe({
+      error: () => {
+        this.errorMessage = `${change.supplierName} was set on this order, but the catalog default supplier could not be updated.`;
+      },
+    });
   }
 
   onItemAdded(newItem: OrderItem): void {
@@ -484,8 +565,13 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         this.isSubmitting = false;
         this.submittedSuccessfully = true;
         const msgId = this.isEditMode ? this.orderId : data.requestId;
+        const message = `Order ${msgId} submitted successfully!`;
+        if (this.embedded) {
+          this.saved.emit(message);
+          return;
+        }
         this.router.navigate(['/inventory-manager/order-creation'], {
-          queryParams: { success: `Order ${msgId} submitted successfully!` }
+          queryParams: { success: message }
         });
       },
       error: (err) => {
@@ -587,7 +673,16 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     if (supplierName && !this.selectedSupplier) this.selectedSupplier = supplierName;
   }
 
-  goBack(): void {
+  async goBack(): Promise<void> {
+    if (this.embedded) {
+      // No router guard runs for a modal, so confirm the discard here instead.
+      const canLeave = await this.canDeactivate();
+      if (!canLeave) {
+        return;
+      }
+      this.closed.emit();
+      return;
+    }
     this.router.navigate(['/inventory-manager/order-creation']);
   }
 }

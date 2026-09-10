@@ -3,6 +3,7 @@ import { convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { ReceiptAuthorization } from '../../services/purchase-workflow';
+import { ConfirmService } from '../../../../services/confirm.service';
 import { ProcurementDashboardComponent } from './procurement.component';
 
 describe('ProcurementDashboardComponent workflow queues', () => {
@@ -59,9 +60,10 @@ describe('ProcurementDashboardComponent workflow queues', () => {
       quarantine: null,
     }));
     const route = { snapshot: { queryParamMap: convertToParamMap(params) } };
-    const component = new ProcurementDashboardComponent(new FormBuilder(), service, route as never);
+    const confirmService = jasmine.createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
+    const component = new ProcurementDashboardComponent(new FormBuilder(), service, confirmService, route as never);
     component.ngOnInit();
-    return { component, service };
+    return { component, service, confirmService };
   }
 
   it('finishes loading when a ready-to-receive PO is present and no line is selected yet', () => {
