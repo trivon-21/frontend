@@ -11,8 +11,8 @@ export interface TrackedOrder {
   productImage: string;
   quantity: number;
   amount: number;
-  status: 'Completed' | 'Pending' | 'Returned';
-  paymentStatus: 'Pending Payment' | 'Under Review' | 'Confirmed' | 'Rejected';
+  status: 'Completed' | 'Pending' | 'Returned' | 'Rejected';
+  paymentStatus: 'Pending Payment' | 'Pending' | 'Under Review' | 'Confirmed' | 'Approved' | 'Rejected';
   orderType: 'Buy Only' | 'Buy & Install';
   orderStatus:
     | 'Order Placed'
