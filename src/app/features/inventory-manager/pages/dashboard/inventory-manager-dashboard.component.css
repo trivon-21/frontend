@@ -50,7 +50,7 @@
 /* ── Main Content Layout ── */
 .dashboard-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
   align-items: stretch;
 }
