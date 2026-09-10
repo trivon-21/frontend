@@ -26,6 +26,9 @@ interface ServiceRequestApiItem {
   fullName?: string;
   customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
+  detailedProductType?: string;
+  productDetails?: { generalType?: string; detailedType?: string };
+  acUnitModel?: string;
   location?: string;
   serviceDate?: string;
   status?: string;
@@ -184,7 +187,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
     return {
       id: normalizedId,
       customerName: item.fullName || item.customerName || populatedCustomerName || '-',
-      productType: item.productType || '-',
+      productType: item.productType || item.detailedProductType || item.productDetails?.detailedType || item.productDetails?.generalType || item.acUnitModel || '-',
       location: populatedCustomerAddress || item.location || '-',
       date: displayDate.date,
       year: displayDate.year,

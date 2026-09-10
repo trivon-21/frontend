@@ -72,7 +72,7 @@ export class MainTechnicianMaintenanceComponent implements OnInit {
               customerName: item.fullName || item.customerName || (item.customerId ? item.customerId.fullName || item.customerId.name : 'Unknown Customer'),
               location: item.location || (item.customerId ? item.customerId.address : 'N/A'),
               date: item.date || item.createdAt || item.preferredDate || new Date().toISOString(),
-              productType: item.productType || item.acUnitModel || 'N/A',
+              productType: item.productType || item.detailedProductType || item.productDetails?.detailedType || item.productDetails?.generalType || item.acUnitModel || item.scheduledServiceType || item.serviceType || 'N/A',
               status: item.status === 'Scheduled' ? 'Assigned' : item.status,
             }));
             this.applyFilters();
