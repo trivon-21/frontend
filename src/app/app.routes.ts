@@ -696,8 +696,8 @@ export const routes: Routes = [
         path: 'notifications',
         loadComponent: () =>
           import(
-            './features/customer/pages/notifications/notifications.component'
-          ).then((m) => m.NotificationsPageComponent),
+            './features/csa/pages/csa-notifications/csa-notifications.component'
+          ).then((m) => m.CsaNotificationsComponent),
       },
     ]
   },
