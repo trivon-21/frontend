@@ -13,6 +13,7 @@ describe('BankDetailsFormComponent', () => {
       standardMaintenanceFee: 6000,
       standardRepairFee: 7500,
       standardSiteInspectionFee: 5000,
+      profitMargin: 0.25,
       logRetentionDays: 30,
       paymentAutoCancelDays: 14,
       defaultWarrantyMonths: 24,
