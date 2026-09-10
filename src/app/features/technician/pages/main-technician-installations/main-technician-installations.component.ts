@@ -14,7 +14,7 @@ interface InstallationTicket {
   location: string;
   date: string;
   year: string;
-  status: 'Assigned' | 'In Progress' | 'Completed' | 'On Hold';
+  status: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold';
   assignedTeam: string;
 }
 
@@ -28,7 +28,7 @@ type RawInstallation = {
   location?: string;
   date?: string;
   serviceDate?: string;
-  status?: 'Assigned' | 'In Progress' | 'Completed' | 'On Hold';
+  status?: 'Assigned' | 'In Progress' | 'Scheduled' | 'Completed' | 'On Hold';
   assignedTeam?: string | { teamName?: string };
   assignedTeamName?: string;
 };
@@ -98,7 +98,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
     const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
 
-    const isScheduledOrLater = ['In Progress', 'Completed', 'On Hold'].includes(item.status || '');
+    const isScheduledOrLater = ['Scheduled', 'In Progress', 'Completed', 'On Hold'].includes(item.status || '');
     const scheduledDate = isScheduledOrLater ? (item.date || item.serviceDate) : undefined;
 
     return {
@@ -108,7 +108,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
       location: populatedCustomerAddress || (item.location && !/logistic area/i.test(item.location) ? item.location : '-'),
       date: this.formatDisplayDate(scheduledDate),
       year: this.formatDisplayYear(scheduledDate),
-      status: String(item.status || '') === 'Scheduled' ? 'Assigned' : ((item.status as InstallationTicket['status']) || 'Assigned'),
+      status: (item.status as InstallationTicket['status']) || 'Scheduled',
       assignedTeam: item.assignedTeamName || (typeof item.assignedTeam === 'string'
         ? item.assignedTeam
         : (item.assignedTeam && typeof item.assignedTeam === 'object' && 'teamName' in item.assignedTeam

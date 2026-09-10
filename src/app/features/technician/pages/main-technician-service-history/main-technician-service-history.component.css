@@ -1,6 +1,4 @@
 
-@import '../../../../shared/styles/service-history.common.css';
-
     .service-history-container {
       display: flex;
       flex-direction: column;

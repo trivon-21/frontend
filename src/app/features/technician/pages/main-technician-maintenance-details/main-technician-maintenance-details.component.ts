@@ -1,14 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
-
-interface TeamMember {
-  name: string;
-  position?: string;
-  contactNumber?: string;
-}
 
 interface MaintenanceDetail {
   _id: string;
@@ -30,21 +24,13 @@ interface MaintenanceDetail {
   location: string;
   date: string;
   productType: string;
-  description?: string;
-  acUnitModel?: string;
   status: string;
   assignedTeam: string;
-  assignedTeamId?: {
-    _id: string;
-    teamName: string;
-    specialization?: string;
-    status?: string;
-  };
   assignedTeamData?: {
-    teamLead?: TeamMember | null;
-    helpers?: TeamMember[];
+    teamLead?: { name: string; position?: string };
+    helpers?: { name: string; position?: string }[];
   };
-  materialList?: { item?: string; name?: string; itemName?: string; quantity: string | number }[];
+  materialList?: { item: string; quantity: string }[];
 }
 
 @Component({
@@ -61,28 +47,17 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
   error: string | null = null;
   private readonly apiUrl = `${environment.apiBaseUrl}/maintenance`;
 
-  get description(): string {
-    return this.ticket?.description || (this.ticket as any)?.serviceDescription || 'No description provided.';
-  }
-
-  get teamLead(): string {
-    const lead = this.ticket?.assignedTeamData?.teamLead;
-    return lead ? lead.name : '-';
-  }
-
-  get helpers(): TeamMember[] {
-    return this.ticket?.assignedTeamData?.helpers || [];
-  }
-
-  get productType(): string {
-    return this.ticket?.productType || this.ticket?.acUnitModel || 'N/A';
-  }
+  // Mocks for UI based on image since it isn't in backend currently
+  mockDescription = 'Water has been leaking from the outside unit and cooling process is not properly happening.';
+  mockTeamLead = 'Anil Fernando (Technician)';
+  mockHelper = 'Rajesh Kumar ( Helper)';
+  mockStartDate = '10 March 2026 10:00 AM';
+  mockEstimatedDate = '10 March 2026 12:00 AM';
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
-    private location: Location,
-    private router: Router
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -103,11 +78,6 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             this.ticket = response.data;
-            // Backend now returns assignedTeamData directly.
-            // If it's missing but assignedTeamId is populated, use fallback.
-            if (!this.ticket.assignedTeamData && this.ticket.assignedTeamId) {
-              this.loadAssignedTeamMembersFallback(this.ticket.assignedTeamId._id);
-            }
           } else {
             this.error = 'Failed to load maintenance details.';
           }
@@ -121,35 +91,8 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
       });
   }
 
-  /** Fallback: fetch team list and locate members if backend didn't include assignedTeamData */
-  loadAssignedTeamMembersFallback(teamId: string): void {
-    this.http.get<{ success: boolean; data: any[] }>(`${environment.apiBaseUrl}/tech-teams`)
-      .subscribe({
-        next: (res) => {
-          if (!res.success || !Array.isArray(res.data)) return;
-          const team = res.data.find(t => String(t._id) === String(teamId));
-          if (team && this.ticket) {
-            const members: any[] = team.members || [];
-            const lead = members.find(m => m.role === 'Lead');
-            const helpers = members.filter(m => m.role !== 'Lead');
-            this.ticket.assignedTeamData = {
-              teamLead: lead ? { name: lead.name, position: lead.role } : null,
-              helpers: helpers.map(h => ({ name: h.name, position: h.role }))
-            };
-          }
-        },
-        error: (err) => console.error('Error loading team members (fallback)', err)
-      });
-  }
-
   goBack(): void {
     this.location.back();
-  }
-
-  viewServiceHistory(): void {
-    if (this.ticketId) {
-      this.router.navigate(['/main-technician-service-history', 'maintenance', this.ticketId]);
-    }
   }
 
   getStatusClass(status: string | undefined): string {

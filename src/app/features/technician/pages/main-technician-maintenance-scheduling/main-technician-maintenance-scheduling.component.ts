@@ -174,7 +174,7 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     if (!Number.isNaN(date.getTime())) {
-      return this.formatInputDate(date);
+      return date.toISOString().split('T')[0];
     }
     return dateStr;
   }
@@ -186,61 +186,6 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
       return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     }
     return dateStr;
-  }
-
-  private scheduleValidationError(): string | null {
-    if (!this.selectedSchedule) return 'No schedule is selected.';
-    const installationDate = this.toLocalDate(this.selectedSchedule.installationDate);
-    if (!installationDate) return 'The installation date is missing or invalid.';
-
-    // A current Date always produces a valid local calendar date.
-    const today = this.toLocalDate(new Date().toISOString())!;
-    const endDate = new Date(installationDate);
-    endDate.setFullYear(endDate.getFullYear() + 3);
-    const dates: Date[] = [];
-
-    for (let index = 0; index < this.selectedSchedule.services.length; index += 1) {
-      const service = this.selectedSchedule.services[index];
-      const name = String(service.serviceName || '').trim();
-      const date = this.toLocalDate(service.date);
-      if (!name) return `Service ${index + 1} requires a service name.`;
-      if (!date) return `${name} requires a date.`;
-      if (date < today) return `${name} cannot be scheduled in the past.`;
-      if (date < installationDate) return `${name} cannot be scheduled before the installation date.`;
-      if (date > endDate) return `${name} must fall within the three-year maintenance period.`;
-      dates.push(date);
-    }
-
-    for (let index = 1; index < dates.length; index += 1) {
-      if (dates[index].getTime() === dates[index - 1].getTime()) return 'Each maintenance service must have a different date.';
-      if (dates[index] < dates[index - 1]) return 'Service dates must be in chronological order.';
-    }
-    return null;
-  }
-
-  private toLocalDate(value: string): Date | null {
-    if (!value) return null;
-    const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  private formatInputDate(date: Date): string {
-    const pad = (value: number) => String(value).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-  }
-
-  minimumServiceDate(): string {
-    const installationDate = this.toLocalDate(this.selectedSchedule?.installationDate || '');
-    const today = this.toLocalDate(new Date().toISOString())!;
-    const earliest = installationDate && installationDate > today ? installationDate : today;
-    return this.formatInputDate(earliest);
-  }
-
-  maximumServiceDate(): string {
-    const installationDate = this.toLocalDate(this.selectedSchedule?.installationDate || '');
-    if (!installationDate) return '';
-    installationDate.setFullYear(installationDate.getFullYear() + 3);
-    return this.formatInputDate(installationDate);
   }
 
   /** Read-only lock: Sent to CSA or Sent to Customer */
@@ -273,11 +218,6 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
    */
   saveDraft(): void {
     if (!this.selectedSchedule || !this.canSaveDraft()) return;
-    const validationError = this.scheduleValidationError();
-    if (validationError) {
-      this.error = validationError;
-      return;
-    }
 
     this.isSaving = true;
     this.successMessage = null;
@@ -316,11 +256,6 @@ export class MainTechnicianMaintenanceSchedulingComponent implements OnInit {
    */
   sendToCSA(): void {
     if (!this.selectedSchedule || !this.canSendToCSA()) return;
-    const validationError = this.scheduleValidationError();
-    if (validationError) {
-      this.error = validationError;
-      return;
-    }
 
     this.isSendingToCSA = true;
     this.successMessage = null;

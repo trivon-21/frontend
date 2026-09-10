@@ -1,6 +1,23 @@
 import { Routes } from '@angular/router';
+import { MainTechnicianMaintenanceDetailsComponent } from './features/technician/pages/main-technician-maintenance-details/main-technician-maintenance-details.component';
 import { LayoutComponent as TechnicianLayoutComponent } from './features/technician/components/layout/layout.component';
 import { LayoutComponent as ServiceTeamLayoutComponent } from './features/service-team/components/layout/layout.component';
+import { MainTechnicianDashboardComponent } from './features/technician/pages/main-technician-dashboard/main-technician-dashboard.component';
+import { MainTechnicianInspectionDetailsComponent } from './features/technician/pages/main-technician-inspection-details/main-technician-inspection-details.component';
+import { MainTechnicianInspectionReportsComponent } from './features/technician/pages/main-technician-inspection-report/main-technician-inspection-report.component';
+import { MainTechnicianInspectionReportReviewComponent } from './features/technician/pages/main-technician-inspection-report-review/main-technician-inspection-report-review.component';
+import { MainTechnicianInstallationsComponent } from './features/technician/pages/main-technician-installations/main-technician-installations.component';
+import { MainTechnicianInstallationDetailsComponent } from './features/technician/pages/main-technician-installation-details/main-technician-installation-details.component';
+import { MainTechnicianServiceRequestsComponent } from './features/technician/pages/main-technician-service-requests/main-technician-service-requests.component';
+import { MainTechnicianServiceRequestDetailsComponent } from './features/technician/pages/main-technician-service-request-details/main-technician-service-request-details.component';
+import { MainTechnicianTeamManagementComponent } from './features/technician/pages/main-technician-team-management/main-technician-team-management.component';
+import { MainTechnicianMaterialsComponent } from './features/technician/pages/main-technician-materials/main-technician-materials.component';
+import { MainTechnicianInspectionsComponent } from './features/technician/pages/main-technician-inspections/main-technician-inspections.component';
+import { MainTechnicianServiceHistoryComponent } from './features/technician/pages/main-technician-service-history/main-technician-service-history.component';
+import { MainTechnicianServiceReportsComponent } from './features/technician/pages/main-technician-service-report/main-technician-service-report.component';
+import { MainTechnicianServiceReportReviewComponent } from './features/technician/pages/main-technician-service-report-review/main-technician-service-report-review.component';
+import { MainTechnicianMaintenanceComponent } from './features/technician/pages/main-technician-maintenance/main-technician-maintenance.component';
+import { MainTechnicianMaintenanceSchedulingComponent } from './features/technician/pages/main-technician-maintenance-scheduling/main-technician-maintenance-scheduling.component';
 import { ServiceTeamDashboardComponent } from './features/service-team/pages/service-team-dashboard/service-team-dashboard.component';
 import { ServiceTeamAssignedJobsComponent } from './features/service-team/pages/service-team-assigned-jobs/service-team-assigned-jobs.component';
 import { ServiceTeamTeamDetailsComponent } from './features/service-team/pages/service-team-team-details/service-team-team-details.component';
@@ -108,78 +125,24 @@ export const routes: Routes = [
     data: { roles: ['MAIN_TECH', 'SUPER_ADMIN'] },
     component: TechnicianLayoutComponent,
     children: [
-      {
-        path: 'main-technician-dashboard',
-        loadComponent: () => import('./features/technician/pages/main-technician-dashboard/main-technician-dashboard.component').then(m => m.MainTechnicianDashboardComponent),
-      },
-      {
-        path: 'main-technician-inspections',
-        loadComponent: () => import('./features/technician/pages/main-technician-inspections/main-technician-inspections.component').then(m => m.MainTechnicianInspectionsComponent),
-      },
-      {
-        path: 'main-technician-inspection-report-review/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-inspection-report-review/main-technician-inspection-report-review.component').then(m => m.MainTechnicianInspectionReportReviewComponent),
-      },
-      {
-        path: 'main-technician-inspection-reports',
-        loadComponent: () => import('./features/technician/pages/main-technician-inspection-report/main-technician-inspection-report.component').then(m => m.MainTechnicianInspectionReportsComponent),
-      },
-      {
-        path: 'main-technician-inspection-details/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-inspection-details/main-technician-inspection-details.component').then(m => m.MainTechnicianInspectionDetailsComponent),
-      },
-      {
-        path: 'main-technician-installations',
-        loadComponent: () => import('./features/technician/pages/main-technician-installations/main-technician-installations.component').then(m => m.MainTechnicianInstallationsComponent),
-      },
-      {
-        path: 'main-technician-installation-details/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-installation-details/main-technician-installation-details.component').then(m => m.MainTechnicianInstallationDetailsComponent),
-      },
-      {
-        path: 'main-technician-service-requests',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-requests/main-technician-service-requests.component').then(m => m.MainTechnicianServiceRequestsComponent),
-      },
-      {
-        path: 'main-technician-service-request-details/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-request-details/main-technician-service-request-details.component').then(m => m.MainTechnicianServiceRequestDetailsComponent),
-      },
-      {
-        path: 'main-technician-service-history/:source/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-history/main-technician-service-history.component').then(m => m.MainTechnicianServiceHistoryComponent),
-      },
-      {
-        path: 'main-technician-service-history/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-history/main-technician-service-history.component').then(m => m.MainTechnicianServiceHistoryComponent),
-      },
-      {
-        path: 'main-technician-team-management',
-        loadComponent: () => import('./features/technician/pages/main-technician-team-management/main-technician-team-management.component').then(m => m.MainTechnicianTeamManagementComponent),
-      },
-      {
-        path: 'main-technician-maintenance',
-        loadComponent: () => import('./features/technician/pages/main-technician-maintenance/main-technician-maintenance.component').then(m => m.MainTechnicianMaintenanceComponent),
-      },
-      {
-        path: 'main-technician-maintenance-details/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-maintenance-details/main-technician-maintenance-details.component').then(m => m.MainTechnicianMaintenanceDetailsComponent),
-      },
-      {
-        path: 'main-technician-maintenance-scheduling',
-        loadComponent: () => import('./features/technician/pages/main-technician-maintenance-scheduling/main-technician-maintenance-scheduling.component').then(m => m.MainTechnicianMaintenanceSchedulingComponent),
-      },
-      {
-        path: 'main-technician-materials',
-        loadComponent: () => import('./features/technician/pages/main-technician-materials/main-technician-materials.component').then(m => m.MainTechnicianMaterialsComponent),
-      },
-      {
-        path: 'main-technician-service-reports',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-report/main-technician-service-report.component').then(m => m.MainTechnicianServiceReportsComponent),
-      },
-      {
-        path: 'main-technician-service-report-review/:id',
-        loadComponent: () => import('./features/technician/pages/main-technician-service-report-review/main-technician-service-report-review.component').then(m => m.MainTechnicianServiceReportReviewComponent),
-      },
+      { path: 'main-technician-dashboard', component: MainTechnicianDashboardComponent },
+      { path: 'main-technician-inspections', component: MainTechnicianInspectionsComponent },
+      { path: 'main-technician-inspection-report-review/:id', component: MainTechnicianInspectionReportReviewComponent },
+      { path: 'main-technician-inspection-reports', component: MainTechnicianInspectionReportsComponent },
+      { path: 'main-technician-inspection-details/:id', component: MainTechnicianInspectionDetailsComponent },
+      { path: 'main-technician-installations', component: MainTechnicianInstallationsComponent },
+      { path: 'main-technician-installation-details/:id', component: MainTechnicianInstallationDetailsComponent },
+      { path: 'main-technician-service-requests', component: MainTechnicianServiceRequestsComponent },
+      { path: 'main-technician-service-request-details/:id', component: MainTechnicianServiceRequestDetailsComponent },
+      { path: 'main-technician-service-history/:source/:id', component: MainTechnicianServiceHistoryComponent },
+      { path: 'main-technician-service-history/:id', component: MainTechnicianServiceHistoryComponent },
+      { path: 'main-technician-team-management', component: MainTechnicianTeamManagementComponent },
+      { path: 'main-technician-maintenance', component: MainTechnicianMaintenanceComponent },
+      { path: 'main-technician-maintenance-details/:id', component: MainTechnicianMaintenanceDetailsComponent },
+      { path: 'main-technician-maintenance-scheduling', component: MainTechnicianMaintenanceSchedulingComponent },
+      { path: 'main-technician-materials', component: MainTechnicianMaterialsComponent },
+      { path: 'main-technician-service-reports', component: MainTechnicianServiceReportsComponent },
+      { path: 'main-technician-service-report-review/:id', component: MainTechnicianServiceReportReviewComponent },
     ]
   },
 
@@ -733,8 +696,8 @@ export const routes: Routes = [
         path: 'notifications',
         loadComponent: () =>
           import(
-            './features/csa/pages/csa-notifications/csa-notifications.component'
-          ).then((m) => m.CsaNotificationsComponent),
+            './features/customer/pages/notifications/notifications.component'
+          ).then((m) => m.NotificationsPageComponent),
       },
     ]
   },

@@ -51,6 +51,7 @@
       <div class="modal-body">
         <p><strong>Requested By:</strong> {{ selectedRequest?.requestedBy }}</p>
         <p><strong>Email:</strong> {{ selectedRequest?.requestedByEmail }}</p>
+        <p><strong>Reason:</strong> {{ selectedRequest?.reason || '—' }}</p>
         <p><strong>Approved Date:</strong> {{ selectedRequest?.approvedAt | date:'dd MMM yyyy' }}</p>
         <p><strong>Status:</strong> <span class="accepted-badge"><svg xmlns="http://www.w3.org/2000/svg"
      width="18" height="18"

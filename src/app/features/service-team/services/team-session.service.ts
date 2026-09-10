@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
-import { Router } from '@angular/router';
-
 export type TeamKey = 'A' | 'B';
 
 export interface TeamSessionState {
@@ -27,7 +25,7 @@ export class TeamSessionService {
   private readonly sessionSubject = new BehaviorSubject<TeamSessionState | null>(this.readSession());
   readonly session$ = this.sessionSubject.asObservable();
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   /**
    * Persists and broadcasts a team session state.
@@ -63,11 +61,11 @@ export class TeamSessionService {
    * Returns the active team name with a safe default.
    */
   getTeamName(): string {
-    const url = decodeURIComponent(this.router.url);
-    if (url.includes('/service-team-a') || url.includes('/service team a')) {
-      return 'Service Team A';
+    const url = window.location.pathname;
+    if (url.includes('/service-team-a')) {
+      return 'Colombo Installation Team A';
     }
-    if (url.includes('/service-team-b') || url.includes('/service team b')) {
+    if (url.includes('/service-team-b')) {
       return 'Service Team B';
     }
 

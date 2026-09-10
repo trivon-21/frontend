@@ -241,6 +241,11 @@
       <div class="modal-body">
 
         <p>
+          <strong>Order ID:</strong>
+          {{ selectedPayment?.orderId }}
+        </p>
+
+        <p>
           <strong>Ticket ID:</strong>
           {{ selectedPayment?.ticketId }}
         </p>
@@ -263,6 +268,11 @@
         <p>
           <strong>Amount:</strong>
           LKR {{ selectedPayment?.amount | number:'1.2-2' }}
+        </p>
+
+        <p>
+          <strong>Description:</strong>
+          {{ selectedPayment?.description || '-' }}
         </p>
 
 
