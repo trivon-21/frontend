@@ -35,6 +35,9 @@ export interface ServiceTicket {
   maintenanceScheduleData?: MaintenanceSchedule;
   isMaintenanceRecord?: boolean;
   maintenanceRecordData?: any;
+  isTechnicalRecord?: boolean;
+  assignedTeam?: string;
+  rawRecord?: any;
   customerId: {
     _id: string;
     fullName: string;
@@ -79,6 +82,9 @@ export class CsaTicketService {
   private apiUrl = `${environment.apiUrl}/csa/service-tickets`;
   private maintenanceApiUrl = `${environment.apiBaseUrl}/maintenance`;
   private schedulesApiUrl = `${environment.apiBaseUrl}/maintenance/schedules`;
+  private serviceRequestsApiUrl = `${environment.apiBaseUrl}/service-requests`;
+  private installationsApiUrl = `${environment.apiBaseUrl}/installations`;
+  private inspectionsApiUrl = `${environment.apiBaseUrl}/inspections`;
 
   constructor(private http: HttpClient) {}
 
@@ -119,6 +125,26 @@ export class CsaTicketService {
       this.maintenanceApiUrl,
       { params }
     );
+  }
+
+  getServiceRequests(status?: string): Observable<{ success: boolean; data: any[] }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    return this.http.get<{ success: boolean; data: any[] }>(this.serviceRequestsApiUrl, { params });
+  }
+
+  getInstallations(status?: string): Observable<{ success: boolean; data: any[] }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    return this.http.get<{ success: boolean; data: any[] }>(this.installationsApiUrl, { params });
+  }
+
+  getInspections(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(this.inspectionsApiUrl);
   }
 
   getMaintenanceSchedules(status?: string, search?: string): Observable<{ success: boolean; data: MaintenanceSchedule[]; count: number }> {

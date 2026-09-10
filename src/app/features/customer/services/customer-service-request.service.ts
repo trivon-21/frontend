@@ -27,6 +27,7 @@ export interface ServiceRequest {
 }
 
 export interface CreateServiceRequestPayload {
+  customerId?: string;
   acUnitModel?: string;
   acUnitSerial?: string;
   acWarrantyStatus?: string;
@@ -41,6 +42,8 @@ export interface CreateServiceRequestPayload {
   paymentRequired?: boolean;
   paymentSlipUrl?: string;
   paymentAmount?: number;
+  requestType?: string;
+  maintenanceType?: string;
 }
 
 export interface ServiceChargesResponse {
@@ -61,6 +64,10 @@ export class CustomerServiceRequestService {
 
   getCharges(): Observable<ServiceChargesResponse> {
     return this.http.get<ServiceChargesResponse>(`${this.apiUrl}/charges`);
+  }
+
+  validateSlip(paymentSlipUrl: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/validate-slip`, { paymentSlipUrl });
   }
 
   getServiceRequests(): Observable<ServiceRequest[]> {

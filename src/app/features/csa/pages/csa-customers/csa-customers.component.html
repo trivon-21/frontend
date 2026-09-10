@@ -182,28 +182,40 @@
             </div>
 
             <div class="form-group">
-              <label>Last Name</label>
+              <label>Last Name <span class="req">*</span></label>
               <input type="text" formControlName="lastName" placeholder="e.g. Perera" />
+              <span class="field-error" *ngIf="customerForm.get('lastName')?.touched && customerForm.get('lastName')?.errors?.['required']">
+                Last name is required.
+              </span>
               <span class="field-error" *ngIf="customerForm.get('lastName')?.touched && customerForm.get('lastName')?.errors?.['pattern']">
                 Last name can only contain letters.
+              </span>
+              <span class="field-error" *ngIf="customerForm.get('lastName')?.touched && customerForm.get('lastName')?.errors?.['minlength']">
+                Last name must be at least 2 characters.
               </span>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Phone Number <span class="req">*</span></label>
+              <label>Phone Number <span class="contact-req-tag">(or Email <span class="req">*</span>)</span></label>
               <input type="text" formControlName="phoneNumber" placeholder="e.g. 0771234567 (10 digits)" />
-              <span class="field-error" *ngIf="customerForm.get('phoneNumber')?.touched && customerForm.get('phoneNumber')?.invalid">
+              <span class="field-error" *ngIf="customerForm.get('phoneNumber')?.touched && customerForm.get('phoneNumber')?.errors?.['pattern']">
                 Must be a valid 10-digit number starting with 0.
+              </span>
+              <span class="field-error" *ngIf="hasContactError() && !customerForm.get('phoneNumber')?.value?.trim()">
+                At least one contact method (Phone or Email) is required.
               </span>
             </div>
 
             <div class="form-group">
-              <label>Email Address</label>
+              <label>Email Address <span class="contact-req-tag">(or Phone <span class="req">*</span>)</span></label>
               <input type="email" formControlName="email" placeholder="e.g. kasun@gmail.com" />
-              <span class="field-error" *ngIf="customerForm.get('email')?.touched && customerForm.get('email')?.invalid">
+              <span class="field-error" *ngIf="customerForm.get('email')?.touched && customerForm.get('email')?.errors?.['email']">
                 Please enter a valid email format.
+              </span>
+              <span class="field-error" *ngIf="hasContactError() && !customerForm.get('email')?.value?.trim()">
+                At least one contact method (Phone or Email) is required.
               </span>
             </div>
           </div>
