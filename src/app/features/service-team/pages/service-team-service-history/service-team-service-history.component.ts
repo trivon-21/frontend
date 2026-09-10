@@ -75,92 +75,36 @@ export class ServiceTeamServiceHistoryComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading task summary:', err);
-        const fallback = this.getFallbackSummary(id);
-        if (fallback) {
-          this.summary = fallback;
-        }
       }
     });
   }
 
   fetchServiceHistory(id: string): void {
-    this.http.get<any>(`${environment.apiBaseUrl}/service-history/${id}${this.teamSessionService.buildTeamQuery()}`).subscribe({
+    const url = `${environment.apiBaseUrl}/service-requests/${encodeURIComponent(id)}/history`;
+    const queryParams = this.teamSessionService.buildTeamQuery();
+    // Assuming source defaults to 'service' if not specified, or just let backend handle it
+    const finalUrl = queryParams ? `${url}${queryParams}&source=service` : `${url}?source=service`;
+
+    this.http.get<any>(finalUrl).subscribe({
       next: (res) => {
-        if (res.success) {
+        if (res.success && res.data) {
           this.summary = {
+            ...this.summary,
             ...res.data.summary,
             customerName: res.data.summary?.customerName || this.summary.customerName,
             location: res.data.summary?.location || this.summary.location,
           };
           this.historyItems = [...(res.data.history || [])].sort((a, b) => {
-            const aTime = a.date ? new Date(a.date).getTime() : Number.POSITIVE_INFINITY;
-            const bTime = b.date ? new Date(b.date).getTime() : Number.POSITIVE_INFINITY;
-            return aTime - bTime;
+            const aTime = a.date ? new Date(a.date).getTime() : Number.NEGATIVE_INFINITY;
+            const bTime = b.date ? new Date(b.date).getTime() : Number.NEGATIVE_INFINITY;
+            return bTime - aTime;
           });
         }
       },
       error: (err) => {
         console.error('Error fetching history:', err);
-        this.historyItems = this.getFallbackHistory(id);
       }
     });
-  }
-
-  private getFallbackSummary(id: string): ServiceHistorySummary | null {
-    const fallbacks: Record<string, ServiceHistorySummary> = {
-      '238489782': {
-        customerName: 'John Anderson',
-        location: 'Logistic Area 1, Colombo',
-        productType: 'Split AC - 3 Units',
-        installationDate: new Date('2026-01-10').toISOString()
-      },
-      '238489783': {
-        customerName: 'Nimal Perera',
-        location: 'Galle Road, Colombo 03',
-        productType: 'Cassette AC - 2 Units',
-        installationDate: new Date('2026-02-15').toISOString()
-      },
-      '238489784': {
-        customerName: 'Kavindi Silva',
-        location: 'Malabe Tech Park, Malabe',
-        productType: 'Ducted AC - 1 Unit',
-        installationDate: new Date('2026-03-20').toISOString()
-      }
-    };
-    return fallbacks[id] || null;
-  }
-
-  private getFallbackHistory(id: string): ServiceHistoryItem[] {
-    const commonHistory: ServiceHistoryItem[] = [
-      {
-        ticketId: 'TKT-1001',
-        serviceType: 'Inspection',
-        productType: 'Split AC',
-        date: new Date('2025-12-01').toISOString(),
-        status: 'Completed',
-        assignedTeam: 'Service Team A',
-        warrantyStatus: 'Warranty Period not started yet'
-      },
-      {
-        ticketId: 'TKT-1002',
-        serviceType: 'Installation',
-        productType: 'Split AC',
-        date: new Date('2026-01-10').toISOString(),
-        status: 'Completed',
-        assignedTeam: 'Service Team B',
-        warrantyStatus: 'Warranty Activated'
-      },
-      {
-        ticketId: 'TKT-1003',
-        serviceType: 'Repair',
-        productType: 'Split AC',
-        date: new Date('2026-05-14').toISOString(),
-        status: 'Completed',
-        assignedTeam: 'Service Team B',
-        warrantyStatus: 'Warranty Claimed'
-      }
-    ];
-    return commonHistory;
   }
 
   getWarrantyClass(status: string): string {
