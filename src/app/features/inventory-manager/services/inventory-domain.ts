@@ -50,15 +50,9 @@ export const INVENTORY_ITEM_FORMS: InventoryItemForm[] = ['Single', 'Kit', 'Bund
 export const INVENTORY_UNITS = ['units', 'kits', 'sets', 'meters', 'rolls', 'kg', 'cylinders', 'liters'];
 export const INVENTORY_PHASES: InventoryPhase[] = ['Single Phase', 'Three Phase', 'Not Applicable'];
 
-export interface InventoryRack {
-  rackTag: string;
-  bins: string[];
-}
-
 export interface InventoryLocationOption {
   warehouse: string;
-  warehouseLabel?: string;
-  racks: InventoryRack[];
+  placementAreas: string[];
 }
 
 export interface SupplierReference {
@@ -70,7 +64,6 @@ export interface InventoryItem {
   _id?: string;
   id?: string;
   name: string;
-  description?: string;
   sku: string;
   available: number;
   reserved: number;
@@ -113,7 +106,6 @@ export interface InventoryItem {
 
 export interface InventoryMasterDataInput {
   name: string;
-  description?: string;
   itemClass: InventoryItemClass;
   subcategory: string;
   brand: string;
@@ -141,30 +133,6 @@ export interface CreateInventoryCatalogItemInput extends InventoryMasterDataInpu
 }
 
 export type UpdateInventoryMasterDataInput = InventoryMasterDataInput;
-
-// Mirrors backend/src/utils/inventory-domain.js: storage is addressed as
-// warehouse ("A", shown as "Warehouse A") > rack ("R2") > bin code ("A201"),
-// where the bin code is the only part persisted alongside the warehouse.
-const RACKS_PER_WAREHOUSE = 5;
-const BINS_PER_RACK = 5;
-
-export function warehouseLabelFor(warehouse: string): string {
-  return warehouse ? `Warehouse ${warehouse}` : '';
-}
-
-export function rackTagFor(warehouse: string, binCode: string): string {
-  const match = binCode?.match(/^([A-Za-z])(\d)(\d{2})$/);
-  if (!warehouse || !match || match[1] !== warehouse) return '';
-  const rackNumber = Number(match[2]);
-  const binNumber = Number(match[3]);
-  if (!rackNumber || rackNumber > RACKS_PER_WAREHOUSE) return '';
-  if (!binNumber || binNumber > BINS_PER_RACK) return '';
-  return `R${rackNumber}`;
-}
-
-export function formatStorageLocation(warehouse: string, binCode: string): string {
-  return [warehouseLabelFor(warehouse), rackTagFor(warehouse, binCode), binCode].filter(Boolean).join(', ');
-}
 
 export function isValidSubcategory(itemClass: InventoryItemClass, subcategory: string): boolean {
   return (INVENTORY_SUBCATEGORIES[itemClass] || []).includes(subcategory);

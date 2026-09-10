@@ -22,7 +22,7 @@ const workItem: OperationalWorkItem = {
   managerClosed: false,
   blockers: [],
   children: [],
-  allowedActions: [],
+  allowedActions: ['update-control', 'escalate'],
   version: 1,
   technicalComplete: false,
   reportComplete: false,
@@ -77,7 +77,7 @@ describe('TicketsComponent pagination', () => {
 });
 
 describe('TicketsComponent table presentation contract', () => {
-  it('uses the shared wide table and accessible scroll region with view-only action buttons', async () => {
+  it('uses the shared wide table and accessible scroll region', async () => {
     const response: WorkItemsResponse = {
       status: 'Live',
       summary: { total: 1, open: 1, inProgress: 0, escalated: 0, awaitingVerification: 0, closed: 0 },
@@ -100,14 +100,12 @@ describe('TicketsComponent table presentation contract', () => {
     const root = fixture.nativeElement as HTMLElement;
     const region = root.querySelector<HTMLElement>('.alx-table-container')!;
     const table = region.querySelector<HTMLTableElement>('.alx-table')!;
-    const actionButton = table.querySelector<HTMLButtonElement>('.actions-cell button')!;
 
     expect(region.getAttribute('role')).toBe('region');
     expect(region.tabIndex).toBe(0);
     expect(region.getAttribute('aria-label')).toContain('operational work items');
     expect(table.classList).toContain('alx-table--wide');
     expect(table.querySelector('.alx-table-status')).not.toBeNull();
-    expect(actionButton.textContent?.trim()).toBe('View details');
     fixture.destroy();
   });
 });
@@ -149,53 +147,17 @@ describe('TicketsComponent work-item dialog', () => {
     expect(component.selectedItem).toBeNull();
   }));
 
-  it('supports Escape dismissal', fakeAsync(() => {
+  it('supports Escape dismissal but keeps the dialog open during an update', fakeAsync(() => {
     const component = createComponent();
     component.openDetails(workItem);
     tick();
+    component.updatingId = workItem.id;
 
+    component.onEscape();
+    expect(component.selectedItem).toBe(workItem);
+
+    component.updatingId = null;
     component.onEscape();
     expect(component.selectedItem).toBeNull();
   }));
-
-  it('renders read-only operational details without editable inputs or mutation controls', async () => {
-    const response: WorkItemsResponse = {
-      status: 'Live',
-      summary: { total: 1, open: 1, inProgress: 0, escalated: 0, awaitingVerification: 0, closed: 0 },
-      page: 1,
-      limit: 25,
-      total: 1,
-      items: [workItem],
-    };
-
-    await TestBed.configureTestingModule({
-      imports: [TicketsComponent],
-      providers: [
-        { provide: TicketsService, useValue: { getWorkItems: () => of(response) } },
-        provideRouter([]),
-      ],
-    }).compileComponents();
-
-    const fixture = TestBed.createComponent(TicketsComponent);
-    fixture.detectChanges();
-    fixture.componentInstance.openDetails(workItem);
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    const dialog = root.querySelector<HTMLElement>('.work-item-dialog')!;
-    expect(dialog).not.toBeNull();
-
-    // Verify editable controls do NOT exist
-    expect(dialog.querySelector('select#priority')).toBeNull();
-    expect(dialog.querySelector('input#sla')).toBeNull();
-    expect(dialog.querySelector('textarea#action-reason')).toBeNull();
-    expect(dialog.querySelector('.lifecycle-controls')).toBeNull();
-    expect(dialog.querySelector('.control-grid')).toBeNull();
-
-    // Verify read-only operational details are rendered
-    expect(dialog.textContent).toContain('View only');
-    expect(dialog.textContent).toContain('HIGH');
-    expect(dialog.textContent).toContain('Sample Customer');
-    fixture.destroy();
-  });
 });

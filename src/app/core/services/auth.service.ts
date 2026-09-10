@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TtlCacheService } from './ttl-cache.service';
 
 export interface SignupPayload {
   fullName: string;
@@ -57,10 +56,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getCurrentUser());
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private readonly ttlCache: TtlCacheService,
-  ) {}
+  constructor(private http: HttpClient) {}
 
   private authOptions(): { headers: HttpHeaders } {
     const token = this.getToken();
@@ -192,8 +188,5 @@ export class AuthService {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
     this.currentUserSubject.next(null);
-    // Prevents a second user logging in on the same browser session from
-    // seeing the previous user's cached dashboard/analytics data.
-    this.ttlCache.clearAll();
   }
 }

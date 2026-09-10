@@ -6,6 +6,7 @@ import { InventoryManagerDashboardComponent } from './pages/dashboard/inventory-
 import { DispatchLogisticsDashboardComponent } from './pages/dispatch-logistics/dispatch-logistics.component';
 import { InventoryListComponent } from './pages/inventory/inventory-list.component';
 import { MaterialRequestsDashboardComponent } from './pages/material-requests/material-requests.component';
+import { NewOrderFormComponent } from './pages/order-creation/new-order-form/new-order-form.component';
 import { OrderCreationComponent } from './pages/order-creation/order-creation.component';
 import { ProcurementDashboardComponent } from './pages/procurement/procurement.component';
 import { ProductWizardComponent } from './pages/product-wizard/product-wizard.component';
@@ -25,8 +26,10 @@ export const INVENTORY_MANAGER_ROUTES: Routes = [
       { path: 'asset-management', component: AssetManagementDashboardComponent },
       { path: 'material-requests', component: MaterialRequestsDashboardComponent },
       { path: 'dispatch-logistics', component: DispatchLogisticsDashboardComponent },
-      { path: 'order-creation', component: OrderCreationComponent, canDeactivate: [pendingChangesGuard] },
-      { path: 'procurement', component: ProcurementDashboardComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'order-creation/new', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'order-creation/edit/:id', component: NewOrderFormComponent, canDeactivate: [pendingChangesGuard] },
+      { path: 'order-creation', component: OrderCreationComponent },
+      { path: 'procurement', component: ProcurementDashboardComponent },
       { path: 'returns-rma', component: ReturnsRmaDashboardComponent },
       { path: 'activity-log', component: ActivityLogComponent },
       { path: '**', redirectTo: '/inventory-manager' },

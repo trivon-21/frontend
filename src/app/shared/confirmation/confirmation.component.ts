@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmService } from '../../services/confirm.service';
 
@@ -7,38 +7,20 @@ import { ConfirmService } from '../../services/confirm.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div
-      class="confirmation-overlay"
-      *ngIf="state$ | async as state"
-      [class.confirmation-overlay--open]="state.isOpen"
-      (mousedown)="onBackdropMouseDown($event)"
-    >
-      <div
-        *ngIf="state.isOpen"
-        class="confirmation-modal"
-        role="alertdialog"
-        aria-modal="true"
-        [attr.aria-labelledby]="titleId"
-        [attr.aria-describedby]="bodyId"
-        (mousedown)="$event.stopPropagation()"
-      >
+    <div class="confirmation-overlay" *ngIf="(state$ | async)?.isOpen">
+      <div class="confirmation-modal">
         <div class="confirmation-header">
-          <h2 [id]="titleId">{{ state.title }}</h2>
+          <h2>{{ (state$ | async)?.title }}</h2>
         </div>
         <div class="confirmation-body">
-          <p [id]="bodyId">{{ state.message }}</p>
+          <p>{{ (state$ | async)?.message }}</p>
         </div>
         <div class="confirmation-footer">
-          <button #cancelButton class="btn btn-secondary" type="button" (click)="onCancel()">
-            {{ state.cancelText }}
+          <button class="btn btn-secondary" (click)="onCancel()">
+            {{ (state$ | async)?.cancelText }}
           </button>
-          <button
-            class="btn btn-primary"
-            type="button"
-            [class.btn-danger]="state.variant === 'danger'"
-            (click)="onAccept()"
-          >
-            {{ state.confirmText }}
+          <button class="btn btn-primary" (click)="onAccept()">
+            {{ (state$ | async)?.confirmText }}
           </button>
         </div>
       </div>
@@ -47,44 +29,43 @@ import { ConfirmService } from '../../services/confirm.service';
   styles: [`
     .confirmation-overlay {
       position: fixed;
-      inset: 0;
-      display: none;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9998;
-      background-color: var(--surface-overlay, rgba(0, 0, 0, 0.45));
-    }
-
-    .confirmation-overlay--open {
-      display: flex;
-      animation: fadeIn 0.15s ease-out;
+      animation: fadeIn 0.2s ease-out;
     }
 
     .confirmation-modal {
-      background: var(--background-card);
-      border-radius: var(--border-radius-xl, 16px);
-      box-shadow: var(--shadow-modal);
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       max-width: 450px;
       width: 90%;
       overflow: hidden;
-      animation: slideUp 0.2s ease-out;
+      animation: slideUp 0.3s ease-out;
     }
 
     .confirmation-header {
-      padding: var(--spacing-lg, 20px) var(--spacing-xl, 24px);
-      border-bottom: 1px solid var(--border-light);
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
     }
 
     .confirmation-header h2 {
       margin: 0;
-      font-size: var(--h2-size, 20px);
-      font-weight: var(--h2-weight, 600);
-      color: var(--text-primary);
+      font-size: 20px;
+      color: #333;
     }
 
     .confirmation-body {
-      padding: var(--spacing-lg, 20px) var(--spacing-xl, 24px);
-      color: var(--text-secondary);
+      padding: 20px;
+      color: #666;
       line-height: 1.6;
     }
 
@@ -93,70 +74,64 @@ import { ConfirmService } from '../../services/confirm.service';
     }
 
     .confirmation-footer {
-      padding: var(--spacing-lg, 20px) var(--spacing-xl, 24px);
-      border-top: 1px solid var(--border-light);
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
       display: flex;
-      gap: var(--spacing-sm, 10px);
+      gap: 10px;
       justify-content: flex-end;
+      background: #f8f9fa;
     }
 
     .btn {
       padding: 10px 20px;
-      border: 1px solid transparent;
-      border-radius: var(--border-radius-md, 8px);
-      font-size: var(--button-size, 14px);
-      font-weight: var(--button-weight, 500);
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
       cursor: pointer;
-      transition: background-color 0.15s, border-color 0.15s;
+      transition: all 0.2s;
+      font-weight: 500;
     }
 
     .btn-primary {
-      background-color: var(--primary-main);
-      color: var(--text-inverse);
+      background-color: #007bff;
+      color: white;
     }
 
     .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-primary.btn-danger {
-      background-color: var(--error);
-    }
-
-    .btn-primary.btn-danger:hover {
-      background-color: var(--error-hover, var(--error));
-      filter: brightness(0.92);
+      background-color: #0056b3;
     }
 
     .btn-secondary {
-      background-color: var(--background-page);
-      color: var(--text-primary);
-      border-color: var(--border-medium);
+      background-color: #6c757d;
+      color: white;
     }
 
     .btn-secondary:hover {
-      background-color: var(--background-hover);
+      background-color: #5a6268;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes slideUp {
-      from { transform: translateY(24px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
   `]
 })
 export class ConfirmationComponent {
-  @ViewChild('cancelButton') cancelButtonRef?: ElementRef<HTMLButtonElement>;
-
-  readonly titleId = 'confirmation-title';
-  readonly bodyId = 'confirmation-body';
-
-  private wasOpen = false;
-
   constructor(private confirmService: ConfirmService) {}
 
   get state$() {
@@ -169,16 +144,5 @@ export class ConfirmationComponent {
 
   onCancel(): void {
     this.confirmService.cancel();
-  }
-
-  onBackdropMouseDown(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.onCancel();
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.onCancel();
   }
 }

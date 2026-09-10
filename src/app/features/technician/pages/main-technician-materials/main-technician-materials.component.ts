@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, HostListener } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -88,7 +88,6 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: 'All' | 'approved' | 'sent' | 'pending' | 'draft' = 'All';
   showCreateModal: boolean = false;
-  createRequestError: string | null = null;
   showViewModal: boolean = false;
   newRequest = {
     ticketId: '',
@@ -132,52 +131,6 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   isLoading = false;
   isTicketDropdownLoading = false;
   error: string | null = null;
-
-  // ── Custom catalog dropdown state ──────────────────────────────────
-  openDropdownIndex: number | null = null;
-  catalogSearchQueries: string[] = [];
-
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    this.closeDropdown();
-  }
-
-  toggleDropdown(index: number): void {
-    if (this.openDropdownIndex === index) {
-      this.closeDropdown();
-    } else {
-      this.openDropdownIndex = index;
-      if (!this.catalogSearchQueries[index]) {
-        this.catalogSearchQueries[index] = '';
-      }
-    }
-  }
-
-  closeDropdown(): void {
-    this.openDropdownIndex = null;
-  }
-
-  getCatalogItem(inventoryId: string): MaterialCatalogItem | undefined {
-    return this.materialCatalog.find(m => m._id === inventoryId);
-  }
-
-  getFilteredCatalog(index: number): MaterialCatalogItem[] {
-    const q = (this.catalogSearchQueries[index] || '').toLowerCase().trim();
-    if (!q) return this.materialCatalog;
-    return this.materialCatalog.filter(m =>
-      m.name.toLowerCase().includes(q) ||
-      m.sku.toLowerCase().includes(q) ||
-      (m.unit || '').toLowerCase().includes(q)
-    );
-  }
-
-  selectCatalogItem(item: MaterialItem, material: MaterialCatalogItem, index: number): void {
-    item.inventoryId = material._id;
-    item.name = material.name;
-    item.sku = material.sku;
-    this.closeDropdown();
-  }
-  // ──────────────────────────────────────────────────────────────────
 
   private readonly apiUrl = `${environment.apiBaseUrl}/material-requests`;
 
@@ -240,7 +193,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
   private mapApiMaterialRequest(item: RawMaterialRequest & { fullName?: string; customerId?: any }): MaterialRequest {
     return {
-      id: this.normalizeTicketId(item.ticketId),
+      id: this.normalizeTicketId(item.ticketId || item._id),
       materialRequestId: item.materialRequestId || String(item._id || item.ticketId || ''),
       // Show 'Maintenance' explicitly when the API indicates a maintenance service
       type: item.serviceType === 'Maintenance' ? 'Maintenance' : (item.requestType || 'Service'),
@@ -272,13 +225,10 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       }
     });
     
-    // Exclude entries with no valid ticket ID
-    const filtered = combined.filter(r => r.id && r.id !== '#N/A');
+    // Sort combined by date descending
+    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    // Sort by date descending
-    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    this.requests = filtered;
+    this.requests = combined;
     this.applyFilters();
   }
 
@@ -340,7 +290,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             }))
             .filter((ticket) => 
               ticket.id !== '#N/A' && 
-              ticket.status === 'New'
+              (ticket.status === 'New' || ticket.status === 'Finance Rejected' || ticket.status === 'REJECTED')
             );
 
           this.dropdownTickets = tickets;
@@ -459,7 +409,6 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.createRequestError = null;
     this.showCreateModal = true;
     this.loadNewStatusTicketIds();
     this.loadMaterialCatalog();
@@ -499,7 +448,6 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   private resetCreateForm(): void {
-    this.createRequestError = null;
     this.newRequest = {
       ticketId: '',
       productType: '',
@@ -534,41 +482,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.items.splice(index, 1);
   }
 
-  private validateMaterialSubmission(): string | null {
-    const ticketId = this.newRequest.ticketId.replace(/^#/, '');
-    if (!ticketId || !this.dropdownTickets.some((ticket) => ticket.id === this.newRequest.ticketId)) {
-      return 'Please select a valid service ticket.';
-    }
-    if (!Array.isArray(this.newRequest.items) || this.newRequest.items.length === 0) {
-      return 'Please add at least one material item.';
-    }
-    const itemIds = new Set<string>();
-    for (const item of this.newRequest.items) {
-      const quantity = Number(item.quantity);
-      if (!item.inventoryId || !this.materialCatalog.some((catalogItem) => catalogItem._id === item.inventoryId)) {
-        return 'Every material row must contain a catalog item.';
-      }
-      if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10000) {
-        return 'Each material quantity must be a whole number between 1 and 10,000.';
-      }
-      if (itemIds.has(item.inventoryId)) return 'A material can only be added once; combine its quantity instead.';
-      itemIds.add(item.inventoryId);
-    }
-    if (this.newRequest.notes.trim().length > 2000) return 'Finance notes cannot exceed 2,000 characters.';
-    return null;
-  }
-
-  private optionalRequestValue(value: string): string {
-    const normalized = String(value || '').trim();
-    return normalized === '-' ? '' : normalized;
-  }
-
   submitToFinance(): void {
-    const validationError = this.validateMaterialSubmission();
-    if (validationError) {
-      this.createRequestError = validationError;
-      return;
-    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const selectedTicket = this.dropdownTickets.find((ticket) => ticket.id === this.newRequest.ticketId);
     const materials = this.newRequest.items
@@ -592,16 +506,16 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.createRequestError = null;
+    this.error = null;
 
     this.http
       .post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/submit-to-finance-custom`, {
         newRequestId: normalizedTicketId,
         ticketId: normalizedTicketId,
-        fullName: this.optionalRequestValue(this.newRequest.customerName),
-        customerEmail: this.optionalRequestValue(this.newRequest.customerEmail),
-        customerphoneNumber: this.optionalRequestValue(this.newRequest.customerContactNo),
-        customerAddress: this.optionalRequestValue(this.newRequest.customerAddress),
+        customerName: this.newRequest.customerName,
+        customerEmail: this.newRequest.customerEmail,
+        customerContactNo: this.newRequest.customerContactNo,
+        customerAddress: this.newRequest.customerAddress,
         materials,
         financeNotes: this.newRequest.notes,
         isUnderWarranty: this.newRequest.isUnderWarranty,
@@ -611,7 +525,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.createRequestError = response.error || response.message || 'Failed to submit material request.';
+            this.error = response.error || response.message || 'Failed to submit material request.';
             return;
           }
 
@@ -624,18 +538,12 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error submitting material request to finance:', err);
-          const firstValidationError = err.error?.errors?.[0]?.msg;
-          this.createRequestError = firstValidationError || err.error?.error || err.error?.message || `Failed to submit to finance: ${err.message || 'Unknown error'}`;
+          this.error = `Failed to submit to finance: ${err.message || 'Unknown error'}`;
         }
       });
   }
 
   submitToIMDirectly(): void {
-    const validationError = this.validateMaterialSubmission();
-    if (validationError) {
-      this.createRequestError = validationError;
-      return;
-    }
     const normalizedTicketId = this.newRequest.ticketId.replace(/^#/, '');
     const materials = this.newRequest.items
       .map((item) => {
@@ -658,7 +566,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       return;
     }
 
-    this.createRequestError = null;
+    this.error = null;
 
     const inventoryManagerData = {
       serviceRequestId: normalizedTicketId,
@@ -677,7 +585,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.createRequestError = response.error || response.message || 'Failed to send material request to IM.';
+            this.error = response.error || response.message || 'Failed to send material request to IM.';
             return;
           }
 
@@ -689,7 +597,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error sending material request to IM:', err);
-          this.createRequestError = err.error?.error || err.error?.message || `Failed to send to IM: ${err.message || 'Unknown error'}`;
+          this.error = `Failed to send to IM: ${err.message || 'Unknown error'}`;
         }
       });
   }
@@ -744,22 +652,28 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    const s = (status || '').toLowerCase();
-    if (s.includes('finance approved')) return 'approved';
-    if (s.includes('new')) return 'draft';
-    if (s.includes('pending')) return 'pending';
-    if (s.includes('sent to im')) return 'im';
-    return '';
+    switch (status) {
+      case 'Finance Approved': return 'approved';
+      case 'New': return 'draft';
+      case 'Pending':
+      case 'Pending Approval': return 'pending';
+      case 'Sent to IM': return 'im';
+      default: return '';
+    }
   }
 
-  private getStatusFilterKey(status: string): 'approved' | 'draft' | 'pending' | 'sent' {
-    const s = (status || '').toLowerCase();
-    if (s.includes('finance approved')) return 'approved';
-    if (s.includes('new')) return 'draft';
-    if (s.includes('pending')) return 'pending';
-    if (s.includes('sent to im')) return 'sent';
-    // Default fallback to prevent undefined
-    return 'draft';
+  private getStatusFilterKey(status: MaterialRequest['status']): 'approved' | 'draft' | 'pending' | 'sent' {
+    switch (status) {
+      case 'Finance Approved':
+        return 'approved';
+      case 'New':
+        return 'draft';
+      case 'Pending':
+      case 'Pending Approval':
+        return 'pending';
+      case 'Sent to IM':
+        return 'sent';
+    }
   }
 }
 

@@ -1,96 +1,25 @@
-/* The component host is the actual grid item that gets stretched by
-   .split-layout; it needs to be a flex container itself so that stretch
-   height reaches .layout-right below (a plain child div's height:auto
-   does not inherit a parent's grid-stretched height on its own). */
-:host {
-  display: flex;
-  min-height: 0;
-}
-
 /* Right Panel - Added Items */
 .layout-right {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-width: 0;
-  /* Flex stretch (the host's default align-items) fills the host's height
-     and subtracts these margins for us; an explicit height:100% here would
-     double-count them and overflow the fixed-height card. */
-  min-height: 0;
-  margin: 14px 14px 14px 0;
-  padding: 20px;
-  background: var(--background-page);
-  border-radius: 14px;
+  height: auto;
   overflow: hidden;
 }
 
 .right-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex: 0 0 auto;
-  margin-bottom: 18px;
+  padding: 20px;
+  border-bottom: 1px solid var(--background-hover);
 }
 
 .right-header h3 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
-.btn-close-panel {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.2s;
-  flex: 0 0 auto;
-}
-
-.btn-close-panel:hover {
-  background: var(--background-hover);
-  color: var(--text-primary);
-}
-
-/* Selected supplier, mirroring the reference card's Client block */
-.supplier-summary {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-bottom: 16px;
-}
-
-.supplier-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.supplier-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.supplier-value.unset {
-  font-weight: 500;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
 .added-items-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .empty-items-state {
@@ -100,13 +29,12 @@
   justify-content: center;
   padding: 48px 24px;
   text-align: center;
-  width: 100%;
 }
 
 .empty-icon {
   width: 48px;
   height: 48px;
-  background: var(--background-card);
+  background: var(--background-page);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -120,72 +48,23 @@
   font-weight: 500;
 }
 
-/* Bordered white list box — mirrors the reference card's dated-rows panel */
-.items-box {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  width: 100%;
-  background: var(--background-card);
-  border: 1px solid var(--background-hover);
-  border-radius: 12px;
-  padding: 4px 18px;
-}
-
-/* Fills the fixed panel height, so the card never resizes as items change. */
-.items-box-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.item-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--background-hover);
-}
-
-.items-box-scroll .item-row:last-child {
-  border-bottom: none;
-}
-
-.item-row.clickable-row {
-  cursor: pointer;
-}
-
-.item-row-main {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+.qty-static {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .item-name {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 14px;
+  display: block;
 }
 
-.item-sub {
+.item-sku {
   font-size: 11px;
   color: var(--text-muted);
-}
-
-.item-row-end {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
-}
-
-.item-row-value {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 14px;
-  white-space: nowrap;
+  font-family: monospace;
 }
 
 .qty-editor {
@@ -194,8 +73,6 @@
   background: var(--background-page);
   border-radius: 8px;
   padding: var(--spacing-xs);
-  margin-top: 6px;
-  width: fit-content;
 }
 
 .qty-editor button {
@@ -221,6 +98,12 @@
   font-size: 13px;
 }
 
+.total-val {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
 .btn-delete-row {
   background: transparent;
   border: none;
@@ -233,57 +116,46 @@
   color: var(--error);
 }
 
-/* Totals pinned to the bottom of the panel, so they stay put as items are added */
-.totals-footer {
-  flex: 0 0 auto;
-  margin-top: 16px;
+
+/* Summary Footer */
+.summary-footer {
+  padding: 20px;
+  border-top: 1px solid var(--background-hover);
+  background: var(--background-page);
 }
 
-.totals-row {
+.summary-row {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.totals-label {
+.summary-row .label {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
-.totals-value {
-  font-size: 14px;
-  font-weight: 700;
+.summary-row .value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.summary-row.grand-total {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid var(--background-hover);
+}
+
+.summary-row.grand-total .label {
+  font-size: 18px;
+  font-weight: 800;
   color: var(--text-primary);
 }
 
-.totals-row.estimated {
-  margin-top: 10px;
-  padding-top: 12px;
-  border-top: 1px solid var(--background-hover);
-}
-
-.estimated-label {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--primary-main);
-}
-
-.estimated-value {
-  font-size: 26px;
+.summary-row.grand-total .value {
+  font-size: 18px;
   font-weight: 800;
   color: var(--primary-main);
 }
-
 button:focus-visible, input:focus-visible { outline: 3px solid rgb(0 132 61 / 22%); outline-offset: 2px; }
-
-@media (max-width: 1100px) {
-  .layout-right {
-    margin: 0 14px 14px;
-  }
-
-  .items-box-scroll {
-    max-height: 320px;
-  }
-}

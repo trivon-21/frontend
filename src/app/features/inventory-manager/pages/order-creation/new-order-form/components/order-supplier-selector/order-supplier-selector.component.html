@@ -10,7 +10,6 @@
         <div class="input-wrapper search-wrapper">
           <lucide-angular name="truck" class="search-icon" [size]="18" strokeWidth="2.5"></lucide-angular>
           <input
-            #supplierInput
             id="supplier-search"
             type="text"
             [(ngModel)]="supplierSearchQuery"
@@ -19,36 +18,21 @@
             (blur)="onSupplierInputBlur()"
             placeholder="Search or add supplier..."
             class="form-input search-input"
-            [class.has-selection]="hasSupplierSelection"
             autocomplete="off"
             aria-autocomplete="list"
-            aria-controls="supplier-dropdown-list"
             [attr.aria-expanded]="showSupplierDropdown">
-
-          <button type="button" class="btn-clear-selection im-btn im-btn--close" *ngIf="hasSupplierSelection" (mousedown)="clearSupplier()" aria-label="Clear selected supplier" title="Clear selection">
-            <lucide-angular name="x" [size]="18" strokeWidth="2.5"></lucide-angular>
-          </button>
-          <lucide-angular *ngIf="!hasSupplierSelection" name="chevron-down" class="dropdown-icon" [size]="16" strokeWidth="2.5"></lucide-angular>
+          <lucide-angular name="chevron-down" class="dropdown-icon" [size]="16" strokeWidth="2.5"></lucide-angular>
         </div>
 
-        <div id="supplier-dropdown-list" class="dropdown-list glass-panel animate-fade" role="listbox" *ngIf="showSupplierDropdown">
-          <div
-            class="dropdown-item add-new"
-            [class.change-supplier]="isChangeAction"
-            role="button"
-            tabindex="-1"
-            [attr.aria-label]="pinnedActionLabel"
-            (mousedown)="onPinnedAction()">
-            <lucide-angular [name]="isChangeAction ? 'arrow-right-left' : 'plus'" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
-            {{ pinnedActionLabel }}
+        <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
+          <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
+            <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+            Add New Supplier
           </div>
-          <div class="dropdown-item" role="option" *ngFor="let s of filteredSuppliers" (mousedown)="selectSupplier(s)">
+          <div class="dropdown-item" *ngFor="let s of filteredSuppliers" (mousedown)="selectSupplier(s)">
             <div class="item-info">
               <span class="name">{{ s.name }}</span>
             </div>
-          </div>
-          <div class="dropdown-item empty-hint" *ngIf="filteredSuppliers.length === 0">
-            <span>No matching supplier</span>
           </div>
         </div>
       </div>

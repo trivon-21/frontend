@@ -30,8 +30,6 @@ describe('ManagerLayoutComponent presentation contract', () => {
           { path: 'manager', component: EmptyRouteComponent },
           { path: 'manager/orders', component: EmptyRouteComponent },
           { path: 'manager/work-items', component: EmptyRouteComponent },
-          { path: 'manager/inventory', component: EmptyRouteComponent },
-          { path: 'manager/customers', component: EmptyRouteComponent },
           { path: 'manager/analytics/period-performance', component: EmptyRouteComponent },
           { path: 'manager/analytics/financial-overview', component: EmptyRouteComponent },
           { path: 'login', component: EmptyRouteComponent },
@@ -57,8 +55,6 @@ describe('ManagerLayoutComponent presentation contract', () => {
       '/manager',
       '/manager/orders',
       '/manager/work-items',
-      '/manager/inventory',
-      '/manager/customers',
       '/manager/analytics/period-performance',
     ]);
   });

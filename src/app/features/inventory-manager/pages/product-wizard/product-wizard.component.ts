@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, HostListener, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -23,21 +22,15 @@ import {
   InventoryItemForm,
   InventoryLocationOption,
   InventoryPhase,
-  InventoryRack,
   InventorySystemType,
   UpdateInventoryMasterDataInput,
   deriveStockStatus,
-  formatStorageLocation,
   isValidSubcategory,
   normalizeInventoryList,
-  rackTagFor,
   supplierIdOf,
-  warehouseLabelFor,
 } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
 import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
-import { ConfirmService } from '../../../../services/confirm.service';
-import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface SupplierOption {
   _id: string;
@@ -79,13 +72,10 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly inventoryService: InventoryManagerDashboardService,
-    private readonly confirmService: ConfirmService,
-    @Optional() private readonly destroyRef?: DestroyRef,
   ) {
     this.form = this.fb.group(
       {
         name: ['', [Validators.required, Validators.maxLength(160)]],
-        description: ['', [Validators.maxLength(500)]],
         sku: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._-]+$')]],
         itemClass: ['Unclassified', Validators.required],
         subcategory: ['Unclassified', Validators.required],
@@ -97,7 +87,6 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
         maxStockLevel: [100, [Validators.required, Validators.min(0)]],
         unitCost: [0, [Validators.required, Validators.min(0)]],
         location: ['', Validators.required],
-        rackTag: ['', Validators.required],
         binLocation: ['', Validators.required],
         supplierId: [''],
         isSerialized: [false],
@@ -122,22 +111,14 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   loadSuppliers(): void {
-    let supp$ = this.inventoryService.getSuppliers();
-    if (this.destroyRef) {
-      supp$ = supp$.pipe(takeUntilDestroyed(this.destroyRef));
-    }
-    supp$.subscribe({
+    this.inventoryService.getSuppliers().subscribe({
       next: (suppliers) => (this.suppliers = suppliers),
       error: () => this.errorMessage = 'Suppliers could not be loaded. Retry before saving a supplier-linked product.',
     });
   }
 
   loadLocations(): void {
-    let loc$ = this.inventoryService.getLocations();
-    if (this.destroyRef) {
-      loc$ = loc$.pipe(takeUntilDestroyed(this.destroyRef));
-    }
-    loc$.subscribe({
+    this.inventoryService.getLocations().subscribe({
       next: (locations) => {
         this.locations = locations;
         this.form.updateValueAndValidity();
@@ -154,18 +135,9 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     return INVENTORY_SUBCATEGORIES[this.form.controls['itemClass'].value as InventoryItemClass] || ['Unclassified'];
   }
 
-  get availableRacks(): InventoryRack[] {
+  get availablePlacementAreas(): string[] {
     const warehouse = this.form.controls['location'].value;
-    return this.locations.find((location) => location.warehouse === warehouse)?.racks || [];
-  }
-
-  get availableBins(): string[] {
-    const rackTag = this.form.controls['rackTag'].value;
-    return this.availableRacks.find((rack) => rack.rackTag === rackTag)?.bins || [];
-  }
-
-  warehouseLabel(location: InventoryLocationOption): string {
-    return location.warehouseLabel || warehouseLabelFor(location.warehouse);
+    return this.locations.find((location) => location.warehouse === warehouse)?.placementAreas || [];
   }
 
   get compatibleModels(): string[] {
@@ -195,14 +167,8 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   onWarehouseChange(): void {
-    const rackControl = this.form.controls['rackTag'];
-    if (!this.availableRacks.some((rack) => rack.rackTag === rackControl.value)) rackControl.setValue('');
-    this.onRackChange();
-  }
-
-  onRackChange(): void {
-    const binControl = this.form.controls['binLocation'];
-    if (!this.availableBins.includes(binControl.value)) binControl.setValue('');
+    const placementArea = this.form.controls['binLocation'];
+    if (!this.availablePlacementAreas.includes(placementArea.value)) placementArea.setValue('');
     this.form.updateValueAndValidity();
   }
 
@@ -250,11 +216,7 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
       ? this.inventoryService.updateItem(this.itemId, payload)
       : this.inventoryService.addItem({ ...payload, sku: this.form.getRawValue().sku.trim() });
 
-    let req$ = request;
-    if (this.destroyRef) {
-      req$ = req$.pipe(takeUntilDestroyed(this.destroyRef));
-    }
-    req$.subscribe({
+    request.subscribe({
       next: (item) => {
         this.item = item;
         this.createdNewProduct = creating;
@@ -281,11 +243,8 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     if (id) this.router.navigate(['/inventory-manager/procurement'], { queryParams: { inventoryId: id } });
   }
 
-  canDeactivate(): boolean | Promise<boolean> {
-    if (!this.form.dirty || this.savedItem) {
-      return true;
-    }
-    return confirmDiscard(this.confirmService, 'product changes');
+  canDeactivate(): boolean {
+    return !this.form.dirty || !!this.savedItem || window.confirm('Discard your unsaved product changes?');
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -300,16 +259,11 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
 
   private loadItem(id: string): void {
     this.loading = true;
-    let item$ = this.inventoryService.getItem(id);
-    if (this.destroyRef) {
-      item$ = item$.pipe(takeUntilDestroyed(this.destroyRef));
-    }
-    item$.subscribe({
+    this.inventoryService.getItem(id).subscribe({
       next: (item) => {
         this.item = item;
         this.form.patchValue({
           name: item.name,
-          description: item.description || '',
           sku: item.sku,
           itemClass: item.itemClass || 'Unclassified',
           subcategory: item.subcategory || 'Unclassified',
@@ -321,7 +275,6 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
           maxStockLevel: item.maxStockLevel,
           unitCost: item.unitCost,
           location: item.location,
-          rackTag: rackTagFor(item.location, item.binLocation || ''),
           binLocation: item.binLocation || '',
           supplierId: supplierIdOf(item),
           isSerialized: item.isSerialized,
@@ -350,7 +303,6 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     const capacity = value.capacityBtu;
     return {
       name: value.name.trim(),
-      description: value.description?.trim() || '',
       itemClass: value.itemClass as InventoryItemClass,
       subcategory: value.subcategory,
       brand: value.brand.trim(),
@@ -381,31 +333,6 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
     control.markAsDirty();
   }
 
-  get storageLocationLabel(): string {
-    const warehouse = this.form.controls['location'].value;
-    const binCode = this.form.controls['binLocation'].value;
-    return binCode ? formatStorageLocation(warehouse, binCode) : '';
-  }
-
-  // Compatibility metadata is entirely optional, so a valid step 3 is not a
-  // finished one - only mark it complete once the technician filled something in.
-  isStepComplete(step: number): boolean {
-    if (!this.isStepValid(step)) return false;
-    return step === this.totalSteps ? this.hasCompatibilityData : true;
-  }
-
-  get hasCompatibilityData(): boolean {
-    const value = this.form.getRawValue();
-    const capacity = value.capacityBtu;
-    return this.compatibleModels.length > 0
-      || this.refrigerants.length > 0
-      || (!!value.systemType && value.systemType !== 'Not Applicable')
-      || (!!value.phase && value.phase !== 'Not Applicable')
-      || (capacity !== null && capacity !== undefined && String(capacity).trim() !== '')
-      || String(value.voltage || '').trim() !== ''
-      || String(value.specsUrl || '').trim() !== '';
-  }
-
   isStepValid(step: number): boolean {
     return this.stepFields(step).every((name) => this.form.controls[name].valid)
       && !(step === 1 && this.form.hasError('classification'))
@@ -419,8 +346,8 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
   }
 
   private stepFields(step: number): string[] {
-    if (step === 1) return ['name', 'description', 'sku', 'itemClass', 'subcategory', 'brand', 'manufacturerPartNumber', 'type'];
-    if (step === 2) return ['unit', 'reorderLevel', 'maxStockLevel', 'unitCost', 'location', 'rackTag', 'binLocation', 'supplierId', 'isSerialized'];
+    if (step === 1) return ['name', 'sku', 'itemClass', 'subcategory', 'brand', 'manufacturerPartNumber', 'type'];
+    if (step === 2) return ['unit', 'reorderLevel', 'maxStockLevel', 'unitCost', 'location', 'binLocation', 'supplierId', 'isSerialized'];
     return ['compatibleModels', 'systemType', 'refrigerants', 'capacityBtu', 'voltage', 'phase', 'specsUrl'];
   }
 
@@ -449,11 +376,8 @@ export class ProductWizardComponent implements OnInit, HasPendingChanges {
 
   private storageLocationValidator = (group: AbstractControl): ValidationErrors | null => {
     const warehouse = group.get('location')?.value;
-    const rackTag = group.get('rackTag')?.value;
-    const binCode = group.get('binLocation')?.value;
-    const rack = this.locations
-      .find((entry) => entry.warehouse === warehouse)
-      ?.racks.find((entry) => entry.rackTag === rackTag);
-    return rack?.bins.includes(binCode) ? null : { storageLocation: true };
+    const placementArea = group.get('binLocation')?.value;
+    const location = this.locations.find((entry) => entry.warehouse === warehouse);
+    return location?.placementAreas.includes(placementArea) ? null : { storageLocation: true };
   };
 }

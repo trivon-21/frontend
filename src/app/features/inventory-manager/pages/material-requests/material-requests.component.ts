@@ -1,11 +1,8 @@
-import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
-import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
 import { Router } from '@angular/router';
-import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface MaterialItem {
   lineId: string;
@@ -42,6 +39,8 @@ interface MaterialRequest {
   lastMovedAt?: string;
 }
 
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+
 @Component({
   selector: 'app-material-requests',
   standalone: true,
@@ -71,50 +70,37 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   reservedRequests: MaterialRequest[] = [];
   completedRequests: MaterialRequest[] = [];
 
-  constructor(
-    private apiService: ApiService,
-    @Optional() private ttlCache?: TtlCacheService,
-    @Optional() private router?: Router,
-    @Optional() private destroyRef?: DestroyRef,
-  ) {}
+  constructor(private apiService: ApiService, private router?: Router) {}
 
   ngOnInit() {
     this.fetchRequests();
   }
 
-  fetchRequests(options: { force?: boolean } = {}) {
-    if (!this.pendingRequests.length && !this.reservedRequests.length && !this.completedRequests.length) {
-      this.loading = true;
-    }
+  fetchRequests() {
+    this.loading = true;
     this.loadError = '';
-    const fetch = () => this.apiService.get<any[]>('/inventory/material-requests');
-    const request$ = this.ttlCache
-      ? (options.force ? this.ttlCache.force('inventory:material-requests', 30_000, fetch) : this.ttlCache.observe('inventory:material-requests', 30_000, fetch))
-      : fetch();
-
-    const sub$ = this.destroyRef ? request$.pipe(takeUntilDestroyed(this.destroyRef)) : request$;
-    sub$.subscribe({
+    this.apiService.get<any[]>('/inventory/material-requests').subscribe({
       next: (data: any[]) => {
-        // Map backend model to frontend model
-        const requests: MaterialRequest[] = data.map((r: any) => ({
-          id: r.requestId,
-          sourceMaterialRequestId: r.sourceMaterialRequestId,
-          requester: r.requester,
-          date: r.date,
-          location: r.location,
-          status: r.status,
-          items: r.items,
-          assignedTeamId: r.assignedTeamId,
-          assignedTeamName: r.assignedTeamName,
-          hasShortage: r.hasShortage,
-          statusVersion: r.statusVersion || 0,
-          completedAt: r.completedAt,
-          lastMovedAt: r.lastMovedAt,
-        }));
+      // Map backend model to frontend model
+      const requests: MaterialRequest[] = data.map((r: any) => ({
+        id: r.requestId,
+        sourceMaterialRequestId: r.sourceMaterialRequestId,
+        requester: r.requester,
+        date: r.date,
+        location: r.location,
+        status: r.status,
+        items: r.items,
+        assignedTeamId: r.assignedTeamId,
+        assignedTeamName: r.assignedTeamName,
+        hasShortage: r.hasShortage,
+        statusVersion: r.statusVersion || 0,
+        completedAt: r.completedAt,
+        lastMovedAt: r.lastMovedAt,
+      }));
 
-        this.pendingRequests = requests.filter((r: MaterialRequest) => r.status === 'pending');
-        this.reservedRequests = requests.filter((r: MaterialRequest) => r.status === 'reserved');
-        this.completedRequests = requests.filter((r: MaterialRequest) => r.status === 'completed');
+      this.pendingRequests = requests.filter((r: MaterialRequest) => r.status === 'pending');
+      this.reservedRequests = requests.filter((r: MaterialRequest) => r.status === 'reserved');
+      this.completedRequests = requests.filter((r: MaterialRequest) => r.status === 'completed');
         this.loading = false;
       },
       error: () => {
@@ -179,6 +165,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     this.selectedRequestId = id;
     const source = [...this.pendingRequests, ...this.reservedRequests, ...this.completedRequests].find((r) => r.id === id);
     this.dialogRequest = source ? structuredClone(source) : null;
+    const req = this.dialogRequest;
     this.showModal = true;
     this.mutationError = '';
   }
@@ -207,8 +194,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         this.saving = false;
         item.confirmed = confirmed;
         req.statusVersion = updated.statusVersion;
-        this.ttlCache?.invalidate('inventory:');
-        this.fetchRequests({ force: true });
+        this.fetchRequests();
       },
       error: error => {
         this.saving = false;
@@ -227,8 +213,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         next: () => {
           this.saving = false;
           this.setActiveTab('reserved');
-          this.ttlCache?.invalidate('inventory:');
-          this.fetchRequests({ force: true });
+          this.fetchRequests();
           this.closeModal();
         },
         error: (error) => {
@@ -257,8 +242,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
         next: () => {
           this.saving = false;
           this.setActiveTab('completed');
-          this.ttlCache?.invalidate('inventory:');
-          this.fetchRequests({ force: true });
+          this.fetchRequests();
           this.closeModal();
         },
         error: (error) => {
@@ -286,8 +270,7 @@ export class MaterialRequestsDashboardComponent implements OnInit {
       next: () => {
         this.saving = false;
         this.setActiveTab('pending');
-        this.ttlCache?.invalidate('inventory:');
-        this.fetchRequests({ force: true });
+        this.fetchRequests();
         this.closeModal();
       },
       error: (error) => {
@@ -315,19 +298,19 @@ export class MaterialRequestsDashboardComponent implements OnInit {
     const shortageItems = req.items
       .filter(item => item.shortage > 0 && (supplierId === undefined || (item.supplierId || '') === supplierId))
       .map(item => ({
-        _id: item.inventoryId,
-        name: item.name,
-        sku: item.sku,
-        suggestedQuantity: item.shortage,
-        unit: item.unit,
-        unitCost: item.unitCost,
-        itemClass: item.itemClass,
-        subcategory: item.subcategory,
-        manufacturerPartNumber: item.manufacturerPartNumber,
-        supplierId: item.supplierId,
-        supplierName: item.supplierName,
+      _id: item.inventoryId,
+      name: item.name,
+      sku: item.sku,
+      suggestedQuantity: item.shortage,
+      unit: item.unit,
+      unitCost: item.unitCost,
+      itemClass: item.itemClass,
+      subcategory: item.subcategory,
+      manufacturerPartNumber: item.manufacturerPartNumber,
+      supplierId: item.supplierId,
+      supplierName: item.supplierName,
       }));
-    this.router?.navigate(['/inventory-manager/order-creation'], {
+    this.router?.navigate(['/inventory-manager/order-creation/new'], {
       state: { shortageItems, sourceMaterialRequestId: req.sourceMaterialRequestId },
     });
   }

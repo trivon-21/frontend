@@ -48,11 +48,14 @@
       <div class="metric-content">
         <span class="metric-value">{{ dashboardData?.metrics?.activeTickets || 0 }}</span>
         <span class="metric-label">Active Service Tickets</span>
+        <span class="metric-sub-tag" *ngIf="(dashboardData?.metrics?.highPriorityTickets || 0) > 0">
+          {{ dashboardData?.metrics?.highPriorityTickets }} Urgent
+        </span>
       </div>
       <div class="metric-arrow">→</div>
     </a>
 
-    <!-- CARD 3: AWAITING INQUIRIES -->
+    <!-- CARD 3: PENDING INQUIRIES -->
     <a routerLink="/csa/inquiries" class="metric-card">
       <div class="metric-icon-wrap">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -60,8 +63,8 @@
         </svg>
       </div>
       <div class="metric-content">
-        <span class="metric-value">{{ dashboardData?.metrics?.awaitingInquiries ?? dashboardData?.metrics?.pendingInquiries ?? 0 }}</span>
-        <span class="metric-label">Awaiting Inquiries</span>
+        <span class="metric-value">{{ dashboardData?.metrics?.pendingInquiries || 0 }}</span>
+        <span class="metric-label">Ongoing Inquiries</span>
       </div>
       <div class="metric-arrow">→</div>
     </a>
@@ -103,11 +106,12 @@
                 <th>Subject</th>
                 <th>Customer</th>
                 <th>Category</th>
+                <th>Priority</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let t of (dashboardData?.recentTickets | slice:0:5)">
+              <tr *ngFor="let t of dashboardData?.recentTickets">
                 <td>
                   <span class="table-subject">{{ t.subject || 'Service Request' }}</span>
                 </td>
@@ -115,10 +119,15 @@
                   <span class="table-customer">{{ t.customerId ? t.customerId.fullName : 'Customer' }}</span>
                 </td>
                 <td>
-                  <span class="badge-tag" [ngClass]="'cat-' + (t.category || t.serviceType || 'repair').toLowerCase()">{{ (t.category || t.serviceType || 'repair') | uppercase }}</span>
+                  <span class="badge-tag">{{ t.category | uppercase }}</span>
                 </td>
                 <td>
-                  <span class="status-pill" [ngClass]="'stat-' + (t.status || '').toLowerCase().replace(' ', '-')">{{ t.status }}</span>
+                  <span class="priority-pill" [class.high]="t.priority === 'high'" [class.med]="t.priority === 'medium'">
+                    {{ t.priority | uppercase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill">{{ t.status }}</span>
                 </td>
               </tr>
             </tbody>
@@ -139,14 +148,14 @@
           <h3 class="card-title">Recent Inquiries</h3>
           <p class="card-subtitle">Direct messages from customers</p>
         </div>
-        <a routerLink="/csa/inquiries" class="card-link">View All →</a>
+        <a routerLink="/csa/inquiries" class="card-link">Open Inbox →</a>
       </div>
 
       <div class="dash-card-body inquiries-feed">
-        <div *ngFor="let inq of (dashboardData?.recentInquiries | slice:0:5)" class="inquiry-feed-item">
+        <div *ngFor="let inq of dashboardData?.recentInquiries" class="inquiry-feed-item">
           <div class="inq-feed-top">
             <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
-            <span class="inq-feed-status" [class.awaiting]="inq.status === 'Awaiting'" [class.ongoing]="inq.status === 'Ongoing'" [class.closed]="inq.status === 'Closed'">{{ inq.status }}</span>
+            <span class="inq-feed-status" [class.ongoing]="inq.status === 'Ongoing'">{{ inq.status }}</span>
           </div>
           <div class="inq-feed-msg">{{ inq.message }}</div>
           <div class="inq-feed-time">{{ formatDate(inq.createdAt) }} • Ref: {{ inq.inquiryRef }}</div>
@@ -167,7 +176,7 @@
 
       <div class="dash-card-body">
         <div class="customer-mini-list">
-          <div *ngFor="let c of (dashboardData?.recentCustomers | slice:0:5)" class="customer-mini-item">
+          <div *ngFor="let c of dashboardData?.recentCustomers" class="customer-mini-item">
             <div class="mini-avatar">{{ getInitials(c.fullName) }}</div>
             <div class="mini-info">
               <div class="mini-name">{{ c.fullName }} {{ c.lastName || '' }}</div>

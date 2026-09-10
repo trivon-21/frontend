@@ -1,32 +1,34 @@
 <div class="page-wrapper team-details-container">
   <!-- Page Header -->
-  <header class="page-header">
+  <header class="page-header" style="margin-bottom: 24px;">
     <h1 class="page-title">Team Details</h1>
   </header>
 
-  <p class="status-text" *ngIf="isLoading">
+  <p class="status-text" *ngIf="isLoading" style="font-size: 14px; color: #8a9e96; text-align: center; margin: 40px 0;">
     Loading team details...
   </p>
-  <p class="status-text error-text" *ngIf="loadError">
+  <p class="status-text error-text" *ngIf="loadError" style="font-size: 14px; color: #e11d48; text-align: center; margin: 40px 0; font-weight: 600;">
     {{ loadError }}
   </p>
 
   <ng-container *ngIf="teamDetails as details">
-    <div class="main-grid">
-
+    <div class="main-grid" style="grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+      
       <!-- Team Details Panel -->
-      <div class="details-card card-panel">
-        <h2 class="panel-title">{{ details.team.teamName }}</h2>
-
-        <div class="members-list">
+      <div class="details-card card-panel" style="padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: #1b2f27; margin: 0 0 20px 0; border-bottom: 1.5px solid rgba(0,0,0,0.05); padding-bottom: 12px;">
+          {{ details.team.teamName }}
+        </h2>
+        
+        <div class="members-list" style="display: flex; flex-direction: column; gap: 16px;">
           <!-- Team Lead -->
-          <div class="member-entry">
-            <div class="member-icon member-icon--lead">
-              <lucide-angular name="user" [size]="20"></lucide-angular>
+          <div class="member-entry" style="display: flex; align-items: center; gap: 16px;">
+            <div class="member-icon" style="width: 40px; height: 40px; border-radius: 10px; background: var(--primary-lighter); color: var(--primary-main); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <div class="member-info">
-              <span class="member-role-label">Team Lead</span>
-              <span class="member-name">
+            <div class="member-info" style="display: flex; flex-direction: column; gap: 2px;">
+              <span class="member-role" style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Team Lead</span>
+              <span class="member-name" style="font-size: 14.5px; font-weight: 700; color: #1b2f27;">
                 {{ details.teamLeader?.name || 'Unassigned' }}
               </span>
             </div>
@@ -34,38 +36,39 @@
 
           <!-- Team Members -->
           <ng-container *ngIf="details.teamMembers.length; else noMembers">
-            <div class="member-entry" *ngFor="let member of details.teamMembers">
-              <div class="member-icon member-icon--regular">
-                <lucide-angular name="user" [size]="20"></lucide-angular>
+            <div class="member-entry" *ngFor="let member of details.teamMembers" style="display: flex; align-items: center; gap: 16px;">
+              <div class="member-icon" style="width: 40px; height: 40px; border-radius: 10px; background: #f4f6f5; color: #566463; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </div>
-              <div class="member-info">
-                <span class="member-role-label">{{ member.role }}</span>
-                <span class="member-name member-name--regular">
+              <div class="member-info" style="display: flex; flex-direction: column; gap: 2px;">
+                <span class="member-role" style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">{{ member.role }}</span>
+                <span class="member-name" style="font-size: 14px; font-weight: 600; color: #2D3139;">
                   {{ member.name }}
                 </span>
               </div>
             </div>
           </ng-container>
           <ng-template #noMembers>
-            <p class="status-text">No additional team members available.</p>
+            <p class="status-text" style="font-size: 13.5px; color: #8a9e96; text-align: center; margin: 12px 0;">No additional team members available.</p>
           </ng-template>
         </div>
       </div>
 
       <!-- Time Slots Panel -->
-      <div class="details-card card-panel">
-        <h2 class="panel-title">Available Time Slots</h2>
-
-        <div class="slots-grid" *ngIf="details.team.availableSlots.length; else noSlots">
-          <div class="slot-tag" *ngFor="let slot of details.team.availableSlots">
-            <lucide-angular name="calendar" [size]="16" class="slot-icon"></lucide-angular>
-            <span class="slot-day">{{ slot.date | date:'EEEE' }}</span>
-            <span class="slot-date">{{ slot.date | date:'MMMM d, yyyy' }}</span>
-            <span class="slot-time" *ngIf="slot.timeSlot">{{ slot.timeSlot }}</span>
+      <div class="details-card card-panel" style="padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: #1b2f27; margin: 0 0 20px 0; border-bottom: 1.5px solid rgba(0,0,0,0.05); padding-bottom: 12px;">
+          Available Time Slots
+        </h2>
+        
+        <div class="slots-grid" *ngIf="details.team.availableSlots.length; else noSlots" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+          <div class="slot-tag" *ngFor="let slot of details.team.availableSlots" style="background: #f4f6f5; border: 1px solid rgba(0,0,0,0.05); border-radius: 10px; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px;">
+            <span class="slot-day" style="font-size: 14px; font-weight: 700; color: #1b2f27;">{{ slot.date | date:'EEEE' }}</span>
+            <span class="slot-date" style="font-size: 12px; color: #8a9e96; font-weight: 500;">{{ slot.date | date:'MMMM d, yyyy' }}</span>
+            <span class="slot-time" *ngIf="slot.timeSlot" style="font-size: 12px; color: var(--primary-main); font-weight: 600; margin-top: 2px;">{{ slot.timeSlot }}</span>
           </div>
         </div>
         <ng-template #noSlots>
-          <p class="status-text">No available time slots found.</p>
+          <p class="status-text" style="font-size: 13.5px; color: #8a9e96; text-align: center; margin: 20px 0;">No available time slots found.</p>
         </ng-template>
       </div>
     </div>

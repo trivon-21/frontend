@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
@@ -13,162 +13,71 @@ import { Supplier } from '../../../../../services/order-creation.service';
 })
 export class OrderSupplierSelectorComponent implements OnChanges {
   @Input() suppliers: Supplier[] = [];
-  @Input() relevantSuppliers: Supplier[] = [];
   @Input() initialSupplier: string = '';
-  @Input() revertSignal = 0;
   @Output() supplierSelected = new EventEmitter<string>();
-  @Output() newSupplierRequested = new EventEmitter<string>();
-  @Output() registeringNewSupplier = new EventEmitter<boolean>();
-
-  @ViewChild('supplierInput') supplierInputRef?: ElementRef<HTMLInputElement>;
 
   supplierSearchQuery = '';
   filteredSuppliers: Supplier[] = [];
   showSupplierDropdown = false;
   isAddingNewSupplier = false;
-  showAllSuppliers = false;
-  private suppressNextBlur = false;
-
-  get isRestricted(): boolean {
-    return this.relevantSuppliers.length > 0 && !this.showAllSuppliers;
-  }
-
-  get sourceSuppliers(): Supplier[] {
-    return this.isRestricted ? this.relevantSuppliers : this.suppliers;
-  }
-
-  /**
-   * Offer "Change Supplier" whenever one is already committed — an order is
-   * single-supplier, so re-opening the field means switching, not adding.
-   */
-  get isChangeAction(): boolean {
-    return (this.isRestricted || !!(this.initialSupplier || '').trim()) && !this.showAllSuppliers;
-  }
-
-  get pinnedActionLabel(): string {
-    return this.isChangeAction ? 'Change Supplier' : 'Add New Supplier';
-  }
-
-  get hasSupplierSelection(): boolean {
-    return !!this.supplierSearchQuery.trim() && !this.isAddingNewSupplier;
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['suppliers'] || changes['relevantSuppliers']) {
-      if (changes['relevantSuppliers']) {
-        this.showAllSuppliers = false;
-      }
-      this.filteredSuppliers = this.sourceSuppliers;
+    if (changes['suppliers']) {
+      this.filteredSuppliers = this.suppliers;
     }
-    if (changes['initialSupplier']) {
-      this.supplierSearchQuery = this.initialSupplier || '';
-    }
-    if (changes['revertSignal'] && !changes['revertSignal'].firstChange) {
-      this.showSupplierDropdown = false;
-      this.showAllSuppliers = false;
-      this.supplierSearchQuery = this.initialSupplier || '';
+    if (changes['initialSupplier'] && this.initialSupplier) {
+      this.supplierSearchQuery = this.initialSupplier;
     }
   }
 
   filterSuppliers(): void {
     const q = (this.supplierSearchQuery || '').toLowerCase().trim();
     if (!q) {
-      this.filteredSuppliers = this.sourceSuppliers;
+      this.filteredSuppliers = this.suppliers;
     } else {
-      this.filteredSuppliers = this.sourceSuppliers.filter(s =>
+      this.filteredSuppliers = this.suppliers.filter(s =>
         s.name.toLowerCase().includes(q)
       );
     }
-    if (!this.isAddingNewSupplier) {
-      this.showSupplierDropdown = true;
+
+    const exactMatch = this.suppliers.find(s => s.name.toLowerCase() === q);
+    if (exactMatch) {
+      this.supplierSelected.emit(exactMatch.name);
+    } else if (!this.isAddingNewSupplier) {
+      this.supplierSelected.emit('');
     }
+    this.showSupplierDropdown = true;
   }
 
   onSupplierInputFocus(): void {
-    if (this.isAddingNewSupplier) {
-      return;
-    }
     this.showSupplierDropdown = true;
     this.filterSuppliers();
   }
 
   onSupplierInputBlur(): void {
-    setTimeout(() => {
-      if (this.suppressNextBlur) {
-        this.suppressNextBlur = false;
-        return;
-      }
-      this.showSupplierDropdown = false;
-      if (this.isAddingNewSupplier) {
-        return;
-      }
-      const q = (this.supplierSearchQuery || '').toLowerCase().trim();
-      if (!q) {
-        if (this.showAllSuppliers) {
-          this.showAllSuppliers = false;
-          this.supplierSearchQuery = this.initialSupplier || '';
-          this.supplierSelected.emit(this.supplierSearchQuery);
-          return;
-        }
-        this.supplierSelected.emit('');
-        return;
-      }
-      const exactMatch = this.sourceSuppliers.find(s => s.name.toLowerCase() === q);
-      if (exactMatch) {
-        this.supplierSearchQuery = exactMatch.name;
-        this.showAllSuppliers = false;
-        this.supplierSelected.emit(exactMatch.name);
-      } else {
-        this.supplierSearchQuery = this.initialSupplier || '';
-        this.supplierSelected.emit(this.supplierSearchQuery);
-      }
-    }, 300);
+    setTimeout(() => { this.showSupplierDropdown = false; }, 300);
   }
 
-  onPinnedAction(): void {
-    if (this.isChangeAction) {
-      this.showAllSuppliers = true;
-      this.supplierSearchQuery = '';
-      this.suppressNextBlur = true;
-      this.filterSuppliers();
-      setTimeout(() => this.supplierInputRef?.nativeElement.focus());
+  selectSupplier(supplier: Supplier | 'new'): void {
+    if (supplier === 'new') {
+      this.isAddingNewSupplier = true;
+      this.showSupplierDropdown = false;
       return;
     }
-    this.isAddingNewSupplier = true;
-    this.showSupplierDropdown = false;
-    this.supplierSearchQuery = '';
-    this.registeringNewSupplier.emit(true);
-  }
-
-  clearSupplier(): void {
-    this.supplierSearchQuery = '';
-    this.showSupplierDropdown = false;
-    this.showAllSuppliers = false;
-    this.suppressNextBlur = true;
-    this.supplierSelected.emit('');
-  }
-
-  selectSupplier(supplier: Supplier): void {
     this.supplierSearchQuery = supplier.name;
     this.isAddingNewSupplier = false;
     this.showSupplierDropdown = false;
-    this.showAllSuppliers = false;
-    this.registeringNewSupplier.emit(false);
     this.supplierSelected.emit(supplier.name);
   }
 
   confirmNewSupplier(): void {
-    const trimmed = (this.supplierSearchQuery || '').trim();
-    if (!trimmed) return;
+    if (!this.supplierSearchQuery.trim()) return;
     this.isAddingNewSupplier = false;
-    this.registeringNewSupplier.emit(false);
-    this.newSupplierRequested.emit(trimmed);
+    this.supplierSelected.emit(this.supplierSearchQuery.trim());
   }
 
   cancelNewSupplier(): void {
     this.isAddingNewSupplier = false;
-    this.showAllSuppliers = false;
-    this.registeringNewSupplier.emit(false);
     this.supplierSearchQuery = this.initialSupplier || '';
     this.supplierSelected.emit(this.supplierSearchQuery);
   }

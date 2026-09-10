@@ -2,211 +2,34 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
-/* ── Header ── */
 .page-header {
-  margin-bottom: 4px;
+  margin-bottom: 24px;
 }
 
 .page-title {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: #1b2f27;
   margin: 0;
-  letter-spacing: -0.5px;
 }
 
-/* ── Status Text ── */
-.status-text {
-  font-size: 14px;
-  color: #8a9e96;
-  text-align: center;
-  margin: 40px 0;
-}
-
-.error-text {
-  color: #e11d48;
-  font-weight: 600;
-}
-
-/* ── Card ── */
 .card-panel {
   background: #fff;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  padding: 24px;
-  transition: box-shadow 0.2s;
 }
 
-.card-panel:hover {
-  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-}
-
-.panel-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1b2f27;
-  margin: 0 0 20px 0;
-  border-bottom: 1.5px solid rgba(0, 0, 0, 0.05);
-  padding-bottom: 12px;
-}
-
-/* ── Grid ── */
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: start;
 }
 
-/* ── Members List ── */
-.members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.member-entry {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px;
-  border-radius: 10px;
-  transition: background 0.15s;
-}
-
-.member-entry:hover {
-  background: #f8faf9;
-}
-
-.member-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.2s;
-}
-
-.member-entry:hover .member-icon {
-  transform: scale(1.05);
-}
-
-.member-icon--lead {
-  background: var(--primary-lighter);
-  color: var(--primary-main);
-}
-
-.member-icon--regular {
-  background: #f4f6f5;
-  color: #566463;
-}
-
-.member-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.member-role-label {
-  font-size: 10px;
-  color: #8a9e96;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.member-name {
-  font-size: 14.5px;
-  font-weight: 700;
-  color: #1b2f27;
-}
-
-.member-name--regular {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2D3139;
-}
-
-/* ── Slots Grid ── */
-.slots-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.slot-tag {
-  background: #f4f6f5;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 4px;
-  transition: transform 0.15s, background 0.15s;
-}
-
-.slot-tag:hover {
-  background: var(--primary-lighter);
-  transform: translateY(-2px);
-}
-
-.slot-icon {
-  color: var(--primary-main);
-  margin-bottom: 4px;
-}
-
-.slot-day {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1b2f27;
-}
-
-.slot-date {
-  font-size: 12px;
-  color: #8a9e96;
-  font-weight: 500;
-}
-
-.slot-time {
-  font-size: 12px;
-  color: var(--primary-main);
-  font-weight: 600;
-  margin-top: 2px;
-}
-
-/* ── Responsive ── */
 @media (max-width: 768px) {
   .main-grid {
     grid-template-columns: 1fr;
-  }
-
-  .team-details-container {
-    padding: 16px;
-  }
-
-  .page-title {
-    font-size: 22px;
-  }
-}
-
-@media (max-width: 480px) {
-  .slots-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .card-panel {
-    padding: 18px;
   }
 }

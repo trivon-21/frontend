@@ -103,22 +103,10 @@ export function outstanding(line: PurchaseLine): number {
   return Math.max(0, Number(line.orderedQuantity ?? line.quantity) - Number(line.receivedQuantity || 0));
 }
 
-export function canonicalPurchaseStatus(status?: string): PurchaseStatus {
-  if (!status) return 'draft';
-  const legacyMap: Record<string, PurchaseStatus> = {
-    'pending-approval': 'pending-manager',
-    PENDING: 'pending-finance',
-    APPROVED: 'approved',
-    REJECTED: 'rejected',
-  };
-  return legacyMap[status] || (status.toLowerCase() as PurchaseStatus);
-}
-
-export function purchaseStatusLabel(status: PurchaseStatus | string): string {
-  const normalized = canonicalPurchaseStatus(status);
+export function purchaseStatusLabel(status: PurchaseStatus): string {
   return ({
     draft: 'Draft', 'pending-manager': 'Awaiting Manager', 'pending-finance': 'Awaiting Finance',
     approved: 'Approved', rejected: 'Rejected', ordered: 'Ordered / Receiving',
     'partially-received': 'Partially Received', received: 'Completed', cancelled: 'Cancelled',
-  } as Record<PurchaseStatus, string>)[normalized] || status;
+  } as Record<PurchaseStatus, string>)[status];
 }

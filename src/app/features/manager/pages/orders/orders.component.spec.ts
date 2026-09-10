@@ -2,11 +2,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { OrdersComponent } from './orders.component';
 import { OrdersService, PurchaseRequest } from '../../services/orders.service';
-import { ConfirmService } from '../../../../services/confirm.service';
-
-function createConfirmServiceSpy(): jasmine.SpyObj<ConfirmService> {
-  return jasmine.createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
-}
 
 describe('OrdersComponent decision dialog', () => {
   it('requires a comment and retains the dialog input after a conflict', () => {
@@ -17,7 +12,6 @@ describe('OrdersComponent decision dialog', () => {
       service,
       {} as ActivatedRoute,
       { navigate: jasmine.createSpy() } as unknown as Router,
-      createConfirmServiceSpy(),
     );
     const order = { _id: 'order-1', requestId: 'REQ-001', statusVersion: 2 } as PurchaseRequest;
     component.openDecision('purchase', order, 'rejected', order.requestId);
@@ -40,7 +34,6 @@ describe('OrdersComponent decision dialog', () => {
       {} as OrdersService,
       {} as ActivatedRoute,
       {} as Router,
-      createConfirmServiceSpy(),
     );
     component.decisionTarget = {
       kind: 'purchase',

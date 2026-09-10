@@ -13,7 +13,7 @@ interface MaintenanceTicket {
   productType: string;
   location: string;
   date: string;
-  status: 'Completed' | 'In Progress' | 'On Hold' | 'Assigned' | 'New' | 'Pending' | 'Finance Approved' | 'Finance Rejected' | 'Sent to IM' | 'Materials Ready';
+  status: 'Completed' | 'In Progress' | 'Scheduled' | 'On Hold' | 'Assigned';
   assignedTeam: string;
   isCustomerInitiated?: boolean;
 }
