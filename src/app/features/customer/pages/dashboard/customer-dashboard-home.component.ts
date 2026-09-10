@@ -42,6 +42,8 @@ export class CustomerDashboardHomeComponent implements OnInit {
   // Filter mode for orders
   filterMode: 'all' | 'completed' | 'pending' | 'returned' | 'rejected' | null = null;
   showFilteredOrders = false;
+  orderHistoryPage = 1;
+  readonly orderHistoryPageSize = 5;
 
   constructor(private dashboardService: CustomerDashboardService) {}
 
@@ -128,6 +130,23 @@ export class CustomerDashboardHomeComponent implements OnInit {
     return this.data?.orders ?? [];
   }
 
+  get pagedOrders(): DashboardOrder[] {
+    const start = (this.orderHistoryPage - 1) * this.orderHistoryPageSize;
+    return this.orders.slice(start, start + this.orderHistoryPageSize);
+  }
+
+  get orderHistoryPageCount(): number {
+    return Math.max(1, Math.ceil(this.orders.length / this.orderHistoryPageSize));
+  }
+
+  get orderHistoryPageEnd(): number {
+    return Math.min(this.orderHistoryPage * this.orderHistoryPageSize, this.orders.length);
+  }
+
+  goToOrderHistoryPage(page: number): void {
+    this.orderHistoryPage = Math.min(Math.max(page, 1), this.orderHistoryPageCount);
+  }
+
   getFilteredOrders(): DashboardOrder[] {
     if (!this.filterMode || this.filterMode === 'all') {
       return this.orders;
@@ -144,7 +163,7 @@ export class CustomerDashboardHomeComponent implements OnInit {
   }
 
   formatAmount(amount: number): string {
-    return `$${amount.toFixed(2)}`;
+    return `LKR ${amount.toFixed(2)}`;
   }
 
   formatDate(dateStr: string): string {

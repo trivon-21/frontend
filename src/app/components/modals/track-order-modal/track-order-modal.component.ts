@@ -25,8 +25,18 @@ const BUY_INSTALL_STEPS: TimelineStep[] = [
   { label: 'Installation Completed', key: 'Installation Completed' },
 ];
 
+const INSTALLATION_STEPS: TimelineStep[] = [
+  { label: 'Order Placed', key: 'Pending Review' },
+  { label: 'Awaiting Quote', key: 'Awaiting Quote' },
+  { label: 'Awaiting Inspection', key: 'Awaiting Inspection' },
+  { label: 'Payment Confirmed', key: 'Confirmed' },
+  { label: 'Installation Scheduled', key: 'Installation Scheduled' },
+  { label: 'Installation Completed', key: 'Installation Completed' },
+];
+
 const STATUS_ORDER = [
-  'Order Placed', 'Payment Uploaded', 'Payment Confirmed', 'Inventory Approved',
+  'Order Placed', 'Pending Review', 'Payment Uploaded', 'Payment Confirmed',
+  'Awaiting Quote', 'Awaiting Inspection', 'Confirmed', 'Inventory Approved',
   'Shipped', 'Delivered', 'Installation Scheduled', 'Installation Completed'
 ];
 
@@ -92,7 +102,8 @@ export class TrackOrderModalComponent {
   }
 
   getSteps(): TimelineStep[] {
-    return this.order?.orderType === 'Buy & Install' ? BUY_INSTALL_STEPS : BUY_ONLY_STEPS;
+    if (this.order?.orderType === 'Buy & Install') return INSTALLATION_STEPS;
+    return BUY_ONLY_STEPS;
   }
 
   getStepState(stepKey: string): 'done' | 'active' | 'pending' {
@@ -112,7 +123,7 @@ export class TrackOrderModalComponent {
   }
 
   formatAmount(amount: number): string {
-    return `$${amount.toFixed(2)}`;
+    return `LKR ${amount.toFixed(2)}`;
   }
 
   getPaymentStatusClass(status: string): string {
