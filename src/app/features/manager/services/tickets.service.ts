@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
+import { TtlCacheService } from '../../../core/services/ttl-cache.service';
 
 export type WorkItemSource = 'service' | 'inspection' | 'installation' | 'maintenance';
 export type WorkItemPriority = 'high' | 'medium' | 'low';
@@ -104,7 +105,10 @@ function hydrate(item: OperationalWorkItem): OperationalWorkItem {
 
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly cache: TtlCacheService,
+  ) {}
 
   getWorkItems(filters: WorkItemFilters = {}): Observable<WorkItemsResponse> {
     let params = new HttpParams();
@@ -121,13 +125,13 @@ export class TicketsService {
       priority,
       slaDueAt,
       expectedVersion: item.version,
-    }).pipe(map(hydrate));
+    }).pipe(map(hydrate), tap(() => this.cache.invalidate('manager:')));
   }
 
   runAction(item: OperationalWorkItem, action: Exclude<WorkItemAction, 'update-control'>, reason: string): Observable<OperationalWorkItem> {
     return this.api.post<OperationalWorkItem>(`/manager/work-items/${item.sourceType}/${item.sourceId}/${action}`, {
       reason,
       expectedVersion: item.version,
-    }).pipe(map(hydrate));
+    }).pipe(map(hydrate), tap(() => this.cache.invalidate('manager:')));
   }
 }

@@ -36,7 +36,7 @@
     <table class="alx-table alx-table--wide">
       <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Priority</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
-        <tr *ngFor="let item of items; trackBy: trackItem" [class.row-updating]="updatingId === item.id">
+        <tr *ngFor="let item of items; trackBy: trackItem">
           <td class="sku-cell">{{ item.reference }}</td>
           <td>{{ item.customer?.fullName || 'Unknown customer' }}</td>
           <td class="cap">{{ item.sourceType }}</td>
@@ -48,7 +48,7 @@
             <span *ngIf="item.assignedTeam || item.assignedTechnician; else unassigned">{{ item.assignedTeam?.teamName || 'No team' }}<span *ngIf="item.assignedTechnician"> · {{ item.assignedTechnician.fullName }}</span></span>
             <ng-template #unassigned><span class="muted">Awaiting Main Technician</span></ng-template>
           </td>
-          <td class="actions-cell"><button #viewButton type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item, viewButton)">{{ item.allowedActions.length ? 'View and control' : 'View details' }}</button></td>
+          <td class="actions-cell"><button #viewButton type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item, viewButton)">View details</button></td>
         </tr>
         <tr *ngIf="!loading && items.length === 0"><td colspan="9" class="empty-cell">No operational work matches the current filters.</td></tr>
       </tbody>
@@ -71,15 +71,14 @@
       aria-modal="true"
       aria-labelledby="work-item-dialog-title"
       aria-describedby="work-item-dialog-description"
-      [attr.aria-busy]="updatingId === item.id"
     >
       <div class="portal-dialog__header work-item-dialog__header">
         <div>
           <span class="sku-cell">{{ item.reference }}</span>
           <h2 id="work-item-dialog-title">{{ item.sourceType | titlecase }} work item</h2>
-          <p id="work-item-dialog-description">Review operational details and use the manager controls available for this work item.</p>
+          <p id="work-item-dialog-description">Review operational details for this work item.</p>
         </div>
-        <button #detailsCloseButton type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close work item details" (click)="closeDetails()" [disabled]="updatingId === item.id">×</button>
+        <button #detailsCloseButton type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close work item details" (click)="closeDetails()">×</button>
       </div>
 
       <div class="error-message" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
@@ -91,22 +90,20 @@
           <div><span class="detail-label">Read-only assignment</span><strong>{{ item.assignedTeam?.teamName || 'No team assigned' }}</strong><span>{{ item.assignedTechnician?.fullName || 'No technician assigned' }}</span><span class="muted">Assignments are controlled by the Main Technician.</span></div>
         </div>
 
-        <div class="detail-grid control-grid" *ngIf="can('update-control')">
-          <div><label class="detail-label" for="priority">Priority</label><select id="priority" [(ngModel)]="selectedPriority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
-          <div><label class="detail-label" for="sla">SLA deadline</label><input id="sla" type="datetime-local" [(ngModel)]="selectedSla"></div>
-          <div><span class="detail-label">Manager controls</span><button class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" type="button" (click)="saveControls()" [disabled]="updatingId === item.id">Save priority and SLA</button></div>
-        </div>
-
-        <p class="muted read-only-note" *ngIf="item.allowedActions.length === 0">This record is read-only here. Use its owning inspection or installation workflow to make changes.</p>
-
-        <div class="lifecycle-controls" *ngIf="can('escalate') || can('clear-escalation') || can('close') || can('reopen')">
-          <label class="detail-label" for="action-reason">Reason for escalation or closure action</label>
-          <textarea id="action-reason" rows="2" [(ngModel)]="actionReason" placeholder="Required for every lifecycle action"></textarea>
-          <div class="row-actions mgr-action-group">
-            <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" *ngIf="can('escalate')" (click)="runAction('escalate')" [disabled]="updatingId === item.id">Escalate</button>
-            <button type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('clear-escalation')" (click)="runAction('clear-escalation')" [disabled]="updatingId === item.id">Clear escalation</button>
-            <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" *ngIf="can('close')" (click)="runAction('close')" [disabled]="updatingId === item.id">Verify and close</button>
-            <button type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" *ngIf="can('reopen')" (click)="runAction('reopen')" [disabled]="updatingId === item.id">Reopen</button>
+        <div class="detail-grid">
+          <div>
+            <span class="detail-label">Priority</span>
+            <div><span class="pill priority alx-table-status" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></div>
+          </div>
+          <div>
+            <span class="detail-label">SLA Deadline</span>
+            <strong>{{ item.slaDueAt ? (item.slaDueAt | date:'medium') : 'Not set' }}</strong>
+            <span class="sla" [class.overdue]="slaOverdue(item)">{{ slaText(item) }}</span>
+          </div>
+          <div>
+            <span class="detail-label">Operational Mode</span>
+            <strong>View only</strong>
+            <span class="muted">Operations are monitored in view-only mode.</span>
           </div>
         </div>
 

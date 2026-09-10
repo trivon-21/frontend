@@ -3,12 +3,14 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { InventoryItem } from '../../services/inventory-domain';
 import { InventoryManagerDashboardService } from '../../services/inventory-manager-dashboard.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 import { ProductWizardComponent } from './product-wizard.component';
 
 function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
   return {
     _id: '507f1f77bcf86cd799439011',
     name: 'Existing Compressor',
+    description: 'Existing scroll compressor',
     sku: 'COMP-EDIT-1',
     available: 0,
     reserved: 0,
@@ -20,8 +22,8 @@ function inventoryItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
     itemClass: 'Spare Parts',
     subcategory: 'Compressor',
     brand: 'Copeland',
-    location: 'Central Warehouse',
-    binLocation: 'Small Parts Racking',
+    location: 'A',
+    binLocation: 'A101',
     unit: 'units',
     unitCost: 100,
     isSerialized: false,
@@ -34,6 +36,7 @@ function createComponent(id: string | null = null): {
   component: ProductWizardComponent;
   service: jasmine.SpyObj<InventoryManagerDashboardService>;
   router: jasmine.SpyObj<Router>;
+  confirmService: jasmine.SpyObj<ConfirmService>;
 } {
   const item = inventoryItem();
   const service = jasmine.createSpyObj<InventoryManagerDashboardService>(
@@ -42,8 +45,8 @@ function createComponent(id: string | null = null): {
   );
   service.getSuppliers.and.returnValue(of([]));
   service.getLocations.and.returnValue(of([
-    { warehouse: 'Central Warehouse', placementAreas: ['Small Parts Racking', 'Consumables Storage'] },
-    { warehouse: 'Service Warehouse', placementAreas: ['Tool Crib'] },
+    { warehouse: 'A', racks: [{ rackTag: 'R1', bins: ['A101', 'A102'] }, { rackTag: 'R2', bins: ['A201', 'A202'] }] },
+    { warehouse: 'C', racks: [{ rackTag: 'R1', bins: ['C101', 'C102'] }] },
   ]));
   service.getItem.and.returnValue(of(item));
   service.updateItem.and.callFake((_itemId, update) => of({ ...item, ...update }));
@@ -53,9 +56,10 @@ function createComponent(id: string | null = null): {
     snapshot: { paramMap: convertToParamMap(id ? { id } : {}) },
   } as ActivatedRoute;
   const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
-  const component = new ProductWizardComponent(new FormBuilder(), route, router, service);
+  const confirmService = jasmine.createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
+  const component = new ProductWizardComponent(new FormBuilder(), route, router, service, confirmService);
   component.ngOnInit();
-  return { component, service, router };
+  return { component, service, router, confirmService };
 }
 
 describe('ProductWizardComponent', () => {
@@ -79,6 +83,7 @@ describe('ProductWizardComponent', () => {
     const { component, service, router } = createComponent(id);
     component.goToStep(2);
     component.form.controls['name'].setValue('Updated Compressor');
+    component.form.controls['description'].setValue('High-performance scroll compressor');
     component.form.controls['unitCost'].setValue(250);
     component.form.controls['capacityBtu'].setValue(null);
 
@@ -88,6 +93,7 @@ describe('ProductWizardComponent', () => {
       id,
       jasmine.objectContaining({
         name: 'Updated Compressor',
+        description: 'High-performance scroll compressor',
         unitCost: 250,
         capacityBtu: null,
       }),
@@ -111,52 +117,78 @@ describe('ProductWizardComponent', () => {
     expect(component.form.controls['name'].touched).toBeTrue();
   });
 
-  it('clears a placement area that does not belong to the selected warehouse', () => {
+  it('clears the rack and bin that do not belong to the selected warehouse', () => {
     const { component } = createComponent('507f1f77bcf86cd799439011');
 
-    component.form.patchValue({ location: 'Service Warehouse', binLocation: 'Small Parts Racking' });
+    component.form.patchValue({ location: 'C', rackTag: 'R2', binLocation: 'A201' });
     component.onWarehouseChange();
 
+    expect(component.form.controls['rackTag'].value).toBe('');
     expect(component.form.controls['binLocation'].value).toBe('');
     expect(component.form.hasError('storageLocation')).toBeTrue();
   });
 
+  it('keeps only the bins of the selected rack and describes the full storage address', () => {
+    const { component } = createComponent('507f1f77bcf86cd799439011');
+
+    component.form.patchValue({ location: 'A', rackTag: 'R2', binLocation: 'A101' });
+    component.onRackChange();
+
+    expect(component.availableBins).toEqual(['A201', 'A202']);
+    expect(component.form.controls['binLocation'].value).toBe('');
+
+    component.form.patchValue({ binLocation: 'A201' });
+
+    expect(component.storageLocationLabel).toBe('Warehouse A, R2, A201');
+    expect(component.form.hasError('storageLocation')).toBeFalse();
+  });
+
+  it('marks the compatibility step complete only once compatibility data is entered', () => {
+    const { component } = createComponent();
+    component.goToStep(3);
+
+    // Standing on the step must not mark it done - only entered data does.
+    expect(component.isStepComplete(3)).toBeFalse();
+
+    component.form.patchValue({ systemType: 'Split' });
+
+    expect(component.isStepComplete(3)).toBeTrue();
+  });
+
   describe('unsaved changes protection', () => {
     it('allows pristine navigation without confirmation prompt', () => {
-      const { component } = createComponent('507f1f77bcf86cd799439011');
-      spyOn(window, 'confirm');
+      const { component, confirmService } = createComponent('507f1f77bcf86cd799439011');
 
       expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
-    it('prompts user and aborts navigation when dirty and cancelled', () => {
-      const { component } = createComponent('507f1f77bcf86cd799439011');
+    it('prompts user and aborts navigation when dirty and cancelled', async () => {
+      const { component, confirmService } = createComponent('507f1f77bcf86cd799439011');
       component.form.controls['name'].setValue('Dirty Name Change');
       component.form.controls['name'].markAsDirty();
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmService.confirm.and.resolveTo(false);
 
-      expect(component.canDeactivate()).toBeFalse();
-      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved product changes?');
+      await expectAsync(component.canDeactivate()).toBeResolvedTo(false);
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({ variant: 'danger' }));
     });
 
-    it('prompts user and permits navigation when dirty and discarded', () => {
-      const { component } = createComponent('507f1f77bcf86cd799439011');
+    it('prompts user and permits navigation when dirty and discarded', async () => {
+      const { component, confirmService } = createComponent('507f1f77bcf86cd799439011');
       component.form.controls['name'].setValue('Dirty Name Change');
       component.form.controls['name'].markAsDirty();
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmService.confirm.and.resolveTo(true);
 
-      expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).toHaveBeenCalledOnceWith('Discard your unsaved product changes?');
+      await expectAsync(component.canDeactivate()).toBeResolvedTo(true);
+      expect(confirmService.confirm).toHaveBeenCalledOnceWith(jasmine.objectContaining({ variant: 'danger' }));
     });
 
     it('permits navigation without prompt after successful save', () => {
-      const { component } = createComponent('507f1f77bcf86cd799439011');
+      const { component, confirmService } = createComponent('507f1f77bcf86cd799439011');
       component.savedItem = inventoryItem();
-      spyOn(window, 'confirm');
 
       expect(component.canDeactivate()).toBeTrue();
-      expect(window.confirm).not.toHaveBeenCalled();
+      expect(confirmService.confirm).not.toHaveBeenCalled();
     });
 
     it('prevents browser beforeunload when dirty and allows when clean or saved', () => {

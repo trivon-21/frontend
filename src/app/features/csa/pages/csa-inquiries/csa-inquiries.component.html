@@ -25,7 +25,7 @@
 
   <!-- KPI SUMMARY CARDS -->
   <div class="summary-cards">
-    <div class="summary-card">
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'ALL'" (click)="setStatusFilter('ALL')" title="Show all inquiries">
       <div class="summary-icon blue">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'Awaiting'" (click)="setStatusFilter('Awaiting')" title="Show awaiting response inquiries">
       <div class="summary-icon amber">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'Ongoing'" (click)="setStatusFilter('Ongoing')" title="Show ongoing active inquiries">
       <div class="summary-icon blue">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card clickable-card" [class.active-card]="selectedStatus === 'Closed'" (click)="setStatusFilter('Closed')" title="Show closed inquiries">
       <div class="summary-icon green">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
@@ -98,14 +98,6 @@
         />
       </div>
 
-      <!-- FILTER TABS -->
-      <div class="inbox-filter-tabs">
-        <button [class.active]="selectedStatus === 'ALL'" (click)="setStatusFilter('ALL')">All</button>
-        <button [class.active]="selectedStatus === 'Awaiting'" (click)="setStatusFilter('Awaiting')">Awaiting</button>
-        <button [class.active]="selectedStatus === 'Ongoing'" (click)="setStatusFilter('Ongoing')">Ongoing</button>
-        <button [class.active]="selectedStatus === 'Closed'" (click)="setStatusFilter('Closed')">Closed</button>
-      </div>
-
       <!-- INQUIRY ITEMS LIST -->
       <div class="inquiry-items-list">
         <div 
@@ -121,7 +113,6 @@
             <span class="item-time">{{ formatDate(item.updatedAt || item.createdAt) }}</span>
           </div>
 
-          <div class="item-subject">{{ item.subject || item.inquiryType }}</div>
           <div class="item-snippet">{{ item.message }}</div>
 
           <div class="item-footer">
@@ -160,6 +151,7 @@
         <!-- STATUS BADGE & CLOSE ACTION BUTTON -->
         <div class="chat-status-action">
           <span class="inq-ref-code">Ref: {{ selectedInquiry.inquiryRef }}</span>
+          <span class="inq-type-badge inq-type-header">{{ selectedInquiry.inquiryType }}</span>
 
           <span 
             class="inq-status-pill" 
@@ -187,14 +179,6 @@
 
       <!-- MESSAGE STREAM -->
       <div class="chat-messages" #chatMessages>
-        
-        <!-- INITIAL INQUIRY TOPIC CARD -->
-        <div class="topic-info-box">
-          <div class="topic-title">Inquiry Topic: {{ selectedInquiry.subject || selectedInquiry.inquiryType }}</div>
-          <p class="topic-desc">{{ selectedInquiry.message }}</p>
-          <span class="topic-time">Started on {{ formatDate(selectedInquiry.createdAt) }}</span>
-        </div>
-
         <!-- THREAD BUBBLES -->
         <div 
           *ngFor="let msg of selectedInquiry.thread" 

@@ -107,7 +107,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let t of dashboardData?.recentTickets">
+              <tr *ngFor="let t of (dashboardData?.recentTickets | slice:0:5)">
                 <td>
                   <span class="table-subject">{{ t.subject || 'Service Request' }}</span>
                 </td>
@@ -139,11 +139,11 @@
           <h3 class="card-title">Recent Inquiries</h3>
           <p class="card-subtitle">Direct messages from customers</p>
         </div>
-        <a routerLink="/csa/inquiries" class="card-link">Open Inbox →</a>
+        <a routerLink="/csa/inquiries" class="card-link">View All →</a>
       </div>
 
       <div class="dash-card-body inquiries-feed">
-        <div *ngFor="let inq of dashboardData?.recentInquiries" class="inquiry-feed-item">
+        <div *ngFor="let inq of (dashboardData?.recentInquiries | slice:0:5)" class="inquiry-feed-item">
           <div class="inq-feed-top">
             <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
             <span class="inq-feed-status" [class.awaiting]="inq.status === 'Awaiting'" [class.ongoing]="inq.status === 'Ongoing'" [class.closed]="inq.status === 'Closed'">{{ inq.status }}</span>
@@ -167,7 +167,7 @@
 
       <div class="dash-card-body">
         <div class="customer-mini-list">
-          <div *ngFor="let c of dashboardData?.recentCustomers" class="customer-mini-item">
+          <div *ngFor="let c of (dashboardData?.recentCustomers | slice:0:5)" class="customer-mini-item">
             <div class="mini-avatar">{{ getInitials(c.fullName) }}</div>
             <div class="mini-info">
               <div class="mini-name">{{ c.fullName }} {{ c.lastName || '' }}</div>

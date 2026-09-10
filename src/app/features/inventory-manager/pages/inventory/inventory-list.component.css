@@ -259,6 +259,8 @@
   align-items: center;
   justify-content: center;
   z-index: 10000;
+  padding: 24px;
+  overflow-y: auto;
   animation: fade-in 0.2s ease-out;
 }
 
@@ -271,6 +273,43 @@
   overflow: hidden;
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* The product card reads as a landscape sheet: wide enough for four columns of
+   detail so every field fits at once, with no scrolling area inside the card. */
+.detail-modal {
+  width: min(96vw, 1120px);
+  max-width: 1120px;
+  /* margin:auto keeps a tall card fully reachable when the overlay scrolls */
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-modal .modal-body {
+  overflow: visible;
+}
+
+.detail-modal .detail-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+@media (max-width: 1100px) {
+  .detail-modal .detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .detail-modal .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.detail-modal .detail-item .value {
+  overflow-wrap: anywhere;
+}
+
 
 .save-confirmation-modal {
   max-width: 520px;
@@ -473,4 +512,8 @@
   .sort-field {
     margin-left: 0;
   }
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
 }
