@@ -1,0 +1,267 @@
+/**
+ * Shared visual language for the analytics section components
+ * (performance, financial, service, purchasing, inventory, coverage).
+ *
+ * Included as an extra `styleUrls` entry on each of those components so
+ * Angular's view encapsulation scopes it per-component, the same way each
+ * component already scopes its own CSS - no global selectors needed.
+ */
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: #1b2f27;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.section-heading.compact h2 {
+  font-size: 16px;
+}
+
+.section-heading p,
+.chart-header p,
+.coverage-panel p,
+.error-state p {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.scope-badge,
+.status-badge,
+.coverage-badge,
+.value-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge.danger,
+.value-badge.risk {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+.scope-badge.period {
+  color: var(--info);
+  background: var(--info-light);
+}
+
+.scope-badge.current,
+.status-badge,
+.coverage-badge.partial {
+  color: var(--success);
+  background: var(--success-light);
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+.kpi-card,
+.chart-card,
+.position-panel,
+.coverage-panel {
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--background-card);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  padding: 20px;
+}
+
+.kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpi-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kpi-label,
+.kpi-detail {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  color: var(--primary-main);
+  background: var(--primary-lighter);
+}
+
+.kpi-value {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+}
+
+.kpi-delta {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.kpi-delta.positive {
+  color: var(--success);
+}
+
+.kpi-delta.negative {
+  color: var(--error);
+}
+
+.kpi-card.negative-money .kpi-value {
+  color: var(--error);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: var(--spacing-md);
+}
+
+.chart-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chart-card {
+  min-width: 0;
+  padding: 20px 24px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.chart-header h3 {
+  margin: 0;
+  color: #1b2f27;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.legend {
+  display: flex;
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--text-muted);
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 220px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.empty-state strong {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.empty-state.compact {
+  min-height: 100px;
+}
+
+.alx-table td strong,
+.alx-table td small {
+  display: block;
+}
+
+.alx-table td strong {
+  color: var(--text-primary);
+}
+
+.alx-table td small {
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+@media (width <= 1100px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-grid,
+  .chart-grid.two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width <= 440px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card,
+  .position-panel,
+  .coverage-panel {
+    padding: var(--spacing-md);
+  }
+
+  .chart-header {
+    flex-direction: column;
+  }
+}

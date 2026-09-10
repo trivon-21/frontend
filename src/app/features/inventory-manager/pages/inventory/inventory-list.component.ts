@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, DestroyRef, Input, OnDestroy, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,8 +14,10 @@ import {
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   deriveStockStatus,
+  formatStorageLocation,
   StockStatus,
   supplierNameOf,
+  warehouseLabelFor,
 } from '../../services/inventory-domain';
 export { deriveStockStatus } from '../../services/inventory-domain';
 
@@ -37,6 +39,7 @@ export type InventorySortField =
   styleUrls: ['./inventory-list.component.css'],
 })
 export class InventoryListComponent implements OnInit, OnDestroy {
+  @Input() readOnly = false;
   Math = Math;
   private queryParamsSub?: Subscription;
   private searchSub?: Subscription;
@@ -93,6 +96,10 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    if (this.route.snapshot?.data?.['readOnly'] !== undefined) {
+      this.readOnly = Boolean(this.route.snapshot.data['readOnly']);
+    }
+
     const stream$ = this.destroyRef
       ? this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef))
       : this.route.queryParams;
@@ -123,13 +130,17 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     this.searchSubject.next(value);
   }
 
-  loadInventory(): void {
+  loadInventory(options: { force?: boolean } = {}): void {
     this.loading = true;
     this.error = null;
-    forkJoin({
-      items: this.inventoryService.getInventory(),
-      locations: this.inventoryService.getLocations(),
-    }).subscribe({
+    let stream$ = forkJoin({
+      items: this.inventoryService.getInventory(options),
+      locations: this.inventoryService.getLocations(options),
+    });
+    if (this.destroyRef) {
+      stream$ = stream$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    stream$.subscribe({
       next: ({ items, locations }) => {
         this.allInventoryItems = items;
         this.locationOptions = locations.map((location) => location.warehouse);
@@ -146,7 +157,11 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   loadInventoryPaged(params: InventoryListParams): void {
     this.loading = true;
     this.error = null;
-    this.inventoryService.getInventoryPaged(params).subscribe({
+    let paged$ = this.inventoryService.getInventoryPaged(params);
+    if (this.destroyRef) {
+      paged$ = paged$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    paged$.subscribe({
       next: (result) => {
         this.inventoryItems = result.items;
         this.totalItems = result.total;
@@ -163,9 +178,18 @@ export class InventoryListComponent implements OnInit, OnDestroy {
 
   private applyRouteParams(params: Params): void {
     if (params['search']) this.searchQuery = params['search'];
+    if (params['stockStatus']) {
+      const status = String(params['stockStatus']).toLowerCase();
+      if (['all', 'in-stock', 'low-stock', 'out-of-stock', 'reserved'].includes(status)) {
+        this.selectedStockStatus = status as StockFilter;
+      }
+    }
+    if (params['itemClass']) this.selectedItemClass = params['itemClass'];
+    if (params['subcategory']) this.selectedSubcategory = params['subcategory'];
+    if (params['location']) this.selectedLocation = params['location'];
     this.applyFilters();
     const selected = params['selected'] ? this.selectItemById(params['selected']) : null;
-    if (params['editSaved'] === '1' && selected) {
+    if (params['editSaved'] === '1' && selected && !this.readOnly) {
       this.savedProduct = selected;
       this.showSaveConfirmation = true;
       void this.router.navigate([], {
@@ -245,6 +269,7 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     this.filteredItems = this.allInventoryItems.filter((item) => {
       const searchable = [
         item.name,
+        item.description,
         item.sku,
         item.brand,
         item.category,
@@ -343,8 +368,12 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     }[deriveStockStatus(item)];
   }
 
-  getDisplayLocation(item: InventoryItem): string {
-    return item.binLocation ? `${item.location} · ${item.binLocation}` : item.location;
+  getStorageAddress(item: InventoryItem): string {
+    return formatStorageLocation(item.location, item.binLocation || '') || '—';
+  }
+
+  warehouseLabel(warehouse: string): string {
+    return warehouseLabelFor(warehouse) || warehouse;
   }
 
   getSupplierName(item: InventoryItem): string {

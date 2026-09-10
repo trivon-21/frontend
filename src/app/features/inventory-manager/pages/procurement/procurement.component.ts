@@ -1,9 +1,9 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 import {
   InventoryItem,
@@ -13,7 +13,10 @@ import {
   ReceiveInventoryInput,
 } from '../../services/inventory-manager-dashboard.service';
 import { NonPoReason, PurchaseLine, PurchaseRequest, ReceiptAuthorization, ReceiptMode, outstanding } from '../../services/purchase-workflow';
-import { toBusinessDateString } from '../../services/inventory-domain';
+import { InventoryRack, rackTagFor, toBusinessDateString, warehouseLabelFor } from '../../services/inventory-domain';
+import { HasPendingChanges } from '../../../../core/guards/pending-changes.guard';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface RecentProcurement {
   _id?: string;
@@ -51,7 +54,7 @@ type AuthItem = InventoryItem | string | undefined | null;
   templateUrl: './procurement.component.html',
   styleUrls: ['./procurement.component.css'],
 })
-export class ProcurementDashboardComponent implements OnInit {
+export class ProcurementDashboardComponent implements OnInit, HasPendingChanges {
   currentStep = 1;
   receiptMode: 'PO' | 'NON_PO' = 'PO';
   receiptForm!: FormGroup;
@@ -81,6 +84,7 @@ export class ProcurementDashboardComponent implements OnInit {
   selectedReplacement: ReceiptDiscrepancy | null = null;
   private readonly preselectedInventoryId: string | null;
   private pendingReceiptEventId = '';
+  private justSubmitted = false;
 
   readonly nonPoReasonLabels: Record<string, string> = {
     EMERGENCY_REPAIR: 'Emergency repair',
@@ -93,7 +97,9 @@ export class ProcurementDashboardComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly inventoryService: InventoryManagerDashboardService,
+    private readonly confirmService: ConfirmService,
     route: ActivatedRoute,
+    @Optional() private readonly destroyRef?: DestroyRef,
   ) {
     this.preselectedInventoryId = route.snapshot.queryParamMap.get('inventoryId');
     const mode = route.snapshot.queryParamMap.get('mode');
@@ -222,6 +228,7 @@ export class ProcurementDashboardComponent implements OnInit {
         damagedQuantity: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
         missingQuantity: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
         location: ['', Validators.required],
+        rackTag: ['', Validators.required],
         binLocation: ['', Validators.required],
         serialNumbers: this.fb.array([]),
         damagedSerialNumbers: this.fb.array([]),
@@ -237,18 +244,15 @@ export class ProcurementDashboardComponent implements OnInit {
     return toBusinessDateString(new Date());
   }
 
-  loadAllData(): void {
+  loadAllData(options: { force?: boolean } = {}): void {
     this.loading = true;
     this.loadError = '';
-    forkJoin({
-      procurements: this.inventoryService.getProcurements(),
-      inventoryItems: this.inventoryService.getInventory(),
-      orders: this.inventoryService.getOrderRequests(),
-      authorizations: this.inventoryService.getReceiptAuthorizations(),
-      discrepancies: this.inventoryService.getReceiptDiscrepancies(),
-      locations: this.inventoryService.getLocations(),
-    }).subscribe({
-      next: ({ procurements, inventoryItems, orders, authorizations, discrepancies, locations }) => {
+    let stream$ = this.inventoryService.getProcurementSummary(options);
+    if (this.destroyRef) {
+      stream$ = stream$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    stream$.subscribe({
+      next: ({ procurements, inventoryItems, orderRequests: orders, authorizations, discrepancies, locations }) => {
         this.procurements = procurements;
         this.inventoryItems = inventoryItems;
         this.locations = locations;
@@ -283,6 +287,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   setReceiptMode(mode: 'PO' | 'NON_PO'): void {
+    this.justSubmitted = false;
     this.receiptMode = mode;
     this.selectedPurchaseOrder = null;
     this.selectedPurchaseLine = null;
@@ -293,6 +298,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   selectPurchaseOrder(orderId: string): void {
+    this.justSubmitted = false;
     this.selectedReplacement = null;
     this.selectedPurchaseOrder = this.purchaseOrders.find((order) => order._id === orderId) || null;
     this.selectedPurchaseLine = null;
@@ -322,6 +328,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   selectAuthorization(authorization: ReceiptAuthorization): void {
+    this.justSubmitted = false;
     this.selectedReplacement = null;
     if (!['approved', 'partially-received'].includes(authorization.status)) return;
     const inventoryId = this.inventoryIdOf(authorization.inventoryId);
@@ -345,7 +352,7 @@ export class ProcurementDashboardComponent implements OnInit {
     const placement = this.validPlacement(this.selectedItem);
     this.receiptForm.patchValue({
       source: { sourceDocumentNumber: '', invoiceNumber: '', receivedDate: this.today(), condition: 'Good', supportingDocumentUrl: '' },
-      stock: { quantity, acceptedQuantity: quantity, damagedQuantity: 0, missingQuantity: 0, location: placement.location, binLocation: placement.binLocation },
+      stock: { quantity, acceptedQuantity: quantity, damagedQuantity: 0, missingQuantity: 0, location: placement.location, rackTag: placement.rackTag, binLocation: placement.binLocation },
     });
     this.updateSerialNumbers(quantity);
     this.updateDamagedSerialNumbers(0);
@@ -353,7 +360,7 @@ export class ProcurementDashboardComponent implements OnInit {
   }
 
   private clearSelectionFields(): void {
-    this.receiptForm.get('stock')?.reset({ quantity: null, acceptedQuantity: 0, damagedQuantity: 0, missingQuantity: 0, location: '', binLocation: '' });
+    this.receiptForm.get('stock')?.reset({ quantity: null, acceptedQuantity: 0, damagedQuantity: 0, missingQuantity: 0, location: '', rackTag: '', binLocation: '' });
     this.clearSerialNumbers();
     this.clearDamagedSerialNumbers();
   }
@@ -361,29 +368,49 @@ export class ProcurementDashboardComponent implements OnInit {
   private findInventoryItem(id: string): InventoryItem | null {
     const candidate = this.selectedAuthorization?.inventoryId;
     if (candidate && typeof candidate !== 'string' && (candidate._id || candidate.id) === id) return candidate;
-    const lineCandidate = this.selectedPurchaseLine as PurchaseLine & { inventory?: InventoryItem };
-    if (lineCandidate.inventory && (lineCandidate.inventory._id || lineCandidate.inventory.id) === id) {
+    const lineCandidate = this.selectedPurchaseLine as (PurchaseLine & { inventory?: InventoryItem }) | null;
+    if (lineCandidate?.inventory && (lineCandidate.inventory._id || lineCandidate.inventory.id) === id) {
       return lineCandidate.inventory;
     }
     return this.inventoryItems.find((item) => (item._id || item.id) === id) || null;
   }
 
-  get availablePlacementAreas(): string[] {
+  get availableRacks(): InventoryRack[] {
     const warehouse = this.receiptForm?.get('stock.location')?.value;
-    return this.locations.find((location) => location.warehouse === warehouse)?.placementAreas || [];
+    return this.locations.find((location) => location.warehouse === warehouse)?.racks || [];
+  }
+
+  get availableBins(): string[] {
+    const rackTag = this.receiptForm?.get('stock.rackTag')?.value;
+    return this.availableRacks.find((rack) => rack.rackTag === rackTag)?.bins || [];
+  }
+
+  warehouseLabel(location: InventoryLocationOption): string {
+    return location.warehouseLabel || warehouseLabelFor(location.warehouse);
   }
 
   onWarehouseChange(): void {
-    const placementArea = this.receiptForm.get('stock.binLocation');
-    if (!this.availablePlacementAreas.includes(placementArea?.value)) placementArea?.setValue('');
+    const rackControl = this.receiptForm.get('stock.rackTag');
+    if (!this.availableRacks.some((rack) => rack.rackTag === rackControl?.value)) rackControl?.setValue('');
+    this.onRackChange();
+  }
+
+  onRackChange(): void {
+    const binControl = this.receiptForm.get('stock.binLocation');
+    if (!this.availableBins.includes(binControl?.value)) binControl?.setValue('');
     this.receiptForm.get('stock')?.updateValueAndValidity();
   }
 
-  private validPlacement(item: InventoryItem | null): { location: string; binLocation: string } {
+  private validPlacement(item: InventoryItem | null): { location: string; rackTag: string; binLocation: string } {
     const location = item?.location || '';
     const binLocation = item?.binLocation || '';
-    const warehouse = this.locations.find((entry) => entry.warehouse === location);
-    return warehouse?.placementAreas.includes(binLocation) ? { location, binLocation } : { location: '', binLocation: '' };
+    const rackTag = rackTagFor(location, binLocation);
+    const rack = this.locations
+      .find((entry) => entry.warehouse === location)
+      ?.racks.find((entry) => entry.rackTag === rackTag);
+    return rack?.bins.includes(binLocation)
+      ? { location, rackTag, binLocation }
+      : { location: '', rackTag: '', binLocation: '' };
   }
 
   private inventoryItemFromSnapshot(authorization: ReceiptAuthorization): InventoryItem | null {
@@ -474,10 +501,30 @@ export class ProcurementDashboardComponent implements OnInit {
 
   private storageLocationValidator = (group: AbstractControl): Record<string, boolean> | null => {
     const location = group.get('location')?.value;
+    const rackTag = group.get('rackTag')?.value;
     const binLocation = group.get('binLocation')?.value;
-    const warehouse = this.locations.find((entry) => entry.warehouse === location);
-    return warehouse?.placementAreas.includes(binLocation) ? null : { storageLocation: true };
+    const rack = this.locations
+      .find((entry) => entry.warehouse === location)
+      ?.racks.find((entry) => entry.rackTag === rackTag);
+    return rack?.bins.includes(binLocation) ? null : { storageLocation: true };
   };
+
+  get isDirty(): boolean {
+    if (this.justSubmitted) return false;
+    return this.currentStep > 1 || this.receiptForm.dirty;
+  }
+
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.isDirty) {
+      return true;
+    }
+    return confirmDiscard(this.confirmService, 'receipt entry');
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty) event.preventDefault();
+  }
 
   canGoNext(): boolean {
     if (this.currentStep === 1) {
@@ -552,6 +599,7 @@ export class ProcurementDashboardComponent implements OnInit {
         next: ({ item, procurement }) => {
           this.isSubmitting = false;
           this.successMessage = `GRN posted for ${item.name}: ${procurement.acceptedQuantity} accepted, ${procurement.damagedQuantity} damaged, ${procurement.missingQuantity} missing.`;
+          this.justSubmitted = true;
           this.resetForm();
           this.loadAllData();
         },
@@ -583,6 +631,7 @@ export class ProcurementDashboardComponent implements OnInit {
   startReplacement(discrepancy: ReceiptDiscrepancy): void {
     const quantity = discrepancy.outstandingQuantity;
     if (quantity < 1) return;
+    this.justSubmitted = false;
 
     if (discrepancy.receiptMode === 'PO') {
       const orderId = this.relationId(discrepancy.orderRequestId);

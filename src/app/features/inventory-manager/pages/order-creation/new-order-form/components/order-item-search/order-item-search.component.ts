@@ -6,6 +6,18 @@ import { RouterModule } from '@angular/router';
 import { InventoryItem, OrderItem } from '../../../../../services/order-creation.service';
 import { supplierIdOf, supplierNameOf } from '../../../../../services/inventory-domain';
 
+export interface StagedItemSelection {
+  item: InventoryItem;
+  /** Chosen from the all-suppliers list, so it adopts the order's supplier on add. */
+  reassign: boolean;
+}
+
+export interface ProductSupplierChange {
+  inventoryId: string;
+  supplierId: string;
+  supplierName: string;
+}
+
 @Component({
   selector: 'app-order-item-search',
   standalone: true,
@@ -15,7 +27,15 @@ import { supplierIdOf, supplierNameOf } from '../../../../../services/inventory-
 })
 export class OrderItemSearchComponent implements OnChanges {
   @Input() inventoryItems: InventoryItem[] = [];
+  /** Unrestricted catalog, browsed via the "Add existing product" action. */
+  @Input() allInventoryItems: InventoryItem[] = [];
+  @Input() selectedSupplierId = '';
+  @Input() selectedSupplierName = '';
   @Output() itemAdded = new EventEmitter<OrderItem>();
+  @Output() itemSelected = new EventEmitter<StagedItemSelection>();
+  @Output() itemCleared = new EventEmitter<void>();
+  /** Fired only when Add to List commits a cross-supplier product onto the order's supplier. */
+  @Output() productSupplierChanged = new EventEmitter<ProductSupplierChange>();
 
   filteredInventory: InventoryItem[] = [];
   itemSearchQuery = '';
@@ -23,28 +43,58 @@ export class OrderItemSearchComponent implements OnChanges {
   selectedItem: InventoryItem | null = null;
   currentQuantity = 1;
   currentPrice = 0;
+  showAllProducts = false;
+  private stagedFromAllProducts = false;
+
+  get sourceItems(): InventoryItem[] {
+    return this.showAllProducts ? this.allInventoryItems : this.inventoryItems;
+  }
+
+  /**
+   * With nothing in the supplier's catalog there is nothing to browse, so the
+   * only useful action is creating a product. Otherwise offer the wider catalog.
+   */
+  get isCreateAction(): boolean {
+    return this.showAllProducts || this.inventoryItems.length === 0;
+  }
+
+  get pinnedActionLabel(): string {
+    return this.isCreateAction ? 'Create catalog product first' : 'Add existing product';
+  }
+
+  onPinnedAction(): void {
+    if (this.isCreateAction) {
+      return;
+    }
+    this.showAllProducts = true;
+    this.itemSearchQuery = '';
+    this.filterItems();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['inventoryItems']) {
-      this.filteredInventory = this.inventoryItems;
+    if (changes['inventoryItems'] || changes['allInventoryItems']) {
+      this.filteredInventory = this.matchingItems();
     }
   }
 
-  filterItems(): void {
+  private matchingItems(): InventoryItem[] {
     const q = (this.itemSearchQuery || '').toLowerCase().trim();
     if (!q) {
-      this.filteredInventory = this.inventoryItems;
-    } else {
-      this.filteredInventory = this.inventoryItems.filter(i => i && (
-        (i.name?.toLowerCase() || '').includes(q) ||
-        (i.sku?.toLowerCase() || '').includes(q) ||
-        (i.itemClass?.toLowerCase() || '').includes(q) ||
-        (i.subcategory?.toLowerCase() || '').includes(q) ||
-        (i.brand?.toLowerCase() || '').includes(q) ||
-        (i.manufacturerPartNumber?.toLowerCase() || '').includes(q) ||
-        (i.compatibleModels || []).some((model) => model.toLowerCase().includes(q))
-      ));
+      return this.sourceItems;
     }
+    return this.sourceItems.filter(i => i && (
+      (i.name?.toLowerCase() || '').includes(q) ||
+      (i.sku?.toLowerCase() || '').includes(q) ||
+      (i.itemClass?.toLowerCase() || '').includes(q) ||
+      (i.subcategory?.toLowerCase() || '').includes(q) ||
+      (i.brand?.toLowerCase() || '').includes(q) ||
+      (i.manufacturerPartNumber?.toLowerCase() || '').includes(q) ||
+      (i.compatibleModels || []).some((model) => model.toLowerCase().includes(q))
+    ));
+  }
+
+  filterItems(): void {
+    this.filteredInventory = this.matchingItems();
     this.showItemDropdown = true;
   }
 
@@ -54,6 +104,17 @@ export class OrderItemSearchComponent implements OnChanges {
     this.currentQuantity = 1;
     this.currentPrice = item.unitCost;
     this.showItemDropdown = false;
+    this.stagedFromAllProducts = this.showAllProducts;
+    this.itemSelected.emit({ item, reassign: this.willReassign });
+  }
+
+  /** True when adding this item moves it onto the order's supplier. */
+  get willReassign(): boolean {
+    if (!this.stagedFromAllProducts || !this.selectedSupplierName) {
+      return false;
+    }
+    const itemSupplier = supplierNameOf(this.selectedItem as InventoryItem) || '';
+    return itemSupplier.toLowerCase().trim() !== this.selectedSupplierName.toLowerCase().trim();
   }
 
   clearSelection(): void {
@@ -61,6 +122,10 @@ export class OrderItemSearchComponent implements OnChanges {
     this.itemSearchQuery = '';
     this.currentQuantity = 1;
     this.currentPrice = 0;
+    this.showAllProducts = false;
+    this.stagedFromAllProducts = false;
+    this.filteredInventory = this.matchingItems();
+    this.itemCleared.emit();
   }
 
   onItemInputBlur(): void {
@@ -72,8 +137,21 @@ export class OrderItemSearchComponent implements OnChanges {
     this.filterItems();
   }
 
+  itemSupplier(item: InventoryItem): string {
+    return supplierNameOf(item);
+  }
+
   addLineItem(): void {
     if (!this.selectedItem || this.currentQuantity <= 0) return;
+    // The supplier move is committed here, not when the product was picked.
+    const reassign = this.willReassign;
+    if (reassign) {
+      this.productSupplierChanged.emit({
+        inventoryId: this.selectedItem._id || this.selectedItem.id || '',
+        supplierId: this.selectedSupplierId,
+        supplierName: this.selectedSupplierName,
+      });
+    }
     this.itemAdded.emit({
         inventoryId: this.selectedItem._id || this.selectedItem.id || '',
         name: this.selectedItem.name,
@@ -87,8 +165,8 @@ export class OrderItemSearchComponent implements OnChanges {
         subcategory: this.selectedItem.subcategory || 'Unclassified',
         unit: this.selectedItem.unit,
         manufacturerPartNumber: this.selectedItem.manufacturerPartNumber,
-        supplierId: supplierIdOf(this.selectedItem),
-        supplierName: supplierNameOf(this.selectedItem),
+        supplierId: reassign ? this.selectedSupplierId : supplierIdOf(this.selectedItem),
+        supplierName: reassign ? this.selectedSupplierName : supplierNameOf(this.selectedItem),
     });
     this.clearSelection();
   }

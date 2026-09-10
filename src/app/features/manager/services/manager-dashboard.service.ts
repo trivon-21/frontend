@@ -1,7 +1,13 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
+import { TtlCacheService } from '../../../core/services/ttl-cache.service';
+import { OrderLookupResponse } from './manager-customers.service';
+
+const DASHBOARD_CACHE_KEY = 'manager:dashboard';
+const DASHBOARD_CACHE_TTL_MS = 30 * 1000;
 
 export interface CardStat {
   total: number;
@@ -42,6 +48,44 @@ export interface PendingAction extends DashboardLink {
   description: string;
   priority: 'high' | 'medium' | 'low';
   createdAt?: Date | string;
+  reasons?: string[];
+  amount?: number;
+  supplierName?: string;
+  reference?: string;
+  itemsCount?: number;
+  category?: string;
+  approvalType?: 'purchase' | 'non-po';
+}
+
+export interface RecentCustomerOrder {
+  id: string;
+  category: string;
+  reference: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  summary: string;
+  orderType: string;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  orderStatus: string;
+  createdAt: string | Date;
+  timeAgo?: string;
+}
+
+export interface RecentOrdersResponse {
+  success: boolean;
+  count: number;
+  orders: RecentCustomerOrder[];
+}
+
+export interface WorkloadEntry {
+  assigneeId: string;
+  assigneeName: string;
+  assigneeType: string;
+  active: number;
+  slaRisk: number;
 }
 
 export interface ManagerDashboardData {
@@ -51,29 +95,57 @@ export interface ManagerDashboardData {
   stats: ManagerSummaryStats;
   inventoryKpis: {
     reservedItems: InventoryKpiItem;
-    lowStockAlerts: InventoryKpiItem;
-    pendingMaterialRequests: InventoryKpiItem;
+    belowReorderItems: InventoryKpiItem;
+    outOfStockItems: InventoryKpiItem;
+    stockRiskItems: InventoryKpiItem;
     blockedMaterialRequests: InventoryKpiItem;
   };
-  recentActivity: ActivityItem[];
   pendingActions: PendingAction[];
+  pendingActionsTotal?: number;
+  workloadPreview?: WorkloadEntry[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class ManagerDashboardService {
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly cache: TtlCacheService,
+  ) {}
 
-  getDashboard(): Observable<ManagerDashboardData> {
-    return this.api.get<ManagerDashboardData>('/manager/dashboard').pipe(
+  /**
+   * Stale-while-revalidate: a re-entry within the TTL renders the cached
+   * numbers instantly (a stale hit emits the cached value immediately, then
+   * the fresh value when it lands) instead of flashing zeros while refetching.
+   * Pass `force: true` (e.g. from a Retry/Refresh action) to always hit the network.
+   */
+  getDashboard(options: { force?: boolean } = {}): Observable<ManagerDashboardData> {
+    const fetch = () => this.api.get<ManagerDashboardData>('/manager/dashboard').pipe(
       map((data) => ({
         ...data,
         currentDate: new Date(data.currentDate),
-        recentActivity: (data.recentActivity || []).map((activity) => {
-          const timestamp = new Date(activity.timestamp);
-          return { ...activity, timestamp, timeAgo: this.getTimeAgo(timestamp) };
+      })),
+    );
+    return options.force
+      ? this.cache.force(DASHBOARD_CACHE_KEY, DASHBOARD_CACHE_TTL_MS, fetch)
+      : this.cache.observe(DASHBOARD_CACHE_KEY, DASHBOARD_CACHE_TTL_MS, fetch);
+  }
+
+  getRecentOrders(limit = 50): Observable<RecentOrdersResponse> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.api.get<RecentOrdersResponse>('/manager/recent-orders', params).pipe(
+      map((res) => ({
+        ...res,
+        orders: (res.orders || []).map((order) => {
+          const created = new Date(order.createdAt);
+          return { ...order, createdAt: created, timeAgo: this.getTimeAgo(created) };
         }),
       })),
     );
+  }
+
+  lookupOrder(ref: string): Observable<OrderLookupResponse> {
+    const params = new HttpParams().set('ref', ref.trim());
+    return this.api.get<OrderLookupResponse>('/manager/orders/lookup', params);
   }
 
   private getTimeAgo(date: Date): string {

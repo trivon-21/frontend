@@ -1,0 +1,456 @@
+<div class="mgr-page customers-page customers-view-container">
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Past Customers &amp; Prior Engagements</h1>
+      <p class="page-subtitle">
+        Review customer accounts and see how many times they have worked with AirLux before and what those instances were.
+      </p>
+    </div>
+    <div class="header-actions mgr-action-group">
+      <span class="status-chip" [class.offline]="!!errorMessage">
+        <span class="dot" [class.syncing]="isLoading"></span>
+        {{ isLoading ? 'Syncing…' : 'Active Directory' }}
+      </span>
+      <button
+        type="button"
+        class="btn-refresh mgr-btn mgr-btn--secondary"
+        (click)="loadCustomers()"
+        [disabled]="isLoading"
+        title="Refresh list"
+      >
+        <lucide-angular name="rotate-ccw" [size]="16" [class.spin]="isLoading"></lucide-angular>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ERROR ALERT -->
+  <div class="portal-state portal-state--error alert-banner error" *ngIf="errorMessage" role="alert">
+    <lucide-angular name="circle-alert" [size]="20"></lucide-angular>
+    <div class="error-content">
+      <strong>Customer data unavailable</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadCustomers()" [disabled]="isLoading">Retry</button>
+  </div>
+
+  <!-- SUMMARY KPI CARDS (Standard Manager 4-Column Grid) -->
+  <section class="summary-grid summary-cards-grid" aria-label="Customer Engagement Summary">
+    <div class="summary-card">
+      <div class="card-main">
+        <div class="card-icon card-icon--primary">
+          <lucide-angular name="users" [size]="22"></lucide-angular>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Total Customers</span>
+          <span class="card-value">{{ summary.totalCustomers | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-main">
+        <div class="card-icon card-icon--emerald">
+          <lucide-angular name="clipboard-check" [size]="22"></lucide-angular>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Clients with Prior Work</span>
+          <span class="card-value">{{ summary.customersWithHistory | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-main">
+        <div class="card-icon card-icon--pine">
+          <lucide-angular name="history" [size]="22"></lucide-angular>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Total Recorded Instances</span>
+          <span class="card-value">{{ summary.totalInstances | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-main">
+        <div class="card-icon card-icon--slate">
+          <lucide-angular name="list-filter" [size]="22"></lucide-angular>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Loaded in View</span>
+          <span class="card-value">{{ customers.length }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAST ORDER QUICK LOOKUP (Manager Card Structure) -->
+  <section class="order-lookup-card content-card" aria-label="Past Order Quick Lookup">
+    <div class="lookup-card-info">
+      <div class="lookup-badge">
+        <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
+        <span>Past Order Lookup</span>
+      </div>
+      <p class="lookup-description">
+        Quickly inspect past order specifications, customer details, and payment status by entering an order reference (e.g. <code>SRQ-1008</code>, <code>ORD-D2F9...</code>, or <code>INST-...</code>).
+      </p>
+    </div>
+    <form class="lookup-input-form" (ngSubmit)="lookupOrder()">
+      <div class="lookup-input-wrapper">
+        <lucide-angular name="search" [size]="16" class="search-prefix-icon"></lucide-angular>
+        <input
+          type="text"
+          name="orderSearchRef"
+          [(ngModel)]="orderSearchRef"
+          placeholder="Enter order number (e.g. SRQ-1008)..."
+          class="lookup-text-input"
+          aria-label="Enter order number"
+        />
+        <button
+          *ngIf="orderSearchRef"
+          type="button"
+          class="clear-btn"
+          (click)="orderSearchRef = ''"
+          title="Clear reference"
+        >
+          ✕
+        </button>
+      </div>
+      <button
+        type="submit"
+        class="btn-lookup-submit mgr-btn mgr-btn--primary"
+        [disabled]="!orderSearchRef.trim() || orderLoading"
+      >
+        <lucide-angular name="eye" [size]="16"></lucide-angular>
+        <span>View Order</span>
+      </button>
+    </form>
+  </section>
+
+  <!-- CONTROLS: SEARCH & FILTER BAR -->
+  <section class="controls-panel filter-bar" aria-label="Filters and Search">
+    <div class="search-input-wrapper">
+      <lucide-angular name="search" [size]="16" class="search-icon"></lucide-angular>
+      <input
+        type="text"
+        placeholder="Search by name, email, phone, or location..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        aria-label="Search customers"
+      />
+      <button
+        *ngIf="searchQuery"
+        type="button"
+        class="clear-search-btn"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+      >
+        <lucide-angular name="x" [size]="14"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="filter-chips-row chip-group" role="radiogroup" aria-label="Filter by customer history">
+      <button
+        *ngFor="let opt of filterOptions"
+        type="button"
+        class="chip filter-chip"
+        [class.active]="selectedStatus === opt.key"
+        (click)="setStatusFilter(opt.key)"
+        role="radio"
+        [attr.aria-checked]="selectedStatus === opt.key"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
+
+    <div class="sort-wrapper">
+      <label for="sort-select" class="sort-label">Sort By:</label>
+      <select id="sort-select" [(ngModel)]="sortBy" (change)="onSortChange()" class="sort-select">
+        <option *ngFor="let s of sortOptions" [value]="s.key">{{ s.label }}</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS TABLE CARD -->
+  <section class="table-container-card">
+    <!-- Loading State -->
+    <div class="state-container loading portal-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading customer profiles...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="state-container empty" *ngIf="!isLoading && customers.length === 0">
+      <lucide-angular name="users" [size]="48" class="empty-icon"></lucide-angular>
+      <h3>No customer records found</h3>
+      <p>Try adjusting your search query or filter selection.</p>
+      <button type="button" class="btn-secondary mgr-btn mgr-btn--secondary" (click)="clearSearch(); setStatusFilter('all')">Reset Filters</button>
+    </div>
+
+    <!-- Data Table using standard alx-table-container and alx-table -->
+    <div class="alx-table-container table-responsive" *ngIf="!isLoading && customers.length > 0" role="region" aria-label="Customers Table" tabindex="0">
+      <table class="alx-table alx-table--wide data-table" aria-label="Customers Table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Address / City</th>
+            <th class="text-center">Past Instances</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cust of customers">
+            <!-- Customer Avatar & Name -->
+            <td>
+              <div class="customer-info-cell">
+                <div class="customer-avatar" aria-hidden="true">
+                  {{ getInitials(cust.fullName) }}
+                </div>
+                <div class="customer-names">
+                  <span class="customer-full-name">{{ cust.fullName }} {{ cust.lastName }}</span>
+                  <span class="customer-sub-id">ID: {{ cust._id | slice: -6 }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Contact -->
+            <td>
+              <div class="contact-cell">
+                <span class="contact-email" *ngIf="cust.email">{{ cust.email }}</span>
+                <span class="contact-phone" *ngIf="cust.phoneNumber">{{ cust.phoneNumber }}</span>
+                <span class="text-muted" *ngIf="!cust.email && !cust.phoneNumber">—</span>
+              </div>
+            </td>
+
+            <!-- Address -->
+            <td>
+              <span class="address-text" [title]="cust.address || 'Not provided'">
+                {{ cust.address || '—' }}
+              </span>
+            </td>
+
+            <!-- Past Instances Count -->
+            <td class="text-center">
+              <span class="instances-badge" [class.has-history]="cust.totalInstances > 0">
+                <strong>{{ cust.totalInstances }}</strong>
+                {{ cust.totalInstances === 1 ? 'instance' : 'instances' }}
+              </span>
+            </td>
+
+            <!-- Registered Date -->
+            <td>
+              <span class="date-text">{{ formatDate(cust.createdAt) }}</span>
+            </td>
+
+            <!-- Account Status -->
+            <td>
+              <span class="badge" [class.badge-success]="cust.isActive" [class.badge-inactive]="!cust.isActive">
+                {{ cust.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <!-- Action -->
+            <td class="text-right actions-cell">
+              <button
+                type="button"
+                class="btn-table-action mgr-btn mgr-btn--secondary mgr-btn--compact"
+                (click)="viewCustomerDetails(cust)"
+                title="View past instances"
+                aria-label="View past instances"
+              >
+                <lucide-angular name="eye" [size]="14"></lucide-angular>
+                <span>View Instances</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION FOOTER (Standard alx-pagination) -->
+    <nav class="alx-pagination pagination-footer" *ngIf="!isLoading && totalPages > 1" aria-label="Customers pagination">
+      <span class="pagination-info">
+        Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ (currentPage - 1) * pageSize + customers.length }} of {{ totalCount }}
+      </span>
+
+      <div class="alx-pagination__controls pagination-controls">
+        <button
+          type="button"
+          class="page-btn mgr-btn mgr-btn--secondary mgr-btn--compact"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+          aria-label="Previous page"
+        >
+          Previous
+        </button>
+
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+
+        <button
+          type="button"
+          class="page-btn mgr-btn mgr-btn--secondary mgr-btn--compact"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+          aria-label="Next page"
+        >
+          Next
+        </button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: CUSTOMER INSTANCES DETAILS                             -->
+  <!-- ============================================================= -->
+  <div
+    class="modal-backdrop portal-dialog-backdrop"
+    *ngIf="showDetailsModal"
+    (click)="closeDetailsModal()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="customer-modal-title"
+  >
+    <div class="modal-dialog-box portal-dialog customer-details-dialog" (click)="$event.stopPropagation()">
+      <!-- MODAL HEADER -->
+      <header class="modal-header portal-dialog__header">
+        <div class="modal-header-info">
+          <h2 id="customer-modal-title" class="modal-title">Past Work Instances</h2>
+          <p class="modal-subtitle">Summary of past interactions with AirLux</p>
+        </div>
+        <button
+          type="button"
+          class="modal-close-icon-btn portal-dialog__close mgr-btn mgr-btn--close"
+          (click)="closeDetailsModal()"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
+      </header>
+
+      <!-- MODAL BODY: LOADING -->
+      <div class="modal-body loading-state portal-state" *ngIf="isLoadingDetails">
+        <div class="spinner"></div>
+        <p>Loading instance history...</p>
+      </div>
+
+      <!-- MODAL BODY: ERROR -->
+      <div class="modal-body error-state portal-state portal-state--error" *ngIf="!isLoadingDetails && detailError">
+        <lucide-angular name="circle-alert" [size]="24" class="error-icon"></lucide-angular>
+        <p>{{ detailError }}</p>
+      </div>
+
+      <!-- MODAL BODY: DATA CONTENT -->
+      <div class="modal-body data-content" *ngIf="!isLoadingDetails && selectedCustomerDetails">
+        <!-- CUSTOMER OVERVIEW CARD -->
+        <div class="customer-overview-card">
+          <div class="profile-avatar-lg">
+            {{ getInitials(selectedCustomerDetails.customer.fullName) }}
+          </div>
+
+          <div class="profile-main-meta">
+            <div class="profile-name-row">
+              <h3 class="profile-name">
+                {{ selectedCustomerDetails.customer.fullName }} {{ selectedCustomerDetails.customer.lastName }}
+              </h3>
+              <span class="badge" [class.badge-success]="selectedCustomerDetails.customer.isActive" [class.badge-inactive]="!selectedCustomerDetails.customer.isActive">
+                {{ selectedCustomerDetails.customer.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+
+            <div class="profile-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Email</span>
+                <span class="meta-val">{{ selectedCustomerDetails.customer.email || 'Not provided' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Phone</span>
+                <span class="meta-val">{{ selectedCustomerDetails.customer.phoneNumber || 'Not provided' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Address</span>
+                <span class="meta-val">{{ selectedCustomerDetails.customer.address || 'Not provided' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Registered Date</span>
+                <span class="meta-val">{{ formatDate(selectedCustomerDetails.customer.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INSTANCES SUMMARY BANNER -->
+        <div class="instances-summary-banner">
+          <div class="instances-banner-count">
+            <span class="count-number">{{ selectedCustomerDetails.totalInstances }}</span>
+            <span class="count-label">
+              {{ selectedCustomerDetails.totalInstances === 1 ? 'Past Instance with AirLux' : 'Past Instances with AirLux' }}
+            </span>
+          </div>
+          <p class="instances-banner-sub">
+            {{ selectedCustomerDetails.totalInstances > 0 ? 'Chronological record of engagements listed below:' : 'This customer has not recorded any prior orders, services, or installations.' }}
+          </p>
+        </div>
+
+        <!-- INSTANCES LIST -->
+        <div class="instances-timeline-list" *ngIf="selectedCustomerDetails.instances.length > 0">
+          <div class="instance-row-card" *ngFor="let inst of selectedCustomerDetails.instances">
+            <div class="instance-type-badge" [ngClass]="getInstanceTypeBadgeClass(inst.type)">
+              {{ inst.type }}
+            </div>
+
+            <div class="instance-main-info">
+              <div class="instance-ref-line">
+                <strong class="instance-ref">{{ inst.reference }}</strong>
+                <span class="instance-summary-text">{{ inst.summary }}</span>
+              </div>
+              <div class="instance-meta-line">
+                <span class="instance-date">{{ formatDate(inst.date) }}</span>
+              </div>
+            </div>
+
+            <div class="instance-status-col">
+              <span class="badge" [ngClass]="getStatusClass(inst.status)">{{ inst.status }}</span>
+              <button
+                type="button"
+                class="btn-instance-inspect mgr-btn mgr-btn--secondary mgr-btn--compact"
+                (click)="viewInstanceOrder(inst)"
+                title="View order details popup"
+              >
+                <lucide-angular name="eye" [size]="14"></lucide-angular>
+                <span>View Details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Instances State -->
+        <div class="empty-instances-box" *ngIf="selectedCustomerDetails.instances.length === 0">
+          <lucide-angular name="history" [size]="36"></lucide-angular>
+          <p>No prior work instances found for this customer.</p>
+        </div>
+
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <footer class="modal-footer">
+        <button type="button" class="btn-primary mgr-btn mgr-btn--primary" (click)="closeDetailsModal()">Close</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- REUSABLE ORDER DETAIL MODAL -->
+  <app-order-detail-modal
+    [visible]="showOrderModal"
+    [order]="selectedOrder"
+    [loading]="orderLoading"
+    [errorMessage]="orderError"
+    (closed)="closeOrderModal()"
+  ></app-order-detail-modal>
+
+</div>

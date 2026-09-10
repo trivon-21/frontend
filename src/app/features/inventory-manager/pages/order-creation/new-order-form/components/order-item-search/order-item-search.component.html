@@ -29,18 +29,31 @@
         </div>
 
         <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
-          <a class="dropdown-item add-new" routerLink="/inventory-manager/product-wizard">
+          <a class="dropdown-item add-new" *ngIf="isCreateAction" routerLink="/inventory-manager/product-wizard">
             <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
-            Create catalog product first
+            {{ pinnedActionLabel }}
           </a>
+          <div
+            class="dropdown-item add-new change-product"
+            *ngIf="!isCreateAction"
+            role="button"
+            tabindex="-1"
+            [attr.aria-label]="pinnedActionLabel"
+            (mousedown)="onPinnedAction()">
+            <lucide-angular name="arrow-right-left" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+            {{ pinnedActionLabel }}
+          </div>
           <div class="dropdown-item" *ngFor="let item of filteredInventory" (mousedown)="selectInventoryItem(item)">
             <div class="item-info">
               <span class="name">{{ item.name }}</span>
-              <span class="sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</span>
+              <span class="sku" *ngIf="showAllProducts">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}<span *ngIf="itemSupplier(item)"> · {{ itemSupplier(item) }}</span></span>
             </div>
             <div class="item-stock-info">
               Avail: <span class="avail">{{ item.available }}</span>
             </div>
+          </div>
+          <div class="dropdown-item empty-hint" *ngIf="filteredInventory.length === 0" style="color: var(--text-muted); cursor: default;">
+            <span>{{ showAllProducts ? 'No catalog items found' : 'No catalog items found for this supplier' }}</span>
           </div>
         </div>
       </div>
@@ -55,16 +68,17 @@
             <span class="field-label">UNIT COST</span>
             <div class="price-input-wrapper">
               <span class="currency-prefix">LKR</span>
-            <input type="number" min="0" step="0.01" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
+              <input type="number" min="0" step="0.01" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
             </div>
           </div>
+          <button type="button" class="btn-primary im-btn im-btn--primary im-btn--compact btn-add-to-list" (click)="addLineItem()">ADD TO LIST</button>
         </div>
+        <p class="reassign-hint" *ngIf="willReassign">
+          Adding this moves <strong>{{ selectedItem.name }}</strong> to {{ selectedSupplierName }}.
+        </p>
         <div class="config-footer">
-          <div class="total-display">
-            <span class="field-label">SUBTOTAL</span>
-            <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
-          </div>
-          <button type="button" class="btn-primary im-btn im-btn--primary im-btn--compact" (click)="addLineItem()">ADD TO LIST</button>
+          <span class="field-label">SUBTOTAL</span>
+          <span class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</span>
         </div>
       </div>
     </div>
