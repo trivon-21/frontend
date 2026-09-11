@@ -37,7 +37,15 @@ export class Catalog implements OnInit {
   totalProducts: number = 0;
 
   // Static filter options
-  categories: string[] = ['Split AC', 'Window AC', 'Central AC', 'Inverter AC'];
+  categories: string[] = [
+    'Split Indoor Unit',
+    'Split Outdoor Unit',
+    'Cassette Unit',
+    'Ducted Unit',
+    'Multi-Split / VRF Unit',
+    'Fan-Coil / Air-Handling Unit',
+    'Packaged / Rooftop Unit'
+  ];
   brands: string[] = ['Samsung', 'LG', 'Daikin', 'Panasonic'];
   capacities: number[] = [12000, 18000, 24000];
 
@@ -234,9 +242,11 @@ export class Catalog implements OnInit {
   }
 
   getImageUrl(product: any): string {
-    const image = product.image;
-    if (!image) return 'assets/placeholder.png';
-    if (image.startsWith('http')) return image;
+    const image = product?.image || product;
+    if (!image) return '/images/placeholder.png';
+    if (typeof image !== 'string') return '/images/placeholder.png';
+    if (image.startsWith('data:') || image.startsWith('http') || image.startsWith('/')) return image;
+    if (image.startsWith('assets/')) return '/' + image;
     return '/images/' + image;
   }
 
