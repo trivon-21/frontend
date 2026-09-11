@@ -1212,6 +1212,26 @@ app-footer {
   line-height: 1.4;
 }
 
+.pd-purchase-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pd-purchase-error-msg svg {
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
 /* Inquiry button */
 .pd-btn-inquiry {
   flex: 1;
@@ -1514,21 +1534,21 @@ app-footer {
 }
 
 .pd-star-btn {
-    font-size: 1.65rem;
-    line-height: 1;
-    color: #111111;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: color 0.12s, transform 0.1s;
+    transition: transform 0.15s ease;
     user-select: none;
+    padding: 2px;
 }
 
 .pd-star-btn:hover {
-    transform: scale(1.15);
-    color: #f59e0b;
+    transform: scale(1.2);
 }
 
-.pd-star-btn.pd-star-active {
-    color: #f59e0b;
+.pd-star-btn svg {
+    transition: transform 0.15s ease, fill 0.15s ease;
 }
 
 

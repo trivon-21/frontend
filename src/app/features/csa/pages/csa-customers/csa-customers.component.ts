@@ -117,8 +117,8 @@ export class CsaCustomersComponent implements OnInit {
         this.showCreateModal = false;
         const fullName = `${res.customer?.fullName || ''} ${res.customer?.lastName || ''}`.trim();
         const toastMsg = res.emailSent
-          ? `Customer "${fullName}" created! Login credentials have been emailed to ${res.customer?.email}.`
-          : `Customer "${fullName}" created successfully!`;
+          ? `Customer profile created successfully! Login credentials have been emailed to ${res.customer?.email}.`
+          : `Customer profile for "${fullName}" created successfully!`;
         this.showToast(toastMsg);
         this.loadCustomers();
       },
