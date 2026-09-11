@@ -37,13 +37,14 @@
         <span class="kpi-icon"><lucide-angular name="timer" [size]="18"></lucide-angular></span>
         <div class="kpi-text"><span class="kpi-label">Outstanding Receivables</span><strong class="kpi-value">LKR {{ report.financial.outstandingReceivables.value | number:'1.0-0' }}</strong></div>
       </div>
-      <span class="kpi-detail">{{ report.financial.outstandingReceivables.count }} payment records</span>
+      <span class="kpi-detail">{{ report.financial.outstandingReceivables.count }} accepted invoices awaiting payment — matches Finance's Outstanding figure</span>
       <span class="kpi-delta neutral">Current snapshot</span>
     </article>
   </div>
 
-  <div class="financial-position-grid single-item">
+  <div class="financial-position-grid">
     <article><span>Outstanding purchase commitments</span><strong>LKR {{ report.financial.purchaseCommitments.value | number:'1.0-0' }}</strong><small>Approved / ordered, not yet received</small></article>
+    <article><span>All pending receivables</span><strong>LKR {{ report.financial.allOutstandingReceivables.value | number:'1.0-0' }}</strong><small>{{ report.financial.allOutstandingReceivables.count }} records — invoices, orders and service/inspection tickets awaiting payment (broader than Finance's Outstanding figure)</small></article>
   </div>
 
   <article class="chart-card financial-trend-card">

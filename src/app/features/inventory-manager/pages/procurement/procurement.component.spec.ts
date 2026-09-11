@@ -36,8 +36,9 @@ describe('ProcurementDashboardComponent workflow queues', () => {
   function create(params: Record<string, string> = {}, summaryOverrides: Record<string, unknown> = {}) {
     const service = jasmine.createSpyObj<InventoryManagerDashboardService>(
       'InventoryManagerDashboardService',
-      ['getProcurementSummary', 'getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getReceiptDiscrepancies', 'getLocations', 'receiveInventory'],
+      ['getProcurementSummary', 'getProcurements', 'getInventory', 'getOrderRequests', 'getReceiptAuthorizations', 'getReceiptDiscrepancies', 'getLocations', 'receiveInventory', 'getSuppliers', 'createReceiptAuthorization'],
     );
+    service.getSuppliers.and.returnValue(of([]));
     service.getProcurementSummary.and.returnValue(of({
       procurements: [],
       inventoryItems: [],
@@ -96,16 +97,16 @@ describe('ProcurementDashboardComponent workflow queues', () => {
   });
 
   it('honors dashboard workflow query parameters', () => {
-    const { component } = create({ mode: 'NON_PO', authorizationStatus: 'ready', grnFilter: 'FINANCE' });
+    const { component } = create({ mode: 'NON_PO', grnFilter: 'FINANCE' });
 
     expect(component.receiptMode).toBe('NON_PO');
-    expect(component.authorizationStatus).toBe('ready');
     expect(component.grnFilter).toBe('FINANCE');
-    expect(component.filteredAuthorizationQueue).toEqual([newItemAuthorization]);
+    expect(component.authorizations).toEqual([newItemAuthorization]);
   });
 
   it('receives an approved new-item authorization without inventing an inventory id', () => {
     const { component, service } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.patchValue({
       source: { sourceDocumentNumber: 'DELIVERY-1', receivedDate: '2026-09-02', condition: 'Good' },
@@ -126,6 +127,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
   it('submits an incomplete delivery with only accepted units destined for stock', () => {
     const { component, service } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization({ ...newItemAuthorization, authorizedQuantity: 3 });
     component.receiptForm.patchValue({
       source: { sourceDocumentNumber: 'DELIVERY-2', receivedDate: '2026-09-02', condition: 'Incomplete' },
@@ -146,6 +148,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
   it('defaults a damaged delivery to quarantine-only disposition', () => {
     const { component } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.get('source.condition')?.setValue('Damaged');
 
@@ -156,6 +159,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
   it('blocks posting when the disposition does not equal the expected delivery', () => {
     const { component } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.patchValue({
       source: { sourceDocumentNumber: 'DELIVERY-3', receivedDate: '2026-09-02', condition: 'Incomplete' },
@@ -172,6 +176,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
   it('rejects a rack from a different warehouse in the receipt form', () => {
     const { component } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.get('stock')?.patchValue({
       location: 'C',
@@ -184,6 +189,7 @@ describe('ProcurementDashboardComponent workflow queues', () => {
 
   it('narrows bins to the selected rack and clears a bin from another rack', () => {
     const { component } = create({ mode: 'NON_PO' });
+    component.nonPoAction = 'receive';
     component.selectAuthorization(newItemAuthorization);
     component.receiptForm.get('stock')?.patchValue({ location: 'A', rackTag: 'R2', binLocation: 'A102' });
     component.onRackChange();

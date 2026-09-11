@@ -51,7 +51,7 @@
             <lucide-angular name="check" [size]="14" *ngIf="currentStep > 1"></lucide-angular>
             <span *ngIf="currentStep <= 1">1</span>
           </div>
-          <div class="step-meta"><span class="step-title">Receipt Source</span><span class="step-sub">PO / Authorization</span></div>
+          <div class="step-meta"><span class="step-title">{{ isNonPoCreate ? 'Item & Cost' : 'Receipt Source' }}</span><span class="step-sub">{{ isNonPoCreate ? 'Product, price & count' : 'PO / Authorization' }}</span></div>
         </button>
         <div class="step-divider" [class.active]="currentStep > 1"></div>
         <button type="button" class="step-tab" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" [attr.aria-current]="currentStep === 2 ? 'step' : null" (click)="setStep(2)">
@@ -59,23 +59,23 @@
             <lucide-angular name="check" [size]="14" *ngIf="currentStep > 2"></lucide-angular>
             <span *ngIf="currentStep <= 2">2</span>
           </div>
-          <div class="step-meta"><span class="step-title">Documents</span><span class="step-sub">Invoice & Details</span></div>
+          <div class="step-meta"><span class="step-title">{{ isNonPoCreate ? 'Justification' : 'Documents' }}</span><span class="step-sub">{{ isNonPoCreate ? 'Reason & Reference' : 'Invoice & Details' }}</span></div>
         </button>
         <div class="step-divider" [class.active]="currentStep > 2"></div>
         <button type="button" class="step-tab" [class.active]="currentStep === 3" [attr.aria-current]="currentStep === 3 ? 'step' : null" (click)="setStep(3)">
           <div class="step-circle"><span>3</span></div>
-          <div class="step-meta"><span class="step-title">Placement</span><span class="step-sub">Quantity & Storage</span></div>
+          <div class="step-meta"><span class="step-title">{{ isNonPoCreate ? 'Review' : 'Placement' }}</span><span class="step-sub">{{ isNonPoCreate ? 'Confirm & Submit' : 'Quantity & Storage' }}</span></div>
         </button>
       </div>
     </div>
 
     <!-- Form Content -->
-    <form [formGroup]="receiptForm" (ngSubmit)="onSubmit()" class="grn-body">
+    <form [formGroup]="receiptForm" (ngSubmit)="nextStep()" class="grn-body">
       <!-- Step 1: Receipt Source -->
       <div class="step-content animate-fade" *ngIf="currentStep === 1">
         <div class="step-intro">
-          <h3>Select Purchase or Authorization Source</h3>
-          <p class="step-desc">Choose the approved workflow record that authorizes this incoming shipment.</p>
+          <h3>{{ isNonPoCreate ? 'Select the Item Being Sourced' : 'Select Purchase or Authorization Source' }}</h3>
+          <p class="step-desc">{{ isNonPoCreate ? 'Pick the catalog item and enter the unit price and count for this Non-PO request.' : 'Choose the approved workflow record that authorizes this incoming shipment.' }}</p>
         </div>
 
         <div class="mode-selector-wrapper">
@@ -87,12 +87,26 @@
             </button>
             <button type="button" class="segment-btn" [class.active]="receiptMode === 'NON_PO'" [attr.aria-pressed]="receiptMode === 'NON_PO'" (click)="setReceiptMode('NON_PO')">
               <lucide-angular name="shield-check" [size]="16"></lucide-angular>
-              <span>Emergency Approved Authorization (Non-PO)</span>
+              <span>Emergency / Non-PO</span>
             </button>
           </div>
         </div>
 
-        <ng-container *ngIf="receiptMode === 'PO'; else emergencySource">
+        <div class="mode-selector-wrapper" *ngIf="receiptMode === 'NON_PO'">
+          <label class="field-label">NON-PO ACTION *</label>
+          <div class="segmented-control">
+            <button type="button" class="segment-btn" [class.active]="nonPoAction === 'create'" [attr.aria-pressed]="nonPoAction === 'create'" (click)="setNonPoAction('create')">
+              <lucide-angular name="plus" [size]="16"></lucide-angular>
+              <span>New Non-PO Request</span>
+            </button>
+            <button type="button" class="segment-btn" [class.active]="nonPoAction === 'receive'" [attr.aria-pressed]="nonPoAction === 'receive'" (click)="setNonPoAction('receive')">
+              <lucide-angular name="package-check" [size]="16"></lucide-angular>
+              <span>Receive Approved Request</span>
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="receiptMode === 'PO'">
           <div class="form-grid">
             <div class="form-group">
               <label class="field-label">ISSUED PURCHASE ORDER *</label>
@@ -117,7 +131,7 @@
           </div>
         </ng-container>
 
-        <ng-template #emergencySource>
+        <ng-container *ngIf="receiptMode === 'NON_PO' && nonPoAction === 'receive'">
           <div class="form-group">
             <label class="field-label">APPROVED EMERGENCY AUTHORIZATION *</label>
             <select class="form-select" [value]="selectedAuthorization?._id || ''" (change)="selectAuthorizationById($any($event.target).value)">
@@ -126,14 +140,63 @@
                 {{ auth.authorizationNumber }} — {{ auth.supplierName }} ({{ reasonLabel(auth.nonPoReason) }})
               </option>
             </select>
-            <small class="field-help">Emergency stock can only be posted after Manager approval.</small>
+            <small class="field-help">Only Manager-approved Non-PO requests can be received.</small>
           </div>
-        </ng-template>
+        </ng-container>
+
+        <div class="form-grid" *ngIf="isNonPoCreate" [formGroup]="nonPoRequestForm">
+          <ng-container formGroupName="item">
+            <div class="form-group">
+              <label class="field-label">PRODUCT *</label>
+              <div class="product-picker">
+                <div class="input-icon-wrap">
+                  <lucide-angular name="search" [size]="16" class="input-icon"></lucide-angular>
+                  <input
+                    type="text"
+                    class="form-input product-search-input"
+                    [ngModelOptions]="{ standalone: true }"
+                    [(ngModel)]="productSearchQuery"
+                    (input)="filterProducts()"
+                    (focus)="onProductInputFocus()"
+                    (blur)="onProductInputBlur()"
+                    placeholder="Search catalog by name or SKU..."
+                    autocomplete="off"
+                    aria-label="Search catalog items"
+                    aria-autocomplete="list"
+                    [attr.aria-expanded]="showProductDropdown" />
+                  <button type="button" class="btn-clear-selection" *ngIf="nonPoRequestForm.get('item.inventoryId')?.value" (click)="clearProductSelection()" aria-label="Clear selected product" title="Clear selection">
+                    <lucide-angular name="x" [size]="14"></lucide-angular>
+                  </button>
+                </div>
+                <div class="product-dropdown animate-fade" *ngIf="showProductDropdown">
+                  <div class="product-dropdown-item" *ngFor="let item of filteredProducts" (mousedown)="selectProduct(item)">
+                    <div class="product-dropdown-info">
+                      <span class="product-dropdown-name">{{ item.name }}</span>
+                      <span class="product-dropdown-sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }}</span>
+                    </div>
+                    <span class="product-dropdown-avail">Avail: {{ item.available }}</span>
+                  </div>
+                  <div class="product-dropdown-item product-dropdown-empty" *ngIf="filteredProducts.length === 0">
+                    <span>No catalog items found</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="field-label">UNIT PRICE (LKR) *</label>
+              <input type="number" min="0" step="0.01" class="form-input" formControlName="unitCost" placeholder="Enter unit price" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">COUNT (QUANTITY) *</label>
+              <input type="number" min="1" step="1" class="form-input highlight-input" formControlName="authorizedQuantity" placeholder="Enter quantity" />
+            </div>
+          </ng-container>
+        </div>
 
         <div class="item-summary-card animate-fade" *ngIf="selectedItem">
           <div class="summary-header">
             <div class="summary-badge">ITEM VERIFICATION</div>
-            <div class="summary-supplier">
+            <div class="summary-supplier" *ngIf="!isNonPoCreate">
               <lucide-angular name="truck" [size]="14"></lucide-angular>
               <span>{{ selectedPurchaseOrder?.supplierName || selectedAuthorization?.supplierName || '—' }}</span>
             </div>
@@ -142,13 +205,13 @@
             <div class="summary-col"><span class="label">Item Name</span><strong class="val">{{ selectedItem.name }}</strong></div>
             <div class="summary-col"><span class="label">SKU / Code</span><strong class="val sku-badge">{{ selectedItem.sku }}</strong></div>
             <div class="summary-col"><span class="label">Unit Cost</span><strong class="val price">LKR {{ selectedUnitCost | number:'1.2-2' }}</strong></div>
-            <div class="summary-col"><span class="label">Available to Receive</span><strong class="val highlight-badge">{{ remainingQuantity }} {{ selectedItem.unit }}</strong></div>
+            <div class="summary-col"><span class="label">{{ isNonPoCreate ? 'Requested Quantity' : 'Available to Receive' }}</span><strong class="val highlight-badge">{{ remainingQuantity }} {{ selectedItem.unit }}</strong></div>
           </div>
         </div>
       </div>
 
-      <!-- Step 2: Document Details -->
-      <div class="step-content animate-fade" formGroupName="source" *ngIf="currentStep === 2">
+      <!-- Step 2: Documents / Justification -->
+      <div class="step-content animate-fade" formGroupName="source" *ngIf="currentStep === 2 && !isNonPoCreate">
         <div class="step-intro">
           <h3>Supplier Documents & Receipt Details</h3>
           <p class="step-desc">Enter the supplier delivery note or invoice details to attach to this GRN.</p>
@@ -191,8 +254,65 @@
         </div>
       </div>
 
+      <div class="step-content animate-fade" *ngIf="currentStep === 2 && isNonPoCreate" [formGroup]="nonPoRequestForm">
+        <div class="step-intro">
+          <h3>Justify the Non-PO Request</h3>
+          <p class="step-desc">This is submitted to your Manager for approval before it can be received.</p>
+        </div>
+        <div class="form-grid" formGroupName="documents">
+          <div class="form-group">
+            <label class="field-label">SUPPLIER *</label>
+            <select class="form-select" formControlName="supplierId">
+              <option value="">Select a supplier</option>
+              <option *ngFor="let supplier of suppliers" [value]="supplier._id">{{ supplier.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">NON-PO REASON *</label>
+            <select class="form-select" formControlName="nonPoReason">
+              <option value="">Select a reason</option>
+              <option *ngFor="let reason of nonPoReasonKeys" [value]="reason">{{ nonPoReasonLabels[reason] }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">SOURCE DOCUMENT NUMBER *</label>
+            <input class="form-input" formControlName="sourceDocumentNumber" placeholder="e.g. DN-2026-8890 or INV-1045" />
+          </div>
+          <div class="form-group full-span">
+            <label class="field-label">EXPLANATION *</label>
+            <input class="form-input" formControlName="explanation" placeholder="Why this item is being sourced outside a PO" />
+          </div>
+          <div class="form-group full-span">
+            <label class="field-label">SUPPORTING DOCUMENT URL</label>
+            <input class="form-input" formControlName="supportingDocumentUrl" placeholder="https://... (optional)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Review & Submit (Non-PO create) -->
+      <div class="step-content animate-fade" *ngIf="currentStep === 3 && isNonPoCreate">
+        <div class="step-intro">
+          <h3>Review & Submit for Manager Approval</h3>
+          <p class="step-desc">Confirm the details below. This request will be sent to your Manager for approval.</p>
+        </div>
+        <div class="receipt-calculation-card animate-fade" *ngIf="selectedItem">
+          <div class="calc-header">
+            <h4>Non-PO Request Summary</h4>
+            <span class="calc-badge">EMERGENCY AUTH</span>
+          </div>
+          <div class="calc-grid">
+            <div class="calc-row"><span class="label">Item & SKU:</span><span class="value">{{ selectedItem.name }} ({{ selectedItem.sku }})</span></div>
+            <div class="calc-row"><span class="label">Quantity:</span><span class="value highlight">{{ nonPoRequestQuantity }} {{ selectedItem.unit }}</span></div>
+            <div class="calc-row"><span class="label">Unit Price:</span><span class="value">LKR {{ selectedUnitCost | number:'1.2-2' }}</span></div>
+            <div class="calc-row total-row"><span class="label">Estimated Total:</span><span class="value total-price">LKR {{ nonPoRequestTotal | number:'1.2-2' }}</span></div>
+            <div class="calc-row"><span class="label">Reason:</span><span class="value">{{ reasonLabel(nonPoRequestForm.get('documents.nonPoReason')?.value) }}</span></div>
+            <div class="calc-row"><span class="label">Source Document:</span><span class="value">{{ nonPoRequestForm.get('documents.sourceDocumentNumber')?.value || '—' }}</span></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Step 3: Stock Placement -->
-      <div class="step-content animate-fade" formGroupName="stock" *ngIf="currentStep === 3">
+      <div class="step-content animate-fade" formGroupName="stock" *ngIf="currentStep === 3 && !isNonPoCreate">
         <div class="step-intro">
           <h3>Stock Placement & Location</h3>
           <p class="step-desc">Separate accepted stock from damaged and missing units before posting.</p>
@@ -329,58 +449,14 @@
         </button>
         <div class="spacer"></div>
         <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="isSubmitting" (click)="nextStep()">
-          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? 'Post GRN & Update Stock' : 'Continue' }}</span>
-          <span *ngIf="isSubmitting">Posting GRN...</span>
+          <span *ngIf="!isSubmitting">{{ currentStep === 3 ? (isNonPoCreate ? 'Submit for Manager Approval' : 'Post GRN & Update Stock') : 'Continue' }}</span>
+          <span *ngIf="isSubmitting">{{ isNonPoCreate ? 'Submitting…' : 'Posting GRN...' }}</span>
           <lucide-angular name="chevron-right" [size]="16" *ngIf="!isSubmitting && currentStep < 3"></lucide-angular>
           <lucide-angular name="check" [size]="16" *ngIf="!isSubmitting && currentStep === 3"></lucide-angular>
         </button>
       </div>
     </form>
   </div>
-
-  <section class="authorization-section content-card" *ngIf="!loading && !loadError" aria-labelledby="authorization-queue-title">
-    <div class="section-top-bar">
-      <div class="section-title">
-        <h2 id="authorization-queue-title">Non-PO Authorization Queue</h2>
-        <p class="subtitle">Track authorization, receiving, and Finance reconciliation status.</p>
-      </div>
-      <div class="filter-pills" aria-label="Authorization status filters">
-        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'all'" [attr.aria-pressed]="authorizationStatus === 'all'" (click)="authorizationStatus = 'all'">All</button>
-        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'pending'" [attr.aria-pressed]="authorizationStatus === 'pending'" (click)="authorizationStatus = 'pending'">Awaiting Manager</button>
-        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'ready'" [attr.aria-pressed]="authorizationStatus === 'ready'" (click)="authorizationStatus = 'ready'">Ready to Receive</button>
-        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'completed'" [attr.aria-pressed]="authorizationStatus === 'completed'" (click)="authorizationStatus = 'completed'">Completed</button>
-        <button type="button" class="pill-btn" [class.active]="authorizationStatus === 'rejected'" [attr.aria-pressed]="authorizationStatus === 'rejected'" (click)="authorizationStatus = 'rejected'">Rejected</button>
-      </div>
-    </div>
-    <div class="alx-table-container" role="region" aria-label="Non-PO receipt authorizations" tabindex="0">
-      <table class="authorization-table alx-table alx-table--medium alx-table--fixed" *ngIf="filteredAuthorizationQueue.length > 0">
-        <thead>
-          <tr>
-            <th>Authorization</th>
-            <th>Item</th>
-            <th>Reason</th>
-            <th>Received</th>
-            <th>Approval</th>
-            <th>Finance</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let authorization of filteredAuthorizationQueue">
-            <td class="sku-cell">{{ authorization.authorizationNumber }}</td>
-            <td class="name-cell">{{ authorizationItemName(authorization) }}</td>
-            <td>{{ reasonLabel(authorization.nonPoReason) }}</td>
-            <td class="num-cell">{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
-            <td><span class="queue-status" [ngClass]="authorization.status">{{ authorizationStatusLabel(authorization.status) }}</span></td>
-            <td><span class="queue-status" [ngClass]="authorization.financeReviewStatus">{{ authorization.financeReviewStatus | titlecase }}</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="empty-results" *ngIf="filteredAuthorizationQueue.length === 0">
-        <lucide-angular name="clipboard-list" [size]="40" class="empty-icon"></lucide-angular>
-        <p>No authorizations match this workflow stage.</p>
-      </div>
-    </div>
-  </section>
 
   <section class="discrepancy-section content-card" *ngIf="!loading && !loadError" aria-labelledby="supplier-discrepancies-title">
     <div class="section-top-bar">

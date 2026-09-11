@@ -79,6 +79,15 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   // Quarantine
   quarantineItems: QuarantineItemData[] = [];
   confirmDisposeId: string | null = null;
+  confirmDeleteId: string | null = null;
+  showQuarantineModal = false;
+  quarantineForm = {
+    itemName: '',
+    quantity: 1,
+    unit: 'units',
+    reason: '',
+    location: '',
+  };
 
   // RMA status labels and allowed transitions
   rmaStatusLabels: Record<string, string> = {
@@ -321,6 +330,8 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       this.closeInternalRepairModal();
     } else if (this.showReplacementModal) {
       this.closeReplacementModal();
+    } else if (this.showQuarantineModal) {
+      this.closeQuarantineModal();
     }
   }
 
@@ -492,6 +503,91 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   // ── Quarantine ──
 
+  openQuarantineModal(): void {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    this.quarantineForm = {
+      itemName: '',
+      quantity: 1,
+      unit: 'units',
+      reason: '',
+      location: '',
+    };
+    this.showQuarantineModal = true;
+  }
+
+  get matchingQuarantineItems(): InventoryItem[] {
+    const query = this.quarantineForm.itemName.toLowerCase().trim();
+    if (!query) return [];
+    return this.inventoryItems
+      .filter((item) => item.name.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query))
+      .slice(0, 8);
+  }
+
+  selectQuarantineItem(item: InventoryItem): void {
+    this.quarantineForm.itemName = item.name;
+    this.quarantineForm.unit = (item as any).unit || this.quarantineForm.unit;
+  }
+
+  get isQuarantineFormDirty(): boolean {
+    return !!(
+      this.quarantineForm.itemName.trim() ||
+      this.quarantineForm.reason.trim() ||
+      this.quarantineForm.location.trim()
+    );
+  }
+
+  async closeQuarantineModal(): Promise<void> {
+    if (this.submitting) return;
+    if (this.isQuarantineFormDirty && !(await confirmDiscard(this.confirmService, 'quarantine item details'))) {
+      return;
+    }
+    this.resetQuarantineModalState();
+  }
+
+  /** Resets the quarantine modal without confirming — used after a successful
+   *  submit, where there is nothing left to discard. */
+  private resetQuarantineModalState(): void {
+    this.showQuarantineModal = false;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  get isQuarantineFormValid(): boolean {
+    return (
+      this.quarantineForm.itemName.trim().length > 0 &&
+      this.quarantineForm.reason.trim().length > 0 &&
+      Number.isInteger(Number(this.quarantineForm.quantity)) &&
+      Number(this.quarantineForm.quantity) > 0
+    );
+  }
+
+  submitQuarantineItem(): void {
+    if (!this.isQuarantineFormValid || this.submitting) return;
+    this.submitting = true;
+
+    this.dashboardService.createQuarantineItem({
+      itemName: this.quarantineForm.itemName.trim(),
+      quantity: Number(this.quarantineForm.quantity),
+      unit: this.quarantineForm.unit.trim() || 'units',
+      reason: this.quarantineForm.reason.trim(),
+      location: this.quarantineForm.location.trim(),
+    }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.successMessage = 'Item added to quarantine successfully.';
+        this.resetQuarantineModalState();
+        this.refreshData();
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || 'Failed to add item to quarantine.';
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
+
   confirmDispose(quarantineId: string): void {
     this.confirmDisposeId = quarantineId;
   }
@@ -522,6 +618,39 @@ export class ReturnsRmaDashboardComponent implements OnInit {
           this.refreshData();
         } else {
           this.error = err?.error?.message || 'Failed to dispose item.';
+        }
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
+
+  confirmDelete(quarantineId: string): void {
+    this.confirmDeleteId = quarantineId;
+  }
+
+  cancelDelete(): void {
+    this.confirmDeleteId = null;
+  }
+
+  deleteQuarantineItem(quarantineId: string): void {
+    if (this.pendingActionIds.has(quarantineId)) return;
+    this.pendingActionIds.add(quarantineId);
+    this.dashboardService.deleteQuarantineItem(quarantineId).subscribe({
+      next: () => {
+        this.pendingActionIds.delete(quarantineId);
+        this.confirmDeleteId = null;
+        this.successMessage = 'Item removed from quarantine.';
+        this.refreshData();
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.pendingActionIds.delete(quarantineId);
+        this.confirmDeleteId = null;
+        if (err?.status === 404 || err?.error?.code === 'QUARANTINE_NOT_FOUND') {
+          this.error = 'Quarantine item could not be found.';
+          this.refreshData();
+        } else {
+          this.error = err?.error?.message || 'Failed to delete item.';
         }
         setTimeout(() => (this.error = null), 5000);
       },

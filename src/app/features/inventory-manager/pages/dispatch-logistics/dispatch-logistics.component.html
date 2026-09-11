@@ -337,6 +337,14 @@
             </button>
             <button
               type="button"
+              class="btn-secondary-outline im-btn im-btn--secondary"
+              *ngIf="!isEditMode"
+              (click)="printGatePass()"
+            >
+              Print Gate Pass
+            </button>
+            <button
+              type="button"
               class="btn-primary btn-outline im-btn im-btn--secondary"
               *ngIf="!isEditMode"
               (click)="enableEditMode()"
@@ -439,24 +447,14 @@
           </div>
           <div class="form-group full">
             <p class="helper-text">
-              Please ensure all items are kitted and the gate pass is printed before finalizing the
-              dispatch.
+              Please ensure all items are kitted before finalizing the dispatch. The gate pass can be
+              printed once the order moves to Ready to Pick up.
             </p>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer justify-between">
-        <div class="footer-left">
-          <button
-            type="button"
-            class="btn-secondary-outline im-btn im-btn--secondary"
-            [disabled]="!isDeliveryFormValid"
-            (click)="closeModals()"
-          >
-            Print Gate Pass
-          </button>
-        </div>
+      <div class="modal-footer">
         <div class="footer-right">
           <button
             type="button"

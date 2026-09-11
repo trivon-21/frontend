@@ -7,6 +7,8 @@ import {
   CreateInventoryCatalogItemInput,
   InventoryItem,
   InventoryLocationOption,
+  StockAdjustmentInput,
+  StockMovement,
   UpdateInventoryMasterDataInput,
 } from './inventory-domain';
 import { PurchaseRequest, ReceiptAuthorization } from './purchase-workflow';
@@ -18,9 +20,15 @@ export type {
   InventoryItemForm,
   InventoryLocationOption,
   InventorySystemType,
+  StockAdjustmentInput,
+  StockAdjustmentMode,
+  StockAdjustmentReasonCode,
+  StockMovement,
+  StockMovementType,
   StockStatus,
   UpdateInventoryMasterDataInput,
 } from './inventory-domain';
+export { STOCK_ADJUSTMENT_REASONS } from './inventory-domain';
 
 export interface SubStat {
   label: string;
@@ -373,9 +381,45 @@ export class InventoryManagerDashboardService {
     );
   }
 
+  /** Syncs the catalog unit cost when a Non-PO request is entered at a different price than the catalog default. */
+  updateItemPrice(id: string, unitCost: number): Observable<InventoryItem> {
+    return this.http.patch<InventoryItem>(`${this.apiUrl}/item/${id}`, { unitCost }).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
+  }
+
   addItem(data: CreateInventoryCatalogItemInput): Observable<InventoryItem> {
     return this.http.post<InventoryItem>(`${this.apiUrl}/item`, data).pipe(
       tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
+  }
+
+  deleteItem(id: string): Observable<{ message: string; id: string }> {
+    return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/item/${id}`).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
+  }
+
+  /**
+   * Establishes or corrects an item's on-hand quantity through the audited
+   * stock-adjustment workflow — the route around rejectProtectedStockFields
+   * for opening balances, cycle-count corrections, and write-offs.
+   */
+  adjustStock(itemId: string, data: StockAdjustmentInput): Observable<{ item: InventoryItem; movement: StockMovement; duplicate: boolean }> {
+    return this.http.post<{ item: InventoryItem; movement: StockMovement; duplicate: boolean }>(
+      `${this.apiUrl}/item/${itemId}/stock-adjustments`,
+      data,
+    ).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
+  }
+
+  getStockMovements(itemId: string, options: { force?: boolean; limit?: number } = {}): Observable<StockMovement[]> {
+    const params = options.limit ? new HttpParams().set('limit', String(options.limit)) : undefined;
+    return this.requestCached(
+      `${INVENTORY_CACHE_PREFIX}catalog:movements:${itemId}`,
+      () => this.http.get<StockMovement[]>(`${this.apiUrl}/item/${itemId}/stock-movements`, { params }),
+      options,
     );
   }
 
@@ -560,6 +604,12 @@ export class InventoryManagerDashboardService {
 
   disposeQuarantineItem(quarantineId: string): Observable<QuarantineItemData> {
     return this.http.patch<QuarantineItemData>(`${this.apiUrl}/quarantine/${quarantineId}/dispose`, {}).pipe(
+      tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
+    );
+  }
+
+  deleteQuarantineItem(quarantineId: string): Observable<QuarantineItemData> {
+    return this.http.delete<QuarantineItemData>(`${this.apiUrl}/quarantine/${quarantineId}`).pipe(
       tap(() => this.cache.invalidate(INVENTORY_CACHE_PREFIX)),
     );
   }

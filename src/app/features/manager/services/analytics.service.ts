@@ -92,6 +92,7 @@ export interface AnalyticsData {
     procurementSpend: ComparisonMetric;
     operatingContribution: ComparisonMetric;
     outstandingReceivables: MoneyCountSnapshot;
+    allOutstandingReceivables: MoneyCountSnapshot;
     pendingPaymentReview: MoneyCountSnapshot;
     purchaseCommitments: SnapshotMetric;
     unreconciledNonPo: MoneyCountSnapshot;
@@ -175,6 +176,7 @@ export class AnalyticsService {
         financial: {
           ...data.financial,
           outstandingReceivables: hydrateSnapshot(data.financial.outstandingReceivables) as MoneyCountSnapshot,
+          allOutstandingReceivables: hydrateSnapshot(data.financial.allOutstandingReceivables) as MoneyCountSnapshot,
           pendingPaymentReview: hydrateSnapshot(data.financial.pendingPaymentReview) as MoneyCountSnapshot,
           purchaseCommitments: hydrateSnapshot(data.financial.purchaseCommitments),
           unreconciledNonPo: hydrateSnapshot(data.financial.unreconciledNonPo) as MoneyCountSnapshot,

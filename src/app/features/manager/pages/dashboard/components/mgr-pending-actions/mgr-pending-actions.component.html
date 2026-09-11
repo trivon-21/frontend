@@ -24,7 +24,6 @@
     <div *ngFor="let action of data.pendingActions" class="action-item" [class.action-item--approval]="isApprovalAction(action)">
       <div class="action-header">
         <div class="action-header-left">
-          <span class="priority-badge" [ngClass]="getPriorityClass(action.priority)">{{ action.priority | uppercase }}</span>
           <span *ngIf="isApprovalAction(action)" class="action-type-tag approval-tag" [class.non-po]="action.approvalType === 'non-po'">
             {{ action.approvalType === 'non-po' ? 'NON-PO EXCEPTION' : 'PURCHASE REQUEST' }}
           </span>

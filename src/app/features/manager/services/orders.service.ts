@@ -14,7 +14,6 @@ export interface OrderSummary {
   awaitingFinance: number;
   approved: number;
   rejected: number;
-  pendingValue: number;
 }
 
 export interface OrdersResponse {

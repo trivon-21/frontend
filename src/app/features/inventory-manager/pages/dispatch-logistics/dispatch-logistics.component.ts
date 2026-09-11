@@ -277,6 +277,78 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
     }
   }
 
+  printGatePass(): void {
+    const order = this.selectedOrder;
+    if (!order) return;
+
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
+    if (!printWindow) return;
+
+    const itemRows = (order.items || [])
+      .map(
+        (item) => `
+          <tr>
+            <td>${this.escapeHtml(item.name)}</td>
+            <td>${this.escapeHtml(item.sku)}</td>
+            <td class="num">${item.qty}</td>
+          </tr>`,
+      )
+      .join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Gate Pass - ${this.escapeHtml(order.id)}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { font-family: Arial, Helvetica, sans-serif; padding: 24px; color: #111; }
+            h1 { font-size: 20px; margin: 0 0 4px; }
+            .subtitle { font-size: 12px; color: #555; margin-bottom: 20px; }
+            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 20px; font-size: 13px; }
+            .meta div strong { display: inline-block; min-width: 110px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th, td { border: 1px solid #ccc; padding: 6px 8px; font-size: 13px; text-align: left; }
+            th { background: #f2f2f2; }
+            td.num, th.num { text-align: right; }
+            .sign { margin-top: 56px; display: flex; justify-content: space-between; font-size: 13px; }
+            .sign div { width: 45%; border-top: 1px solid #333; padding-top: 4px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h1>Gate Pass</h1>
+          <div class="subtitle">Airlux Inventory &amp; Logistics</div>
+          <div class="meta">
+            <div><strong>Order ID:</strong> ${this.escapeHtml(order.id)}</div>
+            <div><strong>Customer:</strong> ${this.escapeHtml(order.customer)}</div>
+            <div><strong>Courier:</strong> ${this.escapeHtml(order.courier || 'N/A')}</div>
+            <div><strong>Tracking / Ref ID:</strong> ${this.escapeHtml(order.trackId || 'N/A')}</div>
+            <div><strong>Date Printed:</strong> ${this.escapeHtml(new Date().toLocaleString())}</div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Item Name</th><th>SKU</th><th class="num">Qty</th></tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+          <div class="sign">
+            <div>Dispatched By</div>
+            <div>Security / Gate Signature</div>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  }
+
+  private escapeHtml(value: string | undefined | null): string {
+    const div = document.createElement('div');
+    div.textContent = value ?? '';
+    return div.innerHTML;
+  }
+
   markHandedOver() {
     if (!this.selectedOrderId || this.saving) return;
     const order = this.selectedOrder;

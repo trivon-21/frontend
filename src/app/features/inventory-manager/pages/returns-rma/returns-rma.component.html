@@ -298,7 +298,13 @@
           <span class="subtitle">Items damaged or incomplete — pending disposal decision</span>
         </div>
       </div>
-      <span class="items-badge">{{ filteredQuarantineItems.length }} items • Cannot be sold</span>
+      <div class="header-right">
+        <span class="items-badge">{{ filteredQuarantineItems.length }} items • Cannot be sold</span>
+        <button type="button" class="btn-new-rma im-btn im-btn--primary" (click)="openQuarantineModal()">
+          <lucide-angular name="plus" [size]="16" class="inline-icon"></lucide-angular>
+          Add Item
+        </button>
+      </div>
     </div>
 
     <!-- Empty state -->
@@ -327,13 +333,19 @@
             <td class="date-cell">{{ formatDate(item.createdAt) }}</td>
             <td>{{ item.location || '—' }}</td>
             <td class="actions-cell">
-              <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId">
+              <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId && confirmDeleteId !== item.quarantineId">
                 <button type="button" class="btn-danger im-btn im-btn--danger im-btn--compact" (click)="confirmDispose(item.quarantineId)">Dispose</button>
+                <button type="button" class="btn-secondary im-btn im-btn--secondary im-btn--compact" (click)="confirmDelete(item.quarantineId)">Delete</button>
               </div>
               <div class="confirm-actions" *ngIf="confirmDisposeId === item.quarantineId">
                 <span class="confirm-text">Confirm?</span>
                 <button type="button" class="btn-danger-sm im-btn im-btn--danger im-btn--compact" (click)="disposeItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
                 <button type="button" class="btn-cancel-sm im-btn im-btn--secondary im-btn--compact" (click)="cancelDispose()">No</button>
+              </div>
+              <div class="confirm-actions" *ngIf="confirmDeleteId === item.quarantineId">
+                <span class="confirm-text">Delete permanently?</span>
+                <button type="button" class="btn-danger-sm im-btn im-btn--danger im-btn--compact" (click)="deleteQuarantineItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
+                <button type="button" class="btn-cancel-sm im-btn im-btn--secondary im-btn--compact" (click)="cancelDelete()">No</button>
               </div>
             </td>
           </tr>
@@ -383,6 +395,52 @@
         <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeRmaModal()">Cancel</button>
         <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!isRmaFormValid || submitting" (click)="submitRmaCase()">
           {{ submitting ? 'Creating...' : 'Create RMA Case' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Add to Quarantine Modal -->
+  <div class="modal-overlay" *ngIf="showQuarantineModal" (click)="closeQuarantineModal()">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="quarantine-dialog-title" aria-describedby="quarantine-dialog-description" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="quarantine-dialog-title">Add Item to Quarantine</h2>
+        <button type="button" class="modal-close im-btn im-btn--close" aria-label="Close dialog" (click)="closeQuarantineModal()" [disabled]="submitting">
+          <lucide-angular name="x" [size]="20"></lucide-angular>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="quarantine-dialog-description" class="dialog-description">Manually place an item in quarantine — for example, stock found damaged during a stocktake or inspection outside a return or receipt.</p>
+        <div class="form-group">
+          <label for="quarantine-item-name">Item Name *</label>
+          <input id="quarantine-item-name" type="text" [(ngModel)]="quarantineForm.itemName" placeholder="e.g., R410A Refrigerant Cylinder" class="form-input">
+          <div class="autocomplete-results" *ngIf="matchingQuarantineItems.length">
+            <button type="button" *ngFor="let item of matchingQuarantineItems" (click)="selectQuarantineItem(item)">
+              {{ item.name }} ({{ item.sku }})
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="quarantine-quantity">Quantity *</label>
+          <input id="quarantine-quantity" type="number" [(ngModel)]="quarantineForm.quantity" min="1" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="quarantine-unit">Unit</label>
+          <input id="quarantine-unit" type="text" [(ngModel)]="quarantineForm.unit" placeholder="units" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="quarantine-reason">Reason *</label>
+          <textarea id="quarantine-reason" [(ngModel)]="quarantineForm.reason" placeholder="Describe why this item is being quarantined..." class="form-input form-textarea"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="quarantine-location">Location</label>
+          <input id="quarantine-location" type="text" [(ngModel)]="quarantineForm.location" placeholder="e.g., Warehouse A, Bin 12" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="closeQuarantineModal()">Cancel</button>
+        <button type="button" class="btn-primary im-btn im-btn--primary" [disabled]="!isQuarantineFormValid || submitting" (click)="submitQuarantineItem()">
+          {{ submitting ? 'Adding...' : 'Add to Quarantine' }}
         </button>
       </div>
     </div>

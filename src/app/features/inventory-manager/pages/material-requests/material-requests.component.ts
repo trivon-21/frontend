@@ -298,7 +298,13 @@ export class MaterialRequestsDashboardComponent implements OnInit {
   }
 
   canReserve(req: MaterialRequest | undefined): boolean {
-    return Boolean(req?.items.length && !req.hasShortage && req.items.every(item => item.confirmed));
+    // Stock shortages are re-validated authoritatively by the backend when the
+    // reservation is submitted (it returns INSUFFICIENT_STOCK with details if
+    // stock has genuinely run out). Gating on the stale `hasShortage` snapshot
+    // here as well left the button permanently disabled -- with no feedback,
+    // since a disabled button never fires markKitted()'s own validation -- for
+    // any request that ever had a shortage, even after all lines were confirmed.
+    return Boolean(req?.items.length && req.items.every(item => item.confirmed));
   }
 
   get shortageSuppliers(): Array<{ id: string; name: string }> {

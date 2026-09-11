@@ -69,10 +69,10 @@ describe('TicketsComponent pagination', () => {
     const component = new TicketsComponent(service, { queryParamMap: of(convertToParamMap({})) } as ActivatedRoute);
     component.page = 3;
 
-    component.setFilter('priority', 'high');
+    component.setFilter('type', 'service');
 
     expect(component.page).toBe(1);
-    expect(service.getWorkItems).toHaveBeenCalledWith(jasmine.objectContaining({ page: 1, priority: 'high' }));
+    expect(service.getWorkItems).toHaveBeenCalledWith(jasmine.objectContaining({ page: 1, type: 'service' }));
   });
 });
 

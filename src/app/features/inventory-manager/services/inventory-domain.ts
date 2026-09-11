@@ -142,6 +142,61 @@ export interface CreateInventoryCatalogItemInput extends InventoryMasterDataInpu
 
 export type UpdateInventoryMasterDataInput = InventoryMasterDataInput;
 
+// Mirrors backend/src/modules/inventory-manager/services/stock-adjustment.service.js
+// ADJUSTMENT_REASONS and backend/src/models/StockMovement.js.
+export type StockAdjustmentMode = 'SET' | 'DELTA';
+export type StockAdjustmentReasonCode =
+  | 'OPENING_BALANCE'
+  | 'CYCLE_COUNT_VARIANCE'
+  | 'SHRINKAGE'
+  | 'DAMAGE'
+  | 'DATA_CORRECTION';
+
+export const STOCK_ADJUSTMENT_REASONS: Array<{
+  code: StockAdjustmentReasonCode;
+  label: string;
+  requiresNote: boolean;
+}> = [
+  { code: 'OPENING_BALANCE', label: 'Opening balance', requiresNote: false },
+  { code: 'CYCLE_COUNT_VARIANCE', label: 'Cycle-count variance', requiresNote: true },
+  { code: 'SHRINKAGE', label: 'Shrinkage', requiresNote: true },
+  { code: 'DAMAGE', label: 'Damage', requiresNote: true },
+  { code: 'DATA_CORRECTION', label: 'Data correction', requiresNote: true },
+];
+
+export interface StockAdjustmentInput {
+  mode: StockAdjustmentMode;
+  quantity: number;
+  reasonCode: StockAdjustmentReasonCode;
+  note?: string;
+  expectedAvailable: number;
+  adjustmentEventId?: string;
+}
+
+export type StockMovementType =
+  | 'OPENING' | 'ADJUSTMENT' | 'WRITE_OFF'
+  | 'RECEIPT' | 'RESERVE' | 'RELEASE' | 'ISSUE'
+  | 'RETURN_RESTOCK' | 'QUARANTINE_OUT' | 'QUARANTINE_DISPOSAL';
+
+export interface StockMovement {
+  _id: string;
+  movementId: string;
+  inventoryId: string;
+  sku: string;
+  itemName: string;
+  movementType: StockMovementType;
+  reasonCode: string;
+  availableDelta: number;
+  reservedDelta: number;
+  availableAfter: number;
+  reservedAfter: number;
+  sourceType: string;
+  sourceRefId?: string;
+  note?: string;
+  actorName?: string;
+  createdAt: string;
+}
+
 // Mirrors backend/src/utils/inventory-domain.js: storage is addressed as
 // warehouse ("A", shown as "Warehouse A") > rack ("R2") > bin code ("A201"),
 // where the bin code is the only part persisted alongside the warehouse.

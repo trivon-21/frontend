@@ -173,22 +173,12 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
         this.errorMessage = 'This order contains one supplier. Create another linked order for shortages from other suppliers.';
       }
     }
-    if (navState?.suggestedItem) {
+    // A suggested item destined for an existing same-supplier draft is merged in after
+    // that draft loads (see loadOrder), rather than pushed here and then overwritten.
+    const mergingIntoDraft = this.embedded && !!this.embeddedOrderId;
+    if (navState?.suggestedItem && !mergingIntoDraft) {
       const item = navState.suggestedItem;
-      this.orderItems.push({
-        inventoryId: item._id || '',
-        name: item.name,
-        sku: item.sku,
-        quantity: item.suggestedQuantity || 1,
-        unitCost: item.unitCost || 0,
-        estimatedTotal: (item.suggestedQuantity || 1) * (item.unitCost || 0),
-        itemClass: item.itemClass || 'Unclassified',
-        subcategory: item.subcategory || 'Unclassified',
-        unit: item.unit || 'units',
-        manufacturerPartNumber: item.manufacturerPartNumber || '',
-        supplierId: supplierIdOf(item),
-        supplierName: supplierNameOf(item),
-      });
+      this.orderItems.push(this.buildOrderItemFromInventoryItem(item));
       this.selectPreferredSupplier(item);
     }
 
@@ -196,7 +186,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
       if (this.embeddedOrderId) {
         this.isEditMode = true;
         this.orderId = this.embeddedOrderId;
-        this.loadOrder(this.embeddedOrderId);
+        this.loadOrder(this.embeddedOrderId, navState?.suggestedItem);
       }
       return;
     }
@@ -265,7 +255,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
     });
   }
 
-  loadOrder(id: string): void {
+  loadOrder(id: string, mergeSuggestedItem?: InventoryItem): void {
     let req$ = this.orderCreationService.getOrderRequests();
     if (this.destroyRef) {
       req$ = req$.pipe(takeUntilDestroyed(this.destroyRef));
@@ -283,11 +273,43 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
             inventoryId: typeof i.inventoryId === 'object' && i.inventoryId !== null ? (i.inventoryId._id || i.inventoryId.id || '') : (i.inventoryId || i.id || ''),
             supplierId: typeof i.supplierId === 'object' && i.supplierId !== null ? (i.supplierId._id || i.supplierId.id || '') : (i.supplierId || ''),
           }));
+          if (mergeSuggestedItem) {
+            this.mergeOrderItem(this.buildOrderItemFromInventoryItem(mergeSuggestedItem));
+          }
           this.initialSnapshot = this.takeSnapshot();
         }
       },
       error: () => this.loadError = 'The draft order could not be loaded.'
     });
+  }
+
+  private buildOrderItemFromInventoryItem(item: InventoryItem): OrderItem {
+    return {
+      inventoryId: item._id || item.id || '',
+      name: item.name,
+      sku: item.sku,
+      quantity: item.suggestedQuantity || 1,
+      unitCost: item.unitCost || 0,
+      estimatedTotal: (item.suggestedQuantity || 1) * (item.unitCost || 0),
+      itemClass: item.itemClass || 'Unclassified',
+      subcategory: item.subcategory || 'Unclassified',
+      unit: item.unit || 'units',
+      manufacturerPartNumber: item.manufacturerPartNumber || '',
+      supplierId: supplierIdOf(item),
+      supplierName: supplierNameOf(item),
+    } as OrderItem;
+  }
+
+  /** Merges a new line into an existing same-sku line (summing quantity) or appends it. */
+  private mergeOrderItem(newItem: OrderItem): void {
+    const existingIndex = this.orderItems.findIndex(i => i.sku === newItem.sku);
+    if (existingIndex !== -1) {
+      this.orderItems[existingIndex].quantity += newItem.quantity;
+      this.orderItems[existingIndex].unitCost = newItem.unitCost;
+      this.orderItems[existingIndex].estimatedTotal = this.orderItems[existingIndex].quantity * newItem.unitCost;
+    } else {
+      this.orderItems.push(newItem);
+    }
   }
 
   get availableInventoryItems(): InventoryItem[] {
@@ -499,14 +521,7 @@ export class NewOrderFormComponent implements OnInit, HasPendingChanges {
       return;
     }
     if (preferredSupplierName && !this.selectedSupplier) this.selectedSupplier = preferredSupplierName;
-    const existingIndex = this.orderItems.findIndex(i => i.sku === newItem.sku);
-    if (existingIndex !== -1) {
-      this.orderItems[existingIndex].quantity += newItem.quantity;
-      this.orderItems[existingIndex].unitCost = newItem.unitCost;
-      this.orderItems[existingIndex].estimatedTotal = this.orderItems[existingIndex].quantity * newItem.unitCost;
-    } else {
-      this.orderItems.push(newItem);
-    }
+    this.mergeOrderItem(newItem);
   }
 
   onItemUpdated(event: {index: number, newQty: number}): void {

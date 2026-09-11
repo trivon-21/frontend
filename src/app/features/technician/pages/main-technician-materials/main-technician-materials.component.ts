@@ -255,6 +255,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         items: (item.materials || []).map((material) => {
           const catalogItem = this.materialCatalog.find(c => c._id === material.inventoryId);
           return {
+            inventoryId: material.inventoryId || catalogItem?._id,
+            sku: material.sku || catalogItem?.sku,
             name: material.item || material.itemName || material.name || (catalogItem ? catalogItem.name : '-'),
             quantity: material.quantity || '-'
           };
@@ -710,6 +712,9 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       customerContactNo: this.selectedRequest.customerContactNo,
       location: this.selectedRequest.location,
       materials: this.selectedRequest.items.map((item) => ({
+        inventoryId: item.inventoryId,
+        sku: item.sku,
+        name: item.name,
         item: item.name,
         quantity: item.quantity
       })),

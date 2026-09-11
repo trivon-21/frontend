@@ -272,3 +272,4 @@ describe('InventoryListComponent filtering', () => {
     expect(component.getStorageAddress(inventoryItem({ location: 'A', binLocation: '' }))).toBe('Warehouse A');
   });
 });
+

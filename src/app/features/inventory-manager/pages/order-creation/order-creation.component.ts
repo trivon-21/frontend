@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../../../core/services/api.service';
 import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
-import { InventoryItem, supplierNameOf } from '../../services/inventory-domain';
+import { InventoryItem, supplierIdOf, supplierNameOf } from '../../services/inventory-domain';
 import { PurchaseRequest, PurchaseStatus, purchaseStatusLabel, canonicalPurchaseStatus } from '../../services/purchase-workflow';
 import { OrderCreationService } from '../../services/order-creation.service';
 import { forkJoin } from 'rxjs';
@@ -157,7 +157,23 @@ export class OrderCreationComponent implements OnInit, HasPendingChanges {
   }
 
   addSuggestedItem(item: InventoryItem): void {
+    const matchingDraft = this.findDraftForSameSupplier(item);
+    if (matchingDraft) {
+      this.openOrderForm({ orderId: matchingDraft.requestId, prefill: { suggestedItem: item } });
+      return;
+    }
     this.openOrderForm({ prefill: { suggestedItem: item } });
+  }
+
+  /** A saved draft only from the same supplier as the item can absorb it; otherwise a new order is started. */
+  private findDraftForSameSupplier(item: InventoryItem): PurchaseRequest | undefined {
+    const supplierId = supplierIdOf(item);
+    const supplierName = supplierNameOf(item).toLowerCase().trim();
+    if (!supplierId && !supplierName) return undefined;
+    return this.draftOrders.find(order => {
+      if (supplierId && order.supplierId) return order.supplierId === supplierId;
+      return !!supplierName && (order.supplierName || '').toLowerCase().trim() === supplierName;
+    });
   }
 
   supplierName(item: InventoryItem): string {

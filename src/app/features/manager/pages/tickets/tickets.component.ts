@@ -6,7 +6,6 @@ import {
   OperationalWorkItem,
   TicketsService,
   WorkItemAction,
-  WorkItemPriority,
   WorkItemStatus,
   WorkItemSummary,
 } from '../../services/tickets.service';
@@ -37,10 +36,8 @@ export class TicketsComponent implements OnInit {
     'awaiting-payment', 'payment-review', 'awaiting-verification', 'escalated', 'closed', 'cancelled',
   ];
   readonly typeFilters = ['all', 'service', 'inspection', 'installation', 'maintenance'];
-  readonly priorityFilters = ['all', 'high', 'medium', 'low'];
   activeStatus = 'all';
   activeType = 'all';
-  activePriority = 'all';
   activeAssignment = 'all';
   activeSla = 'all';
   private detailsTrigger: HTMLElement | null = null;
@@ -51,7 +48,6 @@ export class TicketsComponent implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       this.activeStatus = this.accepted(params.get('status'), this.statusFilters);
       this.activeType = this.accepted(params.get('type'), this.typeFilters);
-      this.activePriority = this.accepted(params.get('priority'), this.priorityFilters);
       this.activeAssignment = this.accepted(params.get('assignment'), ['all', 'assigned', 'unassigned']);
       this.activeSla = this.accepted(params.get('sla'), ['all', 'overdue']);
       this.page = 1;
@@ -65,7 +61,6 @@ export class TicketsComponent implements OnInit {
     this.ticketsService.getWorkItems({
       status: this.activeStatus,
       type: this.activeType,
-      priority: this.activePriority,
       assignment: this.activeAssignment,
       sla: this.activeSla,
       page: this.page,
@@ -88,10 +83,9 @@ export class TicketsComponent implements OnInit {
     });
   }
 
-  setFilter(kind: 'status' | 'type' | 'priority', value: string): void {
+  setFilter(kind: 'status' | 'type', value: string): void {
     if (kind === 'status') this.activeStatus = value;
     if (kind === 'type') this.activeType = value;
-    if (kind === 'priority') this.activePriority = value;
     this.page = 1;
     this.load();
   }

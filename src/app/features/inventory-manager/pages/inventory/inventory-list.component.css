@@ -197,6 +197,12 @@
   color: var(--error);
 }
 
+.error-text {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: var(--spacing-sm);
+}
+
 .product-name,
 .alx-table td > strong {
   display: block;

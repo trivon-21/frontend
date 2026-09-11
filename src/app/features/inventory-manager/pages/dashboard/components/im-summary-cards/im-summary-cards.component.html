@@ -39,7 +39,11 @@
   </a>
 
   <!-- Stock Alerts -->
-  <a class="summary-card clickable" routerLink="/inventory-manager/inventory">
+  <a
+    class="summary-card clickable"
+    routerLink="/inventory-manager/inventory"
+    [queryParams]="{ stockStatus: 'low-stock' }"
+  >
     <div class="card-main">
       <div class="card-icon tint-red">
         <lucide-angular name="triangle-alert" [size]="24"></lucide-angular>

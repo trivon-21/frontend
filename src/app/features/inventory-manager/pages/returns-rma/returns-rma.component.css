@@ -680,6 +680,12 @@ select.form-input {
   color: var(--error);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* ── Modal ── */
 .modal-overlay {
   position: fixed;

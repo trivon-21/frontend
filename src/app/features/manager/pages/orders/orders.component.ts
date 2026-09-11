@@ -38,7 +38,7 @@ interface DecisionTarget {
 export class OrdersComponent implements OnInit {
   @ViewChild('decisionCommentInput') decisionCommentInput?: ElementRef<HTMLTextAreaElement>;
   orders: PurchaseRequest[] = [];
-  summary: OrderSummary = { pending: 0, awaitingFinance: 0, approved: 0, rejected: 0, pendingValue: 0 };
+  summary: OrderSummary = { pending: 0, awaitingFinance: 0, approved: 0, rejected: 0 };
   status = 'Syncing…';
   loading = false;
   updatingId: string | null = null;
@@ -102,6 +102,9 @@ export class OrdersComponent implements OnInit {
       next: (items) => {
         this.authorizations = items;
         this.authorizationLoading = false;
+        if (this.authorizationExpandedId === null && items.length > 0) {
+          this.authorizationExpandedId = items[0]._id;
+        }
       },
       error: () => {
         this.authorizationLoadError = 'Non-PO authorizations could not be loaded.';
@@ -119,6 +122,9 @@ export class OrdersComponent implements OnInit {
         this.summary = res.summary;
         this.status = res.status;
         this.loading = false;
+        if (this.expandedId === null && res.orders.length > 0) {
+          this.expandedId = res.orders[0]._id;
+        }
       },
       error: () => {
         this.loadError = 'Purchase approvals could not be loaded. Check your connection and try again.';
@@ -129,6 +135,7 @@ export class OrdersComponent implements OnInit {
   }
 
   setFilter(key: string): void {
+    this.expandedId = null;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { type: this.activeType, status: key },

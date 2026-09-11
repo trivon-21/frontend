@@ -26,22 +26,19 @@
   <div class="filter-bar">
     <span class="filter-label">Work type</span>
     <div class="chip-group"><button *ngFor="let type of typeFilters" class="chip" [class.active]="activeType === type" (click)="setFilter('type', type)">{{ type | titlecase }}</button></div>
-    <span class="filter-label">Priority</span>
-    <div class="chip-group"><button *ngFor="let priority of priorityFilters" class="chip" [class.active]="activePriority === priority" (click)="setFilter('priority', priority)">{{ priority | titlecase }}</button></div>
   </div>
 
   <div class="portal-state" *ngIf="loading && items.length === 0" aria-live="polite">Loading operations…</div>
 
   <div class="alx-table-container" *ngIf="!loadError" role="region" aria-label="Manager operational work items" tabindex="0">
     <table class="alx-table alx-table--wide">
-      <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Priority</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
+      <thead><tr><th>Reference</th><th>Customer</th><th>Work Type</th><th>Domain Status</th><th>Manager View</th><th>SLA</th><th>Assignment</th><th class="actions-cell">Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let item of items; trackBy: trackItem">
           <td class="sku-cell">{{ item.reference }}</td>
           <td>{{ item.customer?.fullName || 'Unknown customer' }}</td>
           <td class="cap">{{ item.sourceType }}</td>
           <td>{{ item.domainStatus || 'Not recorded' }}</td>
-          <td><span class="pill priority alx-table-status" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></td>
           <td><span class="pill status alx-table-status" [ngClass]="item.operationalStatus">{{ statusLabel(item.operationalStatus) }}</span></td>
           <td><span class="sla" [class.overdue]="slaOverdue(item)">{{ slaText(item) }}</span></td>
           <td>
@@ -50,7 +47,7 @@
           </td>
           <td class="actions-cell"><button #viewButton type="button" class="mini-btn mgr-btn mgr-btn--secondary mgr-btn--compact" (click)="openDetails(item, viewButton)">View details</button></td>
         </tr>
-        <tr *ngIf="!loading && items.length === 0"><td colspan="9" class="empty-cell">No operational work matches the current filters.</td></tr>
+        <tr *ngIf="!loading && items.length === 0"><td colspan="8" class="empty-cell">No operational work matches the current filters.</td></tr>
       </tbody>
     </table>
   </div>
@@ -91,10 +88,6 @@
         </div>
 
         <div class="detail-grid">
-          <div>
-            <span class="detail-label">Priority</span>
-            <div><span class="pill priority alx-table-status" [ngClass]="item.priority">{{ item.priority | uppercase }}</span></div>
-          </div>
           <div>
             <span class="detail-label">SLA Deadline</span>
             <strong>{{ item.slaDueAt ? (item.slaDueAt | date:'medium') : 'Not set' }}</strong>

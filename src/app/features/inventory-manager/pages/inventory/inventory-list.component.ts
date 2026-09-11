@@ -81,6 +81,10 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   selectedItem: InventoryItem | null = null;
   showSaveConfirmation = false;
   savedProduct: InventoryItem | null = null;
+  showDeleteConfirmation = false;
+  itemPendingDelete: InventoryItem | null = null;
+  deletingItem = false;
+  deleteError: string | null = null;
 
   currentPage = 1;
   itemsPerPage = 10;
@@ -389,6 +393,46 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   closeDetailModal(): void {
     this.showDetailModal = false;
     this.selectedItem = null;
+  }
+
+
+  isItemStockEmpty(item: InventoryItem): boolean {
+    return (item.available || 0) === 0 && (item.reserved || 0) === 0;
+  }
+
+  requestDeleteItem(item: InventoryItem): void {
+    this.itemPendingDelete = item;
+    this.deleteError = null;
+    this.showDeleteConfirmation = true;
+  }
+
+  cancelDeleteItem(): void {
+    if (this.deletingItem) return;
+    this.showDeleteConfirmation = false;
+    this.itemPendingDelete = null;
+    this.deleteError = null;
+  }
+
+  confirmDeleteItem(): void {
+    const item = this.itemPendingDelete;
+    const id = item ? this.getItemId(item) : null;
+    if (!id) return;
+    this.deletingItem = true;
+    this.deleteError = null;
+    this.inventoryService.deleteItem(id).subscribe({
+      next: () => {
+        this.deletingItem = false;
+        this.showDeleteConfirmation = false;
+        this.itemPendingDelete = null;
+        this.closeDetailModal();
+        this.allInventoryItems = this.allInventoryItems.filter((entry) => this.getItemId(entry) !== id);
+        this.applyFilters();
+      },
+      error: (err) => {
+        this.deletingItem = false;
+        this.deleteError = err?.error?.message || 'Failed to delete product';
+      },
+    });
   }
 
   closeSaveConfirmation(): void {

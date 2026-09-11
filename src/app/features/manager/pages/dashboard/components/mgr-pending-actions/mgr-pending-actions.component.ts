@@ -18,10 +18,6 @@ export class MgrPendingActionsComponent {
     return action.type === 'approval' || action.category === 'approval' || action.type === 'order' || action.type === 'authorization';
   }
 
-  getPriorityClass(priority: string): string {
-    return priority === 'high' ? 'critical' : priority === 'medium' ? 'warning' : 'normal';
-  }
-
   formatCurrency(value: number | undefined | null): string {
     return 'LKR ' + (Number(value) || 0).toLocaleString('en-US');
   }

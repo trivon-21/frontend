@@ -75,17 +75,6 @@
   white-space: nowrap;
 }
 
-.priority-badge {
-  padding: 3px 7px;
-  border-radius: 6px;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-.priority-badge.critical { background: var(--tone-danger-bg); color: var(--tone-danger-fg); }
-.priority-badge.warning { background: var(--tone-warning-bg); color: var(--tone-warning-fg); }
-.priority-badge.normal { background: var(--tone-info-bg); color: var(--tone-info-fg); }
-
 .action-type-tag {
   color: var(--text-secondary);
   font-size: 9.5px;

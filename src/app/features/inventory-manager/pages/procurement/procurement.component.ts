@@ -57,13 +57,14 @@ type AuthItem = InventoryItem | string | undefined | null;
 export class ProcurementDashboardComponent implements OnInit, HasPendingChanges {
   currentStep = 1;
   receiptMode: 'PO' | 'NON_PO' = 'PO';
+  nonPoAction: 'create' | 'receive' = 'create';
   receiptForm!: FormGroup;
+  nonPoRequestForm!: FormGroup;
   isSubmitting = false;
   successMessage = '';
   errorMessage = '';
   searchQuery = '';
   grnFilter: 'all' | 'PO' | 'NON_PO' | 'EMERGENCY' | 'FINANCE' = 'all';
-  authorizationStatus: 'all' | 'ready' | ReceiptAuthorization['status'] = 'all';
   showDetailsModal = false;
   selectedProcurement: RecentProcurement | null = null;
   loading = true;
@@ -73,15 +74,18 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
   authorizations: ReceiptAuthorization[] = [];
   discrepancies: ReceiptDiscrepancy[] = [];
   discrepancyFilter: 'active' | 'resolved' | 'all' = 'active';
-  allAuthorizations: ReceiptAuthorization[] = [];
   procurements: RecentProcurement[] = [];
   inventoryItems: InventoryItem[] = [];
   locations: InventoryLocationOption[] = [];
+  suppliers: { _id: string; name: string }[] = [];
   selectedPurchaseOrder: PurchaseRequest | null = null;
   selectedPurchaseLine: PurchaseLine | null = null;
   selectedAuthorization: ReceiptAuthorization | null = null;
   selectedItem: InventoryItem | null = null;
   selectedReplacement: ReceiptDiscrepancy | null = null;
+  productSearchQuery = '';
+  showProductDropdown = false;
+  filteredProducts: InventoryItem[] = [];
   private readonly preselectedInventoryId: string | null;
   private pendingReceiptEventId = '';
   private justSubmitted = false;
@@ -93,6 +97,7 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
     SUPPLIER_REPLACEMENT: 'Supplier replacement',
     OTHER: 'Other',
   };
+  readonly nonPoReasonKeys = Object.keys(this.nonPoReasonLabels);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -108,17 +113,13 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
     if (grnFilter === 'PO' || grnFilter === 'NON_PO' || grnFilter === 'EMERGENCY' || grnFilter === 'FINANCE') {
       this.grnFilter = grnFilter;
     }
-    const authorizationStatus = route.snapshot.queryParamMap.get('authorizationStatus');
-    if (authorizationStatus === 'ready' || authorizationStatus === 'pending'
-      || authorizationStatus === 'approved' || authorizationStatus === 'rejected'
-      || authorizationStatus === 'partially-received' || authorizationStatus === 'completed') {
-      this.authorizationStatus = authorizationStatus;
-    }
   }
 
   ngOnInit(): void {
     this.initForm();
+    this.initNonPoRequestForm();
     this.loadAllData();
+    this.inventoryService.getSuppliers().subscribe((suppliers) => (this.suppliers = suppliers));
   }
 
   get serialNumbersControls(): AbstractControl[] {
@@ -155,11 +156,25 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
     return condition === 'Incomplete' && this.missingQuantity > 0;
   }
 
+  get isNonPoCreate(): boolean {
+    return this.receiptMode === 'NON_PO' && this.nonPoAction === 'create';
+  }
+
   get selectedUnitCost(): number {
+    if (this.isNonPoCreate) return Number(this.nonPoRequestForm?.get('item.unitCost')?.value || 0);
     return Number(this.selectedPurchaseLine?.unitCost ?? this.selectedAuthorization?.unitCost ?? 0);
   }
 
+  get nonPoRequestQuantity(): number {
+    return Number(this.nonPoRequestForm?.get('item.authorizedQuantity')?.value || 0);
+  }
+
+  get nonPoRequestTotal(): number {
+    return this.nonPoRequestQuantity * this.selectedUnitCost;
+  }
+
   get remainingQuantity(): number {
+    if (this.isNonPoCreate) return this.nonPoRequestQuantity;
     if (this.selectedPurchaseLine) return outstanding(this.selectedPurchaseLine);
     if (this.selectedAuthorization) {
       return Math.max(0, this.selectedAuthorization.authorizedQuantity - this.selectedAuthorization.receivedQuantity);
@@ -199,14 +214,6 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
     });
   }
 
-  get filteredAuthorizationQueue(): ReceiptAuthorization[] {
-    if (this.authorizationStatus === 'all') return this.allAuthorizations;
-    if (this.authorizationStatus === 'ready') {
-      return this.allAuthorizations.filter((authorization) => this.isReceivableAuthorization(authorization));
-    }
-    return this.allAuthorizations.filter((authorization) => authorization.status === this.authorizationStatus);
-  }
-
   get filteredDiscrepancies(): ReceiptDiscrepancy[] {
     if (this.discrepancyFilter === 'all') return this.discrepancies;
     if (this.discrepancyFilter === 'resolved') return this.discrepancies.filter((item) => item.status === 'resolved');
@@ -244,6 +251,133 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
     return toBusinessDateString(new Date());
   }
 
+  private initNonPoRequestForm(): void {
+    this.nonPoRequestForm = this.fb.group({
+      item: this.fb.group({
+        inventoryId: ['', Validators.required],
+        unitCost: [null, [Validators.required, Validators.min(0)]],
+        authorizedQuantity: [null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
+      }),
+      documents: this.fb.group({
+        supplierId: ['', Validators.required],
+        nonPoReason: ['', Validators.required],
+        sourceDocumentNumber: ['', [Validators.required, Validators.maxLength(80)]],
+        explanation: ['', Validators.required],
+        supportingDocumentUrl: ['', Validators.pattern(/^https?:\/\/\S+$/i)],
+      }),
+    });
+    this.nonPoRequestForm.get('item.inventoryId')?.valueChanges.subscribe((id) => {
+      this.selectedItem = this.inventoryItems.find((item) => (item._id || item.id) === id) || null;
+    });
+  }
+
+  filterProducts(): void {
+    const query = this.productSearchQuery.toLowerCase().trim();
+    this.filteredProducts = !query ? this.inventoryItems : this.inventoryItems.filter((item) => (
+      (item.name?.toLowerCase() || '').includes(query) || (item.sku?.toLowerCase() || '').includes(query)
+    ));
+    this.showProductDropdown = true;
+  }
+
+  onProductInputFocus(): void {
+    this.filterProducts();
+  }
+
+  onProductInputBlur(): void {
+    setTimeout(() => { this.showProductDropdown = false; }, 200);
+  }
+
+  selectProduct(item: InventoryItem): void {
+    this.nonPoRequestForm.get('item.inventoryId')?.setValue(item._id || item.id);
+    this.nonPoRequestForm.get('item.inventoryId')?.markAsDirty();
+    this.nonPoRequestForm.get('item.unitCost')?.setValue(item.unitCost);
+    this.productSearchQuery = item.name;
+    this.showProductDropdown = false;
+  }
+
+  clearProductSelection(): void {
+    this.nonPoRequestForm.get('item.inventoryId')?.setValue('');
+    this.productSearchQuery = '';
+    this.filteredProducts = this.inventoryItems;
+  }
+
+  setNonPoAction(action: 'create' | 'receive'): void {
+    this.justSubmitted = false;
+    this.nonPoAction = action;
+    this.currentStep = 1;
+    this.selectedAuthorization = null;
+    this.selectedItem = null;
+    this.errorMessage = '';
+    this.nonPoRequestForm.reset();
+    this.productSearchQuery = '';
+    this.showProductDropdown = false;
+  }
+
+  private resetNonPoRequestForm(): void {
+    this.currentStep = 1;
+    this.nonPoRequestForm.reset();
+    this.selectedItem = null;
+    this.errorMessage = '';
+    this.productSearchQuery = '';
+    this.showProductDropdown = false;
+  }
+
+  submitNonPoRequest(): void {
+    if (this.nonPoRequestForm.invalid || this.isSubmitting) {
+      this.nonPoRequestForm.markAllAsTouched();
+      return;
+    }
+    this.isSubmitting = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+    const item = this.nonPoRequestForm.get('item')!.value;
+    const documents = this.nonPoRequestForm.get('documents')!.value;
+    const enteredUnitCost = Number(item.unitCost);
+    const catalogUnitCost = Number(this.selectedItem?.unitCost ?? enteredUnitCost);
+    this.inventoryService.createReceiptAuthorization({
+      inventoryId: item.inventoryId,
+      unitCost: enteredUnitCost,
+      authorizedQuantity: Number(item.authorizedQuantity),
+      supplierId: documents.supplierId,
+      nonPoReason: documents.nonPoReason,
+      sourceDocumentNumber: documents.sourceDocumentNumber,
+      explanation: documents.explanation,
+      supportingDocumentUrl: documents.supportingDocumentUrl,
+    }).subscribe({
+      next: (authorization) => {
+        this.isSubmitting = false;
+        this.successMessage = `${authorization.authorizationNumber} submitted for Manager approval.`;
+        this.justSubmitted = true;
+        if (item.inventoryId && enteredUnitCost !== catalogUnitCost) {
+          this.syncCatalogPrice(item.inventoryId, enteredUnitCost);
+        }
+        this.resetNonPoRequestForm();
+        this.loadAllData({ force: true });
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.errorMessage = err.error?.message || 'The Non-PO request could not be submitted.';
+      },
+    });
+  }
+
+  /**
+   * Keeps the catalog unit cost in sync when a Non-PO request is entered at a
+   * different price. Fire-and-forget: a failure here shouldn't block the
+   * request itself, since the authorization already carries the entered price.
+   */
+  private syncCatalogPrice(inventoryId: string, unitCost: number): void {
+    let update$ = this.inventoryService.updateItemPrice(inventoryId, unitCost);
+    if (this.destroyRef) {
+      update$ = update$.pipe(takeUntilDestroyed(this.destroyRef));
+    }
+    update$.subscribe({
+      error: () => {
+        this.errorMessage = 'The request was submitted, but the catalog price could not be updated.';
+      },
+    });
+  }
+
   loadAllData(options: { force?: boolean } = {}): void {
     this.loading = true;
     this.loadError = '';
@@ -265,7 +399,6 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
             outstanding(line) > 0 && !!this.findInventoryItem(this.inventoryIdOf(line.inventoryId))
           ));
         });
-        this.allAuthorizations = authorizations;
         this.authorizations = authorizations.filter((item) => this.isReceivableAuthorization(item));
         if (this.preselectedInventoryId) {
           const item = this.findInventoryItem(this.preselectedInventoryId);
@@ -275,6 +408,7 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
         const selected = this.authorizations.find((item) => item._id === authorizationId);
         if (selected) {
           this.receiptMode = 'NON_PO';
+          this.nonPoAction = 'receive';
           this.selectAuthorization(selected);
         }
         this.loading = false;
@@ -289,12 +423,16 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
   setReceiptMode(mode: 'PO' | 'NON_PO'): void {
     this.justSubmitted = false;
     this.receiptMode = mode;
+    this.nonPoAction = 'create';
     this.selectedPurchaseOrder = null;
     this.selectedPurchaseLine = null;
     this.selectedAuthorization = null;
     this.selectedItem = null;
     this.selectedReplacement = null;
     this.resetForm();
+    this.nonPoRequestForm.reset();
+    this.productSearchQuery = '';
+    this.showProductDropdown = false;
   }
 
   selectPurchaseOrder(orderId: string): void {
@@ -446,17 +584,6 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
       && hasItemSource;
   }
 
-  authorizationItemName(authorization: ReceiptAuthorization): string {
-    if (authorization.inventoryId && typeof authorization.inventoryId !== 'string') {
-      return authorization.inventoryId.name;
-    }
-    return authorization.newItemSnapshot?.name || 'Catalog item unavailable';
-  }
-
-  authorizationStatusLabel(status: ReceiptAuthorization['status']): string {
-    return status.split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join(' ');
-  }
-
   private inventoryIdOf(value: AuthItem): string {
     if (!value) return '';
     return typeof value === 'string' ? value : String(value._id || value.id || '');
@@ -511,6 +638,7 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
 
   get isDirty(): boolean {
     if (this.justSubmitted) return false;
+    if (this.isNonPoCreate) return this.currentStep > 1 || this.nonPoRequestForm.dirty;
     return this.currentStep > 1 || this.receiptForm.dirty;
   }
 
@@ -527,6 +655,11 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
   }
 
   canGoNext(): boolean {
+    if (this.isNonPoCreate) {
+      if (this.currentStep === 1) return this.nonPoRequestForm.get('item')!.valid;
+      if (this.currentStep === 2) return this.nonPoRequestForm.get('documents')!.valid;
+      return this.nonPoRequestForm.valid;
+    }
     if (this.currentStep === 1) {
       return !!this.selectedItem && (this.receiptMode === 'PO' ? !!this.selectedPurchaseLine : !!this.selectedAuthorization);
     }
@@ -542,7 +675,11 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
       this.markCurrentStepAsTouched();
       return;
     }
-    if (this.currentStep < 3) this.currentStep += 1;
+    if (this.currentStep < 3) {
+      this.currentStep += 1;
+      return;
+    }
+    if (this.isNonPoCreate) this.submitNonPoRequest();
     else this.onSubmit();
   }
 
@@ -555,6 +692,11 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
   }
 
   private markCurrentStepAsTouched(): void {
+    if (this.isNonPoCreate) {
+      const group = this.currentStep === 1 ? 'item' : this.currentStep === 2 ? 'documents' : '';
+      if (group) this.nonPoRequestForm.get(group)?.markAllAsTouched();
+      return;
+    }
     const group = this.currentStep === 2 ? 'source' : this.currentStep === 3 ? 'stock' : '';
     if (group) this.receiptForm.get(group)?.markAllAsTouched();
     if (this.currentStep === 1 && !this.selectedItem) {
@@ -652,6 +794,7 @@ export class ProcurementDashboardComponent implements OnInit, HasPendingChanges 
         return;
       }
       this.receiptMode = 'NON_PO';
+      this.nonPoAction = 'receive';
       this.selectAuthorization(authorization);
     }
 

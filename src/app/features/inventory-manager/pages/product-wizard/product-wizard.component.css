@@ -8,12 +8,15 @@
 .back-link:hover { color: var(--primary-hover); }
 .mode-badge { padding: 4px 10px; border-radius: 8px; background: var(--primary-lighter); color: var(--primary-main); font-weight: 700; font-size: 11px; text-transform: uppercase; }
 .stepper { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); }
-.stepper button { display: flex; align-items: center; gap: var(--spacing-sm); border: 1px solid var(--border-light); background: var(--background-card); padding: 12px 14px; border-radius: 10px; color: var(--text-secondary); text-align: left; }
-.stepper button span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: var(--border-radius-full); background: var(--background-hover); }
-.stepper button.active { border-color: var(--primary-main); color: var(--primary-main); }
+.stepper button { display: flex; align-items: center; gap: var(--spacing-sm); border: 1.5px solid var(--border-light); background: var(--background-card); padding: 12px 14px; border-radius: 10px; color: var(--text-secondary); text-align: left; cursor: pointer; transition: border-color .15s ease, background-color .15s ease, color .15s ease; }
+.stepper button:hover { border-color: var(--primary-light); color: var(--text-primary); }
+.stepper button span { display: grid; place-items: center; flex: 0 0 auto; width: 27px; height: 27px; border-radius: var(--border-radius-full); background: var(--background-hover); color: var(--text-secondary); font-weight: 700; transition: background-color .15s ease, color .15s ease; }
+.stepper button strong { font-weight: 650; }
+.stepper button.active { border-color: var(--primary-main); background: var(--primary-lighter); color: var(--primary-main); }
+.stepper button.active span { background: var(--primary-main); color: var(--text-inverse); }
 /* A green step marker means that step carries data - being the current step is
-   shown by the border alone, so an untouched Compatibility step stays neutral. */
-.stepper button.complete span { background: var(--primary-main); color: var(--text-inverse); }
+   shown by the border/background alone, so an untouched Compatibility step stays neutral. */
+.stepper button.complete:not(.active) span { background: var(--primary-main); color: var(--text-inverse); }
 .form-card { background: var(--background-card); border: 1px solid var(--border-light); border-radius: 14px; box-shadow: 0 4px 12px rgb(0 0 0 / 3%); padding: 24px; }
 .section-heading { border-bottom: 1px solid var(--border-light); padding-bottom: var(--spacing-lg); margin-bottom: 20px; }
 .section-heading h2 { margin: 0 0 5px; color: #1b2f27; font-size: 18px; }
