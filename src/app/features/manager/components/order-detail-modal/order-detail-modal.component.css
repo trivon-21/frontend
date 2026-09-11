@@ -98,6 +98,12 @@
   border: 1px solid rgba(0, 132, 61, 0.16);
 }
 
+.badge-cat-inquiry {
+  background: var(--warning-light, #fff7e6);
+  color: var(--warning, #b45309);
+  border: 1px solid rgba(180, 83, 9, 0.16);
+}
+
 .order-ref-title {
   margin: 0;
   font-size: 1.35rem;

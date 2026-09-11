@@ -115,9 +115,17 @@ export interface ServiceRequestDetail {
   estimatedCharges?: number;
 }
 
+export interface InquiryDetail {
+  inquiryType: string;
+  subject?: string;
+  message?: string;
+  attachmentUrl?: string;
+  threadCount?: number;
+}
+
 export interface OrderLookupResult {
   id: string;
-  category: 'Product Order' | 'Installation Order' | 'Service Request';
+  category: 'Product Order' | 'Installation Order' | 'Service Request' | 'Inquiry';
   reference: string;
   orderType: string;
   status: string;
@@ -135,6 +143,7 @@ export interface OrderLookupResult {
   };
   items?: OrderItemDetail[];
   serviceDetails?: ServiceRequestDetail;
+  inquiryDetails?: InquiryDetail;
   subtotal?: number;
   additionalCharges?: number;
   total: number;

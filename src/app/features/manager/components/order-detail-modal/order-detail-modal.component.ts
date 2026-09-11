@@ -50,6 +50,7 @@ export class OrderDetailModalComponent {
 
   getCategoryBadgeClass(category: string | undefined): string {
     const c = String(category || '').toLowerCase();
+    if (c.includes('inquiry')) return 'badge-cat-inquiry';
     if (c.includes('service')) return 'badge-cat-service';
     if (c.includes('installation')) return 'badge-cat-installation';
     return 'badge-cat-order';
@@ -57,10 +58,10 @@ export class OrderDetailModalComponent {
 
   getStatusBadgeClass(status: string | undefined): string {
     const s = String(status || '').toLowerCase();
-    if (s.includes('complete') || s.includes('delivered') || s.includes('approved') || s.includes('confirmed')) {
+    if (s.includes('complete') || s.includes('delivered') || s.includes('approved') || s.includes('confirmed') || s.includes('addressed')) {
       return 'status-badge--success';
     }
-    if (s.includes('pending') || s.includes('review') || s.includes('progress') || s.includes('scheduled')) {
+    if (s.includes('pending') || s.includes('review') || s.includes('progress') || s.includes('scheduled') || s.includes('awaiting') || s.includes('ongoing')) {
       return 'status-badge--warning';
     }
     if (s.includes('cancel') || s.includes('reject') || s.includes('return')) {

@@ -22,7 +22,7 @@
           <span class="status-pill" [ngClass]="getStatusBadgeClass(order.orderStatus || order.status)">
             {{ order.orderStatus || order.status }}
           </span>
-          <span class="payment-pill" [ngClass]="getStatusBadgeClass(order.paymentStatus)">
+          <span class="payment-pill" *ngIf="order.category !== 'Inquiry'" [ngClass]="getStatusBadgeClass(order.paymentStatus)">
             Payment: {{ order.paymentStatus }}
           </span>
         </div>
@@ -175,6 +175,39 @@
           <div class="info-item" *ngIf="order.serviceDetails.preferredTimeSlot">
             <span class="info-label">Preferred Time Slot</span>
             <span class="info-value">{{ order.serviceDetails.preferredTimeSlot }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- INQUIRY SPECIFIC DETAILS -->
+      <section class="info-section service-section" *ngIf="order.inquiryDetails">
+        <h3 class="section-title">
+          <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
+          Inquiry Details
+        </h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Inquiry Type</span>
+            <span class="info-value font-semibold">{{ order.inquiryDetails.inquiryType }}</span>
+          </div>
+          <div class="info-item" *ngIf="order.inquiryDetails.subject">
+            <span class="info-label">Subject</span>
+            <span class="info-value">{{ order.inquiryDetails.subject }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="order.inquiryDetails.message">
+            <span class="info-label">Message</span>
+            <p class="problem-desc-box">{{ order.inquiryDetails.message }}</p>
+          </div>
+          <div class="info-item" *ngIf="order.inquiryDetails.threadCount">
+            <span class="info-label">Thread Replies</span>
+            <span class="info-value">{{ order.inquiryDetails.threadCount }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="order.inquiryDetails.attachmentUrl">
+            <span class="info-label">Attachment</span>
+            <a [href]="order.inquiryDetails.attachmentUrl" target="_blank" rel="noopener" class="slip-link">
+              <lucide-angular name="file-text" [size]="16"></lucide-angular>
+              <span>View Attachment</span>
+            </a>
           </div>
         </div>
       </section>
