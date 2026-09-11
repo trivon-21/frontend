@@ -15,10 +15,19 @@ interface DispatchItem {
   sku: string;
 }
 
+interface DispatchDeliveryDetails {
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+}
+
 interface DispatchOrder {
   id: string;
   orderId?: string; // from backend
   customer: string;
+  deliveryDetails?: DispatchDeliveryDetails;
   status: 'to-pack' | 'ready' | 'in-transit' | 'completed';
   statusVersion: number;
   type: string;
@@ -96,6 +105,7 @@ export class DispatchLogisticsDashboardComponent implements OnInit {
         const orders: DispatchOrder[] = data.map((o: any) => ({
           id: o.orderId,
           customer: o.customer,
+          deliveryDetails: o.deliveryDetails,
           status: o.status,
           statusVersion: o.statusVersion ?? 0,
           type: o.type,

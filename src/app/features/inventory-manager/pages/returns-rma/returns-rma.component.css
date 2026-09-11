@@ -800,5 +800,6 @@ select.form-input {
 
 .quarantine-icon { color: var(--error); }
 .dialog-description { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.field-hint { margin: 4px 0 0; color: var(--text-secondary); font-size: 11px; line-height: 1.4; }
 .search-box:focus-within { border-color: #00843d; box-shadow: 0 0 0 3px #e8fdf0; }
 .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-danger:focus-visible, .btn-danger-sm:focus-visible, .btn-cancel-sm:focus-visible, .btn-new-rma:focus-visible, .btn-advance:focus-visible, .modal-close:focus-visible, .autocomplete-results button:focus-visible { outline: 2px solid #00843d; outline-offset: 2px; }

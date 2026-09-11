@@ -171,7 +171,7 @@ describe('ReturnsRmaDashboardComponent', () => {
 
     expect(component.pendingActionIds.has('QZ-001')).toBeFalse();
     expect(component.confirmDisposeId).toBeNull();
-    expect(component.successMessage).toBe('Item disposed successfully.');
+    expect(component.successMessage).toBe('Item permanently disposed and removed from the system.');
     expect(component.refreshData).toHaveBeenCalled();
   });
 

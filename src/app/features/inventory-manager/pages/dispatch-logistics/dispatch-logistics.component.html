@@ -206,6 +206,26 @@
 
       <div class="modal-body">
         <div
+          class="delivery-details-card"
+          *ngIf="isViewingDetailsFromAssign && selectedOrder?.deliveryDetails as delivery"
+        >
+          <h3 class="delivery-details-title">Delivery Address</h3>
+          <p class="delivery-details-line" *ngIf="delivery.address">{{ delivery.address }}</p>
+          <p class="delivery-details-line" *ngIf="delivery.city || delivery.postalCode">
+            {{ delivery.city }}<span *ngIf="delivery.city && delivery.postalCode">, </span
+            >{{ delivery.postalCode }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.phone">
+            <lucide-angular name="phone" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.phone }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.email">
+            <lucide-angular name="mail" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.email }}
+          </p>
+        </div>
+
+        <div
           class="delivery-info-banner"
           *ngIf="
             selectedOrder?.courier ||
@@ -424,6 +444,22 @@
       </div>
 
       <div class="modal-body">
+        <div class="delivery-details-card" *ngIf="selectedOrder?.deliveryDetails as delivery">
+          <h3 class="delivery-details-title">Delivery Address</h3>
+          <p class="delivery-details-line" *ngIf="delivery.address">{{ delivery.address }}</p>
+          <p class="delivery-details-line" *ngIf="delivery.city || delivery.postalCode">
+            {{ delivery.city }}<span *ngIf="delivery.city && delivery.postalCode">, </span
+            >{{ delivery.postalCode }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.phone">
+            <lucide-angular name="phone" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.phone }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.email">
+            <lucide-angular name="mail" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.email }}
+          </p>
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label for="dispatch-courier-service">Courier Service</label>

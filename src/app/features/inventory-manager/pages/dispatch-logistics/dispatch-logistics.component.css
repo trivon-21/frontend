@@ -485,6 +485,35 @@
   line-height: 1.5;
 }
 
+.delivery-details-card {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border: 1px solid rgb(0 0 0 / 8%);
+  border-left: 3px solid var(--primary-main);
+  border-radius: 10px;
+  background: #f9faf9;
+}
+
+.delivery-details-title {
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.delivery-details-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 2px 0;
+  color: #566463;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .validation-banner {
   margin: 0 24px 16px;
   padding: 10px 14px;

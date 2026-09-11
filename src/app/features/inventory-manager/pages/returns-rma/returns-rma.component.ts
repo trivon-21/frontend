@@ -83,6 +83,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   showQuarantineModal = false;
   quarantineForm = {
     itemName: '',
+    itemId: '',
     quantity: 1,
     unit: 'units',
     reason: '',
@@ -507,6 +508,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.quarantineForm = {
       itemName: '',
+      itemId: '',
       quantity: 1,
       unit: 'units',
       reason: '',
@@ -517,14 +519,20 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   get matchingQuarantineItems(): InventoryItem[] {
     const query = this.quarantineForm.itemName.toLowerCase().trim();
-    if (!query) return [];
+    if (!query || this.quarantineForm.itemId) return [];
     return this.inventoryItems
       .filter((item) => item.name.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query))
       .slice(0, 8);
   }
 
+  onQuarantineItemNameChange(value: string): void {
+    this.quarantineForm.itemName = value;
+    this.quarantineForm.itemId = '';
+  }
+
   selectQuarantineItem(item: InventoryItem): void {
     this.quarantineForm.itemName = item.name;
+    this.quarantineForm.itemId = (item as any)._id || item.id;
     this.quarantineForm.unit = (item as any).unit || this.quarantineForm.unit;
   }
 
@@ -568,6 +576,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
     this.dashboardService.createQuarantineItem({
       itemName: this.quarantineForm.itemName.trim(),
+      itemId: this.quarantineForm.itemId || undefined,
       quantity: Number(this.quarantineForm.quantity),
       unit: this.quarantineForm.unit.trim() || 'units',
       reason: this.quarantineForm.reason.trim(),
@@ -603,7 +612,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       next: () => {
         this.pendingActionIds.delete(quarantineId);
         this.confirmDisposeId = null;
-        this.successMessage = 'Item disposed successfully.';
+        this.successMessage = 'Item permanently disposed and removed from the system.';
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
@@ -639,7 +648,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       next: () => {
         this.pendingActionIds.delete(quarantineId);
         this.confirmDeleteId = null;
-        this.successMessage = 'Item removed from quarantine.';
+        this.successMessage = 'Item returned to stock.';
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
@@ -649,8 +658,10 @@ export class ReturnsRmaDashboardComponent implements OnInit {
         if (err?.status === 404 || err?.error?.code === 'QUARANTINE_NOT_FOUND') {
           this.error = 'Quarantine item could not be found.';
           this.refreshData();
+        } else if (err?.error?.code === 'QUARANTINE_NO_INVENTORY_LINK') {
+          this.error = 'This item is not linked to an inventory record, so it cannot be automatically returned to stock.';
         } else {
-          this.error = err?.error?.message || 'Failed to delete item.';
+          this.error = err?.error?.message || 'Failed to return item to stock.';
         }
         setTimeout(() => (this.error = null), 5000);
       },

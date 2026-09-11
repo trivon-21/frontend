@@ -335,15 +335,15 @@
             <td class="actions-cell">
               <div class="action-cell" *ngIf="confirmDisposeId !== item.quarantineId && confirmDeleteId !== item.quarantineId">
                 <button type="button" class="btn-danger im-btn im-btn--danger im-btn--compact" (click)="confirmDispose(item.quarantineId)">Dispose</button>
-                <button type="button" class="btn-secondary im-btn im-btn--secondary im-btn--compact" (click)="confirmDelete(item.quarantineId)">Delete</button>
+                <button type="button" class="btn-secondary im-btn im-btn--secondary im-btn--compact" (click)="confirmDelete(item.quarantineId)">Return to Stock</button>
               </div>
               <div class="confirm-actions" *ngIf="confirmDisposeId === item.quarantineId">
-                <span class="confirm-text">Confirm?</span>
+                <span class="confirm-text">Dispose permanently?</span>
                 <button type="button" class="btn-danger-sm im-btn im-btn--danger im-btn--compact" (click)="disposeItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
                 <button type="button" class="btn-cancel-sm im-btn im-btn--secondary im-btn--compact" (click)="cancelDispose()">No</button>
               </div>
               <div class="confirm-actions" *ngIf="confirmDeleteId === item.quarantineId">
-                <span class="confirm-text">Delete permanently?</span>
+                <span class="confirm-text">Return this stock to inventory?</span>
                 <button type="button" class="btn-danger-sm im-btn im-btn--danger im-btn--compact" (click)="deleteQuarantineItem(item.quarantineId)" [disabled]="pendingActionIds.has(item.quarantineId)">Yes</button>
                 <button type="button" class="btn-cancel-sm im-btn im-btn--secondary im-btn--compact" (click)="cancelDelete()">No</button>
               </div>
@@ -413,12 +413,13 @@
         <p id="quarantine-dialog-description" class="dialog-description">Manually place an item in quarantine — for example, stock found damaged during a stocktake or inspection outside a return or receipt.</p>
         <div class="form-group">
           <label for="quarantine-item-name">Item Name *</label>
-          <input id="quarantine-item-name" type="text" [(ngModel)]="quarantineForm.itemName" placeholder="e.g., R410A Refrigerant Cylinder" class="form-input">
+          <input id="quarantine-item-name" type="text" [ngModel]="quarantineForm.itemName" (ngModelChange)="onQuarantineItemNameChange($event)" placeholder="e.g., R410A Refrigerant Cylinder" class="form-input">
           <div class="autocomplete-results" *ngIf="matchingQuarantineItems.length">
             <button type="button" *ngFor="let item of matchingQuarantineItems" (click)="selectQuarantineItem(item)">
               {{ item.name }} ({{ item.sku }})
             </button>
           </div>
+          <p class="field-hint" *ngIf="!quarantineForm.itemId">Pick a matching inventory item so it can later be returned to stock automatically.</p>
         </div>
         <div class="form-group">
           <label for="quarantine-quantity">Quantity *</label>

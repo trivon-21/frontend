@@ -686,6 +686,7 @@ export interface QuarantineItemData {
   location: string;
   source: 'leftover-return' | 'rma' | 'receipt' | 'manual';
   sourceRefId: string;
+  inventoryId?: string;
   status: 'quarantined' | 'disposed' | 'returned-to-supplier';
   disposedAt?: string;
   disposedBy?: string;
