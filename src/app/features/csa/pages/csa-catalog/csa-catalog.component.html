@@ -1,0 +1,350 @@
+<div class="catalog-manage-container">
+
+  <!-- TOAST ALERT -->
+  <div class="toast-alert" *ngIf="successToast">
+    <div class="toast-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <span class="toast-text">{{ successToast }}</span>
+    <button class="toast-close" (click)="successToast = ''" title="Dismiss">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Manage Catalog</h1>
+      <p class="page-subtitle">
+        Curate product presentation (images, descriptions, and feature lists) for air conditioning systems displayed in the public store catalog.
+      </p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/catalog" target="_blank" class="btn-outline-catalog" title="Open live public catalog in a new tab">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        <span>View Live Store Catalog</span>
+      </a>
+      <button class="btn-refresh" (click)="loadCatalogProducts()" [disabled]="isLoading" title="Refresh catalog data">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [class.spinning]="isLoading">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS SUMMARY CARDS -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ products.length }}</span>
+        <span class="summary-label">Total AC Units in Inventory</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ filteredProducts.length }}</span>
+        <span class="summary-label">Showing in Current Filter</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH & CATEGORY FILTER BAR -->
+  <div class="filter-card">
+    <div class="search-box">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Search ACs by name, brand, SKU or description keywords..." 
+        [(ngModel)]="searchQuery" 
+        (ngModelChange)="onSearchChange()"
+      />
+      <button *ngIf="searchQuery" class="clear-search" (click)="searchQuery = ''; onSearchChange()">✕</button>
+    </div>
+
+    <div class="category-tabs">
+      <span class="category-label">Category:</span>
+      <button 
+        *ngFor="let cat of categories" 
+        class="category-tab-btn" 
+        [class.active]="selectedCategory === cat"
+        (click)="selectCategory(cat)">
+        {{ cat }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="error-banner" *ngIf="error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span>{{ error }}</span>
+    <button class="btn-retry" (click)="loadCatalogProducts()">Retry</button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="isLoading && products.length === 0">
+    <div class="spinner"></div>
+    <p>Loading AC equipment inventory for catalog management...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" *ngIf="!isLoading && filteredProducts.length === 0 && !error">
+    <div class="empty-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    </div>
+    <h3>No AC Equipment Found</h3>
+    <p *ngIf="searchQuery || selectedCategory !== 'All'">
+      No products match your current search/category criteria. Try resetting filters.
+    </p>
+    <p *ngIf="!searchQuery && selectedCategory === 'All'">
+      There are currently no items classified as "AC Equipment" in the inventory.
+    </p>
+    <button *ngIf="searchQuery || selectedCategory !== 'All'" class="btn-reset-filters" (click)="searchQuery = ''; selectedCategory = 'All'; applyFilter()">
+      Reset All Filters
+    </button>
+  </div>
+
+  <!-- PRODUCT TILES GRID (Matching Catalog Design) -->
+  <div class="products-grid" *ngIf="!isLoading && filteredProducts.length > 0">
+    <div *ngFor="let product of filteredProducts" class="product-tile">
+      
+      <!-- STOCK BADGE -->
+      <div class="tile-top-bar">
+        <span class="stock-badge" [ngClass]="isInStock(product) ? 'in-stock' : 'out-of-stock'">
+          <span class="badge-dot"></span>
+          {{ isInStock(product) ? 'In Stock (' + (product.availableQuantity ?? 'Available') + ')' : 'Out of Stock' }}
+        </span>
+        <span class="sku-tag" title="Inventory SKU / Item Code">{{ product.sku || product.itemCode || 'AC Unit' }}</span>
+      </div>
+
+      <!-- PRODUCT IMAGE WRAPPER -->
+      <div class="product-image-container">
+        <img [src]="getImageUrl(product)" [alt]="product.name" loading="lazy" (error)="$any($event.target).src='/images/placeholder.png'" />
+      </div>
+
+      <!-- PRODUCT METADATA -->
+      <div class="product-info-body">
+        <div class="product-meta">
+          <span class="brand-name">{{ product.brand }}</span>
+          <span class="separator">·</span>
+          <span class="category-name">{{ product.category }}</span>
+        </div>
+
+        <h3 class="product-name" title="{{ product.name }}">{{ product.name }}</h3>
+
+        <div class="spec-row">
+          <span class="spec-chip">
+            Capacity: <strong>{{ product.capacity }} BTU</strong>
+          </span>
+        </div>
+
+        <!-- DESCRIPTION PREVIEW -->
+        <p class="description-preview" [title]="product.description || 'No description provided yet'">
+          {{ product.description || 'No description set yet. Click "Edit Catalog Details" to add customer-facing description.' }}
+        </p>
+
+        <!-- FEATURES TAGS -->
+        <div class="features-preview" *ngIf="product.features && product.features.length > 0">
+          <span *ngFor="let feat of product.features.slice(0, 3)" class="feature-chip">{{ feat }}</span>
+          <span *ngIf="product.features.length > 3" class="feature-more-chip">+{{ product.features.length - 3 }} more</span>
+        </div>
+        <div class="features-preview empty" *ngIf="!product.features || product.features.length === 0">
+          <span class="feature-none">No highlights/features added yet</span>
+        </div>
+      </div>
+
+      <!-- TILE BOTTOM BAR -->
+      <div class="tile-footer">
+        <div class="price-container">
+          <span class="price-label">Unit Selling Price</span>
+          <span class="product-price">LKR {{ (product.price || 0) | number:'1.0-0' }}</span>
+        </div>
+
+        <button class="btn-edit-tile" (click)="openEditModal(product)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          <span>Edit Catalog Details</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- EDIT CATALOG DETAILS MODAL                                -->
+  <!-- ========================================================= -->
+  <div class="modal-backdrop" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+        <h2 class="modal-title">{{ selectedProduct?.name }}</h2>
+        <button class="modal-close-btn" (click)="closeEditModal()" title="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- MODAL BODY -->
+      <div class="modal-body">
+        
+        <!-- ERROR ALERT -->
+        <div class="form-alert error" *ngIf="editError">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ editError }}</span>
+        </div>
+
+        <!-- LOCKED PRODUCT SPECIFICATIONS -->
+        <div class="readonly-grid">
+          <div class="readonly-item">
+            <label>Product Name</label>
+            <div class="readonly-value">{{ selectedProduct?.name }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>Brand</label>
+            <div class="readonly-value">{{ selectedProduct?.brand }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>Category</label>
+            <div class="readonly-value">{{ selectedProduct?.category }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>Capacity</label>
+            <div class="readonly-value">{{ selectedProduct?.capacity }} BTU</div>
+          </div>
+          <div class="readonly-item">
+            <label>Unit Selling Price</label>
+            <div class="readonly-value price-val">LKR {{ (selectedProduct?.price || 0) | number:'1.0-0' }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>SKU / Item Code</label>
+            <div class="readonly-value">{{ selectedProduct?.sku || selectedProduct?.itemCode || 'N/A' }}</div>
+          </div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <!-- PRODUCT IMAGE -->
+        <div class="form-group field-image-group">
+          <label class="field-label">Product Image</label>
+          <div class="image-editor-layout">
+            <div class="image-preview-card">
+              <div class="preview-box">
+                <img [src]="imagePreview" alt="Product Image Preview" (error)="$any($event.target).src='/images/placeholder.png'" />
+              </div>
+            </div>
+
+            <div class="image-inputs">
+              <div class="upload-control">
+                <label class="btn-file-upload">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>Upload Image</span>
+                  <input type="file" accept="image/*" (change)="onImageFileSelected($event)" style="display:none;" />
+                </label>
+                <span class="upload-hint">Supports JPEG, PNG, WebP (max 2.5MB)</span>
+              </div>
+
+              <input 
+                type="text" 
+                placeholder="Or paste image URL / filename..." 
+                [(ngModel)]="editImage" 
+                (ngModelChange)="onImageUrlChange($event)"
+                class="form-input"
+              />
+
+              <div class="field-error" *ngIf="imageUploadError">
+                {{ imageUploadError }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="form-group">
+          <label class="field-label" for="editDesc">Description</label>
+          <textarea 
+            id="editDesc"
+            rows="3" 
+            class="form-textarea" 
+            placeholder="Enter product description..."
+            [(ngModel)]="editDescription">
+          </textarea>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="form-group">
+          <label class="field-label">Features</label>
+
+          <div class="features-edit-tags" *ngIf="editFeatures.length > 0">
+            <div *ngFor="let feat of editFeatures; let i = index" class="feature-tag-chip">
+              <span>{{ feat }}</span>
+              <button type="button" class="remove-feat-btn" (click)="removeFeature(i)" title="Remove feature">✕</button>
+            </div>
+          </div>
+
+          <div class="add-feature-bar">
+            <input 
+              type="text" 
+              class="form-input feature-input" 
+              placeholder="Add a feature point..." 
+              [(ngModel)]="newFeatureInput"
+              (keydown)="onFeatureKeyDown($event)"
+            />
+            <button type="button" class="btn-add-feature" (click)="addFeature()" [disabled]="!newFeatureInput.trim()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeEditModal()" [disabled]="isSaving">
+          Cancel
+        </button>
+        <button type="button" class="btn-save" (click)="saveProduct()" [disabled]="isSaving">
+          <svg *ngIf="isSaving" class="btn-spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+          </svg>
+          <svg *ngIf="!isSaving" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          <span>{{ isSaving ? 'Saving Changes...' : 'Save & Update Catalog' }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

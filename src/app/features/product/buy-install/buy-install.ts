@@ -100,8 +100,9 @@ export class BuyInstall implements OnInit {
   }
 
   getImageUrl(raw: string): string {
-    if (!raw) return 'assets/placeholder.png';
-    if (raw.startsWith('http')) return raw;
+    if (!raw) return '/images/placeholder.png';
+    if (raw.startsWith('data:') || raw.startsWith('http') || raw.startsWith('/')) return raw;
+    if (raw.startsWith('assets/')) return '/' + raw;
     return '/images/' + raw;
   }
 

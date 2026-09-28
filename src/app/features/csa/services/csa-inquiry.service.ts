@@ -28,7 +28,7 @@ export interface CustomerInquiry {
   message: string;
   attachmentUrl?: string;
   thread: ThreadMessage[];
-  status: 'Ongoing' | 'Addressed' | 'Closed';
+  status: 'Awaiting' | 'Ongoing' | 'Addressed' | 'Closed';
   createdAt: string;
   updatedAt: string;
 }

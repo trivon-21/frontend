@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../directives/click-outside.directive';
 import { FooterComponent } from '../../../components/footer/footer.component';
@@ -19,6 +19,7 @@ export class OrderSuccess implements OnInit {
   showDropdown: boolean = false;
   isBuyAndInstall: boolean = false;
   public router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
 
   ngOnInit() {
@@ -33,7 +34,25 @@ export class OrderSuccess implements OnInit {
     const state = history.state;
     if (state) {
       if (state.orderId) this.orderId = state.orderId;
-      if (state.isBuyAndInstall) this.isBuyAndInstall = state.isBuyAndInstall;
+      if (state.isBuyAndInstall !== undefined) this.isBuyAndInstall = !!state.isBuyAndInstall;
+    }
+
+    const queryParams = this.route.snapshot.queryParams;
+    if (!this.orderId && queryParams['orderId']) {
+      this.orderId = queryParams['orderId'];
+    }
+    if (queryParams['isBuyAndInstall'] !== undefined) {
+      this.isBuyAndInstall = queryParams['isBuyAndInstall'] === 'true' || queryParams['isBuyAndInstall'] === true;
+    }
+  }
+
+  goToInspectionPayment(): void {
+    if (this.orderId) {
+      this.router.navigate(['/inspection-payment'], {
+        queryParams: { orderId: this.orderId }
+      });
+    } else {
+      this.router.navigate(['/inspection-payment']);
     }
   }
 

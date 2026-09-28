@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CsaDashboardService, DashboardData } from '../../services/csa-dashboard.service';
@@ -10,20 +10,46 @@ import { CsaDashboardService, DashboardData } from '../../services/csa-dashboard
   templateUrl: './csa-dashboard.component.html',
   styleUrl: './csa-dashboard.component.css'
 })
-export class CsaDashboardComponent implements OnInit {
+export class CsaDashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage = '';
   dashboardData: DashboardData | null = null;
   currentDate = new Date();
+  private pollInterval: any = null;
+  private onFocusHandler = () => this.loadStats(false);
 
   constructor(private dashboardService: CsaDashboardService) {}
 
   ngOnInit(): void {
-    this.loadStats();
+    this.loadStats(true);
+
+    // Auto-update dashboard metrics live every 8 seconds
+    this.pollInterval = setInterval(() => {
+      this.loadStats(false);
+    }, 8000);
+
+    // Refresh immediately when returning to the tab/window
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', this.onFocusHandler);
+      document.addEventListener('visibilitychange', this.onFocusHandler);
+    }
   }
 
-  loadStats(): void {
-    this.isLoading = true;
+  ngOnDestroy(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('focus', this.onFocusHandler);
+      document.removeEventListener('visibilitychange', this.onFocusHandler);
+    }
+  }
+
+  loadStats(showLoading = true): void {
+    if (showLoading) {
+      this.isLoading = true;
+    }
     this.errorMessage = '';
 
     this.dashboardService.getDashboardStats().subscribe({
@@ -36,7 +62,9 @@ export class CsaDashboardComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         console.error('Failed to load CSA dashboard stats:', err);
-        this.errorMessage = 'Failed to load dashboard metrics. Please refresh.';
+        if (showLoading) {
+          this.errorMessage = 'Failed to load dashboard metrics. Please refresh.';
+        }
       }
     });
   }

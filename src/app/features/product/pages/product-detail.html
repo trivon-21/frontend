@@ -186,7 +186,9 @@
                 <h2 class="pd-product-name">{{ product.name }}</h2>
                 <div class="pd-rating" *ngIf="product.averageRating || product.reviewCount">
                     <span class="pd-stars" style="display:inline-flex; align-items:center; gap:2px;">
-                        <lucide-angular *ngFor="let s of getStars(product.averageRating || 0)" name="star" [size]="14" [style.fill]="s ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular>
+                        <svg *ngFor="let s of getStars(product.averageRating || 0)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" [attr.fill]="s ? '#f5a623' : 'none'" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
                     </span>
                     <span class="pd-rating-text">{{ (product.averageRating || 0) | number:'1.1-1' }} ({{ product.reviewCount || 0 }} {{ product.reviewCount === 1 ? 'Review' : 'Reviews' }})</span>
                 </div>
@@ -249,7 +251,7 @@
             <div class="pd-section" *ngIf="product.inStock && awarenessOption === 'know'">
                 <p class="pd-section-label">Purchase Options:</p>
                 <div class="pd-radio-group">
-                    <div class="pd-radio-option" [class.pd-radio-selected]="purchaseOption === 'buy-only'" (click)="purchaseOption = 'buy-only'">
+                    <div class="pd-radio-option" [class.pd-radio-selected]="purchaseOption === 'buy-only'" (click)="selectPurchaseOption('buy-only')">
                         <div class="pd-radio-check" [class.pd-radio-check-on]="purchaseOption === 'buy-only'">
                             <svg *ngIf="purchaseOption === 'buy-only'" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
                                 viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"
@@ -262,7 +264,7 @@
                             <div class="pd-radio-sub">Pack &amp; delivered to you. Statewide delivery available.</div>
                         </div>
                     </div>
-                    <div class="pd-radio-option" [class.pd-radio-selected]="purchaseOption === 'buy-install'" (click)="purchaseOption = 'buy-install'">
+                    <div class="pd-radio-option" [class.pd-radio-selected]="purchaseOption === 'buy-install'" (click)="selectPurchaseOption('buy-install')">
                         <div class="pd-radio-check" [class.pd-radio-check-on]="purchaseOption === 'buy-install'">
                             <svg *ngIf="purchaseOption === 'buy-install'" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
                                 viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"
@@ -275,6 +277,12 @@
                             <div class="pd-radio-sub">Requires site inspection first. Service limited to specific area.</div>
                         </div>
                     </div>
+                </div>
+                <div class="pd-purchase-error-msg" *ngIf="purchaseOptionError">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>Please select a purchase option (Buy Only or Buy &amp; Install) before adding to cart.</span>
                 </div>
             </div>
 
@@ -343,24 +351,20 @@
 
         <!-- Warranty Panel -->
         <div class="pd-tab-panel" *ngIf="activeTab === 'warranty'" id="panel-warranty">
-            <div class="pd-warranty-section" *ngIf="product.warrantyInfo && (product.warrantyInfo.comprehensive || product.warrantyInfo.compressor)">
+            <div class="pd-warranty-section">
                 <div class="pd-warranty-title">Warranty Coverage</div>
                 <div class="pd-warranty-block">
-                    <div *ngIf="product.warrantyInfo.comprehensive">
-                        <div class="pd-warranty-label">Comprehensive Warranty:</div>
-                        <div class="pd-warranty-desc">{{ product.warrantyInfo.comprehensive }}</div>
+                    <div>
+                        <div class="pd-warranty-label">Default Warranty:</div>
+                        <div class="pd-warranty-desc">{{ defaultWarrantyMonths }} Months</div>
                     </div>
-                    <div *ngIf="product.warrantyInfo.compressor">
-                        <div class="pd-warranty-label">Compressor Warranty:</div>
-                        <div class="pd-warranty-desc">{{ product.warrantyInfo.compressor }}</div>
-                    </div>
-                    <div *ngIf="product.warrantyInfo.covered && product.warrantyInfo.covered.length > 0">
+                    <div *ngIf="product?.warrantyInfo?.covered && product.warrantyInfo.covered.length > 0">
                         <div class="pd-warranty-list-label">What's Covered:</div>
                         <ul class="pd-warranty-list">
                             <li *ngFor="let item of product.warrantyInfo.covered">{{ item }}</li>
                         </ul>
                     </div>
-                    <div *ngIf="product.warrantyInfo.notCovered && product.warrantyInfo.notCovered.length > 0">
+                    <div *ngIf="product?.warrantyInfo?.notCovered && product.warrantyInfo.notCovered.length > 0">
                         <div class="pd-warranty-list-label">What's Not Covered:</div>
                         <ul class="pd-warranty-list">
                             <li *ngFor="let item of product.warrantyInfo.notCovered">{{ item }}</li>
@@ -368,9 +372,6 @@
                     </div>
                 </div>
             </div>
-            <p class="pd-no-data" *ngIf="!product.warrantyInfo || (!product.warrantyInfo.comprehensive && !product.warrantyInfo.compressor)">
-                Warranty information has not been added for this product yet.
-            </p>
         </div>
 
         <!-- Reviews Panel -->
@@ -387,7 +388,9 @@
                                 </span>
                             </span>
                             <span class="pd-review-stars" style="display:inline-flex; align-items:center; gap:2px;">
-                                <lucide-angular *ngFor="let s of getStars(review.rating)" name="star" [size]="13" [style.fill]="s ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular>
+                                <svg *ngFor="let s of getStars(review.rating)" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" [attr.fill]="s ? '#f5a623' : 'none'" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
                             </span>
                             <span class="pd-review-date">{{ review.date | date:'mediumDate' }}</span>
 
@@ -419,15 +422,16 @@
                     <div class="pd-review-edit-box" *ngIf="editingReviewId === review._id">
                         <div class="pd-review-edit-header">
                             <span style="font-weight: 600; font-size: 0.95rem; color: #133B1F;">Edit Your Review</span>
-                            <div class="pd-star-input">
+                            <div class="pd-star-input" (mouseleave)="hoverEditRating = 0">
                                 <span
                                     *ngFor="let star of [1,2,3,4,5]"
                                     class="pd-star-btn"
-                                    [class.pd-star-active]="star <= editReviewForm.rating"
+                                    [class.pd-star-active]="star <= (hoverEditRating || editReviewForm.rating)"
+                                    (mouseenter)="hoverEditRating = star"
                                     (click)="setEditRating(star)"
                                     [title]="star + ' star' + (star > 1 ? 's' : '')"
                                     aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
-                                ><lucide-angular name="star" [size]="18" [style.fill]="star <= editReviewForm.rating ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular></span>
+                                ><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" [attr.fill]="star <= (hoverEditRating || editReviewForm.rating) ? '#f5a623' : 'none'" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
                             </div>
                         </div>
                         <textarea rows="3" class="pd-review-edit-textarea" [(ngModel)]="editReviewForm.comment" placeholder="Update your review comment..."></textarea>
@@ -486,15 +490,16 @@
                 <form class="pd-review-form" (ngSubmit)="submitReview()">
                     <div class="pd-form-row">
                         <input type="text" [value]="userFullName" readonly disabled style="background: #f1f5f9; cursor: not-allowed; opacity: 0.9;" title="Posting as your verified account name">
-                        <div class="pd-star-input">
+                        <div class="pd-star-input" (mouseleave)="hoverRating = 0">
                             <span
                                 *ngFor="let star of [1,2,3,4,5]"
                                 class="pd-star-btn"
-                                [class.pd-star-active]="star <= newReview.rating"
+                                [class.pd-star-active]="star <= (hoverRating || newReview.rating)"
+                                (mouseenter)="hoverRating = star"
                                 (click)="setRating(star)"
                                 [title]="star + ' star' + (star > 1 ? 's' : '')"
                                 aria-label="Rate {{ star }} star{{ star > 1 ? 's' : '' }}"
-                            ><lucide-angular name="star" [size]="18" [style.fill]="star <= newReview.rating ? '#f5a623' : 'none'" [style.color]="'#f5a623'"></lucide-angular></span>
+                            ><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" [attr.fill]="star <= (hoverRating || newReview.rating) ? '#f5a623' : 'none'" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
                         </div>
                     </div>
                     <textarea placeholder="Write your verified review here..." rows="4" [(ngModel)]="newReview.comment" name="comment" required></textarea>

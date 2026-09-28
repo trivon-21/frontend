@@ -6,7 +6,10 @@ import { environment } from '../../../../environments/environment';
 export interface DashboardMetrics {
   totalCustomers: number;
   activeTickets: number;
+  totalTickets?: number;
+  allTickets?: number;
   highPriorityTickets: number;
+  awaitingInquiries?: number;
   pendingInquiries: number;
   pendingMaintenance: number;
 }

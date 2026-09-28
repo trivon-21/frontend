@@ -30,10 +30,17 @@ export class ProductDetail implements OnInit {
   // Purchase flow options
   purchaseOption: 'buy-only' | 'buy-install' | null = null;
   awarenessOption: 'know' | 'unsure' | null = null;
+  purchaseOptionError = false;
 
   selectAwareness(option: 'know' | 'unsure') {
     this.awarenessOption = option;
     this.purchaseOption = null; // always reset purchase choice on awareness change
+    this.purchaseOptionError = false;
+  }
+
+  selectPurchaseOption(option: 'buy-only' | 'buy-install') {
+    this.purchaseOption = option;
+    this.purchaseOptionError = false;
   }
 
   // Success toast
@@ -76,6 +83,13 @@ export class ProductDetail implements OnInit {
  * Requires the user to be logged in before adding to cart.
  */
   addToCart() {
+    // Enforce selection of purchase option
+    if (!this.purchaseOption) {
+      this.purchaseOptionError = true;
+      return;
+    }
+    this.purchaseOptionError = false;
+
     // Check if user is logged in
     if (!this.authService.isLoggedIn()) {
       this.loginModalMessage = 'You need to be logged into your account before adding items to your cart.';
@@ -133,6 +147,7 @@ export class ProductDetail implements OnInit {
 
   // API state
   product: any = null;
+  defaultWarrantyMonths: number = 24;
   loading: boolean = true;
   error: string = '';
 
@@ -145,18 +160,23 @@ export class ProductDetail implements OnInit {
   // Reviews
   newReview = {
     userName: '',
-    rating: 1,
+    rating: 0,
     comment: ''
   };
+  hoverRating = 0;
+  hoverEditRating = 0;
   submittingReview = false;
   reviewError = '';
   reviewSuccess = false;
   eligibilityState: 'LOADING' | 'NOT_LOGGED_IN' | 'NOT_A_BUYER' | 'VERIFIED_BUYER' = 'LOADING';
 
-  // Set rating on click; clicking the already-selected star removes it (rating − 1, min 1)
+  // Set rating on click:
+  // - Clicking an unselected star fills up to that star (or unfills from the right if lower)
+  // - Clicking the currently active top star unfills that specific star (star - 1)
   setRating(star: number) {
+    this.hoverRating = 0;
     if (star === this.newReview.rating) {
-      this.newReview.rating = Math.max(1, star - 1);
+      this.newReview.rating = star - 1;
     } else {
       this.newReview.rating = star;
     }
@@ -241,6 +261,7 @@ export class ProductDetail implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           this.product = res.data;
+          this.defaultWarrantyMonths = res.data.defaultWarrantyMonths ?? res.data.warrantyInfo?.defaultWarrantyMonths ?? 24;
           if (this.product.variants && this.product.variants.length > 0) {
             const match = this.product.variants.find((v: any) => v.capacity === this.product.capacity);
             this.selectedVariant = match || this.product.variants[0];
@@ -298,8 +319,9 @@ export class ProductDetail implements OnInit {
   }
 
   getImageUrl(raw: string): string {
-    if (!raw) return 'assets/placeholder.png';
-    if (raw.startsWith('http')) return raw;
+    if (!raw) return '/images/placeholder.png';
+    if (raw.startsWith('data:') || raw.startsWith('http') || raw.startsWith('/')) return raw;
+    if (raw.startsWith('assets/')) return '/' + raw;
     return '/images/' + raw;
   }
 
@@ -424,6 +446,11 @@ export class ProductDetail implements OnInit {
       return;
     }
 
+    if (!this.newReview.rating || this.newReview.rating < 1) {
+      this.reviewError = 'Please select a star rating.';
+      return;
+    }
+
     if (!this.newReview.comment?.trim()) {
       this.reviewError = 'Please write a review comment.';
       return;
@@ -450,7 +477,7 @@ export class ProductDetail implements OnInit {
         }
         // Reset comment & rating
         this.newReview.comment = '';
-        this.newReview.rating = 1;
+        this.newReview.rating = 0;
         setTimeout(() => {
           this.reviewSuccess = false;
         }, 4000);
@@ -476,11 +503,19 @@ export class ProductDetail implements OnInit {
   isMyReview(review: any): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) return false;
-    if (review.userId && String(review.userId) === String(user.id)) {
+    const currentUserId = user.id || (user as any)._id;
+    if (review.userId && currentUserId && String(review.userId) === String(currentUserId)) {
       return true;
     }
-    const fullName = this.userFullName || [user.fullName, user.lastName].filter(Boolean).join(' ').trim();
-    return Boolean(fullName && review.userName === fullName);
+    const fullName = (this.userFullName || [user.fullName, user.lastName].filter(Boolean).join(' ').trim()).trim().toLowerCase();
+    const reviewAuthor = String(review.userName || '').trim().toLowerCase();
+    if (fullName && reviewAuthor && reviewAuthor === fullName) {
+      return true;
+    }
+    if (user.fullName && reviewAuthor && reviewAuthor === user.fullName.trim().toLowerCase()) {
+      return true;
+    }
+    return false;
   }
 
   hasUserReviewed(): boolean {
@@ -504,14 +539,19 @@ export class ProductDetail implements OnInit {
   }
 
   setEditRating(star: number) {
+    this.hoverEditRating = 0;
     if (star === this.editReviewForm.rating) {
-      this.editReviewForm.rating = Math.max(1, star - 1);
+      this.editReviewForm.rating = star - 1;
     } else {
       this.editReviewForm.rating = star;
     }
   }
 
   saveEditReview(reviewId: string) {
+    if (!this.editReviewForm.rating || this.editReviewForm.rating < 1) {
+      this.editReviewError = 'Please select a star rating.';
+      return;
+    }
     if (!this.editReviewForm.comment.trim()) {
       this.editReviewError = 'Please write a review comment.';
       return;

@@ -140,7 +140,8 @@
       </div>
     </div>
 
-    <table class="oh-table">
+    <div class="oh-table-wrap">
+      <table class="oh-table">
       <thead>
         <tr>
           <th>Name</th>
@@ -150,7 +151,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let order of orders">
+        <tr *ngFor="let order of pagedOrders">
           <td>
             <div class="order-name-cell">
               <div class="order-avatar"></div>
@@ -169,7 +170,16 @@
           <td colspan="4" class="oh-empty">No orders found.</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
+    <div class="oh-footer" *ngIf="orders.length > 0">
+      <span>Showing {{ (orderHistoryPage - 1) * orderHistoryPageSize + 1 }}-{{ orderHistoryPageEnd }} of {{ orders.length }}</span>
+      <span class="oh-pagination" *ngIf="orderHistoryPageCount > 1">
+        <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage - 1)" [disabled]="orderHistoryPage === 1" aria-label="Previous orders">Previous</button>
+        <span>Page {{ orderHistoryPage }} of {{ orderHistoryPageCount }}</span>
+        <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage + 1)" [disabled]="orderHistoryPage === orderHistoryPageCount" aria-label="Next orders">Next</button>
+      </span>
+    </div>
   </div>
 
   <!-- Right Panel -->

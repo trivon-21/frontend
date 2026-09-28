@@ -674,6 +674,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: CsaDashboardComponent },
+      {
+        path: 'catalog',
+        loadComponent: () =>
+          import(
+            './features/csa/pages/csa-catalog/csa-catalog.component'
+          ).then((m) => m.CsaCatalogComponent),
+      },
       { path: 'customers', component: CsaCustomersComponent },
       { path: 'service-tickets', component: CsaServiceTicketsComponent },
       { path: 'inquiries', component: CsaInquiriesComponent },

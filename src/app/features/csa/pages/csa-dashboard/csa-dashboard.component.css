@@ -268,38 +268,36 @@
 
 .badge-tag {
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 7px;
+  font-weight: 700;
+  padding: 3px 8px;
   border-radius: 6px;
   background: #f3f4f2;
   color: #566463;
+  display: inline-block;
 }
 
-.priority-pill {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #f3f4f2;
-  color: #566463;
-}
-
-.priority-pill.high { background: #fee2e2; color: #dc2626; }
-.priority-pill.med { background: #fef3c7; color: #d97706; }
+.badge-tag.cat-repair { background: #fffbeb; color: #b45309; }
+.badge-tag.cat-maintenance { background: #eff6ff; color: #1d4ed8; }
+.badge-tag.cat-installation { background: #ecfdf5; color: #047857; }
+.badge-tag.cat-inspection { background: #fdf4ff; color: #a21caf; }
 
 .status-pill {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 3px 9px;
   border-radius: 999px;
   background: var(--primary-lighter, #e8fdf0);
   color: var(--primary-main, #00843D);
+  display: inline-block;
 }
 
-.status-pill.reviewed {
-  background: #eff6ff;
-  color: #1e40af;
-}
+.status-pill.stat-new { background: #eff6ff; color: #1d4ed8; }
+.status-pill.stat-assigned { background: #fdf4ff; color: #a21caf; }
+.status-pill.stat-pending { background: #fffbeb; color: #b45309; }
+.status-pill.stat-finance-approved { background: #ecfdf5; color: #047857; }
+.status-pill.stat-in-progress { background: #fdf4ff; color: #a21caf; }
+.status-pill.stat-resolved { background: #f0fdf4; color: #15803d; }
+.status-pill.stat-reviewed { background: #eff6ff; color: #1e40af; }
 
 /* INQUIRIES FEED */
 .inquiries-feed {
@@ -339,9 +337,19 @@
   color: #566463;
 }
 
-.inq-feed-status.ongoing {
+.inq-feed-status.awaiting {
   background: #fef3c7;
   color: #b45309;
+}
+
+.inq-feed-status.ongoing {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.inq-feed-status.closed {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .inq-feed-msg {
