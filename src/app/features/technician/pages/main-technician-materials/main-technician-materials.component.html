@@ -297,12 +297,31 @@
                 <div *ngFor="let item of newRequest.items; let i = index" class="item-row">
                   <div class="input-group">
                     <span class="input-label">ITEM DESCRIPTION</span>
-                    <select [(ngModel)]="item.inventoryId" (ngModelChange)="onMaterialSelection(item)">
-                      <option value="" disabled>Select catalog material</option>
-                      <option *ngFor="let material of materialCatalog" [value]="material._id">
-                        {{ material.name }} ({{ material.sku }}) — {{ material.available }} {{ material.unit }} available
-                      </option>
-                    </select>
+                    <div class="custom-dropdown-container">
+                      <div class="custom-dropdown-selected" (click)="toggleDropdown(i)">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ getMaterialName(item.inventoryId) || 'Select catalog material' }}</span>
+                      </div>
+                      <div class="custom-dropdown-options" *ngIf="activeDropdownIndex === i">
+                        <div class="custom-dropdown-search">
+                          <input type="text" placeholder="Search material..." (input)="onSearchMaterial($event)" (click)="$event.stopPropagation()">
+                        </div>
+                        <div class="custom-dropdown-list">
+                          <div class="custom-dropdown-option disabled" *ngIf="getFilteredCatalog().length === 0">
+                            No materials found
+                          </div>
+                          <div class="custom-dropdown-option catalog-item" *ngFor="let material of getFilteredCatalog()" (click)="selectMaterial(item, material._id)" [class.unavailable]="material.available === 0">
+                            <div class="catalog-item-info">
+                              <span class="catalog-item-name">{{ material.name }}</span>
+                              <span class="catalog-item-sku">{{ material.sku }}</span>
+                            </div>
+                            <div class="catalog-item-stock" [ngClass]="{'in-stock': material.available > 0, 'out-of-stock': material.available === 0}">
+                              <span class="stock-indicator"></span>
+                              {{ material.available }} {{ material.unit }} available
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="input-group quantity-group">
                     <span class="input-label">QUANTITY</span>
