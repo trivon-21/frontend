@@ -13,6 +13,7 @@ describe('BusinessRulesFormComponent', () => {
       standardMaintenanceFee: 6000,
       standardRepairFee: 7500,
       standardSiteInspectionFee: 5000,
+      profitMargin: 0.25,
       logRetentionDays: 30,
       paymentAutoCancelDays: 14,
       defaultWarrantyMonths: 24,
@@ -66,6 +67,7 @@ describe('BusinessRulesFormComponent', () => {
     expect(component.form.contains('standardMaintenanceFee')).toBeTrue();
     expect(component.form.contains('standardRepairFee')).toBeTrue();
     expect(component.form.contains('standardSiteInspectionFee')).toBeTrue();
+    expect(component.form.contains('profitMargin')).toBeTrue();
   });
 
   it('should patch values from config on ngOnChanges', () => {
@@ -73,6 +75,7 @@ describe('BusinessRulesFormComponent', () => {
     expect(component.form.get('standardMaintenanceFee')?.value).toBe(6000);
     expect(component.form.get('standardRepairFee')?.value).toBe(7500);
     expect(component.form.get('standardSiteInspectionFee')?.value).toBe(5000);
+    expect(component.form.get('profitMargin')?.value).toBe(25);
   });
 
   it('should emit updated fees on submit when values are changed', () => {
@@ -93,6 +96,7 @@ describe('BusinessRulesFormComponent', () => {
     expect(compiled.textContent).toContain('Standard Maintenance Service Fee (LKR)');
     expect(compiled.textContent).toContain('Standard Repair Service Fee (LKR)');
     expect(compiled.textContent).toContain('Standard Site Inspection Fee (LKR)');
+    expect(compiled.textContent).toContain('Inventory Profit Margin (%)');
     expect(compiled.textContent).not.toContain('Quotation Approval Threshold (LKR)');
   });
 });

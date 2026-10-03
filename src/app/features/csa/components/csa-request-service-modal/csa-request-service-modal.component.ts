@@ -1,35 +1,42 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CustomerServiceRequestService } from '../../../features/customer/services/customer-service-request.service';
-import { PaymentService, BankDetails } from '../../../core/services/payment.service';
-import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
+import { CustomerServiceRequestService } from '../../../customer/services/customer-service-request.service';
+import { PaymentService, BankDetails } from '../../../../core/services/payment.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { CustomerProfile } from '../../services/csa-customer.service';
 
 @Component({
-  selector: 'app-request-service-modal',
+  selector: 'app-csa-request-service-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
-  templateUrl: './request-service-modal.component.html',
-  styleUrl: './request-service-modal.component.css',
+  templateUrl: './csa-request-service-modal.component.html',
+  styleUrl: './csa-request-service-modal.component.css',
 })
-export class RequestServiceModalComponent implements OnInit {
+export class CsaRequestServiceModalComponent implements OnInit {
+  @Input() customers: CustomerProfile[] = [];
+  @Input() products: any[] = [];
   @Output() closed = new EventEmitter<void>();
-  @Output() viewHistory = new EventEmitter<void>();
+  @Output() requestCreated = new EventEmitter<any>();
 
-  // 1 = AC Unit, 2 = Service Details, 3 = Payment (Maintenance only), 4 = Summary (or 3 for Repair)
+  // 1 = Customer & AC Unit, 2 = Service Details, 3 = Payment (Maintenance only), 4 = Summary (or 3 for Repair)
   step = 1;
   submitting = false;
+  isValidatingSlip = false;
   submitted = false;
   error: string | null = null;
   submittedRef = '';
 
-  // Step 1: AC Unit
+  // Step 1: Customer & AC Unit
+  selectedCustomerId = '';
   acUnitModel = '';
+  isCustomModel = false;
+  customModelName = '';
   acUnitSerial = '';
   acWarrantyStatus: 'Active' | 'Expired' | 'Unknown' = 'Unknown';
   acAmcStatus: 'Active' | 'Not Active' = 'Not Active';
 
-  // Step 2: Service Details - only Repair and Maintenance allowed
+  // Step 2: Service Details
   serviceType: 'Repair' | 'Maintenance' | '' = '';
   problemDescription = '';
   preferredDate = '';
@@ -47,12 +54,12 @@ export class RequestServiceModalComponent implements OnInit {
     'Maintenance',
   ];
 
-  // Dynamic charges from database
+  // Dynamic charges
   maintenanceFee = 6000;
   repairFee = 7500;
   loadingCharges = false;
 
-  // Bank details for payment gateway
+  // Bank details for payment
   bankDetails: BankDetails = {
     bankName: 'Commercial Bank of Ceylon',
     accountNumber: '1000234567',
@@ -77,10 +84,14 @@ export class RequestServiceModalComponent implements OnInit {
     this.loadBankDetails();
   }
 
+  get selectedCustomer(): CustomerProfile | undefined {
+    return this.customers.find(c => c._id === this.selectedCustomerId);
+  }
+
   loadCharges(): void {
     this.loadingCharges = true;
     this.srService.getCharges().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res && res.maintenanceFee) {
           this.maintenanceFee = res.maintenanceFee;
         }
@@ -102,15 +113,15 @@ export class RequestServiceModalComponent implements OnInit {
           this.bankDetails = res.data;
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.warn('Using default bank details:', err.message);
       }
     });
   }
 
-  close() { this.closed.emit(); }
-
-  openHistory() { this.viewHistory.emit(); }
+  close() {
+    this.closed.emit();
+  }
 
   onOverlayClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) this.close();
@@ -149,10 +160,42 @@ export class RequestServiceModalComponent implements OnInit {
     return this.serviceType === 'Maintenance' && this.step === 3;
   }
 
+  onModelSelected(val: string): void {
+    this.error = null;
+    if (val === 'OTHER') {
+      this.isCustomModel = true;
+      this.acUnitModel = this.customModelName.trim();
+    } else {
+      this.isCustomModel = false;
+      this.acUnitModel = val;
+    }
+  }
+
+  onCustomModelChange(val: string): void {
+    this.customModelName = val;
+    this.acUnitModel = val.trim();
+    this.error = null;
+  }
+
   nextStep() {
     this.error = null;
 
     if (this.step === 1) {
+      if (!this.selectedCustomerId) {
+        this.error = 'Please select a registered customer.';
+        return;
+      }
+      if (this.isCustomModel) {
+        this.acUnitModel = this.customModelName.trim();
+      }
+      if (!this.acUnitModel || !this.acUnitModel.trim()) {
+        this.error = 'Please select an AC Unit Model from the catalog.';
+        return;
+      }
+      if (!this.acUnitSerial || !this.acUnitSerial.trim()) {
+        this.error = 'Please enter the Unit Serial Number.';
+        return;
+      }
       this.step = 2;
       return;
     }
@@ -162,16 +205,41 @@ export class RequestServiceModalComponent implements OnInit {
         this.error = 'Please select a service type (Repair or Maintenance).';
         return;
       }
+      if (!this.problemDescription || !this.problemDescription.trim()) {
+        this.error = 'Please describe the customer problem or service request.';
+        return;
+      }
+      if (!this.preferredDate) {
+        this.error = 'Please select a preferred service date.';
+        return;
+      }
+      if (!this.preferredTimeSlot) {
+        this.error = 'Please select a preferred time slot.';
+        return;
+      }
       this.step = 3;
       return;
     }
 
     if (this.step === 3 && this.serviceType === 'Maintenance') {
       if (!this.base64Slip) {
-        this.error = 'Please upload your bank payment slip to proceed.';
+        this.error = 'Please upload the bank payment slip to proceed.';
         return;
       }
-      this.step = 4;
+
+      this.isValidatingSlip = true;
+      this.error = null;
+
+      this.srService.validateSlip(this.base64Slip).subscribe({
+        next: () => {
+          this.isValidatingSlip = false;
+          this.step = 4;
+        },
+        error: (err: any) => {
+          this.isValidatingSlip = false;
+          this.error = err.error?.message || 'The uploaded document does not appear to be a valid bank payment slip or transaction receipt. Please ensure bank details, reference number, or amount are clearly visible.';
+        }
+      });
       return;
     }
   }
@@ -210,13 +278,19 @@ export class RequestServiceModalComponent implements OnInit {
   }
 
   setFile(file: File) {
-    const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
     if (!allowed.includes(file.type)) {
-      this.error = 'Only PDF, JPG, PNG, or WEBP files are allowed.';
+      this.uploadedFile = null;
+      this.base64Slip = '';
+      this.filePreviewUrl = null;
+      this.error = 'Only PNG, JPG, JPEG and PDF files are allowed';
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.error = 'File size must be under 5MB.';
+      this.uploadedFile = null;
+      this.base64Slip = '';
+      this.filePreviewUrl = null;
+      this.error = 'File size must be less than 5MB';
       return;
     }
 
@@ -254,6 +328,7 @@ export class RequestServiceModalComponent implements OnInit {
     }
 
     this.srService.createServiceRequest({
+      customerId: this.selectedCustomerId,
       acUnitModel: this.acUnitModel,
       acUnitSerial: this.acUnitSerial,
       acWarrantyStatus: this.acWarrantyStatus,
@@ -266,14 +341,17 @@ export class RequestServiceModalComponent implements OnInit {
       paymentRequired: this.serviceType === 'Maintenance',
       paymentAmount: this.serviceType === 'Maintenance' ? this.maintenanceFee : 0,
       paymentSlipUrl: this.serviceType === 'Maintenance' ? this.base64Slip : undefined,
+      requestType: 'Company Initiated',
+      maintenanceType: 'Company Initiated',
     }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.submittedRef = res.serviceRequest.serviceRequestRef;
         this.submitted = true;
         this.submitting = false;
+        this.requestCreated.emit(res.serviceRequest);
       },
-      error: (err) => {
-        this.error = err.error?.message || 'Failed to submit service request. Please try again.';
+      error: (err: any) => {
+        this.error = err.error?.message || err.message || 'Failed to submit payment slip. Please ensure bank details, reference number, or amount are clearly visible.';
         this.submitting = false;
       },
     });
@@ -284,4 +362,3 @@ export class RequestServiceModalComponent implements OnInit {
     return new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 }
-
