@@ -94,8 +94,9 @@ describe('OrderCreationComponent HTTP contract', () => {
 
   it('filters currentOrders across fields using searchQuery', () => {
     component.loadData();
+    // Drafts live in the Saved Drafts card, so the "All" tab only lists submitted requests.
     http.expectOne(`${baseUrl}/order-requests`).flush([
-      { _id: 'o-1', requestId: 'REQ-100', status: 'draft', supplierName: 'Alpha Tech', items: [], totalEstimate: 50 },
+      { _id: 'o-1', requestId: 'REQ-100', status: 'pending-manager', supplierName: 'Alpha Tech', items: [], totalEstimate: 50 },
       { _id: 'o-2', requestId: 'REQ-200', status: 'approved', supplierName: 'Beta Supplies', items: [], totalEstimate: 150 },
     ]);
     http.expectOne(`${baseUrl}/suggested-orders`).flush([]);

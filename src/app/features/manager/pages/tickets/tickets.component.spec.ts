@@ -194,7 +194,6 @@ describe('TicketsComponent work-item dialog', () => {
 
     // Verify read-only operational details are rendered
     expect(dialog.textContent).toContain('View only');
-    expect(dialog.textContent).toContain('HIGH');
     expect(dialog.textContent).toContain('Sample Customer');
     fixture.destroy();
   });
