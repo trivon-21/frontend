@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -12,6 +13,8 @@ import {
   QuarantineItemData,
   HandedOverMaterialRequest,
 } from '../../services/inventory-manager-dashboard.service';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 @Component({
   selector: 'app-returns-rma-dashboard',
@@ -76,6 +79,16 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   // Quarantine
   quarantineItems: QuarantineItemData[] = [];
   confirmDisposeId: string | null = null;
+  confirmDeleteId: string | null = null;
+  showQuarantineModal = false;
+  quarantineForm = {
+    itemName: '',
+    itemId: '',
+    quantity: 1,
+    unit: 'units',
+    reason: '',
+    location: '',
+  };
 
   // RMA status labels and allowed transitions
   rmaStatusLabels: Record<string, string> = {
@@ -104,7 +117,11 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   replacementSerialNumber = '';
   replacementNotes = '';
 
-  constructor(private dashboardService: InventoryManagerDashboardService) {}
+  constructor(
+    private dashboardService: InventoryManagerDashboardService,
+    private confirmService: ConfirmService,
+    @Optional() private destroyRef?: DestroyRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadAllData();
@@ -112,18 +129,23 @@ export class ReturnsRmaDashboardComponent implements OnInit {
 
   // ── Data Loading ──
 
-  loadAllData(): void {
-    this.loading = true;
+  loadAllData(options: { force?: boolean } = {}): void {
+    if (!this.leftoverReturns.length && !this.rmaCases.length && !this.quarantineItems.length) {
+      this.loading = true;
+    }
     this.error = null;
 
-    forkJoin({
-      summary: this.dashboardService.getReturnsSummary(),
-      leftoverReturns: this.dashboardService.getLeftoverReturns(),
-      rmaCases: this.dashboardService.getRmaCases(),
-      quarantineItems: this.dashboardService.getQuarantineItems(),
-      inventoryItems: this.dashboardService.getInventory(),
-      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(),
-    }).subscribe({
+    const joined$ = forkJoin({
+      summary: this.dashboardService.getReturnsSummary(options),
+      leftoverReturns: this.dashboardService.getLeftoverReturns(options),
+      rmaCases: this.dashboardService.getRmaCases(options),
+      quarantineItems: this.dashboardService.getQuarantineItems(options),
+      inventoryItems: this.dashboardService.getInventory(options),
+      handedOverRequests: this.dashboardService.getHandedOverMaterialRequests(options),
+    });
+
+    const sub$ = this.destroyRef ? joined$.pipe(takeUntilDestroyed(this.destroyRef)) : joined$;
+    sub$.subscribe({
       next: (data) => {
         this.summary = data.summary;
         this.leftoverReturns = data.leftoverReturns;
@@ -141,7 +163,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   refreshData(): void {
-    this.loadAllData();
+    this.loadAllData({ force: true });
   }
 
   // ── Leftover Return Form ──
@@ -277,8 +299,24 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.rmaForm.type = item.type;
   }
 
-  closeRmaModal(): void {
+  get isRmaFormDirty(): boolean {
+    return !!(
+      this.rmaForm.serialNumber.trim() ||
+      this.rmaForm.faultDescription.trim()
+    );
+  }
+
+  async closeRmaModal(): Promise<void> {
     if (this.submitting) return;
+    if (this.isRmaFormDirty && !(await confirmDiscard(this.confirmService, 'RMA case details'))) {
+      return;
+    }
+    this.resetRmaModalState();
+  }
+
+  /** Resets the RMA modal without confirming — used after a successful submit,
+   *  where there is nothing left to discard. */
+  private resetRmaModalState(): void {
     this.showRmaModal = false;
     const trigger = this.dialogTrigger;
     this.dialogTrigger = null;
@@ -286,7 +324,17 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void { this.closeRmaModal(); }
+  onEscape(): void {
+    if (this.showRmaModal) {
+      this.closeRmaModal();
+    } else if (this.showInternalRepairModal) {
+      this.closeInternalRepairModal();
+    } else if (this.showReplacementModal) {
+      this.closeReplacementModal();
+    } else if (this.showQuarantineModal) {
+      this.closeQuarantineModal();
+    }
+  }
 
   get isRmaFormValid(): boolean {
     return (
@@ -303,7 +351,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.successMessage = 'RMA case created successfully.';
-        this.closeRmaModal();
+        this.resetRmaModalState();
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
@@ -364,7 +412,17 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.showInternalRepairModal = true;
   }
 
-  closeInternalRepairModal(): void {
+  async closeInternalRepairModal(): Promise<void> {
+    if (this.submitting) return;
+    if (this.internalRepairNote.trim() && !(await confirmDiscard(this.confirmService, 'repair note'))) {
+      return;
+    }
+    this.resetInternalRepairModalState();
+  }
+
+  /** Resets the internal-repair modal without confirming — used after a
+   *  successful submit, where there is nothing left to discard. */
+  private resetInternalRepairModalState(): void {
     this.showInternalRepairModal = false;
     this.internalRepairRma = null;
     this.internalRepairNote = '';
@@ -382,7 +440,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        this.closeInternalRepairModal();
+        this.resetInternalRepairModalState();
         this.refreshData();
         this.successMessage = `RMA ${rma.rmaId} resolved via internal repair and returned to service.`;
         setTimeout(() => (this.successMessage = null), 5000);
@@ -402,7 +460,18 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     this.showReplacementModal = true;
   }
 
-  closeReplacementModal(): void {
+  async closeReplacementModal(): Promise<void> {
+    if (this.submitting) return;
+    const isDirty = !!(this.replacementSerialNumber.trim() || this.replacementNotes.trim());
+    if (isDirty && !(await confirmDiscard(this.confirmService, 'replacement receipt details'))) {
+      return;
+    }
+    this.resetReplacementModalState();
+  }
+
+  /** Resets the replacement modal without confirming — used after a successful
+   *  submit, where there is nothing left to discard. */
+  private resetReplacementModalState(): void {
     this.showReplacementModal = false;
     this.replacementRma = null;
     this.replacementSerialNumber = '';
@@ -419,9 +488,10 @@ export class ReturnsRmaDashboardComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        this.closeReplacementModal();
+        const serial = this.replacementSerialNumber.trim();
+        this.resetReplacementModalState();
         this.refreshData();
-        this.successMessage = `Replacement serial ${this.replacementSerialNumber.trim()} received for RMA ${rma.rmaId}.`;
+        this.successMessage = `Replacement serial ${serial} received for RMA ${rma.rmaId}.`;
         setTimeout(() => (this.successMessage = null), 5000);
       },
       error: (err) => {
@@ -433,6 +503,99 @@ export class ReturnsRmaDashboardComponent implements OnInit {
   }
 
   // ── Quarantine ──
+
+  openQuarantineModal(): void {
+    this.dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    this.quarantineForm = {
+      itemName: '',
+      itemId: '',
+      quantity: 1,
+      unit: 'units',
+      reason: '',
+      location: '',
+    };
+    this.showQuarantineModal = true;
+  }
+
+  get matchingQuarantineItems(): InventoryItem[] {
+    const query = this.quarantineForm.itemName.toLowerCase().trim();
+    if (!query || this.quarantineForm.itemId) return [];
+    return this.inventoryItems
+      .filter((item) => item.name.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query))
+      .slice(0, 8);
+  }
+
+  onQuarantineItemNameChange(value: string): void {
+    this.quarantineForm.itemName = value;
+    this.quarantineForm.itemId = '';
+  }
+
+  selectQuarantineItem(item: InventoryItem): void {
+    this.quarantineForm.itemName = item.name;
+    this.quarantineForm.itemId = (item as any)._id || item.id;
+    this.quarantineForm.unit = (item as any).unit || this.quarantineForm.unit;
+  }
+
+  get isQuarantineFormDirty(): boolean {
+    return !!(
+      this.quarantineForm.itemName.trim() ||
+      this.quarantineForm.reason.trim() ||
+      this.quarantineForm.location.trim()
+    );
+  }
+
+  async closeQuarantineModal(): Promise<void> {
+    if (this.submitting) return;
+    if (this.isQuarantineFormDirty && !(await confirmDiscard(this.confirmService, 'quarantine item details'))) {
+      return;
+    }
+    this.resetQuarantineModalState();
+  }
+
+  /** Resets the quarantine modal without confirming — used after a successful
+   *  submit, where there is nothing left to discard. */
+  private resetQuarantineModalState(): void {
+    this.showQuarantineModal = false;
+    const trigger = this.dialogTrigger;
+    this.dialogTrigger = null;
+    setTimeout(() => trigger?.focus());
+  }
+
+  get isQuarantineFormValid(): boolean {
+    return (
+      this.quarantineForm.itemName.trim().length > 0 &&
+      this.quarantineForm.reason.trim().length > 0 &&
+      Number.isInteger(Number(this.quarantineForm.quantity)) &&
+      Number(this.quarantineForm.quantity) > 0
+    );
+  }
+
+  submitQuarantineItem(): void {
+    if (!this.isQuarantineFormValid || this.submitting) return;
+    this.submitting = true;
+
+    this.dashboardService.createQuarantineItem({
+      itemName: this.quarantineForm.itemName.trim(),
+      itemId: this.quarantineForm.itemId || undefined,
+      quantity: Number(this.quarantineForm.quantity),
+      unit: this.quarantineForm.unit.trim() || 'units',
+      reason: this.quarantineForm.reason.trim(),
+      location: this.quarantineForm.location.trim(),
+    }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.successMessage = 'Item added to quarantine successfully.';
+        this.resetQuarantineModalState();
+        this.refreshData();
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || 'Failed to add item to quarantine.';
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
 
   confirmDispose(quarantineId: string): void {
     this.confirmDisposeId = quarantineId;
@@ -449,7 +612,7 @@ export class ReturnsRmaDashboardComponent implements OnInit {
       next: () => {
         this.pendingActionIds.delete(quarantineId);
         this.confirmDisposeId = null;
-        this.successMessage = 'Item disposed successfully.';
+        this.successMessage = 'Item permanently disposed and removed from the system.';
         this.refreshData();
         setTimeout(() => (this.successMessage = null), 5000);
       },
@@ -464,6 +627,41 @@ export class ReturnsRmaDashboardComponent implements OnInit {
           this.refreshData();
         } else {
           this.error = err?.error?.message || 'Failed to dispose item.';
+        }
+        setTimeout(() => (this.error = null), 5000);
+      },
+    });
+  }
+
+  confirmDelete(quarantineId: string): void {
+    this.confirmDeleteId = quarantineId;
+  }
+
+  cancelDelete(): void {
+    this.confirmDeleteId = null;
+  }
+
+  deleteQuarantineItem(quarantineId: string): void {
+    if (this.pendingActionIds.has(quarantineId)) return;
+    this.pendingActionIds.add(quarantineId);
+    this.dashboardService.deleteQuarantineItem(quarantineId).subscribe({
+      next: () => {
+        this.pendingActionIds.delete(quarantineId);
+        this.confirmDeleteId = null;
+        this.successMessage = 'Item returned to stock.';
+        this.refreshData();
+        setTimeout(() => (this.successMessage = null), 5000);
+      },
+      error: (err) => {
+        this.pendingActionIds.delete(quarantineId);
+        this.confirmDeleteId = null;
+        if (err?.status === 404 || err?.error?.code === 'QUARANTINE_NOT_FOUND') {
+          this.error = 'Quarantine item could not be found.';
+          this.refreshData();
+        } else if (err?.error?.code === 'QUARANTINE_NO_INVENTORY_LINK') {
+          this.error = 'This item is not linked to an inventory record, so it cannot be automatically returned to stock.';
+        } else {
+          this.error = err?.error?.message || 'Failed to return item to stock.';
         }
         setTimeout(() => (this.error = null), 5000);
       },

@@ -333,8 +333,10 @@ export class Checkout implements OnInit {
         this.total = (this.subtotal || 0) + (this.additionalCharges || 0) + (this.deliveryCharge || 0) - (this.discount || 0);
 
         const savedRef = sessionStorage.getItem('activeCheckoutOrderRef');
+        const savedMongoId = sessionStorage.getItem('activeCheckoutMongoId');
         if (savedRef && !this.generatedOrderId) {
           this.generatedOrderId = savedRef;
+          if (savedMongoId) this.targetOrderId = savedMongoId;
           this.isOrderInitialized = true;
         } else if (!this.isOrderInitialized && !this.isInitializing) {
           this.initializeOrder(true);
@@ -636,10 +638,16 @@ export class Checkout implements OnInit {
         this.isInitializing = false;
         const data = res?.data || res;
         this.generatedOrderId = data?.orderReference || data?.orderId || '';
+        if (data?._id || data?.id) {
+          this.targetOrderId = data._id || data.id;
+        }
         
         if (this.generatedOrderId) {
           this.isOrderInitialized = true;
           sessionStorage.setItem('activeCheckoutOrderRef', this.generatedOrderId);
+          if (this.targetOrderId) {
+            sessionStorage.setItem('activeCheckoutMongoId', this.targetOrderId);
+          }
           if (!silent) alert('Order initialized! Your Reference is: ' + this.generatedOrderId);
         }
       },
@@ -679,10 +687,13 @@ export class Checkout implements OnInit {
     this.orderService.submitPayment(formData).subscribe({
       next: (res) => {
         sessionStorage.removeItem('activeCheckoutOrderRef');
+        sessionStorage.removeItem('activeCheckoutMongoId');
         this.isSubmittingPayment = false;
+        const finalMongoId = res?.data?._id || this.targetOrderId;
         this.router.navigate(['/order-success'], { 
           state: { 
             orderId: this.generatedOrderId,
+            rawOrderId: finalMongoId,
             isBuyAndInstall: !this.isBuyOnly
           } 
         });

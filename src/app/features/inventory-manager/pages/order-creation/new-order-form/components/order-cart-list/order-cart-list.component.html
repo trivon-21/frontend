@@ -1,6 +1,19 @@
-<div class="layout-right white-panel">
+<div class="layout-right">
   <div class="right-header">
     <h3>Added Items List</h3>
+    <button
+      type="button"
+      class="btn-close-panel im-btn im-btn--close"
+      *ngIf="showCloseButton"
+      aria-label="Close and return to order requests"
+      (click)="closeClicked.emit()">
+      <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
+    </button>
+  </div>
+
+  <div class="supplier-summary">
+    <span class="supplier-label">Supplier</span>
+    <span class="supplier-value" [class.unset]="!supplierName">{{ supplierName || 'No supplier selected yet' }}</span>
   </div>
 
   <div class="added-items-content">
@@ -11,57 +24,50 @@
       <p class="empty-text">No items added yet.</p>
     </div>
 
-    <div class="line-items-container alx-table-container alx-table-container--embedded" *ngIf="orderItems.length > 0" role="region" aria-label="Order cart line items" tabindex="0">
-      <table class="line-items-table alx-table alx-table--narrow">
-        <thead>
-          <tr>
-            <th>ITEM</th>
-            <th class="text-center">QTY</th>
-            <th class="text-right">TOTAL</th>
-            <th class="actions-cell" aria-label="Actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of orderItems; let i = index"
-              class="animate-row clickable-row"
-              [class.selected-row]="selectedLineItemIndex === i"
-              (click)="selectLineItem(i)">
-            <td class="name-cell">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-sku">{{ item.sku }}</span>
-            </td>
-            <td class="qty-cell">
-              <div class="qty-editor" *ngIf="selectedLineItemIndex === i">
-                <button type="button" [attr.aria-label]="'Decrease quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity - 1, $event)">
-                  <lucide-angular name="minus" [size]="14"></lucide-angular>
-                </button>
-                <input type="number" [ngModel]="item.quantity" (ngModelChange)="updateItemQuantity(i, $event)" class="inline-qty-input no-spinner">
-                <button type="button" [attr.aria-label]="'Increase quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity + 1, $event)">
-                  <lucide-angular name="plus" [size]="14"></lucide-angular>
-                </button>
-              </div>
-              <span class="qty-static" *ngIf="selectedLineItemIndex !== i">×{{ item.quantity }}</span>
-            </td>
-            <td class="text-right total-val">{{ formatCurrency(item.estimatedTotal) }}</td>
-            <td class="actions-cell">
-              <button type="button" class="btn-delete-row im-btn im-btn--danger im-btn--compact im-btn--icon" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
-                <lucide-angular name="trash-2" [size]="16"></lucide-angular>
+    <div class="items-box" *ngIf="orderItems.length > 0" role="region" aria-label="Order cart line items">
+      <div class="items-box-scroll">
+        <div
+          class="item-row clickable-row"
+          *ngFor="let item of orderItems; let i = index"
+          [class.selected-row]="selectedLineItemIndex === i"
+          (click)="selectLineItem(i)">
+          <div class="item-row-main">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-sub">
+              {{ item.sku }}
+              <ng-container *ngIf="selectedLineItemIndex !== i"> · ×{{ item.quantity }}</ng-container>
+            </span>
+            <div class="qty-editor" *ngIf="selectedLineItemIndex === i" (click)="$event.stopPropagation()">
+              <button type="button" [attr.aria-label]="'Decrease quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity - 1, $event)">
+                <lucide-angular name="minus" [size]="14"></lucide-angular>
               </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <input type="number" [ngModel]="item.quantity" (ngModelChange)="updateItemQuantity(i, $event)" class="inline-qty-input no-spinner">
+              <button type="button" [attr.aria-label]="'Increase quantity for ' + item.name" (click)="updateItemQuantity(i, item.quantity + 1, $event)">
+                <lucide-angular name="plus" [size]="14"></lucide-angular>
+              </button>
+            </div>
+          </div>
+          <div class="item-row-end">
+            <span class="item-row-value">{{ formatCurrency(item.estimatedTotal) }}</span>
+            <button type="button" class="btn-delete-row im-btn im-btn--danger im-btn--compact im-btn--icon" *ngIf="selectedLineItemIndex === i" [attr.aria-label]="'Remove ' + item.name" (click)="removeLineItem(i, $event)">
+              <lucide-angular name="trash-2" [size]="16"></lucide-angular>
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="summary-footer">
-    <div class="summary-row">
-      <span class="label">Total Items</span>
-      <span class="value">{{ orderItems.length }}</span>
+  <div class="totals-footer">
+    <div class="totals-row">
+      <span class="totals-label">Total Items</span>
+      <span class="totals-value">{{ orderItems.length }}</span>
     </div>
-    <div class="summary-row grand-total">
-      <span class="label">Estimated Total</span>
-      <span class="value">{{ formatCurrency(orderTotal) }}</span>
+    <div class="totals-row estimated">
+      <span class="estimated-label">Estimated Total</span>
+      <span class="estimated-value">{{ formatCurrency(orderTotal) }}</span>
     </div>
   </div>
+
 </div>

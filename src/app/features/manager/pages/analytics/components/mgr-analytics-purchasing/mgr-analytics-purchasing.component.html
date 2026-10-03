@@ -1,0 +1,17 @@
+<section aria-labelledby="purchasing-heading">
+  <div class="section-heading"><div><h2 id="purchasing-heading">Purchasing & Approvals</h2><p>Current pipeline position is separated from decisions made during the period.</p></div></div>
+  <div class="chart-grid two">
+    <article class="chart-card">
+      <div class="chart-header"><div><h3>Current Purchase Pipeline</h3><p>Request count and value at each current stage.</p></div><span class="scope-badge current">Current</span></div>
+      <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="countTotal(report.purchasing.currentPipeline) > 0" role="region" aria-label="Current purchase pipeline" tabindex="0"><table class="alx-table alx-table--narrow"><thead><tr><th>Stage</th><th class="text-right">Requests</th><th class="text-right">Value</th></tr></thead><tbody><ng-container *ngFor="let item of report.purchasing.currentPipeline"><tr *ngIf="item.count > 0"><td>{{ label(item.status) }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">{{ item.value | number:'1.0-0' }}</td></tr></ng-container></tbody></table></div>
+      <div class="empty-state compact" *ngIf="countTotal(report.purchasing.currentPipeline) === 0">No active or completed purchase requests.</div>
+      <div class="pipeline-summary"><span>Oldest pending request</span><strong>{{ pendingPurchaseCount(report) ? (report.purchasing.oldestPendingAgeHours | number:'1.0-1') + 'h' : 'None' }}</strong></div>
+    </article>
+    <article class="chart-card">
+      <div class="chart-header"><div><h3>Period Decisions</h3><p>Actual approval events from decision history.</p></div><span class="scope-badge period">{{ activePeriod }}</span></div>
+      <div class="table-wrap alx-table-container alx-table-container--embedded" *ngIf="countTotal(report.purchasing.periodDecisions) > 0" role="region" aria-label="Purchase decisions for the selected period" tabindex="0"><table class="alx-table alx-table--narrow alx-table--fixed"><colgroup><col style="width: 30%"><col style="width: 30%"><col style="width: 18%"><col style="width: 22%"></colgroup><thead><tr><th>Stage</th><th>Decision</th><th class="text-right">Count</th><th class="text-right">Value</th></tr></thead><tbody><ng-container *ngFor="let item of report.purchasing.periodDecisions"><tr *ngIf="item.count > 0"><td>{{ label(item.stage) }}</td><td>{{ label(item.decision) }}</td><td class="num-cell">{{ item.count }}</td><td class="num-cell">{{ item.value | number:'1.0-0' }}</td></tr></ng-container></tbody></table></div>
+      <div class="empty-state compact" *ngIf="countTotal(report.purchasing.periodDecisions) === 0">No Manager or Finance decisions in this period.</div>
+      <div class="approval-times"><span>Manager average <strong>{{ decisionCount(report, 'manager') ? (report.purchasing.averageManagerApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span><span>Finance average <strong>{{ decisionCount(report, 'finance') ? (report.purchasing.averageFinanceApprovalHours | number:'1.0-1') + 'h' : '—' }}</strong></span></div>
+    </article>
+  </div>
+</section>

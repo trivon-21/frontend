@@ -1,0 +1,67 @@
+<div class="content-card workforce-card">
+  <div class="card-header">
+    <div class="title-with-icon">
+      <lucide-angular name="users" class="primary-icon" [size]="18"></lucide-angular>
+      <h2 class="card-title">Workforce Snapshot</h2>
+    </div>
+    <span class="count-badge count-badge--neutral">{{ workloadList.length }} Assignees</span>
+  </div>
+
+  <div class="workforce-container">
+    <div class="workforce-summary-bar" *ngIf="workloadList.length > 0">
+      <div class="workforce-summary-stat">
+        <span class="wf-stat-label">Total Assigned</span>
+        <strong class="wf-stat-val">{{ totalWorkloadActiveTickets }} tickets</strong>
+      </div>
+      <div class="workforce-summary-stat" *ngIf="totalWorkloadSlaRisk > 0">
+        <span class="wf-stat-label">SLA Risk</span>
+        <strong class="wf-stat-val risk-text">{{ totalWorkloadSlaRisk }} tickets</strong>
+      </div>
+      <div class="workforce-summary-stat" *ngIf="unassignedTotal > 0">
+        <span class="wf-stat-label">Unassigned</span>
+        <strong class="wf-stat-val">{{ unassignedTotal }}</strong>
+      </div>
+    </div>
+
+    <div class="workforce-list">
+      <a
+        *ngFor="let worker of workloadList"
+        class="workforce-item"
+        routerLink="/manager/work-items"
+      >
+        <div class="workforce-avatar" [class.team]="worker.assigneeType === 'team'">
+          <lucide-angular [name]="worker.assigneeType === 'team' ? 'users' : 'user'" [size]="15"></lucide-angular>
+        </div>
+        <div class="workforce-details">
+          <div class="workforce-name-row">
+            <span class="workforce-name">{{ worker.assigneeName }}</span>
+            <span class="workforce-type-badge">{{ worker.assigneeType }}</span>
+          </div>
+          <div class="workforce-metrics-row">
+            <span class="workforce-metric">
+              <strong>{{ worker.active }}</strong> active
+            </span>
+            <span class="workforce-dot">·</span>
+            <span class="workforce-metric" [class.risk-text]="worker.slaRisk > 0">
+              <strong>{{ worker.slaRisk }}</strong> SLA risk
+            </span>
+          </div>
+        </div>
+        <div class="workforce-action-icon">
+          <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+        </div>
+      </a>
+
+      <div *ngIf="workloadList.length === 0" class="empty-state">
+        No active technicians or teams currently assigned.
+      </div>
+    </div>
+
+    <div class="workforce-footer" *ngIf="workloadList.length > 0">
+      <a routerLink="/manager/work-items" class="workforce-manage-link">
+        <span>Manage Work Queue</span>
+        <lucide-angular name="chevron-right" [size]="14"></lucide-angular>
+      </a>
+    </div>
+  </div>
+</div>

@@ -15,7 +15,12 @@
         <lucide-angular name="layout-dashboard" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Dashboard</span>
       </a>
-      <a routerLink="/inventory-manager/inventory" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-item">
+      <a
+        routerLink="/inventory-manager/inventory"
+        class="nav-item"
+        [class.active]="isInventorySectionActive"
+        [attr.aria-current]="isInventorySectionActive ? 'page' : null"
+      >
         <lucide-angular name="package" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Inventory</span>
       </a>
