@@ -47,6 +47,7 @@ describe('AnalyticsService', () => {
       financial: {
         collectedRevenue: {}, procurementSpend: {}, operatingContribution: {},
         outstandingReceivables: { ...snapshot(3000, '2026-08-24T12:00:05.000Z'), count: 2 },
+        allOutstandingReceivables: { ...snapshot(3500, '2026-08-24T12:00:05.000Z'), count: 3 },
         pendingPaymentReview: { ...snapshot(1200, '2026-08-24T12:00:06.000Z'), count: 1 },
         purchaseCommitments: snapshot(5000, '2026-08-24T12:00:07.000Z'),
         unreconciledNonPo: { ...snapshot(400, '2026-08-24T12:00:08.000Z'), count: 1 },
@@ -84,6 +85,7 @@ describe('AnalyticsService', () => {
     expect(result?.currentPosition.openTickets.asOf).toEqual(new Date('2026-08-24T12:00:00.000Z'));
     expect(result?.purchasing.pendingApprovalValue.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
     expect(result?.financial.outstandingReceivables.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
+    expect(result?.financial.allOutstandingReceivables.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
     expect(result?.financial.pendingPaymentReview.count).toBe(1);
     expect(result?.inventoryRisk.approvedAwaitingReceipt.asOf).toEqual(
       new Date('2026-08-24T12:00:10.000Z'),
@@ -168,6 +170,7 @@ describe('AnalyticsService', () => {
       financial: {
         collectedRevenue: {}, procurementSpend: {}, operatingContribution: {},
         outstandingReceivables: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
+        allOutstandingReceivables: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
         pendingPaymentReview: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
         purchaseCommitments: snapshot(0, '2026-08-24T12:00:00.000Z'),
         unreconciledNonPo: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },

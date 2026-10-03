@@ -81,7 +81,7 @@ describe('InventoryManagerDashboardComponent presentation contract', () => {
       '/inventory-manager/material-requests',
       '/inventory-manager/dispatch-logistics',
       '/inventory-manager/asset-management',
-      '/inventory-manager/inventory',
+      '/inventory-manager/inventory?stockStatus=low-stock',
     ]);
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelector('.live-time')).toBeNull();
