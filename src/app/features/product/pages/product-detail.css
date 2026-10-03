@@ -1212,13 +1212,7 @@ app-footer {
   line-height: 1.4;
 }
 
-/* Purchase option validation error */
-.pd-radio-group-error .pd-radio-option:not(.pd-radio-selected) {
-  border-color: #f87171;
-  background: #fff8f8;
-}
-
-.pd-purchase-error {
+.pd-purchase-error-msg {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1226,29 +1220,16 @@ app-footer {
   padding: 10px 14px;
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-left: 3.5px solid #dc2626;
   border-radius: 8px;
-  color: #b91c1c;
-  font-size: 0.84rem;
-  font-weight: 500;
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 600;
   line-height: 1.4;
-  animation: pdErrorFadeIn 0.2s ease-in-out;
 }
 
-.pd-purchase-error svg {
+.pd-purchase-error-msg svg {
   flex-shrink: 0;
   color: #dc2626;
-}
-
-@keyframes pdErrorFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Inquiry button */
@@ -1553,21 +1534,21 @@ app-footer {
 }
 
 .pd-star-btn {
-    font-size: 1.65rem;
-    line-height: 1;
-    color: #111111;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: color 0.12s, transform 0.1s;
+    transition: transform 0.15s ease;
     user-select: none;
+    padding: 2px;
 }
 
 .pd-star-btn:hover {
-    transform: scale(1.15);
-    color: #f59e0b;
+    transform: scale(1.2);
 }
 
-.pd-star-btn.pd-star-active {
-    color: #f59e0b;
+.pd-star-btn svg {
+    transition: transform 0.15s ease, fill 0.15s ease;
 }
 
 

@@ -142,3 +142,19 @@
     </main>
   </div>
 </div>
+
+<div class="profile-completion-overlay" *ngIf="showProfileCompletionModal">
+  <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
+    <div class="profile-completion-icon">
+      <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
+    </div>
+    <h2 id="profile-completion-title">Complete your profile</h2>
+    <p>Please add the following details before continuing:</p>
+    <ul>
+      <li *ngFor="let field of missingProfileFields">{{ field }}</li>
+    </ul>
+    <button type="button" class="btn-add-profile-fields" (click)="goToCompleteProfile()">
+      Add fields
+    </button>
+  </section>
+</div>

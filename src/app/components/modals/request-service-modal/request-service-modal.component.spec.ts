@@ -62,6 +62,15 @@ describe('RequestServiceModalComponent', () => {
     expect(component.bankDetails.accountNumber).toBe('1000234567');
   });
 
+  it('emits a history event from the My Requests action', () => {
+    const historySpy = jasmine.createSpy('history');
+    component.viewHistory.subscribe(historySpy);
+
+    component.openHistory();
+
+    expect(historySpy).toHaveBeenCalled();
+  });
+
   it('configures 4 steps and requires payment slip for Maintenance', () => {
     component.step = 2;
     component.serviceType = 'Maintenance';

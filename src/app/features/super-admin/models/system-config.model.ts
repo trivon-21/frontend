@@ -3,6 +3,7 @@ export interface BusinessRules {
   standardMaintenanceFee: number;
   standardRepairFee: number;
   standardSiteInspectionFee: number;
+  profitMargin: number;
   logRetentionDays: number;
   paymentAutoCancelDays: number;
   defaultWarrantyMonths: number;

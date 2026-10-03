@@ -3,31 +3,35 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CsaTicketService, ServiceTicket, MaintenanceSchedule } from '../../services/csa-ticket.service';
+import { CsaTicketService, ServiceTicket } from '../../services/csa-ticket.service';
 import { CsaCustomerService, CustomerProfile } from '../../services/csa-customer.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { CsaRequestServiceModalComponent } from '../../components/csa-request-service-modal/csa-request-service-modal.component';
 
 @Component({
   selector: 'app-csa-service-tickets',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule, CsaRequestServiceModalComponent],
   templateUrl: './csa-service-tickets.component.html',
   styleUrl: './csa-service-tickets.component.css'
 })
 export class CsaServiceTicketsComponent implements OnInit {
   tickets: ServiceTicket[] = [];
   rawTickets: ServiceTicket[] = [];
+  rawRepairs: any[] = [];
   rawMaintenances: any[] = [];
+  rawInstallations: any[] = [];
+  rawInspections: any[] = [];
   customers: CustomerProfile[] = [];
   products: any[] = [];
   totalTickets = 0;
   
-  // Status Filter Counts
+  // Category Counts for Summary Cards
   countTotal = 0;
-  countNew = 0;
-  countAssigned = 0;
-  countResolved = 0;
-  countPendingCSA = 0;
+  countRepairs = 0;
+  countMaintenance = 0;
+  countInstallations = 0;
+  countInspections = 0;
 
   // Filters
   selectedCategory = 'ALL';
@@ -44,15 +48,9 @@ export class CsaServiceTicketsComponent implements OnInit {
   isSubmitting = false;
   formError = '';
 
-  // Details Modal
+  // Details Modal (Read-Only)
   showDetailsModal = false;
   selectedTicket: ServiceTicket | null = null;
-  statusUpdateForm: { status: string; rejectionReason: string } = { status: '', rejectionReason: '' };
-  isUpdatingStatus = false;
-
-  // Maintenance Schedule Action
-  customerNotes = '';
-  isSendingToCustomer = false;
 
   constructor(
     private ticketService: CsaTicketService,
@@ -64,10 +62,10 @@ export class CsaServiceTicketsComponent implements OnInit {
       category: ['repair', Validators.required],
       subject: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(5)]],
-      acUnitModel: [''],
-      acUnitSerial: [''],
-      preferredDate: [''],
-      preferredTimeSlot: ['Morning (9 AM - 12 PM)'],
+      acUnitModel: ['', [Validators.required, Validators.minLength(2)]],
+      acUnitSerial: ['', [Validators.required, Validators.minLength(2)]],
+      preferredDate: ['', Validators.required],
+      preferredTimeSlot: ['', Validators.required],
       serviceFee: [0]
     });
   }
@@ -100,6 +98,14 @@ export class CsaServiceTicketsComponent implements OnInit {
     });
   }
 
+  /**
+   * Fetches all 4 categories from the live technician dashboard collections:
+   * 1. Repairs: /api/service-requests
+   * 2. Maintenance: /api/maintenance
+   * 3. Installations: /api/installations
+   * 4. Inspections: /api/inspections
+   * Along with existing CSA-created tickets.
+   */
   loadAllData(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -111,32 +117,95 @@ export class CsaServiceTicketsComponent implements OnInit {
           return of({ success: false, tickets: [], total: 0, page: 1, totalPages: 1 });
         })
       ),
+      repairRes: this.ticketService.getServiceRequests().pipe(
+        catchError((err) => {
+          console.error('Failed to load repair requests:', err);
+          return of({ success: false, data: [] });
+        })
+      ),
       maintenanceRes: this.ticketService.getMaintenanceTickets().pipe(
         catchError((err) => {
           console.error('Failed to load maintenance records:', err);
           return of({ success: false, data: [], count: 0 });
         })
+      ),
+      installationRes: this.ticketService.getInstallations().pipe(
+        catchError((err) => {
+          console.error('Failed to load installation records:', err);
+          return of({ success: false, data: [] });
+        })
+      ),
+      inspectionRes: this.ticketService.getInspections().pipe(
+        catchError((err) => {
+          console.error('Failed to load inspection records:', err);
+          return of({ success: false, data: [] });
+        })
       )
     }).subscribe({
-      next: ({ ticketRes, maintenanceRes }) => {
+      next: ({ ticketRes, repairRes, maintenanceRes, installationRes, inspectionRes }) => {
         this.isLoading = false;
 
         this.rawTickets = (ticketRes && ticketRes.success) ? (ticketRes.tickets || []) : [];
+        this.rawRepairs = (repairRes && repairRes.success) ? (repairRes.data || []) : [];
         this.rawMaintenances = (maintenanceRes && maintenanceRes.success) ? (maintenanceRes.data || []) : [];
+        this.rawInstallations = (installationRes && installationRes.success) ? (installationRes.data || []) : [];
+        this.rawInspections = (inspectionRes && inspectionRes.success) ? (inspectionRes.data || []) : [];
 
+        this.calculateStats();
         this.applyFilters();
       },
       error: (err) => {
         this.isLoading = false;
         console.error('Failed to load portal data:', err);
-        this.errorMessage = 'Failed to load tickets and maintenance records. Please refresh.';
+        this.errorMessage = 'Failed to load technician records and tickets. Please refresh.';
       }
     });
   }
 
+  private mapRepairToTicket(r: any): ServiceTicket {
+    const rawId = r.serviceRequestRef || r.ticketId || (r._id ? `SRQ-${r._id.slice(-4).toUpperCase()}` : 'SRQ-1001');
+    const formattedId = String(rawId).startsWith('#') ? String(rawId) : `#${rawId}`;
+    const cust = r.customerId && typeof r.customerId === 'object' ? r.customerId : {};
+    const custName = r.fullName || r.customerName || cust.fullName || cust.name || 'Customer';
+    const custAddress = cust.address || r.location || 'N/A';
+    const custPhone = cust.phoneNumber || cust.contactNo || cust.phone || r.contactNo || '';
+    const custEmail = cust.email || r.customerEmail || '';
+    const product = r.productType || r.acUnitModel || 'AirLux AC';
+    const team = typeof r.assignedTeam === 'object'
+      ? (r.assignedTeam?.teamName || 'Unassigned')
+      : (r.assignedTeam || r.assignedTeamName || 'Unassigned');
+    const status = r.status === 'Scheduled' ? 'Assigned' : (r.status || 'New');
+
+    return {
+      _id: r._id,
+      ticketId: formattedId,
+      isTechnicalRecord: true,
+      assignedTeam: team,
+      rawRecord: r,
+      customerId: {
+        _id: cust._id || (typeof r.customerId === 'string' ? r.customerId : ''),
+        fullName: custName,
+        email: custEmail,
+        phoneNumber: custPhone,
+        address: custAddress
+      },
+      category: 'repair',
+      requestType: r.repairType || 'Repair Request',
+      subject: r.issue || r.subject || `Repair - ${product}`,
+      description: r.problemDescription || r.description || `Repair required for ${product} at ${custAddress}. Assigned Team: ${team}.`,
+      priority: (r.priority || 'medium').toLowerCase() as any,
+      status: status,
+      acUnitModel: product,
+      acUnitSerial: r.acUnitSerial || '',
+      preferredDate: r.serviceDate || r.date || r.createdAt,
+      preferredTimeSlot: r.preferredTimeSlot || 'Standard Slot',
+      createdAt: r.createdAt || r.serviceDate || new Date().toISOString()
+    };
+  }
+
   private mapMaintenanceToTicket(m: any): ServiceTicket {
-    const rawId = m.ticketId || (m._id ? `M-${m._id.slice(-4).toUpperCase()}` : 'M-1001');
-    const formattedId = rawId.startsWith('#') ? rawId : `#${rawId}`;
+    const rawId = m.ticketId || (m._id ? `MS-${m._id.slice(-4).toUpperCase()}` : 'MS-1001');
+    const formattedId = String(rawId).startsWith('#') ? String(rawId) : `#${rawId}`;
     const cust = m.customerId && typeof m.customerId === 'object' ? m.customerId : {};
     const custName = m.fullName || m.customerName || cust.fullName || 'Customer';
     const custAddress = m.location || cust.address || 'N/A';
@@ -144,12 +213,16 @@ export class CsaServiceTicketsComponent implements OnInit {
     const custEmail = m.customerEmail || cust.email || '';
     const product = m.productType || m.acUnitModel || 'AirLux AC';
     const maintenanceType = m.maintenanceType || (m.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated');
+    const team = m.assignedTeam || 'Maintenance Team';
 
     return {
       _id: m._id,
       ticketId: formattedId,
       isMaintenanceRecord: true,
+      isTechnicalRecord: true,
       maintenanceRecordData: m,
+      assignedTeam: team,
+      rawRecord: m,
       customerId: {
         _id: cust._id || (typeof m.customerId === 'string' ? m.customerId : ''),
         fullName: custName,
@@ -159,8 +232,8 @@ export class CsaServiceTicketsComponent implements OnInit {
       },
       category: 'maintenance',
       requestType: maintenanceType,
-      subject: `Maintenance (${formattedId}) - ${product}`,
-      description: m.description || m.scheduledServiceType || `${maintenanceType} Maintenance for ${product} at ${custAddress}. Assigned Team: ${m.assignedTeam || 'Not Assigned'}.`,
+      subject: `Maintenance - ${product}`,
+      description: m.description || m.scheduledServiceType || `${maintenanceType} Maintenance for ${product} at ${custAddress}. Assigned Team: ${team}.`,
       priority: 'medium',
       status: m.status || 'New',
       acUnitModel: product,
@@ -168,6 +241,91 @@ export class CsaServiceTicketsComponent implements OnInit {
       preferredTimeSlot: m.scheduledServiceType || 'Scheduled Routine',
       createdAt: m.createdAt || m.date || new Date().toISOString()
     };
+  }
+
+  private mapInstallationToTicket(item: any): ServiceTicket {
+    const rawId = item.ticketId || (item._id ? `INT-${item._id.slice(-4).toUpperCase()}` : 'INT-1001');
+    const formattedId = String(rawId).startsWith('#') ? String(rawId) : `#${rawId}`;
+    const cust = item.customerId && typeof item.customerId === 'object' ? item.customerId : {};
+    const custName = item.fullName || item.customerName || cust.fullName || cust.name || 'Customer';
+    const custAddress = cust.address || item.location || 'N/A';
+    const custPhone = cust.phoneNumber || cust.phone || item.customerPhone || '';
+    const custEmail = cust.email || item.customerEmail || '';
+    const product = item.productType || item.itemName || item.acUnitModel || 'AirLux AC System';
+    const team = typeof item.assignedTeam === 'object'
+      ? (item.assignedTeam?.teamName || 'Unassigned')
+      : (item.assignedTeam || item.assignedTeamName || 'Unassigned');
+
+    return {
+      _id: item._id,
+      ticketId: formattedId,
+      isTechnicalRecord: true,
+      assignedTeam: team,
+      rawRecord: item,
+      customerId: {
+        _id: cust._id || (typeof item.customerId === 'string' ? item.customerId : ''),
+        fullName: custName,
+        email: custEmail,
+        phoneNumber: custPhone,
+        address: custAddress
+      },
+      category: 'installation',
+      requestType: 'Unit Installation',
+      subject: `Installation - ${product}`,
+      description: item.description || item.notes || `Installation of ${product} at ${custAddress}. Assigned Team: ${team}.`,
+      priority: 'medium',
+      status: item.status || 'Assigned',
+      acUnitModel: product,
+      preferredDate: item.date || item.serviceDate || item.createdAt,
+      preferredTimeSlot: item.timeSlot || 'Scheduled Slot',
+      createdAt: item.createdAt || item.date || new Date().toISOString()
+    };
+  }
+
+  private mapInspectionToTicket(ins: any): ServiceTicket {
+    const rawId = ins.ticketId || ins.ticketRef || (ins._id ? `INS-${ins._id.slice(-5).toUpperCase()}` : 'INS-00001');
+    const formattedId = String(rawId).startsWith('#') ? String(rawId) : `#${rawId}`;
+    const cust = ins.customerId && typeof ins.customerId === 'object' ? ins.customerId : {};
+    const custName = ins.customerName || cust.fullName || cust.name || 'Customer';
+    const custAddress = cust.address || ins.location || 'N/A';
+    const custPhone = cust.phoneNumber || cust.phone || ins.customerPhone || '';
+    const custEmail = cust.email || ins.customerEmail || '';
+    const product = ins.productType || (ins.orderId && (ins.orderId.itemName || ins.orderId.productType)) || 'Site Inspection';
+    const team = ins.assignedTeam || 'Inspection Team';
+    const status = String(ins.status || '') === 'Scheduled' ? 'Assigned' : (ins.status || 'Assigned');
+
+    return {
+      _id: ins._id,
+      ticketId: formattedId,
+      isTechnicalRecord: true,
+      assignedTeam: team,
+      rawRecord: ins,
+      customerId: {
+        _id: cust._id || (typeof ins.customerId === 'string' ? ins.customerId : ''),
+        fullName: custName,
+        email: custEmail,
+        phoneNumber: custPhone,
+        address: custAddress
+      },
+      category: 'inspection',
+      requestType: 'Site Inspection',
+      subject: `Inspection - ${product}`,
+      description: ins.description || ins.notes || `Site inspection for ${product} at ${custAddress}. Assigned Team: ${team}.`,
+      priority: 'medium',
+      status: status,
+      acUnitModel: product,
+      preferredDate: ins.date || ins.scheduledDate || ins.createdAt,
+      preferredTimeSlot: ins.timeSlot || 'Scheduled Inspection',
+      createdAt: ins.createdAt || ins.date || new Date().toISOString()
+    };
+  }
+
+  getDisplaySubject(ticket: ServiceTicket | null | undefined): string {
+    if (!ticket || !ticket.subject) return 'Service Request';
+    let subject = ticket.subject;
+    // Strip redundant bracketed ticket ID e.g. (#SRQ-1007), (SRQ-1007), (#MS-1008), (#INT-1013), etc.
+    subject = subject.replace(/\s*\(\s*#?[A-Za-z0-9_-]+\s*\)\s*/g, ' ');
+    return subject.replace(/\s{2,}/g, ' ').trim() || 'Service Request';
   }
 
   getFormattedTicketId(ticket: ServiceTicket | null | undefined): string {
@@ -194,20 +352,38 @@ export class CsaServiceTicketsComponent implements OnInit {
   }
 
   private getUnifiedTickets(): ServiceTicket[] {
+    const mappedRepairs = this.rawRepairs.map(r => this.mapRepairToTicket(r));
     const mappedMaintenances = this.rawMaintenances.map(m => this.mapMaintenanceToTicket(m));
-    const maintenanceTicketIds = new Set(
-      mappedMaintenances.map(m => (m.ticketId || '').replace('#', '').trim().toUpperCase())
-    );
+    const mappedInstallations = this.rawInstallations.map(i => this.mapInstallationToTicket(i));
+    const mappedInspections = this.rawInspections.map(ins => this.mapInspectionToTicket(ins));
 
-    const normalizedTickets: ServiceTicket[] = [];
+    const knownIds = new Set<string>();
+    const allTickets: ServiceTicket[] = [];
 
+    const addTicket = (ticket: ServiceTicket) => {
+      const cleanId = (ticket.ticketId || ticket._id || '').replace('#', '').trim().toUpperCase();
+      if (cleanId && knownIds.has(cleanId)) {
+        return;
+      }
+      if (cleanId) {
+        knownIds.add(cleanId);
+      }
+      allTickets.push(ticket);
+    };
+
+    // Add all live technician tickets first
+    mappedRepairs.forEach(addTicket);
+    mappedMaintenances.forEach(addTicket);
+    mappedInstallations.forEach(addTicket);
+    mappedInspections.forEach(addTicket);
+
+    // Add any CSA-created tickets not already covered
     for (const t of this.rawTickets) {
       const anyT = t as any;
-      const ref = anyT.serviceRequestRef || (anyT.ticketId ? anyT.ticketId.replace('#', '') : '');
-      const refUpper = ref ? ref.trim().toUpperCase() : '';
+      const ref = anyT.serviceRequestRef || (anyT.ticketId ? anyT.ticketId.replace('#', '') : (t._id || ''));
+      const cleanRef = ref.trim().toUpperCase();
 
-      // Skip duplicate if this maintenance ticket is already present from the live maintenance collection
-      if (refUpper && maintenanceTicketIds.has(refUpper)) {
+      if (cleanRef && knownIds.has(cleanRef)) {
         continue;
       }
 
@@ -233,45 +409,59 @@ export class CsaServiceTicketsComponent implements OnInit {
           : `#${anyT.serviceRequestRef}`;
       }
 
-      normalizedTickets.push({
+      let reqType = anyT.maintenanceType || t.requestType;
+      if (category === 'maintenance') {
+        if (!reqType || reqType.toLowerCase() === 'maintenance') {
+          reqType = 'Company Initiated';
+        }
+      }
+
+      addTicket({
         ...t,
         category: category as any,
+        requestType: reqType,
         ticketId: displayTicketId
       });
     }
 
-    return [...normalizedTickets, ...mappedMaintenances];
+    // Sort by date descending
+    return allTickets.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.preferredDate || 0).getTime();
+      const dateB = new Date(b.createdAt || b.preferredDate || 0).getTime();
+      return dateB - dateA;
+    });
   }
 
   applyFilters(): void {
     const allUnified = this.getUnifiedTickets();
     let combined: ServiceTicket[] = [];
 
+    // Category Filter
     if (this.selectedCategory === 'ALL') {
       combined = allUnified;
     } else {
       combined = allUnified.filter(t => (t.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
     }
 
-    // Apply Status Filter
+    // Status Filter
     if (this.selectedStatus !== 'ALL') {
       combined = combined.filter(t => {
         const s = (t.status || '').toLowerCase();
         const target = this.selectedStatus.toLowerCase();
-        if (target === 'resolved') {
+        if (target === 'resolved' || target === 'completed') {
           return s === 'resolved' || s === 'completed' || s === 'sent to customer';
         }
-        if (target === 'new') {
+        if (target === 'new' || target === 'pending') {
           return s === 'new' || s === 'pending';
         }
-        if (target === 'assigned') {
+        if (target === 'assigned' || target === 'in progress') {
           return s === 'assigned' || s === 'in-progress' || s === 'in progress' || s === 'finance approved' || s === 'materials ready' || s === 'scheduled';
         }
         return s === target;
       });
     }
 
-    // Apply Search Query
+    // Search Filter
     if (this.searchQuery && this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase().trim();
       combined = combined.filter(t => {
@@ -282,45 +472,24 @@ export class CsaServiceTicketsComponent implements OnInit {
         const custName = (t.customerId?.fullName || '').toLowerCase();
         const custPhone = (t.customerId?.phoneNumber || '').toLowerCase();
         const location = (t.customerId?.address || '').toLowerCase();
+        const team = (t.assignedTeam || '').toLowerCase();
 
-        return subj.includes(q) || desc.includes(q) || model.includes(q) || tId.includes(q) || custName.includes(q) || custPhone.includes(q) || location.includes(q);
+        return subj.includes(q) || desc.includes(q) || model.includes(q) || tId.includes(q) || custName.includes(q) || custPhone.includes(q) || location.includes(q) || team.includes(q);
       });
     }
 
     this.tickets = combined;
     this.totalTickets = combined.length;
-    this.calculateStats();
   }
 
   calculateStats(): void {
     const allUnified = this.getUnifiedTickets();
-    let baseList: ServiceTicket[] = [];
 
-    if (this.selectedCategory === 'ALL') {
-      baseList = allUnified;
-    } else {
-      baseList = allUnified.filter(t => (t.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
-    }
-
-    this.countTotal = baseList.length;
-    this.countNew = baseList.filter(t => {
-      const s = (t.status || '').toLowerCase();
-      return s === 'new' || s === 'pending';
-    }).length;
-    this.countAssigned = baseList.filter(t => {
-      const s = (t.status || '').toLowerCase();
-      return s === 'assigned' || s === 'in-progress' || s === 'in progress' || s === 'finance approved' || s === 'materials ready' || s === 'scheduled';
-    }).length;
-    this.countResolved = baseList.filter(t => {
-      const s = (t.status || '').toLowerCase();
-      return s === 'resolved' || s === 'completed' || s === 'sent to customer';
-    }).length;
-
-    this.countPendingCSA = allUnified.filter(t => {
-      if ((t.category || '').toLowerCase() !== 'maintenance') return false;
-      const s = (t.status || '').toLowerCase();
-      return s === 'pending' || s === 'finance approved' || s === 'materials ready';
-    }).length;
+    this.countTotal = allUnified.length;
+    this.countRepairs = allUnified.filter(t => (t.category || '').toLowerCase() === 'repair').length;
+    this.countMaintenance = allUnified.filter(t => (t.category || '').toLowerCase() === 'maintenance').length;
+    this.countInstallations = allUnified.filter(t => (t.category || '').toLowerCase() === 'installation').length;
+    this.countInspections = allUnified.filter(t => (t.category || '').toLowerCase() === 'inspection').length;
   }
 
   setStatusFilter(status: string): void {
@@ -334,20 +503,17 @@ export class CsaServiceTicketsComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.ticketForm.reset({
-      customerId: '',
-      category: 'repair',
-      acUnitModel: '',
-      acUnitSerial: '',
-      preferredTimeSlot: 'Morning (9 AM - 12 PM)',
-      serviceFee: 0
-    });
-    this.formError = '';
     this.showCreateModal = true;
   }
 
   closeCreateModal(): void {
     this.showCreateModal = false;
+  }
+
+  onServiceRequestCreated(req: any): void {
+    const ref = req?.serviceRequestRef || 'Request';
+    this.showToast(`Service Request ${ref} created successfully!`);
+    this.loadAllData();
   }
 
   submitCreateTicket(): void {
@@ -377,65 +543,12 @@ export class CsaServiceTicketsComponent implements OnInit {
 
   viewDetails(ticket: ServiceTicket): void {
     this.selectedTicket = ticket;
-    this.customerNotes = ticket.maintenanceScheduleData?.customerNotes || '';
-    this.statusUpdateForm = { status: ticket.status, rejectionReason: ticket.rejectionReason || '' };
     this.showDetailsModal = true;
   }
 
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.selectedTicket = null;
-    this.customerNotes = '';
-  }
-
-  updateTicketStatus(): void {
-    if (!this.selectedTicket || !this.statusUpdateForm.status) return;
-
-    this.isUpdatingStatus = true;
-    this.ticketService.updateTicketStatus(this.selectedTicket._id, this.statusUpdateForm).subscribe({
-      next: (res) => {
-        this.isUpdatingStatus = false;
-        this.showToast('Ticket status updated successfully!');
-        if (this.selectedTicket) {
-          this.selectedTicket.status = res.ticket.status;
-        }
-        this.closeDetailsModal();
-        this.loadAllData();
-      },
-      error: (err) => {
-        this.isUpdatingStatus = false;
-        console.error('Failed to update ticket status:', err);
-        alert('Failed to update status: ' + (err.error?.message || err.message));
-      }
-    });
-  }
-
-  sendScheduleToCustomer(): void {
-    if (!this.selectedTicket || !this.selectedTicket.isMaintenanceSchedule) return;
-
-    this.isSendingToCustomer = true;
-    const scheduleId = this.selectedTicket._id;
-
-    this.ticketService.sendMaintenanceScheduleToCustomer(scheduleId, this.customerNotes).subscribe({
-      next: (res) => {
-        this.isSendingToCustomer = false;
-        this.showToast(`Schedule ${this.selectedTicket?.ticketId || ''} dispatched to customer successfully!`);
-        if (this.selectedTicket) {
-          this.selectedTicket.status = 'Sent to Customer';
-          if (this.selectedTicket.maintenanceScheduleData) {
-            this.selectedTicket.maintenanceScheduleData.status = 'Sent to Customer';
-            this.selectedTicket.maintenanceScheduleData.customerNotes = this.customerNotes;
-          }
-        }
-        this.closeDetailsModal();
-        this.loadAllData();
-      },
-      error: (err) => {
-        this.isSendingToCustomer = false;
-        console.error('Failed to send schedule to customer:', err);
-        alert('Failed to dispatch schedule to customer: ' + (err.error?.message || err.message));
-      }
-    });
   }
 
   showToast(msg: string): void {
@@ -459,8 +572,6 @@ export class CsaServiceTicketsComponent implements OnInit {
       return dateStr;
     }
   }
-
-
 
   getStatusClass(status: string): string {
     switch ((status || '').toLowerCase()) {
@@ -486,4 +597,3 @@ export class CsaServiceTicketsComponent implements OnInit {
     }
   }
 }
-

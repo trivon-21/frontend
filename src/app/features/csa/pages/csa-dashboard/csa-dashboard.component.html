@@ -38,7 +38,7 @@
       <div class="metric-arrow">→</div>
     </a>
 
-    <!-- CARD 2: ACTIVE SERVICE TICKETS -->
+    <!-- CARD 2: ALL SERVICE TICKETS -->
     <a routerLink="/csa/service-tickets" class="metric-card">
       <div class="metric-icon-wrap">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -46,8 +46,8 @@
         </svg>
       </div>
       <div class="metric-content">
-        <span class="metric-value">{{ dashboardData?.metrics?.activeTickets || 0 }}</span>
-        <span class="metric-label">Active Service Tickets</span>
+        <span class="metric-value">{{ dashboardData?.metrics?.allTickets ?? dashboardData?.metrics?.totalTickets ?? 0 }}</span>
+        <span class="metric-label">All Service Tickets</span>
       </div>
       <div class="metric-arrow">→</div>
     </a>

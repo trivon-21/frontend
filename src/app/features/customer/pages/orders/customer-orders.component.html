@@ -1,93 +1,123 @@
 <div>
   <!-- Page Header -->
-  <h2 style="font-size:26px;font-weight:700;color:var(--primary-main);margin:0 0 24px;">My Orders</h2>
+  <div class="page-header">
+    <div>
+      <p class="page-eyebrow">Account</p>
+      <h2 class="page-title">My Orders</h2>
+    </div>
+    <span class="order-count" *ngIf="!loading">{{ orders.length }} {{ orders.length === 1 ? 'order' : 'orders' }}</span>
+  </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" style="padding: 40px; text-align: center; color: #666;">
+  <div *ngIf="loading" class="state-panel">
+    <span class="state-spinner"></span>
     <p>Loading your orders...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" style="padding: 20px; background: #fee; border: 1px solid #fcc; border-radius: 6px; color: var(--error); margin-bottom: 20px;">
+  <div *ngIf="error && !loading" class="state-panel state-panel--error">
     {{ error }}
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!loading && orders.length === 0 && !error" style="padding: 40px; text-align: center; color: #999;">
-    <p style="font-size: 16px;">You haven't placed any orders yet.</p>
+  <div *ngIf="!loading && orders.length === 0 && !error" class="state-panel">
+    <p>You haven't placed any orders yet.</p>
   </div>
 
-  <!-- Orders List -->
-  <div *ngIf="!loading && orders.length > 0" class="orders-list">
-    <div *ngFor="let order of orders" class="order-card">
-      <!-- Order Header -->
-      <div class="order-header">
-        <div class="order-ref-section">
-          <span class="order-label">Order Reference</span>
-          <span class="order-ref">{{ order.orderRef }}</span>
-        </div>
-        <div class="order-status-section">
-          <span class="order-label">Status</span>
-          <span class="order-status-badge" [style.background-color]="getStatusColor(order.orderStatus)">
-            {{ order.orderStatus }}
-          </span>
-        </div>
-        <div class="payment-status-section">
-          <span class="order-label">Payment</span>
-          <span class="payment-status-badge" [style.background-color]="getPaymentStatusColor(order.paymentStatus)">
-            {{ order.paymentStatus }}
-          </span>
-        </div>
-      </div>
+  <!-- Order Filters -->
+  <div *ngIf="!loading && orders.length > 0" class="orders-toolbar">
+    <div class="search-field">
+      <label for="orderSearch">Search orders</label>
+      <input
+        id="orderSearch"
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by item or reference"
+      />
+    </div>
 
-      <!-- Order Details -->
-      <div class="order-details">
-        <div class="product-info">
-          <div class="product-image" *ngIf="order.productImage">
-            <img [src]="order.productImage" alt="{{ order.itemName }}" />
-          </div>
-          <div class="product-text">
-            <div class="product-name">{{ order.itemName }}</div>
-            <div class="product-quantity">Quantity: {{ order.quantity }}</div>
-            <div class="order-type-badge" [style.background-color]="order.orderType === 'Buy & Install' ? 'var(--primary-lighter)' : '#F3E5F5'">
-              {{ order.orderType }}
-            </div>
-          </div>
-        </div>
+    <div class="filter-field">
+      <label for="orderStatusFilter">Order status</label>
+      <select id="orderStatusFilter" [(ngModel)]="selectedOrderStatus">
+        <option value="All">All statuses</option>
+        <option value="Order Placed">Order Placed</option>
+        <option value="Payment Uploaded">Payment Uploaded</option>
+        <option value="Payment Confirmed">Payment Confirmed</option>
+        <option value="Inventory Approved">Inventory Approved</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Installation Scheduled">Installation Scheduled</option>
+        <option value="Installation Completed">Installation Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
 
-        <div class="order-info-grid">
-          <div class="info-item">
-            <span class="info-label">Amount</span>
-            <span class="info-value">Rs. {{ order.amount }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Warranty</span>
-            <span class="info-value" *ngIf="order.warrantyStart && order.warrantyExpiry">
-              {{ order.warrantyStart | date: 'MMM dd, yyyy' }} - {{ order.warrantyExpiry | date: 'MMM dd, yyyy' }}
-            </span>
-            <span class="info-value" *ngIf="!order.warrantyStart">Not Available</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">AMC Status</span>
-            <span class="info-value" [style.color]="order.amcStatus === 'Active' ? 'var(--primary-main)' : order.amcStatus === 'Expired' ? 'var(--error)' : '#999'">
-              {{ order.amcStatus }}
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Created</span>
-            <span class="info-value">{{ order.createdAt | date: 'MMM dd, yyyy HH:mm' }}</span>
-          </div>
-        </div>
-      </div>
+    <div class="filter-field">
+      <label for="paymentStatusFilter">Payment</label>
+      <select id="paymentStatusFilter" [(ngModel)]="selectedPaymentStatus">
+        <option value="All">All payments</option>
+        <option value="Pending Payment">Pending Payment</option>
+        <option value="Under Review">Under Review</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
 
-      <!-- Tracking Info -->
-      <div class="tracking-info" *ngIf="order.deliveryTrackingId">
-        <span class="tracking-label">Tracking ID:</span>
-        <span class="tracking-id">{{ order.deliveryTrackingId }}</span>
-        <a class="tracking-link" *ngIf="order.deliveryPartnerUrl" [href]="order.deliveryPartnerUrl" target="_blank">
-          Track Delivery →
-        </a>
-      </div>
+    <div class="filter-field">
+      <label for="orderTypeFilter">Order type</label>
+      <select id="orderTypeFilter" [(ngModel)]="selectedOrderType">
+        <option value="All">All types</option>
+        <option value="Buy Only">Buy Only</option>
+        <option value="Buy &amp; Install">Buy &amp; Install</option>
+      </select>
+    </div>
+
+    <button *ngIf="hasActiveFilters" type="button" class="clear-filters" (click)="clearFilters()">
+      Clear filters
+    </button>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0 && filteredOrders.length === 0" class="state-panel state-panel--compact">
+    <p>No orders match your filters.</p>
+    <button type="button" class="clear-filters" (click)="clearFilters()">Clear filters</button>
+  </div>
+
+  <!-- Orders Table -->
+  <div *ngIf="!loading && filteredOrders.length > 0" class="orders-table-wrap">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Order reference</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Order type</th>
+          <th>Amount</th>
+          <th>Placed on</th>
+          <th>Status</th>
+          <th>Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of pagedOrders">
+          <td class="reference-cell">#{{ order.orderRef }}</td>
+          <td class="item-name">{{ order.itemName }}</td>
+          <td>{{ order.quantity }}</td>
+          <td><span class="type-badge">{{ order.orderType }}</span></td>
+          <td class="amount-cell">LKR {{ order.amount | number: '1.2-2' }}</td>
+          <td class="date-cell">{{ order.createdAt | date: 'MMM dd, yyyy' }}</td>
+          <td><span class="status-badge" [style.--status-color]="getStatusColor(order.orderStatus)">{{ order.orderStatus }}</span></td>
+          <td><span class="status-badge" [style.--status-color]="getPaymentStatusColor(order.paymentStatus)">{{ order.paymentStatus }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="orders-pagination">
+      <span>Showing {{ (activeOrderPage - 1) * orderPageSize + 1 }}-{{ orderPageEnd }} of {{ filteredOrders.length }}</span>
+      <span class="pagination-actions" *ngIf="orderPageCount > 1">
+        <button type="button" (click)="goToOrderPage(orderPage - 1)" [disabled]="orderPage === 1">Previous</button>
+        <span>Page {{ activeOrderPage }} of {{ orderPageCount }}</span>
+        <button type="button" (click)="goToOrderPage(activeOrderPage + 1)" [disabled]="activeOrderPage === orderPageCount">Next</button>
+      </span>
     </div>
   </div>
 </div>

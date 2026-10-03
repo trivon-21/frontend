@@ -55,6 +55,7 @@ export class CustomerProfileComponent implements OnInit {
   uploadingPhoto = false;
   photoUploadError = '';
   removingPhoto = false;
+  showProfileCompletionModal = false;
 
   constructor(
     private fb: FormBuilder,
@@ -65,11 +66,11 @@ export class CustomerProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
-      lastName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
-      gender: ['', [Validators.required]],
-      address: ['', [Validators.required, Validators.minLength(5)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^(?:\+94|0)\d{9}$/)]]
+      fullName: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/\S/)]],
+      lastName: ['', [Validators.required, Validators.pattern(/\S/)]],
+      gender: ['', [Validators.required, Validators.pattern(/\S/)]],
+      address: ['', [Validators.required, Validators.pattern(/\S/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/\S/)] ]
     });
     this.loadProfile();
   }
@@ -90,6 +91,7 @@ export class CustomerProfileComponent implements OnInit {
           phoneNumber: data.phoneNumber || ''
         });
         this.profileForm.disable();
+        this.showProfileCompletionModal = this.profileForm.invalid;
         this.loading = false;
       },
       error: () => {
@@ -119,6 +121,7 @@ export class CustomerProfileComponent implements OnInit {
 
   startEditing(): void {
     this.isEditing = true;
+    this.showProfileCompletionModal = false;
     this.profileForm.enable();
     this.success = '';
     this.error = '';
@@ -138,19 +141,11 @@ export class CustomerProfileComponent implements OnInit {
     }
   }
 
-  hasError(controlName: string, errorName: string): boolean {
-    const control = this.profileForm.get(controlName);
-    return control ? control.hasError(errorName) && (control.dirty || control.touched) : false;
-  }
-
-  isInvalid(controlName: string): boolean {
-    const control = this.profileForm.get(controlName);
-    return !!(control && control.invalid && (control.dirty || control.touched));
-  }
-
   saveProfile(): void {
-    this.profileForm.markAllAsTouched();
-    if (this.profileForm.invalid) return;
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
     this.saving = true;
     this.error = '';
     this.success = '';
@@ -163,10 +158,24 @@ export class CustomerProfileComponent implements OnInit {
         this.saving = false;
       },
       error: () => {
-        this.error = 'Failed to save profile. Please try again.';
+        this.error = 'Failed to save profile. Please complete all required fields and try again.';
         this.saving = false;
       }
     });
+  }
+
+  get missingProfileFields(): string[] {
+    const fieldLabels: Record<string, string> = {
+      fullName: 'Full Name',
+      lastName: 'Last Name',
+      gender: 'Gender',
+      address: 'Address',
+      phoneNumber: 'Contact Number'
+    };
+
+    return Object.keys(fieldLabels)
+      .filter((fieldName) => this.profileForm.get(fieldName)?.hasError('required'))
+      .map((fieldName) => fieldLabels[fieldName]);
   }
 
   toggleAddEmail(): void {
