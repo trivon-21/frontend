@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface TeamMember {
   name: string;
@@ -79,7 +80,7 @@ type RawPendingJob = {
 @Component({
   selector: 'app-main-technician-team-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './main-technician-team-management.component.html',
   styleUrl: './main-technician-team-management.component.css'})
 export class MainTechnicianTeamManagementComponent implements OnInit {

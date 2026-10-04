@@ -31,11 +31,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         console.error('Access denied. Insufficient permissions.');
         router.navigate(['/']);
       } else if (error.status === 503) {
-        // Service Unavailable - system under maintenance
-        const currentUser = authService.getCurrentUser();
-        if (currentUser && currentUser.role !== 'SUPER_ADMIN') {
-          authService.logout();
-          router.navigate(['/login']);
+        // Only the maintenance middleware's 503 carries a `maintenance` payload.
+        // Application 503s (an offline dashboard, a failed summary) must surface
+        // to the caller instead of ending the session.
+        if (error.error?.maintenance) {
+          const currentUser = authService.getCurrentUser();
+          if (currentUser && currentUser.role !== 'SUPER_ADMIN') {
+            authService.logout();
+            router.navigate(['/login']);
+          }
         }
       } else if (error.status === 0) {
         // Network error or CORS issue

@@ -206,6 +206,26 @@
 
       <div class="modal-body">
         <div
+          class="delivery-details-card"
+          *ngIf="isViewingDetailsFromAssign && selectedOrder?.deliveryDetails as delivery"
+        >
+          <h3 class="delivery-details-title">Delivery Address</h3>
+          <p class="delivery-details-line" *ngIf="delivery.address">{{ delivery.address }}</p>
+          <p class="delivery-details-line" *ngIf="delivery.city || delivery.postalCode">
+            {{ delivery.city }}<span *ngIf="delivery.city && delivery.postalCode">, </span
+            >{{ delivery.postalCode }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.phone">
+            <lucide-angular name="phone" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.phone }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.email">
+            <lucide-angular name="mail" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.email }}
+          </p>
+        </div>
+
+        <div
           class="delivery-info-banner"
           *ngIf="
             selectedOrder?.courier ||
@@ -337,6 +357,14 @@
             </button>
             <button
               type="button"
+              class="btn-secondary-outline im-btn im-btn--secondary"
+              *ngIf="!isEditMode"
+              (click)="printGatePass()"
+            >
+              Print Gate Pass
+            </button>
+            <button
+              type="button"
               class="btn-primary btn-outline im-btn im-btn--secondary"
               *ngIf="!isEditMode"
               (click)="enableEditMode()"
@@ -416,6 +444,22 @@
       </div>
 
       <div class="modal-body">
+        <div class="delivery-details-card" *ngIf="selectedOrder?.deliveryDetails as delivery">
+          <h3 class="delivery-details-title">Delivery Address</h3>
+          <p class="delivery-details-line" *ngIf="delivery.address">{{ delivery.address }}</p>
+          <p class="delivery-details-line" *ngIf="delivery.city || delivery.postalCode">
+            {{ delivery.city }}<span *ngIf="delivery.city && delivery.postalCode">, </span
+            >{{ delivery.postalCode }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.phone">
+            <lucide-angular name="phone" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.phone }}
+          </p>
+          <p class="delivery-details-line" *ngIf="delivery.email">
+            <lucide-angular name="mail" [size]="14" strokeWidth="2"></lucide-angular>
+            {{ delivery.email }}
+          </p>
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label for="dispatch-courier-service">Courier Service</label>
@@ -439,24 +483,14 @@
           </div>
           <div class="form-group full">
             <p class="helper-text">
-              Please ensure all items are kitted and the gate pass is printed before finalizing the
-              dispatch.
+              Please ensure all items are kitted before finalizing the dispatch. The gate pass can be
+              printed once the order moves to Ready to Pick up.
             </p>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer justify-between">
-        <div class="footer-left">
-          <button
-            type="button"
-            class="btn-secondary-outline im-btn im-btn--secondary"
-            [disabled]="!isDeliveryFormValid"
-            (click)="closeModals()"
-          >
-            Print Gate Pass
-          </button>
-        </div>
+      <div class="modal-footer">
         <div class="footer-right">
           <button
             type="button"

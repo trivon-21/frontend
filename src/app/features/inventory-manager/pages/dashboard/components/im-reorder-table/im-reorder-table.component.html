@@ -1,0 +1,42 @@
+<div class="content-card reorder-card">
+  <div class="card-header">
+    <div class="title-with-icon">
+      <lucide-angular name="triangle-alert" class="primary-icon" [size]="18"></lucide-angular>
+      <h2 class="card-title">Reorder List</h2>
+    </div>
+    <span class="count-badge">{{ items.length }} Items</span>
+  </div>
+  <div class="table-container alx-table-container" role="region" aria-label="Inventory reorder list" tabindex="0">
+    <table class="reorder-table alx-table alx-table--fixed alx-table--sticky-header">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="text-right">Available</th>
+          <th class="text-right">Reserved</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items"
+            class="clickable-row"
+            [routerLink]="['/inventory-manager/order-creation']"
+            [queryParams]="{ itemId: item.id }">
+          <td class="item-name-cell">
+            <div class="item-cell-wrapper">
+              <div class="status-dot" [ngClass]="item.status"></div>
+              <a class="item-name reorder-link" [routerLink]="['/inventory-manager/order-creation']" [queryParams]="{ itemId: item.id }">{{ item.name }}</a>
+            </div>
+          </td>
+          <td class="item-avail text-right" [class.critical]="item.available === 0">
+            {{ item.available }}
+          </td>
+          <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
+            {{ item.reserved }}
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="3" class="empty-cell">No items currently need reordering.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

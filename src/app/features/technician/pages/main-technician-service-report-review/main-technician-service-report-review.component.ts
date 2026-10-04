@@ -92,6 +92,11 @@ export class MainTechnicianServiceReportReviewComponent implements OnInit {
   completeReview() {
     if (!this.report) return;
 
+    if (this.reviewNotes.trim().length > 2000) {
+      this.error = 'Review notes cannot exceed 2,000 characters.';
+      return;
+    }
+
     this.isLoading = true;
     this.http
       .patch(`${this.apiUrl}/${this.id}`, {

@@ -47,6 +47,7 @@ describe('AnalyticsService', () => {
       financial: {
         collectedRevenue: {}, procurementSpend: {}, operatingContribution: {},
         outstandingReceivables: { ...snapshot(3000, '2026-08-24T12:00:05.000Z'), count: 2 },
+        allOutstandingReceivables: { ...snapshot(3500, '2026-08-24T12:00:05.000Z'), count: 3 },
         pendingPaymentReview: { ...snapshot(1200, '2026-08-24T12:00:06.000Z'), count: 1 },
         purchaseCommitments: snapshot(5000, '2026-08-24T12:00:07.000Z'),
         unreconciledNonPo: { ...snapshot(400, '2026-08-24T12:00:08.000Z'), count: 1 },
@@ -84,10 +85,111 @@ describe('AnalyticsService', () => {
     expect(result?.currentPosition.openTickets.asOf).toEqual(new Date('2026-08-24T12:00:00.000Z'));
     expect(result?.purchasing.pendingApprovalValue.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
     expect(result?.financial.outstandingReceivables.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
+    expect(result?.financial.allOutstandingReceivables.asOf).toEqual(new Date('2026-08-24T12:00:05.000Z'));
     expect(result?.financial.pendingPaymentReview.count).toBe(1);
     expect(result?.inventoryRisk.approvedAwaitingReceipt.asOf).toEqual(
       new Date('2026-08-24T12:00:10.000Z'),
     );
     expect(result?.exceptions.awaitingReceipt.asOf).toEqual(new Date('2026-08-24T12:00:12.000Z'));
   });
+
+  it('serves a second subscribe for the same period within the TTL from cache', () => {
+    service.getAnalytics('7d').subscribe();
+    http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`).flush(minimalAnalytics());
+
+    let second: AnalyticsData | undefined;
+    service.getAnalytics('7d').subscribe((data) => (second = data));
+    http.expectNone(`${environment.apiUrl}/manager/analytics?period=7d`);
+
+    expect(second?.status).toBe('Live');
+  });
+
+  it('caches each period independently', () => {
+    service.getAnalytics('7d').subscribe();
+    http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`).flush(minimalAnalytics());
+
+    let result: AnalyticsData | undefined;
+    service.getAnalytics('30d').subscribe((data) => (result = data));
+    const request = http.expectOne(`${environment.apiUrl}/manager/analytics?period=30d`);
+    request.flush(minimalAnalytics());
+
+    expect(request.request.params.get('period')).toBe('30d');
+    expect(result?.status).toBe('Live');
+  });
+
+  it('force always issues a fresh HTTP request, bypassing the cache', () => {
+    service.getAnalytics('7d').subscribe();
+    http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`).flush(minimalAnalytics());
+
+    let result: AnalyticsData | undefined;
+    service.getAnalytics('7d', { force: true }).subscribe((data) => (result = data));
+    const request = http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`);
+    request.flush(minimalAnalytics());
+
+    expect(request.request.method).toBe('GET');
+    expect(result?.status).toBe('Live');
+  });
+
+  it('does not cache an errored request; the next call retries against the network', () => {
+    let errored = false;
+    service.getAnalytics('7d').subscribe({ error: () => (errored = true) });
+    http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`).flush(
+      { message: 'boom' },
+      { status: 500, statusText: 'Server Error' },
+    );
+    expect(errored).toBeTrue();
+
+    service.getAnalytics('7d').subscribe();
+    http.expectOne(`${environment.apiUrl}/manager/analytics?period=7d`).flush(minimalAnalytics());
+  });
+
+  function minimalAnalytics() {
+    const snapshot = (value: number, asOf: string) => ({ value, scope: 'current-snapshot', asOf });
+    return {
+      period: '7d',
+      status: 'Live',
+      generatedAt: '2026-08-24T12:00:00.000Z',
+      reportingPeriod: {
+        period: '7d',
+        currentStart: '2026-08-17T00:00:00.000Z',
+        currentEnd: '2026-08-24T23:59:59.999Z',
+        previousStart: '2026-08-10T00:00:00.000Z',
+        previousEnd: '2026-08-16T23:59:59.999Z',
+      },
+      performance: {},
+      currentPosition: {
+        openTickets: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        unassignedTickets: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        slaRiskTickets: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        pendingApprovalValue: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        stockRiskItems: snapshot(0, '2026-08-24T12:00:00.000Z'),
+      },
+      serviceOperations: {},
+      workforce: {},
+      purchasing: { pendingApprovalValue: snapshot(0, '2026-08-24T12:00:00.000Z') },
+      financial: {
+        collectedRevenue: {}, procurementSpend: {}, operatingContribution: {},
+        outstandingReceivables: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
+        allOutstandingReceivables: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
+        pendingPaymentReview: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
+        purchaseCommitments: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        unreconciledNonPo: { ...snapshot(0, '2026-08-24T12:00:00.000Z'), count: 0 },
+        revenueBySource: [], spendByMode: [],
+        trend: { labels: [], collectedRevenue: [], procurementSpend: [] },
+        basis: 'cash-collected-vs-goods-received',
+      },
+      inventoryRisk: {
+        lowStockItems: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        outOfStockItems: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        reservedUnits: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        pendingMaterialRequests: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        approvedAwaitingReceipt: snapshot(0, '2026-08-24T12:00:00.000Z'),
+      },
+      exceptions: {
+        awaitingFinance: snapshot(0, '2026-08-24T12:00:00.000Z'),
+        awaitingReceipt: snapshot(0, '2026-08-24T12:00:00.000Z'),
+      },
+      dataCoverage: [],
+    };
+  }
 });

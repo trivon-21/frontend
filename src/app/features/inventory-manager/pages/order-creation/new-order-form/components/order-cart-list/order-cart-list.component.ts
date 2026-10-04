@@ -13,8 +13,11 @@ import { OrderItem } from '../../../../../services/order-creation.service';
 })
 export class OrderCartListComponent {
   @Input() orderItems: OrderItem[] = [];
+  @Input() supplierName = '';
+  @Input() showCloseButton = true;
   @Output() itemUpdated = new EventEmitter<{index: number, newQty: number}>();
   @Output() itemRemoved = new EventEmitter<number>();
+  @Output() closeClicked = new EventEmitter<void>();
 
   selectedLineItemIndex: number | null = null;
 

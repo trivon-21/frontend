@@ -29,6 +29,8 @@ describe('InventoryManagerLayoutComponent presentation contract', () => {
         provideRouter([
           { path: 'inventory-manager', component: EmptyRouteComponent },
           { path: 'inventory-manager/inventory', component: EmptyRouteComponent },
+          { path: 'inventory-manager/product-wizard', component: EmptyRouteComponent },
+          { path: 'inventory-manager/product-wizard/:id', component: EmptyRouteComponent },
           { path: 'inventory-manager/asset-management', component: EmptyRouteComponent },
           { path: 'inventory-manager/material-requests', component: EmptyRouteComponent },
           { path: 'inventory-manager/dispatch-logistics', component: EmptyRouteComponent },
@@ -61,6 +63,23 @@ describe('InventoryManagerLayoutComponent presentation contract', () => {
       '/inventory-manager/procurement',
       '/inventory-manager/returns-rma',
     ]);
+  });
+
+  it('keeps Inventory highlighted while the product wizard is open', async () => {
+    const root = fixture.nativeElement as HTMLElement;
+    const inventoryLink = root.querySelector<HTMLAnchorElement>('a[href="/inventory-manager/inventory"]')!;
+
+    await router.navigateByUrl('/inventory-manager/product-wizard/507f1f77bcf86cd799439011');
+    fixture.detectChanges();
+
+    expect(inventoryLink.classList.contains('active')).toBeTrue();
+    expect(inventoryLink.getAttribute('aria-current')).toBe('page');
+
+    await router.navigateByUrl('/inventory-manager/procurement');
+    fixture.detectChanges();
+
+    expect(inventoryLink.classList.contains('active')).toBeFalse();
+    expect(inventoryLink.getAttribute('aria-current')).toBeNull();
   });
 
   it('connects the avatar to its menu and preserves logout', async () => {

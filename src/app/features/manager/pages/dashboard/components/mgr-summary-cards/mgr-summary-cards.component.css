@@ -1,0 +1,18 @@
+.approval-card-primary { position: relative; display: flex; width: 100%; color: inherit; text-decoration: none; }
+.approval-card-primary::after { position: absolute; inset: 0; content: ''; }
+.approval-card-primary:focus-visible { outline: none; }
+.approval-card-primary:focus-visible::after { border-radius: var(--card-radius); box-shadow: inset 0 0 0 2px var(--primary-main); }
+.approval-links.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.clickable-sub-stat { color: inherit; text-decoration: none; }
+.risk-text { color: var(--error); }
+

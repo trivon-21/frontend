@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { TaskService, TeamDetails, TeamDetailsApiPayload, TeamMember, TimeSlot } from '../../services/task.service';
 import { catchError, EMPTY, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-service-team-team-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PortalIconsModule],
   templateUrl: './service-team-team-details.component.html',
   styleUrl: './service-team-team-details.component.css'
 })
@@ -43,31 +44,8 @@ export class ServiceTeamTeamDetailsComponent implements OnInit {
           this.isLoading = false;
         }),
         catchError((error: unknown) => {
-          console.error('Failed to load team details, using fallback', error);
-          this.teamDetails = {
-            team: {
-              id: 'team-id-1',
-              teamName: 'Service Team B',
-              teamType: 'Service',
-              status: 'Available',
-              activeJobsCount: 3,
-              availableSlots: [
-                { date: new Date(Date.now() + 86400000).toISOString(), timeSlot: '9:00 AM - 11:00 AM' },
-                { date: new Date(Date.now() + 86400000).toISOString(), timeSlot: '11:00 AM - 1:00 PM' },
-                { date: new Date(Date.now() + 2 * 86400000).toISOString(), timeSlot: '9:00 AM - 11:00 AM' },
-                { date: new Date(Date.now() + 2 * 86400000).toISOString(), timeSlot: '1:00 PM - 3:00 PM' }
-              ],
-            },
-            teamLeader: {
-              id: 'lead-id-1',
-              name: 'Nuwan Jayewardene',
-              role: 'Team Leader'
-            },
-            teamMembers: [
-              { id: 'member-1', name: 'Dilshan Silva', role: 'Technician' },
-              { id: 'member-2', name: 'Amal Perera', role: 'Technician' }
-            ],
-          };
+          console.error('Failed to load team details:', error);
+          this.loadError = 'Failed to load team details.';
           this.isLoading = false;
           return EMPTY;
         })

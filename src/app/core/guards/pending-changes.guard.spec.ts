@@ -29,4 +29,16 @@ describe('pendingChangesGuard', () => {
 
     expect(result).toBeFalse();
   });
+
+  it('supports an async canDeactivate (e.g. a themed confirm dialog)', async () => {
+    const component: HasPendingChanges = {
+      canDeactivate: () => Promise.resolve(false),
+    };
+
+    const result = TestBed.runInInjectionContext(() =>
+      pendingChangesGuard(component, dummyRoute, dummyState, dummyState),
+    );
+
+    expect(await result).toBeFalse();
+  });
 });
