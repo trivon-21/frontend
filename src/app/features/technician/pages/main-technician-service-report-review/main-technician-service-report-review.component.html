@@ -173,7 +173,7 @@
       
       <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
         <span class="detail-label" style="font-size: 11px; margin-bottom: 0;">Technician Feedback Notes</span>
-        <textarea id="review-notes" placeholder="Add any comment or specific instructions..." [(ngModel)]="reviewNotes" style="width: 100%; min-height: 100px; box-sizing: border-box;"></textarea>
+        <textarea id="review-notes" maxlength="2000" placeholder="Add any comment or specific instructions..." [(ngModel)]="reviewNotes" style="width: 100%; min-height: 100px; box-sizing: border-box;"></textarea>
       </div>
 
       <div class="actions-footer" style="display: flex; justify-content: flex-end; margin-top: 20px;">

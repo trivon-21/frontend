@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ROLE_PORTAL_TEST_TOKENS } from './role-portal-test-tokens';
 
 @Component({
   standalone: true,
   template: `
-    <div class="inventory-portal-shell">
+    <div class="role-portal-shell" [attr.style]="tokens">
       <button type="button" class="im-btn im-btn--primary">Save</button>
       <a class="im-btn im-btn--primary" href="/inventory-manager">Create</a>
       <button type="button" class="im-btn im-btn--secondary" disabled>Disabled</button>
@@ -12,7 +13,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
     </div>
   `,
 })
-class InventoryManagerControlsTestHostComponent {}
+class InventoryManagerControlsTestHostComponent {
+  readonly tokens = ROLE_PORTAL_TEST_TOKENS;
+}
 
 describe('Inventory Manager controls presentation contract', () => {
   let fixture: ComponentFixture<InventoryManagerControlsTestHostComponent>;

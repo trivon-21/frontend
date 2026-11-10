@@ -1,9 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, Optional } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { TtlCacheService } from '../../../../core/services/ttl-cache.service';
 import { forkJoin } from 'rxjs';
 import { isLoanOverdue } from '../../services/inventory-domain';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { DatetimePickerComponent } from '../../components/datetime-picker/datetime-picker.component';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface ActiveLoan {
   _id?: string;
@@ -30,12 +37,10 @@ interface ReturnLog {
 
 type ReturnCondition = 'good' | 'damaged' | 'incomplete';
 
-import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
-
 @Component({
   selector: 'app-asset-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule, DatetimePickerComponent],
   templateUrl: './asset-management.component.html',
   styleUrls: ['./asset-management.component.css'],
 })
@@ -53,6 +58,7 @@ export class AssetManagementDashboardComponent implements OnInit {
   selectedToolId: string = '';
   selectedAssetTag: string = '';
   dueDate: string = '';
+  dueTime: string = '17:00';
   validationMessage = '';
   loading = true;
   loadError = '';
@@ -63,6 +69,29 @@ export class AssetManagementDashboardComponent implements OnInit {
   activeReturnLoan: ActiveLoan | null = null;
   returnCondition: ReturnCondition = 'good';
   returnNotes = '';
+  modalError = '';
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.showReturnModal && !this.isReturningActiveLoan) {
+      this.closeReturnModal();
+    }
+  }
+
+  get isReturningActiveLoan(): boolean {
+    return !!this.activeReturnLoan?._id && this.returningIds.has(this.activeReturnLoan._id);
+  }
+
+  get isNotesRequired(): boolean {
+    return this.returnCondition !== 'good';
+  }
+
+  get isConfirmDisabled(): boolean {
+    if (!this.activeReturnLoan?._id) return true;
+    if (this.isReturningActiveLoan) return true;
+    if (this.isNotesRequired && !this.returnNotes.trim()) return true;
+    return false;
+  }
 
   setActiveTab(tab: 'loans' | 'logs') {
     this.activeTab = tab;
@@ -90,21 +119,62 @@ export class AssetManagementDashboardComponent implements OnInit {
     );
   }
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private confirmService: ConfirmService,
+    @Optional() private route?: ActivatedRoute,
+    @Optional() private ttlCache?: TtlCacheService,
+    @Optional() private destroyRef?: DestroyRef,
+  ) {}
 
   ngOnInit() {
+    this.route?.queryParams.subscribe((params) => {
+      if (params['tab'] === 'logs') {
+        this.activeTab = 'logs';
+      }
+    });
     this.fetchData();
   }
 
-  fetchData() {
-    this.loading = true;
+  fetchData(options: { force?: boolean } = {}) {
+    if (!this.loans.length && !this.tools.length && !this.technicians.length) {
+      this.loading = true;
+    }
     this.loadError = '';
-    forkJoin({
-      technicians: this.apiService.get<any[]>('/inventory/technicians'),
-      tools: this.apiService.get<any[]>('/inventory/available-tools'),
-      loans: this.apiService.get<ActiveLoan[]>('/inventory/asset-loans'),
-      returnLogs: this.apiService.get<ReturnLog[]>('/inventory/asset-return-logs'),
-    }).subscribe({
+
+    const reqTechnicians$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:technicians', 30_000, () => this.apiService.get<any[]>('/inventory/technicians'))
+          : this.ttlCache.observe('inventory:technicians', 30_000, () => this.apiService.get<any[]>('/inventory/technicians')))
+      : this.apiService.get<any[]>('/inventory/technicians');
+
+    const reqTools$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:available-tools', 30_000, () => this.apiService.get<any[]>('/inventory/available-tools'))
+          : this.ttlCache.observe('inventory:available-tools', 30_000, () => this.apiService.get<any[]>('/inventory/available-tools')))
+      : this.apiService.get<any[]>('/inventory/available-tools');
+
+    const reqLoans$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:asset-loans', 30_000, () => this.apiService.get<ActiveLoan[]>('/inventory/asset-loans'))
+          : this.ttlCache.observe('inventory:asset-loans', 30_000, () => this.apiService.get<ActiveLoan[]>('/inventory/asset-loans')))
+      : this.apiService.get<ActiveLoan[]>('/inventory/asset-loans');
+
+    const reqLogs$ = this.ttlCache
+      ? (options.force
+          ? this.ttlCache.force('inventory:asset-return-logs', 30_000, () => this.apiService.get<ReturnLog[]>('/inventory/asset-return-logs'))
+          : this.ttlCache.observe('inventory:asset-return-logs', 30_000, () => this.apiService.get<ReturnLog[]>('/inventory/asset-return-logs')))
+      : this.apiService.get<ReturnLog[]>('/inventory/asset-return-logs');
+
+    const joined$ = forkJoin({
+      technicians: reqTechnicians$,
+      tools: reqTools$,
+      loans: reqLoans$,
+      returnLogs: reqLogs$,
+    });
+
+    const sub$ = this.destroyRef ? joined$.pipe(takeUntilDestroyed(this.destroyRef)) : joined$;
+    sub$.subscribe({
       next: ({ technicians, tools, loans, returnLogs }) => {
         this.technicians = technicians;
         this.tools = tools;
@@ -119,8 +189,13 @@ export class AssetManagementDashboardComponent implements OnInit {
     });
   }
 
-  fetchAvailableTools() {
-    this.apiService.get<any[]>('/inventory/available-tools').subscribe({
+  fetchAvailableTools(options: { force?: boolean } = {}) {
+    const fetch = () => this.apiService.get<any[]>('/inventory/available-tools');
+    const req$ = this.ttlCache
+      ? (options.force ? this.ttlCache.force('inventory:available-tools', 30_000, fetch) : this.ttlCache.observe('inventory:available-tools', 30_000, fetch))
+      : fetch();
+    const sub$ = this.destroyRef ? req$.pipe(takeUntilDestroyed(this.destroyRef)) : req$;
+    sub$.subscribe({
       next: (data) => this.tools = data,
       error: () => this.validationMessage = 'Available tools could not be refreshed.',
     });
@@ -134,26 +209,34 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.selectedAssetTag = '';
   }
 
-  fetchLoans() {
-    this.apiService.get<ActiveLoan[]>('/inventory/asset-loans').subscribe({
+  fetchLoans(options: { force?: boolean } = {}) {
+    const fetch = () => this.apiService.get<ActiveLoan[]>('/inventory/asset-loans');
+    const req$ = this.ttlCache
+      ? (options.force ? this.ttlCache.force('inventory:asset-loans', 30_000, fetch) : this.ttlCache.observe('inventory:asset-loans', 30_000, fetch))
+      : fetch();
+    const sub$ = this.destroyRef ? req$.pipe(takeUntilDestroyed(this.destroyRef)) : req$;
+    sub$.subscribe({
       next: (data) => this.loans = this.withLoanStatus(data),
       error: () => this.validationMessage = 'The loan list could not be refreshed.',
     });
   }
 
-  fetchReturnLogs() {
-    this.apiService
-      .get<ReturnLog[]>('/inventory/asset-return-logs')
-      .subscribe({
-        next: (data) => this.returnLogs = data,
-        error: () => this.validationMessage = 'Return logs could not be refreshed.',
-      });
+  fetchReturnLogs(options: { force?: boolean } = {}) {
+    const fetch = () => this.apiService.get<ReturnLog[]>('/inventory/asset-return-logs');
+    const req$ = this.ttlCache
+      ? (options.force ? this.ttlCache.force('inventory:asset-return-logs', 30_000, fetch) : this.ttlCache.observe('inventory:asset-return-logs', 30_000, fetch))
+      : fetch();
+    const sub$ = this.destroyRef ? req$.pipe(takeUntilDestroyed(this.destroyRef)) : req$;
+    sub$.subscribe({
+      next: (data) => this.returnLogs = data,
+      error: () => this.validationMessage = 'Return logs could not be refreshed.',
+    });
   }
 
 
   checkOut() {
     if (this.checkingOut) return;
-    if (!this.selectedTechnicianId || !this.selectedToolId || !this.selectedAssetTag || !this.dueDate) {
+    if (!this.selectedTechnicianId || !this.selectedToolId || !this.selectedAssetTag || !this.dueDate || !this.dueTime) {
       this.validationMessage = 'Please fill all fields before checking out.';
       setTimeout(() => this.validationMessage = '', 4000);
       return;
@@ -168,7 +251,7 @@ export class AssetManagementDashboardComponent implements OnInit {
       assetTag: this.selectedAssetTag,
       technicianId: technician._id.toString(),
       technicianName: technician.name,
-      dueDate: this.dueDate,
+      dueDate: `${this.dueDate}T${this.dueTime}:00`,
     };
 
     this.checkingOut = true;
@@ -176,12 +259,14 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.apiService.post('/inventory/asset-loans', loanData).subscribe({
       next: () => {
         this.checkingOut = false;
-        this.fetchLoans();
-        this.fetchAvailableTools();
+        this.ttlCache?.invalidate('inventory:');
+        this.fetchLoans({ force: true });
+        this.fetchAvailableTools({ force: true });
         this.selectedToolId = '';
         this.selectedAssetTag = '';
         this.selectedTechnicianId = '';
         this.dueDate = '';
+        this.dueTime = '17:00';
       },
       error: (err) => {
         this.checkingOut = false;
@@ -194,18 +279,42 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.activeReturnLoan = loan;
     this.returnCondition = this.returnConditions[loan._id!] || 'good';
     this.returnNotes = '';
+    this.modalError = '';
     this.showReturnModal = true;
   }
 
-  closeReturnModal(): void {
-    if (this.activeReturnLoan && this.returningIds.has(this.activeReturnLoan._id!)) return;
+  get isReturnModalDirty(): boolean {
+    return this.returnCondition !== 'good' || !!this.returnNotes.trim();
+  }
+
+  async closeReturnModal(): Promise<void> {
+    if (this.isReturningActiveLoan) return;
+    if (this.isReturnModalDirty && !(await confirmDiscard(this.confirmService, 'return details'))) {
+      return;
+    }
+    this.resetReturnModalState();
+  }
+
+  /** Resets the modal without confirming — used after a successful submit, where
+   *  there is nothing left to discard. */
+  private resetReturnModalState(): void {
     this.showReturnModal = false;
     this.activeReturnLoan = null;
     this.returnNotes = '';
+    this.modalError = '';
+  }
+
+  onConditionChange(): void {
+    this.modalError = '';
   }
 
   confirmReturn(): void {
     if (!this.activeReturnLoan?._id) return;
+    if (this.isNotesRequired && !this.returnNotes.trim()) {
+      this.modalError = 'Please provide notes detailing the damage or missing parts before confirming.';
+      return;
+    }
+    this.modalError = '';
     this.markReturned(this.activeReturnLoan._id, this.returnCondition, this.returnNotes);
   }
 
@@ -219,14 +328,19 @@ export class AssetManagementDashboardComponent implements OnInit {
     this.apiService.post(`/inventory/asset-loans/return/${id}`, payload).subscribe({
       next: () => {
         this.returningIds.delete(id);
-        this.closeReturnModal();
-        this.fetchLoans();
-        this.fetchReturnLogs();
-        this.fetchAvailableTools();
+        this.resetReturnModalState();
+        this.ttlCache?.invalidate('inventory:');
+        this.fetchLoans({ force: true });
+        this.fetchReturnLogs({ force: true });
+        this.fetchAvailableTools({ force: true });
       },
       error: (err) => {
         this.returningIds.delete(id);
-        this.validationMessage = err.error?.message || 'The tool could not be returned.';
+        const errMsg = err.error?.message || 'The tool could not be returned.';
+        if (this.showReturnModal) {
+          this.modalError = errMsg;
+        }
+        this.validationMessage = errMsg;
       },
     });
   }

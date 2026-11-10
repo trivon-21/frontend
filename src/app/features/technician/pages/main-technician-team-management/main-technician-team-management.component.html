@@ -6,7 +6,7 @@
       <div class="search-filter-section">
         <div class="search-bar">
           <span class="search-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <lucide-angular name="search" [size]="18"></lucide-angular>
           </span>
           <input
             type="text"
@@ -15,10 +15,10 @@
             (input)="onSearchInput($event)"
           >
         </div>
-        
+
         <div class="filters">
           <span class="filter-label">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <lucide-angular name="filter" [size]="16"></lucide-angular>
             Filters:
           </span>
           <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
@@ -32,7 +32,7 @@
 
       <div class="assignment-alert">
         <div class="alert-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <lucide-angular name="info" [size]="24"></lucide-angular>
         </div>
         <div class="alert-content">
           <h3>Pending Team Assignment</h3>
@@ -40,7 +40,8 @@
         </div>
       </div>
 
-      <div class="table-wrapper">
+      <!-- Desktop Table -->
+      <div class="table-wrapper desktop-table">
         <table>
           <thead>
             <tr>
@@ -63,7 +64,7 @@
             <tr *ngFor="let team of filteredTeams">
               <td style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
                 <div class="team-icon" [ngClass]="team.type.toLowerCase()" style="width: 32px; height: 32px; border-radius: 8px;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <lucide-angular name="users" [size]="16"></lucide-angular>
                 </div>
                 {{ team.name }}
               </td>
@@ -77,13 +78,55 @@
                 </span>
               </td>
               <td>
-                <button class="action-btn" (click)="selectTeam(team)" style="padding: 6px 12px; font-size: 12px;">
+                <button class="action-btn" (click)="selectTeam(team)">
                   Assign
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Card List -->
+      <div class="mobile-card-list">
+        <div class="loading-state-mobile" *ngIf="isLoading">
+          <p style="text-align: center; color: #8a9e96; padding: 24px 0;">Loading teams...</p>
+        </div>
+        <div class="empty-state-mobile" *ngIf="!isLoading && filteredTeams.length === 0">
+          <p style="text-align: center; color: #8a9e96; padding: 24px 0;">No teams found</p>
+        </div>
+        <div class="mobile-team-card" *ngFor="let team of filteredTeams">
+          <div class="mobile-card-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="team-icon" [ngClass]="team.type.toLowerCase()">
+                <lucide-angular name="users" [size]="16"></lucide-angular>
+              </div>
+              <div>
+                <div class="mobile-team-name">{{ team.name }}</div>
+                <div class="mobile-team-type">{{ team.type }} Team</div>
+              </div>
+            </div>
+            <span class="status-chip" [ngClass]="team.status.toLowerCase()">{{ team.status }}</span>
+          </div>
+          <div class="mobile-card-stats">
+            <div class="mobile-stat">
+              <span class="mobile-stat-label">Members</span>
+              <span class="mobile-stat-value">{{ team.membersCount }}</span>
+            </div>
+            <div class="mobile-stat">
+              <span class="mobile-stat-label">Active Jobs</span>
+              <span class="mobile-stat-value">{{ team.activeJobs }}</span>
+            </div>
+            <div class="mobile-stat">
+              <span class="mobile-stat-label">Available Slots</span>
+              <span class="mobile-stat-value">{{ team.availableSlots }}</span>
+            </div>
+          </div>
+          <button class="action-btn mobile-assign-btn" (click)="selectTeam(team)">
+            <lucide-angular name="plus" [size]="16"></lucide-angular>
+            Assign
+          </button>
+        </div>
       </div>
 
       <!-- View Team Modal -->
@@ -94,7 +137,9 @@
               <h2 style="font-size: 24px; margin: 0 0 4px 0;">{{ selectedTeam.name }}</h2>
               <p style="margin: 0; color: #64748b;">{{ selectedTeam.type }} Team</p>
             </div>
-            <button (click)="closeViewModal()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;">&times;</button>
+            <button (click)="closeViewModal()" class="modal-close-btn">
+              <lucide-angular name="x" [size]="20"></lucide-angular>
+            </button>
           </div>
 
           <div class="stats-overview" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px;">
@@ -118,7 +163,7 @@
               <div class="member-list" style="display: flex; flex-direction: column; gap: 16px;">
                 <div *ngFor="let member of selectedTeam.members" class="member-item" style="display: flex; align-items: center; gap: 12px;">
                   <div class="member-icon" style="color: #10b981;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <lucide-angular name="user" [size]="18"></lucide-angular>
                   </div>
                   <div class="member-info" style="display: flex; flex-direction: column;">
                     <span class="member-name" style="font-size: 15px; font-weight: 600;">{{ member.name }}</span>
@@ -159,10 +204,10 @@
             </div>
           </div>
 
-          <div class="modal-actions" style="display: flex; gap: 16px;">
+          <div class="modal-actions" style="display: flex; gap: 16px; margin-top: 32px;">
             <button class="cancel-btn" (click)="closeViewModal()" style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; font-weight: 600; flex: 1;">Close</button>
             <button class="assign-btn" (click)="closeViewModal(); openAssignModal()" style="flex: 2;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <lucide-angular name="plus" [size]="20"></lucide-angular>
               Assign New Job
             </button>
           </div>
@@ -178,9 +223,9 @@
           </div>
 
           <div class="pending-jobs-list">
-            <div 
-              *ngFor="let job of pendingJobs" 
-              class="pending-job-card" 
+            <div
+              *ngFor="let job of pendingJobs"
+              class="pending-job-card"
               [class.selected]="selectedPendingJobId === job.id"
               (click)="selectedPendingJobId = job.id"
             >
@@ -207,7 +252,7 @@
           <div class="modal-actions">
             <button class="cancel-btn" (click)="showAssignModal = false">Cancel</button>
             <button class="confirm-assign-btn" [disabled]="!selectedPendingJobId" (click)="assignSelectedJob()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <lucide-angular name="plus" [size]="18"></lucide-angular>
               Assign Team
             </button>
           </div>
@@ -217,13 +262,13 @@
 
     <!-- Success Toast -->
     <div class="toast-success" *ngIf="successMessage">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      <lucide-angular name="check-circle" [size]="20"></lucide-angular>
       {{ successMessage }}
     </div>
 
     <!-- Error Toast -->
     <div class="toast-error" *ngIf="error">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <lucide-angular name="alert-circle" [size]="20"></lucide-angular>
       {{ error }}
       <button class="toast-close" (click)="error = null" style="background:none;border:none;color:white;cursor:pointer;margin-left:8px;float:right;">&times;</button>
     </div>

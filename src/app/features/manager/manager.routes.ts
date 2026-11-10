@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
 import { ManagerLayoutComponent } from './components/layout/manager-layout/manager-layout.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { CustomersComponent } from './pages/customers/customers.component';
 import { ManagerDashboardComponent } from './pages/dashboard/manager-dashboard.component';
 import { OrdersComponent } from './pages/orders/orders.component';
 import { TicketsComponent } from './pages/tickets/tickets.component';
+import { InventoryListComponent } from '../inventory-manager/pages/inventory/inventory-list.component';
 
 export const MANAGER_ROUTES: Routes = [
   {
@@ -16,6 +18,12 @@ export const MANAGER_ROUTES: Routes = [
       { path: 'work-items', component: TicketsComponent },
       // Component alias preserves query parameters from legacy dashboard links and bookmarks.
       { path: 'tickets', component: TicketsComponent },
+      { path: 'customers', component: CustomersComponent },
+      {
+        path: 'inventory',
+        component: InventoryListComponent,
+        data: { readOnly: true },
+      },
       {
         path: 'analytics',
         redirectTo: 'analytics/period-performance',

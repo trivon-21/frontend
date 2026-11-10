@@ -65,7 +65,7 @@
 
   <div class="table-card" *ngIf="isLoading || error || historyItems.length === 0">
     <p *ngIf="isLoading">Loading service history...</p>
-    <p *ngIf="!isLoading && error">{{ error }}</p>
+    <p *ngIf="!isLoading && error" class="history-validation-message" role="alert">{{ error }}</p>
     <p *ngIf="!isLoading && !error && historyItems.length === 0">No service history found for this customer.</p>
   </div>
 

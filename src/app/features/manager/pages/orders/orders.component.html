@@ -14,20 +14,32 @@
   <!-- Summary tiles -->
   <div class="summary-row">
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.pending }}</span>
-      <span class="tile-label">Pending Approval</span>
+      <div class="tile-icon"><lucide-angular name="timer" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Pending Approval</span>
+        <span class="tile-value">{{ summary.pending }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ formatCurrency(summary.pendingValue) }}</span>
-      <span class="tile-label">Pending Value</span>
+      <div class="tile-icon"><lucide-angular name="clipboard-check" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Awaiting Finance</span>
+        <span class="tile-value">{{ summary.awaitingFinance }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.approved }}</span>
-      <span class="tile-label">Approved</span>
+      <div class="tile-icon"><lucide-angular name="circle-check-big" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Approved</span>
+        <span class="tile-value">{{ summary.approved }}</span>
+      </div>
     </div>
     <div class="summary-tile">
-      <span class="tile-value">{{ summary.rejected }}</span>
-      <span class="tile-label">Rejected</span>
+      <div class="tile-icon"><lucide-angular name="x" [size]="20"></lucide-angular></div>
+      <div class="tile-text">
+        <span class="tile-label">Rejected</span>
+        <span class="tile-value">{{ summary.rejected }}</span>
+      </div>
     </div>
   </div>
 
@@ -88,7 +100,7 @@
               <span class="pill status alx-table-status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
             </td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions mgr-action-group" *ngIf="o.status === 'pending-manager'">
+              <div class="row-actions mgr-action-group" *ngIf="o.status === 'pending-manager' && expandedId === o._id">
                 <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="approve(o)">Approve</button>
                 <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="reject(o)">Reject</button>
               </div>
@@ -143,7 +155,7 @@
             <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
             <td><span class="pill status alx-table-status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions mgr-action-group" *ngIf="authorization.status === 'pending'">
+              <div class="row-actions mgr-action-group" *ngIf="authorization.status === 'pending' && authorizationExpandedId === authorization._id">
                 <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
                 <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
               </div>

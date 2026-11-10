@@ -834,3 +834,14 @@
   font-size: 14px;
   margin: 0;
 }
+.schedule-action-error {
+  margin: 12px 0 0;
+  padding: 11px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}

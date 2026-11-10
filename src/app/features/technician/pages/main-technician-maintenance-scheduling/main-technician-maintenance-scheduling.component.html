@@ -242,7 +242,7 @@
               </td>
               <td class="date-input-cell">
                 <div class="date-picker-wrapper">
-                  <input type="date" [(ngModel)]="service.date" class="date-input" [id]="'date-service-' + i">
+                  <input type="date" [(ngModel)]="service.date" class="date-input" [id]="'date-service-' + i" required [min]="minimumServiceDate()" [max]="maximumServiceDate()">
                 </div>
               </td>
             </tr>
@@ -315,6 +315,7 @@
           {{ isSendingToCSA ? 'Sending...' : 'Send to CSA' }}
         </button>
       </div>
+      <p *ngIf="error && !isLocked()" class="schedule-action-error" role="alert">{{ error }}</p>
 
       <!-- Timestamps for locked schedules -->
       <div class="timestamps" *ngIf="isLocked()" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e2e8f0;">

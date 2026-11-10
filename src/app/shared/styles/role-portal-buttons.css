@@ -1,0 +1,161 @@
+/**
+ * Role Portal Buttons
+ *
+ * One canonical button system shared by the Inventory-Manager and Manager
+ * portals. Both `.im-btn` and `.mgr-btn` templates resolve to the same
+ * declarations here via combined selectors, so no template markup needed to
+ * change — only the two portals' formerly-duplicated CSS did. Tokens come
+ * from `role-portal-shell.css`'s `:host` block (--control-*, --surface-ghost*,
+ * --danger-hover) plus the app-wide --primary-*, --error and --text-* tokens.
+ */
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn) {
+  box-sizing: border-box;
+  display: inline-flex;
+  height: var(--control-height);
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--control-gap);
+  padding: var(--control-padding);
+  border: 1.5px solid transparent;
+  border-radius: var(--control-radius);
+  background: none;
+  box-shadow: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: var(--control-font-size);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--primary, .mgr-btn--primary) {
+  border-color: var(--primary-main);
+  background: var(--primary-main);
+  color: #fff;
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--primary, .mgr-btn--primary):hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--secondary, .mgr-btn--secondary) {
+  border-color: var(--control-border);
+  background: var(--background-card);
+  color: var(--text-secondary);
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--secondary, .mgr-btn--secondary):hover:not(:disabled) {
+  border-color: var(--primary-main);
+  color: var(--primary-main);
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--ghost, .mgr-btn--ghost) {
+  border-color: transparent;
+  background: var(--surface-ghost);
+  color: var(--text-secondary);
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--ghost, .mgr-btn--ghost):hover:not(:disabled) {
+  background: var(--surface-ghost-hover);
+  color: var(--text-primary);
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--danger, .mgr-btn--danger) {
+  border-color: var(--error);
+  background: var(--error);
+  color: #fff;
+}
+
+.role-portal-shell :is(.im-btn, .mgr-btn):is(.im-btn--danger, .mgr-btn--danger):hover:not(:disabled) {
+  border-color: var(--danger-hover);
+  background: var(--danger-hover);
+}
+
+/* Outrank the older shared dialog `.primary` compatibility selector. */
+.role-portal-shell .portal-dialog :is(.im-btn, .mgr-btn):is(.im-btn--primary, .mgr-btn--primary) {
+  border-color: var(--primary-main);
+  background: var(--primary-main);
+  color: #fff;
+}
+
+.role-portal-shell .portal-dialog :is(.im-btn, .mgr-btn):is(.im-btn--danger, .mgr-btn--danger) {
+  border-color: var(--error);
+  background: var(--error);
+  color: #fff;
+}
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn).im-btn--compact,
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn).mgr-btn--compact {
+  height: var(--control-compact-height);
+  min-height: var(--control-compact-height);
+  padding: var(--control-compact-padding);
+  font-size: var(--control-compact-font-size);
+}
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn):is(.im-btn--icon, .mgr-btn--icon, .im-btn--close, .mgr-btn--close) {
+  width: var(--control-compact-height);
+  min-width: var(--control-compact-height);
+  height: var(--control-compact-height);
+  min-height: var(--control-compact-height);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.role-portal-shell :is(button, a):is(.im-btn--close, .mgr-btn--close) {
+  border-color: transparent;
+  background: transparent;
+  color: var(--control-muted);
+  font-size: 22px;
+}
+
+.role-portal-shell :is(button, a):is(.im-btn--close, .mgr-btn--close):hover:not(:disabled) {
+  background: var(--surface-ghost);
+  color: var(--text-primary);
+}
+
+.role-portal-shell :is(button, a):is(.im-btn--full, .mgr-btn--full) {
+  width: 100%;
+}
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn):focus-visible {
+  outline: 3px solid var(--control-focus-ring);
+  outline-offset: 2px;
+}
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn):disabled,
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn)[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: var(--control-disabled-opacity);
+}
+
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn) lucide-angular,
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn) lucide-icon,
+.role-portal-shell :is(button, a):is(.im-btn, .mgr-btn) svg {
+  flex: 0 0 auto;
+}
+
+.role-portal-shell :is(.im-action-group, .mgr-action-group) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .role-portal-shell :is(.im-action-group, .mgr-action-group) {
+    width: 100%;
+  }
+
+  .role-portal-shell .im-action-group > .im-btn:not(.im-btn--icon, .im-btn--close, .im-btn--compact),
+  .role-portal-shell .mgr-action-group > .mgr-btn:not(.mgr-btn--compact, .mgr-btn--icon, .mgr-btn--close) {
+    width: 100%;
+  }
+}

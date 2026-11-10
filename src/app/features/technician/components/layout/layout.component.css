@@ -4,6 +4,15 @@
   width: 100%;
   overflow: hidden;
   background: #f3f4f2;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+}
+
+.layout-container *,
+.layout-container input,
+.layout-container button,
+.layout-container select,
+.layout-container textarea {
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
 }
 
 .main-content {
@@ -18,4 +27,4 @@
   padding: 32px;
   overflow-y: auto;
   background-color: #f3f4f2;
-}
+}

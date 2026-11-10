@@ -1,0 +1,92 @@
+<button
+  type="button"
+  class="dtp-trigger"
+  [class.dtp-trigger--open]="open"
+  [class.dtp-trigger--placeholder]="!date || !time"
+  (click)="toggle($event)"
+>
+  <lucide-angular name="calendar" [size]="15" class="dtp-trigger-icon"></lucide-angular>
+  <span class="dtp-trigger-text">{{ triggerLabel }}</span>
+  <lucide-angular name="chevron-down" [size]="13" class="dtp-trigger-chevron"></lucide-angular>
+</button>
+
+<div class="dtp-popover" *ngIf="open" (click)="stopPropagation($event)">
+  <div class="dtp-popover-body">
+    <div class="dtp-calendar">
+      <div class="dtp-cal-header">
+        <button type="button" class="dtp-nav-btn dtp-nav-btn--prev" (click)="prevMonth()" aria-label="Previous month">
+          <lucide-angular name="chevron-right" [size]="15"></lucide-angular>
+        </button>
+        <span class="dtp-cal-title">{{ monthLabel }}</span>
+        <button type="button" class="dtp-nav-btn" (click)="nextMonth()" aria-label="Next month">
+          <lucide-angular name="chevron-right" [size]="15"></lucide-angular>
+        </button>
+      </div>
+      <div class="dtp-weekdays">
+        <span *ngFor="let d of weekdays">{{ d }}</span>
+      </div>
+      <div class="dtp-days">
+        <button
+          type="button"
+          *ngFor="let day of calendarDays"
+          class="dtp-day"
+          [class.dtp-day--muted]="!day.inMonth"
+          [class.dtp-day--disabled]="day.disabled"
+          [class.dtp-day--selected]="day.iso === draftDate"
+          [class.dtp-day--today]="day.isToday"
+          [disabled]="day.disabled"
+          (click)="selectDay(day)"
+        >
+          {{ day.label }}
+        </button>
+      </div>
+    </div>
+
+    <div class="dtp-divider"></div>
+
+    <div class="dtp-time">
+      <span class="dtp-time-label">
+        <lucide-angular name="timer" [size]="13"></lucide-angular>
+        Time
+      </span>
+      <div class="dtp-wheels">
+        <div class="dtp-wheel-highlight" aria-hidden="true"></div>
+        <div #hourWheel class="dtp-wheel" (scroll)="onWheelScroll('hour')">
+          <div class="dtp-wheel-pad"></div>
+          <button
+            type="button"
+            *ngFor="let h of hourItems"
+            class="dtp-wheel-item"
+            [class.dtp-wheel-item--active]="h === draftHour"
+            (click)="pickHour(h)"
+          >
+            {{ pad(h) }}
+          </button>
+          <div class="dtp-wheel-pad"></div>
+        </div>
+        <span class="dtp-wheel-sep">:</span>
+        <div #minuteWheel class="dtp-wheel" (scroll)="onWheelScroll('minute')">
+          <div class="dtp-wheel-pad"></div>
+          <button
+            type="button"
+            *ngFor="let m of minuteItems"
+            class="dtp-wheel-item"
+            [class.dtp-wheel-item--active]="m === draftMinute"
+            (click)="pickMinute(m)"
+          >
+            {{ pad(m) }}
+          </button>
+          <div class="dtp-wheel-pad"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dtp-footer">
+    <span class="dtp-footer-summary">{{ summaryLabel }}</span>
+    <button type="button" class="dtp-confirm-btn" [disabled]="!draftDate" (click)="confirm()">
+      <lucide-angular name="check" [size]="14"></lucide-angular>
+      Confirm
+    </button>
+  </div>
+</div>

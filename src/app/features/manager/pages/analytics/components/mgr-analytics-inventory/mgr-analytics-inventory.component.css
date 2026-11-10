@@ -1,0 +1,115 @@
+section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl, 24px);
+}
+
+.signal-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.signal-grid article {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: var(--background-card);
+  font-size: 12px;
+}
+
+.signal-grid strong {
+  color: var(--text-primary);
+  font-size: 22px;
+}
+
+.signal-grid .danger strong {
+  color: var(--error);
+}
+
+.exception-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.exception-kpis div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  background: var(--background-page);
+}
+
+.exception-kpis span,
+.exception-kpis small {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.exception-kpis strong {
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.exception-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.exception-actions a,
+.exception-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.exception-actions a:hover {
+  border-color: var(--primary-main);
+}
+
+.exception-actions a:focus-visible {
+  outline: 2px solid #00843d;
+  outline-offset: 2px;
+}
+
+.exception-actions strong {
+  color: var(--text-primary);
+}
+
+@media (width <= 1100px) {
+  .signal-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 700px) {
+  .signal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .exception-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 440px) {
+  .signal-grid,
+  .exception-actions {
+    grid-template-columns: 1fr;
+  }
+}

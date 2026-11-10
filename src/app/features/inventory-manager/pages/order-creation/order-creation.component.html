@@ -27,7 +27,7 @@
     <div class="portal-state" *ngIf="loading" role="status" aria-live="polite">Loading orders…</div>
     <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
       <div><strong>Orders unavailable</strong><p>{{ loadError }}</p></div>
-      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()">Retry</button>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData({ force: true })">Retry</button>
     </div>
   </div>
 
@@ -61,6 +61,11 @@
               <span class="value">{{ item.suggestedQuantity || 1 }} {{ item.unit }}</span>
             </div>
           </div>
+          <div class="item-action">
+            <button type="button" class="btn-create-order im-btn im-btn--primary im-btn--compact" (click)="addSuggestedItem(item)" [attr.aria-label]="'Create order for ' + item.name">
+              Order
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +80,7 @@
         <span class="status-info">{{ draftOrders.length }} Drafts Found</span>
       </div>
       <div class="drafts-list">
-        <button type="button" class="draft-item" *ngFor="let draft of draftOrders" (click)="openDetail(draft)">
+        <div class="draft-item" *ngFor="let draft of draftOrders" (click)="openDetail(draft)" role="button" tabindex="0" [attr.aria-label]="'Open draft ' + draft.requestId">
           <div class="draft-main">
             <span class="draft-id">{{ draft.requestId }}</span>
             <span class="draft-vendor">{{ draft.supplierName }}</span>
@@ -84,7 +89,13 @@
             <span class="draft-price">{{ formatCurrency(draft.totalEstimate) }}</span>
             <span class="draft-date">{{ formatDate(draft.createdAt) }}</span>
           </div>
-        </button>
+          <div class="draft-actions" (click)="$event.stopPropagation()">
+            <button type="button" class="im-btn im-btn--secondary im-btn--compact" (click)="editDraft(draft)" [attr.aria-label]="'Edit draft ' + draft.requestId">Edit</button>
+            <button type="button" class="im-btn im-btn--primary im-btn--compact" (click)="submitDraft(draft, $event)" [disabled]="submittingDraftId === draft.requestId" [attr.aria-label]="'Submit draft ' + draft.requestId">
+              {{ submittingDraftId === draft.requestId ? 'Submitting…' : 'Submit' }}
+            </button>
+          </div>
+        </div>
         <div class="empty-mini-state" *ngIf="draftOrders.length === 0">
           <p>No drafts saved at the moment.</p>
         </div>
@@ -96,23 +107,26 @@
   <div class="tracking-section">
     <!-- Tabs -->
     <div class="tabs-nav" role="tablist" aria-label="Order status">
+      <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'all'" [class.active]="activeTab === 'all'" (click)="setActiveTab('all')">
+        All Orders <span class="tab-count" *ngIf="allOrders.length > 0">{{ allOrders.length }}</span>
+      </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending-manager'" [class.active]="activeTab === 'pending-manager'" (click)="setActiveTab('pending-manager')">
-        Awaiting Manager
+        Awaiting Manager <span class="tab-count" *ngIf="pendingManagerOrders.length > 0">{{ pendingManagerOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'pending-finance'" [class.active]="activeTab === 'pending-finance'" (click)="setActiveTab('pending-finance')">
-        Awaiting Finance
+        Awaiting Finance <span class="tab-count" *ngIf="pendingFinanceOrders.length > 0">{{ pendingFinanceOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'approved'" [class.active]="activeTab === 'approved'" (click)="setActiveTab('approved')">
-        Approved
+        Approved <span class="tab-count" *ngIf="approvedOrders.length > 0">{{ approvedOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'receiving'" [class.active]="activeTab === 'receiving'" (click)="setActiveTab('receiving')">
-        Ordered / Receiving
+        Ordered / Receiving <span class="tab-count" *ngIf="receivingOrders.length > 0">{{ receivingOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'received'" [class.active]="activeTab === 'received'" (click)="setActiveTab('received')">
-        Completed
+        Completed <span class="tab-count" *ngIf="receivedOrders.length > 0">{{ receivedOrders.length }}</span>
       </button>
       <button type="button" role="tab" class="tab-item" [attr.aria-selected]="activeTab === 'rejected'" [class.active]="activeTab === 'rejected'" (click)="setActiveTab('rejected')">
-        Rejected
+        Rejected <span class="tab-count" *ngIf="rejectedOrders.length > 0">{{ rejectedOrders.length }}</span>
       </button>
     </div>
 
@@ -120,7 +134,7 @@
     <div class="table-header">
       <div class="search-wrapper">
         <lucide-angular name="search" class="search-icon" [size]="18"></lucide-angular>
-        <input type="text" [(ngModel)]="searchQuery" aria-label="Search orders" placeholder="Search by Order ID, Supplier...">
+        <input type="text" [(ngModel)]="searchQuery" aria-label="Search orders" placeholder="Search by Order ID, Supplier, Status...">
       </div>
     </div>
 
@@ -133,6 +147,7 @@
             <th>SUPPLIER</th>
             <th>ITEMS</th>
             <th class="text-right">ESTIMATED TOTAL</th>
+            <th>STATUS</th>
             <th>DATE</th>
             <th class="actions-cell">ACTION</th>
           </tr>
@@ -143,9 +158,20 @@
             <td>{{ order.supplierName }}</td>
             <td>{{ order.items.length }} Items</td>
             <td class="total-cell num-cell">{{ formatCurrency(order.totalEstimate) }}</td>
+            <td class="status-cell">
+              <span class="status-badge" [ngClass]="order.status">{{ getStatusLabel(order.status) }}</span>
+            </td>
             <td class="date-cell">{{ formatDate(order.createdAt) }}</td>
-            <td class="actions-cell">
-              <button type="button" class="btn-action-view im-btn im-btn--secondary im-btn--compact" [attr.aria-label]="'View order ' + order.requestId">View</button>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <ng-container *ngIf="order.status === 'draft'">
+                <button type="button" class="btn-action-edit im-btn im-btn--secondary im-btn--compact" (click)="editDraft(order)" [attr.aria-label]="'Edit draft ' + order.requestId">Edit</button>
+                <button type="button" class="btn-action-submit im-btn im-btn--primary im-btn--compact" (click)="submitDraft(order, $event)" [disabled]="submittingDraftId === order.requestId" [attr.aria-label]="'Submit draft ' + order.requestId">
+                  {{ submittingDraftId === order.requestId ? '…' : 'Submit' }}
+                </button>
+              </ng-container>
+              <ng-container *ngIf="order.status !== 'draft'">
+                <button type="button" class="btn-action-view im-btn im-btn--secondary im-btn--compact" (click)="openDetail(order)" [attr.aria-label]="'View order ' + order.requestId">View</button>
+              </ng-container>
             </td>
           </tr>
         </tbody>
@@ -160,6 +186,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Order Form Modal -->
+  <div class="modal-overlay" *ngIf="showFormModal" (click)="onFormBackdrop($event)">
+    <div class="order-form-modal" role="dialog" aria-modal="true" aria-label="Purchase order request form" (click)="$event.stopPropagation()">
+      <app-new-order-form
+        [embedded]="true"
+        [embeddedOrderId]="formOrderId"
+        [prefill]="formPrefill"
+        (closed)="onOrderFormClosed()"
+        (saved)="onOrderFormSaved($event)">
+      </app-new-order-form>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
   <div class="modal-overlay" *ngIf="showDetailModal && selectedOrder" (click)="closeDetail()">
     <div class="modal-content detail-modal" role="dialog" aria-modal="true" aria-labelledby="order-detail-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -185,7 +226,7 @@
           </div>
           <div class="summary-box">
             <span class="label">Status</span>
-            <span class="value status-val" [class]="selectedOrder.status">
+            <span class="value status-val" [ngClass]="selectedOrder.status">
               {{ getStatusLabel(selectedOrder.status) }}
             </span>
           </div>
@@ -264,6 +305,11 @@
       </div>
 
       <div class="modal-footer">
+        <button type="button" class="im-btn im-btn--secondary" *ngIf="selectedOrder.status === 'draft'" (click)="editDraft(selectedOrder)">Edit Draft</button>
+        <button type="button" class="im-btn im-btn--primary" *ngIf="selectedOrder.status === 'draft'" (click)="submitDraft(selectedOrder)" [disabled]="submittingDraftId === selectedOrder.requestId">
+          {{ submittingDraftId === selectedOrder.requestId ? 'Submitting…' : 'Submit for Review' }}
+        </button>
+        <button type="button" class="im-btn im-btn--secondary" *ngIf="selectedOrder.status === 'rejected'" (click)="editDraft(selectedOrder)">Edit & Resubmit</button>
         <button type="button" class="btn-primary-close im-btn im-btn--primary" *ngIf="selectedOrder.status === 'approved'" (click)="issuePurchaseOrder(selectedOrder)" [disabled]="issuing">{{ issuing ? 'Issuing…' : 'Issue Purchase Order' }}</button>
         <button type="button" class="btn-primary-close im-btn im-btn--secondary" (click)="closeDetail()">Close</button>
       </div>

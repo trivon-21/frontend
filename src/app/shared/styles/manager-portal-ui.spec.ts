@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ROLE_PORTAL_TEST_TOKENS } from './role-portal-test-tokens';
 
 @Component({
   standalone: true,
   template: `
-    <div class="manager-portal-shell">
+    <div class="manager-portal-shell role-portal-shell" [attr.style]="tokens">
       <button type="button" class="mgr-btn mgr-btn--primary">Save</button>
       <a class="mgr-btn mgr-btn--primary" href="/manager">Open</a>
       <button type="button" class="mgr-btn mgr-btn--secondary" disabled>Disabled</button>
@@ -18,7 +19,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
     </div>
   `,
 })
-class ManagerPortalUiTestHostComponent {}
+class ManagerPortalUiTestHostComponent {
+  readonly tokens = ROLE_PORTAL_TEST_TOKENS;
+}
 
 describe('Manager portal UI presentation contract', () => {
   let fixture: ComponentFixture<ManagerPortalUiTestHostComponent>;
@@ -65,7 +68,7 @@ describe('Manager portal UI presentation contract', () => {
     expect(getComputedStyle(primary).outlineOffset).toBe('2px');
   });
 
-  it('does not apply Manager control styling in other portal shells', () => {
+  it('does not apply the shared control styling outside a role portal shell', () => {
     const root = fixture.nativeElement as HTMLElement;
     const manager = root.querySelector<HTMLButtonElement>('.manager-portal-shell .mgr-btn')!;
     const inventory = root.querySelector<HTMLButtonElement>('.inventory-portal-shell .mgr-btn')!;

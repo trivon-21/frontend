@@ -12,6 +12,9 @@ import {
   ReceiptAuthorization,
 } from '../../services/orders.service';
 import { purchaseStatusLabel } from '../../../inventory-manager/services/purchase-workflow';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { confirmDiscard } from '../../../../core/services/unsaved-changes';
 
 interface FilterChip {
   key: string;
@@ -28,14 +31,14 @@ interface DecisionTarget {
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PortalIconsModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent implements OnInit {
   @ViewChild('decisionCommentInput') decisionCommentInput?: ElementRef<HTMLTextAreaElement>;
   orders: PurchaseRequest[] = [];
-  summary: OrderSummary = { pending: 0, approved: 0, rejected: 0, pendingValue: 0 };
+  summary: OrderSummary = { pending: 0, awaitingFinance: 0, approved: 0, rejected: 0 };
   status = 'Syncing…';
   loading = false;
   updatingId: string | null = null;
@@ -51,6 +54,7 @@ export class OrdersComponent implements OnInit {
   decisionError = '';
   decisionPending = false;
   private decisionTrigger: HTMLElement | null = null;
+  private decisionInitialComment = '';
 
   filters: FilterChip[] = [
     { key: 'all', label: 'All' },
@@ -61,7 +65,12 @@ export class OrdersComponent implements OnInit {
   ];
   activeFilter = 'all';
 
-  constructor(private ordersService: OrdersService, private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private ordersService: OrdersService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private confirmService: ConfirmService,
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
@@ -93,6 +102,9 @@ export class OrdersComponent implements OnInit {
       next: (items) => {
         this.authorizations = items;
         this.authorizationLoading = false;
+        if (this.authorizationExpandedId === null && items.length > 0) {
+          this.authorizationExpandedId = items[0]._id;
+        }
       },
       error: () => {
         this.authorizationLoadError = 'Non-PO authorizations could not be loaded.';
@@ -110,6 +122,9 @@ export class OrdersComponent implements OnInit {
         this.summary = res.summary;
         this.status = res.status;
         this.loading = false;
+        if (this.expandedId === null && res.orders.length > 0) {
+          this.expandedId = res.orders[0]._id;
+        }
       },
       error: () => {
         this.loadError = 'Purchase approvals could not be loaded. Check your connection and try again.';
@@ -120,6 +135,7 @@ export class OrdersComponent implements OnInit {
   }
 
   setFilter(key: string): void {
+    this.expandedId = null;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { type: this.activeType, status: key },
@@ -168,6 +184,7 @@ export class OrdersComponent implements OnInit {
     this.decisionTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.decisionTarget = { kind, record, decision, reference };
     this.decisionComment = initialComment;
+    this.decisionInitialComment = initialComment;
     this.decisionError = '';
     setTimeout(() => this.decisionCommentInput?.nativeElement.focus());
   }
@@ -192,7 +209,7 @@ export class OrdersComponent implements OnInit {
         this.decisionPending = false;
         this.updatingId = null;
         const kind = target.kind;
-        this.closeDecision();
+        this.resetDecisionState();
         if (kind === 'purchase') this.load(); else this.loadAuthorizations();
       },
       error: (error: HttpErrorResponse) => {
@@ -205,9 +222,24 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  closeDecision(): void {
+  get isDecisionDirty(): boolean {
+    return this.decisionComment.trim() !== this.decisionInitialComment.trim();
+  }
+
+  async closeDecision(): Promise<void> {
     if (this.decisionPending) return;
+    if (this.isDecisionDirty && !(await confirmDiscard(this.confirmService, 'review comment'))) {
+      return;
+    }
+    this.resetDecisionState();
+  }
+
+  /** Resets the decision dialog without confirming — used after a successful
+   *  submit, where there is nothing left to discard. */
+  private resetDecisionState(): void {
     this.decisionTarget = null;
+    this.decisionComment = '';
+    this.decisionInitialComment = '';
     this.decisionError = '';
     const trigger = this.decisionTrigger;
     this.decisionTrigger = null;

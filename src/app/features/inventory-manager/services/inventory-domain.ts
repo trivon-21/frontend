@@ -50,9 +50,15 @@ export const INVENTORY_ITEM_FORMS: InventoryItemForm[] = ['Single', 'Kit', 'Bund
 export const INVENTORY_UNITS = ['units', 'kits', 'sets', 'meters', 'rolls', 'kg', 'cylinders', 'liters'];
 export const INVENTORY_PHASES: InventoryPhase[] = ['Single Phase', 'Three Phase', 'Not Applicable'];
 
+export interface InventoryRack {
+  rackTag: string;
+  bins: string[];
+}
+
 export interface InventoryLocationOption {
   warehouse: string;
-  placementAreas: string[];
+  warehouseLabel?: string;
+  racks: InventoryRack[];
 }
 
 export interface SupplierReference {
@@ -64,6 +70,7 @@ export interface InventoryItem {
   _id?: string;
   id?: string;
   name: string;
+  description?: string;
   sku: string;
   available: number;
   reserved: number;
@@ -106,6 +113,7 @@ export interface InventoryItem {
 
 export interface InventoryMasterDataInput {
   name: string;
+  description?: string;
   itemClass: InventoryItemClass;
   subcategory: string;
   brand: string;
@@ -133,6 +141,85 @@ export interface CreateInventoryCatalogItemInput extends InventoryMasterDataInpu
 }
 
 export type UpdateInventoryMasterDataInput = InventoryMasterDataInput;
+
+// Mirrors backend/src/modules/inventory-manager/services/stock-adjustment.service.js
+// ADJUSTMENT_REASONS and backend/src/models/StockMovement.js.
+export type StockAdjustmentMode = 'SET' | 'DELTA';
+export type StockAdjustmentReasonCode =
+  | 'OPENING_BALANCE'
+  | 'CYCLE_COUNT_VARIANCE'
+  | 'SHRINKAGE'
+  | 'DAMAGE'
+  | 'DATA_CORRECTION';
+
+export const STOCK_ADJUSTMENT_REASONS: Array<{
+  code: StockAdjustmentReasonCode;
+  label: string;
+  requiresNote: boolean;
+}> = [
+  { code: 'OPENING_BALANCE', label: 'Opening balance', requiresNote: false },
+  { code: 'CYCLE_COUNT_VARIANCE', label: 'Cycle-count variance', requiresNote: true },
+  { code: 'SHRINKAGE', label: 'Shrinkage', requiresNote: true },
+  { code: 'DAMAGE', label: 'Damage', requiresNote: true },
+  { code: 'DATA_CORRECTION', label: 'Data correction', requiresNote: true },
+];
+
+export interface StockAdjustmentInput {
+  mode: StockAdjustmentMode;
+  quantity: number;
+  reasonCode: StockAdjustmentReasonCode;
+  note?: string;
+  expectedAvailable: number;
+  adjustmentEventId?: string;
+}
+
+export type StockMovementType =
+  | 'OPENING' | 'ADJUSTMENT' | 'WRITE_OFF'
+  | 'RECEIPT' | 'RESERVE' | 'RELEASE' | 'ISSUE'
+  | 'RETURN_RESTOCK' | 'QUARANTINE_OUT' | 'QUARANTINE_DISPOSAL';
+
+export interface StockMovement {
+  _id: string;
+  movementId: string;
+  inventoryId: string;
+  sku: string;
+  itemName: string;
+  movementType: StockMovementType;
+  reasonCode: string;
+  availableDelta: number;
+  reservedDelta: number;
+  availableAfter: number;
+  reservedAfter: number;
+  sourceType: string;
+  sourceRefId?: string;
+  note?: string;
+  actorName?: string;
+  createdAt: string;
+}
+
+// Mirrors backend/src/utils/inventory-domain.js: storage is addressed as
+// warehouse ("A", shown as "Warehouse A") > rack ("R2") > bin code ("A201"),
+// where the bin code is the only part persisted alongside the warehouse.
+const RACKS_PER_WAREHOUSE = 5;
+const BINS_PER_RACK = 5;
+
+export function warehouseLabelFor(warehouse: string): string {
+  return warehouse ? `Warehouse ${warehouse}` : '';
+}
+
+export function rackTagFor(warehouse: string, binCode: string): string {
+  const match = binCode?.match(/^([A-Za-z])(\d)(\d{2})$/);
+  if (!warehouse || !match || match[1] !== warehouse) return '';
+  const rackNumber = Number(match[2]);
+  const binNumber = Number(match[3]);
+  if (!rackNumber || rackNumber > RACKS_PER_WAREHOUSE) return '';
+  if (!binNumber || binNumber > BINS_PER_RACK) return '';
+  return `R${rackNumber}`;
+}
+
+export function formatStorageLocation(warehouse: string, binCode: string): string {
+  return [warehouseLabelFor(warehouse), rackTagFor(warehouse, binCode), binCode].filter(Boolean).join(', ');
+}
 
 export function isValidSubcategory(itemClass: InventoryItemClass, subcategory: string): boolean {
   return (INVENTORY_SUBCATEGORIES[itemClass] || []).includes(subcategory);

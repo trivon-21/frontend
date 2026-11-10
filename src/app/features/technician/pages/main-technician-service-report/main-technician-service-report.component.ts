@@ -78,7 +78,10 @@ export class MainTechnicianServiceReportsComponent implements OnInit {
 
   private mapApiServiceReport(item: RawServiceReport): ServiceReportTicket {
     const ticketId = String(item.serviceReportId || item.ticketId || item._id || '');
-    const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
+    // SREP-xxxx IDs are already formatted — only prepend # for plain numeric/ObjectId fallbacks
+    const normalizedId = ticketId.startsWith('SREP-') || ticketId.startsWith('REP-')
+      ? ticketId
+      : (ticketId.startsWith('#') ? ticketId : `#${ticketId}`);
 
     const rawStatus = String(item.status || item.finalStatus || 'Pending').trim().toLowerCase();
     const normalizedStatus: ServiceReportTicket['status'] = rawStatus === 'approved'
