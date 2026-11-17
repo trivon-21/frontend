@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { SystemConfigService } from '../../services/system-config.service';
 import { MaintenanceService } from '../../../../core/services/maintenance.service';
 import { SystemInfoService } from '../../../../core/services/system-info.service';
@@ -24,14 +24,13 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
   selector: 'app-system-config',
   standalone: true,
   imports: [
-    CommonModule,
     BusinessRulesFormComponent,
     FeatureFlagsFormComponent,
     MaintenanceFormComponent,
     SystemInfoFormComponent,
     BankDetailsFormComponent,
-    PortalIconsModule,
-  ],
+    PortalIconsModule
+],
   template: `
     <div class="system-config-container">
       <div class="page-header">
@@ -43,88 +42,102 @@ type Tab = 'business-rules' | 'feature-flags' | 'maintenance' | 'system-info' | 
       <div class="config-content">
         <!-- Tabs Navigation -->
         <div class="tabs-navigation">
-          <button
-            *ngFor="let tab of tabs"
-            [class.active]="activeTab === tab.id"
-            (click)="switchTab(tab.id)"
-            class="tab-button"
-          >
-            {{ tab.label }}
-          </button>
+          @for (tab of tabs; track tab) {
+            <button
+              [class.active]="activeTab === tab.id"
+              (click)="switchTab(tab.id)"
+              class="tab-button"
+              >
+              {{ tab.label }}
+            </button>
+          }
         </div>
 
         <!-- Error Message -->
-        <div *ngIf="error" class="alert-banner">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
-            <span>{{ error }}</span>
+        @if (error) {
+          <div class="alert-banner">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
+              <span>{{ error }}</span>
+            </div>
+            <button (click)="error = null" class="close-btn" style="display: flex; align-items: center;">
+              <lucide-angular name="x" [size]="16"></lucide-angular>
+            </button>
           </div>
-          <button (click)="error = null" class="close-btn" style="display: flex; align-items: center;">
-            <lucide-angular name="x" [size]="16"></lucide-angular>
-          </button>
-        </div>
+        }
 
         <!-- Loading State -->
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Fetching platform settings...</p>
-        </div>
+        @if (loading) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Fetching platform settings...</p>
+          </div>
+        }
 
         <!-- Tabs Content -->
-        <div *ngIf="!loading" class="tabs-content">
-          <!-- Business Rules Tab -->
-          <section *ngIf="activeTab === 'business-rules'" class="tab-section">
-            <app-business-rules-form
-              [config]="config"
-              [isSaving]="isSaving['business-rules']"
-              (save)="saveBusinessRules($event)"
-              (error)="handleError($event)"
-            ></app-business-rules-form>
-          </section>
-
-          <!-- Feature Flags Tab -->
-          <section *ngIf="activeTab === 'feature-flags'" class="tab-section">
-            <app-feature-flags-form
-              [config]="config"
-              [isSaving]="isSaving['feature-flags']"
-              (save)="saveFeatureFlags($event)"
-              (error)="handleError($event)"
-            ></app-feature-flags-form>
-          </section>
-
-          <!-- Maintenance Tab -->
-          <section *ngIf="activeTab === 'maintenance'" class="tab-section">
-            <app-maintenance-form
-              [config]="config"
-              [isSaving]="isSaving['maintenance']"
-              (save)="saveMaintenanceMode($event)"
-              (error)="handleError($event)"
-            ></app-maintenance-form>
-          </section>
-
-          <!-- System Info Tab -->
-          <section *ngIf="activeTab === 'system-info'" class="tab-section">
-            <app-system-info-form
-              [config]="config"
-              [isSaving]="isSaving['system-info']"
-              (save)="saveSystemInfo($event)"
-              (error)="handleError($event)"
-            ></app-system-info-form>
-          </section>
-
-          <!-- Bank Details Tab -->
-          <section *ngIf="activeTab === 'bank-details'" class="tab-section">
-            <app-bank-details-form
-              [config]="config"
-              [isSaving]="isSaving['bank-details']"
-              (save)="saveBankDetails($event)"
-              (error)="handleError($event)"
-            ></app-bank-details-form>
-          </section>
-        </div>
+        @if (!loading) {
+          <div class="tabs-content">
+            <!-- Business Rules Tab -->
+            @if (activeTab === 'business-rules') {
+              <section class="tab-section">
+                <app-business-rules-form
+                  [config]="config"
+                  [isSaving]="isSaving['business-rules']"
+                  (save)="saveBusinessRules($event)"
+                  (error)="handleError($event)"
+                ></app-business-rules-form>
+              </section>
+            }
+            <!-- Feature Flags Tab -->
+            @if (activeTab === 'feature-flags') {
+              <section class="tab-section">
+                <app-feature-flags-form
+                  [config]="config"
+                  [isSaving]="isSaving['feature-flags']"
+                  (save)="saveFeatureFlags($event)"
+                  (error)="handleError($event)"
+                ></app-feature-flags-form>
+              </section>
+            }
+            <!-- Maintenance Tab -->
+            @if (activeTab === 'maintenance') {
+              <section class="tab-section">
+                <app-maintenance-form
+                  [config]="config"
+                  [isSaving]="isSaving['maintenance']"
+                  (save)="saveMaintenanceMode($event)"
+                  (error)="handleError($event)"
+                ></app-maintenance-form>
+              </section>
+            }
+            <!-- System Info Tab -->
+            @if (activeTab === 'system-info') {
+              <section class="tab-section">
+                <app-system-info-form
+                  [config]="config"
+                  [isSaving]="isSaving['system-info']"
+                  (save)="saveSystemInfo($event)"
+                  (error)="handleError($event)"
+                ></app-system-info-form>
+              </section>
+            }
+            <!-- Bank Details Tab -->
+            @if (activeTab === 'bank-details') {
+              <section class="tab-section">
+                <app-bank-details-form
+                  [config]="config"
+                  [isSaving]="isSaving['bank-details']"
+                  (save)="saveBankDetails($event)"
+                  (error)="handleError($event)"
+                ></app-bank-details-form>
+              </section>
+            }
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .system-config-container {

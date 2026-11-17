@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InspectionTicketService } from '../../services/inspection-ticket.service';
@@ -10,6 +10,7 @@ import { ConfirmService } from '../../../../services/confirm.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './inspection-payment-verification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-payment-verification.component.css']
 })
 export class InspectionPaymentVerificationComponent implements OnInit {

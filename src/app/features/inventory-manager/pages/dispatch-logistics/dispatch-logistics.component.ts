@@ -1,6 +1,11 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { ApiService } from '../../../../core/services/api.service';
 
 interface DispatchItem {
@@ -31,13 +36,27 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-dispatch-logistics',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule, DatePipe, HlmButton, HlmInput, HlmBadge, ...HlmDialogImports],
   templateUrl: './dispatch-logistics.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dispatch-logistics.component.css'],
 })
 export class DispatchLogisticsDashboardComponent implements OnInit {
   activeTab: 'to-pack' | 'ready' | 'in-transit' | 'completed' = 'to-pack';
   searchQuery: string = '';
+  readonly statusTabs = [
+    { value: 'to-pack', label: 'To pack', icon: 'box' },
+    { value: 'ready', label: 'Ready for pickup', icon: 'clipboard-check' },
+    { value: 'in-transit', label: 'In transit', icon: 'truck' },
+    { value: 'completed', label: 'Completed', icon: 'circle-check-big' },
+  ] as const;
+
+  countForStatus(status: DispatchOrder['status']): number {
+    return ({ 'to-pack': this.ordersToPack, ready: this.ordersReady, 'in-transit': this.ordersInTransit, completed: this.ordersCompleted })[status].length;
+  }
+
+  onPackDialogClosed(): void { if (this.showPackModal) this.closeModals(); }
+  onAssignDialogClosed(): void { if (this.showAssignModal) this.closeModals(); }
   showPackModal = false;
   showAssignModal = false;
   isViewingDetailsFromAssign = false;

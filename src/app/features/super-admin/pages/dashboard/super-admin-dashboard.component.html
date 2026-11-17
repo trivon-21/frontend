@@ -5,160 +5,155 @@
   </header>
 
   <!-- State Boxes -->
-  <div *ngIf="loading" class="state-box">
-    <div class="spinner"></div>
-    <p>Synchronizing platform data...</p>
-  </div>
-  
-  <div *ngIf="!loading && error" class="state-box state-error">
-    <lucide-angular name="circle-alert" [size]="24" strokeWidth="2"></lucide-angular>
-    <p>{{ error }}</p>
-  </div>
+  @if (loading) {
+    <div class="state-box">
+      <div class="spinner"></div>
+      <p>Synchronizing platform data...</p>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="state-box state-error">
+      <lucide-angular name="circle-alert" [size]="24" strokeWidth="2"></lucide-angular>
+      <p>{{ error }}</p>
+    </div>
+  }
 
   <!-- Dashboard Overview -->
-  <div class="dashboard-overview" *ngIf="!loading && data">
-    
-    <!-- User Metrics -->
-    <section class="overview-section">
-      <h2 class="section-title">Identity & Access</h2>
-      <div class="metrics-grid">
-        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View all users">
-          <div class="metric-icon blue">
-            <lucide-angular name="users" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Total Users</span>
-            <strong class="metric-value">{{ data.users.total }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View active users">
-          <div class="metric-icon">
-            <lucide-angular name="user-check" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Active Users</span>
-            <strong class="metric-value">{{ data.users.active }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'deactivated' }" title="View deactivated users">
-          <div class="metric-icon red">
-            <lucide-angular name="user-x" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Deactivated</span>
-            <strong class="metric-value">{{ data.users.deactivated }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'reactivation' }" title="View pending reactivation requests">
-          <div class="metric-icon orange">
-            <lucide-angular name="triangle-alert" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Pending Reactivations</span>
-            <strong class="metric-value">{{ data.users.pendingReactivationRequests }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Operational Metrics -->
-    <section class="overview-section">
-      <h2 class="section-title">Core Operations</h2>
-      <div class="metrics-grid">
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders' }" title="View all customer orders">
-          <div class="metric-icon blue">
-            <lucide-angular name="package" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Total Orders</span>
-            <strong class="metric-value">{{ data.operations.totalOrders }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders', status: 'Pending' }" title="View pending orders">
-          <div class="metric-icon orange">
-            <lucide-angular name="clock" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Pending Orders</span>
-            <strong class="metric-value">{{ data.operations.pendingOrders }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries' }" title="View all inquiries">
-          <div class="metric-icon info">
-            <lucide-angular name="message-circle" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Total Inquiries</span>
-            <strong class="metric-value">{{ data.operations.totalInquiries }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries', status: 'Ongoing' }" title="View open inquiries">
-          <div class="metric-icon red">
-            <lucide-angular name="shield" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Open Inquiries</span>
-            <strong class="metric-value">{{ data.operations.openInquiries }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service' }" title="View all service requests">
-          <div class="metric-icon blue">
-            <lucide-angular name="wrench" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Service Requests</span>
-            <strong class="metric-value">{{ data.operations.totalServiceRequests }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-
-        <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service', status: 'Pending' }" title="View open service requests">
-          <div class="metric-icon orange">
-            <lucide-angular name="triangle-alert" [size]="24" strokeWidth="2"></lucide-angular>
-          </div>
-          <div class="metric-content">
-            <span class="metric-label">Open Service Requests</span>
-            <strong class="metric-value">{{ data.operations.openServiceRequests }}</strong>
-          </div>
-          <div class="card-arrow">
-            <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
-          </div>
-        </a>
-      </div>
-    </section>
-
-  </div>
+  @if (!loading && data) {
+    <div class="dashboard-overview">
+      <!-- User Metrics -->
+      <section class="overview-section">
+        <h2 class="section-title">Identity & Access</h2>
+        <div class="metrics-grid">
+          <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View all users">
+            <div class="metric-icon blue">
+              <lucide-angular name="users" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Total Users</span>
+              <strong class="metric-value">{{ data.users.total }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'active' }" title="View active users">
+            <div class="metric-icon">
+              <lucide-angular name="user-check" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Active Users</span>
+              <strong class="metric-value">{{ data.users.active }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'deactivated' }" title="View deactivated users">
+            <div class="metric-icon red">
+              <lucide-angular name="user-x" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Deactivated</span>
+              <strong class="metric-value">{{ data.users.deactivated }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/users" [queryParams]="{ tab: 'reactivation' }" title="View pending reactivation requests">
+            <div class="metric-icon orange">
+              <lucide-angular name="triangle-alert" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Pending Reactivations</span>
+              <strong class="metric-value">{{ data.users.pendingReactivationRequests }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+        </div>
+      </section>
+      <!-- Operational Metrics -->
+      <section class="overview-section">
+        <h2 class="section-title">Core Operations</h2>
+        <div class="metrics-grid">
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders' }" title="View all customer orders">
+            <div class="metric-icon blue">
+              <lucide-angular name="package" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Total Orders</span>
+              <strong class="metric-value">{{ data.operations.totalOrders }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'orders', status: 'Pending' }" title="View pending orders">
+            <div class="metric-icon orange">
+              <lucide-angular name="clock" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Pending Orders</span>
+              <strong class="metric-value">{{ data.operations.pendingOrders }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries' }" title="View all inquiries">
+            <div class="metric-icon info">
+              <lucide-angular name="message-circle" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Total Inquiries</span>
+              <strong class="metric-value">{{ data.operations.totalInquiries }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'inquiries', status: 'Ongoing' }" title="View open inquiries">
+            <div class="metric-icon red">
+              <lucide-angular name="shield" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Open Inquiries</span>
+              <strong class="metric-value">{{ data.operations.openInquiries }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service' }" title="View all service requests">
+            <div class="metric-icon blue">
+              <lucide-angular name="wrench" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Service Requests</span>
+              <strong class="metric-value">{{ data.operations.totalServiceRequests }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+          <a class="metric-card clickable" routerLink="/super-admin/core-operations" [queryParams]="{ tab: 'service', status: 'Pending' }" title="View open service requests">
+            <div class="metric-icon orange">
+              <lucide-angular name="triangle-alert" [size]="24" strokeWidth="2"></lucide-angular>
+            </div>
+            <div class="metric-content">
+              <span class="metric-label">Open Service Requests</span>
+              <strong class="metric-value">{{ data.operations.openServiceRequests }}</strong>
+            </div>
+            <div class="card-arrow">
+              <lucide-angular name="chevron-right" [size]="16" strokeWidth="2"></lucide-angular>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+  }
 </div>

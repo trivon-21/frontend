@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NgFor, NgIf, DecimalPipe, NgClass } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
@@ -13,7 +13,8 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
   selector: 'app-catalog',
   templateUrl: './catalog.html',
   styleUrl: './catalog.css',
-  imports: [NgFor, NgIf, DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent, PortalIconsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [DecimalPipe, NgClass, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent, PortalIconsModule],
 })
 export class Catalog implements OnInit {
   products: any[] = [];

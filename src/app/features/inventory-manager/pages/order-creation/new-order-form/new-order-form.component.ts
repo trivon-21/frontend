@@ -1,5 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
@@ -17,7 +17,6 @@ import { HasPendingChanges } from '../../../../../core/guards/pending-changes.gu
   selector: 'app-new-order-form',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     PortalIconsModule,
@@ -25,8 +24,9 @@ import { HasPendingChanges } from '../../../../../core/guards/pending-changes.gu
     OrderItemSearchComponent,
     OrderCartListComponent,
     OrderSuggestedGridComponent
-  ],
+],
   templateUrl: './new-order-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./new-order-form.component.css']
 })
 export class NewOrderFormComponent implements OnInit, HasPendingChanges {

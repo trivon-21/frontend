@@ -4,16 +4,20 @@
     <h1>Stock Reservations</h1>
   </div>
 
-  <div class="portal-state" role="status" aria-live="polite" *ngIf="loading">
-    Loading stock reservations…
-  </div>
-  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
-    <div>
-      <strong>Reservations unavailable</strong>
-      <p>{{ loadError }}</p>
+  @if (loading) {
+    <div class="portal-state" role="status" aria-live="polite">
+      Loading stock reservations…
     </div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="fetchRequests()">Retry</button>
-  </div>
+  }
+  @if (!loading && loadError) {
+    <div class="portal-state portal-state--error" role="alert">
+      <div>
+        <strong>Reservations unavailable</strong>
+        <p>{{ loadError }}</p>
+      </div>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="fetchRequests()">Retry</button>
+    </div>
+  }
 
   <!-- Tabs Navigation -->
   <div class="tabs-nav" role="tablist" aria-label="Stock reservation status">
@@ -26,9 +30,11 @@
       [attr.aria-selected]="activeTab === 'pending'"
       [class.active]="activeTab === 'pending'"
       (click)="setActiveTab('pending')"
-    >
+      >
       Pending Requests
-      <span class="badge" *ngIf="pendingRequests.length > 0">{{ pendingRequests.length }}</span>
+      @if (pendingRequests.length > 0) {
+        <span class="badge">{{ pendingRequests.length }}</span>
+      }
     </button>
     <button
       type="button"
@@ -39,9 +45,11 @@
       [attr.aria-selected]="activeTab === 'reserved'"
       [class.active]="activeTab === 'reserved'"
       (click)="setActiveTab('reserved')"
-    >
+      >
       Reserved/Kitted
-      <span class="badge" *ngIf="reservedRequests.length > 0">{{ reservedRequests.length }}</span>
+      @if (reservedRequests.length > 0) {
+        <span class="badge">{{ reservedRequests.length }}</span>
+      }
     </button>
     <button
       type="button"
@@ -52,9 +60,11 @@
       [attr.aria-selected]="activeTab === 'completed'"
       [class.active]="activeTab === 'completed'"
       (click)="setActiveTab('completed')"
-    >
+      >
       Handed Over
-      <span class="badge" *ngIf="completedRequests.length > 0">{{ completedRequests.length }}</span>
+      @if (completedRequests.length > 0) {
+        <span class="badge">{{ completedRequests.length }}</span>
+      }
     </button>
   </div>
 
@@ -73,7 +83,7 @@
             ? 'Search by Request ID, Requester, or Date'
             : 'Search by Request ID or Requester Name'
         "
-      />
+        />
     </div>
     <div class="filters">
       <div class="filter-group">
@@ -82,7 +92,7 @@
           id="reservation-sort"
           class="filter-select"
           (change)="toggleSort($any($event.target).value)"
-        >
+          >
           <option value="name">Name ({{ sortField === 'name' ? sortDirection : 'asc' }})</option>
           <option value="time">Time ({{ sortField === 'time' ? sortDirection : 'asc' }})</option>
         </select>
@@ -91,191 +101,221 @@
   </div>
 
   <!-- Table View -->
-  <div
-    id="reservation-panel"
-    class="table-container alx-table-container glass-panel"
-    role="tabpanel"
-    aria-label="Material reservation requests"
-    tabindex="0"
-    [attr.aria-labelledby]="'reservation-' + activeTab + '-tab'"
-    *ngIf="!loading && !loadError"
-  >
-    <table class="alx-table alx-table--wide">
-      <thead>
-        <tr>
-          <th>Request ID</th>
-          <th>REQUESTER NAME</th>
-          <th>LOCATION</th>
-          <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
-          <th class="actions-cell">ACTION</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let req of currentRequests" [class.selected-row]="selectedRequestId === req.id">
-          <td class="sku-cell">{{ req.id }}</td>
-          <td>{{ req.requester }}</td>
-          <td>{{ req.location }}</td>
-          <td class="date-cell" *ngIf="activeTab === 'completed'">{{ req.completedAt }}</td>
-          <td class="actions-cell">
-            <button type="button" class="btn-view im-btn im-btn--secondary im-btn--compact" (click)="openModal(req.id)">
-              <lucide-angular name="eye" [size]="14"></lucide-angular>
-              View Request
-            </button>
-          </td>
-        </tr>
-
-        <!-- Empty State -->
-        <tr *ngIf="currentRequests.length === 0">
-          <td [attr.colspan]="activeTab === 'completed' ? 5 : 4" class="text-center empty-cell">
-            No requests found in this tab.
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (!loading && !loadError) {
+    <div
+      id="reservation-panel"
+      class="table-container alx-table-container glass-panel"
+      role="tabpanel"
+      aria-label="Material reservation requests"
+      tabindex="0"
+      [attr.aria-labelledby]="'reservation-' + activeTab + '-tab'"
+      >
+      <table class="alx-table alx-table--wide">
+        <thead>
+          <tr>
+            <th>Request ID</th>
+            <th>REQUESTER NAME</th>
+            <th>LOCATION</th>
+            @if (activeTab === 'completed') {
+              <th>COMPLETED DATE</th>
+            }
+            <th class="actions-cell">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (req of currentRequests; track req) {
+            <tr [class.selected-row]="selectedRequestId === req.id">
+              <td class="sku-cell">{{ req.id }}</td>
+              <td>{{ req.requester }}</td>
+              <td>{{ req.location }}</td>
+              @if (activeTab === 'completed') {
+                <td class="date-cell">{{ req.completedAt }}</td>
+              }
+              <td class="actions-cell">
+                <button type="button" class="btn-view im-btn im-btn--secondary im-btn--compact" (click)="openModal(req.id)">
+                  <lucide-angular name="eye" [size]="14"></lucide-angular>
+                  View Request
+                </button>
+              </td>
+            </tr>
+          }
+          <!-- Empty State -->
+          @if (currentRequests.length === 0) {
+            <tr>
+              <td [attr.colspan]="activeTab === 'completed' ? 5 : 4" class="text-center empty-cell">
+                No requests found in this tab.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <!-- View Request Modal -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="onBackdrop($event)">
-    <div
-      class="modal-content pack-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reservation-dialog-title"
-      aria-describedby="reservation-dialog-context"
-    >
-      <div class="modal-header">
-        <div>
-          <h2 id="reservation-dialog-title">Request ID : {{ selectedRequest?.id }}</h2>
-          <span id="reservation-dialog-context" class="order-type"
-            >REQUESTER : {{ selectedRequest?.requester }}</span
-          >
-        </div>
-        <button
-          type="button"
-          class="btn-close im-btn im-btn--close"
-          aria-label="Close reservation dialog"
-          (click)="closeModal()"
-          [disabled]="saving"
+  @if (showModal) {
+    <div class="modal-overlay" (click)="onBackdrop($event)">
+      <div
+        class="modal-content pack-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reservation-dialog-title"
+        aria-describedby="reservation-dialog-context"
         >
-          <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="items-verification-full alx-table-container alx-table-container--embedded" role="region" aria-label="Material request line items" tabindex="0">
-          <div class="section-header">
-            <h3>MATERIALS LIST</h3>
-            <span class="items-count">{{ selectedRequest?.items?.length || 0 }} Items</span>
-          </div>
-
-          <table class="verification-table alx-table alx-table--medium">
-            <thead>
-              <tr>
-                <th>ITEM NAME</th>
-                <th>SKU</th>
-                <th>QTY</th>
-                <th>AVAILABLE</th>
-                <th class="text-center" *ngIf="activeTab === 'pending'">RESERVE CONFIRMATION</th>
-                <th class="text-center" *ngIf="activeTab !== 'pending'">RESERVATION STATUS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of selectedRequest?.items">
-                <td class="item-name name-cell">{{ item.name }}</td>
-                <td class="item-sku sku-cell">{{ item.sku }}</td>
-                <td class="item-qty num-cell"><span class="qty-symbol">×</span>{{ item.qty }}</td>
-                <td class="item-qty num-cell" [class.warning]="item.shortage > 0">
-                  {{ item.available }} {{ item.unit }}
-                  <small *ngIf="item.shortage > 0">Short {{ item.shortage }}</small>
-                </td>
-                <td class="text-center">
-                  <ng-container *ngIf="activeTab === 'pending'">
-                    <button
-                      type="button"
-                      class="btn-confirm"
-                      [class.confirmed]="item.confirmed"
-                      [attr.aria-pressed]="item.confirmed"
-                      (click)="confirmItem(item)"
-                    >
-                      <lucide-angular
-                        name="check"
-                        [size]="14"
-                        *ngIf="item.confirmed"
-                      ></lucide-angular>
-                      {{ item.confirmed ? 'Confirmed' : 'Confirm Line' }}
-                    </button>
-                  </ng-container>
-                  <ng-container *ngIf="activeTab !== 'pending'">
-                    <div class="btn-confirm reservation-status alx-table-status" [class.confirmed]="item.confirmed">
-                      <lucide-angular
-                        name="check"
-                        [size]="14"
-                        *ngIf="item.confirmed"
-                      ></lucide-angular>
-                      {{ item.confirmed ? 'Reserved' : 'Pending' }}
-                    </div>
-                  </ng-container>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-          <div class="assignment-section" *ngIf="activeTab === 'reserved'">
-          <div class="section-header">
-            <h3>SERVICE TEAM ASSIGNMENT</h3>
-          </div>
-            <div class="form-group assignment-form-group">
-              <label>Assigned by Main Technician</label>
-              <div class="assigned-team">{{ selectedRequest?.assignedTeamName || 'Awaiting team assignment' }}</div>
+        <div class="modal-header">
+          <div>
+            <h2 id="reservation-dialog-title">Request ID : {{ selectedRequest?.id }}</h2>
+            <span id="reservation-dialog-context" class="order-type"
+              >REQUESTER : {{ selectedRequest?.requester }}</span
+              >
             </div>
+            <button
+              type="button"
+              class="btn-close im-btn im-btn--close"
+              aria-label="Close reservation dialog"
+              (click)="closeModal()"
+              [disabled]="saving"
+              >
+              <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="items-verification-full alx-table-container alx-table-container--embedded" role="region" aria-label="Material request line items" tabindex="0">
+              <div class="section-header">
+                <h3>MATERIALS LIST</h3>
+                <span class="items-count">{{ selectedRequest?.items?.length || 0 }} Items</span>
+              </div>
+              <table class="verification-table alx-table alx-table--medium">
+                <thead>
+                  <tr>
+                    <th>ITEM NAME</th>
+                    <th>SKU</th>
+                    <th>QTY</th>
+                    <th>AVAILABLE</th>
+                    @if (activeTab === 'pending') {
+                      <th class="text-center">RESERVE CONFIRMATION</th>
+                    }
+                    @if (activeTab !== 'pending') {
+                      <th class="text-center">RESERVATION STATUS</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of selectedRequest?.items; track item) {
+                    <tr>
+                      <td class="item-name name-cell">{{ item.name }}</td>
+                      <td class="item-sku sku-cell">{{ item.sku }}</td>
+                      <td class="item-qty num-cell"><span class="qty-symbol">×</span>{{ item.qty }}</td>
+                      <td class="item-qty num-cell" [class.warning]="item.shortage > 0">
+                        {{ item.available }} {{ item.unit }}
+                        @if (item.shortage > 0) {
+                          <small>Short {{ item.shortage }}</small>
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (activeTab === 'pending') {
+                          <button
+                            type="button"
+                            class="btn-confirm"
+                            [class.confirmed]="item.confirmed"
+                            [attr.aria-pressed]="item.confirmed"
+                            (click)="confirmItem(item)"
+                            >
+                            @if (item.confirmed) {
+                              <lucide-angular
+                                name="check"
+                                [size]="14"
+                              ></lucide-angular>
+                            }
+                            {{ item.confirmed ? 'Confirmed' : 'Confirm Line' }}
+                          </button>
+                        }
+                        @if (activeTab !== 'pending') {
+                          <div class="btn-confirm reservation-status alx-table-status" [class.confirmed]="item.confirmed">
+                            @if (item.confirmed) {
+                              <lucide-angular
+                                name="check"
+                                [size]="14"
+                              ></lucide-angular>
+                            }
+                            {{ item.confirmed ? 'Reserved' : 'Pending' }}
+                          </div>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (activeTab === 'reserved') {
+              <div class="assignment-section">
+                <div class="section-header">
+                  <h3>SERVICE TEAM ASSIGNMENT</h3>
+                </div>
+                <div class="form-group assignment-form-group">
+                  <label>Assigned by Main Technician</label>
+                  <div class="assigned-team">{{ selectedRequest?.assignedTeamName || 'Awaiting team assignment' }}</div>
+                </div>
+              </div>
+            }
+          </div>
+          @if (validationMessage) {
+            <div class="validation-banner" role="alert">
+              {{ validationMessage }}
+            </div>
+          }
+          @if (mutationError) {
+            <div class="validation-banner" role="alert">{{ mutationError }}</div>
+          }
+          <div class="modal-footer">
+            @if (activeTab === 'pending') {
+              <div class="footer-right im-action-group">
+                @for (supplier of shortageSuppliers; track supplier) {
+                  <button type="button" class="btn-save im-btn im-btn--secondary" (click)="createShortageOrder(supplier.id)" [disabled]="saving">
+                    Order {{ supplier.name }} Shortages
+                  </button>
+                }
+                <button type="button" class="btn-primary im-btn im-btn--primary" (click)="markKitted()" [disabled]="saving || !canReserve(selectedRequest)">
+                  Mark as Reserved / Kitted
+                </button>
+              </div>
+            }
+            @if (activeTab === 'reserved') {
+              <div class="footer-right im-action-group">
+                @if (canUndo(selectedRequest)) {
+                  <button
+                    type="button"
+                    class="btn-primary btn-outline im-btn im-btn--secondary"
+                    (click)="undoAction()"
+                    [disabled]="saving"
+                    >
+                    Release Reservation
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="btn-save im-btn im-btn--primary"
+                  (click)="markHandedOver()"
+                  [disabled]="saving || !selectedRequest?.assignedTeamId"
+                  [style.opacity]="!selectedRequest?.assignedTeamId ? 0.5 : 1"
+                  [style.cursor]="!selectedRequest?.assignedTeamId ? 'not-allowed' : 'pointer'"
+                  >
+                  Hand Over to Team
+                </button>
+                <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
+                  Close
+                </button>
+              </div>
+            }
+            @if (activeTab === 'completed') {
+              <div class="footer-right im-action-group">
+                <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
+                  Close
+                </button>
+              </div>
+            }
+          </div>
         </div>
       </div>
-
-      <div class="validation-banner" role="alert" *ngIf="validationMessage">
-        {{ validationMessage }}
-      </div>
-      <div class="validation-banner" role="alert" *ngIf="mutationError">{{ mutationError }}</div>
-
-      <div class="modal-footer">
-        <div class="footer-right im-action-group" *ngIf="activeTab === 'pending'">
-          <button type="button" class="btn-save im-btn im-btn--secondary" *ngFor="let supplier of shortageSuppliers" (click)="createShortageOrder(supplier.id)" [disabled]="saving">
-            Order {{ supplier.name }} Shortages
-          </button>
-          <button type="button" class="btn-primary im-btn im-btn--primary" (click)="markKitted()" [disabled]="saving || !canReserve(selectedRequest)">
-            Mark as Reserved / Kitted
-          </button>
-        </div>
-        <div class="footer-right im-action-group" *ngIf="activeTab === 'reserved'">
-          <button
-            type="button"
-            class="btn-primary btn-outline im-btn im-btn--secondary"
-            *ngIf="canUndo(selectedRequest)"
-            (click)="undoAction()"
-            [disabled]="saving"
-          >
-            Release Reservation
-          </button>
-          <button
-            type="button"
-            class="btn-save im-btn im-btn--primary"
-            (click)="markHandedOver()"
-            [disabled]="saving || !selectedRequest?.assignedTeamId"
-            [style.opacity]="!selectedRequest?.assignedTeamId ? 0.5 : 1"
-            [style.cursor]="!selectedRequest?.assignedTeamId ? 'not-allowed' : 'pointer'"
-          >
-            Hand Over to Team
-          </button>
-          <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
-            Close
-          </button>
-        </div>
-        <div class="footer-right im-action-group" *ngIf="activeTab === 'completed'">
-          <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModal()" [disabled]="saving">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    }
   </div>
-</div>

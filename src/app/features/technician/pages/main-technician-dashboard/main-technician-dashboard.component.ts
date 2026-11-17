@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -37,6 +37,7 @@ interface DashboardAlertItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-dashboard.component.css'
 })
 export class MainTechnicianDashboardComponent implements OnInit {

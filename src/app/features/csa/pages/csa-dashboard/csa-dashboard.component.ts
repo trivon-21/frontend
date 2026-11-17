@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CsaDashboardService, DashboardData } from '../../services/csa-dashboard.service';
@@ -8,6 +8,7 @@ import { CsaDashboardService, DashboardData } from '../../services/csa-dashboard
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './csa-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-dashboard.component.css'
 })
 export class CsaDashboardComponent implements OnInit, OnDestroy {

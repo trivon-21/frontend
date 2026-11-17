@@ -1,5 +1,5 @@
 import { CartService } from '../../cart/pages/cart.service';
-import { inject } from '@angular/core';
+import { inject, ChangeDetectionStrategy } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective, FooterComponent, PortalIconsModule],
   templateUrl: './product-detail.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-detail.css',
 })
 export class ProductDetail implements OnInit {
@@ -385,7 +386,7 @@ export class ProductDetail implements OnInit {
     }
 
     this.router.navigate(['/consultation-bridge'], {
-      state: { 
+      state: {
         productId: this.product._id,
         productName: this.product.name
       }

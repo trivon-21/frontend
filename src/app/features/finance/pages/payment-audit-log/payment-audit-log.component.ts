@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService } from '../../services/audit-log.service';
@@ -9,6 +9,7 @@ import { NotificationService } from '../../../../services/notification.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './payment-audit-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./payment-audit-log.component.css']
 })
 export class PaymentAuditLogComponent implements OnInit {

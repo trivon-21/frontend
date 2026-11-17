@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -40,8 +40,9 @@ interface SupplierOption {
 @Component({
   selector: 'app-product-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './product-wizard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./product-wizard.component.css'],
 })
 export class ProductWizardComponent implements OnInit, HasPendingChanges {

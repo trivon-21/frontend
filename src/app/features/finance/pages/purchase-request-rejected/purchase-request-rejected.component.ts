@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PurchaseRequestItem, PurchaseRequestService } from '../../services/purchase-request.service';
@@ -8,6 +8,7 @@ import { PurchaseRequestItem, PurchaseRequestService } from '../../services/purc
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './purchase-request-rejected.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./purchase-request-rejected.component.css']
 })
 export class PurchaseRequestRejectedComponent implements OnInit {

@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 @Component({
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="role-portal-shell" style="--error: #c20e0e; --error-light: #fef2f2; --background-card: #fff; --text-primary: #2d3139; --text-secondary: #566463; --text-muted: #8a9e96; --primary-lighter: #e8fdf0;">
       <div id="table-container" class="alx-table-container" role="region" aria-label="Test inventory" tabindex="0">

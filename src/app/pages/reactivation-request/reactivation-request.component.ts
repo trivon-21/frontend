@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuperAdminService } from '../../features/super-admin/services/super-admin.service';
@@ -8,8 +8,9 @@ import { PortalIconsModule } from '../../shared/components/portal-icons/portal-i
 @Component({
   selector: 'app-reactivation-request',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './reactivation-request.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./reactivation-request.component.css'],
 })
 export class ReactivationRequestComponent implements OnInit {

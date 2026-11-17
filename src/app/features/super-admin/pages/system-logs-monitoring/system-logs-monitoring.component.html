@@ -9,15 +9,17 @@
   </header>
 
   <!-- Alert Banner -->
-  <div *ngIf="error" class="alert-banner">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
-      <span>{{ error }}</span>
+  @if (error) {
+    <div class="alert-banner">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
+        <span>{{ error }}</span>
+      </div>
+      <button type="button" (click)="error = null" style="background:none; border:none; cursor:pointer; display:flex; align-items:center;">
+        <lucide-angular name="x" [size]="16"></lucide-angular>
+      </button>
     </div>
-    <button type="button" (click)="error = null" style="background:none; border:none; cursor:pointer; display:flex; align-items:center;">
-      <lucide-angular name="x" [size]="16"></lucide-angular>
-    </button>
-  </div>
+  }
 
   <!-- Stats Grid -->
   <div class="stats-grid">
@@ -28,7 +30,7 @@
         </div>
         <div class="stat-info">
           <span class="stat-label">Total Logs</span>
-          <strong class="stat-value">{{ totalFromBuckets(analytics?.stats?.totalLogs) }}</strong>
+          <strong class="stat-value">{{ totalFromBuckets($safeNavigationMigration(analytics?.stats?.totalLogs)) }}</strong>
         </div>
       </div>
       <span class="stat-meta">Last 30 days window</span>
@@ -110,7 +112,9 @@
             <label>Actor Role</label>
             <select [(ngModel)]="filters.performedByRole" class="filter-input">
               <option value="">All Roles</option>
-              <option *ngFor="let option of filterOptions.roles" [value]="option">{{ formatLabel(option) }}</option>
+              @for (option of filterOptions.roles; track option) {
+                <option [value]="option">{{ formatLabel(option) }}</option>
+              }
             </select>
           </div>
 
@@ -118,7 +122,9 @@
             <label>Status</label>
             <select [(ngModel)]="filters.status" class="filter-input">
               <option value="">All Statuses</option>
-              <option *ngFor="let option of filterOptions.statuses" [value]="option">{{ formatLabel(option) }}</option>
+              @for (option of filterOptions.statuses; track option) {
+                <option [value]="option">{{ formatLabel(option) }}</option>
+              }
             </select>
           </div>
 
@@ -139,103 +145,121 @@
         </div>
       </div>
 
-      <div class="table-actions" *ngIf="hasResults">
-        <label class="table-select-inline">
-          <input type="checkbox" [checked]="areAllFilteredSelected" (change)="toggleSelectAllFiltered()" />
-          <small>Select all matching filters</small>
-        </label>
-        <div class="table-actions-right">
-          <button type="button" class="secondary-action" (click)="deleteSelected()" [disabled]="selectedIds.size===0">
-            Delete Selected ({{ selectedIds.size }})
-          </button>
+      @if (hasResults) {
+        <div class="table-actions">
+          <label class="table-select-inline">
+            <input type="checkbox" [checked]="areAllFilteredSelected" (change)="toggleSelectAllFiltered()" />
+            <small>Select all matching filters</small>
+          </label>
+          <div class="table-actions-right">
+            <button type="button" class="secondary-action" (click)="deleteSelected()" [disabled]="selectedIds.size===0">
+              Delete Selected ({{ selectedIds.size }})
+            </button>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Table Section -->
-      <div *ngIf="loadingLogs" class="loading-state">
-        <div class="spinner"></div>
-        <p>Fetching latest logs...</p>
-      </div>
+      @if (loadingLogs) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Fetching latest logs...</p>
+        </div>
+      }
 
-      <div *ngIf="!loadingLogs && !hasResults" class="empty-state">
-        <lucide-angular name="search" [size]="48" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
-        <h3>No records found</h3>
-        <p>Try adjusting your search terms or filters.</p>
-      </div>
+      @if (!loadingLogs && !hasResults) {
+        <div class="empty-state">
+          <lucide-angular name="search" [size]="48" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
+          <h3>No records found</h3>
+          <p>Try adjusting your search terms or filters.</p>
+        </div>
+      }
 
-      <div *ngIf="!loadingLogs && hasResults" class="table-wrap">
-        <table class="logs-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Timestamp</th>
-              <th>Action</th>
-              <th>Actor</th>
-              <th>Status</th>
-              <th>Details</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let log of logs">
-              <td>
-                <input type="checkbox" [checked]="selectedIds.has(log._id)" (change)="toggleSelect(log)" />
-              </td>
-              <td>
-                <div class="timestamp-cell">
-                  <span>{{ log.createdAt | date : 'MMM d, yyyy' }}</span>
-                  <small>{{ log.createdAt | date : 'h:mm:ss a' }}</small>
-                </div>
-              </td>
-              <td>
-                <div class="action-cell">
-                  <strong>{{ formatLabel(log.action) }}</strong>
-                  <small>{{ formatLabel(log.module) }}</small>
-                </div>
-              </td>
-              <td>
-                <div class="actor-cell">
-                  <strong>{{ formatActor(log) }}</strong>
-                  <small>{{ formatActorMeta(log) }}</small>
-                </div>
-              </td>
-              <td>
-                <span class="badge" [class]="statusTone(log.status)">{{ formatLabel(log.status || 'SUCCESS') }}</span>
-              </td>
-              <td>
-                <div class="detail-cell">
-                  <span>{{ formatLabel(log.entity) }}</span>
-                  <small *ngIf="log.reason">{{ log.reason }}</small>
-                  <small *ngIf="!log.reason && log.errorDetails?.errorMessage">{{ log.errorDetails?.errorMessage
-                    }}</small>
-                  <small *ngIf="!log.reason && !log.errorDetails?.errorMessage">{{ log.requestDetails?.endpoint || '-'
-                    }}</small>
-                </div>
-              </td>
-              <td style="width: 90px; text-align: right;">
-                <button type="button" class="ghost-action" (click)="deleteSingle(log)" title="Delete log" style="padding: 6px 8px;">
-                  <lucide-angular name="x" [size]="16"></lucide-angular>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @if (!loadingLogs && hasResults) {
+        <div class="table-wrap">
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Actor</th>
+                <th>Status</th>
+                <th>Details</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of logs; track log) {
+                <tr>
+                  <td>
+                    <input type="checkbox" [checked]="selectedIds.has(log._id)" (change)="toggleSelect(log)" />
+                  </td>
+                  <td>
+                    <div class="timestamp-cell">
+                      <span>{{ log.createdAt | date : 'MMM d, yyyy' }}</span>
+                      <small>{{ log.createdAt | date : 'h:mm:ss a' }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="action-cell">
+                      <strong>{{ formatLabel(log.action) }}</strong>
+                      <small>{{ formatLabel(log.module) }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="actor-cell">
+                      <strong>{{ formatActor(log) }}</strong>
+                      <small>{{ formatActorMeta(log) }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="statusTone(log.status)">{{ formatLabel(log.status || 'SUCCESS') }}</span>
+                  </td>
+                  <td>
+                    <div class="detail-cell">
+                      <span>{{ formatLabel(log.entity) }}</span>
+                      @if (log.reason) {
+                        <small>{{ log.reason }}</small>
+                      }
+                      @if (!log.reason && log.errorDetails?.errorMessage) {
+                        <small>{{ log.errorDetails?.errorMessage
+                        }}</small>
+                      }
+                      @if (!log.reason && !log.errorDetails?.errorMessage) {
+                        <small>{{ log.requestDetails?.endpoint || '-'
+                        }}</small>
+                      }
+                    </div>
+                  </td>
+                  <td style="width: 90px; text-align: right;">
+                    <button type="button" class="ghost-action" (click)="deleteSingle(log)" title="Delete log" style="padding: 6px 8px;">
+                      <lucide-angular name="x" [size]="16"></lucide-angular>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
 
       <!-- Pagination -->
-      <div class="pagination-bar" *ngIf="!loadingLogs && totalPages > 1">
-        <button type="button" class="secondary-action" (click)="onPageChange(currentPage - 1)"
-          [disabled]="currentPage === 1">
-          <lucide-angular name="chevron-left" [size]="16"></lucide-angular>
-          Prev
-        </button>
-        <span><strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
-        <button type="button" class="secondary-action" (click)="onPageChange(currentPage + 1)"
-          [disabled]="currentPage === totalPages">
-          Next
-          <lucide-angular name="chevron-right" [size]="16"></lucide-angular>
-        </button>
-      </div>
+      @if (!loadingLogs && totalPages > 1) {
+        <div class="pagination-bar">
+          <button type="button" class="secondary-action" (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1">
+            <lucide-angular name="chevron-left" [size]="16"></lucide-angular>
+            Prev
+          </button>
+          <span><strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+          <button type="button" class="secondary-action" (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages">
+            Next
+            <lucide-angular name="chevron-right" [size]="16"></lucide-angular>
+          </button>
+        </div>
+      }
     </section>
 
     <!-- Insights Panel (Right) -->
@@ -253,18 +277,26 @@
           </div>
         </div>
 
-        <div *ngIf="loadingAnalytics" class="mini-loading">Analyzing activity...</div>
-        <div *ngIf="!loadingAnalytics && recentLogs.length === 0" class="mini-empty">No activity records.</div>
+        @if (loadingAnalytics) {
+          <div class="mini-loading">Analyzing activity...</div>
+        }
+        @if (!loadingAnalytics && recentLogs.length === 0) {
+          <div class="mini-empty">No activity records.</div>
+        }
 
-        <div *ngIf="recentLogs.length > 0" class="insight-list">
-          <article *ngFor="let log of recentLogs | slice : 0 : 5" class="insight-item">
-            <div>
-              <strong>{{ formatLabel(log.action) }}</strong>
-              <p>{{ formatLabel(log.module) }} · {{ formatActor(log) }}</p>
-            </div>
-            <span>{{ log.createdAt | date : 'HH:mm' }}</span>
-          </article>
-        </div>
+        @if (recentLogs.length > 0) {
+          <div class="insight-list">
+            @for (log of recentLogs | slice : 0 : 5; track log) {
+              <article class="insight-item">
+                <div>
+                  <strong>{{ formatLabel(log.action) }}</strong>
+                  <p>{{ formatLabel(log.module) }} · {{ formatActor(log) }}</p>
+                </div>
+                <span>{{ log.createdAt | date : 'HH:mm' }}</span>
+              </article>
+            }
+          </div>
+        }
       </section>
 
       <!-- Security Watch -->
@@ -276,19 +308,22 @@
           </div>
         </div>
 
-        <div class="alert-list" *ngIf="criticalSecurityEvents.length > 0; else noSecurityEvents">
-          <article *ngFor="let log of criticalSecurityEvents | slice : 0 : 4" class="alert-item">
-            <span class="badge warning">{{ formatLabel(log.securityDetails?.riskLevel || 'HIGH') }}</span>
-            <div>
-              <strong>{{ formatLabel(log.action) }}</strong>
-              <p>{{ formatActor(log) }} · {{ log.createdAt | date : 'MMM d' }}</p>
-            </div>
-          </article>
-        </div>
-
-        <ng-template #noSecurityEvents>
+        @if (criticalSecurityEvents.length > 0) {
+          <div class="alert-list">
+            @for (log of criticalSecurityEvents | slice : 0 : 4; track log) {
+              <article class="alert-item">
+                <span class="badge warning">{{ formatLabel(log.securityDetails?.riskLevel || 'HIGH') }}</span>
+                <div>
+                  <strong>{{ formatLabel(log.action) }}</strong>
+                  <p>{{ formatActor(log) }} · {{ log.createdAt | date : 'MMM d' }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
           <div class="mini-empty">No security alerts found.</div>
-        </ng-template>
+        }
+
       </section>
 
       <!-- Top Errors -->
@@ -300,16 +335,22 @@
           </div>
         </div>
 
-        <div *ngIf="topErrors.length === 0" class="mini-empty">No errors flagged.</div>
-        <div *ngIf="topErrors.length > 0" class="error-list">
-          <article *ngFor="let errorItem of topErrors | slice : 0 : 5" class="error-item">
-            <div>
-              <strong>{{ errorItem._id || 'Unknown failure' }}</strong>
-              <p>Occurred {{ errorItem.count }} times</p>
-            </div>
-            <span>{{ errorItem.count }}</span>
-          </article>
-        </div>
+        @if (topErrors.length === 0) {
+          <div class="mini-empty">No errors flagged.</div>
+        }
+        @if (topErrors.length > 0) {
+          <div class="error-list">
+            @for (errorItem of topErrors | slice : 0 : 5; track errorItem) {
+              <article class="error-item">
+                <div>
+                  <strong>{{ errorItem._id || 'Unknown failure' }}</strong>
+                  <p>Occurred {{ errorItem.count }} times</p>
+                </div>
+                <span>{{ errorItem.count }}</span>
+              </article>
+            }
+          </div>
+        }
       </section>
     </aside>
   </div>

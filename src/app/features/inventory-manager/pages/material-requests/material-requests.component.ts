@@ -1,5 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { Router } from '@angular/router';
@@ -44,8 +44,9 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-material-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './material-requests.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./material-requests.component.css'],
 })
 export class MaterialRequestsDashboardComponent implements OnInit {

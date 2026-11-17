@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
@@ -10,6 +10,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './inspection-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-dashboard.component.css']
 })
 export class InspectionDashboardComponent implements OnInit {

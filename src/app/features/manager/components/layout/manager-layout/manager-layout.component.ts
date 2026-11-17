@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+
 import { PortalIconsModule } from '../../../../../shared/components/portal-icons/portal-icons.module';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../../../directives/click-outside.directive';
@@ -14,12 +14,12 @@ import { HeaderClockComponent } from '../../../../../shared/components/header-cl
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    CommonModule,
     PortalIconsModule,
     ClickOutsideDirective,
-    HeaderClockComponent,
-  ],
+    HeaderClockComponent
+],
   templateUrl: './manager-layout.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: [
     '../../../../../shared/styles/role-portal-shell.css',
     './manager-layout.component.css',

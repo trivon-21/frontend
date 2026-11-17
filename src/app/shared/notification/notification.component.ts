@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../services/notification.service';
 
@@ -9,14 +9,15 @@ import { NotificationService, Notification } from '../../services/notification.s
   template: `
     <div class="notification-container">
       <div *ngFor="let notif of notifications$ | async as notifications"
-           [ngClass]="'notification notification-' + notif.type">
+        [ngClass]="'notification notification-' + notif.type">
         <div class="notification-content">
           <span>{{ notif.message }}</span>
           <button class="close-btn" (click)="onClose(notif.id)">×</button>
         </div>
       </div>
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .notification-container {
       position: fixed;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PurchaseRequestItem, PurchaseRequestService } from '../../services/purchase-request.service';
@@ -10,6 +10,7 @@ import { ConfirmService } from '../../../../services/confirm.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './purchase-request-verification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./purchase-request-verification.component.css']
 })
 export class PurchaseRequestVerificationComponent implements OnInit {

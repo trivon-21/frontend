@@ -6,15 +6,21 @@
       <div class="modal-header-left">
         <lucide-angular name="message-circle" [size]="20" style="color: #1f5b45;"></lucide-angular>
         <h2 class="modal-title">
-          <span *ngIf="!selectedInquiry">Inquiry</span>
-          <span *ngIf="selectedInquiry">{{ selectedInquiry.inquiryRef }}</span>
+          @if (!selectedInquiry) {
+            <span>Inquiry</span>
+          }
+          @if (selectedInquiry) {
+            <span>{{ selectedInquiry.inquiryRef }}</span>
+          }
         </h2>
       </div>
       <div class="header-right">
-        <div *ngIf="!selectedInquiry" class="tab-pills">
-          <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'new'}" (click)="setTab('new')">New</button>
-          <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'list'}" (click)="setTab('list')">My Inquiries</button>
-        </div>
+        @if (!selectedInquiry) {
+          <div class="tab-pills">
+            <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'new'}" (click)="setTab('new')">New</button>
+            <button class="tab-pill" [ngClass]="{'tab-pill--active': activeTab === 'list'}" (click)="setTab('list')">My Inquiries</button>
+          </div>
+        }
         <button class="modal-close" (click)="close()" aria-label="Close" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="x" [size]="18"></lucide-angular>
         </button>
@@ -22,151 +28,174 @@
     </div>
 
     <!-- ── TAB: New Inquiry ── -->
-    <div *ngIf="activeTab === 'new' && !selectedInquiry">
-
-      <!-- Success state -->
-      <div *ngIf="submitted && submittedInquiry" class="success-screen">
-        <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
-          <lucide-angular name="check" [size]="32" style="color: white;"></lucide-angular>
-        </div>
-        <h3 class="success-title">Inquiry Submitted!</h3>
-        <p class="success-msg">We've received your inquiry and will respond shortly.</p>
-        <div class="ref-box">
-          <span class="ref-label">Inquiry ID</span>
-          <span class="ref-value">{{ submittedInquiry.inquiryRef }}</span>
-        </div>
-        <div class="success-status-row">
-          <span class="success-status-label">Status</span>
-          <span class="status-badge badge--blue">Ongoing</span>
-        </div>
-        <div class="success-btn-row">
-          <button class="btn-ghost" (click)="resetForm()">New Inquiry</button>
-          <button class="btn-primary" (click)="setTab('list')">View My Inquiries</button>
-        </div>
-      </div>
-
-      <!-- Form -->
-      <div *ngIf="!submitted" class="form-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Name</label>
-            <input class="form-input" type="text" placeholder="Your name" [(ngModel)]="name" />
+    @if (activeTab === 'new' && !selectedInquiry) {
+      <div>
+        <!-- Success state -->
+        @if (submitted && submittedInquiry) {
+          <div class="success-screen">
+            <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
+              <lucide-angular name="check" [size]="32" style="color: white;"></lucide-angular>
+            </div>
+            <h3 class="success-title">Inquiry Submitted!</h3>
+            <p class="success-msg">We've received your inquiry and will respond shortly.</p>
+            <div class="ref-box">
+              <span class="ref-label">Inquiry ID</span>
+              <span class="ref-value">{{ submittedInquiry.inquiryRef }}</span>
+            </div>
+            <div class="success-status-row">
+              <span class="success-status-label">Status</span>
+              <span class="status-badge badge--blue">Ongoing</span>
+            </div>
+            <div class="success-btn-row">
+              <button class="btn-ghost" (click)="resetForm()">New Inquiry</button>
+              <button class="btn-primary" (click)="setTab('list')">View My Inquiries</button>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Phone</label>
-            <input class="form-input" type="tel" placeholder="Phone number" [(ngModel)]="phone" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" type="email" placeholder="Email address" [(ngModel)]="email" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Inquiry Type</label>
-          <div class="type-chips">
-            <button
-              *ngFor="let type of inquiryTypes"
-              class="type-chip"
-              [ngClass]="{'type-chip--active': inquiryType === type}"
-              (click)="inquiryType = type"
-            >
-              {{ type }}
+        }
+        <!-- Form -->
+        @if (!submitted) {
+          <div class="form-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Name</label>
+                <input class="form-input" type="text" placeholder="Your name" [(ngModel)]="name" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input class="form-input" type="tel" placeholder="Phone number" [(ngModel)]="phone" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" type="email" placeholder="Email address" [(ngModel)]="email" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Inquiry Type</label>
+              <div class="type-chips">
+                @for (type of inquiryTypes; track type) {
+                  <button
+                    class="type-chip"
+                    [ngClass]="{'type-chip--active': inquiryType === type}"
+                    (click)="inquiryType = type"
+                    >
+                    {{ type }}
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message <span class="required">*</span></label>
+              <textarea class="form-textarea" rows="4" placeholder="Describe your inquiry in detail..." [(ngModel)]="message"></textarea>
+            </div>
+            @if (submitError) {
+              <div class="error-msg">{{ submitError }}</div>
+            }
+            <button class="btn-primary btn-full" (click)="submit()" [disabled]="submitting">
+              @if (submitting) {
+                <span class="btn-spinner"></span>
+              }
+              <span>{{ submitting ? 'Submitting...' : 'Submit Inquiry' }}</span>
             </button>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Message <span class="required">*</span></label>
-          <textarea class="form-textarea" rows="4" placeholder="Describe your inquiry in detail..." [(ngModel)]="message"></textarea>
-        </div>
-
-        <div *ngIf="submitError" class="error-msg">{{ submitError }}</div>
-
-        <button class="btn-primary btn-full" (click)="submit()" [disabled]="submitting">
-          <span *ngIf="submitting" class="btn-spinner"></span>
-          <span>{{ submitting ? 'Submitting...' : 'Submit Inquiry' }}</span>
-        </button>
+        }
       </div>
-    </div>
+    }
 
     <!-- ── TAB: My Inquiries list ── -->
-    <div *ngIf="activeTab === 'list' && !selectedInquiry" class="list-body">
-      <div *ngIf="loadingList" class="loading-state">
-        <div class="spinner"></div>
+    @if (activeTab === 'list' && !selectedInquiry) {
+      <div class="list-body">
+        @if (loadingList) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+          </div>
+        }
+        @if (listError) {
+          <div class="error-msg">{{ listError }}</div>
+        }
+        @if (!loadingList && inquiries.length === 0 && !listError) {
+          <div class="empty-state">
+            <p>No inquiries found. Submit your first inquiry!</p>
+            <button class="btn-ghost" (click)="setTab('new')">New Inquiry</button>
+          </div>
+        }
+        @for (inq of inquiries; track inq) {
+          <div
+            class="inquiry-item"
+            (click)="openInquiry(inq)"
+            >
+            <div class="inq-top">
+              <span class="inq-ref">{{ inq.inquiryRef }}</span>
+              <span class="status-badge" [ngClass]="getStatusClass(inq.status)">{{ inq.status }}</span>
+            </div>
+            <p class="inq-subject">{{ inq.subject || inq.message }}</p>
+            <div class="inq-meta">
+              <span class="inq-type">{{ inq.inquiryType }}</span>
+              <span class="inq-date">{{ formatDate(inq.createdAt) }}</span>
+            </div>
+          </div>
+        }
       </div>
-      <div *ngIf="listError" class="error-msg">{{ listError }}</div>
-      <div *ngIf="!loadingList && inquiries.length === 0 && !listError" class="empty-state">
-        <p>No inquiries found. Submit your first inquiry!</p>
-        <button class="btn-ghost" (click)="setTab('new')">New Inquiry</button>
-      </div>
-      <div
-        *ngFor="let inq of inquiries"
-        class="inquiry-item"
-        (click)="openInquiry(inq)"
-      >
-        <div class="inq-top">
-          <span class="inq-ref">{{ inq.inquiryRef }}</span>
-          <span class="status-badge" [ngClass]="getStatusClass(inq.status)">{{ inq.status }}</span>
-        </div>
-        <p class="inq-subject">{{ inq.subject || inq.message }}</p>
-        <div class="inq-meta">
-          <span class="inq-type">{{ inq.inquiryType }}</span>
-          <span class="inq-date">{{ formatDate(inq.createdAt) }}</span>
-        </div>
-      </div>
-    </div>
+    }
 
     <!-- ── Inquiry Detail + Thread ── -->
-    <div *ngIf="selectedInquiry" class="detail-body">
-      <button class="back-btn" (click)="backToList()" style="display: inline-flex; align-items: center; gap: 4px;">
-        <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
-        Back to Inquiries
-      </button>
-
-      <div class="inq-detail-header">
-        <div>
-          <p class="detail-type">{{ selectedInquiry.inquiryType }}</p>
-          <p class="detail-date">{{ formatDate(selectedInquiry.createdAt) }}</p>
-        </div>
-        <span class="status-badge" [ngClass]="getStatusClass(selectedInquiry.status)">{{ selectedInquiry.status }}</span>
-      </div>
-
-      <!-- Thread -->
-      <div class="thread">
-        <div
-          *ngFor="let msg of selectedInquiry.thread"
-          class="thread-message"
-          [ngClass]="msg.sender === 'Customer' ? 'msg--customer' : 'msg--support'"
-        >
-          <div class="msg-sender">{{ msg.sender === 'Customer' ? 'You' : 'Support Team' }}</div>
-          <div class="msg-bubble">{{ msg.message }}</div>
-          <div class="msg-time">{{ formatTime(msg.createdAt) }}</div>
-        </div>
-        <div *ngIf="selectedInquiry.thread.length === 0" class="no-thread">
-          No messages yet.
-        </div>
-      </div>
-
-      <!-- Reply Box -->
-      <div *ngIf="selectedInquiry.status !== 'Closed'" class="reply-box">
-        <textarea
-          class="form-textarea"
-          rows="3"
-          placeholder="Type your reply..."
-          [(ngModel)]="replyMessage"
-        ></textarea>
-        <div *ngIf="replyError" class="error-msg">{{ replyError }}</div>
-        <button class="btn-primary" (click)="sendReply()" [disabled]="replying || !replyMessage.trim()">
-          <span *ngIf="replying" class="btn-spinner"></span>
-          <span>{{ replying ? 'Sending...' : 'Send Reply' }}</span>
+    @if (selectedInquiry) {
+      <div class="detail-body">
+        <button class="back-btn" (click)="backToList()" style="display: inline-flex; align-items: center; gap: 4px;">
+          <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
+          Back to Inquiries
         </button>
+        <div class="inq-detail-header">
+          <div>
+            <p class="detail-type">{{ selectedInquiry.inquiryType }}</p>
+            <p class="detail-date">{{ formatDate(selectedInquiry.createdAt) }}</p>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusClass(selectedInquiry.status)">{{ selectedInquiry.status }}</span>
+        </div>
+        <!-- Thread -->
+        <div class="thread">
+          @for (msg of selectedInquiry.thread; track msg) {
+            <div
+              class="thread-message"
+              [ngClass]="msg.sender === 'Customer' ? 'msg--customer' : 'msg--support'"
+              >
+              <div class="msg-sender">{{ msg.sender === 'Customer' ? 'You' : 'Support Team' }}</div>
+              <div class="msg-bubble">{{ msg.message }}</div>
+              <div class="msg-time">{{ formatTime(msg.createdAt) }}</div>
+            </div>
+          }
+          @if (selectedInquiry.thread.length === 0) {
+            <div class="no-thread">
+              No messages yet.
+            </div>
+          }
+        </div>
+        <!-- Reply Box -->
+        @if (selectedInquiry.status !== 'Closed') {
+          <div class="reply-box">
+            <textarea
+              class="form-textarea"
+              rows="3"
+              placeholder="Type your reply..."
+              [(ngModel)]="replyMessage"
+            ></textarea>
+            @if (replyError) {
+              <div class="error-msg">{{ replyError }}</div>
+            }
+            <button class="btn-primary" (click)="sendReply()" [disabled]="replying || !replyMessage.trim()">
+              @if (replying) {
+                <span class="btn-spinner"></span>
+              }
+              <span>{{ replying ? 'Sending...' : 'Send Reply' }}</span>
+            </button>
+          </div>
+        }
+        @if (selectedInquiry.status === 'Closed') {
+          <div class="closed-notice">
+            This inquiry is closed. Submit a new inquiry if you need further help.
+          </div>
+        }
       </div>
-      <div *ngIf="selectedInquiry.status === 'Closed'" class="closed-notice">
-        This inquiry is closed. Submit a new inquiry if you need further help.
-      </div>
-    </div>
+    }
 
   </div>
 </div>

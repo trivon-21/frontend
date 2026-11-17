@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { Router } from '@angular/router';
 import { NotificationService, Notification } from '../../../../core/services/notification.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -7,65 +7,77 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule, PortalIconsModule],
+  imports: [PortalIconsModule],
   template: `
     <div class="notifications-page">
       <div class="page-header">
         <h1 class="page-title">All Notifications</h1>
         <div class="header-actions">
-          <button class="btn-secondary" (click)="markAllAsRead()" *ngIf="unreadCount > 0">
-            Mark all as read
-          </button>
-          <button class="btn-danger" (click)="clearAll()" *ngIf="notifications.length > 0">
-            Clear all
-          </button>
+          @if (unreadCount > 0) {
+            <button class="btn-secondary" (click)="markAllAsRead()">
+              Mark all as read
+            </button>
+          }
+          @if (notifications.length > 0) {
+            <button class="btn-danger" (click)="clearAll()">
+              Clear all
+            </button>
+          }
         </div>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="notifications.length === 0" class="empty-state">
-        <span class="empty-icon">
-          <lucide-angular name="bell" [size]="48" style="opacity: 0.4;"></lucide-angular>
-        </span>
-        <h2>No notifications yet</h2>
-        <p>You'll see all your notifications here</p>
-      </div>
+      @if (notifications.length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">
+            <lucide-angular name="bell" [size]="48" style="opacity: 0.4;"></lucide-angular>
+          </span>
+          <h2>No notifications yet</h2>
+          <p>You'll see all your notifications here</p>
+        </div>
+      }
 
       <!-- Notifications List -->
-      <div class="notifications-list" *ngIf="notifications.length > 0">
-        <div *ngFor="let notif of notifications" class="notification-tile" [class.unread]="!notif.read">
-          <div class="notif-icon">{{ getNotificationIcon(notif.type) }}</div>
-          <div class="notif-body">
-            <div class="notif-header">
-              <h3 class="notif-title">{{ notif.title }}</h3>
-              <span class="notif-time">{{ getTimeAgo(notif.createdAt) }}</span>
+      @if (notifications.length > 0) {
+        <div class="notifications-list">
+          @for (notif of notifications; track notif) {
+            <div class="notification-tile" [class.unread]="!notif.read">
+              <div class="notif-icon">{{ getNotificationIcon(notif.type) }}</div>
+              <div class="notif-body">
+                <div class="notif-header">
+                  <h3 class="notif-title">{{ notif.title }}</h3>
+                  <span class="notif-time">{{ getTimeAgo(notif.createdAt) }}</span>
+                </div>
+                <p class="notif-message">{{ notif.message }}</p>
+                <div class="notif-type-badge">{{ getTypeName(notif.type) }}</div>
+              </div>
+              <div class="notif-actions">
+                @if (notif.actionUrl) {
+                  <button
+                    class="action-btn"
+                    (click)="navigateTo(notif)"
+                    title="Open"
+                    style="display: flex; align-items: center; justify-content: center;"
+                    >
+                    <lucide-angular name="chevron-right" [size]="16"></lucide-angular>
+                  </button>
+                }
+                <button
+                  class="action-btn"
+                  (click)="deleteNotif(notif.id)"
+                  title="Delete"
+                  style="display: flex; align-items: center; justify-content: center;"
+                  >
+                  <lucide-angular name="x" [size]="14"></lucide-angular>
+                </button>
+              </div>
             </div>
-            <p class="notif-message">{{ notif.message }}</p>
-            <div class="notif-type-badge">{{ getTypeName(notif.type) }}</div>
-          </div>
-          <div class="notif-actions">
-            <button
-              class="action-btn"
-              (click)="navigateTo(notif)"
-              *ngIf="notif.actionUrl"
-              title="Open"
-              style="display: flex; align-items: center; justify-content: center;"
-            >
-              <lucide-angular name="chevron-right" [size]="16"></lucide-angular>
-            </button>
-            <button
-              class="action-btn"
-              (click)="deleteNotif(notif.id)"
-              title="Delete"
-              style="display: flex; align-items: center; justify-content: center;"
-            >
-              <lucide-angular name="x" [size]="14"></lucide-angular>
-            </button>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .notifications-page {
       max-width: 700px;

@@ -1,13 +1,14 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { PaymentService, BankDetails } from '../../../core/services/payment.service';
 
 @Component({
   selector: 'app-bank-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './bank-settings.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bank-settings.css'
 })
 export class BankSettings implements OnInit {

@@ -1,5 +1,5 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CsaInquiryService, CustomerInquiry } from '../../services/csa-inquiry.service';
@@ -8,8 +8,9 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-csa-inquiries',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './csa-inquiries.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-inquiries.component.css'
 })
 export class CsaInquiriesComponent implements OnInit {

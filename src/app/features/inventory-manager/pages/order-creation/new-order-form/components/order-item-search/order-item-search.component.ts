@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { RouterModule } from '@angular/router';
@@ -9,8 +9,9 @@ import { supplierIdOf, supplierNameOf } from '../../../../../services/inventory-
 @Component({
   selector: 'app-order-item-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule, RouterModule],
+  imports: [FormsModule, PortalIconsModule, RouterModule],
   templateUrl: './order-item-search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './order-item-search.component.css'
 })
 export class OrderItemSearchComponent implements OnChanges {

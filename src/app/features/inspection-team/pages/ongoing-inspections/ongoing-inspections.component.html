@@ -42,21 +42,25 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let inspection of paginatedInspections">
-          <td>{{ inspection.orderId }}</td>
-          <td>{{ inspection.ticketId }}</td>
-          <td>{{ inspection.customerName }}</td>
-          <td>{{ formatDate(inspection.inspectionDate) }}</td>
-          <td>
-            <button class="action-btn" [ngClass]="inspection.recorded ? 'recorded' : 'record'"
-              (click)="!inspection.recorded && recordInspection(inspection)" [disabled]="inspection.recorded">
-              {{ inspection.recorded ? 'Recorded' : 'Record' }}
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredInspections.length === 0">
-          <td colspan="5" style="text-align:center;color:#9ca3af;padding:24px;">No ongoing inspections</td>
-        </tr>
+        @for (inspection of paginatedInspections; track inspection) {
+          <tr>
+            <td>{{ inspection.orderId }}</td>
+            <td>{{ inspection.ticketId }}</td>
+            <td>{{ inspection.customerName }}</td>
+            <td>{{ formatDate(inspection.inspectionDate) }}</td>
+            <td>
+              <button class="action-btn" [ngClass]="inspection.recorded ? 'recorded' : 'record'"
+                (click)="!inspection.recorded && recordInspection(inspection)" [disabled]="inspection.recorded">
+                {{ inspection.recorded ? 'Recorded' : 'Record' }}
+              </button>
+            </td>
+          </tr>
+        }
+        @if (filteredInspections.length === 0) {
+          <tr>
+            <td colspan="5" style="text-align:center;color:#9ca3af;padding:24px;">No ongoing inspections</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -65,8 +69,10 @@
     <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
     <div class="pages">
       <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
-      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
+      @for (page of totalPages; track page) {
+        <button (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
         }}</button>
+      }
       <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
     </div>
   </div>

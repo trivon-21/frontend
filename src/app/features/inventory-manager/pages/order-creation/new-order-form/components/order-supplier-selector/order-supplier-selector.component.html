@@ -24,24 +24,30 @@
           <lucide-angular name="chevron-down" class="dropdown-icon" [size]="16" strokeWidth="2.5"></lucide-angular>
         </div>
 
-        <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
-          <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
-            <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
-            Add New Supplier
-          </div>
-          <div class="dropdown-item" *ngFor="let s of filteredSuppliers" (mousedown)="selectSupplier(s)">
-            <div class="item-info">
-              <span class="name">{{ s.name }}</span>
+        @if (showSupplierDropdown) {
+          <div class="dropdown-list glass-panel animate-fade">
+            <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
+              <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+              Add New Supplier
             </div>
+            @for (s of filteredSuppliers; track s) {
+              <div class="dropdown-item" (mousedown)="selectSupplier(s)">
+                <div class="item-info">
+                  <span class="name">{{ s.name }}</span>
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
       </div>
 
-      <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
-        <p class="supplier-help">This creates the supplier in the catalog before saving the order.</p>
-        <button class="btn-primary im-btn im-btn--primary" type="button" (click)="confirmNewSupplier()">Confirm Supplier</button>
-        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="cancelNewSupplier()">Cancel</button>
-      </div>
+      @if (isAddingNewSupplier) {
+        <div class="new-supplier-actions animate-fade">
+          <p class="supplier-help">This creates the supplier in the catalog before saving the order.</p>
+          <button class="btn-primary im-btn im-btn--primary" type="button" (click)="confirmNewSupplier()">Confirm Supplier</button>
+          <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="cancelNewSupplier()">Cancel</button>
+        </div>
+      }
     </div>
   </div>
 </div>

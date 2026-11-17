@@ -1,4 +1,4 @@
-import { Component, OnInit, DestroyRef } from '@angular/core';
+import { Component, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -10,12 +10,13 @@ import { environment } from '../../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-inspection-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-inspection-details.component.css'})
 export class MainTechnicianInspectionDetailsComponent implements OnInit {
   jobId: string | null = null;
   isLoading = false;
   error: string | null = null;
-  
+
   inspectionData: any = null;
   inspectionDate: string | Date | null = null;
 
@@ -38,7 +39,7 @@ export class MainTechnicianInspectionDetailsComponent implements OnInit {
 
   loadInspection(): void {
     if (!this.jobId) return;
-    
+
     this.isLoading = true;
     this.error = null;
 

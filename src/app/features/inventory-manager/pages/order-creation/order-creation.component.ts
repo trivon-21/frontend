@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -15,6 +15,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './order-creation.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./order-creation.component.css']
 })
 export class OrderCreationComponent implements OnInit {

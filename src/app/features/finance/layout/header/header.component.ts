@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { environment } from '../../../../../environments/environment';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -20,6 +21,7 @@ interface NotificationItem {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
@@ -35,7 +37,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   notifications: NotificationItem[] = [];
   totalPending = 0;
 
-  private api = 'http://127.0.0.1:5000/api';
+  private api = `${environment.apiUrl}`;
   private clockInterval: any;
 
   constructor(

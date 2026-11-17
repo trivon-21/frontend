@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
@@ -10,8 +10,9 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-completed-inspections',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './completed-inspections.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./completed-inspections.component.css']
 })
 export class CompletedInspectionsComponent implements OnInit {

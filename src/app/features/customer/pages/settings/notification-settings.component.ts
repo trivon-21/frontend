@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { NotificationPreferences, NotificationService } from '../../../../core/services/notification.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -7,7 +7,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-notification-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   template: `
     <div class="settings-page">
       <h1 class="page-title">Notification Settings</h1>
@@ -65,12 +65,15 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
       </div>
 
       <!-- Save Message -->
-      <div *ngIf="saved" class="alert alert-success" style="display: flex; align-items: center; gap: 8px;">
-        <lucide-angular name="check" [size]="16"></lucide-angular>
-        <span>Your notification preferences have been saved</span>
-      </div>
+      @if (saved) {
+        <div class="alert alert-success" style="display: flex; align-items: center; gap: 8px;">
+          <lucide-angular name="check" [size]="16"></lucide-angular>
+          <span>Your notification preferences have been saved</span>
+        </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .settings-page {
       max-width: 600px;

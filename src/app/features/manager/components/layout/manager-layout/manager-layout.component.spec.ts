@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ManagerLayoutComponent } from './manager-layout.component';
 
-@Component({ standalone: true, template: '' })
+@Component({ standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class EmptyRouteComponent {}
 
 describe('ManagerLayoutComponent presentation contract', () => {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -12,6 +12,7 @@ import { InvoiceService } from '../../services/invoice.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {

@@ -1,21 +1,25 @@
 <div class="schedules-container">
 
   <!-- Toast Alert -->
-  <div class="toast-alert" *ngIf="successMessage">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-    </svg>
-    <span>{{ successMessage }}</span>
-    <button class="toast-close" (click)="successMessage = null">✕</button>
-  </div>
+  @if (successMessage) {
+    <div class="toast-alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <span>{{ successMessage }}</span>
+      <button class="toast-close" (click)="successMessage = null">✕</button>
+    </div>
+  }
 
-  <div class="toast-alert error" *ngIf="error">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    <span>{{ error }}</span>
-    <button class="toast-close" (click)="error = null">✕</button>
-  </div>
+  @if (error) {
+    <div class="toast-alert error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>{{ error }}</span>
+      <button class="toast-close" (click)="error = null">✕</button>
+    </div>
+  }
 
   <!-- Page Header -->
   <div class="page-header">
@@ -80,265 +84,285 @@
       <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input 
-        type="text" 
-        placeholder="Search schedules by ticket ID, customer name, location, or product..." 
-        [value]="searchQuery" 
+      <input
+        type="text"
+        placeholder="Search schedules by ticket ID, customer name, location, or product..."
+        [value]="searchQuery"
         (input)="onSearchInput($event)"
-      />
-      <button class="search-clear-btn" *ngIf="searchQuery" (click)="clearSearch()" title="Clear search">✕</button>
+        />
+      @if (searchQuery) {
+        <button class="search-clear-btn" (click)="clearSearch()" title="Clear search">✕</button>
+      }
     </div>
   </div>
 
   <!-- Full-Width Data Table -->
   <div class="table-card">
-    <div class="table-responsive" *ngIf="!isLoading && filteredSchedules.length > 0">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th class="col-ticket">Ticket & Product</th>
-            <th class="col-customer">Customer</th>
-            <th class="col-location">Location</th>
-            <th class="col-status">Status</th>
-            <th class="col-date">Installation Date</th>
-            <th class="col-action" style="text-align: right;">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sched of filteredSchedules" [class.csa-pending-row]="sched.status === 'Sent to CSA'">
-            <td class="col-ticket">
-              <div class="ticket-header-line">
-                <span class="ticket-id-tag">{{ sched.ticketId }}</span>
-              </div>
-              <div class="ticket-subject">{{ sched.productType || 'AirLux Split AC' }}</div>
-            </td>
-            <td class="col-customer">
-              <div class="customer-info-cell">
-                <div class="customer-name">{{ sched.customerName }}</div>
-                <div class="customer-phone" *ngIf="sched.customerPhone">{{ sched.customerPhone }}</div>
-                <div class="customer-email" *ngIf="sched.customerEmail">{{ sched.customerEmail }}</div>
-              </div>
-            </td>
-            <td class="col-location">
-              <div class="location-cell">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span>{{ sched.location || '—' }}</span>
-              </div>
-            </td>
-            <td class="col-status">
-              <span class="status-badge" [ngClass]="getStatusClass(sched.status)">
-                {{ getDisplayStatus(sched.status) }}
-              </span>
-            </td>
-            <td class="col-date">
-              <span class="date-text">{{ formatDate(sched.installationDate) }}</span>
-            </td>
-            <td class="col-action" style="text-align: right;">
-              <button
-                class="btn-table-action"
-                [class.btn-review-approve]="sched.status === 'Sent to CSA'"
-                (click)="openDetailModal(sched)"
-              >
-                View
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (!isLoading && filteredSchedules.length > 0) {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-ticket">Ticket & Product</th>
+              <th class="col-customer">Customer</th>
+              <th class="col-location">Location</th>
+              <th class="col-status">Status</th>
+              <th class="col-date">Installation Date</th>
+              <th class="col-action" style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sched of filteredSchedules; track sched) {
+              <tr [class.csa-pending-row]="sched.status === 'Sent to CSA'">
+                <td class="col-ticket">
+                  <div class="ticket-header-line">
+                    <span class="ticket-id-tag">{{ sched.ticketId }}</span>
+                  </div>
+                  <div class="ticket-subject">{{ sched.productType || 'AirLux Split AC' }}</div>
+                </td>
+                <td class="col-customer">
+                  <div class="customer-info-cell">
+                    <div class="customer-name">{{ sched.customerName }}</div>
+                    @if (sched.customerPhone) {
+                      <div class="customer-phone">{{ sched.customerPhone }}</div>
+                    }
+                    @if (sched.customerEmail) {
+                      <div class="customer-email">{{ sched.customerEmail }}</div>
+                    }
+                  </div>
+                </td>
+                <td class="col-location">
+                  <div class="location-cell">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>{{ sched.location || '—' }}</span>
+                  </div>
+                </td>
+                <td class="col-status">
+                  <span class="status-badge" [ngClass]="getStatusClass(sched.status)">
+                    {{ getDisplayStatus(sched.status) }}
+                  </span>
+                </td>
+                <td class="col-date">
+                  <span class="date-text">{{ formatDate(sched.installationDate) }}</span>
+                </td>
+                <td class="col-action" style="text-align: right;">
+                  <button
+                    class="btn-table-action"
+                    [class.btn-review-approve]="sched.status === 'Sent to CSA'"
+                    (click)="openDetailModal(sched)"
+                    >
+                    View
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
     <!-- Loading State -->
-    <div class="empty-state" *ngIf="isLoading">
-      <div class="spinner"></div>
-      <p>Loading maintenance schedules...</p>
-    </div>
+    @if (isLoading) {
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p>Loading maintenance schedules...</p>
+      </div>
+    }
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!isLoading && filteredSchedules.length === 0">
-      <div class="empty-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
+    @if (!isLoading && filteredSchedules.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <h3>No Schedules Found</h3>
+        @if (searchQuery || statusFilter !== 'All') {
+          <p>
+            No maintenance schedules matching your search or filter criteria.
+          </p>
+        }
+        @if (!searchQuery && statusFilter === 'All') {
+          <p>
+            No maintenance schedules received from the technician yet.
+          </p>
+        }
       </div>
-      <h3>No Schedules Found</h3>
-      <p *ngIf="searchQuery || statusFilter !== 'All'">
-        No maintenance schedules matching your search or filter criteria.
-      </p>
-      <p *ngIf="!searchQuery && statusFilter === 'All'">
-        No maintenance schedules received from the technician yet.
-      </p>
-    </div>
+    }
   </div>
 
   <!-- ========================================== -->
   <!-- MODAL: DETAILED MAINTENANCE SCHEDULE       -->
   <!-- ========================================== -->
-  <div class="modal-backdrop" *ngIf="showDetailModal && selectedSchedule" (click)="closeDetailModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <div>
-          <div class="modal-title-row">
-            <h2 class="modal-title">{{ selectedSchedule.ticketId }}</h2>
-            <span class="status-badge" [ngClass]="getStatusClass(selectedSchedule.status)">
-              {{ getDisplayStatus(selectedSchedule.status) }}
-            </span>
+  @if (showDetailModal && selectedSchedule) {
+    <div class="modal-backdrop" (click)="closeDetailModal()">
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div>
+            <div class="modal-title-row">
+              <h2 class="modal-title">{{ selectedSchedule.ticketId }}</h2>
+              <span class="status-badge" [ngClass]="getStatusClass(selectedSchedule.status)">
+                {{ getDisplayStatus(selectedSchedule.status) }}
+              </span>
+            </div>
+            <p class="modal-subtitle">{{ selectedSchedule.productType || 'AirLux Split AC' }}</p>
           </div>
-          <p class="modal-subtitle">{{ selectedSchedule.productType || 'AirLux Split AC' }}</p>
+          <button class="modal-close-btn" (click)="closeDetailModal()">✕</button>
         </div>
-        <button class="modal-close-btn" (click)="closeDetailModal()">✕</button>
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <!-- Action Required Banner -->
+          @if (selectedSchedule.status === 'Sent to CSA') {
+            <div class="action-required-banner">
+              <div class="banner-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="banner-text">
+                <strong>Action Required — Awaiting Customer Dispatch</strong>
+                <span>The technician has prepared and submitted this maintenance plan. Please review the scheduled dates below, then dispatch to the customer.</span>
+              </div>
+            </div>
+          }
+          <!-- Dispatched Confirmation Banner -->
+          @if (selectedSchedule.status === 'Sent to Customer') {
+            <div class="dispatched-banner">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>Dispatched to customer on {{ formatDate(selectedSchedule.sentToCustomerAt || selectedSchedule.updatedAt) }}.</span>
+            </div>
+          }
+          <!-- Customer & Installation Overview -->
+          <div class="overview-card">
+            <div class="overview-item">
+              <span class="lbl">Customer:</span>
+              <strong>{{ selectedSchedule.customerName }}</strong>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Contact:</span>
+              <span>Phone: {{ selectedSchedule.customerPhone || '—' }} | Email: {{ selectedSchedule.customerEmail || '—' }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Installation Location:</span>
+              <span>{{ selectedSchedule.location || '—' }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Installation Date:</span>
+              <span>{{ formatDate(selectedSchedule.installationDate) }}</span>
+            </div>
+            @if (selectedSchedule.sentToCsaAt) {
+              <div class="overview-item">
+                <span class="lbl">Received from Technician:</span>
+                <span>{{ formatDate(selectedSchedule.sentToCsaAt) }}</span>
+              </div>
+            }
+          </div>
+          <!-- Scheduled Maintenance Services Table -->
+          <div class="services-section">
+            <h4 class="section-subheading">Scheduled Maintenance Services</h4>
+            <table class="services-table">
+              <thead>
+                <tr>
+                  <th>Service Name</th>
+                  <th>Warranty Coverage</th>
+                  <th style="text-align: right;">Scheduled Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (service of selectedSchedule.services; track service; let i = $index) {
+                  <tr>
+                    <td class="service-name-cell">
+                      <span class="service-dot" [class]="'dot-' + (i + 1)"></span>
+                      {{ service.serviceName }}
+                    </td>
+                    <td>
+                      <span class="warranty-tag" [class.covered]="service.underWarranty">
+                        {{ service.underWarranty ? 'Warranty Covered' : 'Standard' }}
+                      </span>
+                    </td>
+                    <td class="service-date-cell">
+                      <span class="date-chip" [class.no-date]="!service.date">
+                        {{ service.date ? formatDate(service.date) : 'Not scheduled' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <!-- Technician Notes (if any) -->
+          @if (selectedSchedule.csaNotes) {
+            <div class="notes-box">
+              <span class="notes-title">Technician Notes:</span>
+              <p>{{ selectedSchedule.csaNotes }}</p>
+            </div>
+          }
+        </div>
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" (click)="closeDetailModal()">Close</button>
+          @if (canSendToCustomer()) {
+            <button
+              type="button"
+              class="btn-send-dispatch"
+              (click)="openConfirmDialog()"
+              [disabled]="isSendingToCustomer"
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              {{ isSendingToCustomer ? 'Sending...' : 'Send Schedule to Customer' }}
+            </button>
+          }
+        </div>
       </div>
-
-      <!-- Modal Body -->
-      <div class="modal-body">
-
-        <!-- Action Required Banner -->
-        <div class="action-required-banner" *ngIf="selectedSchedule.status === 'Sent to CSA'">
-          <div class="banner-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <div class="banner-text">
-            <strong>Action Required — Awaiting Customer Dispatch</strong>
-            <span>The technician has prepared and submitted this maintenance plan. Please review the scheduled dates below, then dispatch to the customer.</span>
-          </div>
-        </div>
-
-        <!-- Dispatched Confirmation Banner -->
-        <div class="dispatched-banner" *ngIf="selectedSchedule.status === 'Sent to Customer'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          <span>Dispatched to customer on {{ formatDate(selectedSchedule.sentToCustomerAt || selectedSchedule.updatedAt) }}.</span>
-        </div>
-
-        <!-- Customer & Installation Overview -->
-        <div class="overview-card">
-          <div class="overview-item">
-            <span class="lbl">Customer:</span>
-            <strong>{{ selectedSchedule.customerName }}</strong>
-          </div>
-          <div class="overview-item">
-            <span class="lbl">Contact:</span>
-            <span>Phone: {{ selectedSchedule.customerPhone || '—' }} | Email: {{ selectedSchedule.customerEmail || '—' }}</span>
-          </div>
-          <div class="overview-item">
-            <span class="lbl">Installation Location:</span>
-            <span>{{ selectedSchedule.location || '—' }}</span>
-          </div>
-          <div class="overview-item">
-            <span class="lbl">Installation Date:</span>
-            <span>{{ formatDate(selectedSchedule.installationDate) }}</span>
-          </div>
-          <div class="overview-item" *ngIf="selectedSchedule.sentToCsaAt">
-            <span class="lbl">Received from Technician:</span>
-            <span>{{ formatDate(selectedSchedule.sentToCsaAt) }}</span>
-          </div>
-        </div>
-
-        <!-- Scheduled Maintenance Services Table -->
-        <div class="services-section">
-          <h4 class="section-subheading">Scheduled Maintenance Services</h4>
-          <table class="services-table">
-            <thead>
-              <tr>
-                <th>Service Name</th>
-                <th>Warranty Coverage</th>
-                <th style="text-align: right;">Scheduled Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let service of selectedSchedule.services; let i = index">
-                <td class="service-name-cell">
-                  <span class="service-dot" [class]="'dot-' + (i + 1)"></span>
-                  {{ service.serviceName }}
-                </td>
-                <td>
-                  <span class="warranty-tag" [class.covered]="service.underWarranty">
-                    {{ service.underWarranty ? 'Warranty Covered' : 'Standard' }}
-                  </span>
-                </td>
-                <td class="service-date-cell">
-                  <span class="date-chip" [class.no-date]="!service.date">
-                    {{ service.date ? formatDate(service.date) : 'Not scheduled' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Technician Notes (if any) -->
-        <div class="notes-box" *ngIf="selectedSchedule.csaNotes">
-          <span class="notes-title">Technician Notes:</span>
-          <p>{{ selectedSchedule.csaNotes }}</p>
-        </div>
-
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn-ghost" (click)="closeDetailModal()">Close</button>
-        <button 
-          type="button" 
-          class="btn-send-dispatch" 
-          *ngIf="canSendToCustomer()"
-          (click)="openConfirmDialog()"
-          [disabled]="isSendingToCustomer"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-          {{ isSendingToCustomer ? 'Sending...' : 'Send Schedule to Customer' }}
-        </button>
-      </div>
-
     </div>
-  </div>
+  }
 
   <!-- Confirmation Dialog Overlay -->
-  <div class="dialog-overlay" *ngIf="showConfirmDialog" (click)="closeConfirmDialog()">
-    <div class="dialog-box" (click)="$event.stopPropagation()">
-      <div class="dialog-header">
-        <h3 class="dialog-title">Send Schedule to Customer</h3>
-        <button class="dialog-close" (click)="closeConfirmDialog()">✕</button>
-      </div>
-
-      <p class="dialog-desc">
-        You are about to dispatch maintenance schedule 
-        <strong>{{ selectedSchedule?.ticketId }}</strong> to 
-        <strong>{{ selectedSchedule?.customerName }}</strong>.
-      </p>
-
-      <div class="dialog-notes">
-        <label for="csa-customer-notes" class="dialog-label">Notes for Customer (optional):</label>
-        <textarea
-          id="csa-customer-notes"
-          [(ngModel)]="customerNotes"
-          placeholder="Add any additional notes for the customer..."
-          rows="3"
-          class="dialog-textarea"
-        ></textarea>
-      </div>
-
-      <div class="dialog-actions">
-        <button class="dialog-cancel-btn" (click)="closeConfirmDialog()">Cancel</button>
-        <button
-          class="dialog-confirm-btn"
-          (click)="confirmSendToCustomer()"
-          [disabled]="isSendingToCustomer"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-          {{ isSendingToCustomer ? 'Sending...' : 'Confirm & Dispatch' }}
-        </button>
+  @if (showConfirmDialog) {
+    <div class="dialog-overlay" (click)="closeConfirmDialog()">
+      <div class="dialog-box" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3 class="dialog-title">Send Schedule to Customer</h3>
+          <button class="dialog-close" (click)="closeConfirmDialog()">✕</button>
+        </div>
+        <p class="dialog-desc">
+          You are about to dispatch maintenance schedule
+          <strong>{{ selectedSchedule?.ticketId }}</strong> to
+          <strong>{{ selectedSchedule?.customerName }}</strong>.
+        </p>
+        <div class="dialog-notes">
+          <label for="csa-customer-notes" class="dialog-label">Notes for Customer (optional):</label>
+          <textarea
+            id="csa-customer-notes"
+            [(ngModel)]="customerNotes"
+            placeholder="Add any additional notes for the customer..."
+            rows="3"
+            class="dialog-textarea"
+          ></textarea>
+        </div>
+        <div class="dialog-actions">
+          <button class="dialog-cancel-btn" (click)="closeConfirmDialog()">Cancel</button>
+          <button
+            class="dialog-confirm-btn"
+            (click)="confirmSendToCustomer()"
+            [disabled]="isSendingToCustomer"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            {{ isSendingToCustomer ? 'Sending...' : 'Confirm & Dispatch' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
 </div>

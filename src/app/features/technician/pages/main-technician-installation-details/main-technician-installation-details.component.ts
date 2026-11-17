@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -50,6 +50,7 @@ interface InstallationDetail {
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule],
   templateUrl: './main-technician-installation-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-installation-details.component.css'})
 export class MainTechnicianInstallationDetailsComponent implements OnInit {
   jobId: string | null = null;

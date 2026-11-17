@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TaskService, TeamDetails, TeamDetailsApiPayload, TeamMember, TimeSlot } from '../../services/task.service';
 import { catchError, EMPTY, tap } from 'rxjs';
@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './service-team-team-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './service-team-team-details.component.css'
 })
 export class ServiceTeamTeamDetailsComponent implements OnInit {

@@ -6,104 +6,104 @@
     <p class="page-subtitle">Read-only record of all payment events</p>
   </div>
 
-<!-- STAT CARDS -->
-<div class="stat-cards">
+  <!-- STAT CARDS -->
+  <div class="stat-cards">
 
-  <!-- Total Events -->
-  <div class="stat-card">
-    <div class="stat-icon total">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="22"
-           height="22"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>
+    <!-- Total Events -->
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <svg xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+
+      <div class="stat-info">
+        <span class="stat-value">{{ totalLogs }}</span>
+        <span class="stat-label">Total Events</span>
+      </div>
     </div>
 
-    <div class="stat-info">
-      <span class="stat-value">{{ totalLogs }}</span>
-      <span class="stat-label">Total Events</span>
+    <!-- Approved -->
+    <div class="stat-card">
+      <div class="stat-icon approved">
+        <svg xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <div class="stat-info">
+        <span class="stat-value">{{ approved }}</span>
+        <span class="stat-label">Approved</span>
+      </div>
     </div>
+
+    <!-- Rejected -->
+    <div class="stat-card">
+      <div class="stat-icon rejected">
+        <svg xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+
+      <div class="stat-info">
+        <span class="stat-value">{{ rejected }}</span>
+        <span class="stat-label">Rejected</span>
+      </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <svg xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 14"/>
+        </svg>
+      </div>
+
+      <div class="stat-info">
+        <span class="stat-value">{{ pending }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+
   </div>
-
-  <!-- Approved -->
-  <div class="stat-card">
-    <div class="stat-icon approved">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="22"
-           height="22"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2.4"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-    </div>
-
-    <div class="stat-info">
-      <span class="stat-value">{{ approved }}</span>
-      <span class="stat-label">Approved</span>
-    </div>
-  </div>
-
-  <!-- Rejected -->
-  <div class="stat-card">
-    <div class="stat-icon rejected">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="22"
-           height="22"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2.2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </div>
-
-    <div class="stat-info">
-      <span class="stat-value">{{ rejected }}</span>
-      <span class="stat-label">Rejected</span>
-    </div>
-  </div>
-
-  <!-- Pending -->
-  <div class="stat-card">
-    <div class="stat-icon pending">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="22"
-           height="22"
-           viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2.2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <polyline points="12 7 12 12 15 14"/>
-      </svg>
-    </div>
-
-    <div class="stat-info">
-      <span class="stat-value">{{ pending }}</span>
-      <span class="stat-label">Pending</span>
-    </div>
-  </div>
-
-</div>
 
   <!-- FILTERS -->
   <div class="filters-bar">
@@ -164,278 +164,321 @@
 
   <!-- TABLE -->
   <div class="table-container">
-    <div class="loading-row" *ngIf="isLoading">
-      <p>Loading audit logs...</p>
-    </div>
+    @if (isLoading) {
+      <div class="loading-row">
+        <p>Loading audit logs...</p>
+      </div>
+    }
 
-    <table class="data-table" *ngIf="!isLoading">
-      <thead>
-        <tr>
-          <th>DATE & TIME</th>
-          <th>CUSTOMER</th>
-          <th>EVENT</th>
-          <th>TYPE</th>
-          <th>AMOUNT</th>
-          <th>REFERENCE</th>
-          <th>PERFORMED BY</th>
-          <th>ACTION</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let log of logs">
-          <td class="date-cell">
-            <span class="date-main">{{ log.createdAt | date:'dd MMM yyyy' }}</span>
-            <span class="date-time">{{ log.createdAt | date:'hh:mm a' }}</span>
-          </td>
-          <td>
-            <span class="customer-name">{{ log.customerName }}</span>
-            <span class="customer-email" *ngIf="log.customerEmail">{{ log.customerEmail }}</span>
-          </td>
-          <td>
-            <span class="event-badge" [ngClass]="getEventClass(log.eventType)">
-              {{ getEventLabel(log.eventType) }}
-            </span>
-          </td>
-          <td>
-            <span class="type-badge" [ngClass]="getTypeClass(log.paymentType)">
-              {{ getTypeLabel(log.paymentType) }}
-            </span>
-          </td>
-          <td class="amount-cell">
-            <span *ngIf="log.amount > 0">LKR {{ log.amount | number:'1.0-0' }}</span>
-            <span *ngIf="log.amount === 0" class="no-amount">—</span>
-          </td>
-          <td class="ref-cell">{{ getReference(log) }}</td>
-          <td class="performed-cell">{{ log.performedByDisplay || log.performedBy }}</td>
-          <td>
-            <div class="action-cell">
-              <button class="view-btn" (click)="openModal(log)">View</button>
-              <span class="attachment-icon" *ngIf="log.slipUrl" title="Has payment slip"></span>
-              <span class="attachment-icon" *ngIf="log.invoiceId" title="Has invoice"></span>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="logs.length === 0 && !isLoading">
-          <td colspan="8" class="empty-row">
-            <div class="empty-state">
-              <span></span>
-              <p>No audit logs found</p>
-              <small>Logs will appear here as payments are processed</small>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    @if (!isLoading) {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>DATE & TIME</th>
+            <th>CUSTOMER</th>
+            <th>EVENT</th>
+            <th>TYPE</th>
+            <th>AMOUNT</th>
+            <th>REFERENCE</th>
+            <th>PERFORMED BY</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs; track log) {
+            <tr>
+              <td class="date-cell">
+                <span class="date-main">{{ log.createdAt | date:'dd MMM yyyy' }}</span>
+                <span class="date-time">{{ log.createdAt | date:'hh:mm a' }}</span>
+              </td>
+              <td>
+                <span class="customer-name">{{ log.customerName }}</span>
+                @if (log.customerEmail) {
+                  <span class="customer-email">{{ log.customerEmail }}</span>
+                }
+              </td>
+              <td>
+                <span class="event-badge" [ngClass]="getEventClass(log.eventType)">
+                  {{ getEventLabel(log.eventType) }}
+                </span>
+              </td>
+              <td>
+                <span class="type-badge" [ngClass]="getTypeClass(log.paymentType)">
+                  {{ getTypeLabel(log.paymentType) }}
+                </span>
+              </td>
+              <td class="amount-cell">
+                @if (log.amount > 0) {
+                  <span>LKR {{ log.amount | number:'1.0-0' }}</span>
+                }
+                @if (log.amount === 0) {
+                  <span class="no-amount">—</span>
+                }
+              </td>
+              <td class="ref-cell">{{ getReference(log) }}</td>
+              <td class="performed-cell">{{ log.performedByDisplay || log.performedBy }}</td>
+              <td>
+                <div class="action-cell">
+                  <button class="view-btn" (click)="openModal(log)">View</button>
+                  @if (log.slipUrl) {
+                    <span class="attachment-icon" title="Has payment slip"></span>
+                  }
+                  @if (log.invoiceId) {
+                    <span class="attachment-icon" title="Has invoice"></span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @if (logs.length === 0 && !isLoading) {
+            <tr>
+              <td colspan="8" class="empty-row">
+                <div class="empty-state">
+                  <span></span>
+                  <p>No audit logs found</p>
+                  <small>Logs will appear here as payments are processed</small>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </div>
 
   <!-- PAGINATION -->
-  <div class="pagination" *ngIf="totalItems > 0">
-    <span class="showing">Showing {{ startItem }}–{{ endItem }} of {{ totalItems }} events</span>
-    <div class="pages">
-      <button [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage === page">{{ page
-        }}</button>
-      <button [disabled]="currentPage * itemsPerPage >= totalItems" (click)="nextPage()">Next</button>
+  @if (totalItems > 0) {
+    <div class="pagination">
+      <span class="showing">Showing {{ startItem }}–{{ endItem }} of {{ totalItems }} events</span>
+      <div class="pages">
+        <button [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+        @for (page of totalPages; track page) {
+          <button (click)="goToPage(page)" [class.active]="currentPage === page">{{ page
+          }}</button>
+        }
+        <button [disabled]="currentPage * itemsPerPage >= totalItems" (click)="nextPage()">Next</button>
+      </div>
     </div>
-  </div>
+  }
 
 </div>
 
 <!-- LOG DETAIL MODAL -->
-<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <div>
-        <h3>Audit Log Detail</h3>
-        <span class="modal-subtitle">Read-only record</span>
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>Audit Log Detail</h3>
+          <span class="modal-subtitle">Read-only record</span>
+        </div>
+        <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
       </div>
-      <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-       <line x1="18" y1="6" x2="6" y2="18"></line>
-<line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
+      @if (selectedLog) {
+        <div class="modal-body">
+          <div class="detail-section">
+            <h4>Event Information</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Event</label>
+                <span class="event-badge" [ngClass]="getEventClass(selectedLog.eventType)">
+                  {{ getEventLabel(selectedLog.eventType) }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <label>Payment Type</label>
+                <span class="type-badge" [ngClass]="getTypeClass(selectedLog.paymentType)">
+                  {{ getTypeLabel(selectedLog.paymentType) }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <label>Date & Time</label>
+                <span>{{ selectedLog.createdAt | date:'dd MMM yyyy, hh:mm:ss a' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Performed By</label>
+                <span>{{ selectedLog.performedBy }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h4>Customer Details</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Customer Name</label>
+                <span>{{ selectedLog.customerName }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Email</label>
+                <span>{{ selectedLog.customerEmail || '—' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h4>Reference Details</h4>
+            <div class="detail-grid">
+              @if (selectedLog.orderId) {
+                <div class="detail-item">
+                  <label>Order ID</label>
+                  <span>{{ selectedLog.orderId }}</span>
+                </div>
+              }
+              @if (selectedLog.ticketId) {
+                <div class="detail-item">
+                  <label>Ticket ID</label>
+                  <span>{{ selectedLog.ticketId }}</span>
+                </div>
+              }
+              @if (selectedLog.invoiceId) {
+                <div class="detail-item">
+                  <label>Invoice ID</label>
+                  <span>{{ selectedLog.invoiceId }}</span>
+                </div>
+              }
+              @if (selectedLog.amount > 0) {
+                <div class="detail-item">
+                  <label>Amount</label>
+                  <span>LKR {{ selectedLog.amount | number:'1.2-2' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          @if (selectedLog.rejectionReason) {
+            <div class="detail-section">
+              <h4>Rejection Reason</h4>
+              <div class="rejection-box">
+                {{ selectedLog.rejectionReason }}
+              </div>
+            </div>
+          }
+          @if (selectedLog.notes) {
+            <div class="detail-section">
+              <h4>Notes</h4>
+              <p class="notes-text">{{ selectedLog.notes }}</p>
+            </div>
+          }
+        </div>
+      }
+      <!-- Attachments -->
+      <div class="modal-footer">
+        <button class="btn-close" (click)="closeModal()">Close</button>
+        <!-- Show slip button if slipUrl exists -->
+        @if (selectedLog?.slipUrl) {
+          <button class="btn-view-slip" (click)="viewSlip()">
+            View Payment Slip
+          </button>
+        }
+        <!-- Show invoice button if invoiceId exists -->
+        @if (selectedLog?.invoiceId) {
+          <button class="btn-view-invoice" (click)="viewInvoice()">
+            View Invoice
+          </button>
+        }
+        <!-- Show both if both exist (e.g. invoice payment verification) -->
+      </div>
     </div>
-
-    <div class="modal-body" *ngIf="selectedLog">
-
-      <div class="detail-section">
-        <h4>Event Information</h4>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Event</label>
-            <span class="event-badge" [ngClass]="getEventClass(selectedLog.eventType)">
-              {{ getEventLabel(selectedLog.eventType) }}
-            </span>
-          </div>
-          <div class="detail-item">
-            <label>Payment Type</label>
-            <span class="type-badge" [ngClass]="getTypeClass(selectedLog.paymentType)">
-              {{ getTypeLabel(selectedLog.paymentType) }}
-            </span>
-          </div>
-          <div class="detail-item">
-            <label>Date & Time</label>
-            <span>{{ selectedLog.createdAt | date:'dd MMM yyyy, hh:mm:ss a' }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Performed By</label>
-            <span>{{ selectedLog.performedBy }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h4>Customer Details</h4>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Customer Name</label>
-            <span>{{ selectedLog.customerName }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Email</label>
-            <span>{{ selectedLog.customerEmail || '—' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h4>Reference Details</h4>
-        <div class="detail-grid">
-          <div class="detail-item" *ngIf="selectedLog.orderId">
-            <label>Order ID</label>
-            <span>{{ selectedLog.orderId }}</span>
-          </div>
-          <div class="detail-item" *ngIf="selectedLog.ticketId">
-            <label>Ticket ID</label>
-            <span>{{ selectedLog.ticketId }}</span>
-          </div>
-          <div class="detail-item" *ngIf="selectedLog.invoiceId">
-            <label>Invoice ID</label>
-            <span>{{ selectedLog.invoiceId }}</span>
-          </div>
-          <div class="detail-item" *ngIf="selectedLog.amount > 0">
-            <label>Amount</label>
-            <span>LKR {{ selectedLog.amount | number:'1.2-2' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="detail-section" *ngIf="selectedLog.rejectionReason">
-        <h4>Rejection Reason</h4>
-        <div class="rejection-box">
-          {{ selectedLog.rejectionReason }}
-        </div>
-      </div>
-
-      <div class="detail-section" *ngIf="selectedLog.notes">
-        <h4>Notes</h4>
-        <p class="notes-text">{{ selectedLog.notes }}</p>
-      </div>
-
-    </div>
-
-    <!-- Attachments -->
-    <div class="modal-footer">
-      <button class="btn-close" (click)="closeModal()">Close</button>
-
-      <!-- Show slip button if slipUrl exists -->
-      <button class="btn-view-slip" *ngIf="selectedLog?.slipUrl" (click)="viewSlip()">
-        View Payment Slip
-      </button>
-
-      <!-- Show invoice button if invoiceId exists -->
-      <button class="btn-view-invoice" *ngIf="selectedLog?.invoiceId" (click)="viewInvoice()">
-        View Invoice
-      </button>
-
-      <!-- Show both if both exist (e.g. invoice payment verification) -->
-    </div>
-
   </div>
-</div>
+}
 <!-- SLIP POPUP -->
-<div class="modal-overlay" *ngIf="showSlipPopup" (click)="closeSlipPopup()">
-  <div class="modal" (click)="$event.stopPropagation()" style="max-width:620px;">
-    <div class="modal-header">
-      <h3>Payment Slip</h3>
-      <button class="modal-close" (click)="closeSlipPopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-<line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
-    </div>
-    <div class="modal-body" style="text-align:center; padding:20px;">
-      <img *ngIf="isImage(slipUrlToShow)" [src]="slipUrlToShow"
-        style="max-width:100%; max-height:500px; border-radius:8px;" alt="Payment Slip" />
-      <iframe *ngIf="isPDF(slipUrlToShow)" [src]="slipUrlToShow" width="100%" height="450px"
-        style="border:none; border-radius:8px;"></iframe>
-      <div *ngIf="!isImage(slipUrlToShow) && !isPDF(slipUrlToShow)"
-        style="padding:16px; background:#f9fafb; border-radius:8px; word-break:break-all; text-align:left;">
-        <p style="color:#6b7280; font-size:13px; margin-bottom:8px;">Slip reference:</p>
-        <code style="font-size:12px;">{{ slipUrlToShow }}</code>
+@if (showSlipPopup) {
+  <div class="modal-overlay" (click)="closeSlipPopup()">
+    <div class="modal" (click)="$event.stopPropagation()" style="max-width:620px;">
+      <div class="modal-header">
+        <h3>Payment Slip</h3>
+        <button class="modal-close" (click)="closeSlipPopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding:20px;">
+        @if (isImage(slipUrlToShow)) {
+          <img [src]="slipUrlToShow"
+            style="max-width:100%; max-height:500px; border-radius:8px;" alt="Payment Slip" />
+        }
+        @if (isPDF(slipUrlToShow)) {
+          <iframe [src]="slipUrlToShow" width="100%" height="450px"
+          style="border:none; border-radius:8px;"></iframe>
+        }
+        @if (!isImage(slipUrlToShow) && !isPDF(slipUrlToShow)) {
+          <div
+            style="padding:16px; background:#f9fafb; border-radius:8px; word-break:break-all; text-align:left;">
+            <p style="color:#6b7280; font-size:13px; margin-bottom:8px;">Slip reference:</p>
+            <code style="font-size:12px;">{{ slipUrlToShow }}</code>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-close" (click)="closeSlipPopup()">Close</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-close" (click)="closeSlipPopup()">Close</button>
-    </div>
   </div>
-</div>
+}
 
 <!-- INVOICE POPUP -->
-<div class="modal-overlay" *ngIf="showInvoicePopup" (click)="closeInvoicePopup()">
-  <div class="modal" (click)="$event.stopPropagation()" style="max-width:700px;">
-    <div class="modal-header">
-      <h3>Invoice — {{ invoiceToShow?.invoiceNumber }}</h3>
-      <button class="modal-close" (click)="closeInvoicePopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-       <line x1="18" y1="6" x2="6" y2="18"></line>
-<line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
-    </div>
-    <div class="modal-body" *ngIf="invoiceToShow">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-        <div>
-          <p class="info-label">Invoice No</p>
-          <p class="info-value">{{ invoiceToShow.invoiceNumber }}</p>
-        </div>
-        <div>
-          <p class="info-label">Status</p>
-          <p class="info-value">{{ invoiceToShow.status }}</p>
-        </div>
-        <div>
-          <p class="info-label">Customer</p>
-          <p class="info-value">{{ invoiceToShow.customerName }}</p>
-        </div>
-        <div>
-          <p class="info-label">Grand Total</p>
-          <p class="info-value" style="font-weight:700; color:#2d5a3d;">LKR {{ invoiceToShow.grandTotal | number:'1.0-0'
-            }}</p>
-        </div>
+@if (showInvoicePopup) {
+  <div class="modal-overlay" (click)="closeInvoicePopup()">
+    <div class="modal" (click)="$event.stopPropagation()" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>Invoice — {{ invoiceToShow?.invoiceNumber }}</h3>
+        <button class="modal-close" (click)="closeInvoicePopup()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
       </div>
-      <hr style="border-color:#e5e7eb; margin:12px 0;" />
-      <table style="width:100%; border-collapse:collapse; font-size:13px;">
-        <thead style="background:#eef2ff;">
-          <tr>
-            <th style="padding:8px 12px; text-align:left;">Item</th>
-            <th style="padding:8px 12px;">Qty</th>
-            <th style="padding:8px 12px;">Rate (LKR)</th>
-            <th style="padding:8px 12px;">Amount (LKR)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of invoiceToShow.items" style="border-top:1px solid #f1f5f9;">
-            <td style="padding:8px 12px;">{{ item.itemName }}</td>
-            <td style="padding:8px 12px; text-align:center;">{{ item.qty }}</td>
-            <td style="padding:8px 12px; text-align:right;">{{ item.rate | number:'1.0-0' }}</td>
-            <td style="padding:8px 12px; text-align:right;">{{ item.amount | number:'1.0-0' }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div
-        style="display:flex; justify-content:flex-end; margin-top:12px; font-size:15px; font-weight:700; color:#2d1b69;">
-        Grand Total: LKR {{ invoiceToShow.grandTotal | number:'1.0-0' }}
+      @if (invoiceToShow) {
+        <div class="modal-body">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div>
+              <p class="info-label">Invoice No</p>
+              <p class="info-value">{{ invoiceToShow.invoiceNumber }}</p>
+            </div>
+            <div>
+              <p class="info-label">Status</p>
+              <p class="info-value">{{ invoiceToShow.status }}</p>
+            </div>
+            <div>
+              <p class="info-label">Customer</p>
+              <p class="info-value">{{ invoiceToShow.customerName }}</p>
+            </div>
+            <div>
+              <p class="info-label">Grand Total</p>
+              <p class="info-value" style="font-weight:700; color:#2d5a3d;">LKR {{ invoiceToShow.grandTotal | number:'1.0-0'
+              }}</p>
+            </div>
+          </div>
+          <hr style="border-color:#e5e7eb; margin:12px 0;" />
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead style="background:#eef2ff;">
+              <tr>
+                <th style="padding:8px 12px; text-align:left;">Item</th>
+                <th style="padding:8px 12px;">Qty</th>
+                <th style="padding:8px 12px;">Rate (LKR)</th>
+                <th style="padding:8px 12px;">Amount (LKR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of invoiceToShow.items; track item) {
+                <tr style="border-top:1px solid #f1f5f9;">
+                  <td style="padding:8px 12px;">{{ item.itemName }}</td>
+                  <td style="padding:8px 12px; text-align:center;">{{ item.qty }}</td>
+                  <td style="padding:8px 12px; text-align:right;">{{ item.rate | number:'1.0-0' }}</td>
+                  <td style="padding:8px 12px; text-align:right;">{{ item.amount | number:'1.0-0' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div
+            style="display:flex; justify-content:flex-end; margin-top:12px; font-size:15px; font-weight:700; color:#2d1b69;">
+            Grand Total: LKR {{ invoiceToShow.grandTotal | number:'1.0-0' }}
+          </div>
+        </div>
+      }
+      <div class="modal-footer">
+        <button class="btn-close" (click)="closeInvoicePopup()">Close</button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-close" (click)="closeInvoicePopup()">Close</button>
     </div>
   </div>
-</div>
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicePaymentService } from '../../services/service-payment.service';
@@ -8,6 +8,7 @@ import { ServicePaymentService } from '../../services/service-payment.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './service-rejected-payments.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./service-rejected-payments.component.css']
 })
 export class ServiceRejectedPaymentsComponent implements OnInit, OnDestroy {

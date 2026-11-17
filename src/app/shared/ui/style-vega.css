@@ -1,0 +1,36 @@
+/* Spartan UI 1.9.0 Vega (MIT): styles for installed input/dialog components only. */
+.style-vega {
+	.spartan-rtl-flip {
+		@apply rtl:rotate-180;
+	}
+	.spartan-dialog-overlay {
+		@apply data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 isolate bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs;
+	}
+
+	.spartan-dialog-content {
+		@apply bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-6 rounded-xl p-6 text-sm ring-1 duration-100 sm:max-w-md;
+	}
+
+	.spartan-dialog-close {
+		@apply absolute end-4 top-4;
+	}
+
+	.spartan-dialog-header {
+		@apply gap-2;
+	}
+
+	.spartan-dialog-footer {
+		@apply gap-2;
+	}
+
+	.spartan-dialog-title {
+		@apply leading-none font-medium;
+	}
+
+	.spartan-dialog-description {
+		@apply text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3;
+	}
+	.spartan-input {
+		@apply dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 data-[matches-spartan-invalid=true]:ring-destructive/20 dark:data-[matches-spartan-invalid=true]:ring-destructive/40 data-[matches-spartan-invalid=true]:border-destructive dark:data-[matches-spartan-invalid=true]:border-destructive/50 h-9 rounded-md border bg-transparent px-2.5 py-1 text-base shadow-xs transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium focus-visible:ring-3 data-[matches-spartan-invalid=true]:ring-3 md:text-sm;
+	}
+}

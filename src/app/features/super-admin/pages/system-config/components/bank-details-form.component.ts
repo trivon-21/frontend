@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SystemConfig, BankDetails } from '../../../models/system-config.model';
@@ -16,212 +16,227 @@ import { SystemConfig, BankDetails } from '../../../models/system-config.model';
             Manage company bank account information displayed to customers for offline bank transfers and invoice settlements
           </p>
         </div>
-        <div *ngIf="config?.bankDetails?.updatedAt" class="audit-badge">
-          <span class="badge-dot"></span>
-          <span>Last modified: {{ config?.bankDetails?.updatedAt | date:'mediumDate' }}</span>
+        @if (config?.bankDetails?.updatedAt) {
+          <div class="audit-badge">
+            <span class="badge-dot"></span>
+            <span>Last modified: {{ $safeNavigationMigration(config?.bankDetails?.updatedAt) | date:'mediumDate' }}</span>
+          </div>
+        }
+      </div>
+
+      @if (config) {
+        <div class="form-container">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-grid">
+              <!-- Bank Name -->
+              <div class="form-group">
+                <label for="bankName">
+                  Bank Name
+                  <span class="required">*</span>
+                </label>
+                <input
+                  id="bankName"
+                  type="text"
+                  formControlName="bankName"
+                  placeholder="e.g., Commercial Bank"
+                  class="form-input"
+                  [class.invalid]="isFieldInvalid('bankName')"
+                  />
+                @if (isFieldInvalid('bankName')) {
+                  <p class="field-error">
+                    Bank name is required
+                  </p>
+                }
+                @if (!isFieldInvalid('bankName')) {
+                  <p class="help-text">
+                    Financial institution name
+                  </p>
+                }
+              </div>
+              <!-- Branch Name -->
+              <div class="form-group">
+                <label for="branch">
+                  Branch
+                  <span class="required">*</span>
+                </label>
+                <input
+                  id="branch"
+                  type="text"
+                  formControlName="branch"
+                  placeholder="e.g., Negombo or Colombo 03"
+                  class="form-input"
+                  [class.invalid]="isFieldInvalid('branch')"
+                  />
+                @if (isFieldInvalid('branch')) {
+                  <p class="field-error">
+                    Branch name is required
+                  </p>
+                }
+                @if (!isFieldInvalid('branch')) {
+                  <p class="help-text">
+                    Issuing branch location
+                  </p>
+                }
+              </div>
+              <!-- Account Holder Name -->
+              <div class="form-group">
+                <label for="accountName">
+                  Account Holder Name
+                  <span class="required">*</span>
+                </label>
+                <input
+                  id="accountName"
+                  type="text"
+                  formControlName="accountName"
+                  placeholder="e.g., Airlux Engineering (Pvt) Ltd"
+                  class="form-input"
+                  [class.invalid]="isFieldInvalid('accountName')"
+                  />
+                @if (isFieldInvalid('accountName')) {
+                  <p class="field-error">
+                    Account holder name is required
+                  </p>
+                }
+                @if (!isFieldInvalid('accountName')) {
+                  <p class="help-text">
+                    Registered corporate business account name
+                  </p>
+                }
+              </div>
+              <!-- Account Number -->
+              <div class="form-group">
+                <label for="accountNumber">
+                  Account Number
+                  <span class="required">*</span>
+                </label>
+                <input
+                  id="accountNumber"
+                  type="text"
+                  formControlName="accountNumber"
+                  placeholder="e.g., 8001234567"
+                  class="form-input mono"
+                  [class.invalid]="isFieldInvalid('accountNumber')"
+                  />
+                @if (isFieldInvalid('accountNumber')) {
+                  <p class="field-error">
+                    Valid numeric account number (min 6 digits) is required
+                  </p>
+                }
+                @if (!isFieldInvalid('accountNumber')) {
+                  <p class="help-text">
+                    Primary numeric account identifier
+                  </p>
+                }
+              </div>
+              <!-- Account Type -->
+              <div class="form-group">
+                <label for="type">
+                  Account Type
+                  <span class="required">*</span>
+                </label>
+                <select id="type" formControlName="type" class="form-input form-select">
+                  <option value="Current">Current Account</option>
+                  <option value="Savings">Savings Account</option>
+                  <option value="Corporate">Corporate Account</option>
+                </select>
+                <p class="help-text">Deposit account classification</p>
+              </div>
+              <!-- Currency -->
+              <div class="form-group">
+                <label for="currency">Currency</label>
+                <input
+                  id="currency"
+                  type="text"
+                  formControlName="currency"
+                  class="form-input disabled-input"
+                  readonly
+                  />
+                <p class="help-text">Company operates strictly in Sri Lankan Rupees (LKR)</p>
+              </div>
+            </div>
+            <!-- Reason for Change -->
+            <div class="form-group reason-group">
+              <label for="reason">Reason for Update (Audit Trail)</label>
+              <input
+                id="reason"
+                type="text"
+                formControlName="reason"
+                placeholder="e.g., Changed default operational account to Commercial Bank Negombo"
+                class="form-input"
+                />
+              <p class="help-text">Optional description recorded in platform audit logs</p>
+            </div>
+            <!-- Customer Transfer Live Preview -->
+            <div class="preview-section">
+              <div class="preview-header">
+                <span class="preview-badge">Customer View Preview</span>
+                <h3>How Customers See Bank Transfer Details</h3>
+              </div>
+              <p class="preview-text">
+                This card reflects exactly how banking instructions appear on customer checkout and invoice payment screens:
+              </p>
+              <div class="preview-card">
+                <div class="preview-card-header">
+                  <div class="bank-avatar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                  </div>
+                  <div class="bank-title-block">
+                    <h4 class="preview-bank-name">{{ form.get('bankName')?.value || 'Bank Name' }}</h4>
+                    <span class="preview-bank-branch">{{ form.get('branch')?.value || 'Branch Location' }}</span>
+                  </div>
+                  <span class="preview-currency-tag">{{ form.get('currency')?.value || 'LKR' }}</span>
+                </div>
+                <div class="preview-card-body">
+                  <div class="preview-item">
+                    <span class="item-label">Account Holder</span>
+                    <span class="item-value bold">{{ form.get('accountName')?.value || 'Airlux Engineering (Pvt) Ltd' }}</span>
+                  </div>
+                  <div class="preview-item">
+                    <span class="item-label">Account Number</span>
+                    <span class="item-value mono highlight">{{ form.get('accountNumber')?.value || '0000000000' }}</span>
+                  </div>
+                  <div class="preview-item">
+                    <span class="item-label">Account Type</span>
+                    <span class="item-value">{{ form.get('type')?.value || 'Current' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="submit"
+                [disabled]="!form.valid || !form.dirty || isSaving"
+                class="btn btn-primary"
+                >
+                @if (!isSaving) {
+                  <span>Save Changes</span>
+                }
+                @if (isSaving) {
+                  <span class="btn-loading">
+                    <span class="spinner-small"></span>
+                    Saving...
+                  </span>
+                }
+              </button>
+              <button
+                type="button"
+                (click)="resetForm()"
+                class="btn btn-secondary"
+                [disabled]="isSaving || !form.dirty"
+                >
+                Reset
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
-
-      <div *ngIf="config" class="form-container">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <div class="form-grid">
-            <!-- Bank Name -->
-            <div class="form-group">
-              <label for="bankName">
-                Bank Name
-                <span class="required">*</span>
-              </label>
-              <input
-                id="bankName"
-                type="text"
-                formControlName="bankName"
-                placeholder="e.g., Commercial Bank"
-                class="form-input"
-                [class.invalid]="isFieldInvalid('bankName')"
-              />
-              <p *ngIf="isFieldInvalid('bankName')" class="field-error">
-                Bank name is required
-              </p>
-              <p *ngIf="!isFieldInvalid('bankName')" class="help-text">
-                Financial institution name
-              </p>
-            </div>
-
-            <!-- Branch Name -->
-            <div class="form-group">
-              <label for="branch">
-                Branch
-                <span class="required">*</span>
-              </label>
-              <input
-                id="branch"
-                type="text"
-                formControlName="branch"
-                placeholder="e.g., Negombo or Colombo 03"
-                class="form-input"
-                [class.invalid]="isFieldInvalid('branch')"
-              />
-              <p *ngIf="isFieldInvalid('branch')" class="field-error">
-                Branch name is required
-              </p>
-              <p *ngIf="!isFieldInvalid('branch')" class="help-text">
-                Issuing branch location
-              </p>
-            </div>
-
-            <!-- Account Holder Name -->
-            <div class="form-group">
-              <label for="accountName">
-                Account Holder Name
-                <span class="required">*</span>
-              </label>
-              <input
-                id="accountName"
-                type="text"
-                formControlName="accountName"
-                placeholder="e.g., Airlux Engineering (Pvt) Ltd"
-                class="form-input"
-                [class.invalid]="isFieldInvalid('accountName')"
-              />
-              <p *ngIf="isFieldInvalid('accountName')" class="field-error">
-                Account holder name is required
-              </p>
-              <p *ngIf="!isFieldInvalid('accountName')" class="help-text">
-                Registered corporate business account name
-              </p>
-            </div>
-
-            <!-- Account Number -->
-            <div class="form-group">
-              <label for="accountNumber">
-                Account Number
-                <span class="required">*</span>
-              </label>
-              <input
-                id="accountNumber"
-                type="text"
-                formControlName="accountNumber"
-                placeholder="e.g., 8001234567"
-                class="form-input mono"
-                [class.invalid]="isFieldInvalid('accountNumber')"
-              />
-              <p *ngIf="isFieldInvalid('accountNumber')" class="field-error">
-                Valid numeric account number (min 6 digits) is required
-              </p>
-              <p *ngIf="!isFieldInvalid('accountNumber')" class="help-text">
-                Primary numeric account identifier
-              </p>
-            </div>
-
-            <!-- Account Type -->
-            <div class="form-group">
-              <label for="type">
-                Account Type
-                <span class="required">*</span>
-              </label>
-              <select id="type" formControlName="type" class="form-input form-select">
-                <option value="Current">Current Account</option>
-                <option value="Savings">Savings Account</option>
-                <option value="Corporate">Corporate Account</option>
-              </select>
-              <p class="help-text">Deposit account classification</p>
-            </div>
-
-            <!-- Currency -->
-            <div class="form-group">
-              <label for="currency">Currency</label>
-              <input
-                id="currency"
-                type="text"
-                formControlName="currency"
-                class="form-input disabled-input"
-                readonly
-              />
-              <p class="help-text">Company operates strictly in Sri Lankan Rupees (LKR)</p>
-            </div>
-          </div>
-
-          <!-- Reason for Change -->
-          <div class="form-group reason-group">
-            <label for="reason">Reason for Update (Audit Trail)</label>
-            <input
-              id="reason"
-              type="text"
-              formControlName="reason"
-              placeholder="e.g., Changed default operational account to Commercial Bank Negombo"
-              class="form-input"
-            />
-            <p class="help-text">Optional description recorded in platform audit logs</p>
-          </div>
-
-          <!-- Customer Transfer Live Preview -->
-          <div class="preview-section">
-            <div class="preview-header">
-              <span class="preview-badge">Customer View Preview</span>
-              <h3>How Customers See Bank Transfer Details</h3>
-            </div>
-            <p class="preview-text">
-              This card reflects exactly how banking instructions appear on customer checkout and invoice payment screens:
-            </p>
-
-            <div class="preview-card">
-              <div class="preview-card-header">
-                <div class="bank-avatar">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="2" y1="10" x2="22" y2="10"/>
-                  </svg>
-                </div>
-                <div class="bank-title-block">
-                  <h4 class="preview-bank-name">{{ form.get('bankName')?.value || 'Bank Name' }}</h4>
-                  <span class="preview-bank-branch">{{ form.get('branch')?.value || 'Branch Location' }}</span>
-                </div>
-                <span class="preview-currency-tag">{{ form.get('currency')?.value || 'LKR' }}</span>
-              </div>
-
-              <div class="preview-card-body">
-                <div class="preview-item">
-                  <span class="item-label">Account Holder</span>
-                  <span class="item-value bold">{{ form.get('accountName')?.value || 'Airlux Engineering (Pvt) Ltd' }}</span>
-                </div>
-                <div class="preview-item">
-                  <span class="item-label">Account Number</span>
-                  <span class="item-value mono highlight">{{ form.get('accountNumber')?.value || '0000000000' }}</span>
-                </div>
-                <div class="preview-item">
-                  <span class="item-label">Account Type</span>
-                  <span class="item-value">{{ form.get('type')?.value || 'Current' }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button
-              type="submit"
-              [disabled]="!form.valid || !form.dirty || isSaving"
-              class="btn btn-primary"
-            >
-              <span *ngIf="!isSaving">Save Changes</span>
-              <span *ngIf="isSaving" class="btn-loading">
-                <span class="spinner-small"></span>
-                Saving...
-              </span>
-            </button>
-            <button
-              type="button"
-              (click)="resetForm()"
-              class="btn btn-secondary"
-              [disabled]="isSaving || !form.dirty"
-            >
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .bank-details-section {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FinancialReportService } from '../../services/financial-report.service';
@@ -8,6 +8,7 @@ import { FinancialReportService } from '../../services/financial-report.service'
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './financial-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./financial-report.component.css']
 })
 export class FinancialReportComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
@@ -8,6 +8,7 @@ import { TaskService } from '../../services/task.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './service-team-service-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './service-team-service-details.component.css'
 })
 export class ServiceTeamServiceDetailsComponent implements OnInit {
@@ -240,7 +241,7 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     this.reportSubmitSuccess = '';
 
     const recordId = this.ticket.sourceId || this.ticket._id || this.ticket.id;
-    
+
     // Intercept fallback tickets for local preview
     if (['238489782', '238489783', '238489784'].includes(String(recordId))) {
       setTimeout(() => {

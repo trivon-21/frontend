@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { PortalIconsModule } from '../../../../../shared/components/portal-icons
   standalone: true,
   imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ClickOutsideDirective, PortalIconsModule],
   templateUrl: './super-admin-layout.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./super-admin-layout.component.css'],
 })
 export class SuperAdminLayoutComponent implements OnInit, OnDestroy {
@@ -173,7 +174,7 @@ export class SuperAdminLayoutComponent implements OnInit, OnDestroy {
   onGlobalSearch(): void {
     if (!this.searchQuery.trim()) return;
     const query = this.searchQuery.trim().toLowerCase();
-    
+
     // Smart routing based on query prefix or default search
     if (query.startsWith('ord') || query.includes('order')) {
       this.router.navigate(['/super-admin/core-operations'], {

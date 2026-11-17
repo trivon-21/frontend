@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../../environments/environment';
@@ -12,7 +12,7 @@ describe('AssetManagementDashboardComponent HTTP contract', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ApiService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [ApiService, provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     component = new AssetManagementDashboardComponent(TestBed.inject(ApiService));
     http = TestBed.inject(HttpTestingController);

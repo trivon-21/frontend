@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -79,6 +79,7 @@ type TechTeamApiItem = {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-service-request-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-service-request-details.component.css'})
 export class MainTechnicianServiceRequestDetailsComponent implements OnInit {
   id: string | null = null;

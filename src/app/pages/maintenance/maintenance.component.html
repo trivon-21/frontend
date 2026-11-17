@@ -12,30 +12,40 @@
     <!-- Main Message -->
     <div class="maintenance-header">
       <h1>System Maintenance</h1>
-      <p class="maintenance-status" *ngIf="!isInstantMaintenance">
-        We're performing scheduled maintenance
-      </p>
-      <p class="maintenance-status" *ngIf="isInstantMaintenance">
-        We're performing important maintenance on the system
-      </p>
+      @if (!isInstantMaintenance) {
+        <p class="maintenance-status">
+          We're performing scheduled maintenance
+        </p>
+      }
+      @if (isInstantMaintenance) {
+        <p class="maintenance-status">
+          We're performing important maintenance on the system
+        </p>
+      }
     </div>
 
     <!-- Custom Message -->
-    <div class="maintenance-message" *ngIf="maintenanceMessage">
-      <p>{{ maintenanceMessage }}</p>
-    </div>
+    @if (maintenanceMessage) {
+      <div class="maintenance-message">
+        <p>{{ maintenanceMessage }}</p>
+      </div>
+    }
 
     <!-- Reason -->
-    <div class="maintenance-reason" *ngIf="maintenanceReason">
-      <h3>Reason:</h3>
-      <p>{{ maintenanceReason }}</p>
-    </div>
+    @if (maintenanceReason) {
+      <div class="maintenance-reason">
+        <h3>Reason:</h3>
+        <p>{{ maintenanceReason }}</p>
+      </div>
+    }
 
     <!-- Countdown Timer -->
-    <div class="countdown" *ngIf="!isInstantMaintenance && countdownDisplay">
-      <div class="countdown-label">Expected Duration:</div>
-      <div class="countdown-timer">{{ countdownDisplay }}</div>
-    </div>
+    @if (!isInstantMaintenance && countdownDisplay) {
+      <div class="countdown">
+        <div class="countdown-label">Expected Duration:</div>
+        <div class="countdown-timer">{{ countdownDisplay }}</div>
+      </div>
+    }
 
     <!-- Support Info -->
     <div class="support-section">

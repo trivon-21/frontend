@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -83,6 +83,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './main-technician-materials.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-materials.component.css'})
 export class MainTechnicianMaterialsComponent implements OnInit {
   searchQuery: string = '';
@@ -147,7 +148,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
         this.searchQuery = query;
         this.applyFilters();
       });
-    
+
     // Load catalog first, then the requests
     this.loadMaterialCatalog();
   }
@@ -157,13 +158,13 @@ export class MainTechnicianMaterialsComponent implements OnInit {
       .get<{ success: boolean; data: MaterialCatalogItem[] }>(`${this.apiUrl}/catalog`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: response => { 
-          this.materialCatalog = response.data || []; 
+        next: response => {
+          this.materialCatalog = response.data || [];
           this.loadMaterialRequests();
           this.loadNewStatusTicketIds();
         },
-        error: () => { 
-          this.error = 'The material catalog could not be loaded.'; 
+        error: () => {
+          this.error = 'The material catalog could not be loaded.';
           this.loadMaterialRequests();
           this.loadNewStatusTicketIds();
         },
@@ -218,16 +219,16 @@ export class MainTechnicianMaterialsComponent implements OnInit {
   private mergeRequests(): void {
     // Only add dropdown requests that don't already exist in the apiRequests list
     const combined = [...this.apiRequests];
-    
+
     this.dropdownRequests.forEach(dr => {
       if (!combined.some(ar => ar.id === dr.id)) {
         combined.push(dr);
       }
     });
-    
+
     // Sort combined by date descending
     combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
+
     this.requests = combined;
     this.applyFilters();
   }
@@ -288,8 +289,8 @@ export class MainTechnicianMaterialsComponent implements OnInit {
               location: item.location || '',
               siteDetails: item.siteDetails || {}
             }))
-            .filter((ticket) => 
-              ticket.id !== '#N/A' && 
+            .filter((ticket) =>
+              ticket.id !== '#N/A' &&
               (ticket.status === 'New' || ticket.status === 'Finance Rejected' || ticket.status === 'REJECTED')
             );
 
@@ -299,7 +300,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
             ticketId: ticket.id.replace('#', '')
           }));
           this.mergeRequests();
-          
+
           const ids = tickets.map((ticket) => ticket.id);
 
           this.newStatusTicketIds = Array.from(new Set(ids));
@@ -432,7 +433,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
     this.newRequest.rejectionReason = selectedTicket?.financeNotes || '';
     this.newRequest.serviceType = selectedTicket?.serviceType || '';
     this.newRequest.siteDetails = selectedTicket?.siteDetails || {};
-    
+
     // Populate materials if they exist on the selected ticket (e.g. Finance Rejected or Company Initiated Maintenance default materials)
     if (selectedTicket?.materials && selectedTicket.materials.length > 0) {
       this.newRequest.items = selectedTicket.materials.map((material: any) => ({
@@ -609,7 +610,7 @@ export class MainTechnicianMaterialsComponent implements OnInit {
 
     const ticketId = this.selectedRequest.id.replace(/^#/, '');
     const materialRequestId = this.selectedRequest.materialRequestId || ticketId;
-    
+
     // Prepare the data to send to inventory manager
     const inventoryManagerData = {
       serviceRequestId: ticketId,

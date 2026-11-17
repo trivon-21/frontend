@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -16,6 +16,7 @@ import { FooterComponent } from '../../../components/footer/footer.component';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './checkout.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './checkout.css',
 })
 export class Checkout implements OnInit {
@@ -45,7 +46,7 @@ export class Checkout implements OnInit {
   deliveryCharge: number = 0;
   discount: number = 0;
   total: number = 0;
-  
+
   // Generated Order Details
   generatedOrderId: string = '';
   isOrderInitialized: boolean = false;
@@ -241,7 +242,7 @@ export class Checkout implements OnInit {
     const sequence = ['firstName', 'lastName', 'address', 'city', 'postalCode', 'phone', 'email'];
     const idx = sequence.indexOf(controlName);
     if (idx <= 0) return true;
-    
+
     const control = this.shippingForm.get(controlName);
     // Field is accessible if:
     // 1. All previous fields are valid
@@ -256,7 +257,7 @@ export class Checkout implements OnInit {
     const sequence = ['firstName', 'lastName', 'address', 'city', 'postalCode', 'phone', 'email'];
     const idx = sequence.indexOf(controlName);
     if (idx <= 0) return true;
-    
+
     for (let i = 0; i < idx; i++) {
       const prevControl = this.shippingForm.get(sequence[i]);
       if (!prevControl || prevControl.invalid) return false;
@@ -327,7 +328,7 @@ export class Checkout implements OnInit {
         }
 
         this.subtotal = this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        this.additionalCharges = res.additionalCharges || 0; 
+        this.additionalCharges = res.additionalCharges || 0;
         this.deliveryCharge = res.deliveryCharge || 0;
         this.discount = res.discount || 0;
         this.total = (this.subtotal || 0) + (this.additionalCharges || 0) + (this.deliveryCharge || 0) - (this.discount || 0);
@@ -473,7 +474,7 @@ export class Checkout implements OnInit {
   applyRejectedOrder(order: any): void {
     if (!order) return;
     this.targetOrderId = order.id || order._id || this.reuploadOrderId;
-    
+
     // Prefer business orderReference (e.g. ALX-BO-0053) over internal schema ref (ORD-...)
     if (order.orderReference) {
       this.generatedOrderId = order.orderReference;
@@ -489,7 +490,7 @@ export class Checkout implements OnInit {
         next: (res: any) => {
           const list = res?.data || res;
           if (Array.isArray(list)) {
-            const match = list.find((o: any) => 
+            const match = list.find((o: any) =>
               (o._id && (String(o._id) === String(this.targetOrderId) || String(o._id) === String(order.id))) ||
               (o.id && (String(o.id) === String(this.targetOrderId) || String(o.id) === String(order.id))) ||
               (o.orderRef && o.orderRef === order.orderRef)
@@ -614,14 +615,14 @@ export class Checkout implements OnInit {
 
   initializeOrder(silent: boolean = false) {
     const consultationCompleted = localStorage.getItem('consultationCompleted') === 'true';
-    const orderData = { 
-      userId: this.userId, 
+    const orderData = {
+      userId: this.userId,
       selectedItems: this.selectedItemIds,
       consultationCompleted: consultationCompleted
     };
     this.isInitializing = true;
     console.log(`[Checkout] Initializing order. Type: ${this.isBuyOnly ? 'Buy Only' : 'Buy & Install'}, data:`, orderData);
-    
+
     let obs;
     if (this.isBuyOnly) {
       console.log('[Checkout] Calling createBuyOnlyOrder');
@@ -636,7 +637,7 @@ export class Checkout implements OnInit {
         this.isInitializing = false;
         const data = res?.data || res;
         this.generatedOrderId = data?.orderReference || data?.orderId || '';
-        
+
         if (this.generatedOrderId) {
           this.isOrderInitialized = true;
           sessionStorage.setItem('activeCheckoutOrderRef', this.generatedOrderId);
@@ -665,12 +666,12 @@ export class Checkout implements OnInit {
     this.uploadError = '';
     const formData = new FormData();
     formData.append('orderReference', this.generatedOrderId);
-    
+
     // Append all form values
     Object.keys(this.shippingForm.value).forEach(key => {
       formData.append(key, this.shippingForm.value[key]);
     });
-    
+
     if (this.selectedFile) {
       formData.append('slip', this.selectedFile);
     }
@@ -680,11 +681,11 @@ export class Checkout implements OnInit {
       next: (res) => {
         sessionStorage.removeItem('activeCheckoutOrderRef');
         this.isSubmittingPayment = false;
-        this.router.navigate(['/order-success'], { 
-          state: { 
+        this.router.navigate(['/order-success'], {
+          state: {
             orderId: this.generatedOrderId,
             isBuyAndInstall: !this.isBuyOnly
-          } 
+          }
         });
       },
       error: (err) => {

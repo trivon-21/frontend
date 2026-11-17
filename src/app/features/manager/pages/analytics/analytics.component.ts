@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -30,6 +30,7 @@ interface DonutSegment extends NamedValue {
   standalone: true,
   imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './analytics.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./analytics.component.css'],
 })
 export class AnalyticsComponent implements OnInit {

@@ -58,14 +58,16 @@
           [(ngModel)]="searchQuery"
           (keyup.enter)="onGlobalSearch()"
           placeholder="Search users, orders, tickets, notifications..."
-        />
+          />
       </div>
 
       <div class="header-actions">
         <!-- Maintenance Countdown -->
-        <div class="maintenance-countdown" *ngIf="maintenanceCountdown">
-          <span class="countdown-badge">{{ maintenanceCountdown }}</span>
-        </div>
+        @if (maintenanceCountdown) {
+          <div class="maintenance-countdown">
+            <span class="countdown-badge">{{ maintenanceCountdown }}</span>
+          </div>
+        }
 
         <!-- Clock Section -->
         <div class="clock-and-maintenance">
@@ -84,56 +86,75 @@
         <div class="notifications-container" appClickOutside (clickOutside)="closeNotifications()">
           <button class="icon-btn" aria-label="Notifications" (click)="toggleNotifications()" title="Notifications">
             <lucide-angular name="bell" [size]="18" strokeWidth="1.8"></lucide-angular>
-            <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            @if (unreadCount > 0) {
+              <span class="notification-badge">{{ unreadCount }}</span>
+            }
           </button>
 
           <!-- Notifications Menu -->
-          <div class="notifications-dropdown" *ngIf="showNotifications">
-            <div class="notifications-header">
-              <h3>Notifications</h3>
-              <div class="notifications-actions">
-                <button class="action-link" (click)="markAllAsRead()" *ngIf="unreadCount > 0" title="Mark all as read">
-                  <lucide-angular name="check" [size]="14" strokeWidth="2"></lucide-angular>
-                </button>
-                <button class="action-link" (click)="clearAllNotifications()" *ngIf="notifications.length > 0" title="Clear all">
-                  <lucide-angular name="x" [size]="14" strokeWidth="2"></lucide-angular>
-                </button>
-              </div>
-            </div>
-
-            <div class="notifications-list">
-              <div *ngIf="notifications.length === 0" class="empty-state">
-                <span>No notifications yet</span>
-              </div>
-              <div
-                *ngFor="let notif of notifications.slice(0, 8)"
-                class="notification-item"
-                [class.unread]="!notif.read"
-                (click)="navigateToNotification(notif)"
-              >
-                <div class="notif-icon-box" [class]="'type-' + (notif.type || 'general')">
-                  <lucide-angular *ngIf="notif.type === 'order'" name="package" [size]="14"></lucide-angular>
-                  <lucide-angular *ngIf="notif.type === 'service'" name="wrench" [size]="14"></lucide-angular>
-                  <lucide-angular *ngIf="notif.type === 'inquiry'" name="message-circle" [size]="14"></lucide-angular>
-                  <lucide-angular *ngIf="notif.type === 'feedback'" name="star" [size]="14"></lucide-angular>
-                  <lucide-angular *ngIf="!notif.type || notif.type === 'general' || notif.type === 'announcement' || notif.type === 'system_alert'" name="bell" [size]="14"></lucide-angular>
+          @if (showNotifications) {
+            <div class="notifications-dropdown">
+              <div class="notifications-header">
+                <h3>Notifications</h3>
+                <div class="notifications-actions">
+                  @if (unreadCount > 0) {
+                    <button class="action-link" (click)="markAllAsRead()" title="Mark all as read">
+                      <lucide-angular name="check" [size]="14" strokeWidth="2"></lucide-angular>
+                    </button>
+                  }
+                  @if (notifications.length > 0) {
+                    <button class="action-link" (click)="clearAllNotifications()" title="Clear all">
+                      <lucide-angular name="x" [size]="14" strokeWidth="2"></lucide-angular>
+                    </button>
+                  }
                 </div>
-                <div class="notif-content">
-                  <div class="notif-title">{{ notif.title }}</div>
-                  <div class="notif-message">{{ notif.message }}</div>
-                </div>
-                <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete">
-                  <lucide-angular name="x" [size]="12"></lucide-angular>
-                </button>
+              </div>
+              <div class="notifications-list">
+                @if (notifications.length === 0) {
+                  <div class="empty-state">
+                    <span>No notifications yet</span>
+                  </div>
+                }
+                @for (notif of notifications.slice(0, 8); track notif) {
+                  <div
+                    class="notification-item"
+                    [class.unread]="!notif.read"
+                    (click)="navigateToNotification(notif)"
+                    >
+                    <div class="notif-icon-box" [class]="'type-' + (notif.type || 'general')">
+                      @if (notif.type === 'order') {
+                        <lucide-angular name="package" [size]="14"></lucide-angular>
+                      }
+                      @if (notif.type === 'service') {
+                        <lucide-angular name="wrench" [size]="14"></lucide-angular>
+                      }
+                      @if (notif.type === 'inquiry') {
+                        <lucide-angular name="message-circle" [size]="14"></lucide-angular>
+                      }
+                      @if (notif.type === 'feedback') {
+                        <lucide-angular name="star" [size]="14"></lucide-angular>
+                      }
+                      @if (!notif.type || notif.type === 'general' || notif.type === 'announcement' || notif.type === 'system_alert') {
+                        <lucide-angular name="bell" [size]="14"></lucide-angular>
+                      }
+                    </div>
+                    <div class="notif-content">
+                      <div class="notif-title">{{ notif.title }}</div>
+                      <div class="notif-message">{{ notif.message }}</div>
+                    </div>
+                    <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete">
+                      <lucide-angular name="x" [size]="12"></lucide-angular>
+                    </button>
+                  </div>
+                }
+              </div>
+              <div class="notifications-footer">
+                <a routerLink="/super-admin/global-notifications" (click)="closeNotifications()">
+                  Manage Global Broadcasts →
+                </a>
               </div>
             </div>
-
-            <div class="notifications-footer">
-              <a routerLink="/super-admin/global-notifications" (click)="closeNotifications()">
-                Manage Global Broadcasts →
-              </a>
-            </div>
-          </div>
+          }
         </div>
 
         <!-- User Menu -->
@@ -143,49 +164,51 @@
           </button>
 
           <!-- User Dropdown -->
-          <div class="user-dropdown" *ngIf="showUserMenu">
-            <div class="user-header">
-              <div class="user-avatar-lg">{{ userInitials }}</div>
-              <div>
-                <div class="user-name">{{ userName }}</div>
-                <div class="user-email">{{ userEmail }}</div>
+          @if (showUserMenu) {
+            <div class="user-dropdown">
+              <div class="user-header">
+                <div class="user-avatar-lg">{{ userInitials }}</div>
+                <div>
+                  <div class="user-name">{{ userName }}</div>
+                  <div class="user-email">{{ userEmail }}</div>
+                </div>
               </div>
+              <div class="menu-divider"></div>
+              <a routerLink="/super-admin" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="layout-dashboard" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Dashboard
+              </a>
+              <a routerLink="/super-admin/users" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="users" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Users
+              </a>
+              <a routerLink="/super-admin/core-operations" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="layers" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Core Operations
+              </a>
+              <a routerLink="/super-admin/global-notifications" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="bell" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Global Notifications
+              </a>
+              <a routerLink="/super-admin/system-config" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="settings" [size]="16" strokeWidth="1.8"></lucide-angular>
+                System Config
+              </a>
+              <a routerLink="/super-admin/system-logs" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="file-text" [size]="16" strokeWidth="1.8"></lucide-angular>
+                System Logs
+              </a>
+              <a routerLink="/super-admin/profile" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="user" [size]="16" strokeWidth="1.8"></lucide-angular>
+                My Profile
+              </a>
+              <div class="menu-divider"></div>
+              <button class="menu-item logout" (click)="logout()">
+                <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Sign out
+              </button>
             </div>
-            <div class="menu-divider"></div>
-            <a routerLink="/super-admin" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="layout-dashboard" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Dashboard
-            </a>
-            <a routerLink="/super-admin/users" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="users" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Users
-            </a>
-            <a routerLink="/super-admin/core-operations" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="layers" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Core Operations
-            </a>
-            <a routerLink="/super-admin/global-notifications" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="bell" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Global Notifications
-            </a>
-            <a routerLink="/super-admin/system-config" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="settings" [size]="16" strokeWidth="1.8"></lucide-angular>
-              System Config
-            </a>
-            <a routerLink="/super-admin/system-logs" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="file-text" [size]="16" strokeWidth="1.8"></lucide-angular>
-              System Logs
-            </a>
-            <a routerLink="/super-admin/profile" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="user" [size]="16" strokeWidth="1.8"></lucide-angular>
-              My Profile
-            </a>
-            <div class="menu-divider"></div>
-            <button class="menu-item logout" (click)="logout()">
-              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Sign out
-            </button>
-          </div>
+          }
         </div>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InvoiceService } from '../../services/invoice.service';
@@ -10,6 +10,7 @@ import { ConfirmService } from '../../../../services/confirm.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './invoice-pending.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./invoice-pending.component.css']
 })
 export class InvoicePendingComponent implements OnInit {

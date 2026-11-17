@@ -1,18 +1,22 @@
 <div class="inventory-dashboard">
-  <div class="portal-state portal-state--error" *ngIf="error" role="alert">
-    <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
-  </div>
-
-  <div class="portal-state portal-state--warning stale-banner" *ngIf="isStale" role="status">
-    <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
-    <div>
-      <strong>Displaying stale data</strong>
-      <p>Unable to refresh latest metrics from server. Showing last successful snapshot.</p>
+  @if (error) {
+    <div class="portal-state portal-state--error" role="alert">
+      <div><strong>Dashboard unavailable</strong><p>{{ error }}</p></div>
+      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="loadData()" [disabled]="loading">Retry</button>
     </div>
-  </div>
+  }
 
-  <ng-container *ngIf="hasLoadedSuccess">
+  @if (isStale) {
+    <div class="portal-state portal-state--warning stale-banner" role="status">
+      <lucide-angular name="triangle-alert" [size]="18"></lucide-angular>
+      <div>
+        <strong>Displaying stale data</strong>
+        <p>Unable to refresh latest metrics from server. Showing last successful snapshot.</p>
+      </div>
+    </div>
+  }
+
+  @if (hasLoadedSuccess) {
     <!-- Header Section -->
     <div class="welcome-banner">
       <div class="banner-content">
@@ -31,7 +35,6 @@
         </button>
       </div>
     </div>
-
     <!-- Summary Cards Section -->
     <div class="summary-grid">
       <!-- Material Reservations -->
@@ -46,13 +49,14 @@
           </div>
         </div>
         <div class="card-footer">
-          <div *ngFor="let sub of data.stats.materialReservations.subStats" class="sub-stat">
-            <span class="sub-label">{{ sub.label }}</span>
-            <span class="sub-value">{{ sub.value }}</span>
-          </div>
+          @for (sub of data.stats.materialReservations.subStats; track sub) {
+            <div class="sub-stat">
+              <span class="sub-label">{{ sub.label }}</span>
+              <span class="sub-value">{{ sub.value }}</span>
+            </div>
+          }
         </div>
       </a>
-
       <!-- Dispatch Queue -->
       <a class="summary-card clickable" routerLink="/inventory-manager/dispatch-logistics">
         <div class="card-main">
@@ -65,13 +69,14 @@
           </div>
         </div>
         <div class="card-footer">
-          <div *ngFor="let sub of data.stats.dispatchQueue.subStats" class="sub-stat">
-            <span class="sub-label">{{ sub.label }}</span>
-            <span class="sub-value">{{ sub.value }}</span>
-          </div>
+          @for (sub of data.stats.dispatchQueue.subStats; track sub) {
+            <div class="sub-stat">
+              <span class="sub-label">{{ sub.label }}</span>
+              <span class="sub-value">{{ sub.value }}</span>
+            </div>
+          }
         </div>
       </a>
-
       <!-- Asset Health -->
       <a class="summary-card clickable" routerLink="/inventory-manager/asset-management">
         <div class="card-main">
@@ -84,13 +89,14 @@
           </div>
         </div>
         <div class="card-footer">
-          <div *ngFor="let sub of data.stats.assetHealth.subStats" class="sub-stat">
-            <span class="sub-label">{{ sub.label }}</span>
-            <span class="sub-value">{{ sub.value }}</span>
-          </div>
+          @for (sub of data.stats.assetHealth.subStats; track sub) {
+            <div class="sub-stat">
+              <span class="sub-label">{{ sub.label }}</span>
+              <span class="sub-value">{{ sub.value }}</span>
+            </div>
+          }
         </div>
       </a>
-
       <!-- Stock Alerts -->
       <a class="summary-card clickable" routerLink="/inventory-manager/inventory">
         <div class="card-main">
@@ -103,14 +109,15 @@
           </div>
         </div>
         <div class="card-footer">
-          <div *ngFor="let sub of data.stats.stockAlerts.subStats" class="sub-stat">
-            <span class="sub-label">{{ sub.label }}</span>
-            <span class="sub-value">{{ sub.value }}</span>
-          </div>
+          @for (sub of data.stats.stockAlerts.subStats; track sub) {
+            <div class="sub-stat">
+              <span class="sub-label">{{ sub.label }}</span>
+              <span class="sub-value">{{ sub.value }}</span>
+            </div>
+          }
         </div>
       </a>
     </div>
-
     <section class="content-card workflow-card" aria-labelledby="purchasing-workflow-title">
       <div class="card-header">
         <div class="title-with-icon">
@@ -166,7 +173,6 @@
         </a>
       </div>
     </section>
-
     <!-- Main Grid Content -->
     <div class="dashboard-main-grid">
       <!-- Left Column: Activity Feed -->
@@ -176,26 +182,29 @@
           <a routerLink="/inventory-manager/activity-log" class="view-all-link">View All</a>
         </div>
         <div class="timeline-container">
-          <div *ngFor="let activity of data.recentActivity" class="timeline-item">
-            <div class="timeline-line"></div>
-            <div class="timeline-marker" [ngClass]="activity.type">
-              <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-header">
-                <p class="activity-title">{{ activity.title }}</p>
-                <span class="activity-time">{{ activity.timeAgo }}</span>
+          @for (activity of data.recentActivity; track activity) {
+            <div class="timeline-item">
+              <div class="timeline-line"></div>
+              <div class="timeline-marker" [ngClass]="activity.type">
+                <lucide-angular [name]="getActivityIcon(activity.type)"></lucide-angular>
               </div>
-              <div class="activity-actions" *ngIf="activity.actionLabel">
-                <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
-                  {{ activity.actionLabel }}
-                </button>
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <p class="activity-title">{{ activity.title }}</p>
+                  <span class="activity-time">{{ activity.timeAgo }}</span>
+                </div>
+                @if (activity.actionLabel) {
+                  <div class="activity-actions">
+                    <button class="activity-btn im-btn im-btn--secondary im-btn--compact" (click)="handleActivityAction(activity)">
+                      {{ activity.actionLabel }}
+                    </button>
+                  </div>
+                }
               </div>
             </div>
-          </div>
+          }
         </div>
       </div>
-
       <!-- Right Column: Reorder & Logistics -->
       <div class="side-column">
         <!-- Reorder List -->
@@ -217,27 +226,28 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let item of data.reorderList"
+                @for (item of data.reorderList; track item) {
+                  <tr
                     class="clickable-row"
                     routerLink="/inventory-manager/order-creation/new">
-                  <td class="item-name-cell">
-                    <div class="item-cell-wrapper">
-                      <div class="status-dot" [ngClass]="item.status"></div>
-                      <a class="item-name reorder-link" routerLink="/inventory-manager/order-creation/new">{{ item.name }}</a>
-                    </div>
-                  </td>
-                  <td class="item-avail text-right" [class.critical]="item.available === 0">
-                    {{ item.available }}
-                  </td>
-                  <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
-                    {{ item.reserved }}
-                  </td>
-                </tr>
+                    <td class="item-name-cell">
+                      <div class="item-cell-wrapper">
+                        <div class="status-dot" [ngClass]="item.status"></div>
+                        <a class="item-name reorder-link" routerLink="/inventory-manager/order-creation/new">{{ item.name }}</a>
+                      </div>
+                    </td>
+                    <td class="item-avail text-right" [class.critical]="item.available === 0">
+                      {{ item.available }}
+                    </td>
+                    <td class="item-rsvd text-right" [class.warning]="item.available <= item.reserved && item.available > 0">
+                      {{ item.reserved }}
+                    </td>
+                  </tr>
+                }
               </tbody>
             </table>
           </div>
         </div>
-
         <!-- Dispatch Logistics Panel -->
         <div class="content-card logistics-card">
           <div class="card-header">
@@ -251,46 +261,53 @@
             </div>
           </div>
           <div class="table-container alx-table-container" role="region" aria-label="Dispatch logistics list" tabindex="0">
-            <table *ngIf="data.logistics.length > 0; else emptyLogistics" class="logistics-table alx-table alx-table--fixed alx-table--sticky-header">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Status</th>
-                  <th>Courier / Track</th>
-                  <th class="text-right">Last Moved</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of data.logistics"
-                    class="clickable-row"
-                    routerLink="/inventory-manager/dispatch-logistics">
-                  <td class="order-id-cell">
-                    <div class="order-cell-wrapper">
-                      <a class="order-id-link" routerLink="/inventory-manager/dispatch-logistics">{{ order.orderId }}</a>
-                      <span class="order-customer" *ngIf="order.customer">{{ order.customer }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="logistics-status-badge" [ngClass]="order.status">{{ order.status }}</span>
-                  </td>
-                  <td class="courier-cell">
-                    <span class="courier-text">{{ order.courier || 'Unassigned' }}</span>
-                    <span class="track-id-text" *ngIf="order.trackId">{{ order.trackId }}</span>
-                  </td>
-                  <td class="text-right last-moved-cell">
-                    {{ (order.lastMovedAt || order.date) | date:'shortDate' }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <ng-template #emptyLogistics>
+            @if (data.logistics.length > 0) {
+              <table class="logistics-table alx-table alx-table--fixed alx-table--sticky-header">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Courier / Track</th>
+                    <th class="text-right">Last Moved</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (order of data.logistics; track order) {
+                    <tr
+                      class="clickable-row"
+                      routerLink="/inventory-manager/dispatch-logistics">
+                      <td class="order-id-cell">
+                        <div class="order-cell-wrapper">
+                          <a class="order-id-link" routerLink="/inventory-manager/dispatch-logistics">{{ order.orderId }}</a>
+                          @if (order.customer) {
+                            <span class="order-customer">{{ order.customer }}</span>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="logistics-status-badge" [ngClass]="order.status">{{ order.status }}</span>
+                      </td>
+                      <td class="courier-cell">
+                        <span class="courier-text">{{ order.courier || 'Unassigned' }}</span>
+                        @if (order.trackId) {
+                          <span class="track-id-text">{{ order.trackId }}</span>
+                        }
+                      </td>
+                      <td class="text-right last-moved-cell">
+                        {{ (order.lastMovedAt || order.date) | date:'shortDate' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
               <div class="empty-logistics-state">
                 <p>No dispatch orders recorded.</p>
               </div>
-            </ng-template>
+            }
           </div>
         </div>
       </div>
     </div>
-  </ng-container>
+  }
 </div>

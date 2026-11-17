@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomerDashboardService, DashboardData, DashboardOrder } from '../../services/customer-dashboard.service';
 import { TrackOrderModalComponent } from '../../../../components/modals/track-order-modal/track-order-modal.component';
@@ -21,6 +21,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
     PortalIconsModule
   ],
   templateUrl: './customer-dashboard-home.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './customer-dashboard-home.component.css'
 })
 export class CustomerDashboardHomeComponent implements OnInit {

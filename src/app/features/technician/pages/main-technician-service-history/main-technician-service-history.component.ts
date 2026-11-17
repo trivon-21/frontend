@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -36,6 +36,7 @@ interface ServiceHistoryResponse {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   templateUrl: './main-technician-service-history.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-service-history.component.css'})
 export class MainTechnicianServiceHistoryComponent implements OnInit {
   allHistoryItems: ServiceHistoryItem[] = [];

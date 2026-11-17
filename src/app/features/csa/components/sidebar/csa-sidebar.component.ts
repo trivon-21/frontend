@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -91,6 +91,7 @@ import { AuthService } from '../../../../core/services/auth.service';
       </div>
     </aside>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .sidebar {
       width: 230px;

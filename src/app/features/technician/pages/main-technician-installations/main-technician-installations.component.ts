@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -38,6 +38,7 @@ type RawInstallation = {
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './main-technician-installations.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-installations.component.css'})
 export class MainTechnicianInstallationsComponent implements OnInit {
   searchQuery = '';

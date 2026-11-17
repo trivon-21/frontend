@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -37,6 +37,7 @@ interface ServiceRequestApiItem {
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './main-technician-service-requests.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-service-requests.component.css'
 })
 export class MainTechnicianServiceRequestsComponent implements OnInit {

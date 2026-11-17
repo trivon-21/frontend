@@ -8,66 +8,77 @@
   </a>
 
   <!--<div class="header-search-wrap">
-    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-    <input class="header-search" type="text" placeholder="Search product, supplier, order" [(ngModel)]="searchQuery"
-      (keyup.enter)="onSearch()" />
-  </div>
+  <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+  <input class="header-search" type="text" placeholder="Search product, supplier, order" [(ngModel)]="searchQuery"
+    (keyup.enter)="onSearch()" />
+</div>
 -->
-  <div class="header-actions">
-    <!-- Clock -->
-    <div class="clock-and-maintenance">
-      <div class="header-clock">
-        <span class="clock-time">{{ currentTime | date: 'h:mm:ss a' }}</span>
-        <span class="clock-date">{{ currentTime | date: 'MMM d, yyyy' }}</span>
-      </div>
+<div class="header-actions">
+  <!-- Clock -->
+  <div class="clock-and-maintenance">
+    <div class="header-clock">
+      <span class="clock-time">{{ currentTime | date: 'h:mm:ss a' }}</span>
+      <span class="clock-date">{{ currentTime | date: 'MMM d, yyyy' }}</span>
     </div>
+  </div>
 
-    <!-- Notifications (pending inspections — inspection-officer specific) -->
-    <div class="dropdown-wrapper">
-      <button class="icon-btn notif-btn" (click)="toggleNotifications()" aria-label="Notifications" title="Notifications">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        <span class="notif-badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
-      </button>
-
-      <div class="notif-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
-        <div class="notif-header">
-          <span class="notif-title">Notifications</span>
-          <span class="notif-total" *ngIf="pendingCount > 0">{{ pendingCount }} pending</span>
-        </div>
-        <div class="notif-empty" *ngIf="pendingCount === 0">
-          All caught up! No pending inspections.
-        </div>
-        <div class="notif-item" *ngIf="pendingCount > 0">
-          <div class="notif-dot dot-inspection"></div>
-          <span>You have {{ pendingCount }} pending inspection(s) to start.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Settings -->
-    <button class="icon-btn" aria-label="Settings" (click)="toggleSettings()" title="Settings">
+  <!-- Notifications (pending inspections — inspection-officer specific) -->
+  <div class="dropdown-wrapper">
+    <button class="icon-btn notif-btn" (click)="toggleNotifications()" aria-label="Notifications" title="Notifications">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
         stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path
-          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       </svg>
+      @if (pendingCount > 0) {
+        <span class="notif-badge">{{ pendingCount }}</span>
+      }
     </button>
 
-    <!-- User Menu -->
-    <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">
-      <button class="user-avatar" (click)="toggleUserMenu()" aria-label="User menu" title="User menu">
-        {{ userInitials }}
-      </button>
+    @if (showNotifications) {
+      <div class="notif-dropdown" (click)="$event.stopPropagation()">
+        <div class="notif-header">
+          <span class="notif-title">Notifications</span>
+          @if (pendingCount > 0) {
+            <span class="notif-total">{{ pendingCount }} pending</span>
+          }
+        </div>
+        @if (pendingCount === 0) {
+          <div class="notif-empty">
+            All caught up! No pending inspections.
+          </div>
+        }
+        @if (pendingCount > 0) {
+          <div class="notif-item">
+            <div class="notif-dot dot-inspection"></div>
+            <span>You have {{ pendingCount }} pending inspection(s) to start.</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
 
-      <div class="user-dropdown" *ngIf="showUserMenu">
+  <!-- Settings -->
+  <button class="icon-btn" aria-label="Settings" (click)="toggleSettings()" title="Settings">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path
+        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  </button>
+
+  <!-- User Menu -->
+  <div class="user-menu-container" appClickOutside (clickOutside)="closeUserMenu()">
+    <button class="user-avatar" (click)="toggleUserMenu()" aria-label="User menu" title="User menu">
+      {{ userInitials }}
+    </button>
+
+    @if (showUserMenu) {
+      <div class="user-dropdown">
         <div class="user-header">
           <div class="user-avatar-lg">{{ userInitials }}</div>
           <div>
@@ -93,6 +104,7 @@
           Sign out
         </button>
       </div>
-    </div>
+    }
   </div>
+</div>
 </header>

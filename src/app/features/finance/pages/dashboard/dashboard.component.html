@@ -101,52 +101,68 @@
       <div class="table-container">
         <table>
           <thead>
-           <tr>
-  <th *ngIf="activeFilter !== 'MAINTENANCE'">ORDER ID</th>
-  <th *ngIf="activeFilter !== 'BUY_ONLY'">TICKET / INVOICE ID</th>
-  <th>TYPE</th>
-  <th>CUSTOMER</th>
-  <th>DATE</th>
-  <th>AMOUNT</th>
-  <th>STATUS</th>
-</tr>
+            <tr>
+              @if (activeFilter !== 'MAINTENANCE') {
+                <th>ORDER ID</th>
+              }
+              @if (activeFilter !== 'BUY_ONLY') {
+                <th>TICKET / INVOICE ID</th>
+              }
+              <th>TYPE</th>
+              <th>CUSTOMER</th>
+              <th>DATE</th>
+              <th>AMOUNT</th>
+              <th>STATUS</th>
+            </tr>
           </thead>
           <tbody>
-        <tr *ngFor="let p of paginatedPayments">
-  <td *ngIf="activeFilter !== 'MAINTENANCE'">{{ p.orderId }}</td>
-  <td *ngIf="activeFilter !== 'BUY_ONLY'">{{ p.invoiceId }}</td>
-              <td>
-                <span class="type-badge" [ngClass]="getTypeBadgeClass(p.paymentType)">
-                  {{ getTypeLabel(p.paymentType) }}
-                </span>
-              </td>
-              <td>{{ p.customerName }}</td>
-              <td>{{ formatDate(p.displayDate) }}</td>
-              <td>LKR {{ p.amount | number:'1.0-0' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="getStatusClass(p.status)">
-                  {{ p.status }}
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="paginatedPayments.length === 0">
-              <td colspan="7" style="text-align:center;color:#9ca3af;padding:32px;">No payments found</td>
-            </tr>
+            @for (p of paginatedPayments; track p) {
+              <tr>
+                @if (activeFilter !== 'MAINTENANCE') {
+                  <td>{{ p.orderId }}</td>
+                }
+                @if (activeFilter !== 'BUY_ONLY') {
+                  <td>{{ p.invoiceId }}</td>
+                }
+                <td>
+                  <span class="type-badge" [ngClass]="getTypeBadgeClass(p.paymentType)">
+                    {{ getTypeLabel(p.paymentType) }}
+                  </span>
+                </td>
+                <td>{{ p.customerName }}</td>
+                <td>{{ formatDate(p.displayDate) }}</td>
+                <td>LKR {{ p.amount | number:'1.0-0' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(p.status)">
+                    {{ p.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+            @if (paginatedPayments.length === 0) {
+              <tr>
+                <td colspan="7" style="text-align:center;color:#9ca3af;padding:32px;">No payments found</td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
 
       <div class="pagination">
         <span class="showing">Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} items</span>
-     <div class="pagination-controls">
-  <button class="page-btn" [disabled]="currentPage===1" (click)="prevPage()">Previous</button>
-  <ng-container *ngFor="let page of visiblePages">
-    <button *ngIf="page !== '...'" class="page-number" [class.active]="currentPage===page"
-  (click)="goToPage($any(page))">{{ page }}</button>
-    <span *ngIf="page === '...'" class="page-ellipsis">...</span>
-  </ng-container>
-  <button class="page-btn" [disabled]="currentPage*itemsPerPage>=totalItems" (click)="nextPage()">Next</button>
-</div>
+        <div class="pagination-controls">
+          <button class="page-btn" [disabled]="currentPage===1" (click)="prevPage()">Previous</button>
+          @for (page of visiblePages; track page) {
+            @if (page !== '...') {
+              <button class="page-number" [class.active]="currentPage===page"
+              (click)="goToPage($any(page))">{{ page }}</button>
+            }
+            @if (page === '...') {
+              <span class="page-ellipsis">...</span>
+            }
+          }
+          <button class="page-btn" [disabled]="currentPage*itemsPerPage>=totalItems" (click)="nextPage()">Next</button>
+        </div>
       </div>
     </div>
 

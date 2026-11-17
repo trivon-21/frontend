@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -40,6 +40,7 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './signup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './signup.component.css',
 })
 export class SignupComponent {

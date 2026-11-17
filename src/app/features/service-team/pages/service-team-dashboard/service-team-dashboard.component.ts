@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -36,6 +36,7 @@ interface DashboardAlertItem {
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule],
   templateUrl: './service-team-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './service-team-dashboard.component.css'
 })
 /**

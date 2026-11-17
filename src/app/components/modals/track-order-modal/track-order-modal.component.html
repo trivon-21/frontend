@@ -13,158 +13,175 @@
     </div>
 
     <!-- Search Section (shown when no order loaded) -->
-    <div *ngIf="!order" class="search-section">
-      <p class="search-hint">Enter your order reference number to view full order details and status.</p>
-
-      <div class="form-group">
-        <label class="form-label">Order Reference Number <span class="required">*</span></label>
-        <input
-          class="form-input"
-          type="text"
-          placeholder="e.g. ORD-A1B2C3D4"
-          [(ngModel)]="searchRef"
-          (keydown.enter)="search()"
-        />
-      </div>
-
-      <div class="form-row">
+    @if (!order) {
+      <div class="search-section">
+        <p class="search-hint">Enter your order reference number to view full order details and status.</p>
         <div class="form-group">
-          <label class="form-label">Phone (optional)</label>
-          <input class="form-input" type="tel" placeholder="Your phone number" [(ngModel)]="searchPhone" />
+          <label class="form-label">Order Reference Number <span class="required">*</span></label>
+          <input
+            class="form-input"
+            type="text"
+            placeholder="e.g. ORD-A1B2C3D4"
+            [(ngModel)]="searchRef"
+            (keydown.enter)="search()"
+            />
         </div>
-        <div class="form-group">
-          <label class="form-label">Email (optional)</label>
-          <input class="form-input" type="email" placeholder="Your email address" [(ngModel)]="searchEmail" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone (optional)</label>
+            <input class="form-input" type="tel" placeholder="Your phone number" [(ngModel)]="searchPhone" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email (optional)</label>
+            <input class="form-input" type="email" placeholder="Your email address" [(ngModel)]="searchEmail" />
+          </div>
         </div>
+        @if (error) {
+          <div class="error-msg">{{ error }}</div>
+        }
+        <button class="btn-primary" (click)="search()" [disabled]="loading">
+          @if (loading) {
+            <span class="btn-spinner"></span>
+          }
+          @if (!loading) {
+            <span>Search Order</span>
+          }
+          @if (loading) {
+            <span>Searching...</span>
+          }
+        </button>
       </div>
-
-      <div *ngIf="error" class="error-msg">{{ error }}</div>
-
-      <button class="btn-primary" (click)="search()" [disabled]="loading">
-        <span *ngIf="loading" class="btn-spinner"></span>
-        <span *ngIf="!loading">Search Order</span>
-        <span *ngIf="loading">Searching...</span>
-      </button>
-    </div>
+    }
 
     <!-- Order Results -->
-    <div *ngIf="order" class="results-section">
-
-      <!-- Back button -->
-      <button class="back-btn" (click)="resetSearch()" style="display: inline-flex; align-items: center; gap: 4px;">
-        <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
-        Search again
-      </button>
-
-      <!-- Order Summary Card -->
-      <div class="summary-card">
-        <div class="summary-top">
-          <div class="summary-product">
-            <div class="product-img">
-              <lucide-angular name="package" [size]="28" style="color: #1f5b45;"></lucide-angular>
-            </div>
-            <div>
-              <p class="product-name">{{ order.itemName }}</p>
-              <p class="product-meta">Qty: {{ order.quantity }}</p>
-            </div>
-          </div>
-          <div class="summary-amount">{{ formatAmount(order.amount) }}</div>
-        </div>
-
-        <div class="summary-meta-row">
-          <div class="meta-item">
-            <span class="meta-label">Order ID</span>
-            <span class="meta-value mono">{{ order.orderRef }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Order Date</span>
-            <span class="meta-value">{{ formatDate(order.createdAt) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Order Type</span>
-            <span class="meta-value">{{ order.orderType }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Payment Status</span>
-            <span class="status-badge" [ngClass]="getPaymentStatusClass(order.paymentStatus)">
-              {{ order.paymentStatus }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Order Status Timeline -->
-      <div class="section-block">
-        <h3 class="section-title">Order Timeline</h3>
-        <div class="timeline">
-          <div
-            *ngFor="let step of getSteps(); let last = last"
-            class="timeline-item"
-            [ngClass]="'step-' + getStepState(step.key)"
-          >
-            <div class="timeline-left">
-              <div class="timeline-dot">
-                <lucide-angular *ngIf="getStepState(step.key) === 'done'" name="check" [size]="12" style="color: white;"></lucide-angular>
+    @if (order) {
+      <div class="results-section">
+        <!-- Back button -->
+        <button class="back-btn" (click)="resetSearch()" style="display: inline-flex; align-items: center; gap: 4px;">
+          <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
+          Search again
+        </button>
+        <!-- Order Summary Card -->
+        <div class="summary-card">
+          <div class="summary-top">
+            <div class="summary-product">
+              <div class="product-img">
+                <lucide-angular name="package" [size]="28" style="color: #1f5b45;"></lucide-angular>
               </div>
-              <div *ngIf="!last" class="timeline-line"></div>
+              <div>
+                <p class="product-name">{{ order.itemName }}</p>
+                <p class="product-meta">Qty: {{ order.quantity }}</p>
+              </div>
             </div>
-            <div class="timeline-content">
-              <span class="timeline-label">{{ step.label }}</span>
+            <div class="summary-amount">{{ formatAmount(order.amount) }}</div>
+          </div>
+          <div class="summary-meta-row">
+            <div class="meta-item">
+              <span class="meta-label">Order ID</span>
+              <span class="meta-value mono">{{ order.orderRef }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Order Date</span>
+              <span class="meta-value">{{ formatDate(order.createdAt) }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Order Type</span>
+              <span class="meta-value">{{ order.orderType }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Payment Status</span>
+              <span class="status-badge" [ngClass]="getPaymentStatusClass(order.paymentStatus)">
+                {{ order.paymentStatus }}
+              </span>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Delivery Tracking (Buy Only, if shipped) -->
-      <div *ngIf="order.orderType === 'Buy Only' && order.deliveryTrackingId" class="section-block">
-        <h3 class="section-title">Delivery Tracking</h3>
-        <div class="delivery-row">
-          <div>
-            <span class="meta-label">Tracking ID</span>
-            <span class="meta-value mono">{{ order.deliveryTrackingId }}</span>
-          </div>
-          <a *ngIf="order.deliveryPartnerUrl" [href]="order.deliveryPartnerUrl" target="_blank" class="link-btn" style="display: inline-flex; align-items: center; gap: 4px;">
-            Track Shipment
-            <lucide-angular name="external-link" [size]="12"></lucide-angular>
-          </a>
-        </div>
-      </div>
-
-      <!-- Invoice & Warranty -->
-      <div class="section-block">
-        <h3 class="section-title">Invoice & Warranty</h3>
-        <div class="warranty-grid">
-          <div class="warranty-item">
-            <span class="meta-label">Warranty Status</span>
-            <span class="status-badge" [ngClass]="warrantyActive() ? 'badge--green' : 'badge--red'">
-              {{ warrantyActive() ? 'Active' : 'Expired / Not Set' }}
-            </span>
-          </div>
-          <div class="warranty-item" *ngIf="order.warrantyStart">
-            <span class="meta-label">Warranty Start</span>
-            <span class="meta-value">{{ formatDate(order.warrantyStart) }}</span>
-          </div>
-          <div class="warranty-item" *ngIf="order.warrantyExpiry">
-            <span class="meta-label">Warranty Expiry</span>
-            <span class="meta-value">{{ formatDate(order.warrantyExpiry) }}</span>
-          </div>
-          <div class="warranty-item">
-            <span class="meta-label">AMC Status</span>
-            <span class="status-badge" [ngClass]="order.amcStatus === 'Active' ? 'badge--green' : 'badge--grey'">
-              {{ order.amcStatus }}
-            </span>
+        <!-- Order Status Timeline -->
+        <div class="section-block">
+          <h3 class="section-title">Order Timeline</h3>
+          <div class="timeline">
+            @for (step of getSteps(); track step; let last = $last) {
+              <div
+                class="timeline-item"
+                [ngClass]="'step-' + getStepState(step.key)"
+                >
+                <div class="timeline-left">
+                  <div class="timeline-dot">
+                    @if (getStepState(step.key) === 'done') {
+                      <lucide-angular name="check" [size]="12" style="color: white;"></lucide-angular>
+                    }
+                  </div>
+                  @if (!last) {
+                    <div class="timeline-line"></div>
+                  }
+                </div>
+                <div class="timeline-content">
+                  <span class="timeline-label">{{ step.label }}</span>
+                </div>
+              </div>
+            }
           </div>
         </div>
+        <!-- Delivery Tracking (Buy Only, if shipped) -->
+        @if (order.orderType === 'Buy Only' && order.deliveryTrackingId) {
+          <div class="section-block">
+            <h3 class="section-title">Delivery Tracking</h3>
+            <div class="delivery-row">
+              <div>
+                <span class="meta-label">Tracking ID</span>
+                <span class="meta-value mono">{{ order.deliveryTrackingId }}</span>
+              </div>
+              @if (order.deliveryPartnerUrl) {
+                <a [href]="order.deliveryPartnerUrl" target="_blank" class="link-btn" style="display: inline-flex; align-items: center; gap: 4px;">
+                  Track Shipment
+                  <lucide-angular name="external-link" [size]="12"></lucide-angular>
+                </a>
+              }
+            </div>
+          </div>
+        }
+        <!-- Invoice & Warranty -->
+        <div class="section-block">
+          <h3 class="section-title">Invoice & Warranty</h3>
+          <div class="warranty-grid">
+            <div class="warranty-item">
+              <span class="meta-label">Warranty Status</span>
+              <span class="status-badge" [ngClass]="warrantyActive() ? 'badge--green' : 'badge--red'">
+                {{ warrantyActive() ? 'Active' : 'Expired / Not Set' }}
+              </span>
+            </div>
+            @if (order.warrantyStart) {
+              <div class="warranty-item">
+                <span class="meta-label">Warranty Start</span>
+                <span class="meta-value">{{ formatDate(order.warrantyStart) }}</span>
+              </div>
+            }
+            @if (order.warrantyExpiry) {
+              <div class="warranty-item">
+                <span class="meta-label">Warranty Expiry</span>
+                <span class="meta-value">{{ formatDate(order.warrantyExpiry) }}</span>
+              </div>
+            }
+            <div class="warranty-item">
+              <span class="meta-label">AMC Status</span>
+              <span class="status-badge" [ngClass]="order.amcStatus === 'Active' ? 'badge--green' : 'badge--grey'">
+                {{ order.amcStatus }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="action-row">
+          @if (canCancel()) {
+            <button class="btn-danger" (click)="cancelOrder()">Cancel Order</button>
+          }
+          @if (canReupload()) {
+            <button class="btn-secondary" (click)="goToReupload()">Re-upload Payment Slip</button>
+          }
+          <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
+        </div>
       </div>
-
-      <!-- Action Buttons -->
-      <div class="action-row">
-        <button *ngIf="canCancel()" class="btn-danger" (click)="cancelOrder()">Cancel Order</button>
-        <button *ngIf="canReupload()" class="btn-secondary" (click)="goToReupload()">Re-upload Payment Slip</button>
-        <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
-      </div>
-
-    </div>
+    }
 
   </div>
 </div>

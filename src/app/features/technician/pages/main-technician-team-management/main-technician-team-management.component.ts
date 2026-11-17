@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -81,6 +81,7 @@ type RawPendingJob = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './main-technician-team-management.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-team-management.component.css'})
 export class MainTechnicianTeamManagementComponent implements OnInit {
   searchQuery: string = '';

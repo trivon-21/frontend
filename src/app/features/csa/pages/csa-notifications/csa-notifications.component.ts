@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -28,31 +28,35 @@ type FilterType = 'all' | 'unread' | 'system' | 'announcements' | 'service';
           </div>
 
           <div class="header-actions">
-            <button
-              class="btn-secondary"
-              (click)="markAllAsRead()"
-              *ngIf="unreadCount > 0"
-              title="Mark all notifications as read"
-            >
-              <lucide-angular name="check" [size]="15"></lucide-angular>
-              <span>Mark all as read</span>
-            </button>
-            <ng-container *ngIf="notifications.length > 0">
+            @if (unreadCount > 0) {
               <button
-                class="btn-danger-outline"
-                (click)="confirmingClear = true"
-                *ngIf="!confirmingClear"
-                title="Clear all notifications"
-              >
-                <lucide-angular name="trash-2" [size]="15"></lucide-angular>
-                <span>Clear all</span>
+                class="btn-secondary"
+                (click)="markAllAsRead()"
+                title="Mark all notifications as read"
+                >
+                <lucide-angular name="check" [size]="15"></lucide-angular>
+                <span>Mark all as read</span>
               </button>
-              <div class="confirm-clear-box" *ngIf="confirmingClear">
-                <span class="confirm-text">Clear all?</span>
-                <button class="btn-confirm-yes" (click)="executeClearAll()">Yes, Clear</button>
-                <button class="btn-confirm-no" (click)="confirmingClear = false">Cancel</button>
-              </div>
-            </ng-container>
+            }
+            @if (notifications.length > 0) {
+              @if (!confirmingClear) {
+                <button
+                  class="btn-danger-outline"
+                  (click)="confirmingClear = true"
+                  title="Clear all notifications"
+                  >
+                  <lucide-angular name="trash-2" [size]="15"></lucide-angular>
+                  <span>Clear all</span>
+                </button>
+              }
+              @if (confirmingClear) {
+                <div class="confirm-clear-box">
+                  <span class="confirm-text">Clear all?</span>
+                  <button class="btn-confirm-yes" (click)="executeClearAll()">Yes, Clear</button>
+                  <button class="btn-confirm-no" (click)="confirmingClear = false">Cancel</button>
+                </div>
+              }
+            }
           </div>
         </div>
 
@@ -62,141 +66,159 @@ type FilterType = 'all' | 'unread' | 'system' | 'announcements' | 'service';
             class="filter-tab"
             [class.active]="currentFilter === 'all'"
             (click)="setFilter('all')"
-          >
+            >
             <span>All Bulletins</span>
-            <span class="tab-count" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+            @if (notifications.length > 0) {
+              <span class="tab-count">{{ notifications.length }}</span>
+            }
           </button>
           <button
             class="filter-tab"
             [class.active]="currentFilter === 'unread'"
             (click)="setFilter('unread')"
-          >
+            >
             <span>Unread</span>
-            <span class="tab-count unread" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            @if (unreadCount > 0) {
+              <span class="tab-count unread">{{ unreadCount }}</span>
+            }
           </button>
           <button
             class="filter-tab"
             [class.active]="currentFilter === 'system'"
             (click)="setFilter('system')"
-          >
+            >
             <span>System Alerts</span>
-            <span class="tab-count" *ngIf="systemCount > 0">{{ systemCount }}</span>
+            @if (systemCount > 0) {
+              <span class="tab-count">{{ systemCount }}</span>
+            }
           </button>
           <button
             class="filter-tab"
             [class.active]="currentFilter === 'announcements'"
             (click)="setFilter('announcements')"
-          >
+            >
             <span>Announcements</span>
-            <span class="tab-count" *ngIf="announcementCount > 0">{{ announcementCount }}</span>
+            @if (announcementCount > 0) {
+              <span class="tab-count">{{ announcementCount }}</span>
+            }
           </button>
           <button
             class="filter-tab"
             [class.active]="currentFilter === 'service'"
             (click)="setFilter('service')"
-          >
+            >
             <span>Service &amp; Ops</span>
-            <span class="tab-count" *ngIf="serviceCount > 0">{{ serviceCount }}</span>
+            @if (serviceCount > 0) {
+              <span class="tab-count">{{ serviceCount }}</span>
+            }
           </button>
         </div>
       </div>
 
       <!-- Empty State: Zero Notifications -->
-      <div *ngIf="notifications.length === 0" class="empty-state-card">
-        <div class="empty-icon-wrap">
-          <lucide-angular name="shield" [size]="42"></lucide-angular>
+      @if (notifications.length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-icon-wrap">
+            <lucide-angular name="shield" [size]="42"></lucide-angular>
+          </div>
+          <h2 class="empty-title">No Admin Announcements</h2>
+          <p class="empty-desc">
+            You are all caught up! System maintenance schedules, policy updates, and broadcast bulletins from the Super Admin will appear here.
+          </p>
+          <div class="empty-badge">
+            <lucide-angular name="circle-check-big" [size]="14"></lucide-angular>
+            <span>Real-time channel active</span>
+          </div>
         </div>
-        <h2 class="empty-title">No Admin Announcements</h2>
-        <p class="empty-desc">
-          You are all caught up! System maintenance schedules, policy updates, and broadcast bulletins from the Super Admin will appear here.
-        </p>
-        <div class="empty-badge">
-          <lucide-angular name="circle-check-big" [size]="14"></lucide-angular>
-          <span>Real-time channel active</span>
-        </div>
-      </div>
+      }
 
       <!-- Empty State: Filter Has No Results -->
-      <div *ngIf="notifications.length > 0 && filteredNotifications.length === 0" class="empty-state-card">
-        <div class="empty-icon-wrap subtle">
-          <lucide-angular name="filter" [size]="36"></lucide-angular>
+      @if (notifications.length > 0 && filteredNotifications.length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-icon-wrap subtle">
+            <lucide-angular name="filter" [size]="36"></lucide-angular>
+          </div>
+          <h2 class="empty-title">No matching notifications</h2>
+          <p class="empty-desc">
+            No announcements found under the "<strong>{{ getFilterLabel(currentFilter) }}</strong>" filter.
+          </p>
+          <button class="btn-reset-filter" (click)="setFilter('all')">
+            View all notifications
+          </button>
         </div>
-        <h2 class="empty-title">No matching notifications</h2>
-        <p class="empty-desc">
-          No announcements found under the "<strong>{{ getFilterLabel(currentFilter) }}</strong>" filter.
-        </p>
-        <button class="btn-reset-filter" (click)="setFilter('all')">
-          View all notifications
-        </button>
-      </div>
+      }
 
       <!-- Notifications Feed -->
-      <div class="notifications-feed" *ngIf="filteredNotifications.length > 0">
-        <div
-          *ngFor="let notif of filteredNotifications"
-          class="notification-card"
-          [class.unread]="!notif.read"
-          [class.is-alert]="isAlert(notif)"
-        >
-          <!-- Left Icon Box -->
-          <div class="card-icon-box" [ngClass]="getIconBoxClass(notif)">
-            <lucide-angular [name]="getIconName(notif)" [size]="20"></lucide-angular>
-          </div>
-
-          <!-- Main Content -->
-          <div class="card-content">
-            <div class="card-meta">
-              <div class="meta-tags">
-                <span class="sender-tag">
-                  <lucide-angular name="shield" [size]="12"></lucide-angular>
-                  Super Admin
-                </span>
-                <span class="type-badge" [ngClass]="getTypeBadgeClass(notif)">
-                  {{ getTypeLabel(notif) }}
-                </span>
-                <span class="unread-dot" *ngIf="!notif.read" title="Unread notification"></span>
+      @if (filteredNotifications.length > 0) {
+        <div class="notifications-feed">
+          @for (notif of filteredNotifications; track notif) {
+            <div
+              class="notification-card"
+              [class.unread]="!notif.read"
+              [class.is-alert]="isAlert(notif)"
+              >
+              <!-- Left Icon Box -->
+              <div class="card-icon-box" [ngClass]="getIconBoxClass(notif)">
+                <lucide-angular [name]="getIconName(notif)" [size]="20"></lucide-angular>
               </div>
-              <span class="timestamp" [title]="notif.createdAt | date:'medium'">
-                <lucide-angular name="clock" [size]="12"></lucide-angular>
-                {{ getTimeAgo(notif.createdAt) }}
-              </span>
+              <!-- Main Content -->
+              <div class="card-content">
+                <div class="card-meta">
+                  <div class="meta-tags">
+                    <span class="sender-tag">
+                      <lucide-angular name="shield" [size]="12"></lucide-angular>
+                      Super Admin
+                    </span>
+                    <span class="type-badge" [ngClass]="getTypeBadgeClass(notif)">
+                      {{ getTypeLabel(notif) }}
+                    </span>
+                    @if (!notif.read) {
+                      <span class="unread-dot" title="Unread notification"></span>
+                    }
+                  </div>
+                  <span class="timestamp" [title]="notif.createdAt | date:'medium'">
+                    <lucide-angular name="clock" [size]="12"></lucide-angular>
+                    {{ getTimeAgo(notif.createdAt) }}
+                  </span>
+                </div>
+                <h3 class="card-title">{{ notif.title }}</h3>
+                <p class="card-message">{{ notif.message }}</p>
+                @if (notif.actionUrl) {
+                  <div class="card-footer">
+                    <button class="btn-action-link" (click)="openAction(notif)">
+                      <span>View Details</span>
+                      <lucide-angular name="external-link" [size]="13"></lucide-angular>
+                    </button>
+                  </div>
+                }
+              </div>
+              <!-- Right Action Buttons -->
+              <div class="card-actions">
+                <button
+                  class="action-icon-btn"
+                  (click)="toggleRead(notif, $event)"
+                  [title]="notif.read ? 'Mark as unread' : 'Mark as read'"
+                  >
+                  <lucide-angular
+                    [name]="notif.read ? 'circle' : 'check'"
+                    [size]="16"
+                  ></lucide-angular>
+                </button>
+                <button
+                  class="action-icon-btn delete-btn"
+                  (click)="deleteNotification(notif.id, $event)"
+                  title="Delete bulletin"
+                  >
+                  <lucide-angular name="trash-2" [size]="16"></lucide-angular>
+                </button>
+              </div>
             </div>
-
-            <h3 class="card-title">{{ notif.title }}</h3>
-            <p class="card-message">{{ notif.message }}</p>
-
-            <div class="card-footer" *ngIf="notif.actionUrl">
-              <button class="btn-action-link" (click)="openAction(notif)">
-                <span>View Details</span>
-                <lucide-angular name="external-link" [size]="13"></lucide-angular>
-              </button>
-            </div>
-          </div>
-
-          <!-- Right Action Buttons -->
-          <div class="card-actions">
-            <button
-              class="action-icon-btn"
-              (click)="toggleRead(notif, $event)"
-              [title]="notif.read ? 'Mark as unread' : 'Mark as read'"
-            >
-              <lucide-angular
-                [name]="notif.read ? 'circle' : 'check'"
-                [size]="16"
-              ></lucide-angular>
-            </button>
-            <button
-              class="action-icon-btn delete-btn"
-              (click)="deleteNotification(notif.id, $event)"
-              title="Delete bulletin"
-            >
-              <lucide-angular name="trash-2" [size]="16"></lucide-angular>
-            </button>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .notifications-page {
       padding: 24px 28px 48px;

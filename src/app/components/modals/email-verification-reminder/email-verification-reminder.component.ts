@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Output, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomerProfileService } from '../../../features/customer/services/customer-profile.service';
 import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
@@ -7,8 +7,9 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
 @Component({
   selector: 'app-email-verification-reminder',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PortalIconsModule],
+  imports: [ReactiveFormsModule, PortalIconsModule],
   templateUrl: './email-verification-reminder.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './email-verification-reminder.component.css'
 })
 export class EmailVerificationReminderComponent implements OnInit {
