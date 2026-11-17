@@ -1,7 +1,7 @@
 <div class="page-container">
 
   <!-- =========================================================
-       HEADER
+  HEADER
   ========================================================= -->
 
   <div class="page-header">
@@ -17,20 +17,20 @@
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-      >
+        >
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
+          />
       </svg>
 
       <input
         type="text"
         placeholder="Search by Order, Ticket or Customer..."
         [(ngModel)]="searchQuery"
-      />
+        />
 
     </div>
 
@@ -38,450 +38,351 @@
 
 
   <!-- =========================================================
-       LOADING STATE
+  LOADING STATE
   ========================================================= -->
 
-  <div
-    *ngIf="isLoading"
-    class="empty-state"
-  >
-    <p>Loading...</p>
-  </div>
+  @if (isLoading) {
+    <div
+      class="empty-state"
+      >
+      <p>Loading...</p>
+    </div>
+  }
 
 
   <!-- =========================================================
-       EMPTY STATE
+  EMPTY STATE
   ========================================================= -->
 
-  <div
-    *ngIf="!isLoading && filteredPayments.length === 0"
-    class="empty-state"
-  >
-    <p>
-      No pending
-      {{ serviceType === 'REPAIR' ? 'repair' : 'maintenance' }}
-      payments to verify
-    </p>
-  </div>
+  @if (!isLoading && filteredPayments.length === 0) {
+    <div
+      class="empty-state"
+      >
+      <p>
+        No pending
+        {{ serviceType === 'REPAIR' ? 'repair' : 'maintenance' }}
+        payments to verify
+      </p>
+    </div>
+  }
 
 
   <!-- =========================================================
-       PAYMENT TABLE
+  PAYMENT TABLE
   ========================================================= -->
 
-  <div
-    class="table-container"
-    *ngIf="!isLoading && filteredPayments.length > 0"
-  >
+  @if (!isLoading && filteredPayments.length > 0) {
+    <div
+      class="table-container"
+      >
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>TICKET ID</th>
+            <th>CUSTOMER</th>
+            <th>SERVICE TYPE</th>
+            <th>AMOUNT</th>
+            <th>DATE</th>
+            <th>PAYMENT SLIP</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of filteredPayments; track payment) {
+            <tr>
+              <!-- TICKET ID -->
+              <td>
+                <span class="ticket-id">
+                  {{ payment.ticketId }}
+                </span>
+              </td>
+              <!-- CUSTOMER -->
+              <td>
+                <span class="customer-name">
+                  {{ payment.customerName }}
+                </span>
+              </td>
+              <!-- SERVICE TYPE -->
+              <td>
+                <span class="service-type">
+                  {{ payment.serviceType }}
+                </span>
+              </td>
+              <!-- AMOUNT -->
+              <td>
+                <span class="amount">
+                  LKR {{ payment.amount | number:'1.2-2' }}
+                </span>
+              </td>
+              <!-- DATE -->
+              <td>
+                <span class="date">
+                  {{ payment.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
+                </span>
+              </td>
+              <!-- PAYMENT SLIP -->
+              <td>
+                <button
+                  class="slip-preview-btn"
+                  (click)="openSlipModal(payment)"
+                  >
+                  Slip Preview
+                </button>
+              </td>
+              <!-- ACTIONS -->
+              <td>
+                <div class="action-buttons">
+                  <button
+                    class="btn btn-approve"
+                    (click)="approvePayment(payment)"
+                    [disabled]="isLoading"
+                    >
+                    Approve
+                  </button>
+                  <button
+                    class="btn btn-reject"
+                    (click)="openRejectModal(payment)"
+                    [disabled]="isLoading"
+                    >
+                    Reject
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
-    <table class="data-table">
 
-      <thead>
+  <!-- =========================================================
+  SLIP DETAILS MODAL
+  ========================================================= -->
 
-        <tr>
-          <th>TICKET ID</th>
-          <th>CUSTOMER</th>
-          <th>SERVICE TYPE</th>
-          <th>AMOUNT</th>
-          <th>DATE</th>
-          <th>PAYMENT SLIP</th>
-          <th>ACTIONS</th>
-        </tr>
-
-      </thead>
-
-
-      <tbody>
-
-        <tr *ngFor="let payment of filteredPayments">
-
-          <!-- TICKET ID -->
-
-          <td>
-            <span class="ticket-id">
-              {{ payment.ticketId }}
-            </span>
-          </td>
-
-
-          <!-- CUSTOMER -->
-
-          <td>
-            <span class="customer-name">
-              {{ payment.customerName }}
-            </span>
-          </td>
-
-
-          <!-- SERVICE TYPE -->
-
-          <td>
-            <span class="service-type">
-              {{ payment.serviceType }}
-            </span>
-          </td>
-
-
-          <!-- AMOUNT -->
-
-          <td>
-            <span class="amount">
-              LKR {{ payment.amount | number:'1.2-2' }}
-            </span>
-          </td>
-
-
-          <!-- DATE -->
-
-          <td>
-            <span class="date">
-              {{ payment.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
-            </span>
-          </td>
-
-
-          <!-- PAYMENT SLIP -->
-
-          <td>
-
-            <button
-              class="slip-preview-btn"
-              (click)="openSlipModal(payment)"
+  @if (showSlipModal) {
+    <div
+      class="modal-overlay"
+      (click)="closeSlipModal()"
+      >
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+        >
+        <!-- MODAL HEADER -->
+        <div class="modal-header">
+          <h3>
+            Payment Details
+          </h3>
+          <button
+            class="modal-close"
+            (click)="closeSlipModal()"
             >
-              Slip Preview
-            </button>
-
-          </td>
-
-
-          <!-- ACTIONS -->
-
-          <td>
-
-            <div class="action-buttons">
-
-              <button
-                class="btn btn-approve"
-                (click)="approvePayment(payment)"
-                [disabled]="isLoading"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
               >
-                Approve
-              </button>
-
-              <button
-                class="btn btn-reject"
-                (click)="openRejectModal(payment)"
-                [disabled]="isLoading"
-              >
-                Reject
-              </button>
-
-            </div>
-
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-
-  <!-- =========================================================
-       SLIP DETAILS MODAL
-  ========================================================= -->
-
-  <div
-    class="modal-overlay"
-    *ngIf="showSlipModal"
-    (click)="closeSlipModal()"
-  >
-
-    <div
-      class="modal"
-      (click)="$event.stopPropagation()"
-    >
-
-      <!-- MODAL HEADER -->
-
-      <div class="modal-header">
-
-        <h3>
-          Payment Details
-        </h3>
-
-        <button
-          class="modal-close"
-          (click)="closeSlipModal()"
-        >
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-
-        </button>
-
-      </div>
-
-
-      <!-- MODAL BODY -->
-
-      <div class="modal-body">
-
-        <p>
-          <strong>Order ID:</strong>
-          {{ selectedPayment?.orderId }}
-        </p>
-
-        <p>
-          <strong>Ticket ID:</strong>
-          {{ selectedPayment?.ticketId }}
-        </p>
-
-        <p>
-          <strong>Customer:</strong>
-          {{ selectedPayment?.customerName }}
-        </p>
-
-        <p>
-          <strong>Email:</strong>
-          {{ selectedPayment?.customerEmail }}
-        </p>
-
-        <p>
-          <strong>Service:</strong>
-          {{ selectedPayment?.serviceType }}
-        </p>
-
-        <p>
-          <strong>Amount:</strong>
-          LKR {{ selectedPayment?.amount | number:'1.2-2' }}
-        </p>
-
-        <p>
-          <strong>Description:</strong>
-          {{ selectedPayment?.description || '-' }}
-        </p>
-
-
-        <!-- PAYMENT SLIP -->
-
-        <div
-          class="slip-preview-section"
-          *ngIf="selectedPayment?.slipUrl"
-        >
-
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+          </button>
+        </div>
+        <!-- MODAL BODY -->
+        <div class="modal-body">
           <p>
-            <strong>Payment Slip:</strong>
+            <strong>Order ID:</strong>
+            {{ selectedPayment?.orderId }}
           </p>
-
-          <img
-            *ngIf="isImage(selectedPayment?.slipUrl)"
-            [src]="selectedPayment?.slipUrl"
-            class="slip-image"
-            alt="Payment Slip"
-          />
-
-          <a
-            *ngIf="!isImage(selectedPayment?.slipUrl)"
-            [href]="selectedPayment?.slipUrl"
-            target="_blank"
-            class="slip-link"
-          >
-            View Slip Document
-          </a>
-
+          <p>
+            <strong>Ticket ID:</strong>
+            {{ selectedPayment?.ticketId }}
+          </p>
+          <p>
+            <strong>Customer:</strong>
+            {{ selectedPayment?.customerName }}
+          </p>
+          <p>
+            <strong>Email:</strong>
+            {{ selectedPayment?.customerEmail }}
+          </p>
+          <p>
+            <strong>Service:</strong>
+            {{ selectedPayment?.serviceType }}
+          </p>
+          <p>
+            <strong>Amount:</strong>
+            LKR {{ $safeNavigationMigration(selectedPayment?.amount) | number:'1.2-2' }}
+          </p>
+          <p>
+            <strong>Description:</strong>
+            {{ selectedPayment?.description || '-' }}
+          </p>
+          <!-- PAYMENT SLIP -->
+          @if (selectedPayment?.slipUrl) {
+            <div
+              class="slip-preview-section"
+              >
+              <p>
+                <strong>Payment Slip:</strong>
+              </p>
+              @if (isImage($safeNavigationMigration(selectedPayment?.slipUrl))) {
+                <img
+                  [src]="$safeNavigationMigration(selectedPayment?.slipUrl)"
+                  class="slip-image"
+                  alt="Payment Slip"
+                  />
+              }
+              @if (!isImage($safeNavigationMigration(selectedPayment?.slipUrl))) {
+                <a
+                  [href]="$safeNavigationMigration(selectedPayment?.slipUrl)"
+                  target="_blank"
+                  class="slip-link"
+                  >
+                  View Slip Document
+                </a>
+              }
+            </div>
+          }
+          <!-- NO SLIP -->
+          @if (!selectedPayment?.slipUrl) {
+            <p
+              class="no-slip"
+              >
+              No slip uploaded
+            </p>
+          }
         </div>
-
-
-        <!-- NO SLIP -->
-
-        <p
-          *ngIf="!selectedPayment?.slipUrl"
-          class="no-slip"
-        >
-          No slip uploaded
-        </p>
-
+        <!-- MODAL FOOTER -->
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            (click)="closeSlipModal()"
+            >
+            Close
+          </button>
+          <button
+            class="btn btn-approve"
+            (click)="approvePayment(selectedPayment); closeSlipModal()"
+            [disabled]="isLoading"
+            >
+            Approve
+          </button>
+          <button
+            class="btn btn-reject"
+            (click)="closeSlipModal(); openRejectModal(selectedPayment)"
+            [disabled]="isLoading"
+            >
+            Reject
+          </button>
+        </div>
       </div>
-
-
-      <!-- MODAL FOOTER -->
-
-      <div class="modal-footer">
-
-        <button
-          class="btn btn-secondary"
-          (click)="closeSlipModal()"
-        >
-          Close
-        </button>
-
-        <button
-          class="btn btn-approve"
-          (click)="approvePayment(selectedPayment); closeSlipModal()"
-          [disabled]="isLoading"
-        >
-          Approve
-        </button>
-
-        <button
-          class="btn btn-reject"
-          (click)="closeSlipModal(); openRejectModal(selectedPayment)"
-          [disabled]="isLoading"
-        >
-          Reject
-        </button>
-
-      </div>
-
     </div>
-
-  </div>
+  }
 
 
   <!-- =========================================================
-       REJECT MODAL
+  REJECT MODAL
   ========================================================= -->
 
-  <div
-    class="modal-overlay"
-    *ngIf="showRejectModal"
-    (click)="closeRejectModal()"
-  >
-
+  @if (showRejectModal) {
     <div
-      class="modal"
-      (click)="$event.stopPropagation()"
-    >
-
-      <!-- MODAL HEADER -->
-
-      <div class="modal-header">
-
-        <h3>
-          Reject
-          {{ serviceType === 'REPAIR' ? 'Repair' : 'Maintenance' }}
-          Payment
-        </h3>
-
-        <button
-          class="modal-close"
-          (click)="closeRejectModal()"
-          [disabled]="isLoading"
+      class="modal-overlay"
+      (click)="closeRejectModal()"
+      >
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
         >
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-
-        </button>
-
-      </div>
-
-
-      <!-- MODAL BODY -->
-
-      <div class="modal-body">
-
-        <p>
-          <strong>Order:</strong>
-          {{ selectedPayment?.orderId }}
-        </p>
-
-        <p>
-          <strong>Ticket:</strong>
-          {{ selectedPayment?.ticketId }}
-        </p>
-
-        <p>
-          <strong>Customer:</strong>
-          {{ selectedPayment?.customerName }}
-        </p>
-
-        <p>
-          <strong>Amount:</strong>
-          LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}
-        </p>
-
-        <p class="reupload-notice">
-          An email with a re-upload link will be sent to the customer.
-        </p>
-
-
-        <!-- REJECTION REASON -->
-
-        <div class="form-group">
-
-          <label for="reason">
-
-            Rejection Reason
-
-            <span class="required">
-              *
-            </span>
-
-          </label>
-
-          <textarea
-            id="reason"
-            rows="4"
-            [(ngModel)]="rejectionReason"
-            placeholder="Explain why this payment is being rejected..."
+        <!-- MODAL HEADER -->
+        <div class="modal-header">
+          <h3>
+            Reject
+            {{ serviceType === 'REPAIR' ? 'Repair' : 'Maintenance' }}
+            Payment
+          </h3>
+          <button
+            class="modal-close"
+            (click)="closeRejectModal()"
             [disabled]="isLoading"
-          ></textarea>
-
+            >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+          </button>
         </div>
-
+        <!-- MODAL BODY -->
+        <div class="modal-body">
+          <p>
+            <strong>Order:</strong>
+            {{ selectedPayment?.orderId }}
+          </p>
+          <p>
+            <strong>Ticket:</strong>
+            {{ selectedPayment?.ticketId }}
+          </p>
+          <p>
+            <strong>Customer:</strong>
+            {{ selectedPayment?.customerName }}
+          </p>
+          <p>
+            <strong>Amount:</strong>
+            LKR {{ (selectedPayment?.amount || 0) | number:'1.2-2' }}
+          </p>
+          <p class="reupload-notice">
+            An email with a re-upload link will be sent to the customer.
+          </p>
+          <!-- REJECTION REASON -->
+          <div class="form-group">
+            <label for="reason">
+              Rejection Reason
+              <span class="required">
+                *
+              </span>
+            </label>
+            <textarea
+              id="reason"
+              rows="4"
+              [(ngModel)]="rejectionReason"
+              placeholder="Explain why this payment is being rejected..."
+              [disabled]="isLoading"
+            ></textarea>
+          </div>
+        </div>
+        <!-- MODAL FOOTER -->
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            (click)="closeRejectModal()"
+            [disabled]="isLoading"
+            >
+            Cancel
+          </button>
+          <button
+            class="btn btn-reject"
+            (click)="rejectPayment()"
+            [disabled]="isLoading || !rejectionReason.trim()"
+            >
+            {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
+          </button>
+        </div>
       </div>
-
-
-      <!-- MODAL FOOTER -->
-
-      <div class="modal-footer">
-
-        <button
-          class="btn btn-secondary"
-          (click)="closeRejectModal()"
-          [disabled]="isLoading"
-        >
-          Cancel
-        </button>
-
-        <button
-          class="btn btn-reject"
-          (click)="rejectPayment()"
-          [disabled]="isLoading || !rejectionReason.trim()"
-        >
-          {{ isLoading ? 'Processing...' : 'Confirm Reject' }}
-        </button>
-
-      </div>
-
     </div>
-
-  </div>
+  }
 
 </div>

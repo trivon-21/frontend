@@ -13,93 +13,110 @@
     </div>
 
     <!-- Success Screen -->
-    <div *ngIf="submitted" class="success-screen">
-      <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
-        <lucide-angular name="check" [size]="32" style="color: white;"></lucide-angular>
+    @if (submitted) {
+      <div class="success-screen">
+        <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="check" [size]="32" style="color: white;"></lucide-angular>
+        </div>
+        <h3 class="success-title">Thank you!</h3>
+        <p class="success-msg">Your feedback has been submitted. It helps us improve our service.</p>
+        <!-- Average stars display -->
+        <div class="avg-stars">
+          @for (s of stars; track s) {
+            <span
+              class="star star--display"
+              [ngClass]="s <= avgRating ? 'star--filled' : 'star--empty'"
+            >&#9733;</span>
+          }
+          <span class="avg-label">{{ avgRating.toFixed(1) }} / 5</span>
+        </div>
+        <button class="btn-primary" (click)="close()">Done</button>
       </div>
-      <h3 class="success-title">Thank you!</h3>
-      <p class="success-msg">Your feedback has been submitted. It helps us improve our service.</p>
-      <!-- Average stars display -->
-      <div class="avg-stars">
-        <span
-          *ngFor="let s of stars"
-          class="star star--display"
-          [ngClass]="s <= avgRating ? 'star--filled' : 'star--empty'"
-        >&#9733;</span>
-        <span class="avg-label">{{ avgRating.toFixed(1) }} / 5</span>
-      </div>
-      <button class="btn-primary" (click)="close()">Done</button>
-    </div>
+    }
 
     <!-- Form -->
-    <div *ngIf="!submitted" class="form-body">
-
-      <!-- Category Selection -->
-      <div class="form-group">
-        <label class="form-label">Feedback For <span class="required">*</span></label>
-        <div class="feedback-category-grid">
-          <button
-            *ngFor="let cat of feedbackCategories"
-            class="cat-btn"
-            [ngClass]="{'cat-btn--active': feedbackFor === cat}"
-            (click)="feedbackFor = cat; error = null"
-            style="display: inline-flex; align-items: center; gap: 6px;"
-          >
-            <lucide-angular *ngIf="cat === 'Order'" name="shopping-bag" [size]="16"></lucide-angular>
-            <lucide-angular *ngIf="cat === 'Installation'" name="box" [size]="16"></lucide-angular>
-            <lucide-angular *ngIf="cat === 'Service'" name="wrench" [size]="16"></lucide-angular>
-            <lucide-angular *ngIf="cat === 'AMC Service Visit'" name="shield" [size]="16"></lucide-angular>
-            {{ cat }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Reference Label (optional) -->
-      <div class="form-group">
-        <label class="form-label">Reference (optional)</label>
-        <input class="form-input" type="text" placeholder="e.g. ORD-A1B2C3 or Service Request ID" [(ngModel)]="referenceLabel" />
-      </div>
-
-      <!-- Star Rating Categories -->
-      <div class="ratings-section">
-        <div *ngFor="let cat of ratings" class="rating-row">
-          <div class="rating-label-wrap">
-            <span class="rating-label">{{ cat.label }}</span>
-            <span *ngIf="cat.value > 0" class="rating-text-label">{{ getStarLabel(cat.value) }}</span>
-          </div>
-          <div class="stars-row">
-            <button
-              *ngFor="let s of stars"
-              class="star"
-              [ngClass]="s <= getDisplayRating(cat.key, cat.value) ? 'star--filled' : 'star--empty'"
-              (click)="setRating(cat.key, s)"
-              (mouseenter)="setHover(cat.key, s)"
-              (mouseleave)="clearHover(cat.key)"
-              type="button"
-              aria-label="Rate {{ s }} star"
-            >&#9733;</button>
+    @if (!submitted) {
+      <div class="form-body">
+        <!-- Category Selection -->
+        <div class="form-group">
+          <label class="form-label">Feedback For <span class="required">*</span></label>
+          <div class="feedback-category-grid">
+            @for (cat of feedbackCategories; track cat) {
+              <button
+                class="cat-btn"
+                [ngClass]="{'cat-btn--active': feedbackFor === cat}"
+                (click)="feedbackFor = cat; error = null"
+                style="display: inline-flex; align-items: center; gap: 6px;"
+                >
+                @if (cat === 'Order') {
+                  <lucide-angular name="shopping-bag" [size]="16"></lucide-angular>
+                }
+                @if (cat === 'Installation') {
+                  <lucide-angular name="box" [size]="16"></lucide-angular>
+                }
+                @if (cat === 'Service') {
+                  <lucide-angular name="wrench" [size]="16"></lucide-angular>
+                }
+                @if (cat === 'AMC Service Visit') {
+                  <lucide-angular name="shield" [size]="16"></lucide-angular>
+                }
+                {{ cat }}
+              </button>
+            }
           </div>
         </div>
+        <!-- Reference Label (optional) -->
+        <div class="form-group">
+          <label class="form-label">Reference (optional)</label>
+          <input class="form-input" type="text" placeholder="e.g. ORD-A1B2C3 or Service Request ID" [(ngModel)]="referenceLabel" />
+        </div>
+        <!-- Star Rating Categories -->
+        <div class="ratings-section">
+          @for (cat of ratings; track cat) {
+            <div class="rating-row">
+              <div class="rating-label-wrap">
+                <span class="rating-label">{{ cat.label }}</span>
+                @if (cat.value > 0) {
+                  <span class="rating-text-label">{{ getStarLabel(cat.value) }}</span>
+                }
+              </div>
+              <div class="stars-row">
+                @for (s of stars; track s) {
+                  <button
+                    class="star"
+                    [ngClass]="s <= getDisplayRating(cat.key, cat.value) ? 'star--filled' : 'star--empty'"
+                    (click)="setRating(cat.key, s)"
+                    (mouseenter)="setHover(cat.key, s)"
+                    (mouseleave)="clearHover(cat.key)"
+                    type="button"
+                    aria-label="Rate {{ s }} star"
+                  >&#9733;</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <!-- Comment -->
+        <div class="form-group">
+          <label class="form-label">Comments</label>
+          <textarea
+            class="form-textarea"
+            rows="3"
+            placeholder="Share your experience in detail..."
+            [(ngModel)]="comment"
+          ></textarea>
+        </div>
+        @if (error) {
+          <div class="error-msg">{{ error }}</div>
+        }
+        <button class="btn-primary btn-full" (click)="submit()" [disabled]="submitting">
+          @if (submitting) {
+            <span class="btn-spinner"></span>
+          }
+          <span>{{ submitting ? 'Submitting...' : 'Submit Feedback' }}</span>
+        </button>
       </div>
-
-      <!-- Comment -->
-      <div class="form-group">
-        <label class="form-label">Comments</label>
-        <textarea
-          class="form-textarea"
-          rows="3"
-          placeholder="Share your experience in detail..."
-          [(ngModel)]="comment"
-        ></textarea>
-      </div>
-
-      <div *ngIf="error" class="error-msg">{{ error }}</div>
-
-      <button class="btn-primary btn-full" (click)="submit()" [disabled]="submitting">
-        <span *ngIf="submitting" class="btn-spinner"></span>
-        <span>{{ submitting ? 'Submitting...' : 'Submit Feedback' }}</span>
-      </button>
-    </div>
+    }
 
   </div>
 </div>

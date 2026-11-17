@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InvoiceService } from '../../services/invoice.service';
@@ -8,6 +8,7 @@ import { InvoiceService } from '../../services/invoice.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './invoice-paid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./invoice-paid.component.css']
 })
 export class InvoicePaidComponent implements OnInit {

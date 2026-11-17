@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomerProfileService } from '../../services/customer-profile.service';
@@ -10,8 +10,9 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, PortalIconsModule],
+  imports: [ReactiveFormsModule, FormsModule, PortalIconsModule],
   templateUrl: './customer-profile.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './customer-profile.component.css'
 })
 export class CustomerProfileComponent implements OnInit {

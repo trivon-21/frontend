@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -5,7 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuditLogService {
 
-  private apiUrl = 'http://127.0.0.1:5000/api/audit-logs';
+  private apiUrl = `${environment.apiUrl}/audit-logs`;
 
   constructor(private http: HttpClient) { }
 
@@ -27,6 +28,6 @@ export class AuditLogService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
   getInvoiceById(invoiceId: string): Observable<any> {
-    return this.http.get<any>(`http://127.0.0.1:5000/api/invoices/by-number/${invoiceId}`);
+    return this.http.get<any>(`${environment.apiUrl}/invoices/by-number/${invoiceId}`);
   }
 }

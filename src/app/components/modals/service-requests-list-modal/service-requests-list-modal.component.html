@@ -6,8 +6,12 @@
       <div class="modal-header-left">
         <lucide-angular name="wrench" [size]="20" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
         <h2 class="modal-title">
-          <span *ngIf="!selected">Service Requests</span>
-          <span *ngIf="selected">Request Details</span>
+          @if (!selected) {
+            <span>Service Requests</span>
+          }
+          @if (selected) {
+            <span>Request Details</span>
+          }
         </h2>
       </div>
       <button class="modal-close" (click)="close()" aria-label="Close">
@@ -16,149 +20,171 @@
     </div>
 
     <!-- ── LIST VIEW ── -->
-    <div *ngIf="!selected">
-
-      <!-- Summary pills -->
-      <div *ngIf="!loading && requests.length > 0" class="summary-pills">
-        <div class="pill pill--purple">
-          <span>{{ ongoing }}</span> Ongoing
-        </div>
-        <div class="pill pill--green">
-          <span>{{ completed }}</span> Completed
-        </div>
-        <div class="pill pill--red">
-          <span>{{ cancelled }}</span> Cancelled
-        </div>
-      </div>
-
-      <!-- Loading -->
-      <div *ngIf="loading" class="center-state">
-        <div class="spinner"></div>
-      </div>
-
-      <!-- Error -->
-      <div *ngIf="!loading && error" class="error-msg mx">{{ error }}</div>
-
-      <!-- Empty -->
-      <div *ngIf="!loading && !error && requests.length === 0" class="empty-state">
-        <lucide-angular name="wrench" [size]="40" strokeWidth="1.5" style="color: #bcc4c1;"></lucide-angular>
-        <p>No service requests found.</p>
-      </div>
-
-      <!-- Request list -->
-      <div *ngIf="!loading && !error && requests.length > 0" class="list-body">
-        <div
-          *ngFor="let req of requests"
-          class="list-item"
-          (click)="openDetail(req)"
-        >
-          <div class="item-left">
-            <div class="item-icon">
-              <lucide-angular name="wrench" [size]="16" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
+    @if (!selected) {
+      <div>
+        <!-- Summary pills -->
+        @if (!loading && requests.length > 0) {
+          <div class="summary-pills">
+            <div class="pill pill--purple">
+              <span>{{ ongoing }}</span> Ongoing
             </div>
-            <div class="item-info">
-              <div class="item-row-top">
-                <span class="item-ref">{{ req.serviceRequestRef }}</span>
-                <span class="status-badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span>
-              </div>
-              <p class="item-type">{{ req.serviceType === 'Other' ? req.serviceTypeOther || 'Other' : req.serviceType }}</p>
-              <p class="item-meta">{{ req.acUnitModel || 'AC unit not specified' }} &nbsp;·&nbsp; {{ formatDate(req.createdAt) }}</p>
+            <div class="pill pill--green">
+              <span>{{ completed }}</span> Completed
+            </div>
+            <div class="pill pill--red">
+              <span>{{ cancelled }}</span> Cancelled
             </div>
           </div>
-          <lucide-angular class="item-chevron" name="chevron-right" [size]="14" strokeWidth="2.5"></lucide-angular>
-        </div>
+        }
+        <!-- Loading -->
+        @if (loading) {
+          <div class="center-state">
+            <div class="spinner"></div>
+          </div>
+        }
+        <!-- Error -->
+        @if (!loading && error) {
+          <div class="error-msg mx">{{ error }}</div>
+        }
+        <!-- Empty -->
+        @if (!loading && !error && requests.length === 0) {
+          <div class="empty-state">
+            <lucide-angular name="wrench" [size]="40" strokeWidth="1.5" style="color: #bcc4c1;"></lucide-angular>
+            <p>No service requests found.</p>
+          </div>
+        }
+        <!-- Request list -->
+        @if (!loading && !error && requests.length > 0) {
+          <div class="list-body">
+            @for (req of requests; track req) {
+              <div
+                class="list-item"
+                (click)="openDetail(req)"
+                >
+                <div class="item-left">
+                  <div class="item-icon">
+                    <lucide-angular name="wrench" [size]="16" strokeWidth="2" style="color: #1f5b45;"></lucide-angular>
+                  </div>
+                  <div class="item-info">
+                    <div class="item-row-top">
+                      <span class="item-ref">{{ req.serviceRequestRef }}</span>
+                      <span class="status-badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span>
+                    </div>
+                    <p class="item-type">{{ req.serviceType === 'Other' ? req.serviceTypeOther || 'Other' : req.serviceType }}</p>
+                    <p class="item-meta">{{ req.acUnitModel || 'AC unit not specified' }} &nbsp;·&nbsp; {{ formatDate(req.createdAt) }}</p>
+                  </div>
+                </div>
+                <lucide-angular class="item-chevron" name="chevron-right" [size]="14" strokeWidth="2.5"></lucide-angular>
+              </div>
+            }
+          </div>
+        }
       </div>
-    </div>
+    }
 
     <!-- ── DETAIL VIEW ── -->
-    <div *ngIf="selected" class="detail-body">
-      <button class="back-btn" (click)="backToList()">
-        <lucide-angular name="arrow-left" [size]="14" strokeWidth="2.5"></lucide-angular>
-        Back to list
-      </button>
-
-      <!-- Ref + status row -->
-      <div class="detail-ref-row">
-        <div>
-          <p class="detail-ref">{{ selected.serviceRequestRef }}</p>
-          <p class="detail-date">Submitted {{ formatDate(selected.createdAt) }}</p>
+    @if (selected) {
+      <div class="detail-body">
+        <button class="back-btn" (click)="backToList()">
+          <lucide-angular name="arrow-left" [size]="14" strokeWidth="2.5"></lucide-angular>
+          Back to list
+        </button>
+        <!-- Ref + status row -->
+        <div class="detail-ref-row">
+          <div>
+            <p class="detail-ref">{{ selected.serviceRequestRef }}</p>
+            <p class="detail-date">Submitted {{ formatDate(selected.createdAt) }}</p>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusClass(selected.status)">{{ selected.status }}</span>
         </div>
-        <span class="status-badge" [ngClass]="getStatusClass(selected.status)">{{ selected.status }}</span>
-      </div>
-
-      <!-- Status progress bar -->
-      <div class="progress-track">
-        <div
-          *ngFor="let s of ['Pending','Assigned','In Progress','Completed']"
-          class="progress-step"
+        <!-- Status progress bar -->
+        <div class="progress-track">
+          @for (s of ['Pending','Assigned','In Progress','Completed']; track s) {
+            <div
+              class="progress-step"
           [ngClass]="{
             'pstep--active': selected.status === s,
             'pstep--done': isStepDone(s, selected.status),
             'pstep--cancelled': selected.status === 'Cancelled'
           }"
-        >
-          <div class="pstep-dot"></div>
-          <span class="pstep-label">{{ s }}</span>
+              >
+              <div class="pstep-dot"></div>
+              <span class="pstep-label">{{ s }}</span>
+            </div>
+          }
         </div>
+        <!-- Detail grid -->
+        <div class="detail-grid">
+          <div class="detail-row">
+            <span class="d-label">Service Type</span>
+            <span class="d-value">{{ selected.serviceType === 'Other' ? selected.serviceTypeOther || 'Other' : selected.serviceType }}</span>
+          </div>
+          @if (selected.acUnitModel) {
+            <div class="detail-row">
+              <span class="d-label">AC Model</span>
+              <span class="d-value">{{ selected.acUnitModel }}</span>
+            </div>
+          }
+          @if (selected.acUnitSerial) {
+            <div class="detail-row">
+              <span class="d-label">Serial No.</span>
+              <span class="d-value mono">{{ selected.acUnitSerial }}</span>
+            </div>
+          }
+          <div class="detail-row">
+            <span class="d-label">Warranty</span>
+            <span class="status-badge" [ngClass]="selected.acWarrantyStatus === 'Active' ? 'badge--green' : 'badge--grey'">
+              {{ selected.acWarrantyStatus }}
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="d-label">AMC</span>
+            <span class="status-badge" [ngClass]="selected.acAmcStatus === 'Active' ? 'badge--green' : 'badge--grey'">
+              {{ selected.acAmcStatus }}
+            </span>
+          </div>
+          @if (selected.preferredDate) {
+            <div class="detail-row">
+              <span class="d-label">Preferred Date</span>
+              <span class="d-value">{{ formatDate(selected.preferredDate) }}</span>
+            </div>
+          }
+          @if (selected.preferredTimeSlot) {
+            <div class="detail-row">
+              <span class="d-label">Time Slot</span>
+              <span class="d-value">{{ selected.preferredTimeSlot }}</span>
+            </div>
+          }
+          <div class="detail-row">
+            <span class="d-label">Est. Charges</span>
+            <span class="d-value" [ngClass]="selected.estimatedCharges === 0 ? 'text-green' : ''">
+              {{ formatAmount(selected.estimatedCharges) }}
+            </span>
+          </div>
+          @if (selected.problemDescription) {
+            <div class="detail-row detail-row--full">
+              <span class="d-label">Problem Description</span>
+              <p class="d-value d-desc">{{ selected.problemDescription }}</p>
+            </div>
+          }
+        </div>
+        @if (cancelError) {
+          <div class="error-msg">{{ cancelError }}</div>
+        }
+        <!-- Actions -->
+        @if (canCancel(selected)) {
+          <div class="action-row">
+            <button class="btn-danger" (click)="cancelRequest(selected)" [disabled]="cancelling">
+              @if (cancelling) {
+                <span class="btn-spinner"></span>
+              }
+              <span>{{ cancelling ? 'Cancelling...' : 'Cancel Request' }}</span>
+            </button>
+            <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
+          </div>
+        }
       </div>
-
-      <!-- Detail grid -->
-      <div class="detail-grid">
-        <div class="detail-row">
-          <span class="d-label">Service Type</span>
-          <span class="d-value">{{ selected.serviceType === 'Other' ? selected.serviceTypeOther || 'Other' : selected.serviceType }}</span>
-        </div>
-        <div class="detail-row" *ngIf="selected.acUnitModel">
-          <span class="d-label">AC Model</span>
-          <span class="d-value">{{ selected.acUnitModel }}</span>
-        </div>
-        <div class="detail-row" *ngIf="selected.acUnitSerial">
-          <span class="d-label">Serial No.</span>
-          <span class="d-value mono">{{ selected.acUnitSerial }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="d-label">Warranty</span>
-          <span class="status-badge" [ngClass]="selected.acWarrantyStatus === 'Active' ? 'badge--green' : 'badge--grey'">
-            {{ selected.acWarrantyStatus }}
-          </span>
-        </div>
-        <div class="detail-row">
-          <span class="d-label">AMC</span>
-          <span class="status-badge" [ngClass]="selected.acAmcStatus === 'Active' ? 'badge--green' : 'badge--grey'">
-            {{ selected.acAmcStatus }}
-          </span>
-        </div>
-        <div class="detail-row" *ngIf="selected.preferredDate">
-          <span class="d-label">Preferred Date</span>
-          <span class="d-value">{{ formatDate(selected.preferredDate) }}</span>
-        </div>
-        <div class="detail-row" *ngIf="selected.preferredTimeSlot">
-          <span class="d-label">Time Slot</span>
-          <span class="d-value">{{ selected.preferredTimeSlot }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="d-label">Est. Charges</span>
-          <span class="d-value" [ngClass]="selected.estimatedCharges === 0 ? 'text-green' : ''">
-            {{ formatAmount(selected.estimatedCharges) }}
-          </span>
-        </div>
-        <div class="detail-row detail-row--full" *ngIf="selected.problemDescription">
-          <span class="d-label">Problem Description</span>
-          <p class="d-value d-desc">{{ selected.problemDescription }}</p>
-        </div>
-      </div>
-
-      <div *ngIf="cancelError" class="error-msg">{{ cancelError }}</div>
-
-      <!-- Actions -->
-      <div *ngIf="canCancel(selected)" class="action-row">
-        <button class="btn-danger" (click)="cancelRequest(selected)" [disabled]="cancelling">
-          <span *ngIf="cancelling" class="btn-spinner"></span>
-          <span>{{ cancelling ? 'Cancelling...' : 'Cancel Request' }}</span>
-        </button>
-        <a href="mailto:support@airlux.com" class="btn-ghost">Contact Support</a>
-      </div>
-    </div>
+    }
 
   </div>
 </div>

@@ -1,5 +1,5 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
@@ -40,8 +40,9 @@ type RawServiceReport = {
 @Component({
   selector: 'app-main-technician-service-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
+  imports: [FormsModule, RouterModule, HttpClientModule],
   templateUrl: './main-technician-service-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-service-report.component.css'})
 export class MainTechnicianServiceReportsComponent implements OnInit {
   searchQuery = '';

@@ -99,17 +99,19 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of paginatedInspections">
-          <td>{{ item.orderId }}</td>
-          <td>{{ item.ticketId }}</td>
-          <td>{{ item.customer }}</td>
-          <td>{{ item.date | date:'EEE, dd MMM yyyy' }}</td>
-          <td>
-            <span class="status-badge" [ngClass]="getStatusClass(item.status)">
-              {{ getStatusLabel(item.status) }}
-            </span>
-          </td>
-        </tr>
+        @for (item of paginatedInspections; track item) {
+          <tr>
+            <td>{{ item.orderId }}</td>
+            <td>{{ item.ticketId }}</td>
+            <td>{{ item.customer }}</td>
+            <td>{{ item.date | date:'EEE, dd MMM yyyy' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -119,8 +121,10 @@
     <span>Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} items</span>
     <div class="pages">
       <button (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
-      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage === page">{{ page
+      @for (page of totalPages; track page) {
+        <button (click)="goToPage(page)" [class.active]="currentPage === page">{{ page
         }}</button>
+      }
       <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= totalItems">Next</button>
     </div>
   </div>

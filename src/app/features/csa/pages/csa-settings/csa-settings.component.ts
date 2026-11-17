@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 
 interface CsaWorkspacePreferences {
@@ -10,7 +10,7 @@ interface CsaWorkspacePreferences {
 @Component({
   selector: 'app-csa-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="settings-page">
       <div class="header-section">
@@ -54,14 +54,17 @@ interface CsaWorkspacePreferences {
       </div>
 
       <!-- Save Message Toast -->
-      <div *ngIf="saved" class="alert-success">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 6 9 17l-5-5"/>
-        </svg>
-        <span>Your CSA settings and preferences have been updated</span>
-      </div>
+      @if (saved) {
+        <div class="alert-success">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span>Your CSA settings and preferences have been updated</span>
+        </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .settings-page {
       max-width: 720px;

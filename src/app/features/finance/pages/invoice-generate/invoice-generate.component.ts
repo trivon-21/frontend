@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../services/notification.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './invoice-generate.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./invoice-generate.component.css']
 })
 export class InvoiceGenerateComponent implements OnInit {

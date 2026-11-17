@@ -32,9 +32,11 @@
       </div>
       <div class="header-actions">
         <!-- Maintenance Countdown -->
-        <div class="maintenance-countdown" *ngIf="maintenanceCountdown">
-          <span class="countdown-badge">{{ maintenanceCountdown }}</span>
-        </div>
+        @if (maintenanceCountdown) {
+          <div class="maintenance-countdown">
+            <span class="countdown-badge">{{ maintenanceCountdown }}</span>
+          </div>
+        }
 
         <!-- Clock Section -->
         <div class="clock-and-maintenance">
@@ -53,45 +55,57 @@
         <div class="notifications-container" appClickOutside (clickOutside)="closeNotifications()">
           <button class="icon-btn" aria-label="Notifications" (click)="toggleNotifications()" title="Notifications">
             <lucide-angular name="bell" [size]="20"></lucide-angular>
-            <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            @if (unreadCount > 0) {
+              <span class="notification-badge">{{ unreadCount }}</span>
+            }
           </button>
 
           <!-- Notifications Dropdown -->
-          <div class="notifications-dropdown" *ngIf="showNotifications">
-            <div class="notifications-header">
-              <h3>Notifications</h3>
-              <div class="notifications-actions">
-                <button class="action-link" (click)="markAllAsRead()" *ngIf="unreadCount > 0" title="Mark all as read">
-                  <lucide-angular name="check" [size]="14"></lucide-angular>
-                </button>
-                <button class="action-link" (click)="clearAllNotifications()" *ngIf="notifications.length > 0"
-                  title="Clear all">
-                  <lucide-angular name="x" [size]="14"></lucide-angular>
-                </button>
-              </div>
-            </div>
-
-            <div class="notifications-list">
-              <div *ngIf="notifications.length === 0" class="empty-state">
-                <span>No notifications yet</span>
-              </div>
-              <div *ngFor="let notif of notifications.slice(0, 8)" class="notification-item"
-                [class.unread]="!notif.read" (click)="navigateToNotification(notif)">
-                <span class="notif-icon">{{ getNotificationIcon(notif.type) }}</span>
-                <div class="notif-content">
-                  <div class="notif-title">{{ notif.title }}</div>
-                  <div class="notif-message">{{ notif.message }}</div>
+          @if (showNotifications) {
+            <div class="notifications-dropdown">
+              <div class="notifications-header">
+                <h3>Notifications</h3>
+                <div class="notifications-actions">
+                  @if (unreadCount > 0) {
+                    <button class="action-link" (click)="markAllAsRead()" title="Mark all as read">
+                      <lucide-angular name="check" [size]="14"></lucide-angular>
+                    </button>
+                  }
+                  @if (notifications.length > 0) {
+                    <button class="action-link" (click)="clearAllNotifications()"
+                      title="Clear all">
+                      <lucide-angular name="x" [size]="14"></lucide-angular>
+                    </button>
+                  }
                 </div>
-                <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete" style="display: flex; align-items: center; justify-content: center;">
-                  <lucide-angular name="x" [size]="14"></lucide-angular>
-                </button>
               </div>
+              <div class="notifications-list">
+                @if (notifications.length === 0) {
+                  <div class="empty-state">
+                    <span>No notifications yet</span>
+                  </div>
+                }
+                @for (notif of notifications.slice(0, 8); track notif) {
+                  <div class="notification-item"
+                    [class.unread]="!notif.read" (click)="navigateToNotification(notif)">
+                    <span class="notif-icon">{{ getNotificationIcon(notif.type) }}</span>
+                    <div class="notif-content">
+                      <div class="notif-title">{{ notif.title }}</div>
+                      <div class="notif-message">{{ notif.message }}</div>
+                    </div>
+                    <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete" style="display: flex; align-items: center; justify-content: center;">
+                      <lucide-angular name="x" [size]="14"></lucide-angular>
+                    </button>
+                  </div>
+                }
+              </div>
+              @if (notifications.length > 0) {
+                <div class="notifications-footer">
+                  <a routerLink="/dashboard/notifications">View All Notifications</a>
+                </div>
+              }
             </div>
-
-            <div class="notifications-footer" *ngIf="notifications.length > 0">
-              <a routerLink="/dashboard/notifications">View All Notifications</a>
-            </div>
-          </div>
+          }
         </div>
 
         <!-- User Menu -->
@@ -101,37 +115,39 @@
           </button>
 
           <!-- User Dropdown -->
-          <div class="user-dropdown" *ngIf="showUserMenu">
-            <div class="user-header">
-              <div class="user-avatar-lg">{{ userInitials }}</div>
-              <div>
-                <div class="user-name">{{ userName }}</div>
-                <div class="user-email">{{ userEmail }}</div>
+          @if (showUserMenu) {
+            <div class="user-dropdown">
+              <div class="user-header">
+                <div class="user-avatar-lg">{{ userInitials }}</div>
+                <div>
+                  <div class="user-name">{{ userName }}</div>
+                  <div class="user-email">{{ userEmail }}</div>
+                </div>
               </div>
+              <div class="menu-divider"></div>
+              <a routerLink="/dashboard" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="house" [size]="16"></lucide-angular>
+                Dashboard
+              </a>
+              <a routerLink="/dashboard/profile" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="user" [size]="16"></lucide-angular>
+                My Profile
+              </a>
+              <a routerLink="/dashboard/notifications" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="bell" [size]="16"></lucide-angular>
+                Notifications
+              </a>
+              <a routerLink="/dashboard/settings" class="menu-item" (click)="closeUserMenu()">
+                <lucide-angular name="settings" [size]="16"></lucide-angular>
+                Settings
+              </a>
+              <div class="menu-divider"></div>
+              <button class="menu-item logout" (click)="logout()">
+                <lucide-angular name="log-out" [size]="16"></lucide-angular>
+                Sign out
+              </button>
             </div>
-            <div class="menu-divider"></div>
-            <a routerLink="/dashboard" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="house" [size]="16"></lucide-angular>
-              Dashboard
-            </a>
-            <a routerLink="/dashboard/profile" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="user" [size]="16"></lucide-angular>
-              My Profile
-            </a>
-            <a routerLink="/dashboard/notifications" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="bell" [size]="16"></lucide-angular>
-              Notifications
-            </a>
-            <a routerLink="/dashboard/settings" class="menu-item" (click)="closeUserMenu()">
-              <lucide-angular name="settings" [size]="16"></lucide-angular>
-              Settings
-            </a>
-            <div class="menu-divider"></div>
-            <button class="menu-item logout" (click)="logout()">
-              <lucide-angular name="log-out" [size]="16"></lucide-angular>
-              Sign out
-            </button>
-          </div>
+          }
         </div>
       </div>
     </header>
@@ -143,18 +159,22 @@
   </div>
 </div>
 
-<div class="profile-completion-overlay" *ngIf="showProfileCompletionModal">
-  <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
-    <div class="profile-completion-icon">
-      <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
-    </div>
-    <h2 id="profile-completion-title">Complete your profile</h2>
-    <p>Please add the following details before continuing:</p>
-    <ul>
-      <li *ngFor="let field of missingProfileFields">{{ field }}</li>
-    </ul>
-    <button type="button" class="btn-add-profile-fields" (click)="goToCompleteProfile()">
-      Add fields
-    </button>
-  </section>
-</div>
+@if (showProfileCompletionModal) {
+  <div class="profile-completion-overlay">
+    <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
+      <div class="profile-completion-icon">
+        <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
+      </div>
+      <h2 id="profile-completion-title">Complete your profile</h2>
+      <p>Please add the following details before continuing:</p>
+      <ul>
+        @for (field of missingProfileFields; track field) {
+          <li>{{ field }}</li>
+        }
+      </ul>
+      <button type="button" class="btn-add-profile-fields" (click)="goToCompleteProfile()">
+        Add fields
+      </button>
+    </section>
+  </div>
+}

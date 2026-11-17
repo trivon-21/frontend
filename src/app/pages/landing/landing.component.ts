@@ -1,17 +1,18 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { InquiryModalComponent } from '../../components/modals/inquiry-modal/inquiry-modal.component';
 import { AuthService } from '../../core/services/auth.service';
-import { CommonModule } from '@angular/common';
+
 import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterLink, NavbarComponent, FooterComponent, InquiryModalComponent, CommonModule, PortalIconsModule],
+  imports: [RouterLink, NavbarComponent, FooterComponent, InquiryModalComponent, PortalIconsModule],
   templateUrl: './landing.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './landing.component.css',
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -19,7 +20,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   showInquiry = false;
   selectedServiceDetails: any | null = null;
   preselectedInquiryType = 'Other';
-  
+
   private observer: IntersectionObserver | null = null;
   private carouselInterval: any = null;
   private isCarouselPaused = false;
@@ -173,12 +174,12 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            
+
             // If the stats strip became visible, trigger counter animation
             if (entry.target.classList.contains('stats-strip')) {
               this.animateCounters();
             }
-            
+
             this.observer?.unobserve(entry.target);
           }
         });
@@ -206,10 +207,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   animateCounters(): void {
     const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const counters = document.querySelectorAll('.stat-num[data-count]');
-    
+
     counters.forEach(counter => {
       const target = +counter.getAttribute('data-count')!;
-      
+
       if (isReduced) {
         // Accessibility override: instantly display target count
         counter.textContent = target + '+';
@@ -221,7 +222,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       const steps = 50;
       const stepValue = target / steps;
       const stepTime = duration / steps;
-      
+
       const timer = setInterval(() => {
         count += stepValue;
         if (count >= target) {

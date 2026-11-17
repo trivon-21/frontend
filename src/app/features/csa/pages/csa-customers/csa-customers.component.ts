@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { CsaCustomerService, CustomerProfile } from '../../services/csa-customer.service';
@@ -17,6 +17,7 @@ const atLeastOneContactValidator: ValidatorFn = (control: AbstractControl): Vali
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule],
   templateUrl: './csa-customers.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-customers.component.css'
 })
 export class CsaCustomersComponent implements OnInit {

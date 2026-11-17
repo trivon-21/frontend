@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { CsaCatalogService, CsaCatalogProduct } from '../../services/csa-catalog
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './csa-catalog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./csa-catalog.component.css']
 })
 export class CsaCatalogComponent implements OnInit {

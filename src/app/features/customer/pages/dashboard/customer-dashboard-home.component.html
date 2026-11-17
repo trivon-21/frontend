@@ -1,12 +1,16 @@
 <!-- Loading State -->
-<div *ngIf="loading" class="state-overlay">
-  <div class="spinner"></div>
-</div>
+@if (loading) {
+  <div class="state-overlay">
+    <div class="spinner"></div>
+  </div>
+}
 
 <!-- Error State -->
-<div *ngIf="!loading && error" class="error-banner">
-  {{ error }}
-</div>
+@if (!loading && error) {
+  <div class="error-banner">
+    {{ error }}
+  </div>
+}
 
 <!-- Page Header -->
 <div class="page-header">
@@ -32,10 +36,12 @@
         <button class="more-btn" aria-label="More options" (click)="toggleDropdown('tp', $event)" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
-        <div *ngIf="openDropdown === 'tp'" class="stat-dropdown">
-          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'tp')">View Details</button>
-          <button class="dropdown-item" (click)="onMenuItemClick('export', 'tp')">Export</button>
-        </div>
+        @if (openDropdown === 'tp') {
+          <div class="stat-dropdown">
+            <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'tp')">View Details</button>
+            <button class="dropdown-item" (click)="onMenuItemClick('export', 'tp')">Export</button>
+          </div>
+        }
       </div>
     </div>
     <p class="stat-label">Total Purchases</p>
@@ -52,10 +58,12 @@
         <button class="more-btn" aria-label="More options" (click)="toggleDropdown('ro', $event)" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
-        <div *ngIf="openDropdown === 'ro'" class="stat-dropdown">
-          <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'ro')">View Details</button>
-          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'ro')">Contact Support</button>
-        </div>
+        @if (openDropdown === 'ro') {
+          <div class="stat-dropdown">
+            <button class="dropdown-item" (click)="onMenuItemClick('view-details', 'ro')">View Details</button>
+            <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'ro')">Contact Support</button>
+          </div>
+        }
       </div>
     </div>
     <p class="stat-label">Return Orders</p>
@@ -72,9 +80,11 @@
         <button class="more-btn" aria-label="More options" (click)="toggleDropdown('pp', $event)" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
-        <div *ngIf="openDropdown === 'pp'" class="stat-dropdown">
-          <button class="dropdown-item" (click)="onMenuItemClick('pay-now', 'pp')">View Details</button>
-        </div>
+        @if (openDropdown === 'pp') {
+          <div class="stat-dropdown">
+            <button class="dropdown-item" (click)="onMenuItemClick('pay-now', 'pp')">View Details</button>
+          </div>
+        }
       </div>
     </div>
     <p class="stat-label">Pending Payment</p>
@@ -91,10 +101,12 @@
         <button class="more-btn" aria-label="More options" (click)="toggleDropdown('rp', $event)" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
-        <div *ngIf="openDropdown === 'rp'" class="stat-dropdown">
-          <button class="dropdown-item" (click)="onMenuItemClick('retry-payment', 'rp')">Retry Payment</button>
-          <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'rp')">Contact Support</button>
-        </div>
+        @if (openDropdown === 'rp') {
+          <div class="stat-dropdown">
+            <button class="dropdown-item" (click)="onMenuItemClick('retry-payment', 'rp')">Retry Payment</button>
+            <button class="dropdown-item" (click)="onMenuItemClick('contact-support', 'rp')">Contact Support</button>
+          </div>
+        }
       </div>
     </div>
     <p class="stat-label">Rejected Payment</p>
@@ -111,10 +123,12 @@
         <button class="more-btn" aria-label="More options" (click)="toggleDropdown('comp', $event)" style="display: flex; align-items: center; justify-content: center;">
           <lucide-angular name="more-vertical" [size]="16"></lucide-angular>
         </button>
-        <div *ngIf="openDropdown === 'comp'" class="stat-dropdown">
-          <button class="dropdown-item" (click)="onMenuItemClick('view-orders', 'comp')">View Orders</button>
-          <button class="dropdown-item" (click)="onMenuItemClick('leave-review', 'comp')">Leave Review</button>
-        </div>
+        @if (openDropdown === 'comp') {
+          <div class="stat-dropdown">
+            <button class="dropdown-item" (click)="onMenuItemClick('view-orders', 'comp')">View Orders</button>
+            <button class="dropdown-item" (click)="onMenuItemClick('leave-review', 'comp')">Leave Review</button>
+          </div>
+        }
       </div>
     </div>
     <p class="stat-label">Completed</p>
@@ -142,44 +156,52 @@
 
     <div class="oh-table-wrap">
       <table class="oh-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Date</th>
-          <th>Price</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of pagedOrders">
-          <td>
-            <div class="order-name-cell">
-              <div class="order-avatar"></div>
-              <span>{{ order.itemName }}</span>
-            </div>
-          </td>
-          <td>{{ formatDate(order.date) }}</td>
-          <td>{{ formatAmount(order.amount) }}</td>
-          <td>
-            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
-              {{ order.status }}
-            </span>
-          </td>
-        </tr>
-        <tr *ngIf="!loading && orders.length === 0">
-          <td colspan="4" class="oh-empty">No orders found.</td>
-        </tr>
-      </tbody>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of pagedOrders; track order) {
+            <tr>
+              <td>
+                <div class="order-name-cell">
+                  <div class="order-avatar"></div>
+                  <span>{{ order.itemName }}</span>
+                </div>
+              </td>
+              <td>{{ formatDate(order.date) }}</td>
+              <td>{{ formatAmount(order.amount) }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+                  {{ order.status }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (!loading && orders.length === 0) {
+            <tr>
+              <td colspan="4" class="oh-empty">No orders found.</td>
+            </tr>
+          }
+        </tbody>
       </table>
     </div>
-    <div class="oh-footer" *ngIf="orders.length > 0">
-      <span>Showing {{ (orderHistoryPage - 1) * orderHistoryPageSize + 1 }}-{{ orderHistoryPageEnd }} of {{ orders.length }}</span>
-      <span class="oh-pagination" *ngIf="orderHistoryPageCount > 1">
-        <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage - 1)" [disabled]="orderHistoryPage === 1" aria-label="Previous orders">Previous</button>
-        <span>Page {{ orderHistoryPage }} of {{ orderHistoryPageCount }}</span>
-        <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage + 1)" [disabled]="orderHistoryPage === orderHistoryPageCount" aria-label="Next orders">Next</button>
-      </span>
-    </div>
+    @if (orders.length > 0) {
+      <div class="oh-footer">
+        <span>Showing {{ (orderHistoryPage - 1) * orderHistoryPageSize + 1 }}-{{ orderHistoryPageEnd }} of {{ orders.length }}</span>
+        @if (orderHistoryPageCount > 1) {
+          <span class="oh-pagination">
+            <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage - 1)" [disabled]="orderHistoryPage === 1" aria-label="Previous orders">Previous</button>
+            <span>Page {{ orderHistoryPage }} of {{ orderHistoryPageCount }}</span>
+            <button type="button" (click)="goToOrderHistoryPage(orderHistoryPage + 1)" [disabled]="orderHistoryPage === orderHistoryPageCount" aria-label="Next orders">Next</button>
+          </span>
+        }
+      </div>
+    }
   </div>
 
   <!-- Right Panel -->
@@ -233,69 +255,83 @@
 <!-- ── Modals ── -->
 
 <!-- Filtered Orders Modal -->
-<div *ngIf="showFilteredOrders" class="modal-overlay" (click)="closeFilteredOrders()">
-  <div class="modal-content filtered-orders-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title">
-        {{ filterMode === 'completed' ? 'Completed Orders' :
-           filterMode === 'pending' ? 'Pending Orders' :
-           filterMode === 'returned' ? 'Returned Orders' :
-           filterMode === 'rejected' ? 'Rejected Orders' : 'All Orders' }}
-      </h2>
-      <button class="modal-close" (click)="closeFilteredOrders()" style="display: flex; align-items: center; justify-content: center;">
-        <lucide-angular name="x" [size]="20"></lucide-angular>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div *ngIf="getFilteredOrders().length === 0" class="empty-state">
-        <p>No orders found</p>
+@if (showFilteredOrders) {
+  <div class="modal-overlay" (click)="closeFilteredOrders()">
+    <div class="modal-content filtered-orders-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          {{ filterMode === 'completed' ? 'Completed Orders' :
+          filterMode === 'pending' ? 'Pending Orders' :
+          filterMode === 'returned' ? 'Returned Orders' :
+          filterMode === 'rejected' ? 'Rejected Orders' : 'All Orders' }}
+        </h2>
+        <button class="modal-close" (click)="closeFilteredOrders()" style="display: flex; align-items: center; justify-content: center;">
+          <lucide-angular name="x" [size]="20"></lucide-angular>
+        </button>
       </div>
-      <div *ngIf="getFilteredOrders().length > 0" class="orders-list">
-        <div *ngFor="let order of getFilteredOrders()" class="order-item">
-          <div class="order-info">
-            <div class="order-name">{{ order.itemName }}</div>
-            <div class="order-date">{{ formatDate(order.date) }}</div>
+      <div class="modal-body">
+        @if (getFilteredOrders().length === 0) {
+          <div class="empty-state">
+            <p>No orders found</p>
           </div>
-          <div class="order-amount">{{ formatAmount(order.amount) }}</div>
-          <div class="order-status">
-            <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
-              {{ order.status }}
-            </span>
+        }
+        @if (getFilteredOrders().length > 0) {
+          <div class="orders-list">
+            @for (order of getFilteredOrders(); track order) {
+              <div class="order-item">
+                <div class="order-info">
+                  <div class="order-name">{{ order.itemName }}</div>
+                  <div class="order-date">{{ formatDate(order.date) }}</div>
+                </div>
+                <div class="order-amount">{{ formatAmount(order.amount) }}</div>
+                <div class="order-status">
+                  <span class="status-badge" [ngClass]="'status-badge--' + order.status.toLowerCase()">
+                    {{ order.status }}
+                  </span>
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
       </div>
     </div>
   </div>
-</div>
+}
 
-<app-track-order-modal
-  *ngIf="showTrackOrder"
-  (closed)="showTrackOrder = false"
-></app-track-order-modal>
+@if (showTrackOrder) {
+  <app-track-order-modal
+    (closed)="showTrackOrder = false"
+  ></app-track-order-modal>
+}
 
-<app-request-service-modal
-  *ngIf="showRequestService"
-  (closed)="showRequestService = false"
-  (viewHistory)="openServiceRequestHistory()"
-></app-request-service-modal>
+@if (showRequestService) {
+  <app-request-service-modal
+    (closed)="showRequestService = false"
+    (viewHistory)="openServiceRequestHistory()"
+  ></app-request-service-modal>
+}
 
-<app-inquiry-modal
-  *ngIf="showInquiry"
-  (closed)="showInquiry = false"
-></app-inquiry-modal>
+@if (showInquiry) {
+  <app-inquiry-modal
+    (closed)="showInquiry = false"
+  ></app-inquiry-modal>
+}
 
-<app-feedback-modal
-  *ngIf="showFeedback"
-  (closed)="showFeedback = false"
-></app-feedback-modal>
+@if (showFeedback) {
+  <app-feedback-modal
+    (closed)="showFeedback = false"
+  ></app-feedback-modal>
+}
 
-<app-service-requests-list-modal
-  *ngIf="showServiceRequestsList"
-  (closed)="showServiceRequestsList = false"
-></app-service-requests-list-modal>
+@if (showServiceRequestsList) {
+  <app-service-requests-list-modal
+    (closed)="showServiceRequestsList = false"
+  ></app-service-requests-list-modal>
+}
 
-<app-inquiry-modal
-  *ngIf="showInquiryList"
-  [initialTab]="'list'"
-  (closed)="showInquiryList = false"
-></app-inquiry-modal>
+@if (showInquiryList) {
+  <app-inquiry-modal
+    [initialTab]="'list'"
+    (closed)="showInquiryList = false"
+  ></app-inquiry-modal>
+}

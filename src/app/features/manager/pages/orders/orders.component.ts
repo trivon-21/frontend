@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +30,7 @@ interface DecisionTarget {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './orders.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent implements OnInit {

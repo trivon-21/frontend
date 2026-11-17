@@ -88,19 +88,23 @@
         Recent Activity Feed
       </h2>
       <div class="feed-list">
-        <div class="activity-item" *ngFor="let item of filteredActivity">
-          <div class="activity-icon-wrapper" [innerHTML]="item.svg"></div>
-          <div class="activity-details">
-            <p class="activity-title">{{ item.title }}</p>
-            <p class="activity-time">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              {{ item.time }}
-            </p>
+        @for (item of filteredActivity; track item) {
+          <div class="activity-item">
+            <div class="activity-icon-wrapper" [innerHTML]="item.svg"></div>
+            <div class="activity-details">
+              <p class="activity-title">{{ item.title }}</p>
+              <p class="activity-time">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ item.time }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="no-activity" *ngIf="!filteredActivity.length">
-          <p>No activity matches your criteria.</p>
-        </div>
+        }
+        @if (!filteredActivity.length) {
+          <div class="no-activity">
+            <p>No activity matches your criteria.</p>
+          </div>
+        }
       </div>
     </section>
 
@@ -110,18 +114,22 @@
         Urgent Alerts
       </h2>
       <div class="alerts-list">
-        <div class="alert-item" *ngFor="let alert of filteredAlerts">
-          <div class="alert-info">
-            <p class="alert-title">{{ alert.title }}</p>
-            <p class="alert-subtitle" [class.urgent]="alert.urgent">{{ alert.subtitle }}</p>
+        @for (alert of filteredAlerts; track alert) {
+          <div class="alert-item">
+            <div class="alert-info">
+              <p class="alert-title">{{ alert.title }}</p>
+              <p class="alert-subtitle" [class.urgent]="alert.urgent">{{ alert.subtitle }}</p>
+            </div>
+            <button class="btn-alert-action" (click)="onAlertAction(alert)">
+              {{ alert.action }}
+            </button>
           </div>
-          <button class="btn-alert-action" (click)="onAlertAction(alert)">
-            {{ alert.action }}
-          </button>
-        </div>
-        <div class="no-alerts" *ngIf="!filteredAlerts.length">
-          <p>No alerts available right now.</p>
-        </div>
+        }
+        @if (!filteredAlerts.length) {
+          <div class="no-alerts">
+            <p>No alerts available right now.</p>
+          </div>
+        }
       </div>
     </section>
   </div>

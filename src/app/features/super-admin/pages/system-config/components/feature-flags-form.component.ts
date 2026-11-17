@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { SystemConfig, FeatureFlags } from '../../../models/system-config.model';
 
 interface FlagOption {
@@ -11,47 +11,55 @@ interface FlagOption {
 @Component({
   selector: 'app-feature-flags-form',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="feature-flags-section">
       <h2>Feature Flags</h2>
       <p class="section-description">Enable or disable system modules without redeployment</p>
 
-      <div *ngIf="config" class="flags-container">
-        <div *ngFor="let flag of flags" class="flag-item">
-          <div class="flag-header">
-            <label class="flag-label">
-              <input
-                type="checkbox"
-                [checked]="config.featureFlags[flag.key]"
-                (change)="onFlagChange(flag.key, $event)"
-                [disabled]="isSaving"
-              />
-              <span class="flag-name">{{ flag.label }}</span>
-            </label>
-            <span class="flag-status" [class.enabled]="config.featureFlags[flag.key]">
-              {{ config.featureFlags[flag.key] ? 'Enabled' : 'Disabled' }}
-            </span>
+      @if (config) {
+        <div class="flags-container">
+          @for (flag of flags; track flag) {
+            <div class="flag-item">
+              <div class="flag-header">
+                <label class="flag-label">
+                  <input
+                    type="checkbox"
+                    [checked]="config.featureFlags[flag.key]"
+                    (change)="onFlagChange(flag.key, $event)"
+                    [disabled]="isSaving"
+                    />
+                  <span class="flag-name">{{ flag.label }}</span>
+                </label>
+                <span class="flag-status" [class.enabled]="config.featureFlags[flag.key]">
+                  {{ config.featureFlags[flag.key] ? 'Enabled' : 'Disabled' }}
+                </span>
+              </div>
+              <p class="flag-description">{{ flag.description }}</p>
+            </div>
+          }
+          <!-- Save Button -->
+          <div class="form-actions">
+            <button (click)="onSave()" [disabled]="!hasChanges || isSaving" class="btn btn-primary">
+              @if (!isSaving) {
+                <span>Save Changes</span>
+              }
+              @if (isSaving) {
+                <span>
+                  <span class="spinner-small"></span>
+                  Saving...
+                </span>
+              }
+            </button>
+            <button (click)="resetFlags()" class="btn btn-secondary" [disabled]="isSaving">
+              Reset
+            </button>
           </div>
-          <p class="flag-description">{{ flag.description }}</p>
         </div>
-
-        <!-- Save Button -->
-        <div class="form-actions">
-          <button (click)="onSave()" [disabled]="!hasChanges || isSaving" class="btn btn-primary">
-            <span *ngIf="!isSaving">Save Changes</span>
-            <span *ngIf="isSaving">
-              <span class="spinner-small"></span>
-              Saving...
-            </span>
-          </button>
-          <button (click)="resetFlags()" class="btn btn-secondary" [disabled]="isSaving">
-            Reset
-          </button>
-        </div>
-      </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .feature-flags-section {

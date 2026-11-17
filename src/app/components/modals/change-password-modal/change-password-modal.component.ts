@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmailVerificationReminderComponent } from '../email-verification-reminder/email-verification-reminder.component';
@@ -8,8 +8,9 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
 @Component({
   selector: 'app-change-password-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, EmailVerificationReminderComponent, PortalIconsModule],
+  imports: [ReactiveFormsModule, EmailVerificationReminderComponent, PortalIconsModule],
   templateUrl: './change-password-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './change-password-modal.component.css'
 })
 export class ChangePasswordModalComponent {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -38,6 +38,7 @@ interface MaintenanceDetail {
   standalone: true,
   imports: [CommonModule, HttpClientModule, RouterModule],
   templateUrl: './main-technician-maintenance-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./main-technician-maintenance-details.component.css']
 })
 export class MainTechnicianMaintenanceDetailsComponent implements OnInit {

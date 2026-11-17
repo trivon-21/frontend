@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { environment } from '../../../../environments/environment';
   selector: 'app-buy-install',
   imports: [CommonModule],
   templateUrl: './buy-install.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './buy-install.css',
 })
 export class BuyInstall implements OnInit {
@@ -154,7 +155,7 @@ export class BuyInstall implements OnInit {
 
   onGetExpertAdvice() {
     this.router.navigate(['/consultation-bridge'], {
-      state: { 
+      state: {
         productId: this.product._id,
         productName: this.product.name
       }

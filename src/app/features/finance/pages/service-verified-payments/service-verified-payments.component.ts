@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicePaymentService } from '../../services/service-payment.service';
@@ -8,6 +8,7 @@ import { ServicePaymentService } from '../../services/service-payment.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './service-verified-payments.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./service-verified-payments.component.css']
 })
 export class ServiceVerifiedPaymentsComponent implements OnInit {

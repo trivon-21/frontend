@@ -1,5 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, HostListener, ChangeDetectionStrategy } from '@angular/core';
+
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
@@ -9,8 +9,9 @@ import { roleHomeUrl } from '../../core/routing/role-home';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, ClickOutsideDirective],
+  imports: [RouterLink, RouterLinkActive, ClickOutsideDirective],
   templateUrl: './navbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent implements OnInit {

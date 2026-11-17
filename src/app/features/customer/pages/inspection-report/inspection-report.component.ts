@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
@@ -53,8 +53,9 @@ interface PhotoEntry {
 @Component({
   selector: 'app-inspection-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, PortalIconsModule],
+  imports: [FormsModule, HeaderComponent, PortalIconsModule],
   templateUrl: './inspection-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-report.component.css']
 })
 export class InspectionReportComponent implements OnInit {

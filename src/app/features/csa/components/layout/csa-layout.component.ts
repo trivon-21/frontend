@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { CsaSidebarComponent } from '../sidebar/csa-sidebar.component';
@@ -20,68 +20,72 @@ import { CsaAlertService } from '../../services/csa-alert.service';
       </div>
 
       <!-- Live Floating Inquiry Notifications Stack (Right Side) -->
-      <aside *ngIf="alertService.alerts$ | async as alerts"
-             class="floating-alert-stack"
-             role="alert"
-             aria-live="polite">
-        <ng-container *ngIf="alerts.length > 0">
-          <!-- Top Right Clear All button if multiple notifications -->
-          <div *ngIf="alerts.length > 1" class="alert-stack-header">
-            <button type="button" 
-                    class="alert-clear-all-btn" 
-                    (click)="alertService.clearAllAlerts()" 
-                    title="Clear all notifications">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-              </svg>
-              <span>Clear All ({{ alerts.length }})</span>
-            </button>
-          </div>
-
-          <!-- Notification Cards List -->
-          <div *ngFor="let alert of alerts; trackBy: trackByAlertId"
-               class="floating-alert-card" 
-               (click)="alertService.openInquiry(alert.id)">
-            <div class="alert-top">
-              <div class="alert-type-badge" [class.type-new]="alert.type === 'new'" [class.type-reply]="alert.type === 'reply'">
-                <span class="pulse-dot"></span>
-                {{ alert.type === 'new' ? 'New Inquiry' : 'Customer Replied' }}
+      @if (alertService.alerts$ | async; as alerts) {
+        <aside
+          class="floating-alert-stack"
+          role="alert"
+          aria-live="polite">
+          @if (alerts.length > 0) {
+            <!-- Top Right Clear All button if multiple notifications -->
+            @if (alerts.length > 1) {
+              <div class="alert-stack-header">
+                <button type="button"
+                  class="alert-clear-all-btn"
+                  (click)="alertService.clearAllAlerts()"
+                  title="Clear all notifications">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                  </svg>
+                  <span>Clear All ({{ alerts.length }})</span>
+                </button>
               </div>
-              <span class="alert-ref">{{ alert.inquiryRef }}</span>
-              <button type="button" 
-                      class="alert-close-btn" 
-                      (click)="$event.stopPropagation(); alertService.dismissAlert(alert.id)" 
-                      title="Dismiss this notification">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                </svg>
-              </button>
-            </div>
-
-            <div class="alert-body">
-              <div class="alert-avatar">
-                {{ alert.customerName ? alert.customerName.charAt(0).toUpperCase() : 'C' }}
+            }
+            <!-- Notification Cards List -->
+            @for (alert of alerts; track trackByAlertId($index, alert)) {
+              <div
+                class="floating-alert-card"
+                (click)="alertService.openInquiry(alert.id)">
+                <div class="alert-top">
+                  <div class="alert-type-badge" [class.type-new]="alert.type === 'new'" [class.type-reply]="alert.type === 'reply'">
+                    <span class="pulse-dot"></span>
+                    {{ alert.type === 'new' ? 'New Inquiry' : 'Customer Replied' }}
+                  </div>
+                  <span class="alert-ref">{{ alert.inquiryRef }}</span>
+                  <button type="button"
+                    class="alert-close-btn"
+                    (click)="$event.stopPropagation(); alertService.dismissAlert(alert.id)"
+                    title="Dismiss this notification">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="alert-body">
+                  <div class="alert-avatar">
+                    {{ alert.customerName ? alert.customerName.charAt(0).toUpperCase() : 'C' }}
+                  </div>
+                  <div class="alert-info">
+                    <h4 class="alert-sender">{{ alert.customerName }}</h4>
+                    <p class="alert-snippet">{{ alert.message }}</p>
+                  </div>
+                </div>
+                <div class="alert-footer">
+                  <span class="alert-hint">Click to open & reply</span>
+                  <button type="button" class="alert-action-btn">
+                    <span>Reply</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div class="alert-info">
-                <h4 class="alert-sender">{{ alert.customerName }}</h4>
-                <p class="alert-snippet">{{ alert.message }}</p>
-              </div>
-            </div>
-
-            <div class="alert-footer">
-              <span class="alert-hint">Click to open & reply</span>
-              <button type="button" class="alert-action-btn">
-                <span>Reply</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m9 18 6-6-6-6"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </ng-container>
-      </aside>
+            }
+          }
+        </aside>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .csa-layout {
       display: flex;

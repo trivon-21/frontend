@@ -15,7 +15,7 @@
         [(ngModel)]="searchQuery"
         (input)="filterTasks()"
         style="width: 100%; padding: 12px 16px 12px 44px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; background: #fff;"
-      >
+        >
     </div>
 
     <div class="filter-actions" style="display: flex; align-items: center; gap: 12px;">
@@ -29,7 +29,7 @@
           [(ngModel)]="statusFilter"
           (change)="filterTasks()"
           style="padding: 10px 16px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; color: #2D3139; outline: none; background: #fff; cursor: pointer; min-width: 150px;"
-        >
+          >
           <option value="All">All</option>
           <option value="Assigned">Assigned</option>
           <option value="In Progress">In Progress</option>
@@ -45,46 +45,48 @@
 
   <!-- Jobs List Rows -->
   <div class="jobs-list" style="display: flex; flex-direction: column; gap: 16px;">
-    <div class="job-card card-panel" *ngFor="let task of filteredTasks" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; flex-wrap: wrap; gap: 16px;">
-      <div class="job-info" style="flex-grow: 1; min-width: 250px;">
-        <div class="job-id-title" style="margin-bottom: 12px;">
-          <h3 style="font-size: 16px; font-weight: 700; color: #1b2f27; margin: 0 0 4px 0;">
-            #{{ task.id }} - {{ task.type }}
-          </h3>
-          <p class="customer-name" style="font-size: 14px; color: #8a9e96; margin: 0; font-weight: 500;">
-            {{ task.customer?.name || task.customer }}
-          </p>
+    @for (task of filteredTasks; track task) {
+      <div class="job-card card-panel" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; flex-wrap: wrap; gap: 16px;">
+        <div class="job-info" style="flex-grow: 1; min-width: 250px;">
+          <div class="job-id-title" style="margin-bottom: 12px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #1b2f27; margin: 0 0 4px 0;">
+              #{{ task.id }} - {{ task.type }}
+            </h3>
+            <p class="customer-name" style="font-size: 14px; color: #8a9e96; margin: 0; font-weight: 500;">
+              {{ task.customer?.name || task.customer }}
+            </p>
+          </div>
+          <div class="job-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px;">
+            <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
+              <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Location</label>
+              <span style="font-size: 13.5px; font-weight: 600; color: #2D3139; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" [title]="task.location">
+                {{ task.location }}
+              </span>
+            </div>
+            <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
+              <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Type</label>
+              <span style="font-size: 13.5px; font-weight: 600; color: #2D3139;">
+                {{ task.serviceType }}
+              </span>
+            </div>
+          </div>
         </div>
-
-        <div class="job-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px;">
-          <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
-            <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Location</label>
-            <span style="font-size: 13.5px; font-weight: 600; color: #2D3139; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" [title]="task.location">
-              {{ task.location }}
-            </span>
-          </div>
-          <div class="detail-item" style="display: flex; flex-direction: column; gap: 2px;">
-            <label style="font-size: 10px; color: #8a9e96; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Type</label>
-            <span style="font-size: 13.5px; font-weight: 600; color: #2D3139;">
-              {{ task.serviceType }}
-            </span>
-          </div>
+        <div class="job-status-action" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+          <span class="status-badge" [ngClass]="statusClass(task.status)" style="display: inline-block;">
+            {{ displayStatus(task.status) }}
+          </span>
+          <button class="btn-primary view-btn" [routerLink]="[baseRoute + '/service-details', task.id]" style="padding: 10px 24px;">
+            View
+          </button>
         </div>
       </div>
-
-      <div class="job-status-action" style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
-        <span class="status-badge" [ngClass]="statusClass(task.status)" style="display: inline-block;">
-          {{ displayStatus(task.status) }}
-        </span>
-        <button class="btn-primary view-btn" [routerLink]="[baseRoute + '/service-details', task.id]" style="padding: 10px 24px;">
-          View
-        </button>
-      </div>
-    </div>
+    }
 
     <!-- Empty State -->
-    <div class="no-results card-panel" *ngIf="filteredTasks.length === 0" style="padding: 48px; text-align: center;">
-      <p style="font-size: 15px; color: #8a9e96; margin: 0; font-weight: 500;">No jobs found matching your criteria.</p>
-    </div>
+    @if (filteredTasks.length === 0) {
+      <div class="no-results card-panel" style="padding: 48px; text-align: center;">
+        <p style="font-size: 15px; color: #8a9e96; margin: 0; font-weight: 500;">No jobs found matching your criteria.</p>
+      </div>
+    }
   </div>
 </div>

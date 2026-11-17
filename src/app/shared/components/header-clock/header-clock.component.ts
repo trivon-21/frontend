@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-header-clock',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './header-clock.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header-clock.component.css',
 })
 export class HeaderClockComponent implements OnDestroy {

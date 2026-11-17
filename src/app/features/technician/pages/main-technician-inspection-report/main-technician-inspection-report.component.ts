@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -33,6 +33,7 @@ type RawInspectionReport = {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   templateUrl: './main-technician-inspection-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-inspection-report.component.css'
 })
 export class MainTechnicianInspectionReportsComponent implements OnInit {
@@ -119,7 +120,7 @@ export class MainTechnicianInspectionReportsComponent implements OnInit {
 
   applyFilters(): void {
     const query = this.searchQuery.toLowerCase();
-    this.filteredTickets = this.tickets.filter(t => 
+    this.filteredTickets = this.tickets.filter(t =>
       (this.statusFilter === 'All' || t.status === this.statusFilter) &&
       (t.customerName.toLowerCase().includes(query) || t.id.toLowerCase().includes(query))
     );

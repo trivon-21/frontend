@@ -1,13 +1,14 @@
-﻿import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+﻿import { Component, ChangeDetectionStrategy } from '@angular/core';
+
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-layout',
+  selector: 'app-service-team-layout',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent, RouterOutlet],
+  imports: [SidebarComponent, HeaderComponent, RouterOutlet],
   templateUrl: './layout.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './layout.component.css'})
 export class LayoutComponent {}

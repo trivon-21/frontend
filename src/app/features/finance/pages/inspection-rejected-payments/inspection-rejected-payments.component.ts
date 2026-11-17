@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InspectionTicketService } from '../../services/inspection-ticket.service';
@@ -8,6 +8,7 @@ import { InspectionTicketService } from '../../services/inspection-ticket.servic
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './inspection-rejected-payments.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-rejected-payments.component.css']
 })
 export class InspectionRejectedPaymentsComponent implements OnInit {

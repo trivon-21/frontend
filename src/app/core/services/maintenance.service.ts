@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -62,7 +63,7 @@ export class MaintenanceService implements OnDestroy {
   private fetchMaintenanceStatus(): void {
     this.http
       .get<{ success: boolean; data: { maintenance: Maintenance } }>(
-        '/api/auth/maintenance'
+        `${environment.apiUrl}/auth/maintenance`
       )
       .pipe(
         catchError((err) => {
@@ -99,7 +100,7 @@ export class MaintenanceService implements OnDestroy {
         switchMap(() =>
           this.http
             .get<{ success: boolean; data: { maintenance: Maintenance } }>(
-              '/api/auth/maintenance'
+              `${environment.apiUrl}/auth/maintenance`
             )
             .pipe(
               catchError((err) => {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerServiceRequestService } from '../../../features/customer/services/customer-service-request.service';
@@ -10,6 +10,7 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './request-service-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './request-service-modal.component.css',
 })
 export class RequestServiceModalComponent implements OnInit {

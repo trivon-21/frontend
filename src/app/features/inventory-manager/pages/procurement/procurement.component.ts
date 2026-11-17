@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -49,6 +49,7 @@ type AuthItem = InventoryItem | string | undefined | null;
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule, RouterModule],
   templateUrl: './procurement.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./procurement.component.css'],
 })
 export class ProcurementDashboardComponent implements OnInit {

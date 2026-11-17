@@ -11,7 +11,7 @@
         ariaCurrentWhenActive="page"
         [routerLinkActiveOptions]="{ exact: true }"
         class="nav-item"
-      >
+        >
         <lucide-angular name="layout-dashboard" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Overview</span>
       </a>
@@ -33,13 +33,15 @@
             <lucide-angular name="chevron-down" [size]="16" strokeWidth="1.8"></lucide-angular>
           </button>
         </div>
-        <div id="manager-analytics-submenu" class="analytics-submenu" *ngIf="analyticsExpanded">
-          <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page">Period Performance</a>
-          <a routerLink="/manager/analytics/service-operations" routerLinkActive="active" ariaCurrentWhenActive="page">Service Operations</a>
-          <a routerLink="/manager/analytics/financial-overview" routerLinkActive="active" ariaCurrentWhenActive="page">Financial Overview</a>
-          <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active" ariaCurrentWhenActive="page">Purchasing and Approvals</a>
-          <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active" ariaCurrentWhenActive="page">Inventory and Exception Control</a>
-        </div>
+        @if (analyticsExpanded) {
+          <div id="manager-analytics-submenu" class="analytics-submenu">
+            <a routerLink="/manager/analytics/period-performance" routerLinkActive="active" ariaCurrentWhenActive="page">Period Performance</a>
+            <a routerLink="/manager/analytics/service-operations" routerLinkActive="active" ariaCurrentWhenActive="page">Service Operations</a>
+            <a routerLink="/manager/analytics/financial-overview" routerLinkActive="active" ariaCurrentWhenActive="page">Financial Overview</a>
+            <a routerLink="/manager/analytics/purchasing-approvals" routerLinkActive="active" ariaCurrentWhenActive="page">Purchasing and Approvals</a>
+            <a routerLink="/manager/analytics/inventory-exception-control" routerLinkActive="active" ariaCurrentWhenActive="page">Inventory and Exception Control</a>
+          </div>
+        }
       </div>
     </nav>
   </aside>
@@ -62,26 +64,27 @@
             aria-haspopup="menu"
             [attr.aria-expanded]="showUserMenu"
             title="User menu"
-          >
+            >
             {{ userInitials }}
           </button>
 
           <!-- User Dropdown -->
-          <div id="manager-user-menu" class="user-dropdown" role="menu" *ngIf="showUserMenu">
-            <div class="user-header">
-              <div class="user-avatar-lg">{{ userInitials }}</div>
-              <div>
-                <div class="user-name">{{ userName }}</div>
-                <div class="user-email">{{ userEmail }}</div>
+          @if (showUserMenu) {
+            <div id="manager-user-menu" class="user-dropdown" role="menu">
+              <div class="user-header">
+                <div class="user-avatar-lg">{{ userInitials }}</div>
+                <div>
+                  <div class="user-name">{{ userName }}</div>
+                  <div class="user-email">{{ userEmail }}</div>
+                </div>
               </div>
+              <div class="menu-divider"></div>
+              <button class="menu-item logout" role="menuitem" (click)="logout()">
+                <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
+                Sign out
+              </button>
             </div>
-            <div class="menu-divider"></div>
-
-            <button class="menu-item logout" role="menuitem" (click)="logout()">
-              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
-              Sign out
-            </button>
-          </div>
+          }
         </div>
       </div>
     </header>

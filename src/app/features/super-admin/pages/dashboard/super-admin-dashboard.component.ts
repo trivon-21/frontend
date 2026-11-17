@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { RouterLink } from '@angular/router';
 import { SuperAdminDashboardSummary, SuperAdminService } from '../../services/super-admin.service';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -7,8 +7,9 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, PortalIconsModule],
+  imports: [RouterLink, PortalIconsModule],
   templateUrl: './super-admin-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./super-admin-dashboard.component.css'],
 })
 export class SuperAdminDashboardComponent implements OnInit {

@@ -79,3 +79,10 @@ __screenshots__/
 *.tmp
 *.orig
 *.rej
+
+# Generated public deployment configuration
+src/environments/environment.generated.ts
+.vercel/
+
+# Local generator caches
+.nx/

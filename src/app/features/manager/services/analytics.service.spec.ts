@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
@@ -10,7 +10,7 @@ describe('AnalyticsService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AnalyticsService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [AnalyticsService, provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     service = TestBed.inject(AnalyticsService);
     http = TestBed.inject(HttpTestingController);

@@ -1,18 +1,21 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+
 import { TestBed } from '@angular/core/testing';
 import { PORTAL_ICON_NAMES, PortalIconsModule } from './portal-icons.module';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, PortalIconsModule],
+  imports: [PortalIconsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="role-portal-shell">
-      <lucide-angular *ngFor="let icon of icons" [name]="icon"></lucide-angular>
+      @for (icon of icons; track icon) {
+        <lucide-angular [name]="icon"></lucide-angular>
+      }
       <div class="alx-table-container" id="inside"><table class="alx-table"><tr><td>Inside</td></tr></table></div>
     </div>
     <div class="alx-table-container" id="outside"><table class="alx-table"><tr><td>Outside</td></tr></table></div>
-  `,
+    `,
 })
 class PortalFoundationHostComponent {
   icons = PORTAL_ICON_NAMES;

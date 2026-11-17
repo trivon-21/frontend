@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -16,6 +16,7 @@ import { AuthUser } from '../../../../../core/services/auth.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ClickOutsideDirective, PortalIconsModule],
   templateUrl: './customer-layout.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './customer-layout.component.css'
 })
 export class CustomerLayoutComponent implements OnInit, OnDestroy {

@@ -5,7 +5,7 @@
       Back to Inspection Reports
     </a>
   </div>
-  
+
   <header class="page-header">
     <h1>Inspection Report Review #{{ id }}</h1>
   </header>
@@ -53,7 +53,7 @@
       </div>
       <div class="card-content">
         <p class="label">Inspection Date</p>
-        <p class="value">{{ report?.inspectionDate | date:'longDate' }}</p>
+        <p class="value">{{ $safeNavigationMigration(report?.inspectionDate) | date:'longDate' }}</p>
       </div>
     </div>
   </section>
@@ -126,31 +126,35 @@
         <div class="card-body">
           <div class="findings-list">
             <!-- Iterate over the 'rooms' array from the database -->
-            <div class="finding-item" *ngFor="let room of report?.rooms; let i = index" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
-              <div class="finding-header">
-                <div class="finding-title">
-                  <h3>Room {{ i + 1 }}: {{ room.name || 'Unnamed' }}</h3>
+            @for (room of report?.rooms; track room; let i = $index) {
+              <div class="finding-item" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
+                <div class="finding-header">
+                  <div class="finding-title">
+                    <h3>Room {{ i + 1 }}: {{ room.name || 'Unnamed' }}</h3>
+                  </div>
                 </div>
+                <div class="room-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                  <p><strong>Dimensions:</strong> {{ room.length }}x{{ room.width }}x{{ room.height }} ft ({{ room.area }} sq ft)</p>
+                  <p><strong>Wall Condition:</strong> {{ room.wallCondition }}</p>
+                  <p><strong>Routing Path:</strong> {{ room.possibleRoutingPath }}</p>
+                  <p><strong>Distance (In-Out):</strong> {{ room.indoorOutdoorDistance }}m ({{ room.distanceMeasured }})</p>
+                  <p><strong>Drain Type:</strong> {{ room.drainType }}</p>
+                  <p><strong>Power Nearby:</strong> {{ room.powerPointsNearby ? 'Yes' : 'No' }}</p>
+                </div>
+                @if (room.constraintsRisks) {
+                  <div style="margin-top: 16px;">
+                    <h4 style="margin-bottom: 4px; color: #ef4444;">Constraints & Risks</h4>
+                    <p style="color: #4b5563;">{{ room.constraintsRisks }}</p>
+                  </div>
+                }
+                @if (room.inspectorNotes) {
+                  <div style="margin-top: 12px;">
+                    <h4 style="margin-bottom: 4px;">Inspector Notes</h4>
+                    <p style="color: #4b5563;">{{ room.inspectorNotes }}</p>
+                  </div>
+                }
               </div>
-              
-              <div class="room-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-                <p><strong>Dimensions:</strong> {{ room.length }}x{{ room.width }}x{{ room.height }} ft ({{ room.area }} sq ft)</p>
-                <p><strong>Wall Condition:</strong> {{ room.wallCondition }}</p>
-                <p><strong>Routing Path:</strong> {{ room.possibleRoutingPath }}</p>
-                <p><strong>Distance (In-Out):</strong> {{ room.indoorOutdoorDistance }}m ({{ room.distanceMeasured }})</p>
-                <p><strong>Drain Type:</strong> {{ room.drainType }}</p>
-                <p><strong>Power Nearby:</strong> {{ room.powerPointsNearby ? 'Yes' : 'No' }}</p>
-              </div>
-              <div style="margin-top: 16px;" *ngIf="room.constraintsRisks">
-                <h4 style="margin-bottom: 4px; color: #ef4444;">Constraints & Risks</h4>
-                <p style="color: #4b5563;">{{ room.constraintsRisks }}</p>
-              </div>
-              
-              <div style="margin-top: 12px;" *ngIf="room.inspectorNotes">
-                <h4 style="margin-bottom: 4px;">Inspector Notes</h4>
-                <p style="color: #4b5563;">{{ room.inspectorNotes }}</p>
-              </div>
-            </div>
+            }
           </div>
         </div>
       </section>
@@ -161,12 +165,14 @@
         <div class="card-header"><h2>Site Inspection Photos</h2></div>
         <div class="card-body">
           <div class="photos-grid">
-            <div class="photo-item" *ngFor="let photo of report?.photos">
-              <div class="photo-wrapper">
-                <img [src]="photo.url" [alt]="photo.caption">
+            @for (photo of report?.photos; track photo) {
+              <div class="photo-item">
+                <div class="photo-wrapper">
+                  <img [src]="photo.url" [alt]="photo.caption">
+                </div>
+                <p class="photo-caption">{{ photo.caption }}</p>
               </div>
-              <p class="photo-caption">{{ photo.caption }}</p>
-            </div>
+            }
           </div>
         </div>
       </section>
@@ -182,7 +188,7 @@
             type="text"
             [(ngModel)]="recommendedProduct"
             placeholder="Enter recommended product"
-          />
+            />
         </div>
         <div class="form-group">
           <label for="review-notes">Review Notes</label>
@@ -226,4 +232,3 @@
   }
 
 </div>
-  

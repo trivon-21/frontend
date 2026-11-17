@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,6 +15,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './core-operations.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./core-operations.component.css']
 })
 export class CoreOperationsComponent implements OnInit {

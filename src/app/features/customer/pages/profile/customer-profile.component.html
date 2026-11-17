@@ -10,25 +10,38 @@
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-state">Loading profile...</div>
+  @if (loading) {
+    <div class="loading-state">Loading profile...</div>
+  }
 
-  <ng-container *ngIf="!loading && profile">
-
+  @if (!loading && profile) {
     <!-- Alert messages -->
-    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-    <div *ngIf="success" class="alert alert-success">{{ success }}</div>
-    <div *ngIf="photoUploadError" class="alert alert-error">{{ photoUploadError }}</div>
-
+    @if (error) {
+      <div class="alert alert-error">{{ error }}</div>
+    }
+    @if (success) {
+      <div class="alert alert-success">{{ success }}</div>
+    }
+    @if (photoUploadError) {
+      <div class="alert alert-error">{{ photoUploadError }}</div>
+    }
     <!-- Top section: Profile card + Details -->
     <div class="top-row">
-
       <!-- Profile card -->
       <div class="profile-card">
         <div class="profile-avatar-area">
-          <div class="profile-avatar" *ngIf="!profile.profilePhoto">{{ avatarInitials }}</div>
-          <img *ngIf="profile.profilePhoto" [src]="profile.profilePhoto" alt="Profile photo" class="profile-photo" />
-          <div *ngIf="uploadingPhoto" class="photo-uploading">Uploading...</div>
-          <div *ngIf="removingPhoto" class="photo-uploading">Removing...</div>
+          @if (!profile.profilePhoto) {
+            <div class="profile-avatar">{{ avatarInitials }}</div>
+          }
+          @if (profile.profilePhoto) {
+            <img [src]="profile.profilePhoto" alt="Profile photo" class="profile-photo" />
+          }
+          @if (uploadingPhoto) {
+            <div class="photo-uploading">Uploading...</div>
+          }
+          @if (removingPhoto) {
+            <div class="photo-uploading">Removing...</div>
+          }
           <input
             type="file"
             accept="image/*"
@@ -36,49 +49,60 @@
             [disabled]="uploadingPhoto"
             #fileInput
             style="display: none"
-          />
+            />
         </div>
         <div class="profile-name-area">
           <div class="profile-first-name">{{ profile.fullName }}</div>
           <div class="profile-last-name">{{ profile.lastName }}</div>
           <div class="account-status">
-            <span class="account-status-badge verified" *ngIf="isAccountVerified()">Account Verified</span>
-            <span class="account-status-badge unverified" *ngIf="!isAccountVerified()">Account Not Verified</span>
+            @if (isAccountVerified()) {
+              <span class="account-status-badge verified">Account Verified</span>
+            }
+            @if (!isAccountVerified()) {
+              <span class="account-status-badge unverified">Account Not Verified</span>
+            }
           </div>
           <div class="profile-photo-buttons">
             <button class="btn-edit-photo" (click)="triggerPhotoUpload()" [disabled]="uploadingPhoto || removingPhoto">
               {{ profile.profilePhoto ? 'Edit' : 'Add Photo' }}
             </button>
-            <button *ngIf="profile.profilePhoto" class="btn-remove-photo" (click)="removeProfilePhoto()" [disabled]="removingPhoto || uploadingPhoto">
-              Remove
-            </button>
+            @if (profile.profilePhoto) {
+              <button class="btn-remove-photo" (click)="removeProfilePhoto()" [disabled]="removingPhoto || uploadingPhoto">
+                Remove
+              </button>
+            }
           </div>
         </div>
       </div>
-
       <!-- Details panel -->
       <div class="details-panel">
         <h3 class="details-title">Details</h3>
         <hr class="details-divider" />
-        <p class="details-row" *ngIf="profile.phoneNumber">
-          <span class="details-label">Contact:</span> {{ profile.phoneNumber }}
-        </p>
-        <p class="details-row" *ngIf="!profile.phoneNumber">
-          <span class="details-label">Contact:</span> <span class="details-empty">Not set</span>
-        </p>
+        @if (profile.phoneNumber) {
+          <p class="details-row">
+            <span class="details-label">Contact:</span> {{ profile.phoneNumber }}
+          </p>
+        }
+        @if (!profile.phoneNumber) {
+          <p class="details-row">
+            <span class="details-label">Contact:</span> <span class="details-empty">Not set</span>
+          </p>
+        }
         <p class="details-row">
           <span class="details-label">Email:</span> {{ profile.email }}
         </p>
-        <p class="details-row" *ngIf="profile.address">
-          <span class="details-label">Address:</span> {{ profile.address }}
-        </p>
-        <p class="details-row" *ngIf="!profile.address">
-          <span class="details-label">Address:</span> <span class="details-empty">Not set</span>
-        </p>
+        @if (profile.address) {
+          <p class="details-row">
+            <span class="details-label">Address:</span> {{ profile.address }}
+          </p>
+        }
+        @if (!profile.address) {
+          <p class="details-row">
+            <span class="details-label">Address:</span> <span class="details-empty">Not set</span>
+          </p>
+        }
       </div>
-
     </div>
-
     <!-- Profile Form -->
     <form [formGroup]="profileForm" class="profile-form">
       <div class="form-grid two-col">
@@ -91,7 +115,6 @@
           <input formControlName="lastName" type="text" class="form-input" placeholder="Your Last Name" />
         </div>
       </div>
-
       <div class="form-grid two-col">
         <div class="form-field">
           <label class="form-label">Gender <span class="required-mark">*</span></label>
@@ -110,7 +133,6 @@
           <input formControlName="address" type="text" class="form-input" placeholder="Your Address" />
         </div>
       </div>
-
       <div class="form-grid one-col">
         <div class="form-field">
           <label class="form-label">Contact Number <span class="required-mark">*</span></label>
@@ -118,86 +140,39 @@
         </div>
       </div>
     </form>
-
     <!-- Email section -->
     <div class="email-section">
       <h3 class="email-section-title">My email Address</h3>
-
       <!-- Primary email -->
-      <div class="email-item" *ngIf="profile.email">
-        <div class="email-icon-wrap">
-          <lucide-angular name="mail" [size]="16"></lucide-angular>
-        </div>
-        <div class="email-info">
-          <div class="email-address-row">
-            <span class="email-address">{{ profile.email }}</span>
-            <span class="email-badge verified" *ngIf="emailVerified">Verified</span>
-            <span class="email-badge unverified" *ngIf="!emailVerified">Not Verified</span>
-          </div>
-          <div class="email-time">{{ timeAgo(profile.createdAt) }}</div>
-        </div>
-        <button
-          *ngIf="!emailVerified && !showOtpInput"
-          class="btn-verify-email"
-          (click)="startEmailVerification()"
-        >Verify Email</button>
-      </div>
-
-      <!-- OTP verification panel -->
-      <div *ngIf="showOtpInput" class="otp-panel">
-        <p class="otp-panel-desc">Enter the 6-digit code sent to <strong>{{ profile.email }}</strong></p>
-        <div class="otp-panel-row">
-          <input
-            class="otp-panel-input"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            placeholder="000000"
-            [(ngModel)]="profileOtpValue"
-            [ngModelOptions]="{standalone: true}"
-            [disabled]="otpVerifying"
-          />
-          <button class="btn-otp-confirm" (click)="submitEmailOtp()" [disabled]="otpVerifying">
-            {{ otpVerifying ? 'Verifying…' : 'Confirm' }}
-          </button>
-          <button class="btn-otp-cancel" (click)="cancelEmailVerification()">Cancel</button>
-        </div>
-        <div class="otp-panel-links">
-          <button class="otp-resend-link" (click)="resendProfileOtp()" [disabled]="otpResending">
-            {{ otpResending ? 'Sending…' : 'Resend code' }}
-          </button>
-        </div>
-        <p *ngIf="otpError" class="otp-panel-error">{{ otpError }}</p>
-        <p *ngIf="otpSuccess" class="otp-panel-success">{{ otpSuccess }}</p>
-      </div>
-
-      <!-- Additional emails -->
-      <ng-container *ngFor="let ae of profile.additionalEmails">
+      @if (profile.email) {
         <div class="email-item">
           <div class="email-icon-wrap">
             <lucide-angular name="mail" [size]="16"></lucide-angular>
           </div>
           <div class="email-info">
             <div class="email-address-row">
-              <span class="email-address">{{ ae.email }}</span>
-              <span class="email-badge verified" *ngIf="ae.verified">Verified</span>
-              <span class="email-badge unverified" *ngIf="!ae.verified">Not Verified</span>
+              <span class="email-address">{{ profile.email }}</span>
+              @if (emailVerified) {
+                <span class="email-badge verified">Verified</span>
+              }
+              @if (!emailVerified) {
+                <span class="email-badge unverified">Not Verified</span>
+              }
             </div>
-            <div class="email-time">{{ timeAgo(ae.addedAt) }}</div>
+            <div class="email-time">{{ timeAgo(profile.createdAt) }}</div>
           </div>
-          <button
-            *ngIf="!ae.verified && pendingAdditionalEmailId !== ae._id"
-            class="btn-verify-email"
-            (click)="startAdditionalEmailVerification(ae._id)"
-          >Verify</button>
-          <button class="email-remove-btn" (click)="removeEmail(ae._id)" aria-label="Remove email" style="display: flex; align-items: center; justify-content: center;">
-            <lucide-angular name="x" [size]="14"></lucide-angular>
-          </button>
+          @if (!emailVerified && !showOtpInput) {
+            <button
+              class="btn-verify-email"
+              (click)="startEmailVerification()"
+            >Verify Email</button>
+          }
         </div>
-
-        <!-- OTP panel for this additional email -->
-        <div *ngIf="pendingAdditionalEmailId === ae._id" class="otp-panel">
-          <p class="otp-panel-desc">Enter the 6-digit code sent to <strong>{{ ae.email }}</strong></p>
+      }
+      <!-- OTP verification panel -->
+      @if (showOtpInput) {
+        <div class="otp-panel">
+          <p class="otp-panel-desc">Enter the 6-digit code sent to <strong>{{ profile.email }}</strong></p>
           <div class="otp-panel-row">
             <input
               class="otp-panel-input"
@@ -205,96 +180,171 @@
               inputmode="numeric"
               maxlength="6"
               placeholder="000000"
-              [(ngModel)]="additionalEmailOtpValue"
+              [(ngModel)]="profileOtpValue"
               [ngModelOptions]="{standalone: true}"
-              [disabled]="additionalEmailOtpVerifying"
-            />
-            <button class="btn-otp-confirm" (click)="submitAdditionalEmailOtp()" [disabled]="additionalEmailOtpVerifying">
-              {{ additionalEmailOtpVerifying ? 'Verifying…' : 'Confirm' }}
+              [disabled]="otpVerifying"
+              />
+            <button class="btn-otp-confirm" (click)="submitEmailOtp()" [disabled]="otpVerifying">
+              {{ otpVerifying ? 'Verifying…' : 'Confirm' }}
             </button>
-            <button class="btn-otp-cancel" (click)="cancelAdditionalEmailVerification()">Cancel</button>
+            <button class="btn-otp-cancel" (click)="cancelEmailVerification()">Cancel</button>
           </div>
           <div class="otp-panel-links">
-            <button class="otp-resend-link" (click)="resendAdditionalOtp()" [disabled]="additionalEmailOtpResending">
-              {{ additionalEmailOtpResending ? 'Sending…' : 'Resend code' }}
+            <button class="otp-resend-link" (click)="resendProfileOtp()" [disabled]="otpResending">
+              {{ otpResending ? 'Sending…' : 'Resend code' }}
             </button>
           </div>
-          <p *ngIf="additionalEmailOtpError" class="otp-panel-error">{{ additionalEmailOtpError }}</p>
-          <p *ngIf="additionalEmailOtpSuccess" class="otp-panel-success">{{ additionalEmailOtpSuccess }}</p>
+          @if (otpError) {
+            <p class="otp-panel-error">{{ otpError }}</p>
+          }
+          @if (otpSuccess) {
+            <p class="otp-panel-success">{{ otpSuccess }}</p>
+          }
         </div>
-      </ng-container>
-
+      }
+      <!-- Additional emails -->
+      @for (ae of profile.additionalEmails; track ae) {
+        <div class="email-item">
+          <div class="email-icon-wrap">
+            <lucide-angular name="mail" [size]="16"></lucide-angular>
+          </div>
+          <div class="email-info">
+            <div class="email-address-row">
+              <span class="email-address">{{ ae.email }}</span>
+              @if (ae.verified) {
+                <span class="email-badge verified">Verified</span>
+              }
+              @if (!ae.verified) {
+                <span class="email-badge unverified">Not Verified</span>
+              }
+            </div>
+            <div class="email-time">{{ timeAgo(ae.addedAt) }}</div>
+          </div>
+          @if (!ae.verified && pendingAdditionalEmailId !== ae._id) {
+            <button
+              class="btn-verify-email"
+              (click)="startAdditionalEmailVerification(ae._id)"
+            >Verify</button>
+          }
+          <button class="email-remove-btn" (click)="removeEmail(ae._id)" aria-label="Remove email" style="display: flex; align-items: center; justify-content: center;">
+            <lucide-angular name="x" [size]="14"></lucide-angular>
+          </button>
+        </div>
+        <!-- OTP panel for this additional email -->
+        @if (pendingAdditionalEmailId === ae._id) {
+          <div class="otp-panel">
+            <p class="otp-panel-desc">Enter the 6-digit code sent to <strong>{{ ae.email }}</strong></p>
+            <div class="otp-panel-row">
+              <input
+                class="otp-panel-input"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="000000"
+                [(ngModel)]="additionalEmailOtpValue"
+                [ngModelOptions]="{standalone: true}"
+                [disabled]="additionalEmailOtpVerifying"
+                />
+              <button class="btn-otp-confirm" (click)="submitAdditionalEmailOtp()" [disabled]="additionalEmailOtpVerifying">
+                {{ additionalEmailOtpVerifying ? 'Verifying…' : 'Confirm' }}
+              </button>
+              <button class="btn-otp-cancel" (click)="cancelAdditionalEmailVerification()">Cancel</button>
+            </div>
+            <div class="otp-panel-links">
+              <button class="otp-resend-link" (click)="resendAdditionalOtp()" [disabled]="additionalEmailOtpResending">
+                {{ additionalEmailOtpResending ? 'Sending…' : 'Resend code' }}
+              </button>
+            </div>
+            @if (additionalEmailOtpError) {
+              <p class="otp-panel-error">{{ additionalEmailOtpError }}</p>
+            }
+            @if (additionalEmailOtpSuccess) {
+              <p class="otp-panel-success">{{ additionalEmailOtpSuccess }}</p>
+            }
+          </div>
+        }
+      }
       <!-- Add email input -->
-      <div *ngIf="showAddEmailInput" class="add-email-row">
-        <input
-          type="email"
-          class="form-input add-email-input"
-          [(ngModel)]="newEmail"
-          [ngModelOptions]="{standalone: true}"
-          placeholder="Enter new email address"
-        />
-        <button class="btn-confirm-email" (click)="submitAddEmail()" [disabled]="addingEmail">
-          {{ addingEmail ? 'Adding...' : 'Add' }}
-        </button>
-        <button class="btn-cancel-email" (click)="toggleAddEmail()">Cancel</button>
-        <span *ngIf="addEmailError" class="add-email-error">{{ addEmailError }}</span>
-      </div>
-
+      @if (showAddEmailInput) {
+        <div class="add-email-row">
+          <input
+            type="email"
+            class="form-input add-email-input"
+            [(ngModel)]="newEmail"
+            [ngModelOptions]="{standalone: true}"
+            placeholder="Enter new email address"
+            />
+          <button class="btn-confirm-email" (click)="submitAddEmail()" [disabled]="addingEmail">
+            {{ addingEmail ? 'Adding...' : 'Add' }}
+          </button>
+          <button class="btn-cancel-email" (click)="toggleAddEmail()">Cancel</button>
+          @if (addEmailError) {
+            <span class="add-email-error">{{ addEmailError }}</span>
+          }
+        </div>
+      }
       <button class="add-email-btn" (click)="toggleAddEmail()">
         + Add Email Address
       </button>
     </div>
-
     <!-- Action buttons -->
     <div class="actions-row">
-
       <!-- Reset link feedback -->
-      <div *ngIf="resetLinkSent" class="reset-link-notice">
-        A password reset link has been sent to <strong>{{ selectedResetEmail }}</strong>. Check your inbox.
-      </div>
-      <div *ngIf="resetLinkError" class="reset-link-error-notice">{{ resetLinkError }}</div>
-
+      @if (resetLinkSent) {
+        <div class="reset-link-notice">
+          A password reset link has been sent to <strong>{{ selectedResetEmail }}</strong>. Check your inbox.
+        </div>
+      }
+      @if (resetLinkError) {
+        <div class="reset-link-error-notice">{{ resetLinkError }}</div>
+      }
       <!-- Delete confirm prompt -->
-      <div *ngIf="confirmDelete" class="delete-confirm">
-        <span class="delete-confirm-text">Are you sure? This action cannot be undone.</span>
-        <button class="btn-confirm-delete" (click)="deleteAccount()">Yes, Delete</button>
-        <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
-      </div>
-
-      <div class="action-btns" *ngIf="!confirmDelete">
-        <!-- Edit / Save / Cancel -->
-        <ng-container *ngIf="!isEditing">
-          <button class="btn-edit-details" (click)="startEditing()">Edit Details</button>
-        </ng-container>
-        <ng-container *ngIf="isEditing">
-          <button class="btn-cancel-edit" (click)="cancelEditing()">Cancel</button>
-          <button class="btn-save-details" (click)="saveProfile()" [disabled]="saving || profileForm.invalid">
-            {{ saving ? 'Saving...' : 'Save Changes' }}
+      @if (confirmDelete) {
+        <div class="delete-confirm">
+          <span class="delete-confirm-text">Are you sure? This action cannot be undone.</span>
+          <button class="btn-confirm-delete" (click)="deleteAccount()">Yes, Delete</button>
+          <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
+        </div>
+      }
+      @if (!confirmDelete) {
+        <div class="action-btns">
+          <!-- Edit / Save / Cancel -->
+          @if (!isEditing) {
+            <button class="btn-edit-details" (click)="startEditing()">Edit Details</button>
+          }
+          @if (isEditing) {
+            <button class="btn-cancel-edit" (click)="cancelEditing()">Cancel</button>
+            <button class="btn-save-details" (click)="saveProfile()" [disabled]="saving || profileForm.invalid">
+              {{ saving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          }
+          <button class="btn-change-password" (click)="sendPasswordResetLink()" [disabled]="sendingResetLink || resetLinkSent">
+            <lucide-angular name="shield" [size]="14" style="margin-right:6px; vertical-align: -1px;"></lucide-angular>
+            {{ sendingResetLink ? 'Sending...' : resetLinkSent ? 'Link Sent!' : 'Change Password' }}
           </button>
-        </ng-container>
-        <button class="btn-change-password" (click)="sendPasswordResetLink()" [disabled]="sendingResetLink || resetLinkSent">
-          <lucide-angular name="shield" [size]="14" style="margin-right:6px; vertical-align: -1px;"></lucide-angular>
-          {{ sendingResetLink ? 'Sending...' : resetLinkSent ? 'Link Sent!' : 'Change Password' }}
-        </button>
-        <button class="btn-delete-account" (click)="deleteAccount()">Delete Account</button>
-      </div>
+          <button class="btn-delete-account" (click)="deleteAccount()">Delete Account</button>
+        </div>
+      }
     </div>
+  }
 
-  </ng-container>
-
-  <div class="profile-completion-overlay" *ngIf="showProfileCompletionModal">
-    <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
-      <div class="profile-completion-icon">
-        <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
-      </div>
-      <h2 id="profile-completion-title">Complete your profile</h2>
-      <p>Please add the following details before continuing:</p>
-      <ul>
-        <li *ngFor="let field of missingProfileFields">{{ field }}</li>
-      </ul>
-      <button type="button" class="btn-add-profile-fields" (click)="startEditing()">
-        Add fields
-      </button>
-    </section>
-  </div>
+  @if (showProfileCompletionModal) {
+    <div class="profile-completion-overlay">
+      <section class="profile-completion-modal" role="dialog" aria-modal="true" aria-labelledby="profile-completion-title">
+        <div class="profile-completion-icon">
+          <lucide-angular name="user-round-pen" [size]="28"></lucide-angular>
+        </div>
+        <h2 id="profile-completion-title">Complete your profile</h2>
+        <p>Please add the following details before continuing:</p>
+        <ul>
+          @for (field of missingProfileFields; track field) {
+            <li>{{ field }}</li>
+          }
+        </ul>
+        <button type="button" class="btn-add-profile-fields" (click)="startEditing()">
+          Add fields
+        </button>
+      </section>
+    </div>
+  }
 </div>

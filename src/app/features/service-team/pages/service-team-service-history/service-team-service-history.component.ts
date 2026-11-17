@@ -1,5 +1,5 @@
 // service-team-service-history.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -28,6 +28,7 @@ interface ServiceHistorySummary {
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule],
   templateUrl: './service-team-service-history.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './service-team-service-history.component.css'
 })
 export class ServiceTeamServiceHistoryComponent implements OnInit {

@@ -47,31 +47,39 @@
 
       <div class="form-actions">
         <button type="submit" class="save-btn" [disabled]="loading">
-          <span *ngIf="!loading">Save Changes</span>
-          <span *ngIf="loading" class="loader"></span>
+          @if (!loading) {
+            <span>Save Changes</span>
+          }
+          @if (loading) {
+            <span class="loader"></span>
+          }
         </button>
       </div>
     </form>
 
     <!-- TOAST MESSAGES -->
-    <div class="toast success" *ngIf="successMessage">
-      <div class="toast-content">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        <span>{{ successMessage }}</span>
+    @if (successMessage) {
+      <div class="toast success">
+        <div class="toast-content">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>{{ successMessage }}</span>
+        </div>
       </div>
-    </div>
+    }
 
-    <div class="toast error" *ngIf="errorMessage">
-      <div class="toast-content">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
-        </svg>
-        <span>{{ errorMessage }}</span>
+    @if (errorMessage) {
+      <div class="toast error">
+        <div class="toast-content">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span>{{ errorMessage }}</span>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </div>

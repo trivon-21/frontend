@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmService } from '../../services/confirm.service';
 
@@ -7,25 +7,28 @@ import { ConfirmService } from '../../services/confirm.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="confirmation-overlay" *ngIf="(state$ | async)?.isOpen">
-      <div class="confirmation-modal">
-        <div class="confirmation-header">
-          <h2>{{ (state$ | async)?.title }}</h2>
-        </div>
-        <div class="confirmation-body">
-          <p>{{ (state$ | async)?.message }}</p>
-        </div>
-        <div class="confirmation-footer">
-          <button class="btn btn-secondary" (click)="onCancel()">
-            {{ (state$ | async)?.cancelText }}
-          </button>
-          <button class="btn btn-primary" (click)="onAccept()">
-            {{ (state$ | async)?.confirmText }}
-          </button>
+    @if ((state$ | async)?.isOpen) {
+      <div class="confirmation-overlay">
+        <div class="confirmation-modal">
+          <div class="confirmation-header">
+            <h2>{{ (state$ | async)?.title }}</h2>
+          </div>
+          <div class="confirmation-body">
+            <p>{{ (state$ | async)?.message }}</p>
+          </div>
+          <div class="confirmation-footer">
+            <button class="btn btn-secondary" (click)="onCancel()">
+              {{ (state$ | async)?.cancelText }}
+            </button>
+            <button class="btn btn-primary" (click)="onAccept()">
+              {{ (state$ | async)?.confirmText }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `,
+    }
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .confirmation-overlay {
       position: fixed;

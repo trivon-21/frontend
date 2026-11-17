@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
@@ -13,6 +13,7 @@ import { CsaRequestServiceModalComponent } from '../../components/csa-request-se
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, PortalIconsModule, CsaRequestServiceModalComponent],
   templateUrl: './csa-service-tickets.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-service-tickets.component.css'
 })
 export class CsaServiceTicketsComponent implements OnInit {
@@ -25,7 +26,7 @@ export class CsaServiceTicketsComponent implements OnInit {
   customers: CustomerProfile[] = [];
   products: any[] = [];
   totalTickets = 0;
-  
+
   // Category Counts for Summary Cards
   countTotal = 0;
   countRepairs = 0;

@@ -18,48 +18,53 @@
     </nav>
 
     <!-- Guest buttons -->
-    <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
-    </div>
+    @if (!currentUser) {
+      <div class="authbtns">
+        <a routerLink="/login" class="btn ghost">Log in</a>
+        <a routerLink="/signup" class="btn solid">Sign up</a>
+      </div>
+    }
 
     <!-- Logged-in user area -->
-    <div class="user-area" *ngIf="currentUser">
-      <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
-      <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
-        <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
-          <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
-          <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
-          <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <div class="dropdown" *ngIf="showDropdown">
-          <div class="dropdown-header">
-            <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
-            <div>
-              <div class="dropdown-name">{{ currentUser.fullName }}</div>
-              <div class="dropdown-email">{{ currentUser.email }}</div>
-            </div>
-          </div>
-          <div class="dropdown-divider"></div>
-          <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-            My Dashboard
-          </a>
-          <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            My Profile
-          </a>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item logout-item" (click)="logout()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
-            Sign out
+    @if (currentUser) {
+      <div class="user-area">
+        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
+        <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
+          <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
+            <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
+            <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
+            <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
+          @if (showDropdown) {
+            <div class="dropdown">
+              <div class="dropdown-header">
+                <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
+                <div>
+                  <div class="dropdown-name">{{ currentUser.fullName }}</div>
+                  <div class="dropdown-email">{{ currentUser.email }}</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                My Dashboard
+              </a>
+              <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                My Profile
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-item" (click)="logout()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
+                Sign out
+              </button>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
 </header>
 
@@ -75,25 +80,31 @@
 <div class="checkout-main">
 
   <!-- REJECTION NOTICE BANNER (Only in Re-upload Mode) -->
-  <div class="rejection-alert-card" *ngIf="isReuploadMode">
-    <div class="rejection-alert-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
+  @if (isReuploadMode) {
+    <div class="rejection-alert-card">
+      <div class="rejection-alert-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <div class="rejection-alert-body">
+        <div class="rejection-badge">Action Required • Payment Rejected</div>
+        <h3 class="rejection-title">Payment Slip Resubmission Required</h3>
+        @if (rejectionReason) {
+          <p class="rejection-desc">
+            <strong>Reason from Finance:</strong> {{ rejectionReason }}
+          </p>
+        }
+        @if (!rejectionReason) {
+          <p class="rejection-desc">
+            The previously submitted payment slip could not be verified by the finance team. Please ensure bank details, amount, reference number, and date are clearly readable.
+          </p>
+        }
+      </div>
     </div>
-    <div class="rejection-alert-body">
-      <div class="rejection-badge">Action Required • Payment Rejected</div>
-      <h3 class="rejection-title">Payment Slip Resubmission Required</h3>
-      <p class="rejection-desc" *ngIf="rejectionReason">
-        <strong>Reason from Finance:</strong> {{ rejectionReason }}
-      </p>
-      <p class="rejection-desc" *ngIf="!rejectionReason">
-        The previously submitted payment slip could not be verified by the finance team. Please ensure bank details, amount, reference number, and date are clearly readable.
-      </p>
-    </div>
-  </div>
+  }
 
   <!-- ORDER SUMMARY CARD -->
   <div class="order-summary-card">
@@ -115,24 +126,32 @@
       <div class="order-row">
         <span class="order-row-label">Order Reference:</span>
         <span class="order-row-value">
-          <span *ngIf="isInitializing || isLoadingOrder">Loading...</span>
-          <span *ngIf="!isInitializing && !isLoadingOrder">{{ generatedOrderId || 'pending' }}</span>
+          @if (isInitializing || isLoadingOrder) {
+            <span>Loading...</span>
+          }
+          @if (!isInitializing && !isLoadingOrder) {
+            <span>{{ generatedOrderId || 'pending' }}</span>
+          }
         </span>
       </div>
 
-      <div class="order-row" *ngIf="isReuploadMode">
-        <span class="order-row-label">Payment Status:</span>
-        <span class="order-row-value">
-          <span class="status-pill-rejected">Rejected</span>
-        </span>
-      </div>
-      
+      @if (isReuploadMode) {
+        <div class="order-row">
+          <span class="order-row-label">Payment Status:</span>
+          <span class="order-row-value">
+            <span class="status-pill-rejected">Rejected</span>
+          </span>
+        </div>
+      }
+
       <div class="order-row">
         <span class="order-row-label">Items:</span>
         <div class="order-items-list">
-          <div class="order-item-summary" *ngFor="let item of cartItems">
-            {{ item.name }} (x{{ item.quantity }})
-          </div>
+          @for (item of cartItems; track item) {
+            <div class="order-item-summary">
+              {{ item.name }} (x{{ item.quantity }})
+            </div>
+          }
         </div>
       </div>
 
@@ -147,11 +166,13 @@
         <span class="order-row-label">Discount</span>
         <span class="order-row-value">{{ (!discount || discount === 0) ? '-' : 'LKR ' + (discount | number:'1.0-0') }}</span>
       </div>
-      
-      <div class="order-row" *ngIf="!isBuyOnly">
-        <span class="order-row-label">Inspection Fee</span>
-        <span class="order-row-value">Calculated at checkout</span>
-      </div>
+
+      @if (!isBuyOnly) {
+        <div class="order-row">
+          <span class="order-row-label">Inspection Fee</span>
+          <span class="order-row-value">Calculated at checkout</span>
+        </div>
+      }
 
       <div class="order-row order-row-total-amount">
         <span class="order-row-label order-total-label">Total Amount</span>
@@ -160,19 +181,21 @@
     </div>
 
     <!-- PAYMENT INSTRUCTIONS -->
-    <div class="payment-instructions" *ngIf="isBuyOnly">
-      <div class="instruction-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
+    @if (isBuyOnly) {
+      <div class="payment-instructions">
+        <div class="instruction-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </div>
+        <p class="instruction-text">
+          Please transfer the total amount to the account below and upload your payment slip using your
+          <strong>unique Order Reference</strong> (ALX-BO-... or ALX-BI-...) as the transfer remark.
+        </p>
       </div>
-      <p class="instruction-text">
-        Please transfer the total amount to the account below and upload your payment slip using your 
-        <strong>unique Order Reference</strong> (ALX-BO-... or ALX-BI-...) as the transfer remark.
-      </p>
-    </div>
+    }
   </div>
 
   <!-- DELIVERY + BANK + PAYMENT SECTION -->
@@ -184,92 +207,267 @@
       <!-- DELIVERY DETAILS -->
       <div class="checkout-section-title shipping-title-row">
         <span>Shipping details</span>
-        <span class="locked-badge" *ngIf="isReuploadMode">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          Locked for Resubmission
-        </span>
+        @if (isReuploadMode) {
+          <span class="locked-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Locked for Resubmission
+          </span>
+        }
       </div>
 
-      <div class="locked-shipping-notice" *ngIf="isReuploadMode">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          <polyline points="9 12 11 14 15 10"></polyline>
-        </svg>
-        <span>Delivery details are saved from your original order. Only payment slip resubmission is required.</span>
-      </div>
+      @if (isReuploadMode) {
+        <div class="locked-shipping-notice">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <polyline points="9 12 11 14 15 10"></polyline>
+          </svg>
+          <span>Delivery details are saved from your original order. Only payment slip resubmission is required.</span>
+        </div>
+      }
       <form [formGroup]="shippingForm" class="delivery-form" [class.form-locked]="isReuploadMode">
         <div class="form-row-two">
           <div class="form-group">
             <label class="form-label">First Name</label>
             <input type="text" class="form-input" placeholder="e.g. John" [formControl]="$any(shippingForm.get('firstName'))" [class.input-error]="isInvalid('firstName')">
-            <div class="error-msg" *ngIf="isInvalid('firstName')">
-              <span *ngIf="hasError('firstName', 'required')">First name is required</span>
-              <span *ngIf="hasError('firstName', 'pattern')">Only letters allowed</span>
-            </div>
+            @if (isInvalid('firstName')) {
+              <div class="error-msg">
+                @if (hasError('firstName', 'required')) {
+                  <span>First name is required</span>
+                }
+                @if (hasError('firstName', 'pattern')) {
+                  <span>Only letters allowed</span>
+                }
+              </div>
+            }
           </div>
           <div class="form-group">
             <label class="form-label">Last Name</label>
             <input type="text" class="form-input" placeholder="e.g. Doe" [formControl]="$any(shippingForm.get('lastName'))" [class.input-error]="isInvalid('lastName')" [class.field-locked]="!isAccessible('lastName')" [readonly]="!isAccessible('lastName')" [tabindex]="!isAccessible('lastName') ? -1 : 0">
-            <div class="error-msg" *ngIf="isInvalid('lastName')">
-              <span *ngIf="hasError('lastName', 'required')">Last name is required</span>
-              <span *ngIf="hasError('lastName', 'pattern')">Only letters allowed</span>
-            </div>
+            @if (isInvalid('lastName')) {
+              <div class="error-msg">
+                @if (hasError('lastName', 'required')) {
+                  <span>Last name is required</span>
+                }
+                @if (hasError('lastName', 'pattern')) {
+                  <span>Only letters allowed</span>
+                }
+              </div>
+            }
           </div>
         </div>
-        
+
         <div class="form-group">
           <label class="form-label">Address</label>
           <textarea class="form-input form-textarea" placeholder="e.g. 123 Main St, Colombo" rows="2" [formControl]="$any(shippingForm.get('address'))" [class.input-error]="isInvalid('address')" [class.field-locked]="!isAccessible('address')" [readonly]="!isAccessible('address')" [tabindex]="!isAccessible('address') ? -1 : 0"></textarea>
-          <div class="error-msg" *ngIf="isInvalid('address')">
-            <span *ngIf="hasError('address', 'required')">Address is required</span>
-            <span *ngIf="hasError('address', 'minlength')">Address must be at least 5 characters</span>
-          </div>
+          @if (isInvalid('address')) {
+            <div class="error-msg">
+              @if (hasError('address', 'required')) {
+                <span>Address is required</span>
+              }
+              @if (hasError('address', 'minlength')) {
+                <span>Address must be at least 5 characters</span>
+              }
+            </div>
+          }
         </div>
 
         <div class="form-row-two">
           <div class="form-group">
             <label class="form-label">City</label>
             <input type="text" class="form-input" placeholder="e.g. Colombo" [formControl]="$any(shippingForm.get('city'))" [class.input-error]="isInvalid('city')" [class.field-locked]="!isAccessible('city')" [readonly]="!isAccessible('city')" [tabindex]="!isAccessible('city') ? -1 : 0">
-            <div class="error-msg" *ngIf="isInvalid('city')">
-              <span *ngIf="hasError('city', 'required')">City is required</span>
-              <span *ngIf="hasError('city', 'pattern')">Only letters allowed</span>
-            </div>
+            @if (isInvalid('city')) {
+              <div class="error-msg">
+                @if (hasError('city', 'required')) {
+                  <span>City is required</span>
+                }
+                @if (hasError('city', 'pattern')) {
+                  <span>Only letters allowed</span>
+                }
+              </div>
+            }
           </div>
           <div class="form-group">
             <label class="form-label">Postal Code</label>
             <input type="text" class="form-input" placeholder="e.g. 00100" [formControl]="$any(shippingForm.get('postalCode'))" [class.input-error]="isInvalid('postalCode')" [class.field-locked]="!isAccessible('postalCode')" [readonly]="!isAccessible('postalCode')" [tabindex]="!isAccessible('postalCode') ? -1 : 0">
-            <div class="error-msg" *ngIf="isInvalid('postalCode')">
-              <span *ngIf="hasError('postalCode', 'required')">Postal code is required</span>
-              <span *ngIf="hasError('postalCode', 'pattern')">Only numbers allowed</span>
-            </div>
+            @if (isInvalid('postalCode')) {
+              <div class="error-msg">
+                @if (hasError('postalCode', 'required')) {
+                  <span>Postal code is required</span>
+                }
+                @if (hasError('postalCode', 'pattern')) {
+                  <span>Only numbers allowed</span>
+                }
+              </div>
+            }
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Phone</label>
           <input type="text" class="form-input form-input-half" placeholder="e.g. 0771234567" [formControl]="$any(shippingForm.get('phone'))" [class.input-error]="isInvalid('phone')" [class.field-locked]="!isAccessible('phone')" [readonly]="!isAccessible('phone')" [tabindex]="!isAccessible('phone') ? -1 : 0">
-          <div class="error-msg" *ngIf="isInvalid('phone')">
-            <span *ngIf="hasError('phone', 'required')">Phone is required</span>
-            <span *ngIf="hasError('phone', 'pattern')">Must be 10 digits starting with 0</span>
-          </div>
+          @if (isInvalid('phone')) {
+            <div class="error-msg">
+              @if (hasError('phone', 'required')) {
+                <span>Phone is required</span>
+              }
+              @if (hasError('phone', 'pattern')) {
+                <span>Must be 10 digits starting with 0</span>
+              }
+            </div>
+          }
         </div>
 
         <div class="form-group">
           <label class="form-label">Email</label>
           <input type="email" class="form-input" placeholder="e.g. john.doe@example.com" [formControl]="$any(shippingForm.get('email'))" [class.input-error]="isInvalid('email')" [class.field-locked]="!isAccessible('email')" [readonly]="!isAccessible('email')" [tabindex]="!isAccessible('email') ? -1 : 0">
-          <div class="error-msg" *ngIf="isInvalid('email')">
-            <span *ngIf="hasError('email', 'required')">Email is required</span>
-            <span *ngIf="hasError('email', 'pattern')">Invalid format (must contain @ and domain)</span>
-          </div>
+          @if (isInvalid('email')) {
+            <div class="error-msg">
+              @if (hasError('email', 'required')) {
+                <span>Email is required</span>
+              }
+              @if (hasError('email', 'pattern')) {
+                <span>Invalid format (must contain @ and domain)</span>
+              }
+            </div>
+          }
         </div>
       </form>
- 
+
       <!-- CONFIRM BUTTON FOR BUY & INSTALL (Moved from right sidebar) -->
-      <div class="checkout-actions-bottom" *ngIf="!isBuyOnly">
-        <div class="summary-error-banner" *ngIf="showSummaryError && (shippingForm.invalid || (isBuyOnly && !selectedFile))" id="sidebar-error-left">
+      @if (!isBuyOnly) {
+        <div class="checkout-actions-bottom">
+          @if (showSummaryError && (shippingForm.invalid || (isBuyOnly && !selectedFile))) {
+            <div class="summary-error-banner" id="sidebar-error-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ getSummaryErrorMessage() }}</span>
+            </div>
+          }
+          <button class="confirm-btn form-submit-btn" (click)="placeOrder()" [disabled]="isInitializing">
+            @if (isInitializing) {
+              <span>Initializing Order...</span>
+            }
+            @if (!isInitializing) {
+              <span>
+                {{ isOrderInitialized ? 'Confirm shipping & Continue' : 'Confirm & Get Reference' }} &nbsp;→
+              </span>
+            }
+          </button>
+        </div>
+      }
+
+
+      <!-- BANK DETAILS -->
+      @if (isBuyOnly) {
+        <div class="checkout-section-title bank-title">Bank Details</div>
+      }
+      @if (isBuyOnly) {
+        <div class="bank-details-table">
+          <div class="bank-row">
+            <span class="bank-label">Bank Name</span>
+            <span class="bank-value">{{ bankDetails.bankName }}</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Branch Name</span>
+            <span class="bank-value">{{ bankDetails.branch }}</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Account Name</span>
+            <span class="bank-value">{{ bankDetails.accountName }}</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Account No</span>
+            <span class="bank-value">{{ bankDetails.accountNumber }}</span>
+          </div>
+          <div class="bank-row bank-row-total">
+            <span class="bank-label">Total Amount</span>
+            <span class="bank-value bank-total-val">LKR {{ total | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="checkout-right">
+      @if (isBuyOnly) {
+        <div class="status-badge" [class.status-badge-rejected]="isReuploadMode">
+          {{ isReuploadMode ? 'Status: Payment Rejected (Resubmission Required)' : 'Status: Pending payment and shipping' }}
+        </div>
+      }
+
+      @if (isBuyOnly) {
+        <div class="upload-label">
+          {{ isReuploadMode ? 'Upload New Payment Slip:' : 'Upload Slip:' }}
+        </div>
+      }
+
+      <!-- DROPZONE (Hidden if file exists) -->
+      @if (isBuyOnly && !selectedFile) {
+        <div class="upload-dropzone" (click)="fileInput.click()">
+          <div class="upload-dropzone-inner">
+            <span class="upload-camera-icon">
+              <svg width="38" height="32" viewBox="0 0 38 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="7" width="36" height="24" rx="4" stroke="#10A760" stroke-width="2"/>
+                <circle cx="19" cy="19" r="6" stroke="#10A760" stroke-width="2"/>
+                <path d="M13 7l2-6h8l2 6" stroke="#10A760" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="30" cy="12" r="2" fill="#10A760"/>
+              </svg>
+            </span>
+            <div class="upload-text">{{ isReuploadMode ? 'Click to select new slip' : 'Click to upload slip' }}</div>
+            <div class="upload-subtext">(PDF, PNG or JPG, MAX 5MB)</div>
+            <div class="upload-subtext" style="font-size: 11px; color: #64748b; margin-top: 4px;">(Bank transfer receipt or deposit slip)</div>
+          </div>
+          <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)" accept=".png,.jpg,.jpeg,.pdf">
+        </div>
+      }
+
+      <!-- FILE PREVIEW CARD (Shown if file exists) -->
+      @if (isBuyOnly && selectedFile) {
+        <div class="file-preview-card">
+          <div class="file-preview-thumbnail">
+            @if (filePreview) {
+              <img [src]="filePreview" alt="Slip Preview">
+            }
+            @if (!filePreview) {
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            }
+          </div>
+          <div class="file-info">
+            <div class="file-name">{{ selectedFile.name }}</div>
+            <div class="file-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</div>
+          </div>
+          <button class="remove-file-btn" (click)="removeFile()">Remove</button>
+        </div>
+      }
+
+      <!-- REUPLOAD LOAD ERROR BANNER -->
+      @if (reuploadError) {
+        <div class="summary-error-banner" style="margin-bottom: 12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ reuploadError }}</span>
+        </div>
+      }
+
+      <!-- SUMMARY ERROR BANNER (Right side - for Buy Only) -->
+      @if (isBuyOnly && showSummaryError && (shippingForm.invalid || !selectedFile || uploadError)) {
+        <div class="summary-error-banner" id="sidebar-error">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -277,119 +475,25 @@
           </svg>
           <span>{{ getSummaryErrorMessage() }}</span>
         </div>
- 
-        <button class="confirm-btn form-submit-btn" (click)="placeOrder()" [disabled]="isInitializing">
-          <span *ngIf="isInitializing">Initializing Order...</span>
-          <span *ngIf="!isInitializing">
-            {{ isOrderInitialized ? 'Confirm shipping & Continue' : 'Confirm & Get Reference' }} &nbsp;→
-          </span>
+      }
+
+      @if (isBuyOnly) {
+        <button class="confirm-btn" (click)="placeOrder()" [disabled]="isInitializing || isSubmittingPayment">
+          @if (isInitializing) {
+            <span>Initializing Order...</span>
+          }
+          @if (isSubmittingPayment) {
+            <span>
+              {{ isReuploadMode ? 'Verifying Slip & Resubmitting...' : 'Verifying Slip & Placing Order...' }}
+            </span>
+          }
+          @if (!isInitializing && !isSubmittingPayment) {
+            <span>
+              {{ isReuploadMode ? 'Re-upload Slip & Submit for Review' : (isOrderInitialized ? 'Upload Slip & Complete' : 'Confirm & Get Reference') }} &nbsp;→
+            </span>
+          }
         </button>
-      </div>
-
-
-      <!-- BANK DETAILS -->
-      <div class="checkout-section-title bank-title" *ngIf="isBuyOnly">Bank Details</div>
-      <div class="bank-details-table" *ngIf="isBuyOnly">
-        <div class="bank-row">
-          <span class="bank-label">Bank Name</span>
-          <span class="bank-value">{{ bankDetails.bankName }}</span>
-        </div>
-        <div class="bank-row">
-          <span class="bank-label">Branch Name</span>
-          <span class="bank-value">{{ bankDetails.branch }}</span>
-        </div>
-        <div class="bank-row">
-          <span class="bank-label">Account Name</span>
-          <span class="bank-value">{{ bankDetails.accountName }}</span>
-        </div>
-        <div class="bank-row">
-          <span class="bank-label">Account No</span>
-          <span class="bank-value">{{ bankDetails.accountNumber }}</span>
-        </div>
-        <div class="bank-row bank-row-total">
-          <span class="bank-label">Total Amount</span>
-          <span class="bank-value bank-total-val">LKR {{ total | number:'1.0-0' }}</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="checkout-right">
-      <div class="status-badge" [class.status-badge-rejected]="isReuploadMode" *ngIf="isBuyOnly">
-        {{ isReuploadMode ? 'Status: Payment Rejected (Resubmission Required)' : 'Status: Pending payment and shipping' }}
-      </div>
-
-      <div class="upload-label" *ngIf="isBuyOnly">
-        {{ isReuploadMode ? 'Upload New Payment Slip:' : 'Upload Slip:' }}
-      </div>
-      
-      <!-- DROPZONE (Hidden if file exists) -->
-      <div class="upload-dropzone" (click)="fileInput.click()" *ngIf="isBuyOnly && !selectedFile">
-        <div class="upload-dropzone-inner">
-          <span class="upload-camera-icon">
-            <svg width="38" height="32" viewBox="0 0 38 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="7" width="36" height="24" rx="4" stroke="#10A760" stroke-width="2"/>
-              <circle cx="19" cy="19" r="6" stroke="#10A760" stroke-width="2"/>
-              <path d="M13 7l2-6h8l2 6" stroke="#10A760" stroke-width="2" stroke-linejoin="round"/>
-              <circle cx="30" cy="12" r="2" fill="#10A760"/>
-            </svg>
-          </span>
-          <div class="upload-text">{{ isReuploadMode ? 'Click to select new slip' : 'Click to upload slip' }}</div>
-          <div class="upload-subtext">(PDF, PNG or JPG, MAX 5MB)</div>
-          <div class="upload-subtext" style="font-size: 11px; color: #64748b; margin-top: 4px;">(Bank transfer receipt or deposit slip)</div>
-        </div>
-        <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)" accept=".png,.jpg,.jpeg,.pdf">
-      </div>
- 
-      <!-- FILE PREVIEW CARD (Shown if file exists) -->
-      <div class="file-preview-card" *ngIf="isBuyOnly && selectedFile">
-        <div class="file-preview-thumbnail">
-          <img *ngIf="filePreview" [src]="filePreview" alt="Slip Preview">
-          <svg *ngIf="!filePreview" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-        </div>
-        <div class="file-info">
-          <div class="file-name">{{ selectedFile.name }}</div>
-          <div class="file-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</div>
-        </div>
-        <button class="remove-file-btn" (click)="removeFile()">Remove</button>
-      </div>
-
-      <!-- REUPLOAD LOAD ERROR BANNER -->
-      <div class="summary-error-banner" *ngIf="reuploadError" style="margin-bottom: 12px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>{{ reuploadError }}</span>
-      </div>
-
-      <!-- SUMMARY ERROR BANNER (Right side - for Buy Only) -->
-      <div class="summary-error-banner" *ngIf="isBuyOnly && showSummaryError && (shippingForm.invalid || !selectedFile || uploadError)" id="sidebar-error">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>{{ getSummaryErrorMessage() }}</span>
-      </div>
- 
-      <button class="confirm-btn" (click)="placeOrder()" [disabled]="isInitializing || isSubmittingPayment" *ngIf="isBuyOnly">
-        <span *ngIf="isInitializing">Initializing Order...</span>
-        <span *ngIf="isSubmittingPayment">
-          {{ isReuploadMode ? 'Verifying Slip & Resubmitting...' : 'Verifying Slip & Placing Order...' }}
-        </span>
-        <span *ngIf="!isInitializing && !isSubmittingPayment">
-          {{ isReuploadMode ? 'Re-upload Slip & Submit for Review' : (isOrderInitialized ? 'Upload Slip & Complete' : 'Confirm & Get Reference') }} &nbsp;→
-        </span>
-      </button>
+      }
     </div>
 
   </div>

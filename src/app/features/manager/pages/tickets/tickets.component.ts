@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -16,6 +16,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './tickets.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./tickets.component.css'],
 })
 export class TicketsComponent implements OnInit {

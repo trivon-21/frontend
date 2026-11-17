@@ -14,46 +14,56 @@
 
   <!-- Activity List -->
   <div class="log-card glass-panel">
-    <div class="loading-state" *ngIf="loading">
-      <div class="loader"></div>
-      <p>Fetching full activity history...</p>
-    </div>
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <p>Fetching full activity history...</p>
+      </div>
+    }
 
-    <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && errorMessage">
-      <div><strong>Activity log unavailable</strong><p>{{ errorMessage }}</p></div>
-      <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="load()">Retry</button>
-    </div>
+    @if (!loading && errorMessage) {
+      <div class="portal-state portal-state--error" role="alert">
+        <div><strong>Activity log unavailable</strong><p>{{ errorMessage }}</p></div>
+        <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="load()">Retry</button>
+      </div>
+    }
 
-    <div class="empty-state" *ngIf="!loading && !errorMessage && activities.length === 0">
-      <lucide-angular name="clipboard-list" [size]="48"></lucide-angular>
-      <p>No activity logs found.</p>
-    </div>
+    @if (!loading && !errorMessage && activities.length === 0) {
+      <div class="empty-state">
+        <lucide-angular name="clipboard-list" [size]="48"></lucide-angular>
+        <p>No activity logs found.</p>
+      </div>
+    }
 
-    <div class="activity-table-wrapper alx-table-container" *ngIf="!loading && !errorMessage && activities.length > 0" role="region" aria-label="Inventory activity log" tabindex="0">
-      <table class="activity-table alx-table alx-table--medium alx-table--fixed">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Description</th>
-            <th>Date & Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let activity of activities" class="animate-fade">
-            <td class="event-cell">
-              <div class="icon-marker" [ngClass]="activity.type">
-                <lucide-angular [name]="getActivityIcon(activity.type)" [size]="18"></lucide-angular>
-              </div>
-              <span class="event-title">{{ activity.title }}</span>
-            </td>
-            <td class="desc-cell">{{ activity.description }}</td>
-            <td class="time-cell date-cell">
-              <span class="full-date">{{ activity.timestamp | date: 'medium' }}</span>
-              <span class="time-ago">{{ activity.timeAgo }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (!loading && !errorMessage && activities.length > 0) {
+      <div class="activity-table-wrapper alx-table-container" role="region" aria-label="Inventory activity log" tabindex="0">
+        <table class="activity-table alx-table alx-table--medium alx-table--fixed">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Description</th>
+              <th>Date & Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (activity of activities; track activity) {
+              <tr class="animate-fade">
+                <td class="event-cell">
+                  <div class="icon-marker" [ngClass]="activity.type">
+                    <lucide-angular [name]="getActivityIcon(activity.type)" [size]="18"></lucide-angular>
+                  </div>
+                  <span class="event-title">{{ activity.title }}</span>
+                </td>
+                <td class="desc-cell">{{ activity.description }}</td>
+                <td class="time-cell date-cell">
+                  <span class="full-date">{{ activity.timestamp | date: 'medium' }}</span>
+                  <span class="time-ago">{{ activity.timeAgo }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </div>

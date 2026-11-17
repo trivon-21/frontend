@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerServiceRequestService } from '../../../customer/services/customer-service-request.service';
@@ -11,6 +11,7 @@ import { CustomerProfile } from '../../services/csa-customer.service';
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './csa-request-service-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-request-service-modal.component.css',
 })
 export class CsaRequestServiceModalComponent implements OnInit {

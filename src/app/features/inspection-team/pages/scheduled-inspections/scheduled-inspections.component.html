@@ -2,8 +2,8 @@
 <div class="page-container">
 
   <!-- =========================================================
-       HEADER
-       ========================================================= -->
+  HEADER
+  ========================================================= -->
 
   <div class="page-header">
 
@@ -18,20 +18,20 @@
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-      >
+        >
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
+          />
       </svg>
 
       <input
         type="text"
         placeholder="Search by Order ID, Ticket ID or Customer..."
         [(ngModel)]="searchQuery"
-      />
+        />
 
     </div>
 
@@ -39,332 +39,260 @@
 
 
   <!-- =========================================================
-       LOADING STATE
-       ========================================================= -->
+  LOADING STATE
+  ========================================================= -->
 
-  <div
-    *ngIf="isLoading"
-    class="empty-state"
-  >
-    <p>Loading...</p>
-  </div>
-
-
-  <!-- =========================================================
-       EMPTY STATE
-       ========================================================= -->
-
-  <div
-    *ngIf="!isLoading && filteredInspections.length === 0"
-    class="empty-state"
-  >
-    <p>No scheduled inspections found</p>
-  </div>
-
-
-  <!-- =========================================================
-       INSPECTION TABLE
-       ========================================================= -->
-
-  <div
-    class="table-container"
-    *ngIf="!isLoading && filteredInspections.length > 0"
-  >
-
-    <table class="data-table">
-
-      <thead>
-
-        <tr>
-          <th>ORDER ID</th>
-          <th>TICKET ID</th>
-          <th>CUSTOMER</th>
-          <th>INSPECTION DATE</th>
-          <th>DETAILS</th>
-          <th>ACTION</th>
-        </tr>
-
-      </thead>
-
-
-      <tbody>
-
-        <tr *ngFor="let inspection of filteredInspections">
-
-          <!-- ORDER ID -->
-
-          <td>
-            <span class="order-id">
-              {{ inspection.orderId }}
-            </span>
-          </td>
-
-
-          <!-- TICKET ID -->
-
-          <td>
-            <span class="ticket-id">
-              {{ inspection.ticketId }}
-            </span>
-          </td>
-
-
-          <!-- CUSTOMER -->
-
-          <td>
-            <span class="customer-name">
-              {{ inspection.customerName }}
-            </span>
-          </td>
-
-
-          <!-- INSPECTION DATE -->
-
-          <td>
-            <span class="inspection-date">
-              {{ formatDate(inspection.inspectionDate) }}
-            </span>
-          </td>
-
-          <!-- DETAILS -->
-
-          <td>
-
-            <button
-              class="view-details-btn"
-              (click)="openDetails(inspection)"
-            >
-              View Details
-            </button>
-
-          </td>
-
-
-          <!-- ACTION -->
-
-          <td>
-
-            <button
-              class="start-btn"
-              (click)="openArrivalModal(inspection)"
-              [disabled]="isLoading"
-            >
-              Start Inspection
-            </button>
-
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-
-  <!-- =========================================================
-       DETAILS MODAL
-       ========================================================= -->
-
-  <div
-    class="modal-overlay"
-    *ngIf="showDetailsModal"
-    (click)="closeDetailsModal()"
-  >
-
+  @if (isLoading) {
     <div
-      class="modal"
-      (click)="$event.stopPropagation()"
-    >
-
-      <div class="modal-header">
-
-        <h3>
-          Inspection Details
-        </h3>
-
-        <button
-          class="modal-close"
-          (click)="closeDetailsModal()"
-        >
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-
-        </button>
-
-      </div>
-
-
-      <div class="modal-body">
-
-        <p>
-          <strong>Order ID:</strong>
-          {{ selectedInspection?.orderId }}
-        </p>
-
-        <p>
-          <strong>Ticket ID:</strong>
-          {{ selectedInspection?.ticketId }}
-        </p>
-
-        <p>
-          <strong>Customer:</strong>
-          {{ selectedInspection?.customerName }}
-        </p>
-
-        <p>
-          <strong>Email:</strong>
-          {{ selectedInspection?.customerEmail }}
-        </p>
-
-        <p>
-          <strong>Address:</strong>
-          {{ selectedInspection?.customerAddress }}
-        </p>
-
-        <p>
-          <strong>Inspection Date:</strong>
-          {{ formatDate(selectedInspection?.inspectionDate) }}
-        </p>
-
-    
-      </div>
-
-
-      <div class="modal-footer">
-
-        <button
-          class="btn-secondary"
-          (click)="closeDetailsModal()"
-        >
-          Close
-        </button>
-
-        <button
-          class="start-btn"
-          (click)="closeDetailsModal(); openArrivalModal(selectedInspection)"
-        >
-          Start Inspection
-        </button>
-
-      </div>
-
+      class="empty-state"
+      >
+      <p>Loading...</p>
     </div>
-
-  </div>
+  }
 
 
   <!-- =========================================================
-       ARRIVAL TIME MODAL
-       ========================================================= -->
+  EMPTY STATE
+  ========================================================= -->
 
-  <div
-    class="modal-overlay"
-    *ngIf="showArrivalModal"
-    (click)="closeArrivalModal()"
-  >
-
+  @if (!isLoading && filteredInspections.length === 0) {
     <div
-      class="modal"
-      (click)="$event.stopPropagation()"
-    >
+      class="empty-state"
+      >
+      <p>No scheduled inspections found</p>
+    </div>
+  }
 
-      <div class="modal-header">
 
-        <h3>
-          Set Arrival Time
-        </h3>
+  <!-- =========================================================
+  INSPECTION TABLE
+  ========================================================= -->
 
-        <button
-          class="modal-close"
-          (click)="closeArrivalModal()"
+  @if (!isLoading && filteredInspections.length > 0) {
+    <div
+      class="table-container"
+      >
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>TICKET ID</th>
+            <th>CUSTOMER</th>
+            <th>INSPECTION DATE</th>
+            <th>DETAILS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inspection of filteredInspections; track inspection) {
+            <tr>
+              <!-- ORDER ID -->
+              <td>
+                <span class="order-id">
+                  {{ inspection.orderId }}
+                </span>
+              </td>
+              <!-- TICKET ID -->
+              <td>
+                <span class="ticket-id">
+                  {{ inspection.ticketId }}
+                </span>
+              </td>
+              <!-- CUSTOMER -->
+              <td>
+                <span class="customer-name">
+                  {{ inspection.customerName }}
+                </span>
+              </td>
+              <!-- INSPECTION DATE -->
+              <td>
+                <span class="inspection-date">
+                  {{ formatDate(inspection.inspectionDate) }}
+                </span>
+              </td>
+              <!-- DETAILS -->
+              <td>
+                <button
+                  class="view-details-btn"
+                  (click)="openDetails(inspection)"
+                  >
+                  View Details
+                </button>
+              </td>
+              <!-- ACTION -->
+              <td>
+                <button
+                  class="start-btn"
+                  (click)="openArrivalModal(inspection)"
+                  [disabled]="isLoading"
+                  >
+                  Start Inspection
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+
+  <!-- =========================================================
+  DETAILS MODAL
+  ========================================================= -->
+
+  @if (showDetailsModal) {
+    <div
+      class="modal-overlay"
+      (click)="closeDetailsModal()"
+      >
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
         >
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-
-        </button>
-
-      </div>
-
-
-      <div class="modal-body">
-
-        <p>
-          Starting inspection for
-          <strong>{{ selectedInspection?.customerName }}</strong>
-        </p>
-
-        <p style="color:#718079;">
-          An email will be sent to the customer with your expected arrival time.
-        </p>
-
-
-        <div class="form-group">
-
-          <label>
-            Expected Arrival Time
-            <span class="required">*</span>
-          </label>
-
-          <input
-            type="time"
-            [(ngModel)]="arrivalTime"
-            [disabled]="isLoading"
-          />
-
+        <div class="modal-header">
+          <h3>
+            Inspection Details
+          </h3>
+          <button
+            class="modal-close"
+            (click)="closeDetailsModal()"
+            >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+          </button>
         </div>
-
+        <div class="modal-body">
+          <p>
+            <strong>Order ID:</strong>
+            {{ selectedInspection?.orderId }}
+          </p>
+          <p>
+            <strong>Ticket ID:</strong>
+            {{ selectedInspection?.ticketId }}
+          </p>
+          <p>
+            <strong>Customer:</strong>
+            {{ selectedInspection?.customerName }}
+          </p>
+          <p>
+            <strong>Email:</strong>
+            {{ selectedInspection?.customerEmail }}
+          </p>
+          <p>
+            <strong>Address:</strong>
+            {{ selectedInspection?.customerAddress }}
+          </p>
+          <p>
+            <strong>Inspection Date:</strong>
+            {{ formatDate($safeNavigationMigration(selectedInspection?.inspectionDate)) }}
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            (click)="closeDetailsModal()"
+            >
+            Close
+          </button>
+          <button
+            class="start-btn"
+            (click)="closeDetailsModal(); openArrivalModal(selectedInspection)"
+            >
+            Start Inspection
+          </button>
+        </div>
       </div>
-
-
-      <div class="modal-footer">
-
-        <button
-          class="btn-secondary"
-          (click)="closeArrivalModal()"
-          [disabled]="isLoading"
-        >
-          Cancel
-        </button>
-
-        <button
-          class="start-btn"
-          (click)="confirmStartInspection()"
-          [disabled]="isLoading"
-        >
-          {{ isLoading ? 'Starting...' : 'Confirm & Start' }}
-        </button>
-
-      </div>
-
     </div>
+  }
 
-  </div>
+
+  <!-- =========================================================
+  ARRIVAL TIME MODAL
+  ========================================================= -->
+
+  @if (showArrivalModal) {
+    <div
+      class="modal-overlay"
+      (click)="closeArrivalModal()"
+      >
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+        >
+        <div class="modal-header">
+          <h3>
+            Set Arrival Time
+          </h3>
+          <button
+            class="modal-close"
+            (click)="closeArrivalModal()"
+            >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Starting inspection for
+            <strong>{{ selectedInspection?.customerName }}</strong>
+          </p>
+          <p style="color:#718079;">
+            An email will be sent to the customer with your expected arrival time.
+          </p>
+          <div class="form-group">
+            <label>
+              Expected Arrival Time
+              <span class="required">*</span>
+            </label>
+            <input
+              type="time"
+              [(ngModel)]="arrivalTime"
+              [disabled]="isLoading"
+              />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            (click)="closeArrivalModal()"
+            [disabled]="isLoading"
+            >
+            Cancel
+          </button>
+          <button
+            class="start-btn"
+            (click)="confirmStartInspection()"
+            [disabled]="isLoading"
+            >
+            {{ isLoading ? 'Starting...' : 'Confirm & Start' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>
 

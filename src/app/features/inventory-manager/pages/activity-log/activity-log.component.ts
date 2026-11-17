@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -10,6 +10,7 @@ import { IconMappingService } from '../../../../shared/services/icon-mapping.ser
   standalone: true,
   imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './activity-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./activity-log.component.css']
 })
 export class ActivityLogComponent implements OnInit {

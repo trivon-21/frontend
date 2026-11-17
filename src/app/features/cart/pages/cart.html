@@ -1,24 +1,26 @@
 <!-- REMOVE ITEM CONFIRMATION MODAL -->
-<div class="cart-modal-overlay" *ngIf="itemToRemoveIdx !== null" (click)="cancelRemove()">
+@if (itemToRemoveIdx !== null) {
+  <div class="cart-modal-overlay" (click)="cancelRemove()">
     <div class="cart-modal" (click)="$event.stopPropagation()">
-        <div class="cart-modal-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-            </svg>
-        </div>
-        <h3 class="cart-modal-title">Remove Item?</h3>
-        <p class="cart-modal-msg">Are you sure you want to remove <strong>{{ itemToRemoveName }}</strong> from your cart?</p>
-        <div class="cart-modal-actions">
-            <button class="cart-modal-btn cart-modal-cancel" (click)="cancelRemove()">Cancel</button>
-            <button class="cart-modal-btn cart-modal-yes" (click)="confirmRemove()">Yes, Remove</button>
-        </div>
+      <div class="cart-modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+        </svg>
+      </div>
+      <h3 class="cart-modal-title">Remove Item?</h3>
+      <p class="cart-modal-msg">Are you sure you want to remove <strong>{{ itemToRemoveName }}</strong> from your cart?</p>
+      <div class="cart-modal-actions">
+        <button class="cart-modal-btn cart-modal-cancel" (click)="cancelRemove()">Cancel</button>
+        <button class="cart-modal-btn cart-modal-yes" (click)="confirmRemove()">Yes, Remove</button>
+      </div>
     </div>
-</div>
+  </div>
+}
 
 <!-- NAVBAR -->
 <header class="topbar">
@@ -40,48 +42,53 @@
     </nav>
 
     <!-- Guest buttons -->
-    <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
-    </div>
+    @if (!currentUser) {
+      <div class="authbtns">
+        <a routerLink="/login" class="btn ghost">Log in</a>
+        <a routerLink="/signup" class="btn solid">Sign up</a>
+      </div>
+    }
 
     <!-- Logged-in user area -->
-    <div class="user-area" *ngIf="currentUser">
-      <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
-      <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
-        <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
-          <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
-          <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
-          <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <div class="dropdown" *ngIf="showDropdown">
-          <div class="dropdown-header">
-            <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
-            <div>
-              <div class="dropdown-name">{{ currentUser.fullName }}</div>
-              <div class="dropdown-email">{{ currentUser.email }}</div>
-            </div>
-          </div>
-          <div class="dropdown-divider"></div>
-          <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-            My Dashboard
-          </a>
-          <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            My Profile
-          </a>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item logout-item" (click)="logout()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
-            Sign out
+    @if (currentUser) {
+      <div class="user-area">
+        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
+        <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
+          <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
+            <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
+            <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
+            <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
+          @if (showDropdown) {
+            <div class="dropdown">
+              <div class="dropdown-header">
+                <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
+                <div>
+                  <div class="dropdown-name">{{ currentUser.fullName }}</div>
+                  <div class="dropdown-email">{{ currentUser.email }}</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                My Dashboard
+              </a>
+              <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                My Profile
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-item" (click)="logout()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
+                Sign out
+              </button>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
 </header>
 
@@ -94,183 +101,195 @@
 </section>
 
 <!-- MAIN CART CONTENT -->
-<div class="cart-main-content" *ngIf="cartItems.length > 0">
-
+@if (cartItems.length > 0) {
+  <div class="cart-main-content">
     <!-- MIXED CART WARNING BANNER -->
-    <div class="mixed-cart-banner" *ngIf="hasMixedItems()">
+    @if (hasMixedItems()) {
+      <div class="mixed-cart-banner">
         <div class="mixed-cart-banner-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
         </div>
         <div class="mixed-cart-banner-text">
-            Your cart has both Buy Only and Buy & Install items. These will be processed separately.
+          Your cart has both Buy Only and Buy & Install items. These will be processed separately.
         </div>
-    </div>
-
+      </div>
+    }
     <!-- VALIDATION ERROR MODAL -->
-    <div class="cart-modal-overlay" *ngIf="validationError" (click)="dismissValidationError()">
+    @if (validationError) {
+      <div class="cart-modal-overlay" (click)="dismissValidationError()">
         <div class="cart-modal" (click)="$event.stopPropagation()">
-            <div class="cart-modal-icon error-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="#e53e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-            </div>
-            <h3 class="cart-modal-title">Selection Error</h3>
-            <p class="cart-modal-msg">{{ validationError }}</p>
-            <div class="cart-modal-actions">
-                <button class="cart-modal-btn cart-modal-yes" (click)="dismissValidationError()">Got it</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- OUT-OF-STOCK REMOVAL NOTICE -->
-    <div class="oos-notice" *ngIf="removedItems.length > 0">
-        <div class="oos-notice-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
+          <div class="cart-modal-icon error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="#e53e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
+          </div>
+          <h3 class="cart-modal-title">Selection Error</h3>
+          <p class="cart-modal-msg">{{ validationError }}</p>
+          <div class="cart-modal-actions">
+            <button class="cart-modal-btn cart-modal-yes" (click)="dismissValidationError()">Got it</button>
+          </div>
+        </div>
+      </div>
+    }
+    <!-- OUT-OF-STOCK REMOVAL NOTICE -->
+    @if (removedItems.length > 0) {
+      <div class="oos-notice">
+        <div class="oos-notice-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
         </div>
         <div class="oos-notice-body">
-            <p class="oos-notice-title">Some items were removed from your cart</p>
-            <p class="oos-notice-desc">
-                <span *ngFor="let name of removedItems; let last = last">
-                    <strong>{{ name }}</strong><span *ngIf="!last">, </span>
-                </span>
-                went out of stock. We'll let you know as soon as
-                <span *ngIf="removedItems.length === 1">it's</span><span *ngIf="removedItems.length > 1">they're</span>
-                back in stock!
-            </p>
-        </div>
-        <button class="oos-notice-close" (click)="dismissRemovedNotice()" title="Dismiss">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- YOUR CART SECTION -->
-    <div class="cart-card">
-        <div class="cart-card-title-row">
-            <span class="cart-card-icon">
-                <svg width="24" height="24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" viewBox="0 0 24 24">
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                </svg>
+          <p class="oos-notice-title">Some items were removed from your cart</p>
+          <p class="oos-notice-desc">
+            @for (name of removedItems; track name; let last = $last) {
+              <span>
+                <strong>{{ name }}</strong>@if (!last) {
+                <span>, </span>
+              }
             </span>
-            <h2 class="cart-card-title">Your Cart</h2>
-            <p class="cart-selection-hint">Select items from the cart you need to checkout now</p>
-        </div>
-
-        <!-- Cart Items Grid -->
-        <div class="cart-items-grid">
-            <div class="cart-item-card" 
-                 *ngFor="let item of cartItems; let i = index"
-                 [class.item-selected]="isSelected(i)"
-                 [class.item-dimmed]="isDimmed(item)"
-                 (click)="toggleSelection(i)">
-                
-                <div class="cart-item-checkbox">
-                    <div class="custom-checkbox" [class.checked]="isSelected(i)">
-                        <svg *ngIf="isSelected(i)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
-                </div>
-
-                <img [src]="item.image" alt="AC Unit" class="cart-item-img">
-                <div class="cart-item-info">
-                    <div class="cart-item-name">{{ item.name }}</div>
-
-                    <!-- Purchase Type Label -->
-                    <div class="cart-purchase-row">
-                        <span class="cart-purchase-label"
-                              [class.label-buy-only]="item.purchaseType !== 'buy_and_install'"
-                              [class.label-buy-install]="item.purchaseType === 'buy_and_install'">
-                            {{ getPurchaseTypeLabel(item.purchaseType) }}
-                        </span>
-                        <span class="purchase-type-note" *ngIf="item.purchaseType !== 'buy_and_install'">
-                            Delivery Included
-                        </span>
-                        <span class="purchase-type-note" *ngIf="item.purchaseType === 'buy_and_install'">
-                            Inspection required before install
-                        </span>
-                        <span class="purchase-type-note" *ngIf="item.purchaseType === 'buy_and_install'">
-                            Inspection fee charged at checkout
-                        </span>
-                    </div>
-
-                    <div class="cart-item-capacity">
-                        <svg width="14" height="14" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                        </svg>
-                        Capacity: {{ item.capacity }}
-                    </div>
-                    <div class="cart-item-price">LKR <span>{{ item.price | number:'1.0-0' }}</span></div>
-                </div>
-                <div class="cart-item-right">
-                    <button class="cart-remove-btn" title="Remove item" (click)="askRemove(i); $event.stopPropagation()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                            <path d="M10 11v6" />
-                            <path d="M14 11v6" />
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                        </svg>
-                    </button>
-                    <div class="cart-item-qty-row">
-                        <button class="cart-qty-btn" (click)="changeQty(i, -1); $event.stopPropagation()">-</button>
-                        <span class="cart-qty-val">{{ item.quantity }}</span>
-                        <button class="cart-qty-btn" (click)="changeQty(i, 1); $event.stopPropagation()">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- CHECKOUT BUTTON -->
-    <div class="cart-checkout-wrap">
-        <button class="cart-checkout-btn" (click)="onProceedCheckout()">Proceed to Checkout</button>
-    </div>
-
-</div>
-
-<!-- EMPTY CART VIEW -->
-<div class="empty-cart-container" *ngIf="cartItems.length === 0">
-  <div class="empty-cart-card">
-    <h2 class="empty-cart-title-top">Your Cart</h2>
-    
-    <div class="empty-cart-circle">
-      <div class="empty-cart-icon">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="21" r="1"></circle>
-          <circle cx="20" cy="21" r="1"></circle>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-        </svg>
+          }
+          went out of stock. We'll let you know as soon as
+          @if (removedItems.length === 1) {
+            <span>it's</span>
+            }@if (removedItems.length > 1) {
+            <span>they're</span>
+          }
+          back in stock!
+        </p>
       </div>
+      <button class="oos-notice-close" (click)="dismissRemovedNotice()" title="Dismiss">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
-
-    <div class="empty-cart-status">Your cart is empty</div>
-    <p class="empty-cart-desc">Browse our catalog to find products you need</p>
-
-    <button class="explore-catalog-btn" (click)="router.navigate(['/catalog'])">Explore Catalog</button>
+  }
+  <!-- YOUR CART SECTION -->
+  <div class="cart-card">
+    <div class="cart-card-title-row">
+      <span class="cart-card-icon">
+        <svg width="24" height="24" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+      </span>
+      <h2 class="cart-card-title">Your Cart</h2>
+      <p class="cart-selection-hint">Select items from the cart you need to checkout now</p>
+    </div>
+    <!-- Cart Items Grid -->
+    <div class="cart-items-grid">
+      @for (item of cartItems; track item; let i = $index) {
+        <div class="cart-item-card"
+          [class.item-selected]="isSelected(i)"
+          [class.item-dimmed]="isDimmed(item)"
+          (click)="toggleSelection(i)">
+          <div class="cart-item-checkbox">
+            <div class="custom-checkbox" [class.checked]="isSelected(i)">
+              @if (isSelected(i)) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              }
+            </div>
+          </div>
+          <img [src]="item.image" alt="AC Unit" class="cart-item-img">
+          <div class="cart-item-info">
+            <div class="cart-item-name">{{ item.name }}</div>
+            <!-- Purchase Type Label -->
+            <div class="cart-purchase-row">
+              <span class="cart-purchase-label"
+                [class.label-buy-only]="item.purchaseType !== 'buy_and_install'"
+                [class.label-buy-install]="item.purchaseType === 'buy_and_install'">
+                {{ getPurchaseTypeLabel(item.purchaseType) }}
+              </span>
+              @if (item.purchaseType !== 'buy_and_install') {
+                <span class="purchase-type-note">
+                  Delivery Included
+                </span>
+              }
+              @if (item.purchaseType === 'buy_and_install') {
+                <span class="purchase-type-note">
+                  Inspection required before install
+                </span>
+              }
+              @if (item.purchaseType === 'buy_and_install') {
+                <span class="purchase-type-note">
+                  Inspection fee charged at checkout
+                </span>
+              }
+            </div>
+            <div class="cart-item-capacity">
+              <svg width="14" height="14" fill="none" stroke="#10A760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              </svg>
+              Capacity: {{ item.capacity }}
+            </div>
+            <div class="cart-item-price">LKR <span>{{ item.price | number:'1.0-0' }}</span></div>
+          </div>
+          <div class="cart-item-right">
+            <button class="cart-remove-btn" title="Remove item" (click)="askRemove(i); $event.stopPropagation()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+            </button>
+            <div class="cart-item-qty-row">
+              <button class="cart-qty-btn" (click)="changeQty(i, -1); $event.stopPropagation()">-</button>
+              <span class="cart-qty-val">{{ item.quantity }}</span>
+              <button class="cart-qty-btn" (click)="changeQty(i, 1); $event.stopPropagation()">+</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <!-- CHECKOUT BUTTON -->
+  <div class="cart-checkout-wrap">
+    <button class="cart-checkout-btn" (click)="onProceedCheckout()">Proceed to Checkout</button>
   </div>
 </div>
+}
+
+<!-- EMPTY CART VIEW -->
+@if (cartItems.length === 0) {
+  <div class="empty-cart-container">
+    <div class="empty-cart-card">
+      <h2 class="empty-cart-title-top">Your Cart</h2>
+      <div class="empty-cart-circle">
+        <div class="empty-cart-icon">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="empty-cart-status">Your cart is empty</div>
+      <p class="empty-cart-desc">Browse our catalog to find products you need</p>
+      <button class="explore-catalog-btn" (click)="router.navigate(['/catalog'])">Explore Catalog</button>
+    </div>
+  </div>
+}
 
 <!-- FOOTER -->
 <app-footer></app-footer>

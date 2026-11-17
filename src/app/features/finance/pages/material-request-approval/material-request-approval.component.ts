@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 
@@ -30,6 +30,7 @@ interface FinanceMaterialRequest {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './material-request-approval.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./material-request-approval.component.css'],
 })
 export class MaterialRequestApprovalComponent implements OnInit {

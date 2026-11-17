@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, OnChanges, SimpleChanges, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../../services/system-config.service';
 import { SystemConfig, MaintenanceMode } from '../../../models/system-config.model';
@@ -7,158 +7,162 @@ import { SystemConfig, MaintenanceMode } from '../../../models/system-config.mod
 @Component({
   selector: 'app-maintenance-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   template: `
     <div class="maintenance-section">
       <h2>Maintenance Mode</h2>
       <p class="section-description">Configure system maintenance windows and settings</p>
 
-      <div *ngIf="config" class="form-container">
-        <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
-          <!-- Maintenance Status Toggle -->
-          <div class="form-group">
-            <label class="toggle-label">Activate Maintenance Mode</label>
-            <button
-              type="button"
-              (click)="toggleMaintenance()"
-              [class.active]="maintenanceForm.get('isActive')?.value"
-              class="toggle-button"
-            >
-              <span class="toggle-track">
-                <span class="toggle-circle"></span>
-              </span>
-              <span class="toggle-text">
-                {{ maintenanceForm.get('isActive')?.value ? 'ON' : 'OFF' }}
-              </span>
-            </button>
-            <p class="help-text">When enabled, regular users will see a maintenance page</p>
-          </div>
-
-          <!-- Maintenance Message -->
-          <div class="form-group">
-            <label for="message">
-              Maintenance Message
-              <span class="required">*</span>
-            </label>
-            <textarea
-              id="message"
-              formControlName="message"
-              placeholder="System is under maintenance. Please try again later."
-              class="form-input textarea"
-              rows="3"
-            ></textarea>
-            <p class="help-text">Message displayed to users during maintenance</p>
-          </div>
-
-          <!-- Maintenance Reason -->
-          <div class="form-group">
-            <label for="reason">
-              Reason for Maintenance
-              <span class="required">*</span>
-            </label>
-            <textarea
-              id="reason"
-              formControlName="reason"
-              placeholder="e.g., Database migration, security patches"
-              class="form-input textarea"
-              rows="2"
-            ></textarea>
-            <p class="help-text">Internal reason for audit logging</p>
-          </div>
-
-          <!-- Mode Selection -->
-          <div class="form-group">
-            <label>Maintenance Type</label>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input
-                  type="radio"
-                  value="instant"
-                  formControlName="mode"
-                  class="radio-input"
-                />
-                <span class="radio-text">Instant</span>
-              </label>
-              <label class="radio-label">
-                <input
-                  type="radio"
-                  value="scheduled"
-                  formControlName="mode"
-                  class="radio-input"
-                />
-                <span class="radio-text">Scheduled</span>
-              </label>
+      @if (config) {
+        <div class="form-container">
+          <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
+            <!-- Maintenance Status Toggle -->
+            <div class="form-group">
+              <label class="toggle-label">Activate Maintenance Mode</label>
+              <button
+                type="button"
+                (click)="toggleMaintenance()"
+                [class.active]="maintenanceForm.get('isActive')?.value"
+                class="toggle-button"
+                >
+                <span class="toggle-track">
+                  <span class="toggle-circle"></span>
+                </span>
+                <span class="toggle-text">
+                  {{ maintenanceForm.get('isActive')?.value ? 'ON' : 'OFF' }}
+                </span>
+              </button>
+              <p class="help-text">When enabled, regular users will see a maintenance page</p>
             </div>
-          </div>
-
-          <!-- Scheduled Maintenance Times -->
-          <ng-container *ngIf="isScheduledMaintenance">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="startTime">
-                  Start Time
-                  <span class="required">*</span>
+            <!-- Maintenance Message -->
+            <div class="form-group">
+              <label for="message">
+                Maintenance Message
+                <span class="required">*</span>
+              </label>
+              <textarea
+                id="message"
+                formControlName="message"
+                placeholder="System is under maintenance. Please try again later."
+                class="form-input textarea"
+                rows="3"
+              ></textarea>
+              <p class="help-text">Message displayed to users during maintenance</p>
+            </div>
+            <!-- Maintenance Reason -->
+            <div class="form-group">
+              <label for="reason">
+                Reason for Maintenance
+                <span class="required">*</span>
+              </label>
+              <textarea
+                id="reason"
+                formControlName="reason"
+                placeholder="e.g., Database migration, security patches"
+                class="form-input textarea"
+                rows="2"
+              ></textarea>
+              <p class="help-text">Internal reason for audit logging</p>
+            </div>
+            <!-- Mode Selection -->
+            <div class="form-group">
+              <label>Maintenance Type</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    value="instant"
+                    formControlName="mode"
+                    class="radio-input"
+                    />
+                  <span class="radio-text">Instant</span>
                 </label>
-                <input
-                  id="startTime"
-                  type="datetime-local"
-                  formControlName="scheduledStartTime"
-                  class="form-input"
-                />
-                <p class="help-text">When maintenance should start</p>
-              </div>
-
-              <div class="form-group">
-                <label for="endTime">
-                  End Time
-                  <span class="required">*</span>
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    value="scheduled"
+                    formControlName="mode"
+                    class="radio-input"
+                    />
+                  <span class="radio-text">Scheduled</span>
                 </label>
-                <input
-                  id="endTime"
-                  type="datetime-local"
-                  formControlName="scheduledEndTime"
-                  class="form-input"
-                />
-                <p class="help-text">When maintenance should end</p>
               </div>
             </div>
-          </ng-container>
-
-          <!-- Current Status -->
-          <div *ngIf="currentMaintenance" class="status-card">
-            <div class="status-row">
-              <span class="status-label">Current Status:</span>
-              <span class="status-badge" [class.active]="currentMaintenance.isActive">
-                {{ currentMaintenance.isActive ? 'ACTIVE' : 'INACTIVE' }}
-              </span>
+            <!-- Scheduled Maintenance Times -->
+            @if (isScheduledMaintenance) {
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="startTime">
+                    Start Time
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="startTime"
+                    type="datetime-local"
+                    formControlName="scheduledStartTime"
+                    class="form-input"
+                    />
+                  <p class="help-text">When maintenance should start</p>
+                </div>
+                <div class="form-group">
+                  <label for="endTime">
+                    End Time
+                    <span class="required">*</span>
+                  </label>
+                  <input
+                    id="endTime"
+                    type="datetime-local"
+                    formControlName="scheduledEndTime"
+                    class="form-input"
+                    />
+                  <p class="help-text">When maintenance should end</p>
+                </div>
+              </div>
+            }
+            <!-- Current Status -->
+            @if (currentMaintenance) {
+              <div class="status-card">
+                <div class="status-row">
+                  <span class="status-label">Current Status:</span>
+                  <span class="status-badge" [class.active]="currentMaintenance.isActive">
+                    {{ currentMaintenance.isActive ? 'ACTIVE' : 'INACTIVE' }}
+                  </span>
+                </div>
+                @if (countdownDisplay) {
+                  <div class="status-row">
+                    <span class="status-label">{{ countdownLabel }}:</span>
+                    <span class="status-value">{{ countdownDisplay }}</span>
+                  </div>
+                }
+              </div>
+            }
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="submit"
+                [disabled]="maintenanceForm.invalid || isSaving || maintenanceForm.pristine"
+                class="btn btn-primary"
+                >
+                @if (!isSaving) {
+                  <span>Save Changes</span>
+                }
+                @if (isSaving) {
+                  <span>
+                    <span class="spinner-small"></span>
+                    Saving...
+                  </span>
+                }
+              </button>
+              <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
+                Reset
+              </button>
             </div>
-            <div *ngIf="countdownDisplay" class="status-row">
-              <span class="status-label">{{ countdownLabel }}:</span>
-              <span class="status-value">{{ countdownDisplay }}</span>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button
-              type="submit"
-              [disabled]="maintenanceForm.invalid || isSaving || maintenanceForm.pristine"
-              class="btn btn-primary"
-            >
-              <span *ngIf="!isSaving">Save Changes</span>
-              <span *ngIf="isSaving">
-                <span class="spinner-small"></span>
-                Saving...
-              </span>
-            </button>
-            <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .maintenance-section {
@@ -659,7 +663,7 @@ export class MaintenanceFormComponent implements OnInit, OnDestroy, OnChanges {
 
   private formatDuration(ms: number, elapsed = false): string {
     if (ms < 0) return '';
-    
+
     const seconds = Math.floor((ms / 1000) % 60);
     const minutes = Math.floor((ms / (1000 * 60)) % 60);
     const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);

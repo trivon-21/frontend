@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
@@ -9,8 +9,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-scheduled-inspections',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './scheduled-inspections.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./scheduled-inspections.component.css']
 })
 export class ScheduledInspectionsComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
@@ -11,7 +11,7 @@ describe('PurchaseRequestService canonical contract', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PurchaseRequestService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [PurchaseRequestService, provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     service = TestBed.inject(PurchaseRequestService);
     http = TestBed.inject(HttpTestingController);
