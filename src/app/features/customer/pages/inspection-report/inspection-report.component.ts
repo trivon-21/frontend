@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionOfficerService } from '../../../inspection-team/services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
+import { HeaderComponent } from '../../../inspection-team/layout/header/header.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 interface Room {
   name: string;
@@ -51,7 +53,7 @@ interface PhotoEntry {
 @Component({
   selector: 'app-inspection-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HeaderComponent, PortalIconsModule],
   templateUrl: './inspection-report.component.html',
   styleUrls: ['./inspection-report.component.css']
 })
@@ -200,6 +202,27 @@ export class InspectionReportComponent implements OnInit {
       return;
     }
 
+    if (!this.inspectorName.trim()) {
+      this.notificationService.show('Inspector Name is required before submitting.', 'warning');
+      this.currentPage = 3;
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Reject negative values in any numeric room field before submitting
+    const numericFields: (keyof Room)[] = ['length', 'width', 'height', 'windows'];
+    for (const room of this.rooms) {
+      for (const field of numericFields) {
+        const val = room[field];
+        if (typeof val === 'number' && val < 0) {
+          this.notificationService.show(`${field} cannot be a negative value.`, 'warning');
+          this.currentPage = 2;
+          window.scrollTo(0, 0);
+          return;
+        }
+      }
+    }
+
     const reportData = {
       customerName: this.customerName,
       contactNumber: this.contactNumber,
@@ -219,12 +242,12 @@ export class InspectionReportComponent implements OnInit {
 
     this.officerService.recordReport(this.ticketId, reportData).subscribe({
       next: () => {
-        this.notificationService.show('✅ Inspection report recorded successfully!', 'success');
+        this.notificationService.show('Inspection report recorded successfully!', 'success');
         window.history.back();
       },
       error: (err: any) => {
         console.error(err);
-        this.notificationService.show('❌ Failed to record report: ' + err.message, 'error');
+        this.notificationService.show('Failed to record report: ' + err.message, 'error');
       }
     });
   }

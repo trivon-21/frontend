@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuditLogService {
 
-  private apiUrl = 'http://127.0.0.1:3000/api/audit-logs';
+  private apiUrl = 'http://127.0.0.1:5000/api/audit-logs';
 
   constructor(private http: HttpClient) { }
 
@@ -27,6 +27,6 @@ export class AuditLogService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
   getInvoiceById(invoiceId: string): Observable<any> {
-    return this.http.get<any>(`http://127.0.0.1:3000/api/invoices/by-number/${invoiceId}`);
+    return this.http.get<any>(`http://127.0.0.1:5000/api/invoices/by-number/${invoiceId}`);
   }
 }

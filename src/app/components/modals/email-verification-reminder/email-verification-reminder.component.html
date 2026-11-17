@@ -4,9 +4,7 @@
     <div *ngIf="step === 'reminder'" class="modal-content">
       <div class="modal-header">
         <div class="icon-wrapper">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
+          <lucide-angular name="mail" [size]="48"></lucide-angular>
         </div>
         <h2>Verify Your Email</h2>
         <p class="email-display">{{ userEmail }}</p>
@@ -19,9 +17,9 @@
             Email verification helps protect your account and ensures we can communicate important security updates with you.
           </p>
           <ul class="benefits-list">
-            <li>✓ Secure your account</li>
-            <li>✓ Enable account recovery</li>
-            <li>✓ Receive security alerts</li>
+            <li><lucide-angular name="check" [size]="14" style="margin-right: 6px; color: #10b981;"></lucide-angular> Secure your account</li>
+            <li><lucide-angular name="check" [size]="14" style="margin-right: 6px; color: #10b981;"></lucide-angular> Enable account recovery</li>
+            <li><lucide-angular name="check" [size]="14" style="margin-right: 6px; color: #10b981;"></lucide-angular> Receive security alerts</li>
           </ul>
         </div>
 
@@ -47,7 +45,10 @@
     <!-- OTP Verification Step -->
     <div *ngIf="step === 'otp'" class="modal-content">
       <div class="modal-header">
-        <button class="back-btn" (click)="backToReminder()">← Back</button>
+        <button class="back-btn" (click)="backToReminder()" style="display: inline-flex; align-items: center; gap: 4px;">
+          <lucide-angular name="chevron-left" [size]="14"></lucide-angular>
+          Back
+        </button>
         <h2>Enter Verification Code</h2>
       </div>
 

@@ -7,7 +7,18 @@ import { environment } from '../../../../../environments/environment';
 interface MaintenanceDetail {
   _id: string;
   ticketId: string;
+  fullName?: string;
   customerName: string;
+  customerId?: {
+    name?: string;
+    fullName?: string;
+    contactNo?: string;
+    contactNumber?: string;
+    phone?: string;
+    phoneNumber?: string;
+    email?: string;
+    address?: string;
+  };
   customerEmail: string;
   customerPhone: string;
   location: string;
@@ -82,6 +93,16 @@ export class MainTechnicianMaintenanceDetailsComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'in-progress';
+    const s = status.toLowerCase();
+    if (s.includes('completed')) return 'completed';
+    if (s.includes('progress')) return 'in-progress';
+    if (s.includes('schedule')) return 'scheduled';
+    if (s.includes('hold')) return 'on-hold';
+    return 'assigned';
   }
 
   formatDate(dateStr: string | undefined): string {

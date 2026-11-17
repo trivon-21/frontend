@@ -1,10 +1,18 @@
+:host {
+  display: block;
+  width: 100%;
+  background: var(--primary-active, #1A2421);
+  margin: 0;
+  padding: 0;
+}
+
 .footer {
   position: relative;
   z-index: 2;
-  background: var(--primary-active);
+  background: var(--primary-active, #1A2421);
   color: rgba(255,255,255,0.9);
-  padding: 56px 24px 24px;
-  scroll-snap-align: end;
+  padding: 56px 24px 32px;
+  box-shadow: 0 150px 0 0 var(--primary-active, #1A2421);
 }
 .footer-inner {
   max-width: 1200px;

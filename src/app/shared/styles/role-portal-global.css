@@ -1,0 +1,351 @@
+@import './inventory-manager-controls.css';
+@import './manager-portal-ui.css';
+
+.role-portal-shell {
+  --alx-table-cell-padding-block: 12px;
+  --alx-table-cell-padding-inline: 16px;
+  --alx-table-body-font-size: 13px;
+  --alx-table-header-font-size: 11px;
+  --alx-table-radius: 14px;
+  --alx-table-min-width: 760px;
+  --alx-table-border: rgba(0, 0, 0, 0.06);
+  --alx-table-border-strong: rgba(0, 0, 0, 0.08);
+  --alx-table-header-color: #1b2f27;
+  --alx-table-row-hover: rgb(0 0 0 / 1%);
+  --alx-table-shadow: 0 4px 12px rgb(0 0 0 / 3%);
+}
+
+.role-portal-shell .alx-table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0;
+  background: var(--background-card);
+  border: 1px solid var(--alx-table-border);
+  border-radius: var(--alx-table-radius);
+  box-shadow: var(--alx-table-shadow);
+  scrollbar-width: thin;
+}
+
+.role-portal-shell .alx-table-container:focus-visible {
+  outline: 3px solid rgb(0 132 61 / 24%);
+  outline-offset: 2px;
+}
+
+.role-portal-shell .alx-table-container--embedded {
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.role-portal-shell .alx-table {
+  width: 100%;
+  min-width: var(--alx-table-min-width);
+  border-collapse: collapse;
+  background: var(--background-card);
+}
+
+.role-portal-shell .alx-table--narrow { --alx-table-min-width: 480px; }
+.role-portal-shell .alx-table--medium { --alx-table-min-width: 640px; }
+.role-portal-shell .alx-table--wide { --alx-table-min-width: 960px; }
+.role-portal-shell .alx-table--fixed { table-layout: fixed; }
+
+.role-portal-shell .alx-table th {
+  padding: var(--alx-table-cell-padding-block) var(--alx-table-cell-padding-inline);
+  text-align: left;
+  white-space: nowrap;
+  color: var(--alx-table-header-color);
+  background: var(--background-card);
+  border-bottom: 1.5px solid var(--alx-table-border-strong);
+  font-size: var(--alx-table-header-font-size);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.role-portal-shell .alx-table td {
+  padding: var(--alx-table-cell-padding-block) var(--alx-table-cell-padding-inline);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--alx-table-border);
+  font-size: var(--alx-table-body-font-size);
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.role-portal-shell .alx-table--sticky-header th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--alx-table-border-strong);
+}
+
+.role-portal-shell .alx-table--danger th {
+  color: var(--error);
+  background: var(--error-light);
+  border-bottom-color: var(--error-light);
+}
+
+.role-portal-shell .alx-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.role-portal-shell .alx-table .clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.role-portal-shell .alx-table .clickable-row:hover,
+.role-portal-shell .alx-table tbody tr:hover {
+  background: var(--alx-table-row-hover);
+}
+
+.role-portal-shell .alx-table .selected-row {
+  background: var(--primary-lighter);
+}
+
+.role-portal-shell .alx-table .sku-cell {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+}
+
+.role-portal-shell .alx-table .name-cell,
+.role-portal-shell .alx-table .num-cell {
+  font-weight: 600;
+}
+
+.role-portal-shell .alx-table .num-cell,
+.role-portal-shell .alx-table .actions-cell,
+.role-portal-shell .alx-table th.actions-cell,
+.role-portal-shell .alx-table .text-right {
+  text-align: right;
+}
+
+.role-portal-shell .alx-table .date-cell {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.role-portal-shell .alx-table .text-center {
+  text-align: center;
+}
+
+.role-portal-shell .alx-table .empty-cell {
+  padding: 32px var(--alx-table-cell-padding-inline);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.role-portal-shell .alx-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-top: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.role-portal-shell .alx-pagination .pagination-controls,
+.role-portal-shell .alx-pagination .alx-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.role-portal-shell .alx-pagination .btn-page {
+  min-width: 38px;
+  padding: var(--spacing-sm) 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.role-portal-shell .alx-pagination .btn-page:hover:not(:disabled),
+.role-portal-shell .alx-pagination .btn-page.active {
+  border-color: var(--primary-main);
+  background: var(--primary-lighter);
+  color: var(--primary-main);
+}
+
+.role-portal-shell .alx-pagination .btn-page:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.role-portal-shell .portal-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xxl);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--background-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+.role-portal-shell .portal-state.error,
+.role-portal-shell .portal-state--error {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+.role-portal-shell .portal-retry,
+.role-portal-shell .portal-retry-button {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--primary-main);
+  color: var(--text-inverse);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-portal-shell .portal-retry:disabled,
+.role-portal-shell .portal-retry-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.role-portal-shell .portal-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-xl);
+  background: var(--surface-overlay, rgba(0, 0, 0, 0.45));
+  backdrop-filter: blur(3px);
+}
+
+.role-portal-shell .portal-dialog {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-xl, 16px);
+  background: var(--background-card);
+  box-shadow: var(--shadow-modal);
+}
+
+.role-portal-shell .portal-dialog__header,
+.role-portal-shell .portal-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.role-portal-shell .portal-dialog__header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.role-portal-shell .portal-dialog__header h2,
+.role-portal-shell .portal-dialog__header p {
+  margin: 0;
+}
+
+.role-portal-shell .portal-dialog__header p {
+  margin-top: var(--spacing-xs);
+  color: var(--text-secondary);
+}
+
+.role-portal-shell .portal-dialog textarea {
+  width: 100%;
+  min-height: 110px;
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-md);
+  resize: vertical;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-input, #fff);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.role-portal-shell .portal-dialog__close {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.role-portal-shell .portal-dialog__error {
+  color: var(--error);
+}
+
+.role-portal-shell .portal-dialog__actions {
+  justify-content: flex-end;
+  margin-top: var(--spacing-xl);
+}
+
+.role-portal-shell .portal-dialog__actions button,
+.role-portal-shell .portal-retry-button {
+  padding: 9px 18px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm, 8px);
+  background: var(--background-card);
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-portal-shell .portal-dialog__actions button.primary,
+.role-portal-shell .portal-retry-button {
+  border-color: var(--primary-main);
+  background: var(--primary-main);
+  color: var(--text-inverse);
+}
+
+.role-portal-shell .pill,
+.role-portal-shell .status-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--background-hover);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.role-portal-shell .alx-table-status,
+.role-portal-shell .alx-table .alx-table-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--background-hover);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.role-portal-shell lucide-angular,
+.role-portal-shell lucide-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.role-portal-shell lucide-angular svg,
+.role-portal-shell lucide-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke: currentcolor;
+}

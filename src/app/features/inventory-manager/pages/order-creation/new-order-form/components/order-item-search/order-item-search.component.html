@@ -1,0 +1,72 @@
+<div class="form-step">
+  <div class="step-header">
+    <span class="step-badge">2</span>
+    <h3>Items Selection</h3>
+  </div>
+  <div class="step-content">
+    <div class="item-selection-zone">
+      <div class="autocomplete-container">
+        <div class="input-wrapper search-wrapper">
+          <lucide-angular name="search" class="search-icon" [size]="18" strokeWidth="2.5"></lucide-angular>
+          <input
+            id="order-item-search"
+            type="text"
+            [(ngModel)]="itemSearchQuery"
+            (input)="filterItems()"
+            (focus)="onItemInputFocus()"
+            (blur)="onItemInputBlur()"
+            placeholder="Search inventory items to add..."
+            class="form-input search-input"
+            [class.has-selection]="selectedItem"
+            autocomplete="off"
+            aria-label="Search inventory items"
+            aria-autocomplete="list"
+            [attr.aria-expanded]="showItemDropdown">
+
+          <button type="button" class="btn-clear-selection im-btn im-btn--close" *ngIf="selectedItem" (click)="clearSelection()" aria-label="Clear selected item" title="Clear selection">
+            <lucide-angular name="x" [size]="18" strokeWidth="2.5"></lucide-angular>
+          </button>
+        </div>
+
+        <div class="dropdown-list glass-panel animate-fade" *ngIf="showItemDropdown">
+          <a class="dropdown-item add-new" routerLink="/inventory-manager/product-wizard">
+            <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+            Create catalog product first
+          </a>
+          <div class="dropdown-item" *ngFor="let item of filteredInventory" (mousedown)="selectInventoryItem(item)">
+            <div class="item-info">
+              <span class="name">{{ item.name }}</span>
+              <span class="sku">{{ item.sku }} · {{ item.itemClass || 'Unclassified' }} / {{ item.subcategory || 'Unclassified' }}</span>
+            </div>
+            <div class="item-stock-info">
+              Avail: <span class="avail">{{ item.available }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-config animate-fade" *ngIf="selectedItem">
+        <div class="config-row">
+          <div class="config-field">
+            <span class="field-label">QTY</span>
+            <input type="number" min="1" step="1" [(ngModel)]="currentQuantity" class="qty-field no-spinner">
+          </div>
+          <div class="config-field">
+            <span class="field-label">UNIT COST</span>
+            <div class="price-input-wrapper">
+              <span class="currency-prefix">LKR</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="currentPrice" class="qty-field price-input no-spinner">
+            </div>
+          </div>
+        </div>
+        <div class="config-footer">
+          <div class="total-display">
+            <span class="field-label">SUBTOTAL</span>
+            <div class="field-value total">{{ formatCurrency(currentPrice * currentQuantity) }}</div>
+          </div>
+          <button type="button" class="btn-primary im-btn im-btn--primary im-btn--compact" (click)="addLineItem()">ADD TO LIST</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

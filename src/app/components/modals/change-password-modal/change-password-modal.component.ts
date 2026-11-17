@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmailVerificationReminderComponent } from '../email-verification-reminder/email-verification-reminder.component';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-change-password-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, EmailVerificationReminderComponent],
+  imports: [CommonModule, ReactiveFormsModule, EmailVerificationReminderComponent, PortalIconsModule],
   templateUrl: './change-password-modal.component.html',
   styleUrl: './change-password-modal.component.css'
 })

@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
 import { GlobalSearchService } from '../../services/global-search.service';
@@ -35,7 +35,7 @@ interface DashboardAlertItem {
 @Component({
   selector: 'app-main-technician-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './main-technician-dashboard.component.html',
   styleUrl: './main-technician-dashboard.component.css'
 })

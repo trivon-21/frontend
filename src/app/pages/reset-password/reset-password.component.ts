@@ -12,6 +12,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { PortalIconsModule } from '../../shared/components/portal-icons/portal-icons.module';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -33,7 +34,7 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.css',
 })

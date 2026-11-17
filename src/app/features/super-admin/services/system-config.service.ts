@@ -6,6 +6,7 @@ import {
   FeatureFlags,
   MaintenanceMode,
   SystemInfo,
+  BankDetails,
   SystemConfig,
   SystemConfigResponse,
 } from '../models/system-config.model';
@@ -73,6 +74,26 @@ export class SystemConfigService {
   ): Observable<SystemConfigResponse> {
     return this.apiService.put<SystemConfigResponse>(`${this.baseUrl}/system-info`, {
       systemInfo,
+      reason,
+    });
+  }
+
+  /**
+   * Get bank details
+   */
+  getBankDetails(): Observable<{ success: boolean; data: BankDetails }> {
+    return this.apiService.get<{ success: boolean; data: BankDetails }>(`${this.baseUrl}/bank-details`);
+  }
+
+  /**
+   * Update bank details
+   */
+  updateBankDetails(
+    bankDetails: Partial<BankDetails>,
+    reason?: string
+  ): Observable<SystemConfigResponse> {
+    return this.apiService.put<SystemConfigResponse>(`${this.baseUrl}/bank-details`, {
+      bankDetails,
       reason,
     });
   }

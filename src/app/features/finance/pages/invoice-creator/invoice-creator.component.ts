@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvoiceService } from '../../services/invoice.service';
 import { NotificationService } from '../../../../services/notification.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-invoice-creator',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './invoice-creator.component.html',
   styleUrls: ['./invoice-creator.component.css']
 })
@@ -89,12 +90,12 @@ export class InvoiceCreatorComponent implements OnInit {
     this.invoiceService.confirmInvoice(this.invoiceId).subscribe({
       next: () => {
         this.isConfirming = false;
-        this.notificationService.show('✅ Invoice confirmed! It has been moved to Pending Invoices.', 'success');
+        this.notificationService.show('Invoice confirmed! It has been moved to Pending Invoices.', 'success');
         this.router.navigate(['/finance/invoice/pending']);
       },
       error: (err: any) => {
         this.isConfirming = false;
-        this.notificationService.show('❌ Failed to confirm: ' + (err.error?.message || err.message), 'error');
+        this.notificationService.show('Failed to confirm: ' + (err.error?.message || err.message), 'error');
       }
     });
   }

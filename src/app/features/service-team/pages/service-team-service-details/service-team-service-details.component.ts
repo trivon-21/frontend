@@ -22,6 +22,10 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
   statusUpdateSuccess = '';
   reportSubmitError = '';
   reportSubmitSuccess = '';
+  showAdditionalService = false;
+  isSubmittingAdditionalService = false;
+  additionalServiceError = '';
+  additionalServiceSuccess = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -63,6 +67,71 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
 
   private getFallbackTicket(id: string): any | null {
     const fallbackTickets: Record<string, any> = {
+      '238489782': {
+        id: '238489782',
+        sourceId: '238489782',
+        type: 'Service Request',
+        status: 'Assigned',
+        customer: {
+          name: 'John Anderson',
+          address: 'Logistic Area 1, Colombo',
+          phone: '+94 77 123 4567',
+          email: 'john.anderson@logistic.lk'
+        },
+        location: 'Logistic Area 1, Colombo',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Split AC - 3 Units',
+        detailedProductType: 'Split Air Conditioner (Inverter)',
+        description: 'Air Conditioner unit making strange noise and failing to cool the server room.',
+        notesFromTechnician: 'Inspect fan blade alignment and compressor power draw.',
+        materials: [
+          { item: 'Copper piping (3/8" + 5/8")', quantity: '15 meters' },
+          { item: 'Compressor capacitor (45uF)', quantity: '1 unit' }
+        ]
+      },
+      '238489783': {
+        id: '238489783',
+        sourceId: '238489783',
+        type: 'Installation',
+        status: 'In Progress',
+        customer: {
+          name: 'Nimal Perera',
+          address: 'Galle Road, Colombo 03',
+          phone: '+94 77 234 5678',
+          email: 'nimal.p@gmail.com'
+        },
+        location: 'Galle Road, Colombo 03',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Cassette AC - 2 Units',
+        detailedProductType: 'Cassette Air Conditioner',
+        description: 'Standard installation of two Cassette units in the main lobby.',
+        notesFromTechnician: 'Requires scaffold tower for high ceiling mounting.',
+        materials: [
+          { item: 'Wall mounting brackets (heavy duty)', quantity: '2 units' },
+          { item: 'Drainage PVC pipes & fittings', quantity: '10 meters' }
+        ]
+      },
+      '238489784': {
+        id: '238489784',
+        sourceId: '238489784',
+        type: 'Service Request',
+        status: 'On Hold',
+        customer: {
+          name: 'Kavindi Silva',
+          address: 'Malabe Tech Park, Malabe',
+          phone: '+94 77 345 6789',
+          email: 'kavindi@techpark.lk'
+        },
+        location: 'Malabe Tech Park, Malabe',
+        scheduledDate: new Date().toISOString(),
+        serviceType: 'Ducted AC - 1 Unit',
+        detailedProductType: 'Ducted Air Conditioner',
+        description: 'Water leak from the ceiling unit in Section 4.',
+        notesFromTechnician: 'Wait for ceiling tiles to be removed by facility manager.',
+        materials: [
+          { item: 'PVC insulation tape', quantity: '2 rolls' }
+        ]
+      }
     };
 
     return fallbackTickets[id] || null;
@@ -89,13 +158,25 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     this.statusUpdateSuccess = '';
     const normalizedStatus = this.normalizeStatus(newStatus);
 
+    // Intercept fallback tickets for local preview
+    if (['238489782', '238489783', '238489784'].includes(String(recordId))) {
+      setTimeout(() => {
+        if (this.ticket) {
+          this.ticket.status = normalizedStatus;
+        }
+        this.statusUpdateSuccess = `Status updated to ${normalizedStatus}.`;
+        this.isUpdatingStatus = false;
+      }, 500);
+      return;
+    }
+
     this.taskService.updateTaskStatus(String(recordId), normalizedStatus).subscribe({
       next: (res) => {
         if (this.ticket) {
           this.ticket['status'] = (res as any)?.status || normalizedStatus;
         }
         this.statusUpdateSuccess = `Status updated to ${this.ticket?.['status']}.`;
-        this.loadTicket();
+        // Removed this.loadTicket() so we don't accidentally revert the status
         console.log('Ticket status updated to:', this.ticket?.['status']);
       },
       error: (err) => {
@@ -116,9 +197,15 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     return status;
   }
 
+  get baseRoute(): string {
+    if (this.router.url.includes('/service-team-a')) return '/service-team-a';
+    if (this.router.url.includes('/service-team-b')) return '/service-team-b';
+    return '/service-team';
+  }
+
   viewServiceHistory(): void {
     if (this.ticketId) {
-      this.router.navigate(['/service-team/service-history', this.ticketId]);
+      this.router.navigate([this.baseRoute + '/service-history', this.ticketId]);
     }
   }
 
@@ -152,10 +239,22 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
     this.reportSubmitError = '';
     this.reportSubmitSuccess = '';
 
+    const recordId = this.ticket.sourceId || this.ticket._id || this.ticket.id;
+    
+    // Intercept fallback tickets for local preview
+    if (['238489782', '238489783', '238489784'].includes(String(recordId))) {
+      setTimeout(() => {
+        this.reportSubmitSuccess = 'Service report submitted (Local Preview).';
+        noteInput.value = '';
+        this.isSubmittingReport = false;
+      }, 500);
+      return;
+    }
+
     const payload = {
       ...this.ticket,
-      _id: this.ticket.sourceId || this.ticket._id || this.ticket.id,
-      serviceRequestId: this.ticket.sourceId || this.ticket._id || this.ticket.id,
+      _id: recordId,
+      serviceRequestId: recordId,
       onModel: this.ticket.type === 'Installation' ? 'Installation' : 'ServiceRequest',
       materialsUsed: Array.isArray(this.ticket.materials) ? this.ticket.materials : [],
       notesFromMainTechnician: note,
@@ -173,6 +272,57 @@ export class ServiceTeamServiceDetailsComponent implements OnInit {
       },
       complete: () => {
         this.isSubmittingReport = false;
+      }
+    });
+  }
+
+  toggleAdditionalService(): void {
+    this.showAdditionalService = !this.showAdditionalService;
+    this.additionalServiceError = '';
+    this.additionalServiceSuccess = '';
+  }
+
+  submitAdditionalService(descInput: HTMLTextAreaElement): void {
+    if (!this.ticket || this.isSubmittingAdditionalService) {
+      return;
+    }
+
+    const desc = descInput.value.trim();
+    if (!desc) {
+      this.additionalServiceSuccess = '';
+      this.additionalServiceError = 'Please provide a description.';
+      return;
+    }
+
+    this.isSubmittingAdditionalService = true;
+    this.additionalServiceError = '';
+    this.additionalServiceSuccess = '';
+
+    const recordId = this.ticket.sourceId || this.ticket._id || this.ticket.id;
+
+    // Intercept fallback tickets for local preview
+    if (['238489782', '238489783', '238489784'].includes(String(recordId))) {
+      setTimeout(() => {
+        this.additionalServiceSuccess = 'Additional service added (Local Preview).';
+        descInput.value = '';
+        this.isSubmittingAdditionalService = false;
+        this.showAdditionalService = false;
+      }, 500);
+      return;
+    }
+
+    this.taskService.addAdditionalService(String(recordId), desc).subscribe({
+      next: () => {
+        this.additionalServiceSuccess = 'Additional service added successfully.';
+        descInput.value = '';
+        this.showAdditionalService = false;
+      },
+      error: (err) => {
+        this.additionalServiceError = err?.error?.message || 'Failed to add additional service.';
+        this.isSubmittingAdditionalService = false;
+      },
+      complete: () => {
+        this.isSubmittingAdditionalService = false;
       }
     });
   }

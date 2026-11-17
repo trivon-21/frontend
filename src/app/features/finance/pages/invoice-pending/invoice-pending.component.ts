@@ -99,10 +99,10 @@ export class InvoicePendingComponent implements OnInit {
     this.isSending = true;
     this.invoiceService.sendInvoiceToCustomer(this.selectedInvoice._id).subscribe({
       next: () => {
-        this.notificationService.show('✅ Invoice PDF sent to customer email!', 'success');
+        this.notificationService.show('Invoice PDF sent to customer email!', 'success');
         this.closeModal(); this.loadInvoices(); this.isSending = false;
       },
-      error: (err) => { console.error(err); this.isSending = false; this.notificationService.show('❌ Failed to send.', 'error'); }
+      error: (err) => { console.error(err); this.isSending = false; this.notificationService.show('Failed to send.', 'error'); }
     });
   }
 
@@ -156,10 +156,10 @@ export class InvoicePendingComponent implements OnInit {
     this.isRepairSending = true;
     this.invoiceService.sendInvoiceToCustomer(this.selectedRepairInvoice._id).subscribe({
       next: () => {
-        this.notificationService.show('✅ Repair Invoice PDF sent to customer email!', 'success');
+        this.notificationService.show('Repair Invoice PDF sent to customer email!', 'success');
         this.closeRepairModal(); this.loadRepairInvoices(); this.isRepairSending = false;
       },
-      error: (err) => { console.error(err); this.isRepairSending = false; this.notificationService.show('❌ Failed to send.', 'error'); }
+      error: (err) => { console.error(err); this.isRepairSending = false; this.notificationService.show('Failed to send.', 'error'); }
     });
   }
 }

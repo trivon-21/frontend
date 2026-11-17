@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InspectionTicketService } from '../../../finance/services/inspection-ticket.service';
+import { NavbarComponent } from '../../../../components/navbar/navbar.component';
+import { FooterComponent } from '../../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-inspection-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './inspection-payment.component.html',
   styleUrls: ['./inspection-payment.component.css']
 })
@@ -56,6 +59,7 @@ export class InspectionPaymentComponent implements OnInit {
       }
     });
   }
+
   loadOrderData(orderId: string): void {
     this.isLoading = true;
     this.ticketService.getOrCreateTicket(orderId).subscribe({
@@ -68,13 +72,12 @@ export class InspectionPaymentComponent implements OnInit {
           : [data.order.itemName];
         this.totalAmount = data.order.amount;
 
-        // Map backend bankDetails fields to frontend bankDetails object
         this.bankDetails = {
           bankName: data.bankDetails.bankName,
           branchName: data.bankDetails.branchName,
           accountName: data.bankDetails.accountName,
           accountNo: data.bankDetails.accountNo,
-          inspectionAmount: data.bankDetails.inspectionFee  // ← map inspectionFee → inspectionAmount
+          inspectionAmount: data.bankDetails.inspectionFee
         };
 
         if (data.ticket.status === 'PAYMENT_UNDER_REVIEW') {
@@ -156,7 +159,6 @@ export class InspectionPaymentComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMsg = '';
 
-    // Convert file to base64 and send to backend
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result as string;

@@ -41,8 +41,13 @@ interface RawTechTeam {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: (string | { date?: string; timeSlot?: string })[];
   members?: RawTeamMember[];
+}
+
+export interface TimeSlot {
+  date: string;
+  timeSlot: string;
 }
 
 export interface TeamDetailsApiTeam {
@@ -51,7 +56,7 @@ export interface TeamDetailsApiTeam {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: TimeSlot[];
   members?: TeamMember[];
 }
 
@@ -61,7 +66,7 @@ export interface TeamDetailsApiPayload {
   teamType?: string;
   status?: string;
   activeJobsCount?: number;
-  availableSlots?: string[];
+  availableSlots?: TimeSlot[];
   teamLeader?: TeamMember | null;
   teamMembers?: TeamMember[];
   members?: TeamMember[];
@@ -74,7 +79,7 @@ export interface TeamDetails {
     teamType: string;
     status: string;
     activeJobsCount: number;
-    availableSlots: string[];
+    availableSlots: TimeSlot[];
   };
   teamLeader: TeamMember | null;
   teamMembers: TeamMember[];
@@ -132,53 +137,10 @@ export class TaskService {
    * Retrieves team details either by explicit team name or current session.
    */
   getTeamDetails(teamName?: string): Observable<TeamDetailsResponse> {
-    const activeTeamName = teamName?.trim() || this.teamSessionService.getSession()?.teamName?.trim();
+    const activeTeamName = teamName?.trim() || this.teamSessionService.getTeamName();
+    const query = activeTeamName ? `?teamName=${encodeURIComponent(activeTeamName)}` : '';
 
-    if (!activeTeamName) {
-      return throwError(() => new Error('No active service team session found.'));
-    }
-
-    return this.http.get<{ success: boolean; data: RawTechTeam[] }>(`${this.apiUrl}/tech-teams`).pipe(
-      map((response) => {
-        if (!response.success || !Array.isArray(response.data)) {
-          throw new Error('Invalid team list response');
-        }
-
-        const normalizedTeamName = activeTeamName.toLowerCase();
-        const matchedTeam = response.data.find((team) => {
-          const currentTeamName = String(team.teamName || '').trim().toLowerCase();
-          return currentTeamName === normalizedTeamName;
-        });
-
-        if (!matchedTeam) {
-          throw new Error(`Team not found for ${activeTeamName}`);
-        }
-
-        const teamMembers = (matchedTeam.members || []).map((member) => ({
-          id: '',
-          name: String(member.name || '').trim() || 'Unknown Member',
-          role: String(member.role || '').trim() || 'Technician',
-        }));
-        const teamLeader = teamMembers.find((member) => member.role === 'Team Leader') || null;
-
-        return {
-          success: true,
-          data: {
-            team: {
-              id: matchedTeam._id || '',
-              teamName: matchedTeam.teamName || activeTeamName,
-              teamType: matchedTeam.teamType || 'Service',
-              status: matchedTeam.status || 'Unknown',
-              activeJobsCount: matchedTeam.activeJobsCount || 0,
-              availableSlots: (matchedTeam.availableSlots || []).filter((slot): slot is string => typeof slot === 'string' && Boolean(slot.trim())),
-              members: teamMembers,
-            },
-            teamLeader,
-            teamMembers,
-          },
-        };
-      })
-    );
+    return this.http.get<TeamDetailsResponse>(`${this.apiUrl}/team-details${query}`);
   }
 
   /**
@@ -198,6 +160,15 @@ export class TaskService {
     return this.http.post<GenericApiPayload>(this.withTeamQuery(`${this.apiUrl}/service-reports/submit`), {
       ...ticketData,
       teamName: this.teamSessionService.getTeamName()
+    });
+  }
+
+  /**
+   * Adds an additional service to a task.
+   */
+  addAdditionalService(id: string, description: string): Observable<GenericApiPayload> {
+    return this.http.post<GenericApiPayload>(this.withTeamQuery(`${this.apiUrl}/tasks/${id}/additional-service`), {
+      description
     });
   }
 }

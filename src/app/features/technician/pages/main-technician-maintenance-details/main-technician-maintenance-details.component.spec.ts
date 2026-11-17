@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import { MainTechnicianMaintenanceDetails } from './main-technician-maintenance-details';
+import { MainTechnicianMaintenanceDetailsComponent } from './main-technician-maintenance-details.component';
 
-describe('MainTechnicianMaintenanceDetails', () => {
-  let component: MainTechnicianMaintenanceDetails;
-  let fixture: ComponentFixture<MainTechnicianMaintenanceDetails>;
+describe('MainTechnicianMaintenanceDetailsComponent', () => {
+  let component: MainTechnicianMaintenanceDetailsComponent;
+  let fixture: ComponentFixture<MainTechnicianMaintenanceDetailsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainTechnicianMaintenanceDetails]
+      imports: [MainTechnicianMaintenanceDetailsComponent],
+      providers: [provideRouter([])],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MainTechnicianMaintenanceDetails);
+    fixture = TestBed.createComponent(MainTechnicianMaintenanceDetailsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

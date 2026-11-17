@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SuperAdminService, User, ReactivationRequest } from '../../services/super-admin.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css'],
 })
@@ -107,11 +109,21 @@ export class UsersComponent implements OnInit {
   showPassword = false;
   isCreatingUser = false;
 
-  constructor(private superAdminService: SuperAdminService) {}
+  constructor(
+    private superAdminService: SuperAdminService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadCounts();
-    this.loadUsers();
+    this.route.queryParams.subscribe((params) => {
+      const tab = params['tab'];
+      if (tab === 'active' || tab === 'deactivated' || tab === 'reactivation') {
+        this.activeTab = tab;
+      }
+      this.loadTabData(this.activeTab);
+    });
   }
 
   loadCounts(): void {
@@ -130,7 +142,15 @@ export class UsersComponent implements OnInit {
     this.activeTab = tab;
     this.currentPage = 1;
     this.reactivationPage = 1;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
+    });
+    this.loadTabData(tab);
+  }
 
+  loadTabData(tab: 'active' | 'deactivated' | 'reactivation'): void {
     if (tab === 'active') {
       this.loadUsers();
     } else if (tab === 'deactivated') {

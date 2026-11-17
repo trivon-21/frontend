@@ -1,5 +1,9 @@
 export interface BusinessRules {
-  quotationApprovalThreshold: number;
+  quotationApprovalThreshold?: number;
+  standardMaintenanceFee: number;
+  standardRepairFee: number;
+  standardSiteInspectionFee: number;
+  profitMargin: number;
   logRetentionDays: number;
   paymentAutoCancelDays: number;
   defaultWarrantyMonths: number;
@@ -32,6 +36,19 @@ export interface SystemInfo {
   address: string;
 }
 
+export interface BankDetails {
+  _id?: string;
+  bankName: string;
+  branch: string;
+  accountName: string;
+  accountNumber: string;
+  type?: string;
+  currency?: string;
+  updatedBy?: User | string | null;
+  updatedAt?: Date | string;
+  createdAt?: Date | string;
+}
+
 export interface User {
   _id: string;
   fullName: string;
@@ -44,6 +61,7 @@ export interface SystemConfig {
   featureFlags: FeatureFlags;
   maintenance: MaintenanceMode;
   systemInfo: SystemInfo;
+  bankDetails?: BankDetails;
   updatedBy: User | null;
   updatedAt: Date;
   createdAt: Date;

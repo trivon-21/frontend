@@ -22,7 +22,8 @@ type RawInstallation = {
   _id?: string;
   ticketId?: string | number;
   customerName?: string;
-  customerId?: string | { name?: string; address?: string };
+  fullName?: string;
+  customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
   location?: string;
   date?: string;
@@ -94,7 +95,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
   private mapApiInstallation(item: RawInstallation): InstallationTicket {
     const ticketId = String(item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
-    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
+    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
 
     const isScheduledOrLater = ['Scheduled', 'In Progress', 'Completed', 'On Hold'].includes(item.status || '');
@@ -102,7 +103,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
 
     return {
       id: normalizedId,
-      customerName: item.customerName || populatedCustomerName || 'Unknown Customer',
+      customerName: item.fullName || item.customerName || populatedCustomerName || 'Unknown Customer',
       productType: item.productType || 'N/A',
       location: populatedCustomerAddress || (item.location && !/logistic area/i.test(item.location) ? item.location : '-'),
       date: this.formatDisplayDate(scheduledDate),
@@ -148,6 +149,30 @@ export class MainTechnicianInstallationsComponent implements OnInit {
     this.applyFilters();
   }
 
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTickets.length / this.pageSize);
+  }
+
+  get paginatedTickets(): InstallationTicket[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTickets.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   applyFilters(): void {
     const normalized = this.searchQuery.toLowerCase();
     this.filteredTickets = this.tickets.filter((ticket) => {
@@ -163,6 +188,7 @@ export class MainTechnicianInstallationsComponent implements OnInit {
 
       return matchesSearch && matchesStatus;
     });
+    this.currentPage = 1;
   }
 
   clearFilters(): void {

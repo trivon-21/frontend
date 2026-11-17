@@ -21,8 +21,10 @@ interface ServiceRequest {
 interface ServiceRequestApiItem {
   _id?: string;
   ticketId?: string | number;
+  serviceRequestRef?: string;
   customerName?: string;
-  customerId?: string | { name?: string; address?: string };
+  fullName?: string;
+  customerId?: string | { name?: string; address?: string; fullName?: string };
   productType?: string;
   location?: string;
   serviceDate?: string;
@@ -92,6 +94,30 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
     this.router.navigate(['/main-technician-service-request-details', cleanId]);
   }
 
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredRequests.length / this.pageSize);
+  }
+
+  get paginatedRequests(): ServiceRequest[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredRequests.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   /** Filters the loaded requests by the current search text and status. */
   filterRequests(): void {
     const query = this.searchQuery.trim().toLowerCase();
@@ -110,6 +136,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
 
         return aStatusPriority - bStatusPriority;
       });
+    this.currentPage = 1;
   }
 
   /** Returns priority order for status sorting: Assigned (0) -> Others (1) -> Completed (2) */
@@ -145,9 +172,9 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
   /** Maps a backend service request record into the view model used by the table. */
   private mapApiRequest(item: ServiceRequestApiItem): ServiceRequest {
     const displayDate = this.formatDisplayDate(item.serviceDate);
-    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.name : undefined;
+    const populatedCustomerName = typeof item.customerId === 'object' ? item.customerId?.fullName || item.customerId?.name : undefined;
     const populatedCustomerAddress = typeof item.customerId === 'object' ? item.customerId?.address : undefined;
-    const ticketId = String(item.ticketId || item._id || '');
+    const ticketId = String(item.serviceRequestRef || item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
 
     const assignedTeamName = typeof item.assignedTeam === 'object'
@@ -156,7 +183,7 @@ export class MainTechnicianServiceRequestsComponent implements OnInit {
 
     return {
       id: normalizedId,
-      customerName: item.customerName || populatedCustomerName || '-',
+      customerName: item.fullName || item.customerName || populatedCustomerName || '-',
       productType: item.productType || '-',
       location: populatedCustomerAddress || item.location || '-',
       date: displayDate.date,

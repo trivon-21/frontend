@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerInquiryService, Inquiry } from '../../../features/customer/services/customer-inquiry.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-inquiry-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './inquiry-modal.component.html',
   styleUrl: './inquiry-modal.component.css',
 })

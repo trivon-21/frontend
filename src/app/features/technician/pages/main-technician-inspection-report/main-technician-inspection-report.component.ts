@@ -17,12 +17,15 @@ interface InspectionReportTicket {
 
 type RawInspectionReport = {
   _id: string;
+  reportId?: string;
   customerId?: { name?: string; address?: string } | string;
   customerName?: string | null;
   customerAddress?: string | null;
+  siteAddress?: string | null;
   inspectionMeta?: { date?: string | Date; recommendedProducts?: string[] };
   status?: InspectionReportTicket['status'];
   updatedAt?: string;
+  fullName?: string | null;
 };
 
 @Component({
@@ -67,10 +70,10 @@ export class MainTechnicianInspectionReportsComponent implements OnInit {
     const populatedCustomer = item.customerId && typeof item.customerId === 'object' ? item.customerId : undefined;
 
     return {
-      id: item._id, // Critical: Use _id for API consistency
-      customerName: populatedCustomer?.name || item.customerName || 'Unknown Customer',
+      id: item.reportId || item._id, // Critical: Use reportId for API consistency
+      customerName: item.fullName || populatedCustomer?.name || item.customerName || 'Unknown Customer',
       productType: item.inspectionMeta?.recommendedProducts?.[0] || 'N/A',
-      location: populatedCustomer?.address || item.customerAddress || 'N/A',
+      location: item.siteAddress || populatedCustomer?.address || item.customerAddress || 'N/A',
       date: this.formatInspectionDate(inspectionDate),
       status: (item.status as InspectionReportTicket['status']) || 'Pending',
     };
@@ -90,18 +93,43 @@ export class MainTechnicianInspectionReportsComponent implements OnInit {
       });
   }
 
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTickets.length / this.pageSize);
+  }
+
+  get paginatedTickets(): InspectionReportTicket[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTickets.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   applyFilters(): void {
     const query = this.searchQuery.toLowerCase();
     this.filteredTickets = this.tickets.filter(t => 
       (this.statusFilter === 'All' || t.status === this.statusFilter) &&
       (t.customerName.toLowerCase().includes(query) || t.id.toLowerCase().includes(query))
     );
+    this.currentPage = 1;
   }
 
   clearFilters(): void { this.statusFilter = 'All'; this.searchQuery = ''; this.applyFilters(); }
 
   reviewInspectionReport(id: string) {
-    this.router.navigate(['/main-technician-inspection-report-review', id]);
+    this.router.navigate(['/main-technician-inspection-report-review', id.replace('#', '')]);
   }
 }
 

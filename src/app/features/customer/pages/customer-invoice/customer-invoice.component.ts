@@ -5,11 +5,14 @@ import { ActivatedRoute } from '@angular/router';
 import { InvoiceService } from '../../../finance/services/invoice.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
+import { NavbarComponent } from '../../../../components/navbar/navbar.component';
+import { FooterComponent } from '../../../../components/footer/footer.component';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-customer-invoice',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './customer-invoice.component.html',
   styleUrls: ['./customer-invoice.component.css']
 })
@@ -82,7 +85,7 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.notificationService.show('❌ ' + err.message, 'error');
+        this.notificationService.show(err.message, 'error');
       }
     });
   }
@@ -107,7 +110,7 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.notificationService.show('❌ ' + err.message, 'error');
+        this.notificationService.show(err.message, 'error');
       }
     });
   }
@@ -131,7 +134,7 @@ export class CustomerInvoiceComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.notificationService.show('❌ ' + err.message, 'error');
+        this.notificationService.show(err.message, 'error');
       }
     });
   }

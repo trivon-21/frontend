@@ -73,6 +73,7 @@ import { PurchaseRequestVerificationComponent } from './features/finance/pages/p
 import { PurchaseRequestApprovedComponent } from './features/finance/pages/purchase-request-approved/purchase-request-approved.component';
 import { PurchaseRequestRejectedComponent } from './features/finance/pages/purchase-request-rejected/purchase-request-rejected.component';
 
+
 // Inspection
 import { InspectionPaymentComponent } from './features/customer/pages/inspection-payment/inspection-payment.component';
 import { InspectionSchedulingComponent } from './features/customer/pages/inspection-scheduling/inspection-scheduling.component';
@@ -84,13 +85,44 @@ import { CompletedInspectionsComponent } from './features/inspection-team/pages/
 import { InspectionDashboardComponent } from './features/inspection-team/pages/inspection-dashboard/inspection-dashboard.component';
 import { CustomerInvoiceComponent } from './features/customer/pages/customer-invoice/customer-invoice.component';
 
+// CSA (Customer Support Agent)
+import { CsaLayoutComponent } from './features/csa/components/layout/csa-layout.component';
+import { CsaDashboardComponent } from './features/csa/pages/csa-dashboard/csa-dashboard.component';
+import { CsaMaintenanceSchedulesComponent } from './features/csa/pages/csa-maintenance-schedules/csa-maintenance-schedules.component';
+import { CsaCustomersComponent } from './features/csa/pages/csa-customers/csa-customers.component';
+import { CsaServiceTicketsComponent } from './features/csa/pages/csa-service-tickets/csa-service-tickets.component';
+import { CsaInquiriesComponent } from './features/csa/pages/csa-inquiries/csa-inquiries.component';
+import { InvoicePaymentUploadComponent } from './features/customer/pages/invoice-payment-upload/invoice-payment-upload.component';
+
 export const routes: Routes = [
-{ path: '', component: LandingComponent, pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
+
+  // ── Manager portal
+  {
+    path: 'manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MANAGER', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
+  },
+
+  // ── Inventory Manager portal
+  {
+    path: 'inventory-manager',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INVENTORY', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/inventory-manager/inventory-manager.routes').then(
+        (m) => m.INVENTORY_MANAGER_ROUTES,
+      ),
+  },
 
   // ── Technician / Manager portal
   {
     path: '',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['MAIN_TECH', 'SUPER_ADMIN'] },
     component: TechnicianLayoutComponent,
     children: [
       { path: 'main-technician-dashboard', component: MainTechnicianDashboardComponent },
@@ -114,9 +146,43 @@ export const routes: Routes = [
     ]
   },
 
-  // ── Service Team portal
+  // ── Service Team A portal
+  {
+    path: 'service-team-a',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'], team: 'A' },
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team portal (Generic/Fallback)
   {
     path: 'service-team',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'] },
+    component: ServiceTeamLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: ServiceTeamDashboardComponent },
+      { path: 'assigned-jobs', component: ServiceTeamAssignedJobsComponent },
+      { path: 'team-details', component: ServiceTeamTeamDetailsComponent },
+      { path: 'service-details/:id', component: ServiceTeamServiceDetailsComponent },
+      { path: 'service-history/:id', component: ServiceTeamServiceHistoryComponent }
+    ]
+  },
+
+  // ── Service Team B portal
+  {
+    path: 'service-team-b',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['SERVICE_TEAM', 'SUPER_ADMIN'], team: 'B' },
     component: ServiceTeamLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -129,16 +195,16 @@ export const routes: Routes = [
   },
 
   // ── Backward compatibility redirects
-  { path: 'service-dashboard',          redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
-  { path: 'service-team-dashboard',     redirectTo: 'service-team/dashboard',     pathMatch: 'full' },
+  { path: 'service-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
+  { path: 'service-team-dashboard', redirectTo: 'service-team/dashboard', pathMatch: 'full' },
   { path: 'service-team-assigned-jobs', redirectTo: 'service-team/assigned-jobs', pathMatch: 'full' },
-  { path: 'service-team-team-details',  redirectTo: 'service-team/team-details',  pathMatch: 'full' },
+  { path: 'service-team-team-details', redirectTo: 'service-team/team-details', pathMatch: 'full' },
 
-// =========================================================
+  // =========================================================
   // PUBLIC PAGES
   // =========================================================
 
-  
+
 
   {
     path: 'signup',
@@ -148,7 +214,7 @@ export const routes: Routes = [
       ),
   },
 
-  
+
 
   {
     path: 'forgot-password',
@@ -188,7 +254,8 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
-    canActivate: [authGuard, maintenanceGuard],
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['CUSTOMER', 'SUPER_ADMIN'] },
     loadComponent: () =>
       import(
         './features/customer/components/layout/customer-layout/customer-layout.component'
@@ -271,6 +338,28 @@ export const routes: Routes = [
       },
 
       {
+        path: 'core-operations',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/core-operations/core-operations.component'
+          ).then((m) => m.CoreOperationsComponent),
+      },
+
+      {
+        path: 'requests',
+        redirectTo: 'core-operations',
+        pathMatch: 'full'
+      },
+
+      {
+        path: 'global-notifications',
+        loadComponent: () =>
+          import(
+            './features/super-admin/pages/global-notifications/global-notifications.component'
+          ).then((m) => m.GlobalNotificationsComponent),
+      },
+
+      {
         path: 'system-config',
         loadComponent: () =>
           import(
@@ -348,6 +437,8 @@ export const routes: Routes = [
 
   {
     path: 'finance',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['FINANCE', 'SUPER_ADMIN'] },
     component: FinanceLayoutComponent,
 
     children: [
@@ -513,6 +604,8 @@ export const routes: Routes = [
 
   {
     path: 'inspection-officer',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['INSPECTION', 'SUPER_ADMIN'] },
     component: InspectionLayoutComponent,
 
     children: [
@@ -566,6 +659,54 @@ export const routes: Routes = [
   {
     path: 'customer/invoice',
     component: CustomerInvoiceComponent,
+  },
+  { path: 'invoice/upload-payment',
+    component: InvoicePaymentUploadComponent },
+
+  // =========================================================
+  // CSA (CUSTOMER SUPPORT AGENT)
+  // =========================================================
+  {
+    path: 'csa',
+    canActivate: [authGuard, maintenanceGuard, roleGuard],
+    data: { roles: ['CSA', 'SUPER_ADMIN'] },
+    component: CsaLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: CsaDashboardComponent },
+      {
+        path: 'catalog',
+        loadComponent: () =>
+          import(
+            './features/csa/pages/csa-catalog/csa-catalog.component'
+          ).then((m) => m.CsaCatalogComponent),
+      },
+      { path: 'customers', component: CsaCustomersComponent },
+      { path: 'service-tickets', component: CsaServiceTicketsComponent },
+      { path: 'inquiries', component: CsaInquiriesComponent },
+      { path: 'maintenance-schedules', component: CsaMaintenanceSchedulesComponent },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/profile/customer-profile.component'
+          ).then((m) => m.CustomerProfileComponent),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import(
+            './features/csa/pages/csa-settings/csa-settings.component'
+          ).then((m) => m.CsaSettingsComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import(
+            './features/customer/pages/notifications/notifications.component'
+          ).then((m) => m.NotificationsPageComponent),
+      },
+    ]
   },
 
   // =========================================================

@@ -1,27 +1,5 @@
 <!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">AirLux</div>
-  <div class="nav-links">
-    <a href="#">Profile</a>
-    <a href="#">View products</a>
-    <a href="#">Our Services</a>
-    <button class="logout-btn">Logout</button>
-  </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero-banner">
-  <div class="hero-text">
-    <h1>Premium Cooling<br>Solutions</h1>
-    <p>Discover our curated collection of high-performance air conditioning systems</p>
-  </div>
-  <div class="hero-right">
-    <div class="welcome-badge">🔔 Welcome {{ customerName }}!</div>
-    <div class="hero-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ customerName }}&background=4a7c4e&color=fff" alt="avatar" />
-    </div>
-  </div>
-</div>
+<app-navbar></app-navbar>
 
 <div class="page-body">
 
@@ -110,14 +88,18 @@
     <!-- ACTION CARD -->
     <div class="action-card" *ngIf="!isAccepted && !isRejected && !isAutoCancelled && invoice.status === 'SENT'">
       <p class="action-question">Would You Like to,</p>
-      <div class="action-buttons">
-        <button class="btn-accept" (click)="acceptInvoice()" [disabled]="isSubmitting">
-          ✓ Accept Invoice
-        </button>
-        <button class="btn-reject" (click)="openRejectModal()" [disabled]="isSubmitting">
-          ✕ Reject Invoice
-        </button>
-      </div>
+   <div class="action-buttons">
+  <button class="btn-accept" (click)="acceptInvoice()" [disabled]="isSubmitting">
+    <lucide-angular name="check" [size]="18"></lucide-angular>
+    Accept Invoice
+  </button>
+
+  <button class="btn-reject" (click)="openRejectModal()" [disabled]="isSubmitting">
+    <lucide-angular name="x" [size]="18"></lucide-angular>
+    Reject Invoice
+  </button>
+</div>
+
       <p class="action-note">
         Note: You can always resume the rejected invoices within one(1) month of the rejection
         date using the same link
@@ -126,7 +108,9 @@
 
     <!-- ACCEPTED STATE -->
     <div class="success-card" *ngIf="isAccepted">
-      <div class="success-icon">✓</div>
+      <div class="success-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="check" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Accepted!</h3>
       <p>Thank you for accepting the invoice. Our team will be in touch shortly.</p>
       <p *ngIf="invoice.paymentDeadline" style="color:#dc2626;font-weight:600;">
@@ -140,7 +124,9 @@
 
     <!-- REJECTED STATE -->
     <div class="rejected-card" *ngIf="isRejected">
-      <div class="rejected-icon">✕</div>
+      <div class="rejected-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Rejected</h3>
       <p>Your rejection has been recorded.</p>
       <p><strong>Reason:</strong> {{ invoice.rejectionReason }}</p>
@@ -162,7 +148,9 @@
 
     <!-- AUTO CANCELLED STATE -->
     <div class="rejected-card" *ngIf="isAutoCancelled">
-      <div class="rejected-icon">✕</div>
+      <div class="rejected-icon" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="24"></lucide-angular>
+      </div>
       <h3>Invoice Auto-Cancelled</h3>
       <p>This invoice has been automatically cancelled.</p>
       <div class="rejected-badge" style="background:#fef3c7;color:#92400e;">Status: Auto Cancelled</div>
@@ -176,7 +164,9 @@
   <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Reject Invoice</h3>
-      <button class="modal-close" (click)="closeRejectModal()">✕</button>
+      <button class="modal-close" (click)="closeRejectModal()" style="display: flex; align-items: center; justify-content: center;">
+        <lucide-angular name="x" [size]="18"></lucide-angular>
+      </button>
     </div>
     <div class="modal-body">
       <p>Please provide a reason for rejecting this invoice.</p>
@@ -198,29 +188,4 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <h3>AirLux</h3>
-      <p>Sri Lanka's trusted AC service management system.<br>Professional solutions for all your cooling needs.</p>
-    </div>
-    <div class="footer-contact">
-      <h4>Contact Us</h4>
-      <p>📍 123 Galle Road, Colombo 03, Sri Lanka</p>
-      <p>📞 +94 11 234 5678</p>
-      <p>✉️ support@airlux.lk</p>
-    </div>
-    <div class="footer-social">
-      <h4>Follow Us</h4>
-      <div class="social-icons">
-        <a href="#" class="social-btn">f</a>
-        <a href="#" class="social-btn">𝕏</a>
-        <a href="#" class="social-btn">in</a>
-        <a href="#" class="social-btn">▶</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2026 AirLux. All rights reserved. | AC Service Management System</p>
-  </div>
-</footer>
+<app-footer></app-footer>

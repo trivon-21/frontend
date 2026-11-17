@@ -3,40 +3,38 @@
   <aside class="sidebar">
     <a routerLink="/" class="sidebar-brand">{{ systemInfo?.systemName || 'AirLux' }}</a>
     <nav class="sidebar-nav">
-      <a
-        routerLink="/super-admin"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="nav-item"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-        </svg>
+      <a routerLink="/super-admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <lucide-angular name="layout-dashboard" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Dashboard</span>
       </a>
+
       <a routerLink="/super-admin/users" routerLinkActive="active" class="nav-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
+        <lucide-angular name="users" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>Users</span>
       </a>
+
+      <a routerLink="/super-admin/core-operations" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="layers" [size]="18" strokeWidth="1.8"></lucide-angular>
+        <span>Core Operations</span>
+      </a>
+
+      <a routerLink="/super-admin/global-notifications" routerLinkActive="active" class="nav-item">
+        <lucide-angular name="bell" [size]="18" strokeWidth="1.8"></lucide-angular>
+        <span>Global Notifications</span>
+      </a>
+
       <a routerLink="/super-admin/system-config" routerLinkActive="active" class="nav-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6"/><path d="M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24"/><path d="M1 12h6m6 0h6"/><path d="M4.22 19.78l4.24-4.24m2.12-2.12l4.24-4.24"/><path d="M19.78 19.78l-4.24-4.24m-2.12-2.12l-4.24-4.24"/>
-        </svg>
+        <lucide-angular name="settings" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>System Config</span>
       </a>
+
       <a routerLink="/super-admin/system-logs" routerLinkActive="active" class="nav-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
-        </svg>
+        <lucide-angular name="file-text" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>System Logs</span>
       </a>
+
       <a routerLink="/super-admin/profile" routerLinkActive="active" class="nav-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
+        <lucide-angular name="user" [size]="18" strokeWidth="1.8"></lucide-angular>
         <span>My Profile</span>
       </a>
     </nav>
@@ -44,23 +42,97 @@
 
   <!-- Main area -->
   <div class="dashboard-main">
-    <!-- Header -->
+    <!-- Header aligned with customer dashboard header -->
     <header class="dashboard-header">
       <a routerLink="/" class="back-home-btn" aria-label="Back to Home">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
+        <lucide-angular name="arrow-left" [size]="16" strokeWidth="2"></lucide-angular>
         <span>Home</span>
       </a>
 
-      <div class="header-spacer"></div>
+      <!-- Search Bar -->
+      <div class="header-search-wrap">
+        <lucide-angular name="search" class="search-icon" [size]="16" strokeWidth="2"></lucide-angular>
+        <input
+          class="header-search"
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onGlobalSearch()"
+          placeholder="Search users, orders, tickets, notifications..."
+        />
+      </div>
 
       <div class="header-actions">
+        <!-- Maintenance Countdown -->
+        <div class="maintenance-countdown" *ngIf="maintenanceCountdown">
+          <span class="countdown-badge">{{ maintenanceCountdown }}</span>
+        </div>
+
         <!-- Clock Section -->
         <div class="clock-and-maintenance">
           <div class="header-clock">
             <span class="clock-time">{{ currentTime | date: 'h:mm:ss a' }}</span>
             <span class="clock-date">{{ currentTime | date: 'MMM d, yyyy' }}</span>
+          </div>
+        </div>
+
+        <!-- Settings Button -->
+        <button class="icon-btn" aria-label="Settings" (click)="goToSettings()" title="System Configuration">
+          <lucide-angular name="settings" [size]="18" strokeWidth="1.8"></lucide-angular>
+        </button>
+
+        <!-- Notifications Dropdown -->
+        <div class="notifications-container" appClickOutside (clickOutside)="closeNotifications()">
+          <button class="icon-btn" aria-label="Notifications" (click)="toggleNotifications()" title="Notifications">
+            <lucide-angular name="bell" [size]="18" strokeWidth="1.8"></lucide-angular>
+            <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+          </button>
+
+          <!-- Notifications Menu -->
+          <div class="notifications-dropdown" *ngIf="showNotifications">
+            <div class="notifications-header">
+              <h3>Notifications</h3>
+              <div class="notifications-actions">
+                <button class="action-link" (click)="markAllAsRead()" *ngIf="unreadCount > 0" title="Mark all as read">
+                  <lucide-angular name="check" [size]="14" strokeWidth="2"></lucide-angular>
+                </button>
+                <button class="action-link" (click)="clearAllNotifications()" *ngIf="notifications.length > 0" title="Clear all">
+                  <lucide-angular name="x" [size]="14" strokeWidth="2"></lucide-angular>
+                </button>
+              </div>
+            </div>
+
+            <div class="notifications-list">
+              <div *ngIf="notifications.length === 0" class="empty-state">
+                <span>No notifications yet</span>
+              </div>
+              <div
+                *ngFor="let notif of notifications.slice(0, 8)"
+                class="notification-item"
+                [class.unread]="!notif.read"
+                (click)="navigateToNotification(notif)"
+              >
+                <div class="notif-icon-box" [class]="'type-' + (notif.type || 'general')">
+                  <lucide-angular *ngIf="notif.type === 'order'" name="package" [size]="14"></lucide-angular>
+                  <lucide-angular *ngIf="notif.type === 'service'" name="wrench" [size]="14"></lucide-angular>
+                  <lucide-angular *ngIf="notif.type === 'inquiry'" name="message-circle" [size]="14"></lucide-angular>
+                  <lucide-angular *ngIf="notif.type === 'feedback'" name="star" [size]="14"></lucide-angular>
+                  <lucide-angular *ngIf="!notif.type || notif.type === 'general' || notif.type === 'announcement' || notif.type === 'system_alert'" name="bell" [size]="14"></lucide-angular>
+                </div>
+                <div class="notif-content">
+                  <div class="notif-title">{{ notif.title }}</div>
+                  <div class="notif-message">{{ notif.message }}</div>
+                </div>
+                <button class="notif-delete" (click)="deleteNotification(notif.id, $event)" aria-label="Delete">
+                  <lucide-angular name="x" [size]="12"></lucide-angular>
+                </button>
+              </div>
+            </div>
+
+            <div class="notifications-footer">
+              <a routerLink="/super-admin/global-notifications" (click)="closeNotifications()">
+                Manage Global Broadcasts →
+              </a>
+            </div>
           </div>
         </div>
 
@@ -81,48 +153,42 @@
             </div>
             <div class="menu-divider"></div>
             <a routerLink="/super-admin" class="menu-item" (click)="closeUserMenu()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-              </svg>
+              <lucide-angular name="layout-dashboard" [size]="16" strokeWidth="1.8"></lucide-angular>
               Dashboard
             </a>
             <a routerLink="/super-admin/users" class="menu-item" (click)="closeUserMenu()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
+              <lucide-angular name="users" [size]="16" strokeWidth="1.8"></lucide-angular>
               Users
             </a>
+            <a routerLink="/super-admin/core-operations" class="menu-item" (click)="closeUserMenu()">
+              <lucide-angular name="layers" [size]="16" strokeWidth="1.8"></lucide-angular>
+              Core Operations
+            </a>
+            <a routerLink="/super-admin/global-notifications" class="menu-item" (click)="closeUserMenu()">
+              <lucide-angular name="bell" [size]="16" strokeWidth="1.8"></lucide-angular>
+              Global Notifications
+            </a>
             <a routerLink="/super-admin/system-config" class="menu-item" (click)="closeUserMenu()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6"/><path d="M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24"/><path d="M1 12h6m6 0h6"/><path d="M4.22 19.78l4.24-4.24m2.12-2.12l4.24-4.24"/><path d="M19.78 19.78l-4.24-4.24m-2.12-2.12l-4.24-4.24"/>
-              </svg>
+              <lucide-angular name="settings" [size]="16" strokeWidth="1.8"></lucide-angular>
               System Config
             </a>
             <a routerLink="/super-admin/system-logs" class="menu-item" (click)="closeUserMenu()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/><path d="M7 5v14"/>
-              </svg>
+              <lucide-angular name="file-text" [size]="16" strokeWidth="1.8"></lucide-angular>
               System Logs
             </a>
             <a routerLink="/super-admin/profile" class="menu-item" (click)="closeUserMenu()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
+              <lucide-angular name="user" [size]="16" strokeWidth="1.8"></lucide-angular>
               My Profile
             </a>
             <div class="menu-divider"></div>
             <button class="menu-item logout" (click)="logout()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
+              <lucide-angular name="log-out" [size]="16" strokeWidth="1.8"></lucide-angular>
               Sign out
             </button>
           </div>
         </div>
       </div>
     </header>
-
 
     <!-- Page content -->
     <main class="dashboard-content">

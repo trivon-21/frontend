@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerFeedbackService } from '../../../features/customer/services/customer-feedback.service';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 interface RatingCategory {
   key: 'productQuality' | 'technicianBehavior' | 'serviceQuality' | 'deliveryExperience';
@@ -12,7 +13,7 @@ interface RatingCategory {
 @Component({
   selector: 'app-feedback-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './feedback-modal.component.html',
   styleUrl: './feedback-modal.component.css',
 })

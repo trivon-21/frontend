@@ -2,11 +2,12 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerServiceRequestService, ServiceRequest } from '../../../features/customer/services/customer-service-request.service';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-service-requests-list-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './service-requests-list-modal.component.html',
   styleUrl: './service-requests-list-modal.component.css',
 })
@@ -74,13 +75,15 @@ export class ServiceRequestsListModalComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      'Pending':    'badge--purple',
-      'Assigned':   'badge--blue',
-      'In Progress':'badge--orange',
-      'Completed':  'badge--green',
-      'Cancelled':  'badge--red',
+      'Pending':          'badge--purple',
+      'Finance Approved': 'badge--green',
+      'Finance Rejected': 'badge--red',
+      'Assigned':         'badge--blue',
+      'In Progress':      'badge--orange',
+      'Completed':        'badge--green',
+      'Cancelled':        'badge--red',
     };
-    return map[status] || '';
+    return map[status] || 'badge--purple';
   }
 
   formatDate(dateStr: string | null | undefined): string {
@@ -89,7 +92,7 @@ export class ServiceRequestsListModalComponent implements OnInit {
   }
 
   formatAmount(n: number): string {
-    return n === 0 ? 'Free' : `$${n}`;
+    return n === 0 ? 'Free' : `LKR ${n.toLocaleString()}`;
   }
 
   get ongoing(): number { return this.requests.filter(r => ['Pending','Assigned','In Progress'].includes(r.status)).length; }

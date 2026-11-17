@@ -14,22 +14,85 @@ import { SystemConfig, BusinessRules } from '../../../models/system-config.model
 
       <div *ngIf="config" class="form-container">
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <!-- Quotation Approval Threshold -->
+          <!-- Standard Service Fees Section -->
+          <div class="sub-section-header">
+            <h3 class="sub-section-title">Standard Service Charges (LKR)</h3>
+            <p class="sub-section-subtitle">Manage baseline rates synchronized with the service charges database</p>
+          </div>
+
+          <!-- Standard Maintenance Service Fee -->
           <div class="form-group">
-            <label for="quotationThreshold">
-              Quotation Approval Threshold (LKR)
+            <label for="standardMaintenanceFee">
+              Standard Maintenance Service Fee (LKR)
               <span class="required">*</span>
             </label>
             <input
-              id="quotationThreshold"
+              id="standardMaintenanceFee"
               type="number"
-              formControlName="quotationApprovalThreshold"
+              formControlName="standardMaintenanceFee"
               min="0"
-              max="10000000"
-              placeholder="e.g., 1,000,000"
+              placeholder="e.g., 6,000"
               class="form-input"
             />
-            <p class="help-text">Orders above this amount require approval before proceeding</p>
+            <p class="help-text">Baseline service fee for scheduled or routine maintenance visits</p>
+          </div>
+
+          <!-- Standard Repair Service Fee -->
+          <div class="form-group">
+            <label for="standardRepairFee">
+              Standard Repair Service Fee (LKR)
+              <span class="required">*</span>
+            </label>
+            <input
+              id="standardRepairFee"
+              type="number"
+              formControlName="standardRepairFee"
+              min="0"
+              placeholder="e.g., 7,500"
+              class="form-input"
+            />
+            <p class="help-text">Baseline diagnostic and call-out fee for equipment repair services</p>
+          </div>
+
+          <!-- Standard Site Inspection Fee -->
+          <div class="form-group">
+            <label for="standardSiteInspectionFee">
+              Standard Site Inspection Fee (LKR)
+              <span class="required">*</span>
+            </label>
+            <input
+              id="standardSiteInspectionFee"
+              type="number"
+              formControlName="standardSiteInspectionFee"
+              min="0"
+              placeholder="e.g., 5,000"
+              class="form-input"
+            />
+            <p class="help-text">Baseline fee charged for pre-installation site inspections</p>
+          </div>
+
+          <!-- Inventory Profit Margin -->
+          <div class="form-group">
+            <label for="profitMargin">
+              Inventory Profit Margin (%)
+              <span class="required">*</span>
+            </label>
+            <input
+              id="profitMargin"
+              type="number"
+              formControlName="profitMargin"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="e.g., 25"
+              class="form-input"
+            />
+            <p class="help-text">Updates every inventory item's margin and selling price from its unit cost</p>
+          </div>
+
+          <div class="sub-section-header" style="margin-top: 32px;">
+            <h3 class="sub-section-title">Operational Policies & Durations</h3>
+            <p class="sub-section-subtitle">Configure system SLAs, log retention, and lifecycle parameters</p>
           </div>
 
           <!-- Payment Auto-Cancel Window -->
@@ -160,9 +223,28 @@ import { SystemConfig, BusinessRules } from '../../../models/system-config.model
       }
 
       .section-description {
-        margin: 0 0 30px 0;
+        margin: 0 0 24px 0;
         font-size: 14px;
         color: #666;
+      }
+
+      .sub-section-header {
+        margin: 0 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0ee;
+      }
+
+      .sub-section-title {
+        margin: 0 0 4px 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1b2f27;
+      }
+
+      .sub-section-subtitle {
+        margin: 0;
+        font-size: 12.5px;
+        color: #8a9e96;
       }
 
       .form-container {
@@ -288,7 +370,10 @@ export class BusinessRulesFormComponent {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      quotationApprovalThreshold: [0, [Validators.required, Validators.min(0), Validators.max(10000000)]],
+      standardMaintenanceFee: [6000, [Validators.required, Validators.min(0)]],
+      standardRepairFee: [7500, [Validators.required, Validators.min(0)]],
+      standardSiteInspectionFee: [5000, [Validators.required, Validators.min(0)]],
+      profitMargin: [25, [Validators.required, Validators.min(0), Validators.max(100)]],
       logRetentionDays: [30, [Validators.required, Validators.min(7), Validators.max(730)]],
       paymentAutoCancelDays: [14, [Validators.required, Validators.min(1), Validators.max(365)]],
       defaultWarrantyMonths: [24, [Validators.required, Validators.min(1), Validators.max(60)]],
@@ -299,7 +384,10 @@ export class BusinessRulesFormComponent {
 
   ngOnChanges(): void {
     if (this.config) {
-      this.form.patchValue(this.config.businessRules);
+      this.form.patchValue({
+        ...this.config.businessRules,
+        profitMargin: (this.config.businessRules.profitMargin ?? 0.25) * 100,
+      });
       this.form.markAsPristine();
     }
   }
@@ -327,8 +415,10 @@ export class BusinessRulesFormComponent {
 
     const currentRules = this.config.businessRules as any;
     for (const key in formValue) {
-      if (currentRules[key] !== formValue[key]) {
-        changes[key] = formValue[key];
+      const value = key === 'profitMargin' ? formValue[key] / 100 : formValue[key];
+      const currentValue = key === 'profitMargin' ? (currentRules[key] ?? 0.25) : currentRules[key];
+      if (currentValue !== value) {
+        changes[key] = value;
       }
     }
 
@@ -337,7 +427,10 @@ export class BusinessRulesFormComponent {
 
   resetForm(): void {
     if (this.config) {
-      this.form.patchValue(this.config.businessRules);
+      this.form.patchValue({
+        ...this.config.businessRules,
+        profitMargin: (this.config.businessRules.profitMargin ?? 0.25) * 100,
+      });
       this.form.markAsPristine();
     }
   }

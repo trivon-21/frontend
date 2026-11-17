@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService, Notification } from '../../../../core/services/notification.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PortalIconsModule],
   template: `
     <div class="notifications-page">
       <div class="page-header">
@@ -23,7 +24,9 @@ import { NotificationService, Notification } from '../../../../core/services/not
 
       <!-- Empty State -->
       <div *ngIf="notifications.length === 0" class="empty-state">
-        <span class="empty-icon">NT</span>
+        <span class="empty-icon">
+          <lucide-angular name="bell" [size]="48" style="opacity: 0.4;"></lucide-angular>
+        </span>
         <h2>No notifications yet</h2>
         <p>You'll see all your notifications here</p>
       </div>
@@ -46,15 +49,17 @@ import { NotificationService, Notification } from '../../../../core/services/not
               (click)="navigateTo(notif)"
               *ngIf="notif.actionUrl"
               title="Open"
+              style="display: flex; align-items: center; justify-content: center;"
             >
-              →
+              <lucide-angular name="chevron-right" [size]="16"></lucide-angular>
             </button>
             <button
               class="action-btn"
               (click)="deleteNotif(notif.id)"
               title="Delete"
+              style="display: flex; align-items: center; justify-content: center;"
             >
-              ✕
+              <lucide-angular name="x" [size]="14"></lucide-angular>
             </button>
           </div>
         </div>

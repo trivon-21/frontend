@@ -1,4 +1,6 @@
 <aside class="sidebar">
+  <a routerLink="/finance/dashboard" class="sidebar-brand">AirLux</a>
+
   <nav class="nav-menu">
 
     <!-- STANDALONE LINKS (no dropdown) -->
@@ -54,6 +56,14 @@
       </div>
 
     </div>
+
+    <!-- LOGOUT -->
+    <a (click)="logout()" class="standalone-nav-item logout-item" style="cursor: pointer;">
+      <span class="section-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </span>
+      <span>Logout</span>
+    </a>
 
   </nav>
 </aside>

@@ -1,0 +1,551 @@
+<div class="notifications-page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Global Notification System</h1>
+      <p class="page-subtitle">
+        Broadcast instant in-app alerts or schedule future notifications targeted by user role or across the entire platform.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-primary broadcast-btn" (click)="openComposer()">
+        <lucide-angular name="bell" [size]="18"></lucide-angular>
+        <span>Create Broadcast</span>
+      </button>
+
+      <button class="btn btn-outline" (click)="loadNotifications()" title="Refresh list">
+        <lucide-angular name="refresh-cw" [size]="16"></lucide-angular>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  <div class="alert-banner error" *ngIf="error">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <lucide-angular name="circle-alert" [size]="18"></lucide-angular>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-banner-close" (click)="error = null" style="display: flex; align-items: center;">
+      <lucide-angular name="x" [size]="14"></lucide-angular>
+    </button>
+  </div>
+
+  <!-- Success Banner -->
+  <div class="alert-banner success" *ngIf="successMessage">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <lucide-angular name="circle-check-big" [size]="18"></lucide-angular>
+      <span>{{ successMessage }}</span>
+    </div>
+    <button class="btn-banner-close" (click)="successMessage = null" style="display: flex; align-items: center;">
+      <lucide-angular name="x" [size]="14"></lucide-angular>
+    </button>
+  </div>
+
+  <!-- Metrics Cards Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon blue">
+        <lucide-angular name="bell" [size]="22"></lucide-angular>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Total Notifications</span>
+        <strong class="metric-value">{{ totalNotifications }}</strong>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon green">
+        <lucide-angular name="check" [size]="22"></lucide-angular>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Sent Broadcasts</span>
+        <strong class="metric-value">{{ totalSent }}</strong>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon orange">
+        <lucide-angular name="clock" [size]="22"></lucide-angular>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Scheduled in Queue</span>
+        <strong class="metric-value">{{ totalScheduled }}</strong>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon purple">
+        <lucide-angular name="users" [size]="22"></lucide-angular>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Total In-App Delivers</span>
+        <strong class="metric-value">{{ totalRecipients }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Panel -->
+  <div class="filters-panel">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>Search Broadcasts</label>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search by title, message, or roles..."
+          class="filter-input"
+          (keyup.enter)="applyFilters()"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>Delivery Status</label>
+        <select [(ngModel)]="statusFilter" class="filter-input" (change)="applyFilters()">
+          <option value="">All Statuses</option>
+          <option value="Sent">Sent</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Notification Type</label>
+        <select [(ngModel)]="typeFilter" class="filter-input" (change)="applyFilters()">
+          <option value="">All Types</option>
+          <option value="general">General Notification</option>
+          <option value="system_alert">System Alert</option>
+          <option value="announcement">Announcement</option>
+          <option value="order">Order Update</option>
+          <option value="service">Service &amp; Maintenance</option>
+          <option value="inquiry">Customer Inquiry</option>
+          <option value="feedback">Feedback &amp; Review</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-primary" (click)="applyFilters()">Apply Filters</button>
+      <button class="btn btn-outline" (click)="clearFilters()">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading global notifications...</p>
+  </div>
+
+  <!-- History Table -->
+  <div class="table-wrap" *ngIf="!loading && notifications.length > 0">
+    <table class="notifications-table">
+      <thead>
+        <tr>
+          <th>Title &amp; Type</th>
+          <th>Message Preview</th>
+          <th>Target Audience</th>
+          <th>Delivery Mode &amp; Time</th>
+          <th>Status</th>
+          <th>Recipients</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let n of notifications" class="clickable-row" (click)="openDetail(n)">
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="type-icon-box" [class]="'type-' + n.type">
+                <lucide-angular *ngIf="n.type === 'system_alert'" name="triangle-alert" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="n.type === 'announcement'" name="bell" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="n.type === 'order'" name="package" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="n.type === 'service'" name="wrench" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="n.type === 'inquiry'" name="message-circle" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="n.type === 'feedback'" name="star" [size]="16"></lucide-angular>
+                <lucide-angular *ngIf="!n.type || n.type === 'general'" name="bell" [size]="16"></lucide-angular>
+              </div>
+              <div>
+                <strong>{{ n.title }}</strong>
+                <div style="display: flex; gap: 6px; margin-top: 2px;">
+                  <span class="badge" style="background: #eef5f1; color: #1b2f27; font-size: 11px;">
+                    {{ n.type }}
+                  </span>
+                  <span *ngIf="n.priority && n.priority !== 'normal'" class="badge" [class.badge-urgent]="n.priority === 'urgent'" [class.badge-high]="n.priority === 'high'">
+                    {{ n.priority }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="message-preview">
+              {{ n.message.length > 70 ? (n.message | slice: 0:70) + '...' : n.message }}
+            </div>
+          </td>
+          <td>
+            <div class="audience-tags">
+              <ng-container *ngIf="n.targetRoles.includes('ALL')">
+                <span class="badge badge-all">All Platform Users</span>
+              </ng-container>
+              <ng-container *ngIf="!n.targetRoles.includes('ALL')">
+                <span *ngFor="let r of n.targetRoles.slice(0, 2)" class="badge badge-role">
+                  {{ r }}
+                </span>
+                <span *ngIf="n.targetRoles.length > 2" class="badge badge-more">
+                  +{{ n.targetRoles.length - 2 }}
+                </span>
+              </ng-container>
+            </div>
+          </td>
+          <td>
+            <div *ngIf="n.isScheduled && n.status === 'Scheduled'; else instantSent">
+              <span class="timing-label">Scheduled For:</span>
+              <div>{{ n.scheduledFor | date: 'MMM d, yyyy • h:mm a' }}</div>
+            </div>
+            <ng-template #instantSent>
+              <div>{{ n.sentAt ? (n.sentAt | date: 'MMM d, yyyy • h:mm a') : (n.createdAt | date: 'MMM d, yyyy • h:mm a') }}</div>
+              <small style="color: #8a9e96;">{{ n.isScheduled ? 'Dispatched' : 'Instant' }}</small>
+            </ng-template>
+          </td>
+          <td>
+            <span class="status-badge" [class]="getStatusBadgeClass(n.status)">
+              {{ n.status }}
+            </span>
+          </td>
+          <td>
+            <strong style="color: #1b2f27;">{{ n.recipientCount || 0 }}</strong>
+            <small style="color: #8a9e96; display: block;">users</small>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-outline" (click)="openDetail(n)" title="View Details">
+                Details
+              </button>
+              <button
+                *ngIf="n.status === 'Scheduled'"
+                class="btn btn-sm btn-warning"
+                (click)="cancelNotification(n)"
+                [disabled]="cancellingId === n._id"
+                title="Cancel this scheduled notification"
+              >
+                {{ cancellingId === n._id ? 'Cancelling...' : 'Cancel' }}
+              </button>
+              <button
+                class="btn btn-sm btn-delete-icon"
+                (click)="deleteNotification(n)"
+                [disabled]="deletingId === n._id"
+                title="Delete record"
+              >
+                <lucide-angular name="trash-2" [size]="14"></lucide-angular>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && notifications.length === 0">
+    <lucide-angular name="bell" [size]="48" style="margin-bottom: 12px; opacity: 0.5;"></lucide-angular>
+    <p>No broadcast notifications found matching your criteria.</p>
+  </div>
+
+  <!-- Pagination Bar -->
+  <div class="pagination-bar" *ngIf="!loading && totalPages > 1">
+    <button
+      class="btn btn-outline btn-sm"
+      (click)="currentPage = currentPage - 1; loadNotifications()"
+      [disabled]="currentPage === 1"
+    >
+      Previous
+    </button>
+    <span>Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+    <button
+      class="btn btn-outline btn-sm"
+      (click)="currentPage = currentPage + 1; loadNotifications()"
+      [disabled]="currentPage === totalPages"
+    >
+      Next
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: BROADCAST COMPOSER                                    -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" *ngIf="showComposerModal">
+    <div class="modal-container composer-modal">
+      <div class="modal-header">
+        <div>
+          <h2>Create Global Notification</h2>
+          <small style="color: #616b78;">In-App Broadcast to platform users</small>
+        </div>
+        <button class="btn-close" (click)="closeComposer()" style="display: flex; align-items: center;">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Notification Headline & Type -->
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>Notification Title <span class="required">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="formTitle"
+              placeholder="e.g. System Maintenance Update, Product Discount Announcement"
+              class="filter-input"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label>Category / Type</label>
+            <select [(ngModel)]="formType" class="filter-input">
+              <option value="general">General Notification</option>
+              <option value="system_alert">System Alert</option>
+              <option value="announcement">Announcement</option>
+              <option value="order">Order Update</option>
+              <option value="service">Service &amp; Maintenance</option>
+              <option value="inquiry">Customer Inquiry</option>
+              <option value="feedback">Feedback &amp; Review</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Message Body -->
+        <div class="form-group">
+          <label>Notification Message <span class="required">*</span></label>
+          <textarea
+            [(ngModel)]="formMessage"
+            rows="4"
+            placeholder="Type the message body that will appear in user notifications..."
+            class="filter-input"
+          ></textarea>
+        </div>
+
+        <!-- Priority & Action URL -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Priority Level</label>
+            <select [(ngModel)]="formPriority" class="filter-input">
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-2">
+            <label>Action URL (Optional Link on Click)</label>
+            <input
+              type="text"
+              [(ngModel)]="formActionUrl"
+              placeholder="e.g. /dashboard/orders or /products"
+              class="filter-input"
+            />
+          </div>
+        </div>
+
+        <!-- Audience Role Selection -->
+        <div class="audience-section">
+          <div class="audience-header">
+            <label class="section-label">Target Audience</label>
+            <label class="checkbox-label toggle-all">
+              <input
+                type="checkbox"
+                [(ngModel)]="isAllRoles"
+                (change)="toggleAllRoles()"
+              />
+              <strong>All Roles (Broadcast to All Platform Users)</strong>
+            </label>
+          </div>
+
+          <div class="roles-grid" [class.disabled-grid]="isAllRoles">
+            <label *ngFor="let role of availableRoles" class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="selectedRoles[role.key]"
+                (change)="onRoleCheckboxChange()"
+                [disabled]="isAllRoles"
+              />
+              <span>{{ role.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Delivery Mode: Instant vs Scheduled -->
+        <div class="delivery-section">
+          <label class="section-label">Delivery Schedule</label>
+          <div class="delivery-options">
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="deliveryMode"
+                value="instant"
+                [(ngModel)]="deliveryMode"
+              />
+              <div>
+                <strong>Send Instantly</strong>
+                <p>Delivers into recipient notification feeds immediately upon submission.</p>
+              </div>
+            </label>
+
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="deliveryMode"
+                value="scheduled"
+                [(ngModel)]="deliveryMode"
+              />
+              <div>
+                <strong>Schedule for Later</strong>
+                <p>Automated in-app delivery on a specified future date and time.</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Schedule DateTime Picker -->
+          <div class="schedule-picker" *ngIf="deliveryMode === 'scheduled'">
+            <div class="form-group flex-1">
+              <label>Scheduled Date</label>
+              <input
+                type="date"
+                [(ngModel)]="scheduledDate"
+                class="filter-input"
+              />
+            </div>
+            <div class="form-group flex-1">
+              <label>Scheduled Time</label>
+              <input
+                type="time"
+                [(ngModel)]="scheduledTime"
+                class="filter-input"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Box -->
+        <div class="preview-box">
+          <span class="preview-tag">Notification Dropdown Preview</span>
+          <div class="preview-card">
+            <div class="preview-icon-box" [class]="'type-' + formType">
+              <lucide-angular *ngIf="formType === 'system_alert'" name="triangle-alert" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="formType === 'announcement'" name="bell" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="formType === 'order'" name="package" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="formType === 'service'" name="wrench" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="formType === 'inquiry'" name="message-circle" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="formType === 'feedback'" name="star" [size]="18"></lucide-angular>
+              <lucide-angular *ngIf="!formType || formType === 'general'" name="bell" [size]="18"></lucide-angular>
+            </div>
+            <div class="preview-body">
+              <div class="preview-title">{{ formTitle || 'Notification Title Preview' }}</div>
+              <div class="preview-message">{{ formMessage || 'Notification message description will appear here...' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-primary"
+          (click)="submitNotification()"
+          [disabled]="isSubmitting || !formTitle.trim() || !formMessage.trim()"
+        >
+          <span *ngIf="isSubmitting">Processing...</span>
+          <span *ngIf="!isSubmitting && deliveryMode === 'instant'">
+            <lucide-angular name="send" [size]="15" style="margin-right: 6px; vertical-align: -2px;"></lucide-angular>
+            Send Instant Broadcast
+          </span>
+          <span *ngIf="!isSubmitting && deliveryMode === 'scheduled'">
+            <lucide-angular name="clock" [size]="15" style="margin-right: 6px; vertical-align: -2px;"></lucide-angular>
+            Schedule Notification
+          </span>
+        </button>
+        <button class="btn btn-outline" (click)="closeComposer()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL: NOTIFICATION DETAIL                                   -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" *ngIf="showDetailModal && selectedNotification">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedNotification.title }}</h2>
+          <small style="color: #616b78;">Created on {{ selectedNotification.createdAt | date: 'medium' }}</small>
+        </div>
+        <button class="btn-close" (click)="closeDetail()" style="display: flex; align-items: center;">
+          <lucide-angular name="x" [size]="18"></lucide-angular>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-section">
+          <h3>Notification Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Type &amp; Priority:</span>
+            <span class="detail-value">{{ selectedNotification.type }} ({{ selectedNotification.priority || 'normal' }})</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Delivery Status:</span>
+            <span class="status-badge" [class]="getStatusBadgeClass(selectedNotification.status)">
+              {{ selectedNotification.status }}
+            </span>
+          </div>
+          <div class="detail-row" *ngIf="selectedNotification.isScheduled">
+            <span class="detail-label">Scheduled For:</span>
+            <span class="detail-value">{{ selectedNotification.scheduledFor | date: 'medium' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedNotification.sentAt">
+            <span class="detail-label">Sent At:</span>
+            <span class="detail-value">{{ selectedNotification.sentAt | date: 'medium' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Recipient Count:</span>
+            <span class="detail-value"><strong>{{ selectedNotification.recipientCount || 0 }} users</strong></span>
+          </div>
+          <div class="detail-row" *ngIf="selectedNotification.actionUrl">
+            <span class="detail-label">Action Link:</span>
+            <span class="detail-value"><code>{{ selectedNotification.actionUrl }}</code></span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Target Roles</h3>
+          <div class="audience-tags">
+            <ng-container *ngIf="selectedNotification.targetRoles.includes('ALL')">
+              <span class="badge badge-all">All Platform Roles</span>
+            </ng-container>
+            <ng-container *ngIf="!selectedNotification.targetRoles.includes('ALL')">
+              <span *ngFor="let r of selectedNotification.targetRoles" class="badge badge-role">
+                {{ r }}
+              </span>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Message Content</h3>
+          <div class="message-content-box">
+            {{ selectedNotification.message }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          *ngIf="selectedNotification.status === 'Scheduled'"
+          class="btn btn-warning"
+          (click)="cancelNotification(selectedNotification)"
+          [disabled]="cancellingId === selectedNotification._id"
+        >
+          {{ cancellingId === selectedNotification._id ? 'Cancelling...' : 'Cancel Schedule' }}
+        </button>
+        <button class="btn btn-outline" (click)="closeDetail()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

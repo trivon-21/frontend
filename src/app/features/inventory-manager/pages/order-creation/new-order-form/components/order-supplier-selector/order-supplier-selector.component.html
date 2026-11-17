@@ -1,0 +1,47 @@
+<div class="form-step">
+  <div class="step-header">
+    <span class="step-badge">1</span>
+    <h3>Select Supplier</h3>
+  </div>
+  <div class="step-content">
+    <div class="form-group supplier-group">
+      <label for="supplier-search">Vendor / Supplier *</label>
+      <div class="autocomplete-container">
+        <div class="input-wrapper search-wrapper">
+          <lucide-angular name="truck" class="search-icon" [size]="18" strokeWidth="2.5"></lucide-angular>
+          <input
+            id="supplier-search"
+            type="text"
+            [(ngModel)]="supplierSearchQuery"
+            (input)="filterSuppliers()"
+            (focus)="onSupplierInputFocus()"
+            (blur)="onSupplierInputBlur()"
+            placeholder="Search or add supplier..."
+            class="form-input search-input"
+            autocomplete="off"
+            aria-autocomplete="list"
+            [attr.aria-expanded]="showSupplierDropdown">
+          <lucide-angular name="chevron-down" class="dropdown-icon" [size]="16" strokeWidth="2.5"></lucide-angular>
+        </div>
+
+        <div class="dropdown-list glass-panel animate-fade" *ngIf="showSupplierDropdown">
+          <div class="dropdown-item add-new" (mousedown)="selectSupplier('new')">
+            <lucide-angular name="plus" [size]="14" strokeWidth="3" class="inline-icon"></lucide-angular>
+            Add New Supplier
+          </div>
+          <div class="dropdown-item" *ngFor="let s of filteredSuppliers" (mousedown)="selectSupplier(s)">
+            <div class="item-info">
+              <span class="name">{{ s.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="new-supplier-actions animate-fade" *ngIf="isAddingNewSupplier">
+        <p class="supplier-help">This creates the supplier in the catalog before saving the order.</p>
+        <button class="btn-primary im-btn im-btn--primary" type="button" (click)="confirmNewSupplier()">Confirm Supplier</button>
+        <button type="button" class="btn-secondary im-btn im-btn--secondary" (click)="cancelNewSupplier()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

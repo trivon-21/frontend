@@ -1,0 +1,364 @@
+<div class="tickets-container">
+
+  <!-- TOAST ALERT -->
+  <div class="toast-alert" *ngIf="successToast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+    <span>{{ successToast }}</span>
+    <button class="toast-close" (click)="successToast = ''"><lucide-angular name="x" [size]="16"></lucide-angular></button>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Service Tickets & Technical Records</h1>
+      <p class="page-subtitle">Unified live summary of Repairs, Maintenance, Installations, and Inspections from the technical operations team</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      Create Service Ticket
+    </button>
+  </div>
+
+  <!-- 5 CATEGORY SUMMARY CARDS (SYNCHRONIZED WITH MAIN TECHNICIAN PORTAL) -->
+  <div class="summary-cards">
+    <!-- ALL TICKETS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedCategory === 'ALL'" (click)="setCategoryFilter('ALL')" title="Show all tickets across all categories">
+      <div class="summary-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countTotal }}</span>
+        <span class="summary-label">All Tickets</span>
+      </div>
+    </div>
+
+    <!-- REPAIRS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedCategory === 'repair'" (click)="setCategoryFilter('repair')" title="Show live repair requests">
+      <div class="summary-icon amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countRepairs }}</span>
+        <span class="summary-label">Repairs</span>
+      </div>
+    </div>
+
+    <!-- MAINTENANCE -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedCategory === 'maintenance'" (click)="setCategoryFilter('maintenance')" title="Show maintenance schedules & service tickets">
+      <div class="summary-icon purple">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countMaintenance }}</span>
+        <span class="summary-label">Maintenance</span>
+      </div>
+    </div>
+
+    <!-- INSTALLATIONS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedCategory === 'installation'" (click)="setCategoryFilter('installation')" title="Show live installation tickets">
+      <div class="summary-icon teal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countInstallations }}</span>
+        <span class="summary-label">Installations</span>
+      </div>
+    </div>
+
+    <!-- INSPECTIONS -->
+    <div class="summary-card clickable-card" [class.active-card]="selectedCategory === 'inspection'" (click)="setCategoryFilter('inspection')" title="Show live inspection tickets">
+      <div class="summary-icon emerald">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-count">{{ countInspections }}</span>
+        <span class="summary-label">Inspections</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-card">
+    <div class="search-box">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Search tickets by ID, customer name, phone, address, unit model, or team..." 
+        [(ngModel)]="searchQuery" 
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+
+    <div class="filters-row">
+      <div class="status-select-wrap">
+        <label class="filter-label">Status:</label>
+        <select class="status-dropdown" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+          <option value="ALL">All Statuses</option>
+          <option value="New">New / Pending</option>
+          <option value="Assigned">Assigned / In Progress</option>
+          <option value="Completed">Completed / Resolved</option>
+          <option value="On Hold">On Hold</option>
+        </select>
+      </div>
+
+      <button class="btn-refresh" (click)="loadAllData()" [disabled]="isLoading">
+        <svg [class.spin]="isLoading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- ERROR ALERT -->
+  <div class="alert-banner error" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- TICKETS TABLE -->
+  <div class="table-card">
+    <div class="table-responsive" *ngIf="!isLoading && tickets.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-ticket">Ticket & Subject</th>
+            <th class="col-customer">Customer & Location</th>
+            <th class="col-category">Category</th>
+            <th class="col-team">Assigned Team</th>
+            <th class="col-status">Status</th>
+            <th class="col-date">Date</th>
+            <th class="col-action" style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of tickets">
+            <td class="col-ticket">
+              <div class="ticket-header-line">
+                <span class="ticket-id-tag">{{ getFormattedTicketId(ticket) }}</span>
+              </div>
+              <div class="ticket-subject">{{ getDisplaySubject(ticket) }}</div>
+              <div class="ticket-unit" *ngIf="ticket.acUnitModel">Unit: {{ ticket.acUnitModel }}</div>
+            </td>
+            <td class="col-customer">
+              <div class="customer-info-cell">
+                <div class="customer-name">{{ ticket.customerId ? ticket.customerId.fullName + ' ' + (ticket.customerId.lastName || '') : 'Unknown Customer' }}</div>
+                <div class="customer-phone">{{ ticket.customerId ? (ticket.customerId.phoneNumber || 'No phone') : '—' }}</div>
+                <div class="customer-address" *ngIf="ticket.customerId?.address">{{ ticket.customerId.address }}</div>
+              </div>
+            </td>
+            <td class="col-category">
+              <div class="category-cell">
+                <span class="category-badge" [ngClass]="'cat-' + ticket.category">{{ ticket.category || 'Repair' | uppercase }}</span>
+                <span class="source-tag" *ngIf="ticket.requestType">{{ ticket.requestType | uppercase }}</span>
+              </div>
+            </td>
+            <td class="col-team">
+              <span class="team-badge">{{ ticket.assignedTeam || 'Unassigned' }}</span>
+            </td>
+            <td class="col-status">
+              <div class="status-cell">
+                <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+                  {{ ticket.status }}
+                </span>
+              </div>
+            </td>
+            <td class="col-date">
+              <span class="date-text">{{ formatDate(ticket.preferredDate || ticket.createdAt) }}</span>
+            </td>
+            <td class="col-action" style="text-align: right;">
+              <button
+                class="btn-table-action"
+                (click)="viewDetails(ticket)">
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="empty-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading tickets and technician records...</p>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="!isLoading && tickets.length === 0">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+        </svg>
+      </div>
+      <h3>No Tickets Found</h3>
+      <p *ngIf="searchQuery || selectedCategory !== 'ALL' || selectedStatus !== 'ALL'">
+        No tickets matching your current search or filter criteria.
+      </p>
+      <p *ngIf="!searchQuery && selectedCategory === 'ALL' && selectedStatus === 'ALL'">
+        No service tickets found in the technical collections.
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: STEP-BY-STEP SERVICE REQUEST MODAL  -->
+  <!-- ========================================== -->
+  <app-csa-request-service-modal
+    *ngIf="showCreateModal"
+    [customers]="customers"
+    [products]="products"
+    (closed)="closeCreateModal()"
+    (requestCreated)="onServiceRequestCreated($event)"
+  ></app-csa-request-service-modal>
+
+  <!-- ========================================== -->
+  <!-- MODAL: TICKET DETAILS (READ-ONLY)          -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">
+            {{ getFormattedTicketId(selectedTicket) }}
+          </h2>
+          <p class="modal-subtitle">{{ getDisplaySubject(selectedTicket) }}</p>
+        </div>
+        <button class="modal-close-btn" (click)="closeDetailsModal()"><lucide-angular name="x" [size]="20"></lucide-angular></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedTicket">
+
+        <!-- READ-ONLY BADGE BANNER -->
+        <div class="read-only-banner">
+          <div class="banner-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="banner-text">
+            <strong>Technical Record — Read-Only Mode</strong>
+            <span>This ticket is managed by the technical operations team. You have read-only permissions to inspect full details, notes, and progress.</span>
+          </div>
+        </div>
+
+        <!-- TICKET OVERVIEW -->
+        <div class="ticket-overview-card">
+          <div class="overview-item">
+            <span class="lbl">Customer:</span>
+            <strong>{{ selectedTicket.customerId ? selectedTicket.customerId.fullName + ' ' + (selectedTicket.customerId.lastName || '') : 'Unknown' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Contact:</span>
+            <span>Phone: {{ selectedTicket.customerId ? (selectedTicket.customerId.phoneNumber || 'No phone') : 'No phone' }} | Email: {{ selectedTicket.customerId ? (selectedTicket.customerId.email || 'No email') : 'No email' }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Address / Location:</span>
+            <span>{{ selectedTicket.customerId ? (selectedTicket.customerId.address || 'No address') : 'No address' }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Product / AC Model:</span>
+            <span>{{ selectedTicket.acUnitModel || 'Not specified' }} {{ selectedTicket.acUnitSerial ? '(' + selectedTicket.acUnitSerial + ')' : '' }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Category:</span>
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="category-badge" [ngClass]="'cat-' + selectedTicket.category">{{ selectedTicket.category | uppercase }}</span>
+              <span class="source-tag" *ngIf="selectedTicket.requestType">{{ selectedTicket.requestType | uppercase }}</span>
+            </div>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Assigned Team:</span>
+            <strong>{{ selectedTicket.assignedTeam || 'Unassigned' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Service / Scheduled Date:</span>
+            <span>{{ formatDate(selectedTicket.preferredDate || selectedTicket.createdAt) }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="lbl">Current Status:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedTicket.status)">{{ selectedTicket.status }}</span>
+          </div>
+        </div>
+
+        <!-- ────────────────────────────────────────── -->
+        <!-- MAINTENANCE SPECIFIC SECTION               -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="maintenance-schedule-review" *ngIf="selectedTicket.category === 'maintenance' && selectedTicket.maintenanceRecordData">
+          <h4 class="section-subheading">Maintenance Details</h4>
+          
+          <div class="ticket-overview-card" style="margin-bottom: 16px;">
+            <div class="overview-item">
+              <span class="lbl">Maintenance Type:</span>
+              <strong>{{ selectedTicket.maintenanceRecordData.maintenanceType || (selectedTicket.maintenanceRecordData.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated') }}</strong>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Assigned Team:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.assignedTeam || 'Not Assigned' }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Service Date:</span>
+              <span>{{ formatDate(selectedTicket.maintenanceRecordData.date) }}</span>
+            </div>
+            <div class="overview-item">
+              <span class="lbl">Warranty Status:</span>
+              <span>{{ selectedTicket.maintenanceRecordData.isUnderWarranty ? 'Under Warranty' : 'Paid / Out of Warranty' }}</span>
+            </div>
+          </div>
+
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.description">
+            <span class="desc-title">Description & Scope:</span>
+            <p>{{ selectedTicket.maintenanceRecordData.description }}</p>
+          </div>
+
+          <div class="desc-box" *ngIf="selectedTicket.maintenanceRecordData.materialList && selectedTicket.maintenanceRecordData.materialList.length > 0" style="margin-top: 12px;">
+            <span class="desc-title">Materials / Equipment:</span>
+            <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 13px; color: #374151;">
+              <li *ngFor="let m of selectedTicket.maintenanceRecordData.materialList" style="margin-bottom: 4px;">
+                <strong>{{ m.item }}</strong> — Quantity: {{ m.quantity }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ────────────────────────────────────────── -->
+        <!-- REPAIR / INSTALLATION / INSPECTION SECTION -->
+        <!-- ────────────────────────────────────────── -->
+        <div class="standard-ticket-section" *ngIf="selectedTicket.category !== 'maintenance' || !selectedTicket.maintenanceRecordData">
+          <div class="desc-box" *ngIf="selectedTicket.description">
+            <span class="desc-title">Description & Job Scope:</span>
+            <p>{{ selectedTicket.description }}</p>
+          </div>
+
+          <div class="desc-box" *ngIf="selectedTicket.rejectionReason" style="margin-top: 12px; background: #fef2f2; border: 1px solid #fecaca;">
+            <span class="desc-title" style="color: #991b1b;">Rejection Reason:</span>
+            <p style="color: #b91c1c;">{{ selectedTicket.rejectionReason }}</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" (click)="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,7 +1,9 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CustomerOrderService, TrackedOrder } from '../../../features/customer/services/customer-order.service';
+import { PortalIconsModule } from '../../../shared/components/portal-icons/portal-icons.module';
 
 interface TimelineStep {
   label: string;
@@ -23,15 +25,25 @@ const BUY_INSTALL_STEPS: TimelineStep[] = [
   { label: 'Installation Completed', key: 'Installation Completed' },
 ];
 
+const INSTALLATION_STEPS: TimelineStep[] = [
+  { label: 'Order Placed', key: 'Pending Review' },
+  { label: 'Awaiting Quote', key: 'Awaiting Quote' },
+  { label: 'Awaiting Inspection', key: 'Awaiting Inspection' },
+  { label: 'Payment Confirmed', key: 'Confirmed' },
+  { label: 'Installation Scheduled', key: 'Installation Scheduled' },
+  { label: 'Installation Completed', key: 'Installation Completed' },
+];
+
 const STATUS_ORDER = [
-  'Order Placed', 'Payment Uploaded', 'Payment Confirmed', 'Inventory Approved',
+  'Order Placed', 'Pending Review', 'Payment Uploaded', 'Payment Confirmed',
+  'Awaiting Quote', 'Awaiting Inspection', 'Confirmed', 'Inventory Approved',
   'Shipped', 'Delivered', 'Installation Scheduled', 'Installation Completed'
 ];
 
 @Component({
   selector: 'app-track-order-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './track-order-modal.component.html',
   styleUrl: './track-order-modal.component.css',
 })
@@ -90,7 +102,8 @@ export class TrackOrderModalComponent {
   }
 
   getSteps(): TimelineStep[] {
-    return this.order?.orderType === 'Buy & Install' ? BUY_INSTALL_STEPS : BUY_ONLY_STEPS;
+    if (this.order?.orderType === 'Buy & Install') return INSTALLATION_STEPS;
+    return BUY_ONLY_STEPS;
   }
 
   getStepState(stepKey: string): 'done' | 'active' | 'pending' {
@@ -110,7 +123,7 @@ export class TrackOrderModalComponent {
   }
 
   formatAmount(amount: number): string {
-    return `$${amount.toFixed(2)}`;
+    return `LKR ${amount.toFixed(2)}`;
   }
 
   getPaymentStatusClass(status: string): string {
@@ -130,6 +143,15 @@ export class TrackOrderModalComponent {
 
   canReupload(): boolean {
     return this.order?.paymentStatus === 'Rejected';
+  }
+
+  private router = inject(Router);
+
+  goToReupload(): void {
+    if (!this.order) return;
+    const targetId = this.order.id;
+    this.closed.emit();
+    this.router.navigate(['/checkout'], { queryParams: { orderId: targetId } });
   }
 
   cancelOrder() {

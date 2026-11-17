@@ -1,18 +1,5 @@
 <!-- HEADER -->
-<div class="report-header">
-  <div class="header-search">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-    <input type="text" placeholder="Search Report field names" />
-  </div>
-  <div class="header-right">
-    <button class="icon-btn">⚙</button>
-    <button class="icon-btn">🔔</button>
-    <img src="https://ui-avatars.com/api/?name=Inspector&background=4a7c4e&color=fff" class="avatar" alt="avatar" />
-  </div>
-</div>
+<app-header></app-header>
 
 <div class="report-body">
   <h1 class="report-title">Inspection Report</h1>
@@ -106,12 +93,16 @@
             Sections 3–8 will repeat for each room on the next page.
           </p>
           <button class="add-room-btn" (click)="addRoom()">
-            <span class="plus-icon">⊕</span> Add Room
+            <span class="plus-icon">
+              <lucide-angular name="plus" [size]="18"></lucide-angular>
+            </span> Add Room
           </button>
           <div class="room-chips">
             <div class="room-chip" *ngFor="let room of rooms; let i = index">
               <span>Room {{ i+1 }}{{ room.name ? ': '+room.name : '' }}</span>
-              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove">✕</button>
+              <button *ngIf="rooms.length > 1" (click)="removeRoom(i)" class="chip-remove" style="display: inline-flex; align-items: center;">
+                <lucide-angular name="x" [size]="14"></lucide-angular>
+              </button>
             </div>
           </div>
         </div>
@@ -145,13 +136,13 @@
             <div class="form-group">
               <label>Dimensions (L x W x H)</label>
               <div class="dimensions-row">
-                <input type="number" placeholder="Length (ft)" [(ngModel)]="room.length"
+                <input type="number" min="0" placeholder="Length (ft)" [(ngModel)]="room.length"
                   (ngModelChange)="calcArea(room)" class="dim-input" />
                 <span class="dim-x">X</span>
-                <input type="number" placeholder="Width (ft)" [(ngModel)]="room.width" (ngModelChange)="calcArea(room)"
-                  class="dim-input" />
+                <input type="number" min="0" placeholder="Width (ft)" [(ngModel)]="room.width"
+                  (ngModelChange)="calcArea(room)" class="dim-input" />
                 <span class="dim-x">X</span>
-                <input type="number" placeholder="Height (ft)" [(ngModel)]="room.height" class="dim-input" />
+                <input type="number" min="0" placeholder="Height (ft)" [(ngModel)]="room.height" class="dim-input" />
               </div>
             </div>
             <div class="form-group">
@@ -175,7 +166,7 @@
             </div>
             <div class="form-group">
               <label>No. of Windows</label>
-              <input type="number" [(ngModel)]="room.windows" />
+              <input type="number" min="0" [(ngModel)]="room.windows" />
             </div>
           </div>
 
@@ -220,7 +211,7 @@
             <div class="form-group">
               <label>Indoor — Outdoor distance (approx.)</label>
               <div class="inline-row">
-                <input type="number" [(ngModel)]="room.indoorOutdoorDistance" class="small-input" />
+                <input type="number" min="0" [(ngModel)]="room.indoorOutdoorDistance" class="small-input" />
                 <span class="unit-tag">m</span>
                 <select [(ngModel)]="room.distanceMeasured" class="small-select">
                   <option>Measured</option>
@@ -243,7 +234,7 @@
             </div>
             <div class="form-group">
               <label>Estimated Number of Bends</label>
-              <input type="number" [(ngModel)]="room.estimatedBends" />
+              <input type="number" min="0" [(ngModel)]="room.estimatedBends" />
             </div>
             <div class="form-group toggle-row">
               <label>Drain Outlet Availability Nearby</label>
@@ -287,13 +278,13 @@
             </div>
             <div class="form-group">
               <label>Number of Drill points (Approx.)</label>
-              <input type="number" [(ngModel)]="room.drillPoints" />
+              <input type="number" min="0" [(ngModel)]="room.drillPoints" />
             </div>
             <div class="form-group">
               <label>Vertical Height Difference (Approx.)
                 <span class="unit">In meters</span>
               </label>
-              <input type="number" [(ngModel)]="room.verticalHeightDiff" />
+              <input type="number" min="0" [(ngModel)]="room.verticalHeightDiff" />
             </div>
           </div>
 
@@ -364,7 +355,7 @@
           <h3 class="section-title">9. &nbsp; Photo Documentation</h3>
           <div class="add-photo-wrap">
             <label class="add-photo-btn" (click)="triggerPhotoUpload(photoInput)">
-              📷 Add Photo
+              Add Photo
             </label>
             <input #photoInput type="file" accept="image/*" (change)="onPhotoFileSelected($event)"
               style="display:none" />
@@ -386,7 +377,9 @@
             <div class="photo-entry" *ngFor="let entry of photoEntries; let i = index">
               <div class="photo-entry-img">
                 <img [src]="entry.dataUrl" class="photo-preview" />
-                <button class="remove-photo-btn" (click)="removePhoto(i)">✕</button>
+                <button class="remove-photo-btn" (click)="removePhoto(i)" style="display: flex; align-items: center; justify-content: center;">
+                  <lucide-angular name="x" [size]="16"></lucide-angular>
+                </button>
               </div>
               <span class="photo-entry-name">{{ entry.name }}</span>
             </div>
@@ -403,8 +396,8 @@
         <div class="form-card">
           <h3 class="section-title">10. Acknowledgement</h3>
           <div class="form-group">
-            <label>Inspector Name</label>
-            <input type="text" [(ngModel)]="inspectorName" />
+            <label>Inspector Name <span class="required-asterisk">*</span></label>
+            <input type="text" [(ngModel)]="inspectorName" required />
           </div>
           <div class="form-group">
             <label>Date</label>

@@ -10,6 +10,4 @@ import { ConfirmationComponent } from './shared/confirmation/confirmation.compon
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'AirLux Finance';
-}
+export class AppComponent {}

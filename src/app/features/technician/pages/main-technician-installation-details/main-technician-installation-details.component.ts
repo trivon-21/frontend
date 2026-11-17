@@ -8,25 +8,33 @@ import { environment } from '../../../../../environments/environment';
 interface InstallationDetail {
   _id?: string;
   ticketId?: string | number;
+  fullName?: string;
   customerId?: {
     name?: string;
+    fullName?: string;
     email?: string;
     contactNo?: string;
+    contactNumber?: string;
+    phoneNumber?: string;
     address?: string;
   };
   productType?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   location?: string;
   serviceDate?: string;
   date?: string;
   status?: string;
   siteDetails?: {
     buildingType?: string;
-    floors?: number;
+    floors?: string | number;
     rooms?: number;
     ceilingHeight?: string;
     wallType?: string;
     powerSupply?: string;
     outdoorAccess?: string;
+    elevatorAvailability?: string;
+    parkingAvailability?: string;
   };
   materials?: Array<{ item?: string; quantity?: string }>;
   labour?: {
@@ -88,6 +96,16 @@ export class MainTechnicianInstallationDetailsComponent implements OnInit {
           this.isLoading = false;
         }
       });
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'in-progress';
+    const s = status.toLowerCase();
+    if (s.includes('completed')) return 'completed';
+    if (s.includes('progress')) return 'in-progress';
+    if (s.includes('schedule')) return 'scheduled';
+    if (s.includes('hold')) return 'on-hold';
+    return 'assigned';
   }
 }
 

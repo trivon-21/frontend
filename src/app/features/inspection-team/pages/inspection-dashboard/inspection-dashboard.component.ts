@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-inspection-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './inspection-dashboard.component.html',
   styleUrls: ['./inspection-dashboard.component.css']
 })
@@ -28,12 +30,18 @@ export class InspectionDashboardComponent implements OnInit {
   filteredInspections: any[] = [];
   paginatedInspections: any[] = [];
 
-  constructor(private officerService: InspectionOfficerService) { }
+  constructor(
+    private officerService: InspectionOfficerService,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void { this.loadDashboard(); }
 
   loadDashboard(): void {
-    this.officerService.getDashboardStats().subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    const inspectorId = currentUser?.id;
+
+    this.officerService.getDashboardStats(inspectorId).subscribe({
       next: (data: any) => {
         this.ongoingCount = data.ongoing || 0;
         this.scheduledCount = data.scheduled || 0;

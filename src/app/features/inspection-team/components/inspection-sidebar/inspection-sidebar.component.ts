@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface NavItem {
   label: string;
@@ -17,7 +18,11 @@ interface NavItem {
   styleUrls: ['./inspection-sidebar.component.css']
 })
 export class InspectionSidebarComponent {
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/inspection-officer/dashboard' },
@@ -42,5 +47,10 @@ export class InspectionSidebarComponent {
       </svg>`,
     };
     return this.sanitizer.bypassSecurityTrustHtml(icons[iconName] || '');
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

@@ -8,6 +8,8 @@ import {
   SystemLogsService,
 } from '../../services/system-logs.service';
 
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
+
 type LogFilters = {
   performedByRole: string;
   logType?: string;
@@ -19,7 +21,7 @@ type LogFilters = {
 @Component({
   selector: 'app-system-logs-monitoring',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './system-logs-monitoring.component.html',
   styleUrls: ['./system-logs-monitoring.component.css'],
 })

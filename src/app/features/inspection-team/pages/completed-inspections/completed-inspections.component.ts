@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { InspectionOfficerService } from '../../services/inspection-officer.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { ConfirmService } from '../../../../services/confirm.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
 
 @Component({
   selector: 'app-completed-inspections',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './completed-inspections.component.html',
   styleUrls: ['./completed-inspections.component.css']
 })
@@ -34,14 +36,18 @@ export class CompletedInspectionsComponent implements OnInit {
   constructor(
     private officerService: InspectionOfficerService,
     private notificationService: NotificationService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void { this.loadInspections(); }
 
   loadInspections(): void {
     this.isLoading = true;
-    this.officerService.getCompletedInspections().subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    const inspectorId = currentUser?.id;
+
+    this.officerService.getCompletedInspections(inspectorId).subscribe({
       next: (data: any[]) => {
         this.inspections = data;
         this.applyFilters();
@@ -96,7 +102,7 @@ export class CompletedInspectionsComponent implements OnInit {
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        this.notificationService.show('❌ Failed to load report.', 'error');
+        this.notificationService.show('Failed to load report.', 'error');
       }
     });
   }
@@ -117,12 +123,12 @@ export class CompletedInspectionsComponent implements OnInit {
         this.reportData = JSON.parse(JSON.stringify(this.editedReport));
         this.isEditing = false;
         this.isLoading = false;
-        this.notificationService.show('✅ Report updated successfully!', 'success');
+        this.notificationService.show('Report updated successfully!', 'success');
       },
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
-        this.notificationService.show('❌ Failed to save changes.', 'error');
+        this.notificationService.show('Failed to save changes.', 'error');
       }
     });
   }
@@ -138,7 +144,7 @@ export class CompletedInspectionsComponent implements OnInit {
     this.isSubmitting = true;
     this.officerService.submitReport(inspection._id).subscribe({
       next: () => {
-        this.notificationService.show('✅ Report submitted to Main Technician via email!', 'success');
+        this.notificationService.show('Report submitted to Main Technician via email!', 'success');
         this.closeModal();
         this.loadInspections();
         this.isSubmitting = false;
@@ -146,7 +152,7 @@ export class CompletedInspectionsComponent implements OnInit {
       error: (err: any) => {
         console.error(err);
         this.isSubmitting = false;
-        this.notificationService.show('❌ Failed to submit report.', 'error');
+        this.notificationService.show('Failed to submit report.', 'error');
       }
     });
   }

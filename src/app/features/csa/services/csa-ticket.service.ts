@@ -1,0 +1,182 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+
+export interface ServiceItem {
+  serviceName: string;
+  date: string | null;
+  underWarranty?: boolean;
+}
+
+export interface MaintenanceSchedule {
+  _id: string;
+  ticketId: string;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  installationDate: string;
+  location: string;
+  productType?: string;
+  status: 'New' | 'Draft Saved' | 'Sent to CSA' | 'Sent to Customer';
+  services: ServiceItem[];
+  sentToCsaAt?: string;
+  sentToCustomerAt?: string;
+  csaNotes?: string;
+  customerNotes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ServiceTicket {
+  _id: string;
+  ticketId?: string; // e.g. MS-1001 for maintenance schedule
+  isMaintenanceSchedule?: boolean;
+  maintenanceScheduleData?: MaintenanceSchedule;
+  isMaintenanceRecord?: boolean;
+  maintenanceRecordData?: any;
+  isTechnicalRecord?: boolean;
+  assignedTeam?: string;
+  rawRecord?: any;
+  customerId: {
+    _id: string;
+    fullName: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    address?: string;
+  };
+  category: 'repair' | 'maintenance' | 'installation' | 'inspection';
+  requestType?: string;
+  subject: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'New' | 'Reviewed' | 'Assigned' | 'open' | 'in-progress' | 'resolved' | 'escalated' | 'Rejected' | 'Sent to CSA' | 'Sent to Customer' | 'Draft Saved' | 'Finance Approved' | 'Finance Rejected' | 'Sent to IM' | 'Materials Ready' | 'Completed' | 'On Hold' | 'Scheduled' | 'Pending' | string;
+  acUnitModel?: string;
+  acUnitSerial?: string;
+  preferredDate?: string;
+  preferredTimeSlot?: string;
+  serviceFee?: number;
+  assignedTechnicianId?: {
+    _id: string;
+    fullName: string;
+    email?: string;
+  };
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface TicketListResponse {
+  success: boolean;
+  tickets: ServiceTicket[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CsaTicketService {
+  private apiUrl = `${environment.apiUrl}/csa/service-tickets`;
+  private maintenanceApiUrl = `${environment.apiBaseUrl}/maintenance`;
+  private schedulesApiUrl = `${environment.apiBaseUrl}/maintenance/schedules`;
+  private serviceRequestsApiUrl = `${environment.apiBaseUrl}/service-requests`;
+  private installationsApiUrl = `${environment.apiBaseUrl}/installations`;
+  private inspectionsApiUrl = `${environment.apiBaseUrl}/inspections`;
+
+  constructor(private http: HttpClient) {}
+
+  getTickets(filters: { search?: string; category?: string; status?: string; priority?: string; page?: number; limit?: number } = {}): Observable<TicketListResponse> {
+    let params = new HttpParams();
+
+    if (filters.search && filters.search.trim()) {
+      params = params.set('search', filters.search.trim());
+    }
+    if (filters.category && filters.category !== 'ALL') {
+      params = params.set('category', filters.category);
+    }
+    if (filters.status && filters.status !== 'ALL') {
+      params = params.set('status', filters.status);
+    }
+    if (filters.priority && filters.priority !== 'ALL') {
+      params = params.set('priority', filters.priority);
+    }
+    if (filters.page) {
+      params = params.set('page', filters.page.toString());
+    }
+    if (filters.limit) {
+      params = params.set('limit', filters.limit.toString());
+    }
+
+    return this.http.get<TicketListResponse>(this.apiUrl, { params });
+  }
+
+  getMaintenanceTickets(status?: string, search?: string): Observable<{ success: boolean; data: any[]; count: number }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<{ success: boolean; data: any[]; count: number }>(
+      this.maintenanceApiUrl,
+      { params }
+    );
+  }
+
+  getServiceRequests(status?: string): Observable<{ success: boolean; data: any[] }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    return this.http.get<{ success: boolean; data: any[] }>(this.serviceRequestsApiUrl, { params });
+  }
+
+  getInstallations(status?: string): Observable<{ success: boolean; data: any[] }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    return this.http.get<{ success: boolean; data: any[] }>(this.installationsApiUrl, { params });
+  }
+
+  getInspections(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(this.inspectionsApiUrl);
+  }
+
+  getMaintenanceSchedules(status?: string, search?: string): Observable<{ success: boolean; data: MaintenanceSchedule[]; count: number }> {
+    let params = new HttpParams();
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<{ success: boolean; data: MaintenanceSchedule[]; count: number }>(
+      this.schedulesApiUrl,
+      { params }
+    );
+  }
+
+  sendMaintenanceScheduleToCustomer(scheduleId: string, customerNotes?: string): Observable<{ success: boolean; message: string; data: any }> {
+    return this.http.post<{ success: boolean; message: string; data: any }>(
+      `${this.schedulesApiUrl}/${scheduleId}/send-to-customer`,
+      { customerNotes: customerNotes || '' }
+    );
+  }
+
+  createTicket(ticketData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, ticketData);
+  }
+
+  updateTicketStatus(ticketId: string, statusData: { status: string; rejectionReason?: string }): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${ticketId}/status`, statusData);
+  }
+
+  getProducts(): Observable<{ success: boolean; products: any[] }> {
+    return this.http.get<{ success: boolean; products: any[] }>(`${environment.apiUrl}/csa/products`);
+  }
+}

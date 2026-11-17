@@ -18,6 +18,7 @@ interface ServiceReportTicket {
 type RawServiceReport = {
   _id?: string;
   ticketId?: string | number;
+  serviceReportId?: string;
   customerName?: string;
   customer?: {
     name?: string;
@@ -76,7 +77,7 @@ export class MainTechnicianServiceReportsComponent implements OnInit {
   }
 
   private mapApiServiceReport(item: RawServiceReport): ServiceReportTicket {
-    const ticketId = String(item.ticketId || item._id || '');
+    const ticketId = String(item.serviceReportId || item.ticketId || item._id || '');
     const normalizedId = ticketId.startsWith('#') ? ticketId : `#${ticketId}`;
 
     const rawStatus = String(item.status || item.finalStatus || 'Pending').trim().toLowerCase();
@@ -123,6 +124,30 @@ export class MainTechnicianServiceReportsComponent implements OnInit {
       });
   }
 
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTickets.length / this.pageSize);
+  }
+
+  get paginatedTickets(): ServiceReportTicket[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTickets.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   applyFilters(): void {
     const normalized = this.searchQuery.toLowerCase();
     this.filteredTickets = this.tickets.filter((ticket) => {
@@ -137,6 +162,7 @@ export class MainTechnicianServiceReportsComponent implements OnInit {
 
       return matchesSearch && matchesStatus;
     });
+    this.currentPage = 1;
   }
 
   clearFilters(): void {
