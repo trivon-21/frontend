@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerFeedbackService } from '../../../features/customer/services/customer-feedback.service';
@@ -15,6 +15,7 @@ interface RatingCategory {
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './feedback-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './feedback-modal.component.css',
 })
 export class FeedbackModalComponent {

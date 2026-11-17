@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -9,8 +9,9 @@ import { ClickOutsideDirective } from '../../../../directives/click-outside.dire
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, ClickOutsideDirective, RouterModule],
+  imports: [ClickOutsideDirective, RouterModule],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.component.css'
 })
 export class HeaderComponent implements OnInit, OnDestroy {
@@ -53,7 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (user) {
       this.userName = user.fullName || 'Service Team';
       this.userEmail = user.email || '';
-      
+
       const nameParts = this.userName.trim().split(/\s+/);
       if (nameParts.length >= 2) {
         this.userInitials = `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();

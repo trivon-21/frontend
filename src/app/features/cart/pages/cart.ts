@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartResponse, DisplayCartItem } from './cart.service';
@@ -13,6 +13,7 @@ import { FooterComponent } from '../../../components/footer/footer.component';
   standalone: true,
   imports: [CommonModule, DecimalPipe, HttpClientModule, RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './cart.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cart.css',
 })
 export class Cart implements OnInit {
@@ -239,7 +240,7 @@ export class Cart implements OnInit {
       this.validationError = "You need to first select one type of items to checkout";
       return;
     }
-    
+
     const selectedIds = this.selectedIndices.map(i => this.cartItems[i].productId.toString());
     this.router.navigate(['/checkout'], { state: { selectedItems: selectedIds } });
   }

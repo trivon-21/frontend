@@ -1,134 +1,136 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SystemConfig, SystemInfo } from '../../../models/system-config.model';
 
 @Component({
   selector: 'app-system-info-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
     <div class="system-info-section">
       <h2>System Information</h2>
       <p class="section-description">Edit platform details that appear across the system</p>
 
-      <div *ngIf="config" class="form-container">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <!-- System Name -->
-          <div class="form-group">
-            <label for="systemName">
-              System Name
-              <span class="required">*</span>
-            </label>
-            <input
-              id="systemName"
-              type="text"
-              formControlName="systemName"
-              maxlength="100"
-              placeholder="e.g., AirLux"
-              class="form-input"
-            />
-            <p class="help-text">Appears in UI headers and notifications</p>
-          </div>
-
-          <!-- Support Email -->
-          <div class="form-group">
-            <label for="supportEmail">
-              Support Email
-              <span class="required">*</span>
-            </label>
-            <input
-              id="supportEmail"
-              type="email"
-              formControlName="supportEmail"
-              placeholder="e.g., support@airlux.lk"
-              class="form-input"
-            />
-            <p class="help-text">Customer support contact email</p>
-          </div>
-
-          <!-- Support Phone Number -->
-          <div class="form-group">
-            <label for="supportPhone">
-              Support Phone Number
-              <span class="required">*</span>
-            </label>
-            <input
-              id="supportPhone"
-              type="tel"
-              formControlName="supportPhoneNumber"
-              placeholder="e.g., +94 11 234 5678"
-              class="form-input"
-            />
-            <p class="help-text">Customer support contact phone</p>
-          </div>
-
-          <!-- Address -->
-          <div class="form-group">
-            <label for="address">
-              Office Address
-              <span class="required">*</span>
-            </label>
-            <textarea
-              id="address"
-              formControlName="address"
-              placeholder="e.g., 123 Galle Road, Colombo 03, Sri Lanka"
-              class="form-input"
-              rows="3"
-            ></textarea>
-            <p class="help-text">Physical business/support center address</p>
-          </div>
-
-          <!-- Preview -->
-          <div class="preview-section">
-            <h3>Preview</h3>
-            <p class="preview-text">
-              This is how the information will appear in footers and notifications:
-            </p>
-            <div class="preview-card">
-              <p class="preview-line">
-                <strong>{{ form.get('systemName')?.value || 'System Name' }}</strong>
-              </p>
-              <p class="preview-line">
-                <strong>Support:</strong>
-                <a href="mailto:{{ form.get('supportEmail')?.value }}">
-                  {{ form.get('supportEmail')?.value || 'support@example.com' }}
-                </a>
-              </p>
-              <p class="preview-line">
-                <strong>Phone:</strong>
-                <a href="tel:{{ form.get('supportPhoneNumber')?.value }}">
-                  {{ form.get('supportPhoneNumber')?.value || '+94 11 000 0000' }}
-                </a>
-              </p>
-              <p class="preview-line">
-                <strong>Address:</strong>
-                <span>{{ form.get('address')?.value || '123 Galle Road, Colombo 03, Sri Lanka' }}</span>
-              </p>
+      @if (config) {
+        <div class="form-container">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- System Name -->
+            <div class="form-group">
+              <label for="systemName">
+                System Name
+                <span class="required">*</span>
+              </label>
+              <input
+                id="systemName"
+                type="text"
+                formControlName="systemName"
+                maxlength="100"
+                placeholder="e.g., AirLux"
+                class="form-input"
+                />
+              <p class="help-text">Appears in UI headers and notifications</p>
             </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button
-              type="submit"
-              [disabled]="!form.valid || !form.dirty || isSaving"
-              class="btn btn-primary"
-            >
-              <span *ngIf="!isSaving">Save Changes</span>
-              <span *ngIf="isSaving">
-                <span class="spinner-small"></span>
-                Saving...
-              </span>
-            </button>
-            <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
+            <!-- Support Email -->
+            <div class="form-group">
+              <label for="supportEmail">
+                Support Email
+                <span class="required">*</span>
+              </label>
+              <input
+                id="supportEmail"
+                type="email"
+                formControlName="supportEmail"
+                placeholder="e.g., support@airlux.lk"
+                class="form-input"
+                />
+              <p class="help-text">Customer support contact email</p>
+            </div>
+            <!-- Support Phone Number -->
+            <div class="form-group">
+              <label for="supportPhone">
+                Support Phone Number
+                <span class="required">*</span>
+              </label>
+              <input
+                id="supportPhone"
+                type="tel"
+                formControlName="supportPhoneNumber"
+                placeholder="e.g., +94 11 234 5678"
+                class="form-input"
+                />
+              <p class="help-text">Customer support contact phone</p>
+            </div>
+            <!-- Address -->
+            <div class="form-group">
+              <label for="address">
+                Office Address
+                <span class="required">*</span>
+              </label>
+              <textarea
+                id="address"
+                formControlName="address"
+                placeholder="e.g., 123 Galle Road, Colombo 03, Sri Lanka"
+                class="form-input"
+                rows="3"
+              ></textarea>
+              <p class="help-text">Physical business/support center address</p>
+            </div>
+            <!-- Preview -->
+            <div class="preview-section">
+              <h3>Preview</h3>
+              <p class="preview-text">
+                This is how the information will appear in footers and notifications:
+              </p>
+              <div class="preview-card">
+                <p class="preview-line">
+                  <strong>{{ form.get('systemName')?.value || 'System Name' }}</strong>
+                </p>
+                <p class="preview-line">
+                  <strong>Support:</strong>
+                  <a href="mailto:{{ form.get('supportEmail')?.value }}">
+                    {{ form.get('supportEmail')?.value || 'support@example.com' }}
+                  </a>
+                </p>
+                <p class="preview-line">
+                  <strong>Phone:</strong>
+                  <a href="tel:{{ form.get('supportPhoneNumber')?.value }}">
+                    {{ form.get('supportPhoneNumber')?.value || '+94 11 000 0000' }}
+                  </a>
+                </p>
+                <p class="preview-line">
+                  <strong>Address:</strong>
+                  <span>{{ form.get('address')?.value || '123 Galle Road, Colombo 03, Sri Lanka' }}</span>
+                </p>
+              </div>
+            </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="submit"
+                [disabled]="!form.valid || !form.dirty || isSaving"
+                class="btn btn-primary"
+                >
+                @if (!isSaving) {
+                  <span>Save Changes</span>
+                }
+                @if (isSaving) {
+                  <span>
+                    <span class="spinner-small"></span>
+                    Saving...
+                  </span>
+                }
+              </button>
+              <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .system-info-section {

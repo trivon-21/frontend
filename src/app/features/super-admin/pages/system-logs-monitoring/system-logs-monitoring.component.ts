@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -23,6 +23,7 @@ type LogFilters = {
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './system-logs-monitoring.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./system-logs-monitoring.component.css'],
 })
 export class SystemLogsMonitoringComponent implements OnInit {

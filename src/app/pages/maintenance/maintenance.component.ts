@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+
 import { Router } from '@angular/router';
 import { MaintenanceService } from '../../core/services/maintenance.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -10,8 +10,9 @@ import { SystemInfoService, SystemInfo } from '../../core/services/system-info.s
 @Component({
   selector: 'app-maintenance',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './maintenance.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './maintenance.component.css',
 })
 export class MaintenanceComponent implements OnInit, OnDestroy {

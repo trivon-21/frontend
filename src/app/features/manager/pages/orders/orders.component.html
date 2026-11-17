@@ -37,152 +37,199 @@
       <button type="button" class="chip" [class.active]="activeType === 'purchase'" (click)="setType('purchase')">Purchase Requests</button>
       <button type="button" class="chip" [class.active]="activeType === 'non-po'" (click)="setType('non-po')">Non-PO Authorizations</button>
     </div>
-    <div class="chip-group" *ngIf="activeType === 'purchase'">
-      <button
-        *ngFor="let f of filters"
-        type="button" class="chip"
-        [class.active]="activeFilter === f.key"
-        (click)="setFilter(f.key)"
-      >
-        {{ f.label }}
-      </button>
-    </div>
+    @if (activeType === 'purchase') {
+      <div class="chip-group">
+        @for (f of filters; track f) {
+          <button
+            type="button" class="chip"
+            [class.active]="activeFilter === f.key"
+            (click)="setFilter(f.key)"
+            >
+            {{ f.label }}
+          </button>
+        }
+      </div>
+    }
   </div>
 
-  <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'purchase' && loadError">
-    <div><strong>Purchase approvals unavailable</strong><p>{{ loadError }}</p></div>
-    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()" [disabled]="loading">Retry</button>
-  </div>
-  <div class="portal-state portal-state--error" role="alert" *ngIf="activeType === 'non-po' && authorizationLoadError">
-    <div><strong>Non-PO approvals unavailable</strong><p>{{ authorizationLoadError }}</p></div>
-    <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadAuthorizations()" [disabled]="authorizationLoading">Retry</button>
-  </div>
-  <div class="portal-state" *ngIf="activeType === 'purchase' && loading && orders.length === 0">Loading purchase approvals…</div>
-  <div class="portal-state" *ngIf="activeType === 'non-po' && authorizationLoading && authorizations.length === 0">Loading Non-PO approvals…</div>
+  @if (activeType === 'purchase' && loadError) {
+    <div class="portal-state portal-state--error" role="alert">
+      <div><strong>Purchase approvals unavailable</strong><p>{{ loadError }}</p></div>
+      <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="load()" [disabled]="loading">Retry</button>
+    </div>
+  }
+  @if (activeType === 'non-po' && authorizationLoadError) {
+    <div class="portal-state portal-state--error" role="alert">
+      <div><strong>Non-PO approvals unavailable</strong><p>{{ authorizationLoadError }}</p></div>
+      <button type="button" class="portal-retry-button mgr-btn mgr-btn--primary mgr-btn--compact" (click)="loadAuthorizations()" [disabled]="authorizationLoading">Retry</button>
+    </div>
+  }
+  @if (activeType === 'purchase' && loading && orders.length === 0) {
+    <div class="portal-state">Loading purchase approvals…</div>
+  }
+  @if (activeType === 'non-po' && authorizationLoading && authorizations.length === 0) {
+    <div class="portal-state">Loading Non-PO approvals…</div>
+  }
 
   <!-- Table -->
-  <div class="alx-table-container" *ngIf="activeType === 'purchase' && !loadError" role="region" aria-label="Purchase approval requests" tabindex="0">
-    <table class="alx-table alx-table--wide">
-      <thead>
-        <tr>
-          <th>Request</th>
-          <th>Supplier</th>
-          <th>Items</th>
-          <th>Est. Total</th>
-          <th>Priority</th>
-          <th>Status</th>
-          <th class="actions-cell">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container *ngFor="let o of orders">
-          <tr class="clickable-row" [class.row-updating]="updatingId === o._id" (click)="toggleExpand(o)">
-            <td class="sku-cell">{{ o.requestId }}</td>
-            <td class="name-cell">{{ o.supplierName }}</td>
-            <td>{{ o.items.length }} line{{ o.items.length === 1 ? '' : 's' }}</td>
-            <td class="num-cell">{{ formatCurrency(o.totalEstimate) }}</td>
-            <td>
-              <span class="pill priority alx-table-status" [ngClass]="o.priority">{{ o.priority | uppercase }}</span>
-            </td>
-            <td>
-              <span class="pill status alx-table-status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
-            </td>
-            <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions mgr-action-group" *ngIf="o.status === 'pending-manager'">
-                <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="approve(o)">Approve</button>
-                <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="reject(o)">Reject</button>
-              </div>
-              <span class="muted" *ngIf="o.status === 'approved'">by {{ o.approvedBy || 'Manager' }}</span>
-              <span class="muted" *ngIf="o.status === 'rejected'" [title]="o.rejectionReason || ''">Rejected</span>
-            </td>
+  @if (activeType === 'purchase' && !loadError) {
+    <div class="alx-table-container" role="region" aria-label="Purchase approval requests" tabindex="0">
+      <table class="alx-table alx-table--wide">
+        <thead>
+          <tr>
+            <th>Request</th>
+            <th>Supplier</th>
+            <th>Items</th>
+            <th>Est. Total</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th class="actions-cell">Actions</th>
           </tr>
-          <!-- Expandable line-item detail -->
-          <tr *ngIf="expandedId === o._id" class="detail-row">
-            <td colspan="7">
-              <div class="detail-box">
-                <div class="detail-title">
-                  Requested by {{ o.requestedBy }} · {{ o.items.length }} item(s)
-                  <span *ngIf="o.source === 'material-request'"> · Material shortage {{ o.sourceMaterialRequestId }}</span>
-                  <span *ngIf="o.status === 'rejected' && o.rejectionReason" class="reject-note">
-                    Reason: {{ o.rejectionReason }}
-                  </span>
-                </div>
-                <div class="alx-table-container alx-table-container--embedded" role="region" aria-label="Purchase request line items" tabindex="0">
-                  <table class="detail-table alx-table alx-table--narrow">
-                    <tbody>
-                      <tr *ngFor="let it of o.items">
-                        <td class="di-name name-cell">{{ it.name }}</td>
-                        <td class="di-sku sku-cell">{{ it.sku }}</td>
-                        <td class="di-qty num-cell">×{{ it.quantity }}</td>
-                        <td class="di-total num-cell">{{ formatCurrency(it.estimatedTotal || 0) }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </ng-container>
-        <tr *ngIf="!loading && orders.length === 0">
-          <td colspan="7" class="empty-cell">No purchase requests in this view.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (o of orders; track o) {
+            <tr class="clickable-row" [class.row-updating]="updatingId === o._id" (click)="toggleExpand(o)">
+              <td class="sku-cell">{{ o.requestId }}</td>
+              <td class="name-cell">{{ o.supplierName }}</td>
+              <td>{{ o.items.length }} line{{ o.items.length === 1 ? '' : 's' }}</td>
+              <td class="num-cell">{{ formatCurrency(o.totalEstimate) }}</td>
+              <td>
+                <span class="pill priority alx-table-status" [ngClass]="o.priority">{{ o.priority | uppercase }}</span>
+              </td>
+              <td>
+                <span class="pill status alx-table-status" [ngClass]="o.status">{{ statusLabel(o.status) }}</span>
+              </td>
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                @if (o.status === 'pending-manager') {
+                  <div class="row-actions mgr-action-group">
+                    <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="approve(o)">Approve</button>
+                    <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="reject(o)">Reject</button>
+                  </div>
+                }
+                @if (o.status === 'approved') {
+                  <span class="muted">by {{ o.approvedBy || 'Manager' }}</span>
+                }
+                @if (o.status === 'rejected') {
+                  <span class="muted" [title]="o.rejectionReason || ''">Rejected</span>
+                }
+              </td>
+            </tr>
+            <!-- Expandable line-item detail -->
+            @if (expandedId === o._id) {
+              <tr class="detail-row">
+                <td colspan="7">
+                  <div class="detail-box">
+                    <div class="detail-title">
+                      Requested by {{ o.requestedBy }} · {{ o.items.length }} item(s)
+                      @if (o.source === 'material-request') {
+                        <span> · Material shortage {{ o.sourceMaterialRequestId }}</span>
+                      }
+                      @if (o.status === 'rejected' && o.rejectionReason) {
+                        <span class="reject-note">
+                          Reason: {{ o.rejectionReason }}
+                        </span>
+                      }
+                    </div>
+                    <div class="alx-table-container alx-table-container--embedded" role="region" aria-label="Purchase request line items" tabindex="0">
+                      <table class="detail-table alx-table alx-table--narrow">
+                        <tbody>
+                          @for (it of o.items; track it) {
+                            <tr>
+                              <td class="di-name name-cell">{{ it.name }}</td>
+                              <td class="di-sku sku-cell">{{ it.sku }}</td>
+                              <td class="di-qty num-cell">×{{ it.quantity }}</td>
+                              <td class="di-total num-cell">{{ formatCurrency(it.estimatedTotal || 0) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+          @if (!loading && orders.length === 0) {
+            <tr>
+              <td colspan="7" class="empty-cell">No purchase requests in this view.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
-  <div class="alx-table-container" *ngIf="activeType === 'non-po' && !authorizationLoadError" role="region" aria-label="Non-PO authorization requests" tabindex="0">
-    <table class="alx-table alx-table--wide">
-      <thead><tr><th>Authorization</th><th>Reason / Item</th><th>Supplier</th><th>Quantity</th><th>Est. Total</th><th>Status</th><th class="actions-cell">Actions</th></tr></thead>
-      <tbody>
-        <ng-container *ngFor="let authorization of authorizations">
-          <tr class="clickable-row" (click)="authorizationExpandedId = authorizationExpandedId === authorization._id ? null : authorization._id">
-            <td class="sku-cell">{{ authorization.authorizationNumber }}</td>
-            <td><strong>{{ authorization.nonPoReason.replace('_', ' ') }}</strong><br><span class="muted">{{ authorizationItem(authorization) }}</span></td>
-            <td>{{ authorization.supplierName }}</td>
-            <td>{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
-            <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
-            <td><span class="pill status alx-table-status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
-            <td class="actions-cell" (click)="$event.stopPropagation()">
-              <div class="row-actions mgr-action-group" *ngIf="authorization.status === 'pending'">
-                <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
-                <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
-              </div>
-              <span class="muted" *ngIf="authorization.status !== 'pending'">{{ authorization.financeReviewStatus }}</span>
-            </td>
-          </tr>
-          <tr class="detail-row" *ngIf="authorizationExpandedId === authorization._id">
-            <td colspan="7"><div class="detail-box">
-              <div class="detail-title">Requested by {{ authorization.requestedByName }}</div>
-              <p>{{ authorization.explanation }}</p>
-              <p><strong>Affected work:</strong> {{ authorization.affectedWorkReference || 'Not linked' }} · <strong>Source:</strong> {{ authorization.sourceDocumentNumber }}</p>
-              <p *ngIf="authorization.inventoryId"><strong>Stock:</strong> {{ authorization.inventoryId.available || 0 }} available · reorder {{ authorization.inventoryId.reorderLevel || 0 }} · max {{ authorization.inventoryId.maxStockLevel || 0 }}</p>
-              <a *ngIf="authorization.supportingDocumentUrl" [href]="authorization.supportingDocumentUrl" target="_blank" rel="noopener">Open supporting document</a>
-            </div></td>
-          </tr>
-        </ng-container>
-        <tr *ngIf="authorizations.length === 0"><td colspan="7" class="empty-cell">No Non-PO authorizations in this view.</td></tr>
-      </tbody>
-    </table>
-  </div>
+  @if (activeType === 'non-po' && !authorizationLoadError) {
+    <div class="alx-table-container" role="region" aria-label="Non-PO authorization requests" tabindex="0">
+      <table class="alx-table alx-table--wide">
+        <thead><tr><th>Authorization</th><th>Reason / Item</th><th>Supplier</th><th>Quantity</th><th>Est. Total</th><th>Status</th><th class="actions-cell">Actions</th></tr></thead>
+        <tbody>
+          @for (authorization of authorizations; track authorization) {
+            <tr class="clickable-row" (click)="authorizationExpandedId = authorizationExpandedId === authorization._id ? null : authorization._id">
+              <td class="sku-cell">{{ authorization.authorizationNumber }}</td>
+              <td><strong>{{ authorization.nonPoReason.replace('_', ' ') }}</strong><br><span class="muted">{{ authorizationItem(authorization) }}</span></td>
+              <td>{{ authorization.supplierName }}</td>
+              <td>{{ authorization.receivedQuantity }} / {{ authorization.authorizedQuantity }}</td>
+              <td class="num-cell">{{ formatCurrency(authorization.estimatedTotal) }}</td>
+              <td><span class="pill status alx-table-status" [ngClass]="authorization.status">{{ authorization.status }}</span></td>
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                @if (authorization.status === 'pending') {
+                  <div class="row-actions mgr-action-group">
+                    <button type="button" class="mini-btn ok mgr-btn mgr-btn--primary mgr-btn--compact" (click)="decideAuthorization(authorization, 'approved')">Approve</button>
+                    <button type="button" class="mini-btn warn mgr-btn mgr-btn--danger mgr-btn--compact" (click)="decideAuthorization(authorization, 'rejected')">Reject</button>
+                  </div>
+                }
+                @if (authorization.status !== 'pending') {
+                  <span class="muted">{{ authorization.financeReviewStatus }}</span>
+                }
+              </td>
+            </tr>
+            @if (authorizationExpandedId === authorization._id) {
+              <tr class="detail-row">
+                <td colspan="7"><div class="detail-box">
+                  <div class="detail-title">Requested by {{ authorization.requestedByName }}</div>
+                  <p>{{ authorization.explanation }}</p>
+                  <p><strong>Affected work:</strong> {{ authorization.affectedWorkReference || 'Not linked' }} · <strong>Source:</strong> {{ authorization.sourceDocumentNumber }}</p>
+                  @if (authorization.inventoryId) {
+                    <p><strong>Stock:</strong> {{ authorization.inventoryId.available || 0 }} available · reorder {{ authorization.inventoryId.reorderLevel || 0 }} · max {{ authorization.inventoryId.maxStockLevel || 0 }}</p>
+                  }
+                  @if (authorization.supportingDocumentUrl) {
+                    <a [href]="authorization.supportingDocumentUrl" target="_blank" rel="noopener">Open supporting document</a>
+                  }
+                </div></td>
+              </tr>
+            }
+          }
+          @if (authorizations.length === 0) {
+            <tr><td colspan="7" class="empty-cell">No Non-PO authorizations in this view.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
-  <div class="portal-dialog-backdrop" *ngIf="decisionTarget as target" (click)="onDecisionBackdrop($event)">
-    <section class="portal-dialog" role="dialog" aria-modal="true" aria-labelledby="decision-dialog-title" aria-describedby="decision-dialog-description">
-      <div class="portal-dialog__header">
-        <div>
-          <h2 id="decision-dialog-title">{{ target.decision === 'approved' ? 'Approve' : 'Reject' }} {{ target.reference }}</h2>
-          <p id="decision-dialog-description">Add the required operational comment. It will be retained if the request fails.</p>
+  @if (decisionTarget; as target) {
+    <div class="portal-dialog-backdrop" (click)="onDecisionBackdrop($event)">
+      <section class="portal-dialog" role="dialog" aria-modal="true" aria-labelledby="decision-dialog-title" aria-describedby="decision-dialog-description">
+        <div class="portal-dialog__header">
+          <div>
+            <h2 id="decision-dialog-title">{{ target.decision === 'approved' ? 'Approve' : 'Reject' }} {{ target.reference }}</h2>
+            <p id="decision-dialog-description">Add the required operational comment. It will be retained if the request fails.</p>
+          </div>
+          <button type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close decision dialog" (click)="closeDecision()" [disabled]="decisionPending">×</button>
         </div>
-        <button type="button" class="portal-dialog__close mgr-btn mgr-btn--close" aria-label="Close decision dialog" (click)="closeDecision()" [disabled]="decisionPending">×</button>
-      </div>
-      <label for="decision-comment">Comment</label>
-      <textarea #decisionCommentInput id="decision-comment" rows="4" [(ngModel)]="decisionComment" [disabled]="decisionPending" required></textarea>
-      <p class="portal-dialog__error" role="alert" *ngIf="decisionError">{{ decisionError }}</p>
-      <div class="portal-dialog__actions mgr-action-group">
-        <button type="button" class="mgr-btn mgr-btn--ghost" (click)="closeDecision()" [disabled]="decisionPending">Cancel</button>
-        <button type="button" class="primary mgr-btn" [class.mgr-btn--primary]="target.decision === 'approved'" [class.mgr-btn--danger]="target.decision === 'rejected'" (click)="submitDecision()" [disabled]="decisionPending">
-          {{ decisionPending ? 'Saving…' : (target.decision === 'approved' ? 'Approve' : 'Reject') }}
-        </button>
-      </div>
-    </section>
-  </div>
+        <label for="decision-comment">Comment</label>
+        <textarea #decisionCommentInput id="decision-comment" rows="4" [(ngModel)]="decisionComment" [disabled]="decisionPending" required></textarea>
+        @if (decisionError) {
+          <p class="portal-dialog__error" role="alert">{{ decisionError }}</p>
+        }
+        <div class="portal-dialog__actions mgr-action-group">
+          <button type="button" class="mgr-btn mgr-btn--ghost" (click)="closeDecision()" [disabled]="decisionPending">Cancel</button>
+          <button type="button" class="primary mgr-btn" [class.mgr-btn--primary]="target.decision === 'approved'" [class.mgr-btn--danger]="target.decision === 'rejected'" (click)="submitDecision()" [disabled]="decisionPending">
+            {{ decisionPending ? 'Saving…' : (target.decision === 'approved' ? 'Approve' : 'Reject') }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
 </div>

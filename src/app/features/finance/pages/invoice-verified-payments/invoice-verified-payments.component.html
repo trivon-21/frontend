@@ -23,7 +23,7 @@
   </div>
 
   <!-- ═══ INSTALLATION TAB ═══ -->
-  <ng-container *ngIf="activeTab === 'installation'">
+  @if (activeTab === 'installation') {
     <div class="controls-row">
       <div class="search-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,49 +37,58 @@
         <input type="date" class="date-btn" [(ngModel)]="selectedDate" (change)="applyFilters()" />
       </div>
     </div>
-
-    <div *ngIf="isLoading" class="empty-state"><p>Loading...</p></div>
-    <div *ngIf="!isLoading && paginatedPayments.length === 0" class="empty-state">
-      <p>No verified installation invoice payments</p>
-    </div>
-
-    <div class="table-container" *ngIf="!isLoading && paginatedPayments.length > 0">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>ORDER ID</th>
-            <th>INVOICE ID</th>
-            <th>CUSTOMER</th>
-            <th>PAID DATE</th>
-            <th>AMOUNT</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let payment of paginatedPayments">
-            <td>{{ payment.orderRef || shortId(payment.orderId) }}</td>
-            <td>{{ payment.invoiceNumber }}</td>
-            <td>{{ payment.customerName }}</td>
-            <td>{{ (payment.paidAt || payment.updatedAt) | date:'EEE, dd MMM yyyy' }}</td>
-            <td class="amount">LKR {{ payment.grandTotal | number:'1.2-2' }}</td>
-            <td><button class="view-btn" (click)="openDetails(payment)">View</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination" *ngIf="totalItems > 0">
-      <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
-      <div class="pages">
-        <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
-        <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page }}</button>
-        <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+    @if (isLoading) {
+      <div class="empty-state"><p>Loading...</p></div>
+    }
+    @if (!isLoading && paginatedPayments.length === 0) {
+      <div class="empty-state">
+        <p>No verified installation invoice payments</p>
       </div>
-    </div>
-  </ng-container>
+    }
+    @if (!isLoading && paginatedPayments.length > 0) {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ORDER ID</th>
+              <th>INVOICE ID</th>
+              <th>CUSTOMER</th>
+              <th>PAID DATE</th>
+              <th>AMOUNT</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of paginatedPayments; track payment) {
+              <tr>
+                <td>{{ payment.orderRef || shortId(payment.orderId) }}</td>
+                <td>{{ payment.invoiceNumber }}</td>
+                <td>{{ payment.customerName }}</td>
+                <td>{{ (payment.paidAt || payment.updatedAt) | date:'EEE, dd MMM yyyy' }}</td>
+                <td class="amount">LKR {{ payment.grandTotal | number:'1.2-2' }}</td>
+                <td><button class="view-btn" (click)="openDetails(payment)">View</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (totalItems > 0) {
+      <div class="pagination">
+        <span>Showing {{ startItem }} - {{ endItem }} of {{ totalItems }} items</span>
+        <div class="pages">
+          <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
+          @for (page of totalPages; track page) {
+            <button (click)="goToPage(page)" [class.active]="currentPage===page">{{ page }}</button>
+          }
+          <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
+        </div>
+      </div>
+    }
+  }
 
   <!-- ═══ REPAIR TAB ═══ -->
-  <ng-container *ngIf="activeTab === 'repair'">
+  @if (activeTab === 'repair') {
     <div class="controls-row">
       <div class="search-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,101 +102,115 @@
         <input type="date" class="date-btn" [(ngModel)]="repairSelectedDate" (change)="applyRepairFilters()" />
       </div>
     </div>
-
-    <div *ngIf="isRepairLoading" class="empty-state"><p>Loading...</p></div>
-    <div *ngIf="!isRepairLoading && paginatedRepairPayments.length === 0" class="empty-state">
-      <p>No verified repair invoice payments</p>
-    </div>
-
-    <div class="table-container" *ngIf="!isRepairLoading && paginatedRepairPayments.length > 0">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>INVOICE ID</th>
-            <th>CUSTOMER</th>
-            <th>PAID DATE</th>
-            <th>AMOUNT</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let payment of paginatedRepairPayments">
-            <td>{{ payment.invoiceNumber }}</td>
-            <td>{{ payment.customerName }}</td>
-            <td>{{ (payment.paidAt || payment.updatedAt) | date:'EEE, dd MMM yyyy' }}</td>
-            <td class="amount">LKR {{ payment.grandTotal | number:'1.2-2' }}</td>
-            <td><button class="view-btn" (click)="openRepairDetails(payment)">View</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination" *ngIf="repairTotalItems > 0">
-      <span>Showing {{ repairStartItem }} - {{ repairEndItem }} of {{ repairTotalItems }} items</span>
-      <div class="pages">
-        <button (click)="repairPrevPage()" [disabled]="repairCurrentPage===1">Previous</button>
-        <button *ngFor="let page of repairTotalPages" (click)="repairGoToPage(page)" [class.active]="repairCurrentPage===page">{{ page }}</button>
-        <button (click)="repairNextPage()" [disabled]="repairCurrentPage*itemsPerPage>=repairTotalItems">Next</button>
+    @if (isRepairLoading) {
+      <div class="empty-state"><p>Loading...</p></div>
+    }
+    @if (!isRepairLoading && paginatedRepairPayments.length === 0) {
+      <div class="empty-state">
+        <p>No verified repair invoice payments</p>
       </div>
-    </div>
-  </ng-container>
+    }
+    @if (!isRepairLoading && paginatedRepairPayments.length > 0) {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>INVOICE ID</th>
+              <th>CUSTOMER</th>
+              <th>PAID DATE</th>
+              <th>AMOUNT</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of paginatedRepairPayments; track payment) {
+              <tr>
+                <td>{{ payment.invoiceNumber }}</td>
+                <td>{{ payment.customerName }}</td>
+                <td>{{ (payment.paidAt || payment.updatedAt) | date:'EEE, dd MMM yyyy' }}</td>
+                <td class="amount">LKR {{ payment.grandTotal | number:'1.2-2' }}</td>
+                <td><button class="view-btn" (click)="openRepairDetails(payment)">View</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (repairTotalItems > 0) {
+      <div class="pagination">
+        <span>Showing {{ repairStartItem }} - {{ repairEndItem }} of {{ repairTotalItems }} items</span>
+        <div class="pages">
+          <button (click)="repairPrevPage()" [disabled]="repairCurrentPage===1">Previous</button>
+          @for (page of repairTotalPages; track page) {
+            <button (click)="repairGoToPage(page)" [class.active]="repairCurrentPage===page">{{ page }}</button>
+          }
+          <button (click)="repairNextPage()" [disabled]="repairCurrentPage*itemsPerPage>=repairTotalItems">Next</button>
+        </div>
+      </div>
+    }
+  }
 
   <!-- INSTALLATION DETAILS MODAL -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <h3>Invoice</h3>
-          <p class="modal-subtitle">{{ selectedPayment?.invoiceNumber }}</p>
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3>Invoice</h3>
+            <p class="modal-subtitle">{{ selectedPayment?.invoiceNumber }}</p>
+          </div>
+          <button class="modal-close" (click)="closeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
-        <button class="modal-close" (click)="closeModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="invoice-info-grid">
-          <div><p class="info-label">Order ID</p><p class="info-value">{{ selectedPayment?.orderRef || shortId(selectedPayment?.orderId) }}</p></div>
-          <div><p class="info-label">Invoice No</p><p class="info-value">{{ selectedPayment?.invoiceNumber }}</p></div>
-          <div><p class="info-label">Customer</p><p class="info-value">{{ selectedPayment?.customerName }}</p></div>
-          <div><p class="info-label">Email</p><p class="info-value">{{ selectedPayment?.customerEmail }}</p></div>
-          <div><p class="info-label">Paid Date</p><p class="info-value">{{ (selectedPayment?.paidAt || selectedPayment?.updatedAt) | date:'dd MMM yyyy' }}</p></div>
-          <div><p class="info-label">Status</p><p class="info-value" style="color:#2f7d5a;"><svg xmlns="http://www.w3.org/2000/svg"
-     width="18" height="18"
-     viewBox="0 0 24 24"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round"
-     style="vertical-align: middle;">
-  <polyline points="20 6 9 17 4 12"></polyline>
-</svg> Paid</p></div>
+        <div class="modal-body">
+          <div class="invoice-info-grid">
+            <div><p class="info-label">Order ID</p><p class="info-value">{{ selectedPayment?.orderRef || shortId($safeNavigationMigration(selectedPayment?.orderId)) }}</p></div>
+            <div><p class="info-label">Invoice No</p><p class="info-value">{{ selectedPayment?.invoiceNumber }}</p></div>
+            <div><p class="info-label">Customer</p><p class="info-value">{{ selectedPayment?.customerName }}</p></div>
+            <div><p class="info-label">Email</p><p class="info-value">{{ selectedPayment?.customerEmail }}</p></div>
+            <div><p class="info-label">Paid Date</p><p class="info-value">{{ (selectedPayment?.paidAt || selectedPayment?.updatedAt) | date:'dd MMM yyyy' }}</p></div>
+            <div><p class="info-label">Status</p><p class="info-value" style="color:#2f7d5a;"><svg xmlns="http://www.w3.org/2000/svg"
+            width="18" height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="vertical-align: middle;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg> Paid</p></div>
         </div>
         <hr class="modal-divider" />
         <table class="invoice-items-table">
           <thead><tr><th>Item</th><th>Qty</th><th>Rate (LKR)</th><th>Amount (LKR)</th></tr></thead>
           <tbody>
-            <tr *ngFor="let item of selectedPayment?.items">
-              <td>{{ item.itemName }}</td>
-              <td>{{ item.qty }}</td>
-              <td>{{ item.rate | number:'1.0-0' }}</td>
-              <td>{{ item.amount | number:'1.0-0' }}</td>
-            </tr>
+            @for (item of selectedPayment?.items; track item) {
+              <tr>
+                <td>{{ item.itemName }}</td>
+                <td>{{ item.qty }}</td>
+                <td>{{ item.rate | number:'1.0-0' }}</td>
+                <td>{{ item.amount | number:'1.0-0' }}</td>
+              </tr>
+            }
           </tbody>
         </table>
         <div class="total-row">
           <span>Grand Total</span>
-          <span class="total-amount">LKR {{ selectedPayment?.grandTotal | number:'1.0-0' }}</span>
+          <span class="total-amount">LKR {{ $safeNavigationMigration(selectedPayment?.grandTotal) | number:'1.0-0' }}</span>
         </div>
       </div>
     </div>
   </div>
+}
 
-  <!-- REPAIR DETAILS MODAL -->
-  <div class="modal-overlay" *ngIf="showRepairModal" (click)="closeRepairModal()">
+<!-- REPAIR DETAILS MODAL -->
+@if (showRepairModal) {
+  <div class="modal-overlay" (click)="closeRepairModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
@@ -208,35 +231,38 @@
           <div><p class="info-label">Email</p><p class="info-value">{{ selectedRepairPayment?.customerEmail }}</p></div>
           <div><p class="info-label">Paid Date</p><p class="info-value">{{ (selectedRepairPayment?.paidAt || selectedRepairPayment?.updatedAt) | date:'dd MMM yyyy' }}</p></div>
           <div><p class="info-label">Status</p><p class="info-value" style="color:#2f7d5a;"><svg xmlns="http://www.w3.org/2000/svg"
-     width="18" height="18"
-     viewBox="0 0 24 24"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round"
-     style="vertical-align: middle;">
-  <polyline points="20 6 9 17 4 12"></polyline>
-</svg> Paid</p></div>
-        </div>
-        <hr class="modal-divider" />
-        <table class="invoice-items-table">
-          <thead><tr><th>Item</th><th>Qty</th><th>Rate (LKR)</th><th>Amount (LKR)</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let item of selectedRepairPayment?.items">
+          width="18" height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="vertical-align: middle;">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg> Paid</p></div>
+      </div>
+      <hr class="modal-divider" />
+      <table class="invoice-items-table">
+        <thead><tr><th>Item</th><th>Qty</th><th>Rate (LKR)</th><th>Amount (LKR)</th></tr></thead>
+        <tbody>
+          @for (item of selectedRepairPayment?.items; track item) {
+            <tr>
               <td>{{ item.itemName }}</td>
               <td>{{ item.qty }}</td>
               <td>{{ item.rate | number:'1.0-0' }}</td>
               <td>{{ item.amount | number:'1.0-0' }}</td>
             </tr>
-          </tbody>
-        </table>
-        <div class="total-row">
-          <span>Grand Total</span>
-          <span class="total-amount">LKR {{ selectedRepairPayment?.grandTotal | number:'1.0-0' }}</span>
-        </div>
+          }
+        </tbody>
+      </table>
+      <div class="total-row">
+        <span>Grand Total</span>
+        <span class="total-amount">LKR {{ $safeNavigationMigration(selectedRepairPayment?.grandTotal) | number:'1.0-0' }}</span>
       </div>
     </div>
   </div>
+</div>
+}
 
 </div>

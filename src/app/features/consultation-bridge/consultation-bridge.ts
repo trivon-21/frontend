@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, AuthUser } from '../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
@@ -8,14 +8,15 @@ import { FooterComponent } from '../../components/footer/footer.component';
 @Component({
   selector: 'app-consultation-bridge',
   standalone: true,
-  imports: [CommonModule, RouterModule, ClickOutsideDirective, FooterComponent],
+  imports: [RouterModule, ClickOutsideDirective, FooterComponent],
   templateUrl: './consultation-bridge.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './consultation-bridge.css'
 })
 export class ConsultationBridge implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
-  
+
   productId: string | null = null;
   productName: string = '';
   username: string = 'Customer';
@@ -101,7 +102,7 @@ export class ConsultationBridge implements OnInit {
   onNowIKnow() {
     if (this.productId) {
       localStorage.setItem('consultationCompleted', 'true');
-      this.router.navigate(['/product-detail'], { 
+      this.router.navigate(['/product-detail'], {
         queryParams: { id: this.productId },
         state: { autoKnow: true }
       });

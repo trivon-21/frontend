@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { InventoryItem, OrderItem } from '../../../../../services/order-creation.service';
@@ -7,8 +7,9 @@ import { InventoryItem, OrderItem } from '../../../../../services/order-creation
 @Component({
   selector: 'app-order-suggested-grid',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './order-suggested-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './order-suggested-grid.component.css'
 })
 export class OrderSuggestedGridComponent implements OnChanges {

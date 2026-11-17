@@ -17,13 +17,15 @@
   </div>
 
   <!-- ERROR ALERT -->
-  <div class="alert-banner error" *ngIf="errorMessage">
-    <p>{{ errorMessage }}</p>
-  </div>
+  @if (errorMessage) {
+    <div class="alert-banner error">
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
 
   <!-- TOP METRIC CARDS -->
   <div class="metrics-grid">
-    
+
     <!-- CARD 1: CUSTOMERS -->
     <a routerLink="/csa/customers" class="metric-card">
       <div class="metric-icon-wrap">
@@ -84,7 +86,7 @@
 
   <!-- TWO-COLUMN DASHBOARD CONTENT -->
   <div class="dashboard-grid">
-    
+
     <!-- LEFT: RECENT SERVICE TICKETS -->
     <div class="dash-card flex-3">
       <div class="dash-card-header">
@@ -96,44 +98,50 @@
       </div>
 
       <div class="dash-card-body">
-        <div class="table-responsive" *ngIf="(dashboardData?.recentTickets?.length || 0) > 0">
-          <table class="dash-table">
-            <thead>
-              <tr>
-                <th>Subject</th>
-                <th>Customer</th>
-                <th>Category</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let t of (dashboardData?.recentTickets | slice:0:5)">
-                <td>
-                  <span class="table-subject">{{ t.subject || 'Service Request' }}</span>
-                </td>
-                <td>
-                  <span class="table-customer">{{ t.customerId ? t.customerId.fullName : 'Customer' }}</span>
-                </td>
-                <td>
-                  <span class="badge-tag" [ngClass]="'cat-' + (t.category || t.serviceType || 'repair').toLowerCase()">{{ (t.category || t.serviceType || 'repair') | uppercase }}</span>
-                </td>
-                <td>
-                  <span class="status-pill" [ngClass]="'stat-' + (t.status || '').toLowerCase().replace(' ', '-')">{{ t.status }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        @if ((dashboardData?.recentTickets?.length || 0) > 0) {
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Customer</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of ($safeNavigationMigration(dashboardData?.recentTickets) | slice:0:5); track t) {
+                  <tr>
+                    <td>
+                      <span class="table-subject">{{ t.subject || 'Service Request' }}</span>
+                    </td>
+                    <td>
+                      <span class="table-customer">{{ t.customerId ? t.customerId.fullName : 'Customer' }}</span>
+                    </td>
+                    <td>
+                      <span class="badge-tag" [ngClass]="'cat-' + (t.category || t.serviceType || 'repair').toLowerCase()">{{ (t.category || t.serviceType || 'repair') | uppercase }}</span>
+                    </td>
+                    <td>
+                      <span class="status-pill" [ngClass]="'stat-' + (t.status || '').toLowerCase().replace(' ', '-')">{{ t.status }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
 
-        <div class="empty-hint" *ngIf="(dashboardData?.recentTickets?.length || 0) === 0 && !isLoading">
-          No service tickets submitted yet.
-        </div>
+        @if ((dashboardData?.recentTickets?.length || 0) === 0 && !isLoading) {
+          <div class="empty-hint">
+            No service tickets submitted yet.
+          </div>
+        }
       </div>
     </div>
 
     <!-- RIGHT: LIVE CUSTOMER INQUIRIES & RECENT CUSTOMERS -->
     <div class="dash-card flex-2">
-      
+
       <div class="dash-card-header">
         <div>
           <h3 class="card-title">Recent Inquiries</h3>
@@ -143,18 +151,22 @@
       </div>
 
       <div class="dash-card-body inquiries-feed">
-        <div *ngFor="let inq of (dashboardData?.recentInquiries | slice:0:5)" class="inquiry-feed-item">
-          <div class="inq-feed-top">
-            <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
-            <span class="inq-feed-status" [class.awaiting]="inq.status === 'Awaiting'" [class.ongoing]="inq.status === 'Ongoing'" [class.closed]="inq.status === 'Closed'">{{ inq.status }}</span>
+        @for (inq of ($safeNavigationMigration(dashboardData?.recentInquiries) | slice:0:5); track inq) {
+          <div class="inquiry-feed-item">
+            <div class="inq-feed-top">
+              <span class="inq-feed-name">{{ inq.customer ? inq.customer.fullName : (inq.name || 'Anonymous') }}</span>
+              <span class="inq-feed-status" [class.awaiting]="inq.status === 'Awaiting'" [class.ongoing]="inq.status === 'Ongoing'" [class.closed]="inq.status === 'Closed'">{{ inq.status }}</span>
+            </div>
+            <div class="inq-feed-msg">{{ inq.message }}</div>
+            <div class="inq-feed-time">{{ formatDate(inq.createdAt) }} • Ref: {{ inq.inquiryRef }}</div>
           </div>
-          <div class="inq-feed-msg">{{ inq.message }}</div>
-          <div class="inq-feed-time">{{ formatDate(inq.createdAt) }} • Ref: {{ inq.inquiryRef }}</div>
-        </div>
+        }
 
-        <div class="empty-hint" *ngIf="(dashboardData?.recentInquiries?.length || 0) === 0 && !isLoading">
-          No customer inquiries received.
-        </div>
+        @if ((dashboardData?.recentInquiries?.length || 0) === 0 && !isLoading) {
+          <div class="empty-hint">
+            No customer inquiries received.
+          </div>
+        }
       </div>
 
       <!-- RECENTLY JOINED CUSTOMERS -->
@@ -167,14 +179,16 @@
 
       <div class="dash-card-body">
         <div class="customer-mini-list">
-          <div *ngFor="let c of (dashboardData?.recentCustomers | slice:0:5)" class="customer-mini-item">
-            <div class="mini-avatar">{{ getInitials(c.fullName) }}</div>
-            <div class="mini-info">
-              <div class="mini-name">{{ c.fullName }} {{ c.lastName || '' }}</div>
-              <div class="mini-contact">{{ c.phoneNumber || c.email || 'No contact' }}</div>
+          @for (c of ($safeNavigationMigration(dashboardData?.recentCustomers) | slice:0:5); track c) {
+            <div class="customer-mini-item">
+              <div class="mini-avatar">{{ getInitials(c.fullName) }}</div>
+              <div class="mini-info">
+                <div class="mini-name">{{ c.fullName }} {{ c.lastName || '' }}</div>
+                <div class="mini-contact">{{ c.phoneNumber || c.email || 'No contact' }}</div>
+              </div>
+              <div class="mini-date">{{ formatDate(c.createdAt) }}</div>
             </div>
-            <div class="mini-date">{{ formatDate(c.createdAt) }}</div>
-          </div>
+          }
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerInquiryService, Inquiry } from '../../../features/customer/services/customer-inquiry.service';
@@ -10,6 +10,7 @@ import { PortalIconsModule } from '../../../shared/components/portal-icons/porta
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './inquiry-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './inquiry-modal.component.css',
 })
 export class InquiryModalComponent implements OnInit {

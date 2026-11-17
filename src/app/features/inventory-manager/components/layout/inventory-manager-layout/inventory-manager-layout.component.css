@@ -209,3 +209,14 @@
   padding: 32px;
   background: var(--inventory-page);
 }
+
+/* Keep the existing navigation available without squeezing mobile page content. */
+@media (max-width: 760px) {
+  .inventory-portal-shell { flex-direction: column; }
+  .inventory-portal-shell .sidebar { display: flex; flex-direction: row; align-items: center; width: 100%; height: auto; padding: 10px 0; border-right: 0; border-bottom: 1px solid var(--inventory-border); }
+  .inventory-portal-shell .sidebar-brand { flex-shrink: 0; padding: 0 16px; font-size: 20px; }
+  .inventory-portal-shell .sidebar-nav { min-width: 0; flex-direction: row; gap: 4px; padding: 0 12px 0 0; overflow-x: auto; }
+  .inventory-portal-shell .nav-item { flex-shrink: 0; padding: 10px; font-size: 13px; }
+  .inventory-portal-shell .dashboard-header { min-height: 58px; padding: 8px 16px; }
+  .inventory-portal-shell .dashboard-content { padding: 20px 16px; }
+}

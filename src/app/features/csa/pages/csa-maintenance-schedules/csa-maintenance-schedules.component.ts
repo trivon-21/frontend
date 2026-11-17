@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -34,6 +34,7 @@ interface MaintenanceSchedule {
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './csa-maintenance-schedules.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './csa-maintenance-schedules.component.css'
 })
 export class CsaMaintenanceSchedulesComponent implements OnInit {

@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { PortalIconsModule } from '../../../../../../../shared/components/portal-icons/portal-icons.module';
 import { OrderItem } from '../../../../../services/order-creation.service';
@@ -7,8 +7,9 @@ import { OrderItem } from '../../../../../services/order-creation.service';
 @Component({
   selector: 'app-order-cart-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, PortalIconsModule],
+  imports: [FormsModule, PortalIconsModule],
   templateUrl: './order-cart-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './order-cart-list.component.css'
 })
 export class OrderCartListComponent {

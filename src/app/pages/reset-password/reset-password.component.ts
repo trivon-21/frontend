@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -34,8 +34,9 @@ function strongPassword(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, PortalIconsModule],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './reset-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent implements OnInit {

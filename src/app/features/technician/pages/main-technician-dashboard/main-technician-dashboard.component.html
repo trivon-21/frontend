@@ -72,21 +72,25 @@
         <h3 class="card-title">Recent Activity Feed</h3>
       </div>
       <div class="card-body">
-        <div class="activity-item" *ngFor="let item of filteredActivity">
-          <div class="activity-icon-wrapper" [innerHTML]="item.svg"></div>
-          <div class="activity-details">
-            <p class="activity-title">{{ item.title }}</p>
-            <p class="activity-time">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              {{ item.time }}
-            </p>
+        @for (item of filteredActivity; track item) {
+          <div class="activity-item">
+            <div class="activity-icon-wrapper" [innerHTML]="item.svg"></div>
+            <div class="activity-details">
+              <p class="activity-title">{{ item.title }}</p>
+              <p class="activity-time">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ item.time }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="activity-item" *ngIf="!filteredActivity.length">
-          <div class="activity-details">
-            <p class="activity-title">No activity matches "{{ searchQuery }}"</p>
+        }
+        @if (!filteredActivity.length) {
+          <div class="activity-item">
+            <div class="activity-details">
+              <p class="activity-title">No activity matches "{{ searchQuery }}"</p>
+            </div>
           </div>
-        </div>
+        }
       </div>
     </section>
 
@@ -96,18 +100,22 @@
         <h3 class="card-title">Urgent Stock Alerts</h3>
       </div>
       <div class="card-body">
-        <div class="alert-item" *ngFor="let alert of filteredAlerts">
-          <div class="alert-info">
-            <p class="alert-title">{{ alert.title }}</p>
-            <p class="alert-subtitle" [class.urgent]="alert.urgent">{{ alert.subtitle }}</p>
+        @for (alert of filteredAlerts; track alert) {
+          <div class="alert-item">
+            <div class="alert-info">
+              <p class="alert-title">{{ alert.title }}</p>
+              <p class="alert-subtitle" [class.urgent]="alert.urgent">{{ alert.subtitle }}</p>
+            </div>
+            <a (click)="onAlertAction(alert)" class="action-link">{{ alert.action }}</a>
           </div>
-          <a (click)="onAlertAction(alert)" class="action-link">{{ alert.action }}</a>
-        </div>
-        <div class="alert-item" *ngIf="!filteredAlerts.length">
-          <div class="alert-info">
-            <p class="alert-title">No stock alerts match "{{ searchQuery }}"</p>
+        }
+        @if (!filteredAlerts.length) {
+          <div class="alert-item">
+            <div class="alert-info">
+              <p class="alert-title">No stock alerts match "{{ searchQuery }}"</p>
+            </div>
           </div>
-        </div>
+        }
       </div>
     </section>
   </div>

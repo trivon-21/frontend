@@ -1,5 +1,5 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -35,8 +35,9 @@ interface RawServiceReportReview {
 @Component({
   selector: 'app-main-technician-service-report-review',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HttpClientModule],
+  imports: [RouterModule, FormsModule, HttpClientModule],
   templateUrl: './main-technician-service-report-review.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-service-report-review.component.css'
 })
 export class MainTechnicianServiceReportReviewComponent implements OnInit {
@@ -108,7 +109,7 @@ export class MainTechnicianServiceReportReviewComponent implements OnInit {
           console.error('Error completing review:', err);
           this.error = 'Failed to complete review';
           this.isLoading = false;
-          // Even on error, navigate back for demo purposes if needed, 
+          // Even on error, navigate back for demo purposes if needed,
           // but better to show error.
         }
       });

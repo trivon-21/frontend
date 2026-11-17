@@ -63,11 +63,19 @@
     </div>
   </div>
 
-  <div class="table-card" *ngIf="isLoading || error || historyItems.length === 0">
-    <p *ngIf="isLoading">Loading service history...</p>
-    <p *ngIf="!isLoading && error">{{ error }}</p>
-    <p *ngIf="!isLoading && !error && historyItems.length === 0">No service history found for this customer.</p>
-  </div>
+  @if (isLoading || error || historyItems.length === 0) {
+    <div class="table-card">
+      @if (isLoading) {
+        <p>Loading service history...</p>
+      }
+      @if (!isLoading && error) {
+        <p>{{ error }}</p>
+      }
+      @if (!isLoading && !error && historyItems.length === 0) {
+        <p>No service history found for this customer.</p>
+      }
+    </div>
+  }
 
   <!-- Filters Section -->
   <div class="filters-bar">
@@ -117,37 +125,41 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of paginatedHistory">
-            <td class="ticket-id">{{ item.ticketId }}</td>
-            <td>{{ item.serviceType }}</td>
-            <td>{{ item.productType }}</td>
-            <td class="date-cell">
-              {{ getDateWithoutYear(item.date) }}<br>
-              <span class="year">{{ getDateYear(item.date) }}</span>
-            </td>
-            <td>
-              <span class="status-pill" [ngClass]="item.status.toLowerCase().replace(' ', '-')">
-                {{ item.status }}
-              </span>
-            </td>
-            <td>{{ item.assignedTeam }}</td>
-            <td>
-              <span class="warranty-badge" [ngClass]="getWarrantyClass(getDisplayWarrantyStatus(item))">
-                {{ getDisplayWarrantyStatus(item) }}
-              </span>
-            </td>
-          </tr>
+          @for (item of paginatedHistory; track item) {
+            <tr>
+              <td class="ticket-id">{{ item.ticketId }}</td>
+              <td>{{ item.serviceType }}</td>
+              <td>{{ item.productType }}</td>
+              <td class="date-cell">
+                {{ getDateWithoutYear(item.date) }}<br>
+                <span class="year">{{ getDateYear(item.date) }}</span>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="item.status.toLowerCase().replace(' ', '-')">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td>{{ item.assignedTeam }}</td>
+              <td>
+                <span class="warranty-badge" [ngClass]="getWarrantyClass(getDisplayWarrantyStatus(item))">
+                  {{ getDisplayWarrantyStatus(item) }}
+                </span>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
 
     <!-- Pagination -->
-    <div class="pagination-footer pagination-section" *ngIf="totalPages > 1">
-      <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
-      <div class="pagination-controls">
-        <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
-        <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+    @if (totalPages > 1) {
+      <div class="pagination-footer pagination-section">
+        <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+        <div class="pagination-controls">
+          <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+          <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </div>

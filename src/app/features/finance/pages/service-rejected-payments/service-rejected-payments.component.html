@@ -30,17 +30,21 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let p of paginatedPayments">
-          <td>{{ p.ticketId }}</td>
-          <td>{{ p.customerName }}</td>
-          <td>{{ p.serviceType }}</td>
-          <td>{{ (p.rejectedAt || p.updatedAt) | date:'dd MMM yyyy' }}</td>
-          <td>LKR {{ p.amount | number:'1.2-2' }}</td>
-          <td><button class="view-btn" (click)="openModal(p)">View</button></td>
-        </tr>
-        <tr *ngIf="filteredPayments.length === 0">
-          <td colspan="7" style="text-align:center;color:#9ca3af;padding:24px;">No rejected payments found</td>
-        </tr>
+        @for (p of paginatedPayments; track p) {
+          <tr>
+            <td>{{ p.ticketId }}</td>
+            <td>{{ p.customerName }}</td>
+            <td>{{ p.serviceType }}</td>
+            <td>{{ (p.rejectedAt || p.updatedAt) | date:'dd MMM yyyy' }}</td>
+            <td>LKR {{ p.amount | number:'1.2-2' }}</td>
+            <td><button class="view-btn" (click)="openModal(p)">View</button></td>
+          </tr>
+        }
+        @if (filteredPayments.length === 0) {
+          <tr>
+            <td colspan="7" style="text-align:center;color:#9ca3af;padding:24px;">No rejected payments found</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -49,35 +53,39 @@
     <span>Showing {{ startItem }}-{{ endItem }} of {{ totalItems }} items</span>
     <div class="pages">
       <button (click)="prevPage()" [disabled]="currentPage===1">Previous</button>
-      <button *ngFor="let page of totalPages" (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
+      @for (page of totalPages; track page) {
+        <button (click)="goToPage(page)" [class.active]="currentPage===page">{{ page
         }}</button>
+      }
       <button (click)="nextPage()" [disabled]="currentPage*itemsPerPage>=totalItems">Next</button>
     </div>
   </div>
 
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Rejected Payment Details</h3>
-        <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-<line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
-        <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
-        <p><strong>Service:</strong> {{ selectedPayment?.serviceType }}</p>
-        <p><strong>Amount:</strong> LKR {{ selectedPayment?.amount | number:'1.2-2' }}</p>
-        <p style="color:#dc2626;font-weight:600;">
-          <strong>Rejection Reason:</strong> {{ selectedPayment?.rejectionReason || 'Not provided' }}
-        </p>
-        <p><strong>Rejected:</strong> {{ (selectedPayment?.rejectedAt || selectedPayment?.updatedAt) | date:'dd MMM
-          yyyy' }}</p>
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Rejected Payment Details</h3>
+          <button class="modal-close" (click)="closeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Ticket ID:</strong> {{ selectedPayment?.ticketId }}</p>
+          <p><strong>Customer:</strong> {{ selectedPayment?.customerName }}</p>
+          <p><strong>Service:</strong> {{ selectedPayment?.serviceType }}</p>
+          <p><strong>Amount:</strong> LKR {{ $safeNavigationMigration(selectedPayment?.amount) | number:'1.2-2' }}</p>
+          <p style="color:#dc2626;font-weight:600;">
+            <strong>Rejection Reason:</strong> {{ selectedPayment?.rejectionReason || 'Not provided' }}
+          </p>
+          <p><strong>Rejected:</strong> {{ (selectedPayment?.rejectedAt || selectedPayment?.updatedAt) | date:'dd MMM
+        yyyy' }}</p>
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeModal()">Close</button>
       </div>
     </div>
   </div>
+}
 </div>

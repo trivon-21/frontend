@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { TaskService, Task } from '../../services/task.service';
@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './service-team-assigned-jobs.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './service-team-assigned-jobs.component.css'
 })
 export class ServiceTeamAssignedJobsComponent implements OnInit {
@@ -92,12 +93,12 @@ export class ServiceTeamAssignedJobsComponent implements OnInit {
       const customerName = String(task?.customer?.name || task?.customer || '').toLowerCase();
       const taskStatus = this.normalizeStatus(task?.status);
 
-      const matchesSearch = 
+      const matchesSearch =
         taskId.includes(normalizedSearch) ||
         customerName.includes(normalizedSearch);
-      
-      const matchesStatus = 
-        this.statusFilter === 'All' || 
+
+      const matchesStatus =
+        this.statusFilter === 'All' ||
         taskStatus === normalizedFilter ||
         (normalizedFilter === 'assigned' && this.assignedStageStatuses.has(taskStatus));
 

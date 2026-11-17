@@ -18,48 +18,53 @@
     </nav>
 
     <!-- Guest buttons -->
-    <div class="authbtns" *ngIf="!currentUser">
-      <a routerLink="/login" class="btn ghost">Log in</a>
-      <a routerLink="/signup" class="btn solid">Sign up</a>
-    </div>
+    @if (!currentUser) {
+      <div class="authbtns">
+        <a routerLink="/login" class="btn ghost">Log in</a>
+        <a routerLink="/signup" class="btn solid">Sign up</a>
+      </div>
+    }
 
     <!-- Logged-in user area -->
-    <div class="user-area" *ngIf="currentUser">
-      <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
-      <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
-        <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
-          <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
-          <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
-          <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <div class="dropdown" *ngIf="showDropdown">
-          <div class="dropdown-header">
-            <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
-            <div>
-              <div class="dropdown-name">{{ currentUser.fullName }}</div>
-              <div class="dropdown-email">{{ currentUser.email }}</div>
-            </div>
-          </div>
-          <div class="dropdown-divider"></div>
-          <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-            My Dashboard
-          </a>
-          <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            My Profile
-          </a>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item logout-item" (click)="logout()">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
-            Sign out
+    @if (currentUser) {
+      <div class="user-area">
+        <a [routerLink]="getDashboardUrl()" class="btn dashboard-btn">Dashboard</a>
+        <div class="user-menu" appClickOutside (clickOutside)="closeDropdown()">
+          <button class="avatar-btn" (click)="toggleDropdown()" aria-label="User menu">
+            <div class="avatar">{{ getInitials(currentUser.fullName) }}</div>
+            <span class="user-name">{{ currentUser.fullName.split(' ')[0] }}</span>
+            <svg class="chevron" [class.open]="showDropdown" viewBox="0 0 24 24" width="14" height="14">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
+          @if (showDropdown) {
+            <div class="dropdown">
+              <div class="dropdown-header">
+                <div class="avatar avatar-lg">{{ getInitials(currentUser.fullName) }}</div>
+                <div>
+                  <div class="dropdown-name">{{ currentUser.fullName }}</div>
+                  <div class="dropdown-email">{{ currentUser.email }}</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a [routerLink]="getDashboardUrl()" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                My Dashboard
+              </a>
+              <a [routerLink]="currentUser.role === 'SUPER_ADMIN' ? '/super-admin/profile' : '/dashboard/profile'" class="dropdown-item" (click)="closeDropdown()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                My Profile
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-item" (click)="logout()">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="1.8"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8"/></svg>
+                Sign out
+              </button>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
 </header>
 
@@ -82,23 +87,31 @@
     </div>
 
     <h1 class="success-title">{{ isBuyAndInstall ? 'Inspection Booking Confirmed!' : 'Order Finalized' }}</h1>
-    
-    <p class="success-subtitle" *ngIf="isBuyAndInstall">Your inspection request has been successfully submitted.</p>
-    
-    <p class="success-message" *ngIf="!isBuyAndInstall">
-      Thank you, <strong>{{ username }}</strong>. Your order has been successfully placed and is now under review by our finance team.
-    </p>
 
-    <div class="success-description" *ngIf="isBuyAndInstall">
-      We have received your inspection fee payment slip. Our Finance Officer will verify the payment shortly. 
-      Once confirmed, a member of our Inspection Team will contact you to schedule the onsite visit. 
-      Please keep your Unique Order Reference for further inquiries.
-    </div>
+    @if (isBuyAndInstall) {
+      <p class="success-subtitle">Your inspection request has been successfully submitted.</p>
+    }
 
-    <div class="order-info-box" *ngIf="orderId">
-      <span class="info-label">Order Reference</span>
-      <span class="info-value">{{ orderId }}</span>
-    </div>
+    @if (!isBuyAndInstall) {
+      <p class="success-message">
+        Thank you, <strong>{{ username }}</strong>. Your order has been successfully placed and is now under review by our finance team.
+      </p>
+    }
+
+    @if (isBuyAndInstall) {
+      <div class="success-description">
+        We have received your inspection fee payment slip. Our Finance Officer will verify the payment shortly.
+        Once confirmed, a member of our Inspection Team will contact you to schedule the onsite visit.
+        Please keep your Unique Order Reference for further inquiries.
+      </div>
+    }
+
+    @if (orderId) {
+      <div class="order-info-box">
+        <span class="info-label">Order Reference</span>
+        <span class="info-value">{{ orderId }}</span>
+      </div>
+    }
 
     <div class="status-indicator">
       <span class="status-dot"></span>
@@ -106,19 +119,25 @@
     </div>
 
     <!-- Buy & Install: Single Next button -->
-    <div class="success-actions" *ngIf="isBuyAndInstall">
-      <button class="primary-btn" (click)="goToInspectionPayment()">Next</button>
-    </div>
+    @if (isBuyAndInstall) {
+      <div class="success-actions">
+        <button class="primary-btn" (click)="goToInspectionPayment()">Next</button>
+      </div>
+    }
 
     <!-- Buy Only: Two standard buttons -->
-    <div class="success-actions" *ngIf="!isBuyAndInstall">
-      <button class="primary-btn" (click)="router.navigate(['/catalog'])">Back to Catalog</button>
-      <button class="secondary-btn" (click)="router.navigate(['/cart'])">View Cart</button>
-    </div>
+    @if (!isBuyAndInstall) {
+      <div class="success-actions">
+        <button class="primary-btn" (click)="router.navigate(['/catalog'])">Back to Catalog</button>
+        <button class="secondary-btn" (click)="router.navigate(['/cart'])">View Cart</button>
+      </div>
+    }
 
-    <p class="success-footer" *ngIf="!isBuyAndInstall">
-      An email confirmation will be sent to you shortly once the payment is verified.
-    </p>
+    @if (!isBuyAndInstall) {
+      <p class="success-footer">
+        An email confirmation will be sent to you shortly once the payment is verified.
+      </p>
+    }
   </div>
 </div>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
@@ -8,6 +8,7 @@ import { PaymentService } from '../../services/payment.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './rejected-payments.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./rejected-payments.component.css']
 })
 export class RejectedPaymentsComponent implements OnInit {

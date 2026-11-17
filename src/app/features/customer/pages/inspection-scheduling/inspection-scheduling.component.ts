@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -23,6 +23,7 @@ interface CalendarDay {
   standalone: true,
   imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './inspection-scheduling.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-scheduling.component.css']
 })
 export class InspectionSchedulingComponent implements OnInit {

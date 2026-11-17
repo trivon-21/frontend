@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { InspectionSidebarComponent } from '../../components/inspection-sidebar/inspection-sidebar.component';
@@ -7,6 +7,7 @@ import { InspectionSidebarComponent } from '../../components/inspection-sidebar/
   selector: 'app-inspection-layout',
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, InspectionSidebarComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './inspection-layout.component.html'
 })
 export class InspectionLayoutComponent { }

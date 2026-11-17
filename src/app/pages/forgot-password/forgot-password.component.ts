@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,8 +9,9 @@ import { FooterComponent } from '../../components/footer/footer.component';
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent, FooterComponent],
   templateUrl: './forgot-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './forgot-password.component.css',
 })
 export class ForgotPasswordComponent {

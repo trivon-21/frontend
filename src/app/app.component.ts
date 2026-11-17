@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NotificationComponent } from './shared/notification/notification.component';
 import { ConfirmationComponent } from './shared/confirmation/confirmation.component';
@@ -8,6 +8,7 @@ import { ConfirmationComponent } from './shared/confirmation/confirmation.compon
   standalone: true,
   imports: [RouterOutlet, NotificationComponent, ConfirmationComponent],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.css'
 })
 export class AppComponent {}

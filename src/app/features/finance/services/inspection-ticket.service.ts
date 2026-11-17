@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -6,7 +7,7 @@ import { catchError } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class InspectionTicketService {
 
-  private apiUrl = 'http://127.0.0.1:5000/api/inspection-tickets';
+  private apiUrl = `${environment.apiUrl}/inspection-tickets`;
 
   constructor(private http: HttpClient) { }
 

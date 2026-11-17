@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerOrderService, TrackedOrder } from '../../services/customer-order.service';
@@ -9,6 +9,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './customer-orders.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './customer-orders.component.css'
 })
 export class CustomerOrdersComponent implements OnInit {

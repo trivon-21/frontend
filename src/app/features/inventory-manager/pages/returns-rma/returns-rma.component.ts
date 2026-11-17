@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -18,6 +18,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './returns-rma.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./returns-rma.component.css'],
 })
 export class ReturnsRmaDashboardComponent implements OnInit {

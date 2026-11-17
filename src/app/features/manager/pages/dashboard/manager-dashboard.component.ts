@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PortalIconsModule } from '../../../../shared/components/portal-icons/portal-icons.module';
@@ -9,6 +9,7 @@ import { ManagerDashboardData, ManagerDashboardService } from '../../services/ma
   standalone: true,
   imports: [CommonModule, RouterModule, PortalIconsModule],
   templateUrl: './manager-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './manager-dashboard.component.css',
 })
 export class ManagerDashboardComponent implements OnInit {

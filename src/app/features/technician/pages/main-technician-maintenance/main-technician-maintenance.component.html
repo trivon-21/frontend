@@ -11,9 +11,9 @@
         placeholder="Search by ticket, customer..."
         [value]="searchQuery"
         (input)="onSearchInput($event)"
-      >
+        >
     </div>
-    
+
     <div class="header-actions">
       <div class="filter-group">
         <span class="filter-label">
@@ -51,42 +51,48 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let ticket of paginatedTickets">
-          <td class="ticket-id">{{ ticket.ticketId }}</td>
-          <td>{{ ticket.customerName }}</td>
-          <td>{{ ticket.productType }}</td>
-          <td>{{ ticket.location }}</td>
-          <td class="date-cell">
-            {{ formatDisplayDate(ticket.date).date }}<br>
-            <span class="year">{{ formatDisplayDate(ticket.date).year }}</span>
-          </td>
-          <td>
-            <span class="type-badge" [ngClass]="ticket.isCustomerInitiated ? 'customer-initiated' : 'company-initiated'">
-              {{ ticket.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated' }}
-            </span>
-          </td>
-          <td>
-            <span class="status-text" [ngClass]="ticket.status.toLowerCase().replace(' ', '-')">
-              {{ ticket.status }}
-            </span>
-          </td>
-          <td>{{ ticket.assignedTeam }}</td>
-          <td>
-            <button class="view-btn" (click)="viewDetails(ticket.ticketId || ticket._id)">View</button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredTickets.length === 0">
-          <td colspan="9" class="empty-state">No maintenance tickets found.</td>
-        </tr>
+        @for (ticket of paginatedTickets; track ticket) {
+          <tr>
+            <td class="ticket-id">{{ ticket.ticketId }}</td>
+            <td>{{ ticket.customerName }}</td>
+            <td>{{ ticket.productType }}</td>
+            <td>{{ ticket.location }}</td>
+            <td class="date-cell">
+              {{ formatDisplayDate(ticket.date).date }}<br>
+              <span class="year">{{ formatDisplayDate(ticket.date).year }}</span>
+            </td>
+            <td>
+              <span class="type-badge" [ngClass]="ticket.isCustomerInitiated ? 'customer-initiated' : 'company-initiated'">
+                {{ ticket.isCustomerInitiated ? 'Customer Initiated' : 'Company Initiated' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-text" [ngClass]="ticket.status.toLowerCase().replace(' ', '-')">
+                {{ ticket.status }}
+              </span>
+            </td>
+            <td>{{ ticket.assignedTeam }}</td>
+            <td>
+              <button class="view-btn" (click)="viewDetails(ticket.ticketId || ticket._id)">View</button>
+            </td>
+          </tr>
+        }
+        @if (filteredTickets.length === 0) {
+          <tr>
+            <td colspan="9" class="empty-state">No maintenance tickets found.</td>
+          </tr>
+        }
       </tbody>
     </table>
 
-    <div class="pagination-section" *ngIf="totalPages > 1">
-      <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
-      <div class="pagination-controls">
-        <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
-        <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+    @if (totalPages > 1) {
+      <div class="pagination-section">
+        <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+        <div class="pagination-controls">
+          <button class="pagination-link prev" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+          <button class="pagination-link next" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </div>

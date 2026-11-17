@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
@@ -13,7 +13,7 @@ describe('OrderCreationService HTTP contract', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [OrderCreationService, ApiService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [OrderCreationService, ApiService, provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     service = TestBed.inject(OrderCreationService);
     http = TestBed.inject(HttpTestingController);

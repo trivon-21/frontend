@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common'; // Required for *ngFor, ngClass, and pipes
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Required for ngModel
@@ -13,6 +13,7 @@ import { environment } from '../../../../../environments/environment';
   imports: [CommonModule, RouterModule, FormsModule, HttpClientModule],
   providers: [DatePipe],
   templateUrl: './main-technician-inspection-report-review.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-technician-inspection-report-review.component.css'
 })
 export class MainTechnicianInspectionReportReviewComponent implements OnInit {
@@ -22,10 +23,10 @@ export class MainTechnicianInspectionReportReviewComponent implements OnInit {
   error: string | null = null; // Fix: Property 'error' does not exist
   report: any = null;
   isSubmitting = false;
-  
+
   // Review form states
   recommendedProduct: string = '';
-  reviewNotes: string = ''; 
+  reviewNotes: string = '';
   rejectionReason = '';
 
   // Modal Visibility States

@@ -1,211 +1,207 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SystemConfig, BusinessRules } from '../../../models/system-config.model';
 
 @Component({
   selector: 'app-business-rules-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
     <div class="business-rules-section">
       <h2>Business Rules</h2>
       <p class="section-description">Configure operational rules that drive core workflow logic</p>
 
-      <div *ngIf="config" class="form-container">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <!-- Standard Service Fees Section -->
-          <div class="sub-section-header">
-            <h3 class="sub-section-title">Standard Service Charges (LKR)</h3>
-            <p class="sub-section-subtitle">Manage baseline rates synchronized with the service charges database</p>
-          </div>
-
-          <!-- Standard Maintenance Service Fee -->
-          <div class="form-group">
-            <label for="standardMaintenanceFee">
-              Standard Maintenance Service Fee (LKR)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="standardMaintenanceFee"
-              type="number"
-              formControlName="standardMaintenanceFee"
-              min="0"
-              placeholder="e.g., 6,000"
-              class="form-input"
-            />
-            <p class="help-text">Baseline service fee for scheduled or routine maintenance visits</p>
-          </div>
-
-          <!-- Standard Repair Service Fee -->
-          <div class="form-group">
-            <label for="standardRepairFee">
-              Standard Repair Service Fee (LKR)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="standardRepairFee"
-              type="number"
-              formControlName="standardRepairFee"
-              min="0"
-              placeholder="e.g., 7,500"
-              class="form-input"
-            />
-            <p class="help-text">Baseline diagnostic and call-out fee for equipment repair services</p>
-          </div>
-
-          <!-- Standard Site Inspection Fee -->
-          <div class="form-group">
-            <label for="standardSiteInspectionFee">
-              Standard Site Inspection Fee (LKR)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="standardSiteInspectionFee"
-              type="number"
-              formControlName="standardSiteInspectionFee"
-              min="0"
-              placeholder="e.g., 5,000"
-              class="form-input"
-            />
-            <p class="help-text">Baseline fee charged for pre-installation site inspections</p>
-          </div>
-
-          <!-- Inventory Profit Margin -->
-          <div class="form-group">
-            <label for="profitMargin">
-              Inventory Profit Margin (%)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="profitMargin"
-              type="number"
-              formControlName="profitMargin"
-              min="0"
-              max="100"
-              step="0.01"
-              placeholder="e.g., 25"
-              class="form-input"
-            />
-            <p class="help-text">Updates every inventory item's margin and selling price from its unit cost</p>
-          </div>
-
-          <div class="sub-section-header" style="margin-top: 32px;">
-            <h3 class="sub-section-title">Operational Policies & Durations</h3>
-            <p class="sub-section-subtitle">Configure system SLAs, log retention, and lifecycle parameters</p>
-          </div>
-
-          <!-- Payment Auto-Cancel Window -->
-          <div class="form-group">
-            <label for="paymentCancel">
-              Payment Auto-Cancel Window (Days)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="paymentCancel"
-              type="number"
-              formControlName="paymentAutoCancelDays"
-              min="1"
-              max="365"
-              placeholder="e.g., 14"
-              class="form-input"
-            />
-            <p class="help-text">Orders automatically cancelled if payment not received within this period</p>
-          </div>
-
-          <!-- Log Retention Period -->
-          <div class="form-group">
-            <label for="logRetentionDays">
-              Log Retention Period (Days)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="logRetentionDays"
-              type="number"
-              formControlName="logRetentionDays"
-              min="7"
-              max="730"
-              placeholder="e.g., 30"
-              class="form-input"
-            />
-            <p class="help-text">Number of days to retain audit logs before automatic deletion</p>
-          </div>
-
-          <!-- Default Warranty Duration -->
-          <div class="form-group">
-            <label for="warrantyMonths">
-              Default Warranty Duration (Months)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="warrantyMonths"
-              type="number"
-              formControlName="defaultWarrantyMonths"
-              min="1"
-              max="60"
-              placeholder="e.g., 24"
-              class="form-input"
-            />
-            <p class="help-text">Default warranty period for new orders</p>
-          </div>
-
-          <!-- AMC Contract Duration -->
-          <div class="form-group">
-            <label for="amcMonths">
-              AMC Contract Duration (Months)
-              <span class="required">*</span>
-            </label>
-            <input
-              id="amcMonths"
-              type="number"
-              formControlName="amcContractMonths"
-              min="1"
-              max="60"
-              placeholder="e.g., 12"
-              class="form-input"
-            />
-            <p class="help-text">Default AMC (Annual Maintenance Contract) duration</p>
-          </div>
-
-          <!-- Max Reschedule Attempts -->
-          <div class="form-group">
-            <label for="rescheduleAttempts">
-              Max Reschedule Attempts per Customer
-              <span class="required">*</span>
-            </label>
-            <input
-              id="rescheduleAttempts"
-              type="number"
-              formControlName="maxRescheduleAttempts"
-              min="1"
-              max="10"
-              placeholder="e.g., 3"
-              class="form-input"
-            />
-            <p class="help-text">Maximum times a customer can reschedule a service request</p>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button
-              type="submit"
-              [disabled]="!form.valid || !form.dirty || isSaving"
-              class="btn btn-primary"
-            >
-              <span *ngIf="!isSaving">Save Changes</span>
-              <span *ngIf="isSaving">
-                <span class="spinner-small"></span>
-                Saving...
-              </span>
-            </button>
-            <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
+      @if (config) {
+        <div class="form-container">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Standard Service Fees Section -->
+            <div class="sub-section-header">
+              <h3 class="sub-section-title">Standard Service Charges (LKR)</h3>
+              <p class="sub-section-subtitle">Manage baseline rates synchronized with the service charges database</p>
+            </div>
+            <!-- Standard Maintenance Service Fee -->
+            <div class="form-group">
+              <label for="standardMaintenanceFee">
+                Standard Maintenance Service Fee (LKR)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="standardMaintenanceFee"
+                type="number"
+                formControlName="standardMaintenanceFee"
+                min="0"
+                placeholder="e.g., 6,000"
+                class="form-input"
+                />
+              <p class="help-text">Baseline service fee for scheduled or routine maintenance visits</p>
+            </div>
+            <!-- Standard Repair Service Fee -->
+            <div class="form-group">
+              <label for="standardRepairFee">
+                Standard Repair Service Fee (LKR)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="standardRepairFee"
+                type="number"
+                formControlName="standardRepairFee"
+                min="0"
+                placeholder="e.g., 7,500"
+                class="form-input"
+                />
+              <p class="help-text">Baseline diagnostic and call-out fee for equipment repair services</p>
+            </div>
+            <!-- Standard Site Inspection Fee -->
+            <div class="form-group">
+              <label for="standardSiteInspectionFee">
+                Standard Site Inspection Fee (LKR)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="standardSiteInspectionFee"
+                type="number"
+                formControlName="standardSiteInspectionFee"
+                min="0"
+                placeholder="e.g., 5,000"
+                class="form-input"
+                />
+              <p class="help-text">Baseline fee charged for pre-installation site inspections</p>
+            </div>
+            <!-- Inventory Profit Margin -->
+            <div class="form-group">
+              <label for="profitMargin">
+                Inventory Profit Margin (%)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="profitMargin"
+                type="number"
+                formControlName="profitMargin"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 25"
+                class="form-input"
+                />
+              <p class="help-text">Updates every inventory item's margin and selling price from its unit cost</p>
+            </div>
+            <div class="sub-section-header" style="margin-top: 32px;">
+              <h3 class="sub-section-title">Operational Policies & Durations</h3>
+              <p class="sub-section-subtitle">Configure system SLAs, log retention, and lifecycle parameters</p>
+            </div>
+            <!-- Payment Auto-Cancel Window -->
+            <div class="form-group">
+              <label for="paymentCancel">
+                Payment Auto-Cancel Window (Days)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="paymentCancel"
+                type="number"
+                formControlName="paymentAutoCancelDays"
+                min="1"
+                max="365"
+                placeholder="e.g., 14"
+                class="form-input"
+                />
+              <p class="help-text">Orders automatically cancelled if payment not received within this period</p>
+            </div>
+            <!-- Log Retention Period -->
+            <div class="form-group">
+              <label for="logRetentionDays">
+                Log Retention Period (Days)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="logRetentionDays"
+                type="number"
+                formControlName="logRetentionDays"
+                min="7"
+                max="730"
+                placeholder="e.g., 30"
+                class="form-input"
+                />
+              <p class="help-text">Number of days to retain audit logs before automatic deletion</p>
+            </div>
+            <!-- Default Warranty Duration -->
+            <div class="form-group">
+              <label for="warrantyMonths">
+                Default Warranty Duration (Months)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="warrantyMonths"
+                type="number"
+                formControlName="defaultWarrantyMonths"
+                min="1"
+                max="60"
+                placeholder="e.g., 24"
+                class="form-input"
+                />
+              <p class="help-text">Default warranty period for new orders</p>
+            </div>
+            <!-- AMC Contract Duration -->
+            <div class="form-group">
+              <label for="amcMonths">
+                AMC Contract Duration (Months)
+                <span class="required">*</span>
+              </label>
+              <input
+                id="amcMonths"
+                type="number"
+                formControlName="amcContractMonths"
+                min="1"
+                max="60"
+                placeholder="e.g., 12"
+                class="form-input"
+                />
+              <p class="help-text">Default AMC (Annual Maintenance Contract) duration</p>
+            </div>
+            <!-- Max Reschedule Attempts -->
+            <div class="form-group">
+              <label for="rescheduleAttempts">
+                Max Reschedule Attempts per Customer
+                <span class="required">*</span>
+              </label>
+              <input
+                id="rescheduleAttempts"
+                type="number"
+                formControlName="maxRescheduleAttempts"
+                min="1"
+                max="10"
+                placeholder="e.g., 3"
+                class="form-input"
+                />
+              <p class="help-text">Maximum times a customer can reschedule a service request</p>
+            </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="submit"
+                [disabled]="!form.valid || !form.dirty || isSaving"
+                class="btn btn-primary"
+                >
+                @if (!isSaving) {
+                  <span>Save Changes</span>
+                }
+                @if (isSaving) {
+                  <span>
+                    <span class="spinner-small"></span>
+                    Saving...
+                  </span>
+                }
+              </button>
+              <button type="button" (click)="resetForm()" class="btn btn-secondary" [disabled]="isSaving">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      }
     </div>
-  `,
+    `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .business-rules-section {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { GlobalSearchService } from '../../services/global-search.service';
@@ -10,6 +10,7 @@ import { ClickOutsideDirective } from '../../../../directives/click-outside.dire
   standalone: true,
   imports: [CommonModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.component.css'
 })
 export class HeaderComponent implements OnInit, OnDestroy {

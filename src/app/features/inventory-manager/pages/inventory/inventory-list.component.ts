@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, Optional, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,7 @@ export type InventorySortField =
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, PortalIconsModule],
   templateUrl: './inventory-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inventory-list.component.css'],
 })
 export class InventoryListComponent implements OnInit, OnDestroy {

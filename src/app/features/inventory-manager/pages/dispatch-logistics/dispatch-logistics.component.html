@@ -1,481 +1,171 @@
-<div class="dispatch-container">
-  <!-- Header -->
-  <div class="header page-header">
-    <h1>Logistics</h1>
-  </div>
-
-  <div class="portal-state" role="status" aria-live="polite" *ngIf="loading">
-    Loading dispatch orders…
-  </div>
-  <div class="portal-state portal-state--error" role="alert" *ngIf="!loading && loadError">
+<section class="dispatch-container" aria-labelledby="dispatch-heading">
+  <header class="dispatch-heading">
     <div>
-      <strong>Dispatch unavailable</strong>
-      <p>{{ loadError }}</p>
+      <p class="eyebrow">Inventory / Fulfilment</p>
+      <h1 id="dispatch-heading">Dispatch &amp; logistics</h1>
+      <p class="page-description">Prepare every order for its next step.</p>
     </div>
-    <button type="button" class="portal-retry-button im-btn im-btn--primary im-btn--compact" (click)="fetchOrders()">Retry</button>
-  </div>
+    <button hlmBtn variant="outline" type="button" [disabled]="loading || saving" (click)="fetchOrders()">
+      <lucide-angular name="refresh-cw" [size]="16" /> Refresh
+    </button>
+  </header>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs-nav" role="tablist" aria-label="Logistics order status">
-    <button
-      type="button"
-      id="logistics-to-pack-tab"
-      class="tab-btn"
-      role="tab"
-      aria-controls="logistics-orders-panel"
-      [attr.aria-selected]="activeTab === 'to-pack'"
-      [class.active]="activeTab === 'to-pack'"
-      (click)="setActiveTab('to-pack')"
-    >
-      To Pack <span class="badge" *ngIf="ordersToPack.length > 0">{{ ordersToPack.length }}</span>
-    </button>
-    <button
-      type="button"
-      id="logistics-ready-tab"
-      class="tab-btn"
-      role="tab"
-      aria-controls="logistics-orders-panel"
-      [attr.aria-selected]="activeTab === 'ready'"
-      [class.active]="activeTab === 'ready'"
-      (click)="setActiveTab('ready')"
-    >
-      Ready to Pick up
-      <span class="badge" *ngIf="ordersReady.length > 0">{{ ordersReady.length }}</span>
-    </button>
-    <button
-      type="button"
-      id="logistics-in-transit-tab"
-      class="tab-btn"
-      role="tab"
-      aria-controls="logistics-orders-panel"
-      [attr.aria-selected]="activeTab === 'in-transit'"
-      [class.active]="activeTab === 'in-transit'"
-      (click)="setActiveTab('in-transit')"
-    >
-      In Transit
-      <span class="badge" *ngIf="ordersInTransit.length > 0">{{ ordersInTransit.length }}</span>
-    </button>
-    <button
-      type="button"
-      id="logistics-completed-tab"
-      class="tab-btn"
-      role="tab"
-      aria-controls="logistics-orders-panel"
-      [attr.aria-selected]="activeTab === 'completed'"
-      [class.active]="activeTab === 'completed'"
-      (click)="setActiveTab('completed')"
-    >
-      Completed
-      <span class="badge" *ngIf="ordersCompleted.length > 0">{{ ordersCompleted.length }}</span>
-    </button>
-  </div>
+  <nav class="status-grid" aria-label="Filter dispatch orders by status">
+    @for (tab of statusTabs; track tab.value) {
+      <button hlmBtn variant="outline" type="button" class="status-card"
+        [class.is-active]="activeTab === tab.value" [attr.aria-pressed]="activeTab === tab.value"
+        (click)="setActiveTab(tab.value)">
+        <span class="status-icon"><lucide-angular [name]="tab.icon" [size]="19" /></span>
+        <span class="status-copy"><span class="status-label">{{ tab.label }}</span><strong>{{ countForStatus(tab.value) }}</strong></span>
+      </button>
+    }
+  </nav>
 
-  <!-- Table Controls -->
-  <div class="table-controls glass-panel">
-    <div class="search-box">
-      <lucide-angular name="search" class="inline-icon"></lucide-angular>
-      <label class="visually-hidden" for="logistics-search">Search logistics orders</label>
-      <input
-        id="logistics-search"
-        type="text"
-        [(ngModel)]="searchQuery"
-        (input)="($event)"
-        [placeholder]="
-          activeTab === 'completed'
-            ? 'Search by Order ID, Customer, or Date (YYYY-MM-DD)'
-            : activeTab === 'to-pack'
-              ? 'Search by Order ID or Customer Name'
-              : 'Search by Order ID, Customer, or Track ID'
-        "
-      />
-    </div>
-    <div class="filters">
-      <div class="filter-group">
-        <label for="logistics-sort">Sort By:</label>
-        <select
-          id="logistics-sort"
-          class="filter-select"
-          (change)="toggleSort($any($event.target).value)"
-        >
-          <option value="name">Name ({{ sortField === 'name' ? sortDirection : 'asc' }})</option>
-          <option value="time">Time ({{ sortField === 'time' ? sortDirection : 'asc' }})</option>
+  <div class="dispatch-panel">
+    <div class="table-controls">
+      <div class="search-field">
+        <lucide-angular name="search" [size]="18" />
+        <label class="sr-only" for="logistics-search">Search dispatch orders</label>
+        <input hlmInput id="logistics-search" type="search" [(ngModel)]="searchQuery" placeholder="Search order, customer or tracking ID…" />
+      </div>
+      <div class="sort-controls">
+        <label for="logistics-sort">Sort by</label>
+        <select id="logistics-sort" [ngModel]="sortField" (ngModelChange)="sortField = $event">
+          <option value="name">Customer</option><option value="time">Date</option>
         </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Orders Table -->
-  <div
-    id="logistics-orders-panel"
-    class="table-container alx-table-container glass-panel"
-    role="tabpanel"
-    aria-label="Dispatch and logistics orders"
-    tabindex="0"
-    [attr.aria-labelledby]="'logistics-' + activeTab + '-tab'"
-    *ngIf="!loading && !loadError"
-  >
-    <table class="alx-table alx-table--wide">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th *ngIf="activeTab === 'to-pack'">CUSTOMER</th>
-          <th *ngIf="activeTab !== 'to-pack'">CUSTOMER NAME</th>
-          <th *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">TRACK ID</th>
-          <th *ngIf="activeTab === 'completed'">COMPLETED DATE</th>
-          <th class="actions-cell">ACTION{{ activeTab === 'to-pack' ? 'S' : '' }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let order of currentOrders"
-          (click)="selectOrder(order.id)"
-          [class.selected-row]="selectedOrderId === order.id"
-        >
-          <td class="sku-cell">{{ order.id }}</td>
-          <td>{{ order.customer }}</td>
-          <td class="sku-cell" *ngIf="activeTab === 'ready' || activeTab === 'in-transit'">
-            {{ order.trackId || 'N/A' }}
-          </td>
-          <td class="date-cell" *ngIf="activeTab === 'completed'">{{ order.completedAt }}</td>
-          <td class="actions-cell">
-            <ng-container *ngIf="selectedOrderId === order.id">
-              <ng-container *ngIf="activeTab === 'to-pack'">
-                <button
-                  type="button"
-                  class="btn-assign im-btn im-btn--secondary im-btn--compact"
-                  [disabled]="!isOrderFullyReserved(order)"
-                  [title]="
-                    isOrderFullyReserved(order)
-                      ? ''
-                      : 'All items must be reserved before assigning delivery'
-                  "
-                  (click)="openAssignModal(order.id); $event.stopPropagation()"
-                >
-                  Assign Delivery
-                </button>
-                <button
-                  type="button"
-                  class="btn-pack im-btn im-btn--primary im-btn--compact"
-                  (click)="openPackModal(order.id); $event.stopPropagation()"
-                >
-                  Pack Order
-                </button>
-              </ng-container>
-              <ng-container *ngIf="activeTab !== 'to-pack'">
-                <button
-                  type="button"
-                  class="btn-view im-btn im-btn--secondary im-btn--compact"
-                  (click)="openPackModal(order.id); $event.stopPropagation()"
-                >
-                  View Order
-                </button>
-              </ng-container>
-            </ng-container>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pack Order Modal -->
-  <div class="modal-overlay" *ngIf="showPackModal" (click)="onBackdrop($event)">
-    <div
-      class="modal-content pack-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dispatch-pack-title"
-      aria-describedby="dispatch-pack-context"
-    >
-      <div class="modal-header">
-        <div class="header-text">
-          <h2 id="dispatch-pack-title">Order ID : {{ selectedOrderId }}</h2>
-          <span id="dispatch-pack-context" class="order-type"
-            >ORDER TYPE : {{ selectedOrder?.type || 'N/A' }}</span
-          >
-        </div>
-        <button
-          type="button"
-          class="btn-close im-btn im-btn--close"
-          aria-label="Close dispatch dialog"
-          (click)="closeModals()"
-          [disabled]="saving"
-        >
-          <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
+        <button hlmBtn variant="ghost" size="icon" type="button" (click)="toggleSort(sortField)"
+          [attr.aria-label]="sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'">
+          <lucide-angular [name]="sortDirection === 'asc' ? 'arrow-down-wide-narrow' : 'arrow-up-narrow-wide'" [size]="18" />
         </button>
       </div>
+    </div>
 
-      <div class="modal-body">
-        <div
-          class="delivery-info-banner"
-          *ngIf="
-            selectedOrder?.courier ||
-            selectedOrder?.trackId ||
-            (activeTab === 'ready' && isEditMode)
-          "
-        >
-          <div class="info-item">
-            <span class="label">COURIER SERVICE</span>
-            <span class="value" *ngIf="!isEditMode">{{ selectedOrder?.courier || 'Pending' }}</span>
-            <input
-              *ngIf="isEditMode"
-              type="text"
-              class="form-input"
-              aria-label="Courier service"
-              [(ngModel)]="editCourier"
-              placeholder="Enter Courier Service"
-            />
-          </div>
-          <div class="info-item border-left">
-            <span class="label">TRACKING / REF ID</span>
-            <span class="value" *ngIf="!isEditMode">{{
-              selectedOrder?.trackId || 'Not Assigned'
-            }}</span>
-            <input
-              *ngIf="isEditMode"
-              type="text"
-              class="form-input"
-              aria-label="Tracking or reference ID"
-              [(ngModel)]="editTrackId"
-              placeholder="Enter Tracking ID"
-            />
-          </div>
-        </div>
-
-        <div class="items-verification-full alx-table-container alx-table-container--embedded" role="region" aria-label="Dispatch order line items" tabindex="0">
-          <div class="section-header">
-            <h3>MATERIALS LIST</h3>
-            <span class="items-count">{{ selectedOrder?.items?.length || 0 }} Items</span>
-          </div>
-
-          <table class="verification-table alx-table alx-table--medium">
-            <thead>
+    @if (loading) {
+      <div class="dispatch-state" role="status" aria-live="polite">Loading dispatch orders…</div>
+    } @else if (loadError) {
+      <div class="dispatch-state" role="alert"><h2>Dispatch unavailable</h2><p>{{ loadError }}</p>
+        <button hlmBtn type="button" (click)="fetchOrders()">Try again</button>
+      </div>
+    } @else if (currentOrders.length === 0) {
+      <div class="dispatch-state" role="status"><lucide-angular name="box" [size]="32" />
+        <h2>{{ searchQuery ? 'No matching orders' : 'You’re all caught up' }}</h2>
+        <p>{{ searchQuery ? 'Try another order reference or customer name.' : 'Orders at this stage will appear here.' }}</p>
+        @if (searchQuery) { <button hlmBtn variant="outline" type="button" (click)="searchQuery = ''">Clear search</button> }
+      </div>
+    } @else {
+      <div class="dispatch-table-scroll" role="region" aria-label="Dispatch orders" tabindex="0">
+        <table class="dispatch-table">
+          <thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Details</th><th scope="col" class="actions-heading">Actions</th></tr></thead>
+          <tbody>
+            @for (order of currentOrders; track order.id) {
               <tr>
-                <th>ITEM NAME</th>
-                <th>SKU</th>
-                <th>QTY</th>
-                <th
-                  class="text-center"
-                  *ngIf="!isViewingDetailsFromAssign && activeTab === 'to-pack'"
-                >
-                  RESERVE CONFIRMATION
-                </th>
-                <th
-                  class="text-center"
-                  *ngIf="!isViewingDetailsFromAssign && activeTab !== 'to-pack'"
-                >
-                  RESERVATION STATUS
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of selectedOrder?.items">
-                <td class="item-name name-cell">{{ item.name }}</td>
-                <td class="item-sku sku-cell">{{ item.sku }}</td>
-                <td class="item-qty num-cell"><span class="qty-symbol">×</span>{{ item.qty }}</td>
-                <td class="text-center" *ngIf="!isViewingDetailsFromAssign">
-                  <ng-container *ngIf="activeTab === 'to-pack'">
-                    <button
-                      type="button"
-                      class="btn-confirm"
-                      [class.confirmed]="item.confirmed"
-                      [attr.aria-pressed]="item.confirmed"
-                      (click)="confirmItem(item)"
-                    >
-                      <lucide-angular
-                        name="check"
-                        [size]="14"
-                        *ngIf="item.confirmed"
-                      ></lucide-angular>
-                      {{ item.confirmed ? 'Reserved' : 'Click to Reserve' }}
-                    </button>
-                  </ng-container>
-                  <ng-container *ngIf="activeTab !== 'to-pack'">
-                    <div class="btn-confirm reservation-status alx-table-status" [class.confirmed]="item.confirmed">
-                      <lucide-angular
-                        name="check"
-                        [size]="14"
-                        *ngIf="item.confirmed"
-                      ></lucide-angular>
-                      {{ item.confirmed ? 'Reserved' : 'Pending' }}
-                    </div>
-                  </ng-container>
+                <td><strong class="order-reference">{{ order.id }}</strong><span class="cell-detail">{{ order.type }}</span></td>
+                <td>{{ order.customer }}</td>
+                <td>
+                  @if (activeTab === 'to-pack') {
+                    <span hlmBadge [variant]="isOrderFullyReserved(order) ? 'secondary' : 'outline'">{{ isOrderFullyReserved(order) ? 'Items reserved' : 'Packing required' }}</span>
+                  } @else if (activeTab === 'completed') {
+                    <span class="cell-detail">{{ order.completedAt ? (order.completedAt | date:'mediumDate') : 'Completed' }}</span>
+                  } @else {
+                    <span>{{ order.courier || 'Unassigned' }}</span><span class="cell-detail">{{ order.trackId || 'No tracking reference' }}</span>
+                  }
                 </td>
+                <td><div class="row-actions">
+                  @if (activeTab === 'to-pack') {
+                    <button hlmBtn variant="outline" size="sm" type="button" (click)="openPackModal(order.id)">Pack order</button>
+                    <button hlmBtn size="sm" type="button" [disabled]="!isOrderFullyReserved(order)"
+                      [title]="isOrderFullyReserved(order) ? 'Assign courier' : 'Reserve all items first'"
+                      (click)="openAssignModal(order.id)">Assign delivery</button>
+                  } @else {
+                    <button hlmBtn variant="outline" size="sm" type="button" (click)="openPackModal(order.id)">View order <lucide-angular name="arrow-left" class="forward-icon" [size]="14" /></button>
+                  }
+                </div></td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            }
+          </tbody>
+        </table>
       </div>
-
-      <div class="validation-banner" role="alert" *ngIf="mutationError">{{ mutationError }}</div>
-      <div class="modal-footer">
-        <!-- If coming from Assign Modal, show Back regardless of tab -->
-        <div class="footer-right" *ngIf="isViewingDetailsFromAssign">
-          <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="backToAssign()">← Back</button>
-        </div>
-
-        <!-- Normal view modes -->
-        <ng-container *ngIf="!isViewingDetailsFromAssign">
-          <div class="footer-right" *ngIf="activeTab === 'to-pack'">
-            <button type="button" class="btn-save im-btn im-btn--primary" (click)="saveStatus()" [disabled]="saving">
-              Save Current Status
-            </button>
-            <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModals()" [disabled]="saving">
-              Done
-            </button>
-          </div>
-          <div class="footer-right" *ngIf="activeTab === 'ready'">
-            <button
-              type="button"
-              class="btn-primary btn-outline im-btn im-btn--secondary"
-              *ngIf="!isEditMode && canUndo(selectedOrder)"
-              (click)="undoAction()"
-            >
-              Undo Transition
-            </button>
-            <button type="button" class="btn-save im-btn im-btn--primary" *ngIf="!isEditMode" (click)="markHandedOver()">
-              Mark Handed Over
-            </button>
-            <button
-              type="button"
-              class="btn-primary btn-outline im-btn im-btn--secondary"
-              *ngIf="!isEditMode"
-              (click)="enableEditMode()"
-            >
-              Edit Details
-            </button>
-            <button type="button" class="btn-primary im-btn im-btn--secondary" *ngIf="!isEditMode" (click)="closeModals()">
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn-primary btn-outline im-btn im-btn--secondary"
-              *ngIf="isEditMode"
-              (click)="cancelEdit()"
-            >
-              Cancel
-            </button>
-            <button type="button" class="btn-save im-btn im-btn--primary" *ngIf="isEditMode" (click)="saveEdit()">
-              Save Changes
-            </button>
-          </div>
-          <div class="footer-right" *ngIf="activeTab === 'in-transit'">
-            <button
-              type="button"
-              class="btn-primary btn-outline im-btn im-btn--secondary"
-              *ngIf="canUndo(selectedOrder)"
-              (click)="undoAction()"
-            >
-              Undo Transition
-            </button>
-            <button type="button" class="btn-save im-btn im-btn--primary" (click)="markComplete()" [disabled]="saving">
-              Mark as Complete
-            </button>
-            <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModals()">Close</button>
-          </div>
-          <div class="footer-right" *ngIf="activeTab === 'completed'">
-            <button
-              type="button"
-              class="btn-primary btn-outline im-btn im-btn--secondary"
-              *ngIf="canUndo(selectedOrder)"
-              (click)="undoAction()"
-            >
-              Undo Transition
-            </button>
-            <button type="button" class="btn-primary im-btn im-btn--secondary" (click)="closeModals()">Close</button>
-          </div>
-        </ng-container>
-      </div>
-    </div>
+      <footer class="table-summary">{{ currentOrders.length }} {{ currentOrders.length === 1 ? 'order' : 'orders' }} at this stage</footer>
+    }
   </div>
+</section>
 
-  <!-- Assign Delivery Modal -->
-  <div class="modal-overlay" *ngIf="showAssignModal" (click)="onBackdrop($event)">
-    <div
-      class="modal-content assign-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dispatch-assign-title"
-      aria-describedby="dispatch-assign-context"
-    >
-      <div class="modal-header">
-        <div class="header-text">
-          <h2 id="dispatch-assign-title">Assign Delivery Partner</h2>
-          <span id="dispatch-assign-context" class="order-type"
-            >ORDER {{ selectedOrderId }} • LOGISTICS PREPARATION</span
-          >
-        </div>
-        <button
-          type="button"
-          class="btn-close im-btn im-btn--close"
-          aria-label="Close courier dialog"
-          (click)="closeModals()"
-          [disabled]="saving"
-        >
-          <lucide-angular name="x" [size]="20" strokeWidth="2.5"></lucide-angular>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="dispatch-courier-service">Courier Service</label>
-            <input
-              id="dispatch-courier-service"
-              type="text"
-              class="form-input"
-              placeholder="e.g. DMX / Prompt Express"
-              [(ngModel)]="courierService"
-            />
+<hlm-dialog [state]="showPackModal ? 'open' : 'closed'" [disableClose]="saving" (closed)="onPackDialogClosed()">
+  <hlm-dialog-content *hlmDialogPortal class="dispatch-dialog" [showCloseButton]="false">
+    <header hlmDialogHeader class="dialog-heading">
+      <div><h2 hlmDialogTitle>Order {{ selectedOrderId }}</h2><p hlmDialogDescription>{{ selectedOrder?.type || 'Delivery' }} · Review items and dispatch details.</p></div>
+      <button hlmBtn variant="ghost" size="icon" type="button" aria-label="Close dispatch dialog" [disabled]="saving" (click)="closeModals()"><lucide-angular name="x" [size]="18" /></button>
+    </header>
+    <div class="dialog-body">
+      @if (selectedOrder?.courier || selectedOrder?.trackId || isEditMode) {
+        <div class="delivery-details">
+          <div><label for="dispatch-edit-courier">Courier</label>
+            @if (isEditMode) { <input hlmInput id="dispatch-edit-courier" [(ngModel)]="editCourier" /> }
+            @else { <p>{{ selectedOrder?.courier || 'Unassigned' }}</p> }
           </div>
-          <div class="form-group">
-            <label for="dispatch-tracking-id">Tracking / Ref ID</label>
-            <input
-              id="dispatch-tracking-id"
-              type="text"
-              placeholder="e.g., DMX20250217001"
-              class="form-input"
-              [(ngModel)]="trackingId"
-            />
-          </div>
-          <div class="form-group full">
-            <p class="helper-text">
-              Please ensure all items are kitted and the gate pass is printed before finalizing the
-              dispatch.
-            </p>
+          <div><label for="dispatch-edit-tracking">Tracking reference</label>
+            @if (isEditMode) { <input hlmInput id="dispatch-edit-tracking" [(ngModel)]="editTrackId" /> }
+            @else { <p>{{ selectedOrder?.trackId || 'Not assigned' }}</p> }
           </div>
         </div>
+      }
+      <div class="items-heading"><h3>Order items</h3><span hlmBadge variant="secondary">{{ selectedOrder?.items?.length || 0 }} items</span></div>
+      <div class="dispatch-table-scroll" role="region" aria-label="Order line items" tabindex="0">
+        <table class="dispatch-table item-table">
+          <thead><tr><th scope="col">Item</th><th scope="col">Quantity</th>@if (!isViewingDetailsFromAssign) { <th scope="col">Reservation</th> }</tr></thead>
+          <tbody>
+            @for (item of selectedOrder?.items; track item.sku) {
+              <tr><td>{{ item.name }}<span class="cell-detail">{{ item.sku }}</span></td><td>{{ item.qty }}</td>
+                @if (!isViewingDetailsFromAssign) {
+                  <td>@if (activeTab === 'to-pack') {
+                    <button hlmBtn [variant]="item.confirmed ? 'secondary' : 'outline'" size="sm" type="button"
+                      [disabled]="saving" [attr.aria-pressed]="item.confirmed" (click)="confirmItem(item)">
+                      @if (item.confirmed) { <lucide-angular name="check" [size]="14" /> } {{ item.confirmed ? 'Reserved' : 'Reserve item' }}
+                    </button>
+                  } @else { <span hlmBadge variant="secondary">{{ item.confirmed ? 'Reserved' : 'Pending' }}</span> }</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
-
-      <div class="modal-footer justify-between">
-        <div class="footer-left">
-          <button
-            type="button"
-            class="btn-secondary-outline im-btn im-btn--secondary"
-            [disabled]="!isDeliveryFormValid"
-            (click)="closeModals()"
-          >
-            Print Gate Pass
-          </button>
-        </div>
-        <div class="footer-right">
-          <button
-            type="button"
-            class="btn-primary-alt im-btn im-btn--secondary"
-            (click)="viewPackingDetails()"
-            [disabled]="saving"
-          >
-            View Packing Details
-          </button>
-          <button
-            type="button"
-            class="btn-primary im-btn im-btn--primary"
-            [disabled]="saving || !isDeliveryFormValid"
-            (click)="completeAssignment()"
-          >
-            Done
-          </button>
-        </div>
-      </div>
+      @if (mutationError) { <p class="mutation-error" role="alert">{{ mutationError }}</p> }
     </div>
-  </div>
-</div>
+    <footer hlmDialogFooter class="dialog-actions">
+      @if (isViewingDetailsFromAssign) {
+        <button hlmBtn variant="outline" type="button" (click)="backToAssign()">Back to delivery</button>
+      } @else if (isEditMode) {
+        <button hlmBtn variant="outline" type="button" [disabled]="saving" (click)="cancelEdit()">Cancel</button>
+        <button hlmBtn type="button" [disabled]="saving || !editCourier.trim() || !editTrackId.trim()" (click)="saveEdit()">{{ saving ? 'Saving…' : 'Save changes' }}</button>
+      } @else {
+        <button hlmBtn variant="outline" type="button" [disabled]="saving" (click)="closeModals()">Close</button>
+        @if (canUndo(selectedOrder)) { <button hlmBtn variant="outline" type="button" [disabled]="saving" (click)="undoAction()">Undo transition</button> }
+        @if (activeTab === 'to-pack') { <button hlmBtn type="button" [disabled]="saving" (click)="saveStatus()">{{ saving ? 'Saving…' : 'Save packing status' }}</button> }
+        @if (activeTab === 'ready') {
+          <button hlmBtn variant="outline" type="button" [disabled]="saving" (click)="enableEditMode()">Edit delivery</button>
+          <button hlmBtn type="button" [disabled]="saving" (click)="markHandedOver()">Mark handed over</button>
+        }
+        @if (activeTab === 'in-transit') { <button hlmBtn type="button" [disabled]="saving" (click)="markComplete()">Mark complete</button> }
+      }
+    </footer>
+  </hlm-dialog-content>
+</hlm-dialog>
+
+<hlm-dialog [state]="showAssignModal ? 'open' : 'closed'" [disableClose]="saving" (closed)="onAssignDialogClosed()">
+  <hlm-dialog-content *hlmDialogPortal class="dispatch-dialog" [showCloseButton]="false">
+    <header hlmDialogHeader class="dialog-heading">
+      <div><h2 hlmDialogTitle>Assign delivery</h2><p hlmDialogDescription>Choose a courier and tracking reference for {{ selectedOrderId }}.</p></div>
+      <button hlmBtn variant="ghost" size="icon" type="button" aria-label="Close courier dialog" [disabled]="saving" (click)="closeModals()"><lucide-angular name="x" [size]="18" /></button>
+    </header>
+    <div class="dialog-body delivery-form">
+      <div><label for="dispatch-courier-service">Courier service</label><input hlmInput id="dispatch-courier-service" placeholder="Courier name" [(ngModel)]="courierService" [disabled]="saving" /></div>
+      <div><label for="dispatch-tracking-id">Tracking reference</label><input hlmInput id="dispatch-tracking-id" placeholder="Tracking or reference ID" [(ngModel)]="trackingId" [disabled]="saving" /></div>
+      <p class="helper-text">Confirm all items are packed before assigning delivery.</p>
+      @if (mutationError) { <p class="mutation-error" role="alert">{{ mutationError }}</p> }
+    </div>
+    <footer hlmDialogFooter class="dialog-actions">
+      <button hlmBtn variant="outline" type="button" [disabled]="saving" (click)="viewPackingDetails()">Review packing</button>
+      <button hlmBtn type="button" [disabled]="saving || !isDeliveryFormValid" (click)="completeAssignment()">{{ saving ? 'Saving…' : 'Assign delivery' }}</button>
+    </footer>
+  </hlm-dialog-content>
+</hlm-dialog>

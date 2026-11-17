@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -45,6 +45,7 @@ const STATUS_ORDER = [
   standalone: true,
   imports: [CommonModule, FormsModule, PortalIconsModule],
   templateUrl: './track-order-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './track-order-modal.component.css',
 })
 export class TrackOrderModalComponent {

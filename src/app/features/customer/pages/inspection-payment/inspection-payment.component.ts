@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -12,6 +12,7 @@ import { PortalIconsModule } from '../../../../shared/components/portal-icons/po
   standalone: true,
   imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, PortalIconsModule],
   templateUrl: './inspection-payment.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./inspection-payment.component.css']
 })
 export class InspectionPaymentComponent implements OnInit {
