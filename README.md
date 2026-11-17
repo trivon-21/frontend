@@ -18,3 +18,6 @@ Run `npm run test:browser` after `npx playwright install chromium`. For an exist
 [Desktop preview](docs/assets/dispatch-desktop.png) · [Dialog preview](docs/assets/dispatch-dialog.png) · [Mobile preview](docs/assets/dispatch-mobile.png)
 
 The API build setting routes maintenance, finance, and inspection services as well as the shared API service. `npm run build:deploy` requires an HTTPS API URL ending in `/api`; normal local builds default to the development proxy path. Vercel environment changes require a rebuild.
+
+## Organization and contribution workflow
+See [organization guidelines](docs/ORGANIZATION.md) for the proposed branch/CI policy, roles, PR practices, release coordination, team credit, and one-hour development routine. Settings recommendations are tracked separately from the application migration.
