@@ -1,6 +1,6 @@
 # Trivon / Airlux organization and development guidelines
 
-Reviewed: 2026-11-18 (Asia/Colombo). These are proposed operating guidelines. Repository and organization setting changes require a separate, recorded maintainer action. This documentation update does not apply them.
+Reviewed: 2026-11-18 (Asia/Colombo). The dev policy below was applied at the user’s explicit request. Broader organization and main-release recommendations remain pending; each settings change must be recorded separately.
 
 ## Ownership and attribution
 
@@ -14,9 +14,9 @@ GitHub guidance: [organization best practices](https://docs.github.com/en/organi
 
 ## Branches and rules that permit normal development
 
-Use `dev` for integration and the default PR target after the baseline transition. Use `main` for tested releases. Feature branches use `feat/<short-task>`, fixes `fix/<short-task>`, and maintenance `chore/<short-task>`. Keep one active feature at a time for the current one-hour daily schedule.
+Use `dev` for integration and the default PR target in both repositories. Use `main` for tested releases. Feature branches use `feat/<short-task>`, fixes `fix/<short-task>`, and maintenance `chore/<short-task>`. Keep one active feature at a time for the current one-hour daily schedule.
 
-### Findings from the actual repositories
+### Historical snapshot before the merge fix
 
 | Setting | Frontend | Backend |
 |---|---|---|
@@ -29,9 +29,13 @@ Use `dev` for integration and the default PR target after the baseline transitio
 | Auto-delete merged branches | Disabled | Disabled |
 | Auto-merge | Disabled | Disabled |
 
-A direct push and normal merge of the baseline PRs were both rejected. The restriction on updates plus the single bypass actor is the apparent cause; it is not a request for one more review. Check every applicable repository/organization ruleset before changing settings because protections can overlap.
+The old Restrict updates rule permitted only one always-bypass user to update dev and blocked the current maintainer despite zero required approvals. Removing that lock allowed both baseline PRs to merge normally. Keep this snapshot as the explanation for the change.
 
-### Proposed settings
+### Applied dev configuration (2026-11-18)
+
+Both rulesets are now named `dev / PR and CI` (IDs unchanged). Restrict updates was removed; PRs, deletion protection, and force-push protection remain. Zero approvals support the current solo-maintainer setup; review conversations must be resolved. Frontend `build-and-test` and backend `hosting` are required from GitHub Actions app 15368, with strict up-to-date branch checks. dev is the default branch in both repos. Existing bypass actors were retained and were not used for these merges. main remains intentionally frozen until its release reconciliation; its rules were not weakened.
+
+### Operating policy (dev applied; main planned)
 
 | Rule | dev | main |
 |---|---|---|
@@ -53,11 +57,11 @@ GitHub explains [Restrict updates and PR rules](https://docs.github.com/en/repos
 
 ### Transition order
 
-1. An authorized ruleset editor reviews overlapping protections and applies the agreed dev policy in both repositories, retaining PR, force-push, and deletion protections.
-2. Merge frontend #73 and backend #71 with merge commits to preserve the original baseline history. Use the documented baseline verification for this bootstrap step; do not pretend future CI already ran on those old branches.
-3. Retarget frontend #74 and backend #72 from dev-new to dev, review the implementation, and require passing checks on the retargeted PRs before merging.
-4. Set dev as the GitHub default and enable its exact CI gates. Confirm that an ordinary feature PR can merge through the normal workflow.
-5. Remove the temporary dev-new CI target after the transition. Keep historical branches until the branch inventory accounts for their work.
+1. Completed: reviewed the effective protections and applied the dev policy while retaining PR, force-push, and deletion protections.
+2. Completed: merged frontend #73 and backend #71 with merge commits and the documented baseline verification. Original history and authorship are preserved.
+3. Retargeted frontend #74 and backend #72 to dev. Require passing checks on the latest synchronized branches before normal merges; the PRs provide the live check and merge record.
+4. Completed: dev is the default and the exact CI gates are enforced. Baseline merges already verified the normal PR path; implementation merges also exercise CI gating.
+5. Removed the temporary dev-new CI target. Keep historical branches until the inventory accounts for their work.
 6. Reconcile old main history separately before its first release. Keep production-branch selection in hosting explicit; changing the GitHub default does not change it automatically.
 
 ## Small tasks and reviewable PRs
@@ -93,9 +97,9 @@ Done means acceptance checks pass, results are recorded, paired changes are link
 ## Configuration checklist (recommendations, pending)
 
 - [ ] Agree active maintainer and trusted recovery owner; review access.
-- [ ] Replace the dev update lock with the agreed normal PR/CI policy in both repos.
-- [ ] Complete baseline merges, retarget implementation PRs, then set dev as default.
-- [ ] Configure the exact successful CI checks after workflow installation.
+- [x] Replace the dev update lock with normal PR/CI policy in both repos.
+- [x] Complete baseline merges, retarget implementation PRs, and set dev as default.
+- [x] Configure exact successful GitHub Actions checks, with strict up-to-date validation.
 - [ ] Keep main release control explicit and document hosting ownership.
 - [ ] Verify the public synthetic-data demo and record rollback targets.
 - [ ] Account for old branches before cleanup; preserve contributor credit.
